@@ -1,0 +1,8 @@
+20-09-27 17:30:13.283 INFO  market_dispatcher %% - [Redis] SubscribeTopic: UPDATEx|EOS_USDT.XDAEX 
+20-09-27 17:35:43.925 INFO  market_dispatcher %% - [Redis] SubscribeTopic: UPDATEx|EOS_USDT.XDAEX 
+20-09-27 17:38:10.132 INFO  market_dispatcher %% - [Redis] SubscribeTopic: UPDATEx|EOS_USDT.XDAEX 
+20-09-27 18:50:46.837 INFO  market_dispatcher %% - [Redis] PSubscribeTopic: * 
+20-09-27 18:53:20.892 INFO  market_dispatcher %% - [Redis] PSubscribeTopic: * 
+20-09-27 18:54:05.377 INFO  market_dispatcher %% - [Redis] PSubscribeTopic: * 
+20-09-27 18:55:38.291 INFO  market_dispatcher %% - [Redis] PSubscribeTopic: * 
+20-09-27 18:55:47.045 INFO  market_dispatcher %% - [Redis] PSubscribeTopic: * 
