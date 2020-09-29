@@ -35,7 +35,7 @@ bool parse_snap(const string& data, SDepthQuote& quote) {
 
 
 void RedisHub::OnMessage(const std::string& channel, const std::string& msg){
-    //cout << "redis OnMessage:" << channel << " Msg: " << msg << "\n" << endl;
+    cout << "redis OnMessage:" << channel << " Msg: " << msg << "\n" << endl;
     if (channel.find(DEPTH_UPDATE_HEAD)!=string::npos)
     {
         int pos = channel.find(DEPTH_UPDATE_HEAD);

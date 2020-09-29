@@ -1,8 +1,11 @@
 #pragma once
 
+#include <unistd.h>
+#include <fcntl.h>
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <iostream>
 using namespace std;
 
 using TExchange = string;
@@ -154,4 +157,26 @@ inline void vassign(char * r,const std::string &v)
 inline void vassign(SDepthPrice& depth, const string& price, const double& volume) {
     depth.Price.From(price);    
     depth.Volume = volume;
+};
+
+struct SMixDepthPrice {
+    SDecimal Price;
+    unordered_map<TExchange, double> Volume;
+    SMixDepthPrice* Next;
+
+    SMixDepthPrice() {
+        Next = NULL;
+    }
+};
+
+#define MAX_MIXDEPTH 50
+struct SMixQuote {
+    SMixDepthPrice* Asks; // 卖盘
+    SMixDepthPrice* Bids; // 买盘
+    SDecimal Watermark;
+
+    SMixQuote() {
+        Asks = NULL;
+        Bids = NULL;
+    }
 };

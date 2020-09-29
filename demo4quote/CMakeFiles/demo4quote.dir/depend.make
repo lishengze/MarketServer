@@ -306,6 +306,7 @@ CMakeFiles/demo4quote.dir/main.cpp.o: empty.pb.h
 CMakeFiles/demo4quote.dir/main.cpp.o: gogo.pb.h
 CMakeFiles/demo4quote.dir/main.cpp.o: grpc_publisher.h
 CMakeFiles/demo4quote.dir/main.cpp.o: main.cpp
+CMakeFiles/demo4quote.dir/main.cpp.o: quote_dumper.h
 CMakeFiles/demo4quote.dir/main.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/main.cpp.o: redis_hub.h
 CMakeFiles/demo4quote.dir/main.cpp.o: snap_task.h
@@ -478,6 +479,7 @@ CMakeFiles/demo4quote.dir/redis_hub.cpp.o: api.pb.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: empty.pb.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: gogo.pb.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: grpc_publisher.h
+CMakeFiles/demo4quote.dir/redis_hub.cpp.o: quote_dumper.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: redis_hub.cpp
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: redis_hub.h
@@ -651,6 +653,7 @@ CMakeFiles/demo4quote.dir/snap_task.cpp.o: api.pb.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: empty.pb.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: gogo.pb.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: grpc_publisher.h
+CMakeFiles/demo4quote.dir/snap_task.cpp.o: quote_dumper.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: redis_hub.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: snap_task.cpp

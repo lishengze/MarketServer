@@ -3,6 +3,7 @@
 #include "redis_hub.h"
 #include "snap_task.h"
 #include "quote_mixer.h"
+#include "quote_dumper.h"
 
 class EngineInterface
 {
@@ -85,5 +86,6 @@ private:
     RedisHub   redis_hub_;
 
     // mix quotation
-    QuoteMixer  quote_mixer_;
+    //QuoteMixer  quote_mixer_;
+    QuoteDumper  quote_mixer_;
 };

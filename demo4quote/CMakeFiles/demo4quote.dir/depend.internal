@@ -307,6 +307,7 @@ CMakeFiles/demo4quote.dir/main.cpp.o
  /home/mk/workspace/demo/demo4quote/gogo.pb.h
  /home/mk/workspace/demo/demo4quote/grpc_publisher.h
  /home/mk/workspace/demo/demo4quote/main.cpp
+ /home/mk/workspace/demo/demo4quote/quote_dumper.h
  /home/mk/workspace/demo/demo4quote/quote_mixer.h
  /home/mk/workspace/demo/demo4quote/redis_hub.h
  /home/mk/workspace/demo/demo4quote/snap_task.h
@@ -479,6 +480,7 @@ CMakeFiles/demo4quote.dir/redis_hub.cpp.o
  /home/mk/workspace/demo/demo4quote/empty.pb.h
  /home/mk/workspace/demo/demo4quote/gogo.pb.h
  /home/mk/workspace/demo/demo4quote/grpc_publisher.h
+ /home/mk/workspace/demo/demo4quote/quote_dumper.h
  /home/mk/workspace/demo/demo4quote/quote_mixer.h
  /home/mk/workspace/demo/demo4quote/redis_hub.cpp
  /home/mk/workspace/demo/demo4quote/redis_hub.h
@@ -652,6 +654,7 @@ CMakeFiles/demo4quote.dir/snap_task.cpp.o
  /home/mk/workspace/demo/demo4quote/empty.pb.h
  /home/mk/workspace/demo/demo4quote/gogo.pb.h
  /home/mk/workspace/demo/demo4quote/grpc_publisher.h
+ /home/mk/workspace/demo/demo4quote/quote_dumper.h
  /home/mk/workspace/demo/demo4quote/quote_mixer.h
  /home/mk/workspace/demo/demo4quote/redis_hub.h
  /home/mk/workspace/demo/demo4quote/snap_task.cpp
