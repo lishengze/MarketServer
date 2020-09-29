@@ -123,6 +123,60 @@ demo4quote/fast:
 	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/build
 .PHONY : demo4quote/fast
 
+api.grpc.pb.o: api.grpc.pb.cc.o
+
+.PHONY : api.grpc.pb.o
+
+# target to build an object file
+api.grpc.pb.cc.o:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o
+.PHONY : api.grpc.pb.cc.o
+
+api.grpc.pb.i: api.grpc.pb.cc.i
+
+.PHONY : api.grpc.pb.i
+
+# target to preprocess a source file
+api.grpc.pb.cc.i:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.grpc.pb.cc.i
+.PHONY : api.grpc.pb.cc.i
+
+api.grpc.pb.s: api.grpc.pb.cc.s
+
+.PHONY : api.grpc.pb.s
+
+# target to generate assembly for a file
+api.grpc.pb.cc.s:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.grpc.pb.cc.s
+.PHONY : api.grpc.pb.cc.s
+
+api.pb.o: api.pb.cc.o
+
+.PHONY : api.pb.o
+
+# target to build an object file
+api.pb.cc.o:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.pb.cc.o
+.PHONY : api.pb.cc.o
+
+api.pb.i: api.pb.cc.i
+
+.PHONY : api.pb.i
+
+# target to preprocess a source file
+api.pb.cc.i:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.pb.cc.i
+.PHONY : api.pb.cc.i
+
+api.pb.s: api.pb.cc.s
+
+.PHONY : api.pb.s
+
+# target to generate assembly for a file
+api.pb.cc.s:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.pb.cc.s
+.PHONY : api.pb.cc.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -213,6 +267,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... demo4quote"
+	@echo "... api.grpc.pb.o"
+	@echo "... api.grpc.pb.i"
+	@echo "... api.grpc.pb.s"
+	@echo "... api.pb.o"
+	@echo "... api.pb.i"
+	@echo "... api.pb.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

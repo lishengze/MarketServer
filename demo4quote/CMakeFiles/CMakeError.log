@@ -1,21 +1,21 @@
 Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
 Change Dir: /home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_082af/fast && /usr/bin/make -f CMakeFiles/cmTC_082af.dir/build.make CMakeFiles/cmTC_082af.dir/build
+Run Build Command(s):/usr/bin/make cmTC_52d6b/fast && /usr/bin/make -f CMakeFiles/cmTC_52d6b.dir/build.make CMakeFiles/cmTC_52d6b.dir/build
 make[1]: Entering directory '/home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_082af.dir/src.c.o
-/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_082af.dir/src.c.o   -c /home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp/src.c
-Linking C executable cmTC_082af
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_082af.dir/link.txt --verbose=1
-/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_082af.dir/src.c.o  -o cmTC_082af 
-/usr/bin/ld: CMakeFiles/cmTC_082af.dir/src.c.o: in function `main':
+Building C object CMakeFiles/cmTC_52d6b.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_52d6b.dir/src.c.o   -c /home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_52d6b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_52d6b.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_52d6b.dir/src.c.o  -o cmTC_52d6b 
+/usr/bin/ld: CMakeFiles/cmTC_52d6b.dir/src.c.o: in function `main':
 src.c:(.text+0x46): undefined reference to `pthread_create'
 /usr/bin/ld: src.c:(.text+0x52): undefined reference to `pthread_detach'
 /usr/bin/ld: src.c:(.text+0x63): undefined reference to `pthread_join'
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_082af.dir/build.make:87: cmTC_082af] Error 1
+make[1]: *** [CMakeFiles/cmTC_52d6b.dir/build.make:87: cmTC_52d6b] Error 1
 make[1]: Leaving directory '/home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_082af/fast] Error 2
+make: *** [Makefile:121: cmTC_52d6b/fast] Error 2
 
 
 Source file was:
@@ -41,18 +41,18 @@ int main(void)
 Determining if the function pthread_create exists in the pthreads failed with the following output:
 Change Dir: /home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp
 
-Run Build Command(s):/usr/bin/make cmTC_a865f/fast && /usr/bin/make -f CMakeFiles/cmTC_a865f.dir/build.make CMakeFiles/cmTC_a865f.dir/build
+Run Build Command(s):/usr/bin/make cmTC_84850/fast && /usr/bin/make -f CMakeFiles/cmTC_84850.dir/build.make CMakeFiles/cmTC_84850.dir/build
 make[1]: Entering directory '/home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_a865f.dir/CheckFunctionExists.c.o
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_a865f.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
-Linking C executable cmTC_a865f
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a865f.dir/link.txt --verbose=1
-/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_a865f.dir/CheckFunctionExists.c.o  -o cmTC_a865f  -lpthreads 
+Building C object CMakeFiles/cmTC_84850.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_84850.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_84850
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_84850.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_84850.dir/CheckFunctionExists.c.o  -o cmTC_84850  -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-make[1]: *** [CMakeFiles/cmTC_a865f.dir/build.make:87: cmTC_a865f] Error 1
+make[1]: *** [CMakeFiles/cmTC_84850.dir/build.make:87: cmTC_84850] Error 1
 make[1]: Leaving directory '/home/mk/workspace/demo/demo4quote/CMakeFiles/CMakeTmp'
-make: *** [Makefile:121: cmTC_a865f/fast] Error 2
+make: *** [Makefile:121: cmTC_84850/fast] Error 2
 
 
 

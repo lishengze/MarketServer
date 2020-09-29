@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11 -g3 -Wall -pthread
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/mk/workspace/demo/demo4quote/.. -I/home/mk/workspace/demo/demo4quote/../pandora 
+CXX_INCLUDES = -I/home/mk/workspace/demo/demo4quote/.. -I/home/mk/workspace/demo/demo4quote/../pandora -I/root/.local/include -I/home/mk/go/src 
 

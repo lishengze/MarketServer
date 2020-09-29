@@ -1,2 +1,5 @@
 # generate protobuf
 protoc --proto_path=/home/mk/go/src --proto_path=. --cpp_out=. api.proto 
+
+# generate grpc 
+protoc --proto_path=/home/mk/go/src --proto_path=. --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=. api.proto

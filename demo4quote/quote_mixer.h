@@ -29,7 +29,7 @@ class QuoteMixer
 public:
 public:
     QuoteMixer(){
-
+        publisher_.init();
     }
 
     void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
@@ -76,6 +76,10 @@ public:
 
 private:
 
+    // trade client
+    GrpcPublisher publisher_;
+
+    // symbols
     unordered_map<TSymbol, SMixQuote*> symbols_;
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const {

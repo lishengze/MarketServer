@@ -9,11 +9,18 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 ###############################################################################################
 # for general include
 INCLUDE_DIRECTORIES("..")
-# for include envdeclare.h
+# for include pandora
 INCLUDE_DIRECTORIES("../pandora")
+# for grpc
+INCLUDE_DIRECTORIES("/root/.local/include")
+# for gogo
+INCLUDE_DIRECTORIES("/home/mk/go/src")
 # for search lib pandora
 LINK_DIRECTORIES("./")
+# for search lib grpc
+LINK_DIRECTORIES("/root/.local/lib")
 
-add_executable(demo4quote main.cpp redis_hub.cpp snap_task.cpp)
+add_executable(demo4quote main.cpp redis_hub.cpp snap_task.cpp api.pb.cc api.grpc.pb.cc)
 target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
+target_link_libraries(demo4quote grpc++_reflection grpc++)
