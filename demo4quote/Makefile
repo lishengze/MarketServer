@@ -177,6 +177,60 @@ api.pb.cc.s:
 	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/api.pb.cc.s
 .PHONY : api.pb.cc.s
 
+empty.pb.o: empty.pb.cc.o
+
+.PHONY : empty.pb.o
+
+# target to build an object file
+empty.pb.cc.o:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/empty.pb.cc.o
+.PHONY : empty.pb.cc.o
+
+empty.pb.i: empty.pb.cc.i
+
+.PHONY : empty.pb.i
+
+# target to preprocess a source file
+empty.pb.cc.i:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/empty.pb.cc.i
+.PHONY : empty.pb.cc.i
+
+empty.pb.s: empty.pb.cc.s
+
+.PHONY : empty.pb.s
+
+# target to generate assembly for a file
+empty.pb.cc.s:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/empty.pb.cc.s
+.PHONY : empty.pb.cc.s
+
+gogo.pb.o: gogo.pb.cc.o
+
+.PHONY : gogo.pb.o
+
+# target to build an object file
+gogo.pb.cc.o:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/gogo.pb.cc.o
+.PHONY : gogo.pb.cc.o
+
+gogo.pb.i: gogo.pb.cc.i
+
+.PHONY : gogo.pb.i
+
+# target to preprocess a source file
+gogo.pb.cc.i:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/gogo.pb.cc.i
+.PHONY : gogo.pb.cc.i
+
+gogo.pb.s: gogo.pb.cc.s
+
+.PHONY : gogo.pb.s
+
+# target to generate assembly for a file
+gogo.pb.cc.s:
+	$(MAKE) -f CMakeFiles/demo4quote.dir/build.make CMakeFiles/demo4quote.dir/gogo.pb.cc.s
+.PHONY : gogo.pb.cc.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -273,6 +327,12 @@ help:
 	@echo "... api.pb.o"
 	@echo "... api.pb.i"
 	@echo "... api.pb.s"
+	@echo "... empty.pb.o"
+	@echo "... empty.pb.i"
+	@echo "... empty.pb.s"
+	@echo "... gogo.pb.o"
+	@echo "... gogo.pb.i"
+	@echo "... gogo.pb.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

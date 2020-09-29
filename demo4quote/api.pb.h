@@ -32,8 +32,8 @@
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
-#include "github.com/gogo/protobuf/gogoproto/gogo.pb.h"
-#include <google/protobuf/empty.pb.h>
+#include "gogo.pb.h"
+#include "empty.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_api_2eproto

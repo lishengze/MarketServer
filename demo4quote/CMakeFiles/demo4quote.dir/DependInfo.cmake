@@ -6,6 +6,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/mk/workspace/demo/demo4quote/api.grpc.pb.cc" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o"
   "/home/mk/workspace/demo/demo4quote/api.pb.cc" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/api.pb.cc.o"
+  "/home/mk/workspace/demo/demo4quote/empty.pb.cc" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/empty.pb.cc.o"
+  "/home/mk/workspace/demo/demo4quote/gogo.pb.cc" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/gogo.pb.cc.o"
   "/home/mk/workspace/demo/demo4quote/main.cpp" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/main.cpp.o"
   "/home/mk/workspace/demo/demo4quote/redis_hub.cpp" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/redis_hub.cpp.o"
   "/home/mk/workspace/demo/demo4quote/snap_task.cpp" "/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir/snap_task.cpp.o"

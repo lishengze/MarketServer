@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o"
   "CMakeFiles/demo4quote.dir/api.pb.cc.o"
+  "CMakeFiles/demo4quote.dir/empty.pb.cc.o"
+  "CMakeFiles/demo4quote.dir/gogo.pb.cc.o"
   "CMakeFiles/demo4quote.dir/main.cpp.o"
   "CMakeFiles/demo4quote.dir/redis_hub.cpp.o"
   "CMakeFiles/demo4quote.dir/snap_task.cpp.o"

@@ -20,7 +20,7 @@ LINK_DIRECTORIES("./")
 # for search lib grpc
 LINK_DIRECTORIES("/root/.local/lib")
 
-add_executable(demo4quote main.cpp redis_hub.cpp snap_task.cpp api.pb.cc api.grpc.pb.cc)
+add_executable(demo4quote main.cpp redis_hub.cpp snap_task.cpp empty.pb.cc gogo.pb.cc api.pb.cc api.grpc.pb.cc)
 target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote grpc++_reflection grpc++)

@@ -96,9 +96,35 @@ CMakeFiles/demo4quote.dir/snap_task.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/demo4quote.dir/snap_task.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/mk/workspace/demo/demo4quote/snap_task.cpp -o CMakeFiles/demo4quote.dir/snap_task.cpp.s
 
+CMakeFiles/demo4quote.dir/empty.pb.cc.o: CMakeFiles/demo4quote.dir/flags.make
+CMakeFiles/demo4quote.dir/empty.pb.cc.o: empty.pb.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/demo4quote.dir/empty.pb.cc.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/demo4quote.dir/empty.pb.cc.o -c /home/mk/workspace/demo/demo4quote/empty.pb.cc
+
+CMakeFiles/demo4quote.dir/empty.pb.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/demo4quote.dir/empty.pb.cc.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/mk/workspace/demo/demo4quote/empty.pb.cc > CMakeFiles/demo4quote.dir/empty.pb.cc.i
+
+CMakeFiles/demo4quote.dir/empty.pb.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/demo4quote.dir/empty.pb.cc.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/mk/workspace/demo/demo4quote/empty.pb.cc -o CMakeFiles/demo4quote.dir/empty.pb.cc.s
+
+CMakeFiles/demo4quote.dir/gogo.pb.cc.o: CMakeFiles/demo4quote.dir/flags.make
+CMakeFiles/demo4quote.dir/gogo.pb.cc.o: gogo.pb.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/demo4quote.dir/gogo.pb.cc.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/demo4quote.dir/gogo.pb.cc.o -c /home/mk/workspace/demo/demo4quote/gogo.pb.cc
+
+CMakeFiles/demo4quote.dir/gogo.pb.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/demo4quote.dir/gogo.pb.cc.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/mk/workspace/demo/demo4quote/gogo.pb.cc > CMakeFiles/demo4quote.dir/gogo.pb.cc.i
+
+CMakeFiles/demo4quote.dir/gogo.pb.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/demo4quote.dir/gogo.pb.cc.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/mk/workspace/demo/demo4quote/gogo.pb.cc -o CMakeFiles/demo4quote.dir/gogo.pb.cc.s
+
 CMakeFiles/demo4quote.dir/api.pb.cc.o: CMakeFiles/demo4quote.dir/flags.make
 CMakeFiles/demo4quote.dir/api.pb.cc.o: api.pb.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/demo4quote.dir/api.pb.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/demo4quote.dir/api.pb.cc.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/demo4quote.dir/api.pb.cc.o -c /home/mk/workspace/demo/demo4quote/api.pb.cc
 
 CMakeFiles/demo4quote.dir/api.pb.cc.i: cmake_force
@@ -111,7 +137,7 @@ CMakeFiles/demo4quote.dir/api.pb.cc.s: cmake_force
 
 CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o: CMakeFiles/demo4quote.dir/flags.make
 CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o: api.grpc.pb.cc
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o -c /home/mk/workspace/demo/demo4quote/api.grpc.pb.cc
 
 CMakeFiles/demo4quote.dir/api.grpc.pb.cc.i: cmake_force
@@ -127,6 +153,8 @@ demo4quote_OBJECTS = \
 "CMakeFiles/demo4quote.dir/main.cpp.o" \
 "CMakeFiles/demo4quote.dir/redis_hub.cpp.o" \
 "CMakeFiles/demo4quote.dir/snap_task.cpp.o" \
+"CMakeFiles/demo4quote.dir/empty.pb.cc.o" \
+"CMakeFiles/demo4quote.dir/gogo.pb.cc.o" \
 "CMakeFiles/demo4quote.dir/api.pb.cc.o" \
 "CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o"
 
@@ -136,6 +164,8 @@ demo4quote_EXTERNAL_OBJECTS =
 demo4quote: CMakeFiles/demo4quote.dir/main.cpp.o
 demo4quote: CMakeFiles/demo4quote.dir/redis_hub.cpp.o
 demo4quote: CMakeFiles/demo4quote.dir/snap_task.cpp.o
+demo4quote: CMakeFiles/demo4quote.dir/empty.pb.cc.o
+demo4quote: CMakeFiles/demo4quote.dir/gogo.pb.cc.o
 demo4quote: CMakeFiles/demo4quote.dir/api.pb.cc.o
 demo4quote: CMakeFiles/demo4quote.dir/api.grpc.pb.cc.o
 demo4quote: CMakeFiles/demo4quote.dir/build.make
@@ -152,7 +182,7 @@ demo4quote: /usr/local/lib/libboost_unit_test_framework.so
 demo4quote: /usr/local/lib/libboost_locale.a
 demo4quote: /usr/local/lib/libboost_atomic.so
 demo4quote: CMakeFiles/demo4quote.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable demo4quote"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/mk/workspace/demo/demo4quote/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable demo4quote"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/demo4quote.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

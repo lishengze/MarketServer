@@ -147,30 +147,29 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_api_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\tapi.proto\022\020trade.service.v1\032-github.co"
-  "m/gogo/protobuf/gogoproto/gogo.proto\032\033go"
-  "ogle/protobuf/empty.proto\"\352\002\n\020MarketStre"
-  "amData\022$\n\006symbol\030\001 \001(\tB\024\342\336\037\006Symbol\352\336\037\006sy"
-  "mbol\022&\n\007msg_seq\030\002 \001(\tB\025\342\336\037\006MsgSeq\352\336\037\007msg"
-  "_seq\0222\n\004time\030\003 \001(\003B$\342\336\037\004Time\352\336\037\004time\372\336\037\020"
-  "wx/pkg/time.Time\022F\n\013time_arrive\030\004 \001(\003B1\342"
-  "\336\037\nTimeArrive\352\336\037\013time_arrive\372\336\037\020wx/pkg/t"
-  "ime.Time\022E\n\task_depth\030\005 \003(\0132\027.trade.serv"
-  "ice.v1.DepthB\031\342\336\037\010AskDepth\352\336\037\task_depth\022"
-  "E\n\tbid_depth\030\006 \003(\0132\027.trade.service.v1.De"
-  "pthB\031\342\336\037\010BidDepth\352\336\037\tbid_depth\"g\n\005Depth\022"
-  "!\n\005price\030\001 \001(\002B\022\342\336\037\005Price\352\336\037\005price\022;\n\004da"
-  "ta\030\002 \003(\0132\033.trade.service.v1.DepthDataB\020\342"
-  "\336\037\004Data\352\336\037\004data\"W\n\tDepthData\022\036\n\004size\030\001 \001"
-  "(\002B\020\342\336\037\004Size\352\336\037\004size\022*\n\010exchange\030\002 \001(\tB\030"
-  "\342\336\037\010Exchange\352\336\037\010exchange\"\014\n\nEmptyReply2X"
-  "\n\005Trade\022O\n\017PutMarketStream\022\".trade.servi"
-  "ce.v1.MarketStreamData\032\026.google.protobuf"
-  ".Empty(\001B\004Z\002v1b\006proto3"
+  "\n\tapi.proto\022\020trade.service.v1\032\ngogo.prot"
+  "o\032\013empty.proto\"\352\002\n\020MarketStreamData\022$\n\006s"
+  "ymbol\030\001 \001(\tB\024\342\336\037\006Symbol\352\336\037\006symbol\022&\n\007msg"
+  "_seq\030\002 \001(\tB\025\342\336\037\006MsgSeq\352\336\037\007msg_seq\0222\n\004tim"
+  "e\030\003 \001(\003B$\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time"
+  ".Time\022F\n\013time_arrive\030\004 \001(\003B1\342\336\037\nTimeArri"
+  "ve\352\336\037\013time_arrive\372\336\037\020wx/pkg/time.Time\022E\n"
+  "\task_depth\030\005 \003(\0132\027.trade.service.v1.Dept"
+  "hB\031\342\336\037\010AskDepth\352\336\037\task_depth\022E\n\tbid_dept"
+  "h\030\006 \003(\0132\027.trade.service.v1.DepthB\031\342\336\037\010Bi"
+  "dDepth\352\336\037\tbid_depth\"g\n\005Depth\022!\n\005price\030\001 "
+  "\001(\002B\022\342\336\037\005Price\352\336\037\005price\022;\n\004data\030\002 \003(\0132\033."
+  "trade.service.v1.DepthDataB\020\342\336\037\004Data\352\336\037\004"
+  "data\"W\n\tDepthData\022\036\n\004size\030\001 \001(\002B\020\342\336\037\004Siz"
+  "e\352\336\037\004size\022*\n\010exchange\030\002 \001(\tB\030\342\336\037\010Exchang"
+  "e\352\336\037\010exchange\"\014\n\nEmptyReply2X\n\005Trade\022O\n\017"
+  "PutMarketStream\022\".trade.service.v1.Marke"
+  "tStreamData\032\026.google.protobuf.Empty(\001B\004Z"
+  "\002v1b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_api_2eproto_deps[2] = {
-  &::descriptor_table_github_2ecom_2fgogo_2fprotobuf_2fgogoproto_2fgogo_2eproto,
-  &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
+  &::descriptor_table_empty_2eproto,
+  &::descriptor_table_gogo_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_api_2eproto_sccs[4] = {
   &scc_info_Depth_api_2eproto.base,
@@ -180,7 +179,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_api
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_api_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_api_2eproto = {
-  false, false, descriptor_table_protodef_api_2eproto, "api.proto", 782,
+  false, false, descriptor_table_protodef_api_2eproto, "api.proto", 731,
   &descriptor_table_api_2eproto_once, descriptor_table_api_2eproto_sccs, descriptor_table_api_2eproto_deps, 4, 2,
   schemas, file_default_instances, TableStruct_api_2eproto::offsets,
   file_level_metadata_api_2eproto, 4, file_level_enum_descriptors_api_2eproto, file_level_service_descriptors_api_2eproto,
