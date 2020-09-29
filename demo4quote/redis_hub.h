@@ -4,6 +4,10 @@
 #include "pandora/util/json.hpp"
 #include "pandora/redis/redis_api.h"
 using namespace std;
+using json = nlohmann::json;
+#include "stream_engine_define.h"
+
+bool parse_snap(const string& data, SDepthQuote& quote);
 
 inline string make_redis_depth_key(const string& exchange, const string& symbol) {
     return "DEPTHx|" + symbol + "." + exchange;

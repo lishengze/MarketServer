@@ -10,6 +10,7 @@ CMakeFiles/demo4quote.dir/main.cpp.o: ../pandora/util/json.hpp
 CMakeFiles/demo4quote.dir/main.cpp.o: ../pandora/util/thread_base.h
 CMakeFiles/demo4quote.dir/main.cpp.o: ../pandora/util/thread_basepool.h
 CMakeFiles/demo4quote.dir/main.cpp.o: main.cpp
+CMakeFiles/demo4quote.dir/main.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/main.cpp.o: redis_hub.h
 CMakeFiles/demo4quote.dir/main.cpp.o: snap_task.h
 CMakeFiles/demo4quote.dir/main.cpp.o: stream_engine.h
@@ -23,6 +24,7 @@ CMakeFiles/demo4quote.dir/redis_hub.cpp.o: ../pandora/util/io_service_pool.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: ../pandora/util/json.hpp
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: ../pandora/util/thread_base.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: ../pandora/util/thread_basepool.h
+CMakeFiles/demo4quote.dir/redis_hub.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: redis_hub.cpp
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: redis_hub.h
 CMakeFiles/demo4quote.dir/redis_hub.cpp.o: snap_task.h
@@ -37,6 +39,7 @@ CMakeFiles/demo4quote.dir/snap_task.cpp.o: ../pandora/util/io_service_pool.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: ../pandora/util/json.hpp
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: ../pandora/util/thread_base.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: ../pandora/util/thread_basepool.h
+CMakeFiles/demo4quote.dir/snap_task.cpp.o: quote_mixer.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: redis_hub.h
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: snap_task.cpp
 CMakeFiles/demo4quote.dir/snap_task.cpp.o: snap_task.h

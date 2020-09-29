@@ -1,0 +1,2 @@
+# generate protobuf
+protoc --proto_path=/home/mk/go/src --proto_path=. --cpp_out=. api.proto 

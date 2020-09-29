@@ -180,13 +180,15 @@ boost/asio.hpp
 stream_engine.h
 /home/mk/workspace/demo/demo4quote/stream_engine.h
 
+/home/mk/workspace/demo/demo4quote/quote_mixer.h
+stream_engine_define.h
+/home/mk/workspace/demo/demo4quote/stream_engine_define.h
+
 /home/mk/workspace/demo/demo4quote/redis_hub.cpp
 redis_hub.h
 /home/mk/workspace/demo/demo4quote/redis_hub.h
 stream_engine.h
 /home/mk/workspace/demo/demo4quote/stream_engine.h
-stream_engine_define.h
-/home/mk/workspace/demo/demo4quote/stream_engine_define.h
 
 /home/mk/workspace/demo/demo4quote/redis_hub.h
 pandora/messager/ut_log.h
@@ -195,12 +197,16 @@ pandora/util/json.hpp
 /home/mk/workspace/demo/demo4quote/pandora/util/json.hpp
 pandora/redis/redis_api.h
 /home/mk/workspace/demo/demo4quote/pandora/redis/redis_api.h
+stream_engine_define.h
+/home/mk/workspace/demo/demo4quote/stream_engine_define.h
 
 /home/mk/workspace/demo/demo4quote/snap_task.cpp
 snap_task.h
 /home/mk/workspace/demo/demo4quote/snap_task.h
 stream_engine.h
 /home/mk/workspace/demo/demo4quote/stream_engine.h
+redis_hub.h
+/home/mk/workspace/demo/demo4quote/redis_hub.h
 
 /home/mk/workspace/demo/demo4quote/snap_task.h
 pandora/messager/ut_log.h
@@ -221,8 +227,8 @@ redis_hub.h
 /home/mk/workspace/demo/demo4quote/redis_hub.h
 snap_task.h
 /home/mk/workspace/demo/demo4quote/snap_task.h
-stream_engine_define.h
-/home/mk/workspace/demo/demo4quote/stream_engine_define.h
+quote_mixer.h
+/home/mk/workspace/demo/demo4quote/quote_mixer.h
 
 /home/mk/workspace/demo/demo4quote/stream_engine_define.h
 string

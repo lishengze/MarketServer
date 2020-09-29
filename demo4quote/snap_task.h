@@ -57,7 +57,7 @@ public:
         std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
         if( symbols_.find(combinedSymbol) != symbols_.end() )
             return;
-        cout << "find new symbol:" << combinedSymbol << endl;
+        //cout << "find new symbol:" << combinedSymbol << endl;
         symbols_[combinedSymbol] = 0;
         boost::asio::post(boost::bind(&SnapTaskCenter::get_snap, this, exchange, symbol));
     }

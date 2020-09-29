@@ -63,3 +63,103 @@
 20-09-28 10:38:38.337 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
 20-09-28 10:39:12.317 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
 20-09-28 10:39:12.317 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 11:25:55.418 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 11:25:55.467 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:33:06.487 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:33:06.522 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:40:49.734 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:40:49.779 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:41:47.992 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:41:48.036 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:58:21.655 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 14:58:21.712 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:00:36.598 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:00:36.637 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:01:09.514 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:01:09.556 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:01:47.684 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 15:01:47.686 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 15:31:52.935 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:31:52.974 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:32:36.706 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 15:32:36.706 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 15:35:25.102 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:35:25.146 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 15:36:01.572 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 15:36:01.573 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 16:11:56.323 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:11:56.360 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:12:05.681 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:12:05.725 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:25:42.981 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:25:43.023 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:26:15.963 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 16:26:15.964 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 16:32:01.779 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:32:01.856 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 16:32:39.478 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 16:32:39.479 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-28 17:55:53.374 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 17:55:53.413 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 17:56:09.098 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 17:56:09.142 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:01:15.756 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:01:15.797 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:02:47.659 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:02:47.702 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:02:59.469 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:02:59.513 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:05:24.827 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:05:24.866 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:11:44.018 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:11:44.056 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:11:54.689 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:11:55.311 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:22:36.756 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:22:36.858 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:24:08.935 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:24:08.973 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:24:24.158 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:24:24.206 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:30.315 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:30.351 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:50.282 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:50.329 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:55.673 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:25:55.714 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-28 18:26:45.369 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-28 18:26:45.369 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-29 10:04:19.326 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:04:19.375 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:08:42.825 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:08:42.865 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:08:58.024 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:08:59.111 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:11:40.063 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:11:40.102 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:11:52.389 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:11:52.431 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:12:52.258 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:12:52.297 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:18:13.330 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:18:13.366 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:19:22.251 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:19:22.310 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:22:17.694 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:22:17.738 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:30:09.952 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:30:10.024 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:30:28.604 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:30:28.640 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:33:59.845 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:33:59.886 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:40:40.845 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:40:40.889 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:41:37.221 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:41:37.281 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 10:42:21.930 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-29 10:42:21.930 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 
+20-09-29 11:07:04.140 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 11:07:04.181 INFO  SnapTaskCenter %% - [Redis] PSubscribeTopic: * 
+20-09-29 11:07:50.109 ERROR SnapTaskCenter %% - [Redis] replay is null,error: Server closed the connection 
+20-09-29 11:07:50.109 ERROR SnapTaskCenter %% - [Redis] OnDisconnect_Callback Error: Server closed the connection 

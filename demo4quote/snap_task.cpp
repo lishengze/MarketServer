@@ -1,5 +1,6 @@
 #include "snap_task.h"
 #include "stream_engine.h"
+#include "redis_hub.h"
 
 void SnapTaskCenter::get_snap(const string& exchange, const string& symbol) {
     std::thread::id thread_id = std::this_thread::get_id();
@@ -15,5 +16,9 @@ void SnapTaskCenter::get_snap(const string& exchange, const string& symbol) {
     
     string depth_key = make_redis_depth_key(exchange, symbol);
     string depthData = redis_sync_api->SyncGet(depth_key);
-    engine_interface_->on_snap(exchange, symbol);
+    //cout << "get_snap: " << depthData << endl;
+    SDepthQuote quote;
+    if( !parse_snap(depthData, quote))
+        return;
+    engine_interface_->on_snap(exchange, symbol, quote);
 }
