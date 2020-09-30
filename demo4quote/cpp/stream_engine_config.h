@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <set>
 using namespace std;
 
 #define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
@@ -39,7 +40,8 @@ public:
 
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
-            dump_binary_only_ = bool(js["debug"]["dump_binary_only_"].get<int>());
+            dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
+            output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
 
             // redis quote
             quote_redis_host_ = js["redis_quote"]["host"].get<string>();
@@ -47,6 +49,15 @@ public:
             quote_redis_password_ = js["redis_quote"]["password"].get<string>();
             quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
+            // include
+            for (auto iter = js["include"]["symbols"].begin(); iter != js["include"]["symbols"].end(); ++iter) {
+                const string& symbol = *iter;
+                include_symbols_.insert(symbol);
+            }
+            for (auto iter = js["include"]["exchanges"].begin(); iter != js["include"]["exchanges"].end(); ++iter) {
+                const string& exchange = *iter;
+                include_exchanges_.insert(exchange);
+            }
             UT_LOG_INFO(logger_, "Parse Config finish.");
         }
         catch (std::exception& e)
@@ -67,12 +78,18 @@ public:
     string sample_symbol_;
     // [for debug] only dump binary data instead of push
     bool dump_binary_only_;
+    // [for debug] output to screen
+    bool output_to_screen_;
 
     // quote redis config
     string quote_redis_host_;
     int quote_redis_port_;
     string quote_redis_password_;
     int quote_redis_snap_interval_;
+
+    // include
+    std::set<string> include_symbols_;
+    std::set<string> include_exchanges_;
 
     // logger
     UTLogPtr logger_;

@@ -48,6 +48,8 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
         if( CONFIG->sample_symbol_ != "" && symbol != CONFIG->sample_symbol_ )
             return;  
         UT_LOG_INFO(CONFIG->logger_, "redis OnMessage:" << channel << " Msg: " << msg);
+        if( CONFIG->output_to_screen_ )
+            cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
 
         SDepthQuote quote;
         if( !parse_snap(msg, quote, false))
@@ -65,5 +67,18 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
     else
     {
         //UT_LOG_WARNING(logger_, "Unknown Message Type");
+    }
+};
+
+void RedisQuote::OnConnected() {
+    cout << "\n##### Redis MarketDispatcher::OnConnected ####\n" << endl;
+    //redis_api_->PSubscribeTopic("*");
+    //redis_api_->PSubscribeTopic("UPDATEx|*.OKEX");
+    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
+            const string& symbol = *iterSymbol;
+            const string& exchange = *iterExchange;
+            redis_api_->SubscribeTopic("UPDATEx|" + symbol + "." + exchange);            
+        }
     }
 };

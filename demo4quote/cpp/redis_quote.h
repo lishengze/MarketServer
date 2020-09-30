@@ -65,10 +65,8 @@ public:
 
 
     // redis connect notify
-    virtual void OnConnected(){
-        cout << "\n##### Redis MarketDispatcher::OnConnected ####\n" << endl;
-        redis_api_->PSubscribeTopic("*");
-    }
+    virtual void OnConnected();
+    
     // redis disconnect notify
     virtual void OnDisconnected(int status){
         cout << "\n##### Redis MarketDispatcher::OnDisconnected ####\n" << endl;

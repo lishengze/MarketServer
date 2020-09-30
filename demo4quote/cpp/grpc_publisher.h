@@ -37,13 +37,24 @@ class TradeClient {
 public:
     using StreamPtr = boost::shared_ptr<ClientWriter<MarketStreamData>>;
 public:
-    TradeClient(std::shared_ptr<Channel> channel)
-        : stub_(Trade::NewStub(channel)) { 
-        stream_ = StreamPtr{ stub_->PutMarketStream(&context_, &response_) };
-    }
+    TradeClient(){}
 
-    void PutMarketStream(const string& symbol, const SMixQuote& quote) {   
-   
+    void PutMarketStream(const string& symbol, const SMixQuote& quote) {
+        if( stub_ == nullptr ) {
+            ClientContext context_;
+            google::protobuf::Empty response_;
+            // create channel
+            auto channel = grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials());
+            stub_ = Trade::NewStub(channel);
+            stream_ = StreamPtr{ stub_->PutMarketStream(&context_, &response_) };
+            int state = channel->GetState(true);
+            std::cout << "status is " << state << endl;
+            if( state != GRPC_CHANNEL_READY) {
+                stub_ = nullptr;
+                stream_ = nullptr;
+            }
+        }
+
         MarketStreamData msd; 
         msd.set_symbol(symbol);
         // 卖盘
@@ -78,26 +89,24 @@ public:
                 ptr = ptr->Next;
             }
         }
-        stream_->Write(msd);
+        //stream_->Write(msd);
         //stream->WritesDone();
     }
 
 private:  
-    ClientContext context_;
-    google::protobuf::Empty response_;
-    std::unique_ptr<Trade::Stub> stub_;
-    StreamPtr stream_;
+    std::unique_ptr<Trade::Stub> stub_ = nullptr;
+    StreamPtr stream_ = nullptr;
 };
 
 class GrpcPublisher {
 public:
     void init() {
-        client_ = new TradeClient(grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials()));
+        //client_ = new TradeClient(grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials()));
     }
 
     void publish(const string& symbol, const SMixQuote& quote) {
-        client_->PutMarketStream(symbol, quote);
+        client_.PutMarketStream(symbol, quote);
     }
 private: 
-    TradeClient *client_;
+    TradeClient client_;
 };
