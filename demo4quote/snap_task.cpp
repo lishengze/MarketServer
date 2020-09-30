@@ -16,9 +16,13 @@ void SnapTaskCenter::get_snap(const string& exchange, const string& symbol) {
     
     string depth_key = make_redis_depth_key(exchange, symbol);
     string depthData = redis_sync_api->SyncGet(depth_key);
-    //cout << "get_snap: " << depthData << endl;
+    cout << "get_snap: " << depthData << endl;
     SDepthQuote quote;
-    if( !parse_snap(depthData, quote))
+    if( !parse_snap(depthData, quote, true))
+        return;        
+    if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
+        cout << "get_snap: not match" << endl;
         return;
+    }
     engine_interface_->on_snap(exchange, symbol, quote);
 }

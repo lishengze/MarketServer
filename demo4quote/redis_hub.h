@@ -7,7 +7,7 @@ using namespace std;
 using json = nlohmann::json;
 #include "stream_engine_define.h"
 
-bool parse_snap(const string& data, SDepthQuote& quote);
+bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap);
 
 inline string make_redis_depth_key(const string& exchange, const string& symbol) {
     return "DEPTHx|" + symbol + "." + exchange;

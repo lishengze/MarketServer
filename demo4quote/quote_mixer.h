@@ -12,11 +12,6 @@ public:
     }
 
     void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-        if( symbol == "BTC_USDC" ){
-            cout << "on_mix_snap exchange-" << exchange << " time-" << quote.TimeArrive << endl;
-        } else {
-         //   return;
-        }
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) ) {
             ptr = new SMixQuote();
@@ -39,16 +34,13 @@ public:
     }
 
     void on_mix_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-        if( symbol == "BTC_USDC" ){
-            cout << "on_mix_update exchange-" << exchange << " time-" << quote.TimeArrive << endl;
-        }
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) )
             return;
         SDepthQuote newQuote = quote;
         // 1. 需要清除的价位数据
-        ptr->Asks = _clear_pricelevel(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength);
-        ptr->Bids = _clear_pricelevel(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength);
+        ptr->Asks = _clear_pricelevel(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, true);
+        ptr->Bids = _clear_pricelevel(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, false);
         // 2. 修剪cross的价位
         _cross_askbid(ptr, newQuote);
         // 3. 合并价位
@@ -60,9 +52,6 @@ public:
     }
 
     void publish_quote(const string& symbol, const SMixQuote& quote) {
-        if( symbol == "BTC_USDC" ){
-            cout << "publish_quote symbol-" << symbol << endl;
-        }
         publisher_.publish(symbol, quote);
     }
 
@@ -82,47 +71,45 @@ private:
         return true;
     }
 
-    SMixDepthPrice* _clear_pricelevel(const string& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, int& newLength) {
-        if( newLength == 0 )
-            return depths;
-        const SDepthPrice& level = newDepths[0];
-        if( level.Volume > 0.00001 ) {
-            return depths;
-        }
-        newLength = 0;
-
-        // 删除对应价位的挂单
+    SMixDepthPrice* _clear_pricelevel(const string& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, const int& newLength, bool isAsk) {
         SMixDepthPrice head;
         head.Next = depths;        
         SMixDepthPrice *tmp = depths, *last = &head;
-        while( tmp != NULL ) {
-            if( tmp->Price == level.Price ) {                
-                // 找到对应的价位
-                unordered_map<TExchange, double>& volumeByExchange = tmp->Volume;
-                auto iter = volumeByExchange.find(exchange);
-                if( iter != volumeByExchange.end() ) {
-                    volumeByExchange.erase(iter);                
-                    if( volumeByExchange.size() == 0 ) {
-                        // 删除             
-                        SMixDepthPrice* waitToDel = tmp;
-                        last->Next = tmp->Next;
-                        tmp = tmp->Next;
-                        delete waitToDel;
-                        continue;
-                    }
-                }
-                break;
+
+        for( int i = 0 ; i < newLength ; ++i ) {
+            const SDepthPrice& depth = newDepths[i];
+            if( depth.Volume > VOLUME_PRECISE ) {
+                continue;
             }
-            last = tmp;
-            tmp = tmp->Next;
+            // 找到并删除对应价位
+            while( tmp != NULL ) {
+                if( tmp->Price == depth.Price ) {                
+                    unordered_map<TExchange, double>& volumeByExchange = tmp->Volume;
+                    auto iter = volumeByExchange.find(exchange);
+                    if( iter != volumeByExchange.end() ) {
+                        volumeByExchange.erase(iter);                
+                        if( volumeByExchange.size() == 0 ) {
+                            // 删除             
+                            SMixDepthPrice* waitToDel = tmp;
+                            last->Next = tmp->Next;
+                            tmp = tmp->Next;
+                            delete waitToDel;
+                            break;
+                        }
+                    }
+                } else if ( isAsk ? (tmp->Price > depth.Price) : (tmp->Price < depth.Price) ) {
+                    break;
+                }
+                last = tmp;
+                tmp = tmp->Next;
+            }
         }
         return head.Next;
     }
 
     SMixDepthPrice* _clear_exchange(const string& exchange, SMixDepthPrice* depths) {
         SMixDepthPrice head;
-        head.Next = depths;
-        
+        head.Next = depths;        
         SMixDepthPrice *tmp = depths, *last = &head;
         while( tmp != NULL ) {
             unordered_map<TExchange, double>& volumeByExchange = tmp->Volume;
@@ -147,11 +134,11 @@ private:
     void _cross_askbid(SMixQuote* mixedQuote, const SDepthQuote& quote) {
         // 新行情的买1价 大于 聚合行情的卖1价
         if( mixedQuote->Asks != NULL && quote.BidLength > 0 && mixedQuote->Asks->Price < quote.Bids[0].Price ) {
-            mixedQuote->Watermark = (quote.Bids[0].Price - mixedQuote->Asks->Price) / 2;
+            mixedQuote->Watermark = (quote.Bids[0].Price + mixedQuote->Asks->Price) / 2;
         }
         // 新行情的卖1价 小于 聚合行情的买1价
         else if( mixedQuote->Bids != NULL && quote.AskLength > 0 && mixedQuote->Bids->Price > quote.Asks[0].Price ) {
-            mixedQuote->Watermark = (mixedQuote->Bids->Price - quote.Asks[0].Price) / 2;
+            mixedQuote->Watermark = (mixedQuote->Bids->Price + quote.Asks[0].Price) / 2;
         }
         else {
             mixedQuote->Watermark = SDecimal();
@@ -179,14 +166,18 @@ private:
         }
 
         // 2. 裁剪新行情对应价位（闭区间）
-        int filteredLevel = 0;
-        double virtualVolume; // 虚拟价位挂单量
+        int filteredLevel = 99999999;
+        double virtualVolume = 0; // 虚拟价位挂单量
         for( int i = 0 ; i < length ; ++ i ) {
-            if( watermark.Value == 0 || (isAsk ? (depths[i].Price >= watermark) : (depths[i].Price <= watermark)) ) {
+            const SDepthPrice& depth = depths[i];
+            if( depth.Volume < VOLUME_PRECISE ) {
+                continue;
+            }
+            if( watermark.Value == 0 || (isAsk ? (depth.Price >= watermark) : (depth.Price <= watermark)) ) {
+                filteredLevel = i;
                 break;        
             } else {
-                filteredLevel = i;
-                virtualVolume += depths[i].Volume;
+                virtualVolume += depth.Volume;
             }
         }
 
@@ -204,18 +195,22 @@ private:
         int i = filteredLevel;
         for( tmp = head.Next ; i < length && tmp != NULL ; ) {
             const SDepthPrice& depth = depths[i];
+            if( depth.Volume < VOLUME_PRECISE ) {
+                ++i;
+                continue;
+            }
             if( isAsk ? (depth.Price < tmp->Price) : (depth.Price > tmp->Price) ) {
                 // 新建价位
                 SMixDepthPrice *newDepth = new SMixDepthPrice();
                 newDepth->Price = depth.Price;
-                newDepth->Volume[exchange] += depth.Volume;
+                newDepth->Volume[exchange] = depth.Volume;
                 
                 last->Next = newDepth;
                 last = newDepth;
                 newDepth->Next = tmp;
                 ++i;
             } else if( depth.Price == tmp->Price ) {
-                tmp->Volume[exchange] += depth.Volume;
+                tmp->Volume[exchange] = depth.Volume;
                 ++i;
             } else {
                 last = tmp;
@@ -226,10 +221,13 @@ private:
         // 5. 剩余全部加入队尾
         for( ; i < length ; ++i) {
             const SDepthPrice& depth = depths[i];
+            if( depth.Volume < VOLUME_PRECISE ) {
+                continue;
+            }
             // 新建价位
             SMixDepthPrice *newDepth = new SMixDepthPrice();
             newDepth->Price = depth.Price;
-            newDepth->Volume[exchange] += depth.Volume;
+            newDepth->Volume[exchange] = depth.Volume;
             newDepth->Next = NULL;
             // 插入
             last->Next = newDepth;

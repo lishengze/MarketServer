@@ -48,7 +48,7 @@ public:
         quote_mixer_.on_mix_snap(exchange, symbol, quote);
     };
 
-    void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){        
+    void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
         //cout << "on_update exchange: " << exchange << " symbol: " << symbol << "\n" << endl;
         // update new symbol
         snap_task_.on_update_symbol(exchange, symbol);
@@ -60,7 +60,7 @@ public:
         // filter by SequenceNo
         if( quote.SequenceNo < lastQuote.SequenceNo )
             return;
-        quote_mixer_.on_mix_update(exchange, symbol, quote);    
+        quote_mixer_.on_mix_update(exchange, symbol, quote);
     };
 
 private:
@@ -86,6 +86,6 @@ private:
     RedisHub   redis_hub_;
 
     // mix quotation
-    //QuoteMixer  quote_mixer_;
-    QuoteDumper  quote_mixer_;
+    QuoteMixer  quote_mixer_;
+    //QuoteDumper  quote_mixer_;
 };

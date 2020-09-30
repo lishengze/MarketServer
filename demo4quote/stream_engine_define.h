@@ -2,6 +2,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
+#include <math.h>
 #include <string>
 #include <map>
 #include <unordered_map>
@@ -13,12 +14,15 @@ using TSymbol = string;
 
 
 #define PRICE_PRECISE 0.000000001
+#define VOLUME_PRECISE 0.000000001
 #define TICK_HEAD "TRADEx|"
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
 
+#define CALC_BASE(x) (int(pow(10, (x))))
+
 struct SDecimal {
-    int Value;
+    long long Value;
     short Base;
 
     SDecimal() {
@@ -27,47 +31,47 @@ struct SDecimal {
 
     void From(const string& data) {
         std::string::size_type pos = data.find(".");
-        Base = data.length() - pos;
-        Value = atof(data.c_str()) * (10^Base);
+        Base = data.length() - pos - 1;
+        Value = atof(data.c_str()) * CALC_BASE(Base);
     }
 
     double GetValue() const {
-        return Value * 1.0 / (10^Base);
+        return Value * 1.0 / CALC_BASE(Base);
     }
 
     bool operator <(const SDecimal& d) const {
         if( Base > d.Base ) {
-            return Value < d.Value * (10^(Base-d.Base));
+            return Value < d.Value * CALC_BASE(Base-d.Base);
         } else {
-            return Value * (10^(d.Base-Base)) < d.Value;
+            return Value * CALC_BASE(d.Base-Base) < d.Value;
         }
     }
     bool operator >(const SDecimal& d) const {
         if( Base > d.Base ) {
-            return Value > d.Value * (10^(Base-d.Base));
+            return Value > d.Value * CALC_BASE(Base-d.Base);
         } else {
-            return Value * (10^(d.Base-Base)) > d.Value;
+            return Value * CALC_BASE(d.Base-Base) > d.Value;
         }
     }
     bool operator ==(const SDecimal& d) const {
         if( Base > d.Base ) {
-            return Value == d.Value * (10^(Base-d.Base));
+            return Value == d.Value * CALC_BASE(Base-d.Base);
         } else {
-            return Value * (10^(d.Base-Base)) == d.Value;
+            return Value * CALC_BASE(d.Base-Base) == d.Value;
         }
     }
     bool operator <=(const SDecimal& d) const {
         if( Base > d.Base ) {
-            return Value <= d.Value * (10^(Base-d.Base));
+            return Value <= d.Value * CALC_BASE(Base-d.Base);
         } else {
-            return Value * (10^(d.Base-Base)) <= d.Value;
+            return Value * CALC_BASE(d.Base-Base) <= d.Value;
         }
     }
     bool operator >=(const SDecimal& d) const {
         if( Base > d.Base ) {
-            return Value >= d.Value * (10^(Base-d.Base));
+            return Value >= d.Value * CALC_BASE(Base-d.Base);
         } else {
-            return Value * (10^(d.Base-Base)) >= d.Value;
+            return Value * CALC_BASE(d.Base-Base) >= d.Value;
         }
     }
 
@@ -75,10 +79,10 @@ struct SDecimal {
         SDecimal ret;
         if( Base > d.Base ) {
             ret.Base = Base;
-            ret.Value = Value + d.Value * (10^(Base-d.Base));
+            ret.Value = Value + d.Value * CALC_BASE(Base-d.Base);
         } else {
             ret.Base = d.Base;
-            ret.Value = Value * (10^(d.Base-Base)) + d.Value;
+            ret.Value = Value * CALC_BASE(d.Base-Base) + d.Value;
         }
         return ret;
     }
@@ -86,10 +90,10 @@ struct SDecimal {
         SDecimal ret;
         if( Base > d.Base ) {
             ret.Base = Base;
-            ret.Value = Value - d.Value * (10^(Base-d.Base));
+            ret.Value = Value - d.Value * CALC_BASE(Base-d.Base);
         } else {
             ret.Base = d.Base;
-            ret.Value = Value * (10^(d.Base-Base)) - d.Value;
+            ret.Value = Value * CALC_BASE(d.Base-Base) - d.Value;
         }
         return ret;
     }
@@ -116,9 +120,9 @@ struct SDepthQuote {
     char Symbol[32];
     long long SequenceNo;
     char TimeArrive[64];
-    SDepthPrice Asks[MAX_DEPTH];
+    SDepthPrice Asks[MAX_DEPTH];        // 卖盘
     int AskLength;
-    SDepthPrice Bids[MAX_DEPTH];
+    SDepthPrice Bids[MAX_DEPTH];        // 买盘
     int BidLength;
 
     SDepthQuote() {
