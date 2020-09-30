@@ -1,3 +1,0 @@
-/home/mk/workspace/demo/demo4quote/CMakeFiles/rebuild_cache.dir
-/home/mk/workspace/demo/demo4quote/CMakeFiles/edit_cache.dir
-/home/mk/workspace/demo/demo4quote/CMakeFiles/demo4quote.dir
