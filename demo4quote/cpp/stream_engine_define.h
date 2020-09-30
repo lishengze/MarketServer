@@ -26,7 +26,8 @@ struct SDecimal {
     short Base;
 
     SDecimal() {
-        memset(this, 0, sizeof(SDecimal));
+        Value = 0;
+        Base = 0;
     }
 
     void From(const string& data) {
@@ -110,26 +111,9 @@ struct SDepthPrice {
     double Volume;
 
     SDepthPrice() {
-        memset(this, 0, sizeof(SDepthPrice));
+        Volume = 0;
     }
 };
-
-#define MAX_DEPTH 50
-struct SDepthQuote {
-    char Exchange[32];
-    char Symbol[32];
-    long long SequenceNo;
-    char TimeArrive[64];
-    SDepthPrice Asks[MAX_DEPTH];        // 卖盘
-    int AskLength;
-    SDepthPrice Bids[MAX_DEPTH];        // 买盘
-    int BidLength;
-
-    SDepthQuote() {
-        memset(this, 0, sizeof(SDepthQuote));
-    }
-};
-
 
 template<class T,class S>
 inline void vassign(T &r, S v)
@@ -161,6 +145,27 @@ inline void vassign(char * r,const std::string &v)
 inline void vassign(SDepthPrice& depth, const string& price, const double& volume) {
     depth.Price.From(price);    
     depth.Volume = volume;
+};
+
+#define MAX_DEPTH 50
+struct SDepthQuote {
+    char Exchange[32];
+    char Symbol[32];
+    long long SequenceNo;
+    char TimeArrive[64];
+    SDepthPrice Asks[MAX_DEPTH];        // 卖盘
+    int AskLength;
+    SDepthPrice Bids[MAX_DEPTH];        // 买盘
+    int BidLength;
+
+    SDepthQuote() {
+        vassign(Exchange, "");
+        vassign(Symbol, "");
+        vassign(SequenceNo, 0);
+        vassign(TimeArrive, "");
+        AskLength = 0;
+        BidLength = 0;
+    }
 };
 
 struct SMixDepthPrice {

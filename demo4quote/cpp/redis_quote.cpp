@@ -1,5 +1,6 @@
-#include "redis_hub.h"
+#include "redis_quote.h"
 #include "stream_engine.h"
+#include "stream_engine_config.h"
 
 bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap) {
     json snap_json = json::parse(data); 
@@ -36,7 +37,7 @@ bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap) {
 }
 
 
-void RedisHub::OnMessage(const std::string& channel, const std::string& msg){
+void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
     if (channel.find(DEPTH_UPDATE_HEAD)!=string::npos)
     {
         int pos = channel.find(DEPTH_UPDATE_HEAD);
@@ -44,18 +45,19 @@ void RedisHub::OnMessage(const std::string& channel, const std::string& msg){
         string symbol = channel.substr(pos+strlen(DEPTH_UPDATE_HEAD), pos2-pos-strlen(DEPTH_UPDATE_HEAD));
         string exchange = channel.substr(pos2+1);
     
-        if( symbol != "BTC_USDC" )
+        if( CONFIG->sample_symbol_ != "" && symbol != CONFIG->sample_symbol_ )
             return;  
-        cout << "redis OnMessage:" << channel << " Msg: " << msg << "\n" << endl;
+        UT_LOG_INFO(CONFIG->logger_, "redis OnMessage:" << channel << " Msg: " << msg);
 
         SDepthQuote quote;
         if( !parse_snap(msg, quote, false))
             return;
         if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
-            cout << "redis OnMessage: not match" << endl;
+            UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");
             return;
         }
-        //engine_interface_->on_update(exchange, symbol, quote);
+        redis_snap_.on_update_symbol(exchange, symbol);
+        engine_interface_->on_update(exchange, symbol, quote);
     }
     else if(channel.find(TICK_HEAD)!=string::npos)
     {

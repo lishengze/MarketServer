@@ -6,6 +6,7 @@
 using namespace std;
 using json = nlohmann::json;
 #include "stream_engine_define.h"
+#include "redis_snap.h"
 
 bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap);
 
@@ -13,31 +14,35 @@ inline string make_redis_depth_key(const string& exchange, const string& symbol)
     return "DEPTHx|" + symbol + "." + exchange;
 };
 
-#define SUBMODE_ALL 1
-#define SUBMODE_CHANNEL 2
-#define SUBMODE_PATTERN 3
+class QuoteInterface
+{
+public:
+    virtual void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) = 0;
+};
 
-class EngineInterface;
-class RedisHub : public utrade::pandora::CRedisSpi
+class RedisQuote : public utrade::pandora::CRedisSpi
 {
 public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    RedisHub():engine_interface_(NULL){};
-    ~RedisHub(){};
+    RedisQuote():engine_interface_(NULL){};
+    ~RedisQuote(){};
 
     // init
     void init(const string& host, const int& port, const string& password, UTLogPtr logger){
         redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
-        // register callback
         redis_api_->RegisterSpi(this);
-        // redis connector
         redis_api_->RegisterRedis(host, port, password, utrade::pandora::RM_Subscribe);
+        
+        // request snap 
+        redis_snap_.init(host, port, password, logger);
     }
 
-    void set_engine(EngineInterface* ptr) {
+    void set_engine(QuoteInterface* ptr) {
         engine_interface_ = ptr;
+        redis_snap_.set_engine(ptr);
     }
 
     // lauch the market data
@@ -55,19 +60,14 @@ public:
     }
 
     void SubscribeAll() {
-        //sub_mode_ = SUBMODE_ALL;
-        //redis_api_->PSubscribeTopic("*");
+        redis_api_->PSubscribeTopic("*");
     }
 
 
     // redis connect notify
     virtual void OnConnected(){
         cout << "\n##### Redis MarketDispatcher::OnConnected ####\n" << endl;
-        //if( sub_mode_ == SUBMODE_ALL ) {
-            redis_api_->PSubscribeTopic("*");
-        //} else {
-
-        //}
+        redis_api_->PSubscribeTopic("*");
     }
     // redis disconnect notify
     virtual void OnDisconnected(int status){
@@ -77,7 +77,9 @@ public:
     virtual void OnMessage(const std::string& channel, const std::string& msg);
 
 private:
-    int             sub_mode_;
     RedisApiPtr     redis_api_;
-    EngineInterface *engine_interface_;
+
+    QuoteInterface *engine_interface_;
+
+    GetRedisSnap    redis_snap_;
 };

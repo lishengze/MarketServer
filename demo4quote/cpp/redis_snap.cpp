@@ -1,8 +1,9 @@
-#include "snap_task.h"
+#include "redis_snap.h"
 #include "stream_engine.h"
-#include "redis_hub.h"
+#include "redis_quote.h"
+#include "stream_engine_config.h"
 
-void SnapTaskCenter::get_snap(const string& exchange, const string& symbol) {
+void GetRedisSnap::get_snap(const string& exchange, const string& symbol) {
     std::thread::id thread_id = std::this_thread::get_id();
     RedisApiPtr redis_sync_api;
     auto iter = redis_sync_apis_.find(thread_id);
@@ -16,13 +17,13 @@ void SnapTaskCenter::get_snap(const string& exchange, const string& symbol) {
     
     string depth_key = make_redis_depth_key(exchange, symbol);
     string depthData = redis_sync_api->SyncGet(depth_key);
-    cout << "get_snap: " << depthData << endl;
+    UT_LOG_INFO(CONFIG->logger_, "get_snap: " << depthData);
     SDepthQuote quote;
     if( !parse_snap(depthData, quote, true))
         return;        
     if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
-        cout << "get_snap: not match" << endl;
+        UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");
         return;
     }
-    engine_interface_->on_snap(exchange, symbol, quote);
+    quote_interface_->on_snap(exchange, symbol, quote);
 }

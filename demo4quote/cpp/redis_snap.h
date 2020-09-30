@@ -22,18 +22,18 @@ inline bool split_symbol(const string& combined, string& exchange, string& symbo
     return true;
 };
 
-class EngineInterface;
-class SnapTaskCenter 
+class QuoteInterface;
+class GetRedisSnap 
 {
 public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    SnapTaskCenter() {
+    GetRedisSnap() {
         thread_run_ = true;
     }
 
-    ~SnapTaskCenter() {
+    ~GetRedisSnap() {
         if (thread_loop_) {
             if (thread_loop_->joinable()) {
                 thread_loop_->join();
@@ -59,15 +59,15 @@ public:
             return;
         //cout << "find new symbol:" << combinedSymbol << endl;
         symbols_[combinedSymbol] = 0;
-        boost::asio::post(boost::bind(&SnapTaskCenter::get_snap, this, exchange, symbol));
+        boost::asio::post(boost::bind(&GetRedisSnap::get_snap, this, exchange, symbol));
     }
 
     void start(){
-        thread_loop_ = new std::thread(&SnapTaskCenter::thread_loop, this);
+        thread_loop_ = new std::thread(&GetRedisSnap::thread_loop, this);
     }
 
-    void set_engine(EngineInterface* ptr) {
-        engine_interface_ = ptr;
+    void set_engine(QuoteInterface* ptr) {
+        quote_interface_ = ptr;
     }
 
 private:
@@ -89,7 +89,7 @@ private:
                 if( !split_symbol(iter->first, exchange, symbol) ) {
                     continue;
                 }
-                boost::asio::post(boost::bind(&SnapTaskCenter::get_snap, this, exchange, symbol));
+                boost::asio::post(boost::bind(&GetRedisSnap::get_snap, this, exchange, symbol));
             }
             std::this_thread::sleep_for(std::chrono::seconds(60));
         }
@@ -104,12 +104,12 @@ private:
     int port_;
     string password_;
     UTLogPtr logger_;
-    unordered_map<std::thread::id, RedisApiPtr>                redis_sync_apis_;
+    unordered_map<std::thread::id, RedisApiPtr> redis_sync_apis_;
 
     std::mutex                 mutex_symbols_;
     unordered_map<string, int> symbols_;
 
-    EngineInterface*           engine_interface_;
+    QuoteInterface*            quote_interface_;
 
     std::thread*               thread_loop_ = nullptr;
     std::atomic<bool>          thread_run_;

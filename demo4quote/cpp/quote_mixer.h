@@ -16,7 +16,6 @@ public:
         if( !_get_quote(symbol, ptr) ) {
             ptr = new SMixQuote();
             symbols_[symbol] = ptr;
-            cout << "create symbol " << symbol << " new " << ptr << endl;
         } else {
             // 1. 清除老的exchange数据
             ptr->Asks = _clear_exchange(exchange, ptr->Asks);

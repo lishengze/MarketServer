@@ -1,6 +1,20 @@
 #include "stream_engine.h"
 
+
+// exit handler function
+void setup_signal_handler_callback()
+{
+    signal(SIGTERM, StreamEngine::signal_handler);
+    signal(SIGINT, StreamEngine::signal_handler);
+    signal(SIGHUP, StreamEngine::signal_handler);
+    signal(SIGQUIT, StreamEngine::signal_handler);
+    signal(SIGKILL, StreamEngine::signal_handler);
+}
+
 int main(int argc, char** argv) {
+
+    // setup the signal here
+    setup_signal_handler_callback();
 
     StreamEngine streamEngine;
     streamEngine.start();

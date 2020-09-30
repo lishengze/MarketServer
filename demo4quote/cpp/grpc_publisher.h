@@ -19,6 +19,7 @@
 #include "api.grpc.pb.h"
 #endif
 #include "stream_engine_define.h"
+#include "stream_engine_config.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -32,51 +33,54 @@ using trade::service::v1::DepthData;
 using trade::service::v1::EmptyReply;
 using trade::service::v1::Trade;
 
-
 class TradeClient {
 public:
     using StreamPtr = boost::shared_ptr<ClientWriter<MarketStreamData>>;
 public:
-  TradeClient(std::shared_ptr<Channel> channel)
-      : stub_(Trade::NewStub(channel)) { 
+    TradeClient(std::shared_ptr<Channel> channel)
+        : stub_(Trade::NewStub(channel)) { 
         stream_ = StreamPtr{ stub_->PutMarketStream(&context_, &response_) };
+    }
 
-  }
-
-  void PutMarketStream(const string& symbol, const SMixQuote& quote) {   
+    void PutMarketStream(const string& symbol, const SMixQuote& quote) {   
    
-    MarketStreamData msd;
-    msd.set_symbol(symbol);
-    SMixDepthPrice* ptr = quote.Asks;
-    while( ptr != NULL ) {
-        Depth* depth = msd.add_ask_depth();
-        depth->set_price(ptr->Price.GetValue());
-        for(auto &v : ptr->Volume) {
-            const TExchange& exchange = v.first;
-            const double volume = v.second;
-            DepthData* depthData = depth->add_data();
-            depthData->set_size(volume);
-            depthData->set_exchange(exchange);
+        MarketStreamData msd; 
+        msd.set_symbol(symbol);
+        // 卖盘
+        {
+            SMixDepthPrice* ptr = quote.Asks;
+            while( ptr != NULL ) {
+                Depth* depth = msd.add_ask_depth();
+                depth->set_price(ptr->Price.GetValue());
+                for(auto &v : ptr->Volume) {
+                    const TExchange& exchange = v.first;
+                    const double volume = v.second;
+                    DepthData* depthData = depth->add_data();
+                    depthData->set_size(volume);
+                    depthData->set_exchange(exchange);
+                }
+                ptr = ptr->Next;
+            }
         }
-        ptr = ptr->Next;
-    }
-    ptr = quote.Bids;
-    while( ptr != NULL ) {
-        Depth* depth = msd.add_bid_depth();
-        depth->set_price(ptr->Price.GetValue());
-        for(auto &v : ptr->Volume) {
-            const TExchange& exchange = v.first;
-            const double volume = v.second;
-            DepthData* depthData = depth->add_data();
-            depthData->set_size(volume);
-            depthData->set_exchange(exchange);
+        // 买盘
+        {
+            SMixDepthPrice* ptr = quote.Bids;
+            while( ptr != NULL ) {
+                Depth* depth = msd.add_bid_depth();
+                depth->set_price(ptr->Price.GetValue());
+                for(auto &v : ptr->Volume) {
+                    const TExchange& exchange = v.first;
+                    const double volume = v.second;
+                    DepthData* depthData = depth->add_data();
+                    depthData->set_size(volume);
+                    depthData->set_exchange(exchange);
+                }
+                ptr = ptr->Next;
+            }
         }
-        ptr = ptr->Next;
+        stream_->Write(msd);
+        //stream->WritesDone();
     }
-
-    stream_->Write(msd);
-    //stream->WritesDone();
-  }
 
 private:  
     ClientContext context_;
@@ -88,7 +92,7 @@ private:
 class GrpcPublisher {
 public:
     void init() {
-        client_ = new TradeClient(grpc::CreateChannel("127.0.0.1:9000", grpc::InsecureChannelCredentials()));
+        client_ = new TradeClient(grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials()));
     }
 
     void publish(const string& symbol, const SMixQuote& quote) {

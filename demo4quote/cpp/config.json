@@ -1,0 +1,16 @@
+{
+    "grpc": {
+        "push_addr": "127.0.0.1:9000"
+    },
+    "debug": {
+        "sample_symbol": "",
+        "sample_symbol_bak": "BTC_USDC",
+        "dump_binary_only_": 0
+    },
+    "redis_quote": {
+        "host": "45.249.244.59",
+        "port": 6666,
+        "password": "rkqFB4,wpoMmHqT6he}r",
+        "snap_interval": 10
+    }
+}
