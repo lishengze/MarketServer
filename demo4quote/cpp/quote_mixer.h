@@ -11,6 +11,10 @@ public:
         publisher_.init();
     }
 
+    void publish_fake() {
+        publisher_.publish_fake();
+    }
+
     void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) ) {

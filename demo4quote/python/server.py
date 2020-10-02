@@ -16,7 +16,7 @@ class TradeServicer(api_pb2_grpc.TradeServicer):
 
     def PutMarketStream(self, request_iterator, context):
         for data in request_iterator:
-            if data.symbol != "BTC_USDC":
+            if data.symbol != "BTC_USDT":
                 continue            
             print("{0}({2}) - {1}({3})".format(data.ask_depth[0].price, data.bid_depth[0].price, data.ask_depth[0].data[0].exchange, data.bid_depth[0].data[0].exchange))
 

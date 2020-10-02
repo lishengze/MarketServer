@@ -24,7 +24,8 @@ StreamEngine::~StreamEngine(){
 }
 
 void StreamEngine::start() {
-    redis_quote_->start();
+    //redis_quote_->start();
+    quote_mixer_->publish_fake();
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
