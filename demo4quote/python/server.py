@@ -8,6 +8,26 @@ import grpc
 import api_pb2
 import api_pb2_grpc
 
+
+def convert_depth(depths):
+    if len(depths) == 0:
+        return "-"
+    price = depths[0].price
+    exchanges = [item.exchange for item in depths[0].data]
+    return "{0}({1})".format(price, ",".join(exchanges))
+
+def display_depth(prefix, depth):
+    exchanges = [item.exchange for item in depth.data]
+    print("{2}:{0}({1})".format(depth.price, ",".join(exchanges), prefix))
+
+def display(data):
+    print("{0} / {1}".format(data.symbol, data.msg_seq))
+    for depth in data.ask_depth[::-1]:
+        display_depth("ask", depth)
+    for depth in data.bid_depth:
+        display_depth("bid", depth)
+    print("-----------------------------------")
+
 class TradeServicer(api_pb2_grpc.TradeServicer):
     """Provides methods that implement functionality of route guide server."""
 
@@ -17,8 +37,8 @@ class TradeServicer(api_pb2_grpc.TradeServicer):
     def PutMarketStream(self, request_iterator, context):
         for data in request_iterator:
             if data.symbol != "BTC_USDT":
-                continue            
-            print("{0}({2}) - {1}({3})".format(data.ask_depth[0].price, data.bid_depth[0].price, data.ask_depth[0].data[0].exchange, data.bid_depth[0].data[0].exchange))
+                continue
+            display(data)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

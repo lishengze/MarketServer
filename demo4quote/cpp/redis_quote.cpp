@@ -2,7 +2,7 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap) {
+bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap, int precise) {
     json snap_json = json::parse(data); 
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
@@ -14,25 +14,49 @@ bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap) {
     vassign(quote.SequenceNo, sequence_no);
     vassign(quote.TimeArrive, timeArrive);
     
+    // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
-    int count = 0;
-    for (auto iter=snap_json[askDepth].begin(); count < MAX_DEPTH && iter!=snap_json[askDepth].end(); ++count, ++iter)
     {
-        const string& price = iter.key();
-        const double& volume = iter.value();
-        vassign(quote.Asks[count], price, volume);
+        int count = 0;
+        SDecimal lastPrice;
+        for (auto iter=snap_json[askDepth].begin(); count < MAX_DEPTH && iter!=snap_json[askDepth].end(); ++iter)
+        {
+            const string& price = iter.key();
+            const double& volume = iter.value();
+            SDecimal d;
+            d.From(price, precise, true); // 卖价往上取整
+            if( d > lastPrice ) {
+                count ++;
+                quote.Asks[count-1].Price = d;
+                lastPrice = d;
+            }
+            quote.Asks[count-1].Volume += volume;
+        }
+        quote.AskLength = count;
+        //cout << "ask " << count << endl;
     }
-    quote.AskLength = count;
 
-    count = 0;
-    for (auto iter=snap_json[bidDepth].rbegin(); count < MAX_DEPTH && iter!=snap_json[bidDepth].rend(); ++count, ++iter)
     {
-        const string& price = iter.key();
-        const double& volume = iter.value();
-        vassign(quote.Bids[count], price, volume);
+        int count = 0;
+        SDecimal lastPrice;
+        lastPrice.Value = 9999999999;
+        for (auto iter=snap_json[bidDepth].rbegin(); count < MAX_DEPTH && iter!=snap_json[bidDepth].rend(); ++iter)
+        {
+            const string& price = iter.key();
+            const double& volume = iter.value();
+            SDecimal d;
+            d.From(price, precise); // 买价往下取整
+            if( d < lastPrice ) {
+                count ++;
+                quote.Bids[count-1].Price = d;
+                lastPrice = d;
+            }
+            quote.Bids[count-1].Volume += volume;
+        }
+        quote.BidLength = count;
+        //cout << "bid " << count << endl;
     }
-    quote.BidLength = count;
     return true;
 }
 
@@ -52,7 +76,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
             cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
 
         SDepthQuote quote;
-        if( !parse_snap(msg, quote, false))
+        if( !parse_snap(msg, quote, false, CONFIG->get_precise(symbol)))
             return;
         if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");

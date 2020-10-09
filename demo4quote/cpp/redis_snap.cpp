@@ -19,7 +19,7 @@ void GetRedisSnap::get_snap(const string& exchange, const string& symbol) {
     string depthData = redis_sync_api->SyncGet(depth_key);
     UT_LOG_INFO(CONFIG->logger_, "get_snap: " << depthData);
     SDepthQuote quote;
-    if( !parse_snap(depthData, quote, true))
+    if( !parse_snap(depthData, quote, true, CONFIG->get_precise(symbol)))
         return;        
     if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
         UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");

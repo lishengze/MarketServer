@@ -30,14 +30,34 @@ struct SDecimal {
         Base = 0;
     }
 
-    void From(const string& data) {
+    void From(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
         Base = data.length() - pos - 1;
-        Value = atof(data.c_str()) * CALC_BASE(Base);
+        if( precise >= 0 && precise < Base ) { // 精度调整
+            Base = precise;
+            string newData = data.substr(0, pos + 1 + precise);
+            Value = atof(newData.c_str()) * CALC_BASE(Base);
+            if( ceiling )
+                Value += 1;
+        } else {
+            Value = atof(data.c_str()) * CALC_BASE(Base);
+        }
     }
 
     double GetValue() const {
         return Value * 1.0 / CALC_BASE(Base);
+    }
+
+    string GetStrValue() const {
+        char precise[25];
+        sprintf(precise, "%d", Base+1);
+
+        char holder[1024];
+        string fmt = "%0" + string(precise) + "lld";
+        sprintf(holder, fmt.c_str(), Value);
+        string ret = holder;
+        ret.insert(ret.begin() + ret.length() - Base, '.');
+        return ret;
     }
 
     bool operator <(const SDecimal& d) const {
@@ -142,11 +162,6 @@ inline void vassign(char * r,const std::string &v)
     strcpy(r,v.c_str());
 }
 
-inline void vassign(SDepthPrice& depth, const string& price, const double& volume) {
-    depth.Price.From(price);    
-    depth.Volume = volume;
-};
-
 #define MAX_DEPTH 50
 struct SDepthQuote {
     char Exchange[32];
@@ -183,6 +198,7 @@ struct SMixQuote {
     SMixDepthPrice* Asks; // 卖盘
     SMixDepthPrice* Bids; // 买盘
     SDecimal Watermark;
+    long long SequenceNo;
 
     SMixQuote() {
         Asks = NULL;

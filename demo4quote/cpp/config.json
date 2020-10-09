@@ -4,8 +4,8 @@
         "push_addr_bak": "172.25.1.222:9000"
     },
     "debug": {
-        "sample_symbol": "",
-        "sample_symbol_bak": "BTC_USDC",
+        "sample_symbol_bak": "",
+        "sample_symbol": "BTC_USDT",
         "output_to_screen": 0,
         "dump_binary_only": 0
     },
@@ -17,6 +17,7 @@
     },
     "include": {
         "symbols": ["BTC_USDT", "BCH_USDT@P", "OKB_ETH", "BTC_USD@201002"],
-        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
+        "exchanges": ["OKEX"],
+        "exchanges_bak": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
     }
 }

@@ -1,8 +1,8 @@
 # generate protobuf
-protoc --proto_path=/home/mk/go/src --proto_path=. --cpp_out=. api.proto 
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=cpp api.proto
 
 # generate grpc 
-protoc --proto_path=/home/mk/go/src --proto_path=. --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=. api.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=cpp api.proto
 
 # generate for python3
-python3 -m grpc_tools.protoc -I ./ --python_out=. --grpc_python_out=. ./api.proto 
+python3 -m grpc_tools.protoc -I protos --python_out=python --grpc_python_out=python api.proto

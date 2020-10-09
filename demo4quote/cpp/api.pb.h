@@ -205,6 +205,7 @@ class MarketStreamData PROTOBUF_FINAL :
     kMsgSeqFieldNumber = 2,
     kTimeFieldNumber = 3,
     kTimeArriveFieldNumber = 4,
+    kIsCoverFieldNumber = 7,
   };
   // repeated .trade.service.v1.Depth ask_depth = 5 [(.gogoproto.customname) = "AskDepth", (.gogoproto.jsontag) = "ask_depth"];
   int ask_depth_size() const;
@@ -292,6 +293,15 @@ class MarketStreamData PROTOBUF_FINAL :
   void _internal_set_time_arrive(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
+  // bool is_cover = 7 [(.gogoproto.customname) = "IsCover", (.gogoproto.jsontag) = "is_cover"];
+  void clear_is_cover();
+  bool is_cover() const;
+  void set_is_cover(bool value);
+  private:
+  bool _internal_is_cover() const;
+  void _internal_set_is_cover(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:trade.service.v1.MarketStreamData)
  private:
   class _Internal;
@@ -305,6 +315,7 @@ class MarketStreamData PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_seq_;
   ::PROTOBUF_NAMESPACE_ID::int64 time_;
   ::PROTOBUF_NAMESPACE_ID::int64 time_arrive_;
+  bool is_cover_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_api_2eproto;
 };
@@ -444,13 +455,20 @@ class Depth PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthData >&
       data() const;
 
-  // float price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+  // string price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
   void clear_price();
-  float price() const;
-  void set_price(float value);
+  const std::string& price() const;
+  void set_price(const std::string& value);
+  void set_price(std::string&& value);
+  void set_price(const char* value);
+  void set_price(const char* value, size_t size);
+  std::string* mutable_price();
+  std::string* release_price();
+  void set_allocated_price(std::string* price);
   private:
-  float _internal_price() const;
-  void _internal_set_price(float value);
+  const std::string& _internal_price() const;
+  void _internal_set_price(const std::string& value);
+  std::string* _internal_mutable_price();
   public:
 
   // @@protoc_insertion_point(class_scope:trade.service.v1.Depth)
@@ -461,7 +479,7 @@ class Depth PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthData > data_;
-  float price_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr price_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_api_2eproto;
 };
@@ -997,28 +1015,90 @@ MarketStreamData::bid_depth() const {
   return bid_depth_;
 }
 
+// bool is_cover = 7 [(.gogoproto.customname) = "IsCover", (.gogoproto.jsontag) = "is_cover"];
+inline void MarketStreamData::clear_is_cover() {
+  is_cover_ = false;
+}
+inline bool MarketStreamData::_internal_is_cover() const {
+  return is_cover_;
+}
+inline bool MarketStreamData::is_cover() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.is_cover)
+  return _internal_is_cover();
+}
+inline void MarketStreamData::_internal_set_is_cover(bool value) {
+  
+  is_cover_ = value;
+}
+inline void MarketStreamData::set_is_cover(bool value) {
+  _internal_set_is_cover(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.is_cover)
+}
+
 // -------------------------------------------------------------------
 
 // Depth
 
-// float price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+// string price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
 inline void Depth::clear_price() {
-  price_ = 0;
+  price_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline float Depth::_internal_price() const {
-  return price_;
-}
-inline float Depth::price() const {
+inline const std::string& Depth::price() const {
   // @@protoc_insertion_point(field_get:trade.service.v1.Depth.price)
   return _internal_price();
 }
-inline void Depth::_internal_set_price(float value) {
-  
-  price_ = value;
-}
-inline void Depth::set_price(float value) {
+inline void Depth::set_price(const std::string& value) {
   _internal_set_price(value);
   // @@protoc_insertion_point(field_set:trade.service.v1.Depth.price)
+}
+inline std::string* Depth::mutable_price() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.Depth.price)
+  return _internal_mutable_price();
+}
+inline const std::string& Depth::_internal_price() const {
+  return price_.Get();
+}
+inline void Depth::_internal_set_price(const std::string& value) {
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void Depth::set_price(std::string&& value) {
+  
+  price_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.Depth.price)
+}
+inline void Depth::set_price(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.Depth.price)
+}
+inline void Depth::set_price(const char* value,
+    size_t size) {
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.Depth.price)
+}
+inline std::string* Depth::_internal_mutable_price() {
+  
+  return price_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* Depth::release_price() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.Depth.price)
+  return price_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Depth::set_allocated_price(std::string* price) {
+  if (price != nullptr) {
+    
+  } else {
+    
+  }
+  price_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), price,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.Depth.price)
 }
 
 // repeated .trade.service.v1.DepthData data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];

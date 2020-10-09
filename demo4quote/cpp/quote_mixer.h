@@ -11,10 +11,6 @@ public:
         publisher_.init();
     }
 
-    void publish_fake() {
-        publisher_.publish_fake();
-    }
-
     void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) ) {
@@ -32,7 +28,8 @@ public:
         ptr->Bids = _mix_exchange(exchange, ptr->Bids, quote.Bids, quote.BidLength, ptr->Watermark, false);
 
         // 4. 推送结果
-        publish_quote(symbol, *ptr);
+        ptr->SequenceNo = quote.SequenceNo;
+        publish_quote(symbol, *ptr, true);
         return;
     }
 
@@ -50,12 +47,25 @@ public:
         ptr->Asks = _mix_exchange(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, ptr->Watermark, true);
         ptr->Bids = _mix_exchange(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, ptr->Watermark, false);
         // 4. 推送结果
-        publish_quote(symbol, *ptr);
+        ptr->SequenceNo = quote.SequenceNo;
+        publish_quote(symbol, *ptr, false);
         return;
     }
 
-    void publish_quote(const string& symbol, const SMixQuote& quote) {
-        publisher_.publish(symbol, quote);
+    void publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap) {
+        /*if( quote.Asks != NULL ) {
+            cout << quote.Asks->Price.GetValue();
+        } else {
+            cout << "-";
+        }
+        cout << ",";
+        if( quote.Bids != NULL ) {
+            cout << quote.Bids->Price.GetValue();
+        } else {
+            cout << "-";
+        }
+        cout << endl;*/
+        publisher_.publish(symbol, quote, isSnap);
     }
 
 private:

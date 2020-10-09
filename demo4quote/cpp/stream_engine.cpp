@@ -47,7 +47,7 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
     if( quote.SequenceNo < lastQuote.SequenceNo )
         return;
     if( CONFIG->dump_binary_only_ )
-        quote_dumper_->on_mix_snap(exchange, symbol, quote);
+        quote_dumper_->on_mix_update(exchange, symbol, quote);
     else
         quote_mixer_->on_mix_update(exchange, symbol, quote);
 };

@@ -20,7 +20,11 @@ public:
 
     // pasrse utrade.config.json file
     void parse_config(const std::string& file_name) {
+        // init logger
         logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
+
+        // init precise
+        symbol_precise_["BTC_USDT"] = 1;  // 按照okex的1位小数点来
 
         try
         {
@@ -37,6 +41,7 @@ public:
 
             // grpc
             grpc_push_addr_ = js["grpc"]["push_addr"].get<string>();
+            grpc_push_depth_ = 10;
 
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
@@ -70,9 +75,17 @@ public:
         }
     }
 
+    int get_precise(const string& symbol) const {
+        auto iter = symbol_precise_.find(symbol);
+        if( iter == symbol_precise_.end() ) {
+            return -1;
+        }
+        return iter->second;
+    }
 public:
-    // grpc push address
+    // grpc push
     string grpc_push_addr_;
+    int grpc_push_depth_;
 
     // [for debug] sample symbol
     string sample_symbol_;
@@ -91,6 +104,8 @@ public:
     std::set<string> include_symbols_;
     std::set<string> include_exchanges_;
 
+    // precise configuration
+    std::unordered_map<string, int> symbol_precise_;
     // logger
     UTLogPtr logger_;
 };
