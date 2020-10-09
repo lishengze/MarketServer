@@ -12,7 +12,6 @@
 #include "grpcpp/client_context.h"
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
-//#include "helper.h"
 #ifdef BAZEL_BUILD
 #include "api.grpc.pb.h"
 #else
@@ -33,129 +32,128 @@ using trade::service::v1::DepthData;
 using trade::service::v1::EmptyReply;
 using trade::service::v1::Trade;
 
-class TradeClient {
+inline void make_market_stream(const string& symbol, const SMixQuote& quote, MarketStreamData& msd) {
+    msd.set_symbol(symbol);
+    // 卖盘
+    {
+        SMixDepthPrice* ptr = quote.Asks;
+        while( ptr != NULL ) {
+            Depth* depth = msd.add_ask_depth();
+            depth->set_price(ptr->Price.GetValue());
+            for(auto &v : ptr->Volume) {
+                const TExchange& exchange = v.first;
+                const double volume = v.second;
+                DepthData* depthData = depth->add_data();
+                depthData->set_size(volume);
+                depthData->set_exchange(exchange);
+            }
+            ptr = ptr->Next;
+        }
+    }
+    // 买盘
+    {
+        SMixDepthPrice* ptr = quote.Bids;
+        while( ptr != NULL ) {
+            Depth* depth = msd.add_bid_depth();
+            depth->set_price(ptr->Price.GetValue());
+            for(auto &v : ptr->Volume) {
+                const TExchange& exchange = v.first;
+                const double volume = v.second;
+                DepthData* depthData = depth->add_data();
+                depthData->set_size(volume);
+                depthData->set_exchange(exchange);
+            }
+            ptr = ptr->Next;
+        }
+    }
+};
+
+class GrpcClient {
 public:
-    using StreamPtr = boost::shared_ptr<ClientWriter<MarketStreamData>>;
 public:
-    TradeClient(){
+    GrpcClient(const string& addr) : addr_(addr){
     }
 
     void PutMarketStream(const string& symbol, const SMixQuote& quote) {
-        if( context_ == nullptr ) {
-            auto channel = grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials());
-            stub_ = Trade::NewStub(channel);
-            context_ = new ClientContext();
-            // create channel
-            stream_ = StreamPtr{ stub_->PutMarketStream(context_, &response_) };
-            int state = channel->GetState(true);
-            std::cout << "status is " << state << endl;
-            if( state != GRPC_CHANNEL_READY) {
-                delete context_;
-                context_ = nullptr;
-                stream_ = nullptr;
-                return;
-            }
+        if( context_ == nullptr && !init_context() ) {
+            return;
         }
 
         MarketStreamData msd; 
-        msd.set_symbol(symbol);
-        // 卖盘
-        {
-            SMixDepthPrice* ptr = quote.Asks;
-            while( ptr != NULL ) {
-                Depth* depth = msd.add_ask_depth();
-                depth->set_price(ptr->Price.GetValue());
-                for(auto &v : ptr->Volume) {
-                    const TExchange& exchange = v.first;
-                    const double volume = v.second;
-                    DepthData* depthData = depth->add_data();
-                    depthData->set_size(volume);
-                    depthData->set_exchange(exchange);
-                }
-                ptr = ptr->Next;
-            }
-        }
-        // 买盘
-        {
-            SMixDepthPrice* ptr = quote.Bids;
-            while( ptr != NULL ) {
-                Depth* depth = msd.add_bid_depth();
-                depth->set_price(ptr->Price.GetValue());
-                for(auto &v : ptr->Volume) {
-                    const TExchange& exchange = v.first;
-                    const double volume = v.second;
-                    DepthData* depthData = depth->add_data();
-                    depthData->set_size(volume);
-                    depthData->set_exchange(exchange);
-                }
-                ptr = ptr->Next;
-            }
-        }
-        if( stream_ ) {
+        make_market_stream(symbol, quote, msd);
+
+        if( context_ && stream_ ) {
             if( !stream_->Write(msd) ) {
-                delete context_;
+                std::cout << "write fail" << endl;
+                stub_ = nullptr;
                 context_ = nullptr;
                 stream_ = nullptr;
             }
         }
-            //stream->WritesDone();
     }
 
 private:  
-    std::unique_ptr<Trade::Stub> stub_ = nullptr;
-    StreamPtr stream_ = nullptr;
-    ClientContext *context_ = nullptr;
+
+    bool init_context() {
+        auto channel = grpc::CreateChannel(addr_, grpc::InsecureChannelCredentials());
+        stub_ = Trade::NewStub(channel);
+        context_ = std::unique_ptr<ClientContext>(new ClientContext());
+        stream_ = std::unique_ptr<ClientWriter<MarketStreamData>>(stub_->PutMarketStream(context_.get(), &response_));
+        switch(channel->GetState(true)) {
+            case GRPC_CHANNEL_IDLE: {
+                std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_CONNECTING: {                
+                std::cout << "status is GRPC_CHANNEL_CONNECTING" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_READY: {           
+                std::cout << "status is GRPC_CHANNEL_READY" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
+                std::cout << "status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                stub_ = nullptr;
+                context_ = nullptr;
+                stream_ = nullptr;
+                break;
+            }
+            case GRPC_CHANNEL_SHUTDOWN: {        
+                std::cout << "status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                break;
+            }
+        }
+        return true;
+    }
+
+    // address
+    std::string addr_;
+
+    // for empty responose
     google::protobuf::Empty response_;
+
+    // 
+    std::unique_ptr<ClientContext> context_ = nullptr;
+    std::unique_ptr<Trade::Stub> stub_ = nullptr;
+    std::unique_ptr<ClientWriter<MarketStreamData>> stream_ = nullptr;
 };
 
 class GrpcPublisher {
 public:
     GrpcPublisher() {
-        thread_run_ = true;
     }
 
     ~GrpcPublisher() {
-        if (fake_thread_) {
-            if (fake_thread_->joinable()) {
-                fake_thread_->join();
-            }
-            delete fake_thread_;        
-        }
     }
     void init() {
-        //client_ = new TradeClient(grpc::CreateChannel(CONFIG->grpc_push_addr_, grpc::InsecureChannelCredentials()));
-    }
-
-    void publish_fake() {
-        fake_thread_ = new std::thread(&GrpcPublisher::_test_publish, this);
+        client_ = new GrpcClient(CONFIG->grpc_push_addr_);
     }
 
     void publish(const string& symbol, const SMixQuote& quote) {
-        client_.PutMarketStream(symbol, quote);
+        if( client_ )
+            client_->PutMarketStream(symbol, quote);
     }
 private: 
-
-    void _test_publish() {
-        
-        while( thread_run_ ) {
-            SMixQuote quote;
-            quote.Asks = new SMixDepthPrice();
-            quote.Asks->Price.Value = 999;
-            quote.Asks->Price.Base = 2;
-            quote.Asks->Volume["test"] = 10;
-            quote.Bids = new SMixDepthPrice();
-            quote.Bids->Price.Value = 900;
-            quote.Bids->Price.Base = 2;
-            quote.Bids->Volume["test"] = 100;
-            
-            publish("BTC_USDT", quote);
-            std::this_thread::sleep_for(std::chrono::microseconds(500));
-        }
-    }
-
-    TradeClient client_;
-
-    // produce fake test msg
-    std::thread* fake_thread_ = nullptr;
-    std::atomic<bool>          thread_run_;
+    GrpcClient* client_ = nullptr;
 };

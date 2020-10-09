@@ -12,8 +12,6 @@ StreamEngine::StreamEngine(){
     CONFIG->parse_config(config_file);
 
     redis_quote_ = new RedisQuote();
-    redis_quote_->init(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
-    redis_quote_->set_engine(this);
 
     quote_mixer_ = new QuoteMixer();
 
@@ -24,11 +22,13 @@ StreamEngine::~StreamEngine(){
 }
 
 void StreamEngine::start() {
-    //redis_quote_->start();
-    quote_mixer_->publish_fake();
+    // start redis
+    redis_quote_->init(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
+    redis_quote_->set_engine(this);
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
+    //std::cout << "on_snap" << std::endl;
     std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
     markets_[exchange][symbol] = quote;
     if( CONFIG->dump_binary_only_ )
@@ -38,6 +38,7 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
+    //std::cout << "on_update" << std::endl;
     std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
     SDepthQuote lastQuote;
     if( !_get_quote(exchange, symbol, lastQuote) )
