@@ -7,6 +7,7 @@
 #include <map>
 #include <unordered_map>
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 using TExchange = string;
@@ -42,6 +43,21 @@ struct SDecimal {
         } else {
             Value = atof(data.c_str()) * CALC_BASE(Base);
         }
+    }
+
+    void From(const SDecimal& data, int precise = -1, bool ceiling = false) {
+        if( precise == -1 || data.Base <= precise ) {
+            Value = data.Value;
+            Base = data.Base;
+            return;
+        }
+
+        if( ceiling ) {
+            Value = ceil(data.Value / CALC_BASE(precise - data.Base));
+        } else {
+            Value = floor(data.Value / CALC_BASE(precise - data.Base));
+        }
+        Base = precise;
     }
 
     double GetValue() const {

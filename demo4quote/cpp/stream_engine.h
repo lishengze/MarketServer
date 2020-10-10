@@ -1,9 +1,9 @@
 #pragma once
 
 #include "redis_quote.h"
-#include "redis_snap.h"
 #include "quote_mixer.h"
 #include "quote_dumper.h"
+#include "grpc_server.h"
 
 class StreamEngine : public QuoteInterface 
 {
@@ -16,25 +16,24 @@ public:
 
     void start();
 
+    // from QuoteInterface
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
-
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
+    void on_connected();
 
     // signal handler function
     static volatile int signal_sys;
     static void signal_handler(int signum);
 
 private:
-    bool _get_quote(const string& exchange, const string& symbol, SDepthQuote& quote) const;
-
-    // origin market data
-    std::mutex                             mutex_markets_;
-    unordered_map<TExchange, TMarketQuote> markets_;
 
     // redis quote upstream
-    RedisQuote *redis_quote_;
+    RedisQuote redis_quote_;
 
     // mix quotation
-    QuoteMixer *quote_mixer_;
-    QuoteDumper *quote_dumper_;
+    QuoteMixer quote_mixer_;
+    QuoteDumper quote_dumper_;
+
+    // publisher
+    ServiceImpl publiser_;
 };

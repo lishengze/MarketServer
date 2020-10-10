@@ -1,9 +1,8 @@
 #include "redis_quote.h"
 #include "stream_engine.h"
-#include "stream_engine_config.h"
 
-bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap, int precise) {
-    json snap_json = json::parse(data); 
+bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precise) {
+    njson snap_json = njson::parse(data); 
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
@@ -19,70 +18,94 @@ bool parse_snap(const string& data, SDepthQuote& quote, bool isSnap, int precise
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
     {
         int count = 0;
-        SDecimal lastPrice;
-        for (auto iter=snap_json[askDepth].begin(); count < MAX_DEPTH && iter!=snap_json[askDepth].end(); ++iter)
+        for (auto iter=snap_json[askDepth].begin(); count < MAX_DEPTH && iter!=snap_json[askDepth].end(); ++iter, ++count)
         {
             const string& price = iter.key();
             const double& volume = iter.value();
-            SDecimal d;
-            d.From(price, precise, true); // 卖价往上取整
-            if( d > lastPrice ) {
-                count ++;
-                quote.Asks[count-1].Price = d;
-                lastPrice = d;
-            }
-            quote.Asks[count-1].Volume += volume;
+            quote.Asks[count].Price.From(price, -1);
+            quote.Asks[count].Volume = volume;
         }
         quote.AskLength = count;
-        //cout << "ask " << count << endl;
     }
 
     {
         int count = 0;
-        SDecimal lastPrice;
-        lastPrice.Value = 9999999999;
-        for (auto iter=snap_json[bidDepth].rbegin(); count < MAX_DEPTH && iter!=snap_json[bidDepth].rend(); ++iter)
+        for (auto iter=snap_json[bidDepth].rbegin(); count < MAX_DEPTH && iter!=snap_json[bidDepth].rend(); ++iter, ++count)
         {
             const string& price = iter.key();
             const double& volume = iter.value();
-            SDecimal d;
-            d.From(price, precise); // 买价往下取整
-            if( d < lastPrice ) {
-                count ++;
-                quote.Bids[count-1].Price = d;
-                lastPrice = d;
-            }
-            quote.Bids[count-1].Volume += volume;
+            quote.Bids[count].Price.From(price, -1);
+            quote.Bids[count].Volume = volume;
         }
         quote.BidLength = count;
-        //cout << "bid " << count << endl;
     }
     return true;
 }
 
 
+void RedisQuote::start(const string& host, const int& port, const string& password, UTLogPtr logger) {
+    redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
+    redis_api_->RegisterSpi(this);
+    redis_api_->RegisterRedis(host, port, password, utrade::pandora::RM_Subscribe);
+    
+    // request snap 
+    redis_snap_requester_.init(host, port, password, logger);
+    redis_snap_requester_.set_engine(this);
+    redis_snap_requester_.start();
+};
+
+void RedisQuote::__on_snap(const string& exchange, const string& symbol, const string& data) {   
+    // string ->  SDepthQuote
+    SDepthQuote quote;
+    if( !parse_quote(data, quote, true, CONFIG->get_precise(symbol)))
+        return;        
+    if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
+        UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");
+        return;
+    }
+
+    // safe callback on_snap
+    std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
+    markets_[exchange][symbol] = quote;
+    engine_interface_->on_snap(exchange, symbol, quote);
+};
+
 void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
     if (channel.find(DEPTH_UPDATE_HEAD)!=string::npos)
     {
+        // decode exchange and symbol
         int pos = channel.find(DEPTH_UPDATE_HEAD);
         int pos2 = channel.find(".");
         string symbol = channel.substr(pos+strlen(DEPTH_UPDATE_HEAD), pos2-pos-strlen(DEPTH_UPDATE_HEAD));
-        string exchange = channel.substr(pos2+1);
-    
+        string exchange = channel.substr(pos2+1);    
         if( CONFIG->sample_symbol_ != "" && symbol != CONFIG->sample_symbol_ )
             return;  
+
+        // log update message
         UT_LOG_INFO(CONFIG->logger_, "redis OnMessage:" << channel << " Msg: " << msg);
         if( CONFIG->output_to_screen_ )
             cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
 
+        // string -> SDepthQuote
         SDepthQuote quote;
-        if( !parse_snap(msg, quote, false, CONFIG->get_precise(symbol)))
+        if( !parse_quote(msg, quote, false, CONFIG->get_precise(symbol)))
             return;
         if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");
             return;
         }
-        redis_snap_.on_update_symbol(exchange, symbol);
+
+        // redis_snap_requester_ add symbol
+        redis_snap_requester_.on_update_symbol(exchange, symbol);
+
+        // safe callback update
+        std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
+        SDepthQuote lastQuote;
+        if( !_get_quote(exchange, symbol, lastQuote) )
+            return;
+        // filter by SequenceNo
+        if( quote.SequenceNo < lastQuote.SequenceNo )
+            return;
         engine_interface_->on_update(exchange, symbol, quote);
     }
     else if(channel.find(TICK_HEAD)!=string::npos)
@@ -96,13 +119,21 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
 
 void RedisQuote::OnConnected() {
     cout << "\n##### Redis MarketDispatcher::OnConnected ####\n" << endl;
-    //redis_api_->PSubscribeTopic("*");
-    //redis_api_->PSubscribeTopic("UPDATEx|*.OKEX");
-    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
-        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
-            const string& symbol = *iterSymbol;
-            const string& exchange = *iterExchange;
-            redis_api_->SubscribeTopic("UPDATEx|" + symbol + "." + exchange);            
-        }
-    }
+    engine_interface_->on_connected();
+};
+
+bool RedisQuote::_get_quote(const string& exchange, const string& symbol, SDepthQuote& quote) const {
+    auto iter = markets_.find(exchange);
+    if( iter == markets_.end() )
+        return false;
+    const TMarketQuote& marketQuote = iter->second;
+    auto iter2 = marketQuote.find(symbol);
+    if( iter2 == marketQuote.end() )
+        return false;
+    quote = iter2->second;
+    return true;
+};
+
+void RedisQuote::subscribe(const string& channel) {
+    redis_api_->SubscribeTopic(channel);
 };

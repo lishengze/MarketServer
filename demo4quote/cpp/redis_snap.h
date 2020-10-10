@@ -22,18 +22,18 @@ inline bool split_symbol(const string& combined, string& exchange, string& symbo
     return true;
 };
 
-class QuoteInterface;
-class GetRedisSnap 
+class RedisQuote;
+class RedisSnapRequester 
 {
 public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    GetRedisSnap() {
+    RedisSnapRequester() {
         thread_run_ = true;
     }
 
-    ~GetRedisSnap() {
+    ~RedisSnapRequester() {
         if (thread_loop_) {
             if (thread_loop_->joinable()) {
                 thread_loop_->join();
@@ -59,14 +59,14 @@ public:
             return;
         //cout << "find new symbol:" << combinedSymbol << endl;
         symbols_[combinedSymbol] = 0;
-        boost::asio::post(boost::bind(&GetRedisSnap::get_snap, this, exchange, symbol));
+        boost::asio::post(boost::bind(&RedisSnapRequester::get_snap, this, exchange, symbol));
     }
 
     void start(){
-        thread_loop_ = new std::thread(&GetRedisSnap::thread_loop, this);
+        thread_loop_ = new std::thread(&RedisSnapRequester::thread_loop, this);
     }
 
-    void set_engine(QuoteInterface* ptr) {
+    void set_engine(RedisQuote* ptr) {
         quote_interface_ = ptr;
     }
 
@@ -89,7 +89,7 @@ private:
                 if( !split_symbol(iter->first, exchange, symbol) ) {
                     continue;
                 }
-                boost::asio::post(boost::bind(&GetRedisSnap::get_snap, this, exchange, symbol));
+                boost::asio::post(boost::bind(&RedisSnapRequester::get_snap, this, exchange, symbol));
             }
             std::this_thread::sleep_for(std::chrono::seconds(60));
         }
@@ -109,7 +109,7 @@ private:
     std::mutex                 mutex_symbols_;
     unordered_map<string, int> symbols_;
 
-    QuoteInterface*            quote_interface_;
+    RedisQuote*                 quote_interface_;
 
     std::thread*               thread_loop_ = nullptr;
     std::atomic<bool>          thread_run_;

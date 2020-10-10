@@ -6,51 +6,13 @@
 class QuoteMixer
 {
 public:
-public:
     QuoteMixer(){
         publisher_.init();
     }
 
-    void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-        SMixQuote* ptr = NULL;
-        if( !_get_quote(symbol, ptr) ) {
-            ptr = new SMixQuote();
-            symbols_[symbol] = ptr;
-        } else {
-            // 1. 清除老的exchange数据
-            ptr->Asks = _clear_exchange(exchange, ptr->Asks);
-            ptr->Bids = _clear_exchange(exchange, ptr->Bids);
-            // 2. 修剪cross的价位
-            _cross_askbid(ptr, quote);
-        }
-        // 3. 合并价位
-        ptr->Asks = _mix_exchange(exchange, ptr->Asks, quote.Asks, quote.AskLength, ptr->Watermark, true);
-        ptr->Bids = _mix_exchange(exchange, ptr->Bids, quote.Bids, quote.BidLength, ptr->Watermark, false);
+    void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
-        // 4. 推送结果
-        ptr->SequenceNo = quote.SequenceNo;
-        publish_quote(symbol, *ptr, true);
-        return;
-    }
-
-    void on_mix_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-        SMixQuote* ptr = NULL;
-        if( !_get_quote(symbol, ptr) )
-            return;
-        SDepthQuote newQuote = quote;
-        // 1. 需要清除的价位数据
-        ptr->Asks = _clear_pricelevel(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, true);
-        ptr->Bids = _clear_pricelevel(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, false);
-        // 2. 修剪cross的价位
-        _cross_askbid(ptr, newQuote);
-        // 3. 合并价位
-        ptr->Asks = _mix_exchange(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, ptr->Watermark, true);
-        ptr->Bids = _mix_exchange(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, ptr->Watermark, false);
-        // 4. 推送结果
-        ptr->SequenceNo = quote.SequenceNo;
-        publish_quote(symbol, *ptr, false);
-        return;
-    }
+    void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
     void publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap) {
         /*if( quote.Asks != NULL ) {

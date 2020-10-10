@@ -2,7 +2,9 @@
 
 #include "pandora/util/singleton.hpp"
 #include "pandora/util/path_util.h"
+#include "pandora/util/json.hpp"
 #include "pandora/messager/ut_log.h"
+using njson = nlohmann::json;
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -37,7 +39,7 @@ public:
             std::ifstream in_config(file_name);
             std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
             // std::cout << contents << std::endl;
-            json js = json::parse(contents);
+            njson js = njson::parse(contents);
 
             // grpc
             grpc_push_addr_ = js["grpc"]["push_addr"].get<string>();

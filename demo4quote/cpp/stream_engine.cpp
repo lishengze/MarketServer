@@ -10,12 +10,6 @@ StreamEngine::StreamEngine(){
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
-
-    redis_quote_ = new RedisQuote();
-
-    quote_mixer_ = new QuoteMixer();
-
-    quote_dumper_ = new QuoteDumper();
 }
 
 StreamEngine::~StreamEngine(){
@@ -23,45 +17,35 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() {
     // start redis
-    redis_quote_->init(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
-    redis_quote_->set_engine(this);
+    redis_quote_.set_engine(this);
+    redis_quote_.start(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
+
+    // start grpc server
+    publiser_.RunServer();
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
-    //std::cout << "on_snap" << std::endl;
-    std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-    markets_[exchange][symbol] = quote;
     if( CONFIG->dump_binary_only_ )
-        quote_dumper_->on_mix_snap(exchange, symbol, quote);
-    else
-        quote_mixer_->on_mix_snap(exchange, symbol, quote);
+        quote_dumper_.on_mix_snap(exchange, symbol, quote);
+    
+    quote_mixer_.on_snap(exchange, symbol, quote);
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
-    //std::cout << "on_update" << std::endl;
-    std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-    SDepthQuote lastQuote;
-    if( !_get_quote(exchange, symbol, lastQuote) )
-        return;
-    // filter by SequenceNo
-    if( quote.SequenceNo < lastQuote.SequenceNo )
-        return;
     if( CONFIG->dump_binary_only_ )
-        quote_dumper_->on_mix_update(exchange, symbol, quote);
-    else
-        quote_mixer_->on_mix_update(exchange, symbol, quote);
+        quote_dumper_.on_mix_update(exchange, symbol, quote);
+
+    quote_mixer_.on_update(exchange, symbol, quote);
 };
 
-bool StreamEngine::_get_quote(const string& exchange, const string& symbol, SDepthQuote& quote) const {
-    auto iter = markets_.find(exchange);
-    if( iter == markets_.end() )
-        return false;
-    const TMarketQuote& marketQuote = iter->second;
-    auto iter2 = marketQuote.find(symbol);
-    if( iter2 == marketQuote.end() )
-        return false;
-    quote = iter2->second;
-    return true;
+void StreamEngine::on_connected() {    
+    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
+            const string& symbol = *iterSymbol;
+            const string& exchange = *iterExchange;
+            redis_quote_.subscribe("UPDATEx|" + symbol + "." + exchange);            
+        }
+    }
 };
 
 void StreamEngine::signal_handler(int signum)
