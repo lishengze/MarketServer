@@ -53,9 +53,9 @@ struct SDecimal {
         }
 
         if( ceiling ) {
-            Value = ceil(data.Value / CALC_BASE(precise - data.Base));
+            Value = ceil(data.Value / CALC_BASE(data.Base - precise));
         } else {
-            Value = floor(data.Value / CALC_BASE(precise - data.Base));
+            Value = floor(data.Value / CALC_BASE(data.Base - precise));
         }
         Base = precise;
     }
@@ -221,3 +221,5 @@ struct SMixQuote {
         Bids = NULL;
     }
 };
+
+using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;

@@ -33,7 +33,4 @@ private:
     // mix quotation
     QuoteMixer quote_mixer_;
     QuoteDumper quote_dumper_;
-
-    // publisher
-    ServiceImpl publiser_;
 };

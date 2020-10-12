@@ -38,7 +38,7 @@ public:
             if (thread_loop_->joinable()) {
                 thread_loop_->join();
             }
-            delete thread_loop_;        
+            delete thread_loop_;
         }
     }
 

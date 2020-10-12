@@ -27,7 +27,6 @@ class RedisQuote : public utrade::pandora::CRedisSpi
 public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
-    using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
 public:
     RedisQuote(){};
     ~RedisQuote(){};

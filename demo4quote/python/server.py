@@ -5,8 +5,8 @@ import logging
 
 import grpc
 
-import api_pb2
-import api_pb2_grpc
+import stream_engine_server_pb2
+import stream_engine_server_pb2_grpc
 
 
 def convert_depth(depths):
@@ -28,7 +28,7 @@ def display(data):
         display_depth("bid", depth)
     print("-----------------------------------")
 
-class TradeServicer(api_pb2_grpc.TradeServicer):
+class TradeServicer(stream_engine_server_pb2_grpc.StreamEngineService):
     """Provides methods that implement functionality of route guide server."""
 
     def __init__(self):
@@ -42,14 +42,35 @@ class TradeServicer(api_pb2_grpc.TradeServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    api_pb2_grpc.add_TradeServicer_to_server(
+    stream_engine_server_pb2_grpc.add_TradeServicer_to_server(
         TradeServicer(), server)
     server.add_insecure_port('[::]:9000')
     server.start()
     server.wait_for_termination()
 
 
+
+def run():
+    # NOTE(gRPC Python Team): .close() is possible on a channel and should be
+    # used in circumstances in which the with statement does not fit the needs
+    # of the code.
+    with grpc.insecure_channel('localhost:9000') as channel:
+        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
+        req = stream_engine_server_pb2.GetQuoteReq()
+        req.exchange = "OKEX"
+        req.symbol = "BTC_USDT"
+        response = stub.GetQuote(req)
+        print(response)
+    #print("Greeter client received: " + response)
+    
+    with grpc.insecure_channel('localhost:9000') as channel:
+        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
+        responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.SubscribeQuoteReq())
+        for resp in responses:
+            print(resp)
+
 if __name__ == '__main__':
     logging.basicConfig()
-    serve()
+    #serve()
+    run()
                             

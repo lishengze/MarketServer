@@ -1,39 +1,21 @@
 #pragma once
 
 #include "stream_engine_define.h"
-#include "grpc_publisher.h"
 
 class QuoteMixer
 {
 public:
     QuoteMixer(){
-        publisher_.init();
+        //publisher_.init();
     }
 
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
-    void publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap) {
-        /*if( quote.Asks != NULL ) {
-            cout << quote.Asks->Price.GetValue();
-        } else {
-            cout << "-";
-        }
-        cout << ",";
-        if( quote.Bids != NULL ) {
-            cout << quote.Bids->Price.GetValue();
-        } else {
-            cout << "-";
-        }
-        cout << endl;*/
-        publisher_.publish(symbol, quote, isSnap);
-    }
+    void publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap);
 
 private:
-
-    // trade client
-    GrpcPublisher publisher_;
 
     // symbols
     unordered_map<TSymbol, SMixQuote*> symbols_;

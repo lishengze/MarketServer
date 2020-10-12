@@ -21,10 +21,10 @@ LINK_DIRECTORIES("../lib")
 LINK_DIRECTORIES("/root/.local/lib")
 
 ###############################################################################################
-add_executable(demo4quote main.cpp stream_engine.cpp quote_mixer.cpp redis_quote.cpp redis_snap.cpp empty.pb.cc gogo.pb.cc api.pb.cc api.grpc.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
+add_executable(demo4quote main.cpp stream_engine.cpp grpc_server.cpp grpc_caller.cpp quote_mixer.cpp redis_quote.cpp redis_snap.cpp empty.pb.cc gogo.pb.cc api.pb.cc api.grpc.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
 target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
-target_link_libraries(demo4quote grpc++_reflection grpc++)
+target_link_libraries(demo4quote grpc++_reflection grpc++ gpr)
 
 ###############################################################################################

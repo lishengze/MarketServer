@@ -1,5 +1,6 @@
 #include "stream_engine_config.h"
 #include "quote_mixer.h"
+#include "grpc_server.h"
 
 void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& dst) {
     int precise = CONFIG->get_precise(symbol);
@@ -48,6 +49,24 @@ void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& d
         dst.BidLength = count;
     }
 }
+
+void QuoteMixer::publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap) {
+    /*
+    if( quote.Asks != NULL ) {
+        cout << quote.Asks->Price.GetValue();
+    } else {
+        cout << "-";
+    }
+    cout << ",";
+    if( quote.Bids != NULL ) {
+        cout << quote.Bids->Price.GetValue();
+    } else {
+        cout << "-";
+    }
+    cout << endl;
+    */
+    PUBLISHER->on_mix_snap(symbol, quote);
+};
 
 void QuoteMixer::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
     // compress price precise

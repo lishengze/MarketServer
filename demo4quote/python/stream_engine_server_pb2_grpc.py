@@ -20,10 +20,10 @@ class StreamEngineServiceStub(object):
                 request_serializer=stream__engine__server__pb2.GetQuoteReq.SerializeToString,
                 response_deserializer=stream__engine__server__pb2.QuoteData.FromString,
                 )
-        self.SubscribeQuote = channel.unary_stream(
-                '/trade.service.v1.StreamEngineService/SubscribeQuote',
+        self.MultiSubscribeQuote = channel.unary_stream(
+                '/trade.service.v1.StreamEngineService/MultiSubscribeQuote',
                 request_serializer=stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-                response_deserializer=stream__engine__server__pb2.QuoteData.FromString,
+                response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
                 )
 
 
@@ -38,8 +38,9 @@ class StreamEngineServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SubscribeQuote(self, request, context):
+    def MultiSubscribeQuote(self, request, context):
         """订阅聚合行情
+        rpc SubscribeQuote(SubscribeQuoteReq) returns (stream QuoteData);
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,10 +54,10 @@ def add_StreamEngineServiceServicer_to_server(servicer, server):
                     request_deserializer=stream__engine__server__pb2.GetQuoteReq.FromString,
                     response_serializer=stream__engine__server__pb2.QuoteData.SerializeToString,
             ),
-            'SubscribeQuote': grpc.unary_stream_rpc_method_handler(
-                    servicer.SubscribeQuote,
+            'MultiSubscribeQuote': grpc.unary_stream_rpc_method_handler(
+                    servicer.MultiSubscribeQuote,
                     request_deserializer=stream__engine__server__pb2.SubscribeQuoteReq.FromString,
-                    response_serializer=stream__engine__server__pb2.QuoteData.SerializeToString,
+                    response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -87,7 +88,7 @@ class StreamEngineService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def SubscribeQuote(request,
+    def MultiSubscribeQuote(request,
             target,
             options=(),
             channel_credentials=None,
@@ -97,8 +98,8 @@ class StreamEngineService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/SubscribeQuote',
+        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/MultiSubscribeQuote',
             stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-            stream__engine__server__pb2.QuoteData.FromString,
+            stream__engine__server__pb2.MultiQuoteData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

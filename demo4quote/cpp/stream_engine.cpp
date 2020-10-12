@@ -10,6 +10,8 @@ StreamEngine::StreamEngine(){
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
+    
+    utrade::pandora::Singleton<ServerImpl>::Instance();
 }
 
 StreamEngine::~StreamEngine(){
@@ -21,7 +23,7 @@ void StreamEngine::start() {
     redis_quote_.start(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
 
     // start grpc server
-    publiser_.RunServer();
+    PUBLISHER->run_in_thread(CONFIG->grpc_push_addr_);
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
@@ -29,6 +31,8 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
         quote_dumper_.on_mix_snap(exchange, symbol, quote);
     
     quote_mixer_.on_snap(exchange, symbol, quote);
+
+    PUBLISHER->on_snap(exchange, symbol, quote);
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
@@ -36,6 +40,8 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
         quote_dumper_.on_mix_update(exchange, symbol, quote);
 
     quote_mixer_.on_update(exchange, symbol, quote);
+    
+    PUBLISHER->on_update(exchange, symbol, quote);
 };
 
 void StreamEngine::on_connected() {    

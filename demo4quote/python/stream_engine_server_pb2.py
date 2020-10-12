@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\002v1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1astream_engine_server.proto\x12\x10trade.service.v1\x1a\ngogo.proto\"\x13\n\x11SubscribeQuoteReq\"3\n\x0bGetQuoteReq\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\"\x95\x03\n\tQuoteData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\x03\x42\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\tB$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\tB1\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12J\n\task_depth\x18\x05 \x03(\x0b\x32\x1c.trade.service.v1.DepthLevelB\x19\xe2\xde\x1f\x08\x41skDepth\xea\xde\x1f\task_depth\x12J\n\tbid_depth\x18\x06 \x03(\x0b\x32\x1c.trade.service.v1.DepthLevelB\x19\xe2\xde\x1f\x08\x42idDepth\xea\xde\x1f\tbid_depth\x12&\n\x07is_snap\x18\x07 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\"\x89\x01\n\nDepthLevel\x12<\n\x05price\x18\x01 \x01(\x0b\x32\x19.trade.service.v1.DecimalB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12=\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x1d.trade.service.v1.DepthVolumeB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\"L\n\x07\x44\x65\x63imal\x12!\n\x05value\x18\x01 \x01(\x03\x42\x12\xe2\xde\x1f\x05Value\xea\xde\x1f\x05value\x12\x1e\n\x04\x62\x61se\x18\x02 \x01(\x05\x42\x10\xe2\xde\x1f\x04\x42\x61se\xea\xde\x1f\x04\x62\x61se\"z\n\x0b\x44\x65pthVolume\x12?\n\x06volume\x18\x01 \x01(\x0b\x32\x19.trade.service.v1.DecimalB\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12*\n\x08\x65xchange\x18\x02 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange2\xb3\x01\n\x13StreamEngineService\x12\x46\n\x08GetQuote\x12\x1d.trade.service.v1.GetQuoteReq\x1a\x1b.trade.service.v1.QuoteData\x12T\n\x0eSubscribeQuote\x12#.trade.service.v1.SubscribeQuoteReq\x1a\x1b.trade.service.v1.QuoteData0\x01\x42\x04Z\x02v1b\x06proto3'
+  serialized_pb=b'\n\x1astream_engine_server.proto\x12\x10trade.service.v1\x1a\ngogo.proto\"\x13\n\x11SubscribeQuoteReq\"_\n\x0bGetQuoteReq\x12*\n\x08\x65xchange\x18\x01 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\x12$\n\x06symbol\x18\x02 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\"S\n\x0eMultiQuoteData\x12\x41\n\x06quotes\x18\x01 \x03(\x0b\x32\x1b.trade.service.v1.QuoteDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x95\x03\n\tQuoteData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\x03\x42\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\tB$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\tB1\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12J\n\task_depth\x18\x05 \x03(\x0b\x32\x1c.trade.service.v1.DepthLevelB\x19\xe2\xde\x1f\x08\x41skDepth\xea\xde\x1f\task_depth\x12J\n\tbid_depth\x18\x06 \x03(\x0b\x32\x1c.trade.service.v1.DepthLevelB\x19\xe2\xde\x1f\x08\x42idDepth\xea\xde\x1f\tbid_depth\x12&\n\x07is_snap\x18\x07 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\"\x89\x01\n\nDepthLevel\x12<\n\x05price\x18\x01 \x01(\x0b\x32\x19.trade.service.v1.DecimalB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12=\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x1d.trade.service.v1.DepthVolumeB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\"L\n\x07\x44\x65\x63imal\x12!\n\x05value\x18\x01 \x01(\x03\x42\x12\xe2\xde\x1f\x05Value\xea\xde\x1f\x05value\x12\x1e\n\x04\x62\x61se\x18\x02 \x01(\x05\x42\x10\xe2\xde\x1f\x04\x42\x61se\xea\xde\x1f\x04\x62\x61se\"_\n\x0b\x44\x65pthVolume\x12$\n\x06volume\x18\x01 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12*\n\x08\x65xchange\x18\x02 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange2\xbd\x01\n\x13StreamEngineService\x12\x46\n\x08GetQuote\x12\x1d.trade.service.v1.GetQuoteReq\x1a\x1b.trade.service.v1.QuoteData\x12^\n\x13MultiSubscribeQuote\x12#.trade.service.v1.SubscribeQuoteReq\x1a .trade.service.v1.MultiQuoteData0\x01\x42\x04Z\x02v1b\x06proto3'
   ,
   dependencies=[gogo__pb2.DESCRIPTOR,])
 
@@ -61,8 +61,15 @@ _GETQUOTEREQ = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='symbol', full_name='trade.service.v1.GetQuoteReq.symbol', index=0,
+      name='exchange', full_name='trade.service.v1.GetQuoteReq.exchange', index=0,
       number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\342\336\037\010Exchange\352\336\037\010exchange', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='symbol', full_name='trade.service.v1.GetQuoteReq.symbol', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -80,7 +87,39 @@ _GETQUOTEREQ = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=81,
-  serialized_end=132,
+  serialized_end=176,
+)
+
+
+_MULTIQUOTEDATA = _descriptor.Descriptor(
+  name='MultiQuoteData',
+  full_name='trade.service.v1.MultiQuoteData',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='quotes', full_name='trade.service.v1.MultiQuoteData.quotes', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\342\336\037\006Quotes\352\336\037\006quotes', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=178,
+  serialized_end=261,
 )
 
 
@@ -153,8 +192,8 @@ _QUOTEDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=135,
-  serialized_end=540,
+  serialized_start=264,
+  serialized_end=669,
 )
 
 
@@ -192,8 +231,8 @@ _DEPTHLEVEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=543,
-  serialized_end=680,
+  serialized_start=672,
+  serialized_end=809,
 )
 
 
@@ -231,8 +270,8 @@ _DECIMAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=682,
-  serialized_end=758,
+  serialized_start=811,
+  serialized_end=887,
 )
 
 
@@ -246,8 +285,8 @@ _DEPTHVOLUME = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='volume', full_name='trade.service.v1.DepthVolume.volume', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=1, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\006Volume\352\336\037\006volume', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -270,17 +309,18 @@ _DEPTHVOLUME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=760,
-  serialized_end=882,
+  serialized_start=889,
+  serialized_end=984,
 )
 
+_MULTIQUOTEDATA.fields_by_name['quotes'].message_type = _QUOTEDATA
 _QUOTEDATA.fields_by_name['ask_depth'].message_type = _DEPTHLEVEL
 _QUOTEDATA.fields_by_name['bid_depth'].message_type = _DEPTHLEVEL
 _DEPTHLEVEL.fields_by_name['price'].message_type = _DECIMAL
 _DEPTHLEVEL.fields_by_name['data'].message_type = _DEPTHVOLUME
-_DEPTHVOLUME.fields_by_name['volume'].message_type = _DECIMAL
 DESCRIPTOR.message_types_by_name['SubscribeQuoteReq'] = _SUBSCRIBEQUOTEREQ
 DESCRIPTOR.message_types_by_name['GetQuoteReq'] = _GETQUOTEREQ
+DESCRIPTOR.message_types_by_name['MultiQuoteData'] = _MULTIQUOTEDATA
 DESCRIPTOR.message_types_by_name['QuoteData'] = _QUOTEDATA
 DESCRIPTOR.message_types_by_name['DepthLevel'] = _DEPTHLEVEL
 DESCRIPTOR.message_types_by_name['Decimal'] = _DECIMAL
@@ -300,6 +340,13 @@ GetQuoteReq = _reflection.GeneratedProtocolMessageType('GetQuoteReq', (_message.
   # @@protoc_insertion_point(class_scope:trade.service.v1.GetQuoteReq)
   })
 _sym_db.RegisterMessage(GetQuoteReq)
+
+MultiQuoteData = _reflection.GeneratedProtocolMessageType('MultiQuoteData', (_message.Message,), {
+  'DESCRIPTOR' : _MULTIQUOTEDATA,
+  '__module__' : 'stream_engine_server_pb2'
+  # @@protoc_insertion_point(class_scope:trade.service.v1.MultiQuoteData)
+  })
+_sym_db.RegisterMessage(MultiQuoteData)
 
 QuoteData = _reflection.GeneratedProtocolMessageType('QuoteData', (_message.Message,), {
   'DESCRIPTOR' : _QUOTEDATA,
@@ -331,7 +378,9 @@ _sym_db.RegisterMessage(DepthVolume)
 
 
 DESCRIPTOR._options = None
+_GETQUOTEREQ.fields_by_name['exchange']._options = None
 _GETQUOTEREQ.fields_by_name['symbol']._options = None
+_MULTIQUOTEDATA.fields_by_name['quotes']._options = None
 _QUOTEDATA.fields_by_name['symbol']._options = None
 _QUOTEDATA.fields_by_name['msg_seq']._options = None
 _QUOTEDATA.fields_by_name['time']._options = None
@@ -353,8 +402,8 @@ _STREAMENGINESERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=885,
-  serialized_end=1064,
+  serialized_start=987,
+  serialized_end=1176,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetQuote',
@@ -367,12 +416,12 @@ _STREAMENGINESERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='SubscribeQuote',
-    full_name='trade.service.v1.StreamEngineService.SubscribeQuote',
+    name='MultiSubscribeQuote',
+    full_name='trade.service.v1.StreamEngineService.MultiSubscribeQuote',
     index=1,
     containing_service=None,
     input_type=_SUBSCRIBEQUOTEREQ,
-    output_type=_QUOTEDATA,
+    output_type=_MULTIQUOTEDATA,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

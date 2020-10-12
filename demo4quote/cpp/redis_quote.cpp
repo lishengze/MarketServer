@@ -1,5 +1,6 @@
 #include "redis_quote.h"
 #include "stream_engine.h"
+#include "stream_engine_config.h"
 
 bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precise) {
     njson snap_json = njson::parse(data); 
@@ -55,6 +56,9 @@ void RedisQuote::start(const string& host, const int& port, const string& passwo
 };
 
 void RedisQuote::__on_snap(const string& exchange, const string& symbol, const string& data) {   
+    if( CONFIG->output_to_screen_ )
+        cout << "redis OnSnap:" << symbol << " Msg: " << data << endl;
+
     // string ->  SDepthQuote
     SDepthQuote quote;
     if( !parse_quote(data, quote, true, CONFIG->get_precise(symbol)))

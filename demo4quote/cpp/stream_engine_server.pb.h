@@ -48,7 +48,7 @@ struct TableStruct_stream_5fengine_5fserver_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[6]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -70,6 +70,9 @@ extern DepthVolumeDefaultTypeInternal _DepthVolume_default_instance_;
 class GetQuoteReq;
 class GetQuoteReqDefaultTypeInternal;
 extern GetQuoteReqDefaultTypeInternal _GetQuoteReq_default_instance_;
+class MultiQuoteData;
+class MultiQuoteDataDefaultTypeInternal;
+extern MultiQuoteDataDefaultTypeInternal _MultiQuoteData_default_instance_;
 class QuoteData;
 class QuoteDataDefaultTypeInternal;
 extern QuoteDataDefaultTypeInternal _QuoteData_default_instance_;
@@ -84,6 +87,7 @@ template<> ::trade::service::v1::Decimal* Arena::CreateMaybeMessage<::trade::ser
 template<> ::trade::service::v1::DepthLevel* Arena::CreateMaybeMessage<::trade::service::v1::DepthLevel>(Arena*);
 template<> ::trade::service::v1::DepthVolume* Arena::CreateMaybeMessage<::trade::service::v1::DepthVolume>(Arena*);
 template<> ::trade::service::v1::GetQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::GetQuoteReq>(Arena*);
+template<> ::trade::service::v1::MultiQuoteData* Arena::CreateMaybeMessage<::trade::service::v1::MultiQuoteData>(Arena*);
 template<> ::trade::service::v1::QuoteData* Arena::CreateMaybeMessage<::trade::service::v1::QuoteData>(Arena*);
 template<> ::trade::service::v1::SubscribeQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::SubscribeQuoteReq>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -330,9 +334,26 @@ class GetQuoteReq PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kSymbolFieldNumber = 1,
+    kExchangeFieldNumber = 1,
+    kSymbolFieldNumber = 2,
   };
-  // string symbol = 1 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
+  // string exchange = 1 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+  void clear_exchange();
+  const std::string& exchange() const;
+  void set_exchange(const std::string& value);
+  void set_exchange(std::string&& value);
+  void set_exchange(const char* value);
+  void set_exchange(const char* value, size_t size);
+  std::string* mutable_exchange();
+  std::string* release_exchange();
+  void set_allocated_exchange(std::string* exchange);
+  private:
+  const std::string& _internal_exchange() const;
+  void _internal_set_exchange(const std::string& value);
+  std::string* _internal_mutable_exchange();
+  public:
+
+  // string symbol = 2 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
   void clear_symbol();
   const std::string& symbol() const;
   void set_symbol(const std::string& value);
@@ -355,7 +376,154 @@ class GetQuoteReq PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr symbol_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MultiQuoteData PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.MultiQuoteData) */ {
+ public:
+  inline MultiQuoteData() : MultiQuoteData(nullptr) {}
+  virtual ~MultiQuoteData();
+
+  MultiQuoteData(const MultiQuoteData& from);
+  MultiQuoteData(MultiQuoteData&& from) noexcept
+    : MultiQuoteData() {
+    *this = ::std::move(from);
+  }
+
+  inline MultiQuoteData& operator=(const MultiQuoteData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MultiQuoteData& operator=(MultiQuoteData&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MultiQuoteData& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const MultiQuoteData* internal_default_instance() {
+    return reinterpret_cast<const MultiQuoteData*>(
+               &_MultiQuoteData_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(MultiQuoteData& a, MultiQuoteData& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MultiQuoteData* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MultiQuoteData* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MultiQuoteData* New() const final {
+    return CreateMaybeMessage<MultiQuoteData>(nullptr);
+  }
+
+  MultiQuoteData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MultiQuoteData>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MultiQuoteData& from);
+  void MergeFrom(const MultiQuoteData& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MultiQuoteData* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.MultiQuoteData";
+  }
+  protected:
+  explicit MultiQuoteData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kQuotesFieldNumber = 1,
+  };
+  // repeated .trade.service.v1.QuoteData quotes = 1 [(.gogoproto.customname) = "Quotes", (.gogoproto.jsontag) = "quotes"];
+  int quotes_size() const;
+  private:
+  int _internal_quotes_size() const;
+  public:
+  void clear_quotes();
+  ::trade::service::v1::QuoteData* mutable_quotes(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::QuoteData >*
+      mutable_quotes();
+  private:
+  const ::trade::service::v1::QuoteData& _internal_quotes(int index) const;
+  ::trade::service::v1::QuoteData* _internal_add_quotes();
+  public:
+  const ::trade::service::v1::QuoteData& quotes(int index) const;
+  ::trade::service::v1::QuoteData* add_quotes();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::QuoteData >&
+      quotes() const;
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.MultiQuoteData)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::QuoteData > quotes_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
 };
@@ -403,7 +571,7 @@ class QuoteData PROTOBUF_FINAL :
                &_QuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(QuoteData& a, QuoteData& b) {
     a.Swap(&b);
@@ -645,7 +813,7 @@ class DepthLevel PROTOBUF_FINAL :
                &_DepthLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(DepthLevel& a, DepthLevel& b) {
     a.Swap(&b);
@@ -811,7 +979,7 @@ class Decimal PROTOBUF_FINAL :
                &_Decimal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(Decimal& a, Decimal& b) {
     a.Swap(&b);
@@ -959,7 +1127,7 @@ class DepthVolume PROTOBUF_FINAL :
                &_DepthVolume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(DepthVolume& a, DepthVolume& b) {
     a.Swap(&b);
@@ -1049,23 +1217,14 @@ class DepthVolume PROTOBUF_FINAL :
   std::string* _internal_mutable_exchange();
   public:
 
-  // .trade.service.v1.Decimal volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
-  bool has_volume() const;
-  private:
-  bool _internal_has_volume() const;
-  public:
+  // double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
   void clear_volume();
-  const ::trade::service::v1::Decimal& volume() const;
-  ::trade::service::v1::Decimal* release_volume();
-  ::trade::service::v1::Decimal* mutable_volume();
-  void set_allocated_volume(::trade::service::v1::Decimal* volume);
+  double volume() const;
+  void set_volume(double value);
   private:
-  const ::trade::service::v1::Decimal& _internal_volume() const;
-  ::trade::service::v1::Decimal* _internal_mutable_volume();
+  double _internal_volume() const;
+  void _internal_set_volume(double value);
   public:
-  void unsafe_arena_set_allocated_volume(
-      ::trade::service::v1::Decimal* volume);
-  ::trade::service::v1::Decimal* unsafe_arena_release_volume();
 
   // @@protoc_insertion_point(class_scope:trade.service.v1.DepthVolume)
  private:
@@ -1075,7 +1234,7 @@ class DepthVolume PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
-  ::trade::service::v1::Decimal* volume_;
+  double volume_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
 };
@@ -1094,7 +1253,69 @@ class DepthVolume PROTOBUF_FINAL :
 
 // GetQuoteReq
 
-// string symbol = 1 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
+// string exchange = 1 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+inline void GetQuoteReq::clear_exchange() {
+  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetQuoteReq::exchange() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetQuoteReq.exchange)
+  return _internal_exchange();
+}
+inline void GetQuoteReq::set_exchange(const std::string& value) {
+  _internal_set_exchange(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetQuoteReq.exchange)
+}
+inline std::string* GetQuoteReq::mutable_exchange() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.GetQuoteReq.exchange)
+  return _internal_mutable_exchange();
+}
+inline const std::string& GetQuoteReq::_internal_exchange() const {
+  return exchange_.Get();
+}
+inline void GetQuoteReq::_internal_set_exchange(const std::string& value) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetQuoteReq::set_exchange(std::string&& value) {
+  
+  exchange_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.GetQuoteReq.exchange)
+}
+inline void GetQuoteReq::set_exchange(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.GetQuoteReq.exchange)
+}
+inline void GetQuoteReq::set_exchange(const char* value,
+    size_t size) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.GetQuoteReq.exchange)
+}
+inline std::string* GetQuoteReq::_internal_mutable_exchange() {
+  
+  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetQuoteReq::release_exchange() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.GetQuoteReq.exchange)
+  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetQuoteReq::set_allocated_exchange(std::string* exchange) {
+  if (exchange != nullptr) {
+    
+  } else {
+    
+  }
+  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.GetQuoteReq.exchange)
+}
+
+// string symbol = 2 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
 inline void GetQuoteReq::clear_symbol() {
   symbol_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -1154,6 +1375,49 @@ inline void GetQuoteReq::set_allocated_symbol(std::string* symbol) {
   symbol_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), symbol,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.GetQuoteReq.symbol)
+}
+
+// -------------------------------------------------------------------
+
+// MultiQuoteData
+
+// repeated .trade.service.v1.QuoteData quotes = 1 [(.gogoproto.customname) = "Quotes", (.gogoproto.jsontag) = "quotes"];
+inline int MultiQuoteData::_internal_quotes_size() const {
+  return quotes_.size();
+}
+inline int MultiQuoteData::quotes_size() const {
+  return _internal_quotes_size();
+}
+inline void MultiQuoteData::clear_quotes() {
+  quotes_.Clear();
+}
+inline ::trade::service::v1::QuoteData* MultiQuoteData::mutable_quotes(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MultiQuoteData.quotes)
+  return quotes_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::QuoteData >*
+MultiQuoteData::mutable_quotes() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.MultiQuoteData.quotes)
+  return &quotes_;
+}
+inline const ::trade::service::v1::QuoteData& MultiQuoteData::_internal_quotes(int index) const {
+  return quotes_.Get(index);
+}
+inline const ::trade::service::v1::QuoteData& MultiQuoteData::quotes(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MultiQuoteData.quotes)
+  return _internal_quotes(index);
+}
+inline ::trade::service::v1::QuoteData* MultiQuoteData::_internal_add_quotes() {
+  return quotes_.Add();
+}
+inline ::trade::service::v1::QuoteData* MultiQuoteData::add_quotes() {
+  // @@protoc_insertion_point(field_add:trade.service.v1.MultiQuoteData.quotes)
+  return _internal_add_quotes();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::QuoteData >&
+MultiQuoteData::quotes() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.MultiQuoteData.quotes)
+  return quotes_;
 }
 
 // -------------------------------------------------------------------
@@ -1638,87 +1902,24 @@ inline void Decimal::set_base(::PROTOBUF_NAMESPACE_ID::int32 value) {
 
 // DepthVolume
 
-// .trade.service.v1.Decimal volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
-inline bool DepthVolume::_internal_has_volume() const {
-  return this != internal_default_instance() && volume_ != nullptr;
-}
-inline bool DepthVolume::has_volume() const {
-  return _internal_has_volume();
-}
+// double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
 inline void DepthVolume::clear_volume() {
-  if (GetArena() == nullptr && volume_ != nullptr) {
-    delete volume_;
-  }
-  volume_ = nullptr;
+  volume_ = 0;
 }
-inline const ::trade::service::v1::Decimal& DepthVolume::_internal_volume() const {
-  const ::trade::service::v1::Decimal* p = volume_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::trade::service::v1::Decimal*>(
-      &::trade::service::v1::_Decimal_default_instance_);
+inline double DepthVolume::_internal_volume() const {
+  return volume_;
 }
-inline const ::trade::service::v1::Decimal& DepthVolume::volume() const {
+inline double DepthVolume::volume() const {
   // @@protoc_insertion_point(field_get:trade.service.v1.DepthVolume.volume)
   return _internal_volume();
 }
-inline void DepthVolume::unsafe_arena_set_allocated_volume(
-    ::trade::service::v1::Decimal* volume) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(volume_);
-  }
-  volume_ = volume;
-  if (volume) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:trade.service.v1.DepthVolume.volume)
-}
-inline ::trade::service::v1::Decimal* DepthVolume::release_volume() {
+inline void DepthVolume::_internal_set_volume(double value) {
   
-  ::trade::service::v1::Decimal* temp = volume_;
-  volume_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
+  volume_ = value;
 }
-inline ::trade::service::v1::Decimal* DepthVolume::unsafe_arena_release_volume() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.DepthVolume.volume)
-  
-  ::trade::service::v1::Decimal* temp = volume_;
-  volume_ = nullptr;
-  return temp;
-}
-inline ::trade::service::v1::Decimal* DepthVolume::_internal_mutable_volume() {
-  
-  if (volume_ == nullptr) {
-    auto* p = CreateMaybeMessage<::trade::service::v1::Decimal>(GetArena());
-    volume_ = p;
-  }
-  return volume_;
-}
-inline ::trade::service::v1::Decimal* DepthVolume::mutable_volume() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.DepthVolume.volume)
-  return _internal_mutable_volume();
-}
-inline void DepthVolume::set_allocated_volume(::trade::service::v1::Decimal* volume) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete volume_;
-  }
-  if (volume) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(volume);
-    if (message_arena != submessage_arena) {
-      volume = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, volume, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  volume_ = volume;
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthVolume.volume)
+inline void DepthVolume::set_volume(double value) {
+  _internal_set_volume(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.DepthVolume.volume)
 }
 
 // string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
@@ -1786,6 +1987,8 @@ inline void DepthVolume::set_allocated_exchange(std::string* exchange) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

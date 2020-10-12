@@ -11,7 +11,8 @@ service StreamEngineService {
   // 获取单次行情
   rpc GetQuote(GetQuoteReq) returns (QuoteData);
   // 订阅聚合行情
-  rpc SubscribeQuote(SubscribeQuoteReq) returns (stream QuoteData);
+  //rpc SubscribeQuote(SubscribeQuoteReq) returns (stream QuoteData);
+  rpc MultiSubscribeQuote(SubscribeQuoteReq) returns (stream MultiQuoteData);
 }
 
 message SubscribeQuoteReq {
@@ -19,7 +20,12 @@ message SubscribeQuoteReq {
 }
 
 message GetQuoteReq {
-  string symbol = 1 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+  string exchange = 1 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
+  string symbol = 2 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+}
+
+message MultiQuoteData {
+  repeated QuoteData quotes = 1 [(gogoproto.customname) = "Quotes", (gogoproto.jsontag) = "quotes"];
 }
 
 message QuoteData {
@@ -43,6 +49,6 @@ message Decimal {
 }
 
 message DepthVolume {
-  Decimal volume = 1 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
+  double volume = 1 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
   string exchange = 2 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
 }
