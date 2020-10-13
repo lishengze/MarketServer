@@ -135,7 +135,7 @@ void CallDataMultiSubscribeQuote::Proceed() {
             {
                 std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
-                for( int i = 0 ; i < datas_.size() ; ++i ) {
+                for( size_t i = 0 ; i < datas_.size() ; ++i ) {
                     QuoteData* quote = reply.add_quotes();
                     quote_to_quote(datas_[i].get(), quote);
                 }

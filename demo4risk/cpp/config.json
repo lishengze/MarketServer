@@ -1,0 +1,23 @@
+{
+    "grpc": {
+        "publish_addr": "127.0.0.1:9900",
+        "quote_addr": "127.0.0.1:9000"
+    },
+    "debug": {
+        "sample_symbol_bak": "",
+        "sample_symbol": "BTC_USDT",
+        "output_to_screen": 0,
+        "dump_binary_only": 0
+    },
+    "redis_quote": {
+        "host": "45.249.244.59",
+        "port": 6666,
+        "password": "rkqFB4,wpoMmHqT6he}r",
+        "snap_interval": 10
+    },
+    "include": {
+        "symbols": ["BTC_USDT", "BCH_USDT@P", "OKB_ETH", "BTC_USD@201002"],
+        "exchanges": ["OKEX"],
+        "exchanges_bak": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
+    }
+}

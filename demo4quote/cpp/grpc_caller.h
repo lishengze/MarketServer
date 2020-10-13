@@ -39,7 +39,7 @@ using trade::service::v1::DepthVolume;
 class ServerImpl;
 class CallData {
 public:
-    CallData(ServerCompletionQueue* cq, ServerImpl* parent) : parent_(parent), cq_(cq), status_(CREATE) {}
+    CallData(ServerCompletionQueue* cq, ServerImpl* parent) : cq_(cq), status_(CREATE), parent_(parent) {}
 public:
     // The producer-consumer queue where for asynchronous server notifications.
     ServerCompletionQueue* cq_ = nullptr;

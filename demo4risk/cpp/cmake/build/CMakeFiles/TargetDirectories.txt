@@ -1,0 +1,3 @@
+/home/mk/workspace/demo/demo4risk/cpp/cmake/build/CMakeFiles/rebuild_cache.dir
+/home/mk/workspace/demo/demo4risk/cpp/cmake/build/CMakeFiles/edit_cache.dir
+/home/mk/workspace/demo/demo4risk/cpp/cmake/build/CMakeFiles/demo4risk.dir
