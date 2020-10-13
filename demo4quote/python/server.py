@@ -67,7 +67,8 @@ def run():
         stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
         responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.SubscribeQuoteReq())
         for resp in responses:
-            print(resp)
+            for quote in resp.quotes:
+                print(quote.symbol)
 
 if __name__ == '__main__':
     logging.basicConfig()

@@ -1,7 +1,39 @@
 #include "grpc_caller.h"
 #include "grpc_server.h"
 
-void convert_market_stream(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd) {
+void quote_to_quote(const QuoteData* src, QuoteData* dst) {
+    dst->set_symbol(src->symbol());
+    dst->set_msg_seq(src->msg_seq());
+
+    // 卖盘
+    for( int i = 0 ; i < src->ask_depth_size() ; ++i ) {
+        const DepthLevel& srcDepth = src->ask_depth(i);
+        DepthLevel* depth = dst->add_ask_depth();
+        depth->mutable_price()->set_value(srcDepth.price().value());
+        depth->mutable_price()->set_base(srcDepth.price().base());
+        for( int j = 0 ; j < srcDepth.data_size() ; ++j ) {
+            DepthVolume* depthVolume = depth->add_data();
+            depthVolume->set_volume(srcDepth.data(j).volume());
+            depthVolume->set_exchange(srcDepth.data(j).exchange());
+            
+        }
+    }
+    // 买盘
+    for( int i = 0 ; i < src->bid_depth_size() ; ++i ) {
+        const DepthLevel& srcDepth = src->bid_depth(i);
+        DepthLevel* depth = dst->add_bid_depth();
+        depth->mutable_price()->set_value(srcDepth.price().value());
+        depth->mutable_price()->set_base(srcDepth.price().base());
+        for( int j = 0 ; j < srcDepth.data_size() ; ++j ) {
+            DepthVolume* depthVolume = depth->add_data();
+            depthVolume->set_volume(srcDepth.data(j).volume());
+            depthVolume->set_exchange(srcDepth.data(j).exchange());
+            
+        }
+    }
+};
+
+void depthquote_to_quote(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd) {
     msd->set_symbol(symbol);
     msd->set_msg_seq(quote.SequenceNo);
 
@@ -58,7 +90,7 @@ void CallDataGetQuote::Proceed()
         QuoteData reply;
         SDepthQuote quote;
         if( parent_->get_snap(request_.exchange(), request_.symbol(), quote) ){
-            convert_market_stream(request_.exchange(), request_.symbol(), quote, &reply);
+            depthquote_to_quote(request_.exchange(), request_.symbol(), quote, &reply);
         }
 
         // And we are done! Let the gRPC runtime know we've finished, using the
@@ -105,8 +137,7 @@ void CallDataMultiSubscribeQuote::Proceed() {
 
                 for( int i = 0 ; i < datas_.size() ; ++i ) {
                     QuoteData* quote = reply.add_quotes();
-                    quote->set_symbol("BTC_USDT");
-                    quote->set_msg_seq(times_);
+                    quote_to_quote(datas_[i].get(), quote);
                 }
                 datas_.clear();
             }
