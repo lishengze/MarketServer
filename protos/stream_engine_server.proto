@@ -10,8 +10,9 @@ option go_package = "v1";
 service StreamEngineService {
   // 获取单次行情
   rpc GetQuote(GetQuoteReq) returns (QuoteData);
+  rpc SubscribeOneQuote(GetQuoteReq) returns (stream MultiQuoteData);
+
   // 订阅聚合行情
-  //rpc SubscribeQuote(SubscribeQuoteReq) returns (stream QuoteData);
   rpc MultiSubscribeQuote(SubscribeQuoteReq) returns (stream MultiQuoteData);
 }
 

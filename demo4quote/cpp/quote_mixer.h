@@ -6,7 +6,6 @@ class QuoteMixer
 {
 public:
     QuoteMixer(){
-        //publisher_.init();
     }
 
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
@@ -19,6 +18,7 @@ private:
 
     // symbols
     unordered_map<TSymbol, SMixQuote*> symbols_;
+    unordered_map<TSymbol, long long> last_clocks_;
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const {
         auto iter = symbols_.find(symbol);

@@ -256,12 +256,14 @@ const char descriptor_table_protodef_stream_5fengine_5fserver_2eproto[] PROTOBUF
   "\005Value\352\336\037\005value\022\036\n\004base\030\002 \001(\005B\020\342\336\037\004Base\352"
   "\336\037\004base\"_\n\013DepthVolume\022$\n\006volume\030\001 \001(\001B\024"
   "\342\336\037\006Volume\352\336\037\006volume\022*\n\010exchange\030\002 \001(\tB\030"
-  "\342\336\037\010Exchange\352\336\037\010exchange2\275\001\n\023StreamEngin"
+  "\342\336\037\010Exchange\352\336\037\010exchange2\225\002\n\023StreamEngin"
   "eService\022F\n\010GetQuote\022\035.trade.service.v1."
   "GetQuoteReq\032\033.trade.service.v1.QuoteData"
-  "\022^\n\023MultiSubscribeQuote\022#.trade.service."
-  "v1.SubscribeQuoteReq\032 .trade.service.v1."
-  "MultiQuoteData0\001B\004Z\002v1b\006proto3"
+  "\022V\n\021SubscribeOneQuote\022\035.trade.service.v1"
+  ".GetQuoteReq\032 .trade.service.v1.MultiQuo"
+  "teData0\001\022^\n\023MultiSubscribeQuote\022#.trade."
+  "service.v1.SubscribeQuoteReq\032 .trade.ser"
+  "vice.v1.MultiQuoteData0\001B\004Z\002v1b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_stream_5fengine_5fserver_2eproto_deps[1] = {
   &::descriptor_table_gogo_2eproto,
@@ -277,7 +279,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_str
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_stream_5fengine_5fserver_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_stream_5fengine_5fserver_2eproto = {
-  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1190,
+  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1278,
   &descriptor_table_stream_5fengine_5fserver_2eproto_once, descriptor_table_stream_5fengine_5fserver_2eproto_sccs, descriptor_table_stream_5fengine_5fserver_2eproto_deps, 7, 1,
   schemas, file_default_instances, TableStruct_stream_5fengine_5fserver_2eproto::offsets,
   file_level_metadata_stream_5fengine_5fserver_2eproto, 7, file_level_enum_descriptors_stream_5fengine_5fserver_2eproto, file_level_service_descriptors_stream_5fengine_5fserver_2eproto,

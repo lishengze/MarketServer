@@ -37,7 +37,7 @@ public:
     void subscribe(const string& channel);
     
     // callback from RedisSnapRequester
-    void __on_snap(const string& exchange, const string& symbol, const string& data);
+    void _on_snap(const string& exchange, const string& symbol, const string& data);
 
 
     // redis connect notify

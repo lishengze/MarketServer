@@ -44,10 +44,12 @@ public:
             // grpc
             grpc_push_addr_ = js["grpc"]["push_addr"].get<string>();
             grpc_push_depth_ = 10;
+            frequency_ = js["grpc"]["frequency"].get<int>();
 
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
-            dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
+            publish_data_ = bool(js["debug"]["publish_data"].get<int>());
+            dump_binary_ = bool(js["debug"]["dump_binary"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
 
             // redis quote
@@ -86,13 +88,15 @@ public:
     }
 public:
     // grpc push
+    int frequency_;     // 品种聚合后的更新频率：每秒frequency_次
     string grpc_push_addr_;
     int grpc_push_depth_;
 
     // [for debug] sample symbol
     string sample_symbol_;
     // [for debug] only dump binary data instead of push
-    bool dump_binary_only_;
+    bool publish_data_;
+    bool dump_binary_;
     // [for debug] output to screen
     bool output_to_screen_;
 

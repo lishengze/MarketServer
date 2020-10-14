@@ -1,6 +1,6 @@
 {
     "grpc": {
-        "publish_addr": "127.0.0.1:9900",
+        "publish_addr": "0.0.0.0:9900",
         "quote_addr": "127.0.0.1:9000"
     },
     "debug": {

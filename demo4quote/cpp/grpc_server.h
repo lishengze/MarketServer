@@ -51,14 +51,13 @@ public:
         thread_loop_ = new std::thread(&ServerImpl::_run, this, grpc_addr);
     }
 
-    void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
-    void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
-    bool get_snap(const string& exchange, const string& symbol, SDepthQuote& quote) const;
-
+    void on_snap(const string& exchange, const string& symbol, const SMixQuote& quote);
     void on_mix_snap(const string& symbol, const SMixQuote& quote);
 
     void register_client(CallDataMultiSubscribeQuote* calldata);
     void unregister_client(CallDataMultiSubscribeQuote* calldata);
+    void register_client2(CallDataSubscribeOneQuote* calldata);
+    void unregister_client2(CallDataSubscribeOneQuote* calldata);
 private:
 
     // This can be run in multiple threads if needed.
@@ -66,6 +65,7 @@ private:
         // Spawn a new CallData instance to serve new clients.
         new CallDataGetQuote(&service_, cq_.get(), this);
         new CallDataMultiSubscribeQuote(&service_, cq_.get(), this);
+        new CallDataSubscribeOneQuote(&service_, cq_.get(), this);
         
         void* tag;  // uniquely identifies a request.
         bool ok;
@@ -81,15 +81,19 @@ private:
                 CallData* cd = static_cast<CallData*>(tag);
                 if( cd->call_type_ == 1 ) {                
                     static_cast<CallDataGetQuote*>(tag)->Proceed();
-                } else if( cd->call_type_ ==2 ) {
+                } else if( cd->call_type_ == 2 ) {
                     static_cast<CallDataMultiSubscribeQuote*>(tag)->Proceed();
+                } else if( cd->call_type_ == 3 ) {
+                    static_cast<CallDataSubscribeOneQuote*>(tag)->Proceed();
                 }
             } else {
                 CallData* cd = static_cast<CallData*>(tag);
                 if( cd->call_type_ == 1 ) {                
                     static_cast<CallDataGetQuote*>(tag)->Release();
-                } else if( cd->call_type_ ==2 ) {
+                } else if( cd->call_type_ == 2 ) {
                     static_cast<CallDataMultiSubscribeQuote*>(tag)->Release();
+                } else if( cd->call_type_ == 3 ) {
+                    static_cast<CallDataSubscribeOneQuote*>(tag)->Release();
                 }
             }
         }
@@ -124,21 +128,7 @@ private:
 
     mutable std::mutex                             mutex_clients_;
     unordered_map<CallDataMultiSubscribeQuote*, bool> clients_;
-    
 
-    //
-    bool _get_quote(const string& exchange, const string& symbol, SDepthQuote& quote) const {
-        auto iter = markets_.find(exchange);
-        if( iter == markets_.end() )
-            return false;
-        const TMarketQuote& marketQuote = iter->second;
-        auto iter2 = marketQuote.find(symbol);
-        if( iter2 == marketQuote.end() )
-            return false;
-        quote = iter2->second;
-        return true;
-    };
-
-    mutable std::mutex                             mutex_markets_;
-    unordered_map<TExchange, TMarketQuote> markets_;
+    mutable std::mutex                             mutex_clients2_;
+    unordered_map<CallDataSubscribeOneQuote*, bool> clients2_;
 };

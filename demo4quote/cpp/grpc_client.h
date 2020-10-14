@@ -79,7 +79,7 @@ inline void make_market_stream(const string& symbol, const SMixQuote& quote, Mar
     {
         int depth_count = 0;
         SMixDepthPrice* ptr = quote.Asks;
-        while( ptr != NULL && depth_count <= CONFIG->grpc_push_depth_ ) {
+        while( ptr != NULL && depth_count < CONFIG->grpc_push_depth_ ) {
             Depth* depth = msd->add_ask_depth();
             depth->set_price(ptr->Price.GetStrValue());
             for(auto &v : ptr->Volume) {
@@ -97,7 +97,7 @@ inline void make_market_stream(const string& symbol, const SMixQuote& quote, Mar
     {
         int depth_count = 0;
         SMixDepthPrice* ptr = quote.Bids;
-        while( ptr != NULL && depth_count <= CONFIG->grpc_push_depth_ ) {
+        while( ptr != NULL && depth_count < CONFIG->grpc_push_depth_ ) {
             Depth* depth = msd->add_bid_depth();
             depth->set_price(ptr->Price.GetStrValue());
             for(auto &v : ptr->Volume) {

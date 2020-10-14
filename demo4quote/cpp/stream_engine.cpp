@@ -27,21 +27,25 @@ void StreamEngine::start() {
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
-    if( CONFIG->dump_binary_only_ )
+    if( CONFIG->dump_binary_ ) {
         quote_dumper_.on_mix_snap(exchange, symbol, quote);
+    }
     
-    quote_mixer_.on_snap(exchange, symbol, quote);
-
-    PUBLISHER->on_snap(exchange, symbol, quote);
+    if( CONFIG->publish_data_ ) {
+        quote_mixer_.on_snap(exchange, symbol, quote);
+        quote_single_.on_snap(exchange, symbol, quote);
+    }
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
-    if( CONFIG->dump_binary_only_ )
+    if( CONFIG->dump_binary_ ) {
         quote_dumper_.on_mix_update(exchange, symbol, quote);
+    }
 
-    quote_mixer_.on_update(exchange, symbol, quote);
-    
-    PUBLISHER->on_update(exchange, symbol, quote);
+    if( CONFIG->publish_data_ ) {
+        quote_mixer_.on_update(exchange, symbol, quote);
+        quote_single_.on_update(exchange, symbol, quote);
+    }
 };
 
 void StreamEngine::on_connected() {    

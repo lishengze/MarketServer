@@ -3,11 +3,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
+#include <limits.h>
 #include <string>
 #include <map>
 #include <unordered_map>
 #include <iostream>
 #include <cstring>
+#include <chrono>
 using namespace std;
 
 using TExchange = string;
@@ -20,15 +22,27 @@ using TSymbol = string;
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
 
-#define CALC_BASE(x) (int(pow(10, (x))))
+#define CALC_BASE(x) (pow(10, (x)))
 
 struct SDecimal {
-    long long Value;
+    unsigned long long Value;
     short Base;
 
     SDecimal() {
         Value = 0;
         Base = 0;
+    }
+
+    static SDecimal MaxDecimal() {
+        SDecimal ret;
+        ret.Value = ULLONG_MAX;
+        ret.Base = 0;
+        return ret;
+    }
+
+    static SDecimal MinDecimal() {
+        SDecimal ret;
+        return ret;
     }
 
     void From(const string& data, int precise = -1, bool ceiling = false) {
@@ -223,3 +237,9 @@ struct SMixQuote {
 };
 
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
+
+inline long long get_miliseconds() {
+    auto time_now = chrono::system_clock::now();
+	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
+    return duration_in_ms.count();
+}

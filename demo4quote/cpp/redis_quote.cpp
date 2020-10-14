@@ -2,7 +2,7 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precise) {
+bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     njson snap_json = njson::parse(data); 
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
@@ -14,29 +14,47 @@ bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precis
     vassign(quote.SequenceNo, sequence_no);
     vassign(quote.TimeArrive, timeArrive);
     
-    // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
+
+    // sell
     {
-        int count = 0;
-        for (auto iter=snap_json[askDepth].begin(); count < MAX_DEPTH && iter!=snap_json[askDepth].end(); ++iter, ++count)
+        map<SDecimal, double> depths;
+        for (auto iter = snap_json[askDepth].begin() ; iter != snap_json[askDepth].end() ; ++iter )
         {
             const string& price = iter.key();
             const double& volume = iter.value();
-            quote.Asks[count].Price.From(price, -1);
-            quote.Asks[count].Volume = volume;
+            SDecimal dPrice;
+            dPrice.From(price, -1);
+            depths[dPrice] = volume;
+        }
+
+        int count = 0;
+        for( auto iter = depths.begin() ; count < MAX_DEPTH && iter != depths.end() ; ++iter, ++count )
+        {
+            quote.Asks[count].Price = iter->first;
+            quote.Asks[count].Volume = iter->second;
         }
         quote.AskLength = count;
     }
 
+    // buy
     {
-        int count = 0;
-        for (auto iter=snap_json[bidDepth].rbegin(); count < MAX_DEPTH && iter!=snap_json[bidDepth].rend(); ++iter, ++count)
+        map<SDecimal, double> depths;
+        for (auto iter = snap_json[bidDepth].begin() ; iter != snap_json[bidDepth].end() ; ++iter )
         {
             const string& price = iter.key();
             const double& volume = iter.value();
-            quote.Bids[count].Price.From(price, -1);
-            quote.Bids[count].Volume = volume;
+            SDecimal dPrice;
+            dPrice.From(price, -1);
+            depths[dPrice] = volume;
+        }
+
+        int count = 0;
+        for( auto iter = depths.rbegin() ; count < MAX_DEPTH && iter != depths.rend() ; ++iter, ++count )
+        {
+            quote.Bids[count].Price = iter->first;
+            quote.Bids[count].Volume = iter->second;
         }
         quote.BidLength = count;
     }
@@ -55,13 +73,17 @@ void RedisQuote::start(const string& host, const int& port, const string& passwo
     redis_snap_requester_.start();
 };
 
-void RedisQuote::__on_snap(const string& exchange, const string& symbol, const string& data) {   
+void RedisQuote::_on_snap(const string& exchange, const string& symbol, const string& data) {   
+    if( exchange == "HUOBI" && symbol == "BTC_USDT") {
+        cout << "redis _on_snap:" << data << endl;
+    }
+
     if( CONFIG->output_to_screen_ )
         cout << "redis OnSnap:" << symbol << " Msg: " << data << endl;
 
     // string ->  SDepthQuote
     SDepthQuote quote;
-    if( !parse_quote(data, quote, true, CONFIG->get_precise(symbol)))
+    if( !parse_quote(data, quote, true))
         return;        
     if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
         UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");
@@ -81,18 +103,23 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
         int pos = channel.find(DEPTH_UPDATE_HEAD);
         int pos2 = channel.find(".");
         string symbol = channel.substr(pos+strlen(DEPTH_UPDATE_HEAD), pos2-pos-strlen(DEPTH_UPDATE_HEAD));
-        string exchange = channel.substr(pos2+1);    
-        if( CONFIG->sample_symbol_ != "" && symbol != CONFIG->sample_symbol_ )
-            return;  
+        string exchange = channel.substr(pos2+1);
 
+        //if( exchange == "HUOBI" && symbol == "BTC_USDT") {
+        //    cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
+        //}
+        
         // log update message
         UT_LOG_INFO(CONFIG->logger_, "redis OnMessage:" << channel << " Msg: " << msg);
-        if( CONFIG->output_to_screen_ )
-            cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
+        if( CONFIG->output_to_screen_ ) {
+            if( CONFIG->sample_symbol_ == "" || symbol == CONFIG->sample_symbol_ ) {
+                cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
+            }
+        }
 
         // string -> SDepthQuote
         SDepthQuote quote;
-        if( !parse_quote(msg, quote, false, CONFIG->get_precise(symbol)))
+        if( !parse_quote(msg, quote, false))
             return;
         if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");

@@ -35,6 +35,7 @@ using trade::service::v1::DepthLevel;
 using trade::service::v1::Decimal;
 using trade::service::v1::DepthVolume;
 
+void depthquote_to_quote(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd);
 
 class ServerImpl;
 class CallData {
@@ -85,6 +86,39 @@ private:
 
     // The means to get back to the client.
     ServerAsyncResponseWriter<QuoteData> responder_;
+};
+
+class CallDataSubscribeOneQuote : public CallData{
+public:
+    CallDataSubscribeOneQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, ServerImpl* parent)
+        : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
+        call_type_ = 3;
+        Proceed();
+    }
+
+    void Release();
+
+    void Proceed();
+
+    void add_data(const string& exchange, std::shared_ptr<QuoteData> pdata) {
+        if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != exchange ) {
+            cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+            return;
+        }
+        cout << "send:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        datas_.push_back(pdata);
+    }
+
+private:
+    StreamEngineService::AsyncService* service_;
+    GetQuoteReq request_;
+    ServerAsyncWriter<MultiQuoteData> responder_;
+    int times_;
+    grpc::Alarm alarm_;
+
+    mutable std::mutex                             mutex_datas_;
+    vector<std::shared_ptr<QuoteData>> datas_;
 };
 
 class CallDataMultiSubscribeQuote : public CallData{

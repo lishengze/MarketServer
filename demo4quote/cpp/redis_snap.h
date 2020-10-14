@@ -91,7 +91,7 @@ private:
                 }
                 boost::asio::post(boost::bind(&RedisSnapRequester::get_snap, this, exchange, symbol));
             }
-            std::this_thread::sleep_for(std::chrono::seconds(60));
+            std::this_thread::sleep_for(std::chrono::seconds(10));
         }
 
         pool.join();

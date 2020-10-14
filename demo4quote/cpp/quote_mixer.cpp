@@ -13,17 +13,20 @@ void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& d
     // sell
     {
         int count = 0;
-        SDecimal lastPrice;        
+        SDecimal lastPrice = SDecimal::MinDecimal();
         for (int i = 0 ; count < MAX_DEPTH && i < src.AskLength; ++i )
         {
             const SDecimal& price = src.Asks[i].Price;
             const double& volume = src.Asks[i].Volume;
-            SDecimal d;
-            d.From(price, precise, true); // 卖价往上取整
-            if( d > lastPrice ) {
+
+            // 卖价往上取整
+            SDecimal scaledPrice;
+            scaledPrice.From(price, precise, true); 
+
+            if( scaledPrice > lastPrice ) {
                 count ++;
-                dst.Asks[count-1].Price = d;
-                lastPrice = d;
+                dst.Asks[count-1].Price = scaledPrice;
+                lastPrice = scaledPrice;
             }
             dst.Asks[count-1].Volume += volume;
         }
@@ -32,17 +35,20 @@ void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& d
     // buy
     {
         int count = 0;
-        SDecimal lastPrice;        
+        SDecimal lastPrice = SDecimal::MaxDecimal();
         for (int i = 0 ; count < MAX_DEPTH && i < src.BidLength; ++i )
         {
             const SDecimal& price = src.Bids[i].Price;
             const double& volume = src.Bids[i].Volume;
-            SDecimal d;
-            d.From(price, precise, false); // 卖价往上取整
-            if( d > lastPrice ) {
+            
+            // 买价往下取整
+            SDecimal scalePrice;
+            scalePrice.From(price, precise, false); 
+
+            if( scalePrice < lastPrice ) {
                 count ++;
-                dst.Bids[count-1].Price = d;
-                lastPrice = d;
+                dst.Bids[count-1].Price = scalePrice;
+                lastPrice = scalePrice;
             }
             dst.Bids[count-1].Volume += volume;
         }
@@ -51,10 +57,9 @@ void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& d
 }
 
 void QuoteMixer::publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap) {
-    /*
-    if( quote.Asks != NULL ) {
+    /*if( quote.Asks != NULL ) {
         cout << quote.Asks->Price.GetValue();
-    } else {
+    } else {    
         cout << "-";
     }
     cout << ",";
@@ -63,8 +68,15 @@ void QuoteMixer::publish_quote(const string& symbol, const SMixQuote& quote, boo
     } else {
         cout << "-";
     }
-    cout << endl;
-    */
+    cout << endl;*/
+
+    // 每秒更新频率控制
+    auto iter = last_clocks_.find(symbol);
+    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->frequency_) )
+    {
+        return;
+    }
+    last_clocks_[symbol] = get_miliseconds();
     PUBLISHER->on_mix_snap(symbol, quote);
 };
 
@@ -83,14 +95,14 @@ void QuoteMixer::on_snap(const string& exchange, const string& symbol, const SDe
         ptr->Asks = _clear_exchange(exchange, ptr->Asks);
         ptr->Bids = _clear_exchange(exchange, ptr->Bids);
         // 2. 修剪cross的价位
-        _cross_askbid(ptr, quote);
+        _cross_askbid(ptr, cpsQuote);
     }
     // 3. 合并价位
-    ptr->Asks = _mix_exchange(exchange, ptr->Asks, quote.Asks, quote.AskLength, ptr->Watermark, true);
-    ptr->Bids = _mix_exchange(exchange, ptr->Bids, quote.Bids, quote.BidLength, ptr->Watermark, false);
+    ptr->Asks = _mix_exchange(exchange, ptr->Asks, cpsQuote.Asks, cpsQuote.AskLength, ptr->Watermark, true);
+    ptr->Bids = _mix_exchange(exchange, ptr->Bids, cpsQuote.Bids, cpsQuote.BidLength, ptr->Watermark, false);
 
     // 4. 推送结果
-    ptr->SequenceNo = quote.SequenceNo;
+    ptr->SequenceNo = cpsQuote.SequenceNo;
     publish_quote(symbol, *ptr, true);
     return;
 }
@@ -104,17 +116,16 @@ void QuoteMixer::on_update(const string& exchange, const string& symbol, const S
     SMixQuote* ptr = NULL;
     if( !_get_quote(symbol, ptr) )
         return;
-    SDepthQuote newQuote = quote;
     // 1. 需要清除的价位数据
-    ptr->Asks = _clear_pricelevel(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, true);
-    ptr->Bids = _clear_pricelevel(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, false);
+    ptr->Asks = _clear_pricelevel(exchange, ptr->Asks, cpsQuote.Asks, cpsQuote.AskLength, true);
+    ptr->Bids = _clear_pricelevel(exchange, ptr->Bids, cpsQuote.Bids, cpsQuote.BidLength, false);
     // 2. 修剪cross的价位
-    _cross_askbid(ptr, newQuote);
+    _cross_askbid(ptr, cpsQuote);
     // 3. 合并价位
-    ptr->Asks = _mix_exchange(exchange, ptr->Asks, newQuote.Asks, newQuote.AskLength, ptr->Watermark, true);
-    ptr->Bids = _mix_exchange(exchange, ptr->Bids, newQuote.Bids, newQuote.BidLength, ptr->Watermark, false);
+    ptr->Asks = _mix_exchange(exchange, ptr->Asks, cpsQuote.Asks, cpsQuote.AskLength, ptr->Watermark, true);
+    ptr->Bids = _mix_exchange(exchange, ptr->Bids, cpsQuote.Bids, cpsQuote.BidLength, ptr->Watermark, false);
     // 4. 推送结果
-    ptr->SequenceNo = quote.SequenceNo;
+    ptr->SequenceNo = cpsQuote.SequenceNo;
     publish_quote(symbol, *ptr, false);
     return;
 };

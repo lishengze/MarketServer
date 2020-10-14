@@ -16,6 +16,5 @@ void RedisSnapRequester::get_snap(const string& exchange, const string& symbol) 
     
     string depth_key = make_redis_depth_key(exchange, symbol);
     string depthData = redis_sync_api->SyncGet(depth_key);
-    UT_LOG_INFO(CONFIG->logger_, "get_snap: " << depthData);
-    quote_interface_->__on_snap(exchange, symbol, depthData);
+    quote_interface_->_on_snap(exchange, symbol, depthData);
 }
