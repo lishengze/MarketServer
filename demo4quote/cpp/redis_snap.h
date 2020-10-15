@@ -29,9 +29,7 @@ public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    RedisSnapRequester() {
-        thread_run_ = true;
-    }
+    RedisSnapRequester() {}
 
     ~RedisSnapRequester() {
         if (thread_loop_) {
@@ -50,54 +48,18 @@ public:
         logger_ = logger;
     }
 
-    void on_update_symbol(const string& exchange, const string& symbol) {
-        
-        string combinedSymbol = combine_symbol(exchange, symbol);
-
-        std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-        if( symbols_.find(combinedSymbol) != symbols_.end() )
-            return;
-        //cout << "find new symbol:" << combinedSymbol << endl;
-        symbols_[combinedSymbol] = 0;
-        boost::asio::post(boost::bind(&RedisSnapRequester::get_snap, this, exchange, symbol));
-    }
-
     void start(){
-        thread_loop_ = new std::thread(&RedisSnapRequester::thread_loop, this);
+        thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
     }
 
-    void set_engine(RedisQuote* ptr) {
-        quote_interface_ = ptr;
-    }
+    void set_engine(RedisQuote* ptr) { quote_interface_ = ptr; }
+
+    void on_update_symbol(const string& exchange, const string& symbol);
 
 private:
-    void thread_loop(){
-        
-        boost::asio::thread_pool pool(4);
+    void _thread_loop();
 
-        while( thread_loop_ ) {
-            // send all tasks 
-            // todo
-            unordered_map<string, int> tmp;
-            {
-                std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-                // put all symbols to thread pool
-                tmp = symbols_;
-            }
-            string exchange, symbol;
-            for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
-                if( !split_symbol(iter->first, exchange, symbol) ) {
-                    continue;
-                }
-                boost::asio::post(boost::bind(&RedisSnapRequester::get_snap, this, exchange, symbol));
-            }
-            std::this_thread::sleep_for(std::chrono::seconds(10));
-        }
-
-        pool.join();
-    }
-
-    void get_snap(const string& exchange, const string& symbol);
+    void _get_snap(const string& exchange, const string& symbol);
 
 private:
     string host_;
@@ -109,8 +71,7 @@ private:
     std::mutex                 mutex_symbols_;
     unordered_map<string, int> symbols_;
 
-    RedisQuote*                 quote_interface_;
+    RedisQuote*                quote_interface_;
 
     std::thread*               thread_loop_ = nullptr;
-    std::atomic<bool>          thread_run_;
 };

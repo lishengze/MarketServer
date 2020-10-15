@@ -37,10 +37,10 @@ using trade::service::v1::DepthVolume;
 
 void depthquote_to_quote(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd);
 
-class ServerImpl;
+class GrpcServer;
 class CallData {
 public:
-    CallData(ServerCompletionQueue* cq, ServerImpl* parent) : cq_(cq), status_(CREATE), parent_(parent) {}
+    CallData(ServerCompletionQueue* cq, GrpcServer* parent) : cq_(cq), status_(CREATE), parent_(parent) {}
 public:
     // The producer-consumer queue where for asynchronous server notifications.
     ServerCompletionQueue* cq_ = nullptr;
@@ -55,7 +55,7 @@ public:
 
     int call_type_;
 
-    ServerImpl* parent_ = nullptr;
+    GrpcServer* parent_ = nullptr;
 };
 
 // Class encompasing the state and logic needed to serve a request.
@@ -64,7 +64,7 @@ public:
     // Take in the "service" instance (in this case representing an asynchronous
     // server) and the completion queue "cq" used for asynchronous communication
     // with the gRPC runtime.
-    CallDataGetQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, ServerImpl* parent)
+    CallDataGetQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
         : CallData(cq, parent), service_(service), responder_(&ctx_) {
         call_type_ = 1;
         // Invoke the serving logic right away.
@@ -90,7 +90,7 @@ private:
 
 class CallDataSubscribeOneQuote : public CallData{
 public:
-    CallDataSubscribeOneQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, ServerImpl* parent)
+    CallDataSubscribeOneQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
         : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
         call_type_ = 3;
         Proceed();
@@ -102,10 +102,10 @@ public:
 
     void add_data(const string& exchange, std::shared_ptr<QuoteData> pdata) {
         if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != exchange ) {
-            cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+            //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
             return;
         }
-        cout << "send:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+        //cout << "send:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         datas_.push_back(pdata);
     }
@@ -123,7 +123,7 @@ private:
 
 class CallDataMultiSubscribeQuote : public CallData{
 public:
-    CallDataMultiSubscribeQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, ServerImpl* parent)
+    CallDataMultiSubscribeQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
         : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
         call_type_ = 2;
         Proceed();

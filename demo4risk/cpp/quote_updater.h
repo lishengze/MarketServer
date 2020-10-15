@@ -49,7 +49,7 @@ public:
 
 private:
 
-    void _run(const string& addr, IQuoteUpdater* callback) {
+    void _request(const string& addr, IQuoteUpdater* callback) {
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
         std::unique_ptr<StreamEngineService::Stub> stub = StreamEngineService::NewStub(channel);
 
@@ -58,6 +58,28 @@ private:
         ClientContext context;
 
         std::unique_ptr<ClientReader<MultiQuoteData> > reader(stub->MultiSubscribeQuote(&context, req));
+        switch(channel->GetState(true)) {
+            case GRPC_CHANNEL_IDLE: {
+                std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_CONNECTING: {                
+                std::cout << "status is GRPC_CHANNEL_CONNECTING" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_READY: {           
+                std::cout << "status is GRPC_CHANNEL_READY" << endl;
+                break;
+            }
+            case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
+                std::cout << "status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                return;
+            }
+            case GRPC_CHANNEL_SHUTDOWN: {        
+                std::cout << "status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                break;
+            }
+        }
         while (reader->Read(&multiQuote)) {
             // split and convert
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
@@ -72,6 +94,13 @@ private:
             std::cout << "MultiSubscribeQuote rpc succeeded." << std::endl;
         } else {
             std::cout << "MultiSubscribeQuote rpc failed." << std::endl;
+        }
+    }
+
+    void _run(const string& addr, IQuoteUpdater* callback) {
+        while( 1 ) {            
+            _request(addr, callback);
+            std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
 

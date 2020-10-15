@@ -45,7 +45,7 @@ void mixquote_to_pbquote(const string& symbol, const SMixQuote& quote, QuoteData
     }
 };
 
-void ServerImpl::on_snap(const string& exchange, const string& symbol, const SMixQuote& quote)
+void GrpcServer::on_snap(const string& exchange, const string& symbol, const SMixQuote& quote)
 {
     // publish
     std::shared_ptr<QuoteData> ptrQuote(new QuoteData());
@@ -56,7 +56,7 @@ void ServerImpl::on_snap(const string& exchange, const string& symbol, const SMi
     }
 };
 
-void ServerImpl::on_mix_snap(const string& symbol, const SMixQuote& quote)
+void GrpcServer::on_mix_snap(const string& symbol, const SMixQuote& quote)
 {
     std::shared_ptr<QuoteData> ptrQuote(new QuoteData());
     mixquote_to_pbquote(symbol, quote, ptrQuote.get());
@@ -66,14 +66,14 @@ void ServerImpl::on_mix_snap(const string& symbol, const SMixQuote& quote)
     }
 };
 
-void ServerImpl::register_client(CallDataMultiSubscribeQuote* calldata)
+void GrpcServer::register_client(CallDataMultiSubscribeQuote* calldata)
 {
     // safe callback on_snap
     std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
     clients_[calldata] = true;
 }
 
-void ServerImpl::unregister_client(CallDataMultiSubscribeQuote* calldata)
+void GrpcServer::unregister_client(CallDataMultiSubscribeQuote* calldata)
 {
     // safe callback on_snap
     std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
@@ -84,14 +84,14 @@ void ServerImpl::unregister_client(CallDataMultiSubscribeQuote* calldata)
 }
 
 
-void ServerImpl::register_client2(CallDataSubscribeOneQuote* calldata)
+void GrpcServer::register_client2(CallDataSubscribeOneQuote* calldata)
 {
     // safe callback on_snap
     std::unique_lock<std::mutex> inner_lock{ mutex_clients2_ };
     clients2_[calldata] = true;
 }
 
-void ServerImpl::unregister_client2(CallDataSubscribeOneQuote* calldata)
+void GrpcServer::unregister_client2(CallDataSubscribeOneQuote* calldata)
 {
     // safe callback on_snap
     std::unique_lock<std::mutex> inner_lock{ mutex_clients2_ };

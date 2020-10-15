@@ -16,8 +16,8 @@ using namespace std;
 #define CALC_BASE(x) (int(pow(10, (x))))
 
 struct SDecimal {
-    long long Value;
-    short Base;
+    unsigned long long Value;
+    unsigned short Base;
 
     SDecimal() {
         Value = 0;
@@ -135,8 +135,14 @@ struct SDecimal {
     }
 };
 
+// 内部行情结构
+#define MAX_EXCHANGE_LENGTH 10
+#define MAX_DEPTH_LENGTH 20
+#define MAX_SYMBOLNAME_LENGTH 32
+#define MAX_EXCHANGENAME_LENGTH 32
+
 struct SExchangeData {
-    char name[32];
+    char name[MAX_EXCHANGENAME_LENGTH];
     double volume;
 
     SExchangeData() {
@@ -144,9 +150,6 @@ struct SExchangeData {
         volume = 0;
     }
 };
-
-#define MAX_EXCHANGE_LENGTH 10
-#define MAX_DEPTH_LENGTH 20
 
 struct SInnerDepth {
     SDecimal price;
@@ -159,7 +162,7 @@ struct SInnerDepth {
 };
 
 struct SInnerQuote {
-    char symbol[32];
+    char symbol[MAX_SYMBOLNAME_LENGTH];
     long long time;
     long long time_arrive;
     long long seq_no;
@@ -193,6 +196,6 @@ private:
     mutable std::mutex                 mutex_datas_;
     unordered_map<string, SInnerQuote> datas_;
     
-    mutable std::mutex                             mutex_clients_;
+    mutable std::mutex                              mutex_clients_;
     unordered_map<CallDataServeMarketStream*, bool> clients_;
 };

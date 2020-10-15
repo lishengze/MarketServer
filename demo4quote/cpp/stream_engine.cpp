@@ -11,7 +11,7 @@ StreamEngine::StreamEngine(){
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
-    utrade::pandora::Singleton<ServerImpl>::Instance();
+    utrade::pandora::Singleton<GrpcServer>::Instance();
 }
 
 StreamEngine::~StreamEngine(){

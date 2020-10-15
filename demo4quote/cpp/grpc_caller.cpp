@@ -64,7 +64,7 @@ void depthquote_to_quote(const string& exchange, const string& symbol, const SDe
 };
 
 void CallDataGetQuote::Release() {
-    std::cout << "delete CallDataGetQuote" << std::endl;
+    std::cout << "delete CallDataGetQuote:" << request_.exchange() << "." << request_.symbol() << std::endl;
     delete this;
 }
 
@@ -104,7 +104,7 @@ void CallDataGetQuote::Proceed()
 };
 
 void CallDataSubscribeOneQuote::Release() {
-    std::cout << "delete CallDataSubscribeOneQuote" << std::endl;
+    std::cout << "delete CallDataSubscribeOneQuote:" << request_.exchange() << "." << request_.symbol() << std::endl;
     parent_->unregister_client2(this);
     delete this;
 }
@@ -140,7 +140,7 @@ void CallDataSubscribeOneQuote::Proceed() {
             }
             
             if( reply.quotes_size() > 0 ) {
-                std::cout << "get " << reply.quotes_size() << " items" << std::endl;
+                //std::cout << "get " << reply.quotes_size() << " items" << std::endl;
                 responder_.Write(reply, this);               
             } else {
                 alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
@@ -196,7 +196,7 @@ void CallDataMultiSubscribeQuote::Proceed() {
             }
             
             if( reply.quotes_size() > 0 ) {
-                std::cout << "get " << reply.quotes_size() << " items" << std::endl;
+                //std::cout << "get " << reply.quotes_size() << " items" << std::endl;
                 responder_.Write(reply, this);               
             } else {
                 alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);

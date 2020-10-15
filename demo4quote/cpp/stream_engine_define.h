@@ -15,7 +15,6 @@ using namespace std;
 using TExchange = string;
 using TSymbol = string;
 
-
 #define PRICE_PRECISE 0.000000001
 #define VOLUME_PRECISE 0.000000001
 #define TICK_HEAD "TRADEx|"
@@ -156,15 +155,6 @@ struct SDecimal {
     }
 };
 
-struct SDepthPrice {
-    SDecimal Price;
-    double Volume;
-
-    SDepthPrice() {
-        Volume = 0;
-    }
-};
-
 template<class T,class S>
 inline void vassign(T &r, S v)
 {
@@ -192,6 +182,16 @@ inline void vassign(char * r,const std::string &v)
     strcpy(r,v.c_str());
 }
 
+// redis行情二进制结构
+struct SDepthPrice {
+    SDecimal Price;
+    double Volume;
+
+    SDepthPrice() {
+        Volume = 0;
+    }
+};
+
 #define MAX_DEPTH 50
 struct SDepthQuote {
     char Exchange[32];
@@ -213,6 +213,7 @@ struct SDepthQuote {
     }
 };
 
+// 内部行情结构（链表）
 struct SMixDepthPrice {
     SDecimal Price;
     unordered_map<TExchange, double> Volume;
@@ -223,7 +224,7 @@ struct SMixDepthPrice {
     }
 };
 
-#define MAX_MIXDEPTH 50
+#define MAX_MIXDEPTH 20
 struct SMixQuote {
     SMixDepthPrice* Asks; // 卖盘
     SMixDepthPrice* Bids; // 买盘

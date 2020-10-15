@@ -9,9 +9,6 @@
 class StreamEngine : public QuoteInterface 
 {
 public:
-    using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
-    using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
-public:
     StreamEngine();
     ~StreamEngine();
 

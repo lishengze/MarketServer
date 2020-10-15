@@ -2,7 +2,7 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap) {
+bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     njson snap_json = njson::parse(data); 
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
@@ -74,16 +74,20 @@ void RedisQuote::start(const string& host, const int& port, const string& passwo
 };
 
 void RedisQuote::_on_snap(const string& exchange, const string& symbol, const string& data) {   
-    if( exchange == "HUOBI" && symbol == "BTC_USDT") {
-        cout << "redis _on_snap:" << data << endl;
-    }
+    //if( exchange == "HUOBI" && symbol == "BTC_USDT") {
+    //    cout << "redis snap " << exchange << "." << symbol << ":" << data << endl;
+    //}
 
-    if( CONFIG->output_to_screen_ )
-        cout << "redis OnSnap:" << symbol << " Msg: " << data << endl;
+    // log snap message
+    if( CONFIG->output_to_screen_ ) {
+        if( CONFIG->sample_symbol_ == "" || symbol == CONFIG->sample_symbol_ ) {
+            cout << "redis snap " << exchange << "." << symbol << ":" << data << endl;
+        }
+    }
 
     // string ->  SDepthQuote
     SDepthQuote quote;
-    if( !parse_quote(data, quote, true))
+    if( !redisquote_to_quote(data, quote, true))
         return;        
     if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
         UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");
@@ -113,14 +117,16 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
         UT_LOG_INFO(CONFIG->logger_, "redis OnMessage:" << channel << " Msg: " << msg);
         if( CONFIG->output_to_screen_ ) {
             if( CONFIG->sample_symbol_ == "" || symbol == CONFIG->sample_symbol_ ) {
-                cout << "redis OnMessage:" << channel << " Msg: " << msg << endl;
+                cout << "redis update " << exchange << "." << symbol << ":" << msg << endl;
             }
         }
 
         // string -> SDepthQuote
         SDepthQuote quote;
-        if( !parse_quote(msg, quote, false))
+        if( !redisquote_to_quote(msg, quote, false)) {
+            UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: redisquote_to_quote failed");
             return;
+        }
         if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");
             return;
@@ -144,7 +150,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
     }
     else
     {
-        //UT_LOG_WARNING(logger_, "Unknown Message Type");
+        UT_LOG_ERROR(CONFIG->logger_, "Unknown Message Type");
     }
 };
 

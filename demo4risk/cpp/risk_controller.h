@@ -22,10 +22,13 @@ public:
     static volatile int signal_sys;
     static void signal_handler(int signum);
 
-
-    // callback
+    // 聚合行情回调
     void on_snap(const QuoteData& quote);
+
+    // 配置修改回调
     void on_configuration_update(const QuoteConfiguration& config);
+
+    // 账户相关回调
     void on_account_update(const AccountInfo& info);
 private:
 
@@ -35,5 +38,6 @@ private:
 
     QuoteUpdater quote_updater_;
 
+    // 行情数据中心
     DataCenter datacenter_;
 };

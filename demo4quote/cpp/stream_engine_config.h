@@ -26,7 +26,9 @@ public:
         logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
 
         // init precise
-        symbol_precise_["BTC_USDT"] = 1;  // 按照okex的1位小数点来
+        symbol_precise_["BTC_USDT"] = 1;
+        symbol_precise_["ETH_USDT"] = 2;
+        symbol_precise_["ETH_BTC"] = 6;
 
         try
         {

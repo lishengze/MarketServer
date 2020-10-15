@@ -37,18 +37,18 @@ using trade::service::v1::DepthLevel;
 using trade::service::v1::Decimal;
 using trade::service::v1::DepthVolume;
 
-#define PUBLISHER utrade::pandora::Singleton<ServerImpl>::GetInstance()
+#define PUBLISHER utrade::pandora::Singleton<GrpcServer>::GetInstance()
 
-class ServerImpl final {
+class GrpcServer final {
 public:
-    ~ServerImpl() {
+    ~GrpcServer() {
         server_->Shutdown();
         // Always shutdown the completion queue after the server.
         cq_->Shutdown();
     }
 
     void run_in_thread(const string& grpc_addr) {
-        thread_loop_ = new std::thread(&ServerImpl::_run, this, grpc_addr);
+        thread_loop_ = new std::thread(&GrpcServer::_run, this, grpc_addr);
     }
 
     void on_snap(const string& exchange, const string& symbol, const SMixQuote& quote);
