@@ -1,14 +1,13 @@
 {
     "grpc": {
         "frequency": 1,
-        "push_addr": "127.0.0.1:9000",
+        "publish_addr": "0.0.0.0:9000",
         "push_addr_bak": "172.25.1.222:9000"
     },
     "debug": {
-        "sample_symbol_bak": "",
         "sample_symbol": "BTC_USDT",
         "output_to_screen": 0,
-        "publish_data": 0,
+        "publish_data": 1,
         "dump_binary": 0
     },
     "redis_quote": {
@@ -18,8 +17,9 @@
         "snap_interval": 10
     },
     "include": {
-        "symbols": ["BTC_USDT", "BCH_USDT@P", "OKB_ETH", "BTC_USD@201002"],
-        "exchanges": ["OKEX"],
-        "exchanges_bak": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
+        "symbols_bak": ["BTC_USDT"],
+        "symbols": ["BTC_USDT", "ETH_USDT", "ETH_BTC"],
+        "exchanges_bak": ["OKEX"],
+        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
     }
 }

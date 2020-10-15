@@ -23,7 +23,7 @@ void StreamEngine::start() {
     redis_quote_.start(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
 
     // start grpc server
-    PUBLISHER->run_in_thread(CONFIG->grpc_push_addr_);
+    PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_);
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){

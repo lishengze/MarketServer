@@ -44,7 +44,7 @@ public:
             njson js = njson::parse(contents);
 
             // grpc
-            grpc_push_addr_ = js["grpc"]["push_addr"].get<string>();
+            grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
             grpc_push_depth_ = 10;
             frequency_ = js["grpc"]["frequency"].get<int>();
 
@@ -91,7 +91,7 @@ public:
 public:
     // grpc push
     int frequency_;     // 品种聚合后的更新频率：每秒frequency_次
-    string grpc_push_addr_;
+    string grpc_publish_addr_;
     int grpc_push_depth_;
 
     // [for debug] sample symbol
