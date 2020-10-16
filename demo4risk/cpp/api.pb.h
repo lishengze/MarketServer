@@ -586,6 +586,7 @@ class Depth PROTOBUF_FINAL :
   enum : int {
     kDataFieldNumber = 2,
     kPriceFieldNumber = 1,
+    kVolumeFieldNumber = 3,
   };
   // repeated .trade.service.v1.DepthData data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];
   int data_size() const;
@@ -621,6 +622,15 @@ class Depth PROTOBUF_FINAL :
   std::string* _internal_mutable_price();
   public:
 
+  // double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+  void clear_volume();
+  double volume() const;
+  void set_volume(double value);
+  private:
+  double _internal_volume() const;
+  void _internal_set_volume(double value);
+  public:
+
   // @@protoc_insertion_point(class_scope:trade.service.v1.Depth)
  private:
   class _Internal;
@@ -630,6 +640,7 @@ class Depth PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthData > data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr price_;
+  double volume_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_api_2eproto;
 };
@@ -1331,6 +1342,26 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::De
 Depth::data() const {
   // @@protoc_insertion_point(field_list:trade.service.v1.Depth.data)
   return data_;
+}
+
+// double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+inline void Depth::clear_volume() {
+  volume_ = 0;
+}
+inline double Depth::_internal_volume() const {
+  return volume_;
+}
+inline double Depth::volume() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.Depth.volume)
+  return _internal_volume();
+}
+inline void Depth::_internal_set_volume(double value) {
+  
+  volume_ = value;
+}
+inline void Depth::set_volume(double value) {
+  _internal_set_volume(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.Depth.volume)
 }
 
 // -------------------------------------------------------------------

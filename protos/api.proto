@@ -30,6 +30,7 @@ message MarketStreamData {
 message Depth {
   string price = 1 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
   repeated DepthData data = 2 [(gogoproto.customname) = "Data", (gogoproto.jsontag) = "data"];
+  double volume = 3 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
 }
 
 message DepthData {

@@ -147,10 +147,16 @@ struct SDecimal {
         }
         return ret;
     }
-    SDecimal operator / (const int &d) const {
+    SDecimal operator / (const double &d) const {
         SDecimal ret;
         ret.Base = Base;
         ret.Value = Value / d;
+        return ret;
+    }
+    SDecimal operator * (const double &d) const {
+        SDecimal ret;
+        ret.Base = Base;
+        ret.Value = Value * d;
         return ret;
     }
 };

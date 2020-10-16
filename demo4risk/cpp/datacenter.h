@@ -10,137 +10,13 @@
 #include <cstring>
 #include <mutex>
 using namespace std;
-#include "config_updater.h"
-#include "account_updater.h"
+#include "updater_configuration.h"
+#include "updater_account.h"
+#include "updater_order.h"
+#include "risk_controller_define.h"
 
-#define CALC_BASE(x) (int(pow(10, (x))))
-
-struct SDecimal {
-    unsigned long long Value;
-    unsigned short Base;
-
-    SDecimal() {
-        Value = 0;
-        Base = 0;
-    }
-
-    void From(const string& data, int precise = -1, bool ceiling = false) {
-        std::string::size_type pos = data.find(".");
-        Base = data.length() - pos - 1;
-        if( precise >= 0 && precise < Base ) { // 精度调整
-            Base = precise;
-            string newData = data.substr(0, pos + 1 + precise);
-            Value = atof(newData.c_str()) * CALC_BASE(Base);
-            if( ceiling )
-                Value += 1;
-        } else {
-            Value = atof(data.c_str()) * CALC_BASE(Base);
-        }
-    }
-
-    void From(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( precise == -1 || data.Base <= precise ) {
-            Value = data.Value;
-            Base = data.Base;
-            return;
-        }
-
-        if( ceiling ) {
-            Value = ceil(data.Value / CALC_BASE(data.Base - precise));
-        } else {
-            Value = floor(data.Value / CALC_BASE(data.Base - precise));
-        }
-        Base = precise;
-    }
-
-    double GetValue() const {
-        return Value * 1.0 / CALC_BASE(Base);
-    }
-
-    string GetStrValue() const {
-        char precise[25];
-        sprintf(precise, "%d", Base+1);
-
-        char holder[1024];
-        string fmt = "%0" + string(precise) + "lld";
-        sprintf(holder, fmt.c_str(), Value);
-        string ret = holder;
-        ret.insert(ret.begin() + ret.length() - Base, '.');
-        return ret;
-    }
-
-    bool operator <(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value < d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            return Value * CALC_BASE(d.Base-Base) < d.Value;
-        }
-    }
-    bool operator >(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value > d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            return Value * CALC_BASE(d.Base-Base) > d.Value;
-        }
-    }
-    bool operator ==(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value == d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            return Value * CALC_BASE(d.Base-Base) == d.Value;
-        }
-    }
-    bool operator <=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value <= d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            return Value * CALC_BASE(d.Base-Base) <= d.Value;
-        }
-    }
-    bool operator >=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value >= d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            return Value * CALC_BASE(d.Base-Base) >= d.Value;
-        }
-    }
-
-    SDecimal operator + (const SDecimal &d) const {
-        SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value + d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) + d.Value;
-        }
-        return ret;
-    }
-    SDecimal operator - (const SDecimal &d) const {
-        SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value - d.Value * CALC_BASE(Base-d.Base);
-        } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) - d.Value;
-        }
-        return ret;
-    }
-    SDecimal operator / (const int &d) const {
-        SDecimal ret;
-        ret.Base = Base;
-        ret.Value = Value / d;
-        return ret;
-    }
-};
 
 // 内部行情结构
-#define MAX_EXCHANGE_LENGTH 10
-#define MAX_DEPTH_LENGTH 20
-#define MAX_SYMBOLNAME_LENGTH 32
-#define MAX_EXCHANGENAME_LENGTH 32
-
 struct SExchangeData {
     char name[MAX_EXCHANGENAME_LENGTH];
     double volume;
@@ -153,11 +29,34 @@ struct SExchangeData {
 
 struct SInnerDepth {
     SDecimal price;
+    double total_volume;
     SExchangeData exchanges[MAX_EXCHANGE_LENGTH];
     int exchange_length;
+    double amount_cost; // 余额消耗量
 
     SInnerDepth() {
+        total_volume = 0;
         exchange_length = 0;
+    }
+
+    void mix_exchanges(const SInnerDepth& src, double bias) {
+        for( int i = 0 ; i < src.exchange_length ; ++i ) {
+            double biasedVolume = src.exchanges[i].volume * bias;
+            total_volume += biasedVolume;
+            bool found = false;
+            for( int j = 0 ; j < exchange_length ; ++j ) {
+                if( string(exchanges[j].name) == string(src.exchanges[i].name) ) {
+                    exchanges[j].volume += biasedVolume;
+                    found = true;
+                    break;
+                }
+            }
+            if( !found ) {
+                strcpy(exchanges[exchange_length].name, src.exchanges[i].name);
+                exchanges[exchange_length].volume = biasedVolume;
+                exchange_length ++;
+            }
+        }
     }
 };
 
@@ -184,18 +83,42 @@ struct SInnerQuote {
 class CallDataServeMarketStream;
 class DataCenter {
 public:
+    struct Params {
+        AccountInfo cache_account;
+        QuoteConfiguration cache_config;
+        unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
+    };
+public:
     DataCenter();
     ~DataCenter();
 
+    // 回调行情通知
     void add_quote(const SInnerQuote& quote);
+    // 触发重新计算，并下发行情给所有client
     void change_account(const AccountInfo& info);
+    // 触发重新计算，并下发行情给所有client
     void change_configuration(const QuoteConfiguration& config);
+    // 触发指定品种重新计算，并下发该品种行情给所有client
+    void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
+
+    // 推送客户端注册
     void add_client(CallDataServeMarketStream* client);
     void del_client(CallDataServeMarketStream* client);
 private:
-    mutable std::mutex                 mutex_datas_;
-    unordered_map<string, SInnerQuote> datas_;
+    void _publish_quote(const SInnerQuote& quote, const Params& params);
+
+    void _update_clients(const string& symbol = "");
+
+    void _calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote);
+    
+    mutable std::mutex                  mutex_datas_;
+    unordered_map<TSymbol, SInnerQuote> datas_;
     
     mutable std::mutex                              mutex_clients_;
     unordered_map<CallDataServeMarketStream*, bool> clients_;
+
+    Params params_;
+
+    // cache
+    unordered_map<string, int> currency_count_;
 };

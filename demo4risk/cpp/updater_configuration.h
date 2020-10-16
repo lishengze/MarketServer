@@ -10,10 +10,12 @@ using namespace std;
 
 struct QuoteConfiguration
 {
-    double MakerFee;
+    double MakerFee;    // 
     double TakerFee;
     int PriceBias; // percent
     int VolumeBias; // percent
+    int UserPercent; // 用户账户可动用比例
+    int HedgePercent; // 对冲账户可动用比例
 };
 
 class IConfigurationUpdater {

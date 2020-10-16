@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z\002v1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tapi.proto\x12\x10trade.service.v1\x1a\ngogo.proto\x1a\x0b\x65mpty.proto\"a\n\x15MultiMarketStreamData\x12H\n\x06quotes\x18\x01 \x03(\x0b\x32\".trade.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x95\x03\n\x10MarketStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\tB\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\x03\x42\x31\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x45\n\task_depth\x18\x05 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x41skDepth\xea\xde\x1f\task_depth\x12\x45\n\tbid_depth\x18\x06 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x42idDepth\xea\xde\x1f\tbid_depth\x12)\n\x08is_cover\x18\x07 \x01(\x08\x42\x17\xe2\xde\x1f\x07IsCover\xea\xde\x1f\x08is_cover\"g\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12;\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x1b.trade.service.v1.DepthDataB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\"W\n\tDepthData\x12\x1e\n\x04size\x18\x01 \x01(\x02\x42\x10\xe2\xde\x1f\x04Size\xea\xde\x1f\x04size\x12*\n\x08\x65xchange\x18\x02 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\"\x0c\n\nEmptyReply2\xb0\x01\n\x05Trade\x12O\n\x0fPutMarketStream\x12\".trade.service.v1.MarketStreamData\x1a\x16.google.protobuf.Empty(\x01\x12V\n\x11ServeMarketStream\x12\x16.google.protobuf.Empty\x1a\'.trade.service.v1.MultiMarketStreamData0\x01\x42\x04Z\x02v1b\x06proto3'
+  serialized_pb=b'\n\tapi.proto\x12\x10trade.service.v1\x1a\ngogo.proto\x1a\x0b\x65mpty.proto\"a\n\x15MultiMarketStreamData\x12H\n\x06quotes\x18\x01 \x03(\x0b\x32\".trade.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x95\x03\n\x10MarketStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\tB\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\x03\x42\x31\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x45\n\task_depth\x18\x05 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x41skDepth\xea\xde\x1f\task_depth\x12\x45\n\tbid_depth\x18\x06 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x42idDepth\xea\xde\x1f\tbid_depth\x12)\n\x08is_cover\x18\x07 \x01(\x08\x42\x17\xe2\xde\x1f\x07IsCover\xea\xde\x1f\x08is_cover\"\x8d\x01\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12;\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x1b.trade.service.v1.DepthDataB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x12$\n\x06volume\x18\x03 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\"W\n\tDepthData\x12\x1e\n\x04size\x18\x01 \x01(\x02\x42\x10\xe2\xde\x1f\x04Size\xea\xde\x1f\x04size\x12*\n\x08\x65xchange\x18\x02 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\"\x0c\n\nEmptyReply2\xb0\x01\n\x05Trade\x12O\n\x0fPutMarketStream\x12\".trade.service.v1.MarketStreamData\x1a\x16.google.protobuf.Empty(\x01\x12V\n\x11ServeMarketStream\x12\x16.google.protobuf.Empty\x1a\'.trade.service.v1.MultiMarketStreamData0\x01\x42\x04Z\x02v1b\x06proto3'
   ,
   dependencies=[gogo__pb2.DESCRIPTOR,empty__pb2.DESCRIPTOR,])
 
@@ -156,6 +156,13 @@ _DEPTH = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\004Data\352\336\037\004data', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='volume', full_name='trade.service.v1.Depth.volume', index=2,
+      number=3, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=b'\342\336\037\006Volume\352\336\037\006volume', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -168,8 +175,8 @@ _DEPTH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=563,
-  serialized_end=666,
+  serialized_start=564,
+  serialized_end=705,
 )
 
 
@@ -207,8 +214,8 @@ _DEPTHDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=668,
-  serialized_end=755,
+  serialized_start=707,
+  serialized_end=794,
 )
 
 
@@ -232,8 +239,8 @@ _EMPTYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=757,
-  serialized_end=769,
+  serialized_start=796,
+  serialized_end=808,
 )
 
 _MULTIMARKETSTREAMDATA.fields_by_name['quotes'].message_type = _MARKETSTREAMDATA
@@ -294,6 +301,7 @@ _MARKETSTREAMDATA.fields_by_name['bid_depth']._options = None
 _MARKETSTREAMDATA.fields_by_name['is_cover']._options = None
 _DEPTH.fields_by_name['price']._options = None
 _DEPTH.fields_by_name['data']._options = None
+_DEPTH.fields_by_name['volume']._options = None
 _DEPTHDATA.fields_by_name['size']._options = None
 _DEPTHDATA.fields_by_name['exchange']._options = None
 
@@ -304,8 +312,8 @@ _TRADE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=772,
-  serialized_end=948,
+  serialized_start=811,
+  serialized_end=987,
   methods=[
   _descriptor.MethodDescriptor(
     name='PutMarketStream',

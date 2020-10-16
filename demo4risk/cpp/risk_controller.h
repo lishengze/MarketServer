@@ -5,12 +5,13 @@
 #include "pandora/util/json.hpp"
 
 #include "risk_controller_define.h"
-#include "quote_updater.h"
-#include "config_updater.h"
-#include "account_updater.h"
+#include "updater_quote.h"
+#include "updater_configuration.h"
+#include "updater_account.h"
+#include "updater_order.h"
 #include "datacenter.h"
 
-class RiskController : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater
+class RiskController : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
 {
 public:
     RiskController();
@@ -30,6 +31,9 @@ public:
 
     // 账户相关回调
     void on_account_update(const AccountInfo& info);
+
+    // 未对冲订单簿更新
+    void on_order_update(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
 private:
 
     ConfigurationUpdater configuration_updater_;
@@ -37,6 +41,8 @@ private:
     AccountUpdater account_updater_;
 
     QuoteUpdater quote_updater_;
+
+    OrderUpdater order_updater_;
 
     // 行情数据中心
     DataCenter datacenter_;

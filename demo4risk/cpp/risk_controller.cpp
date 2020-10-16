@@ -87,3 +87,8 @@ void RiskController::on_account_update(const AccountInfo& account)
 {
     datacenter_.change_account(account);
 }
+
+void RiskController::on_order_update(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
+{
+    datacenter_.change_orders(symbol, order, asks, bids);
+}

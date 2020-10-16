@@ -146,6 +146,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_api_2eproto::offsets[] PROTOBU
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::Depth, price_),
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::Depth, data_),
+  PROTOBUF_FIELD_OFFSET(::trade::service::v1::Depth, volume_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::DepthData, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -163,8 +164,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 0, -1, sizeof(::trade::service::v1::MultiMarketStreamData)},
   { 6, -1, sizeof(::trade::service::v1::MarketStreamData)},
   { 18, -1, sizeof(::trade::service::v1::Depth)},
-  { 25, -1, sizeof(::trade::service::v1::DepthData)},
-  { 32, -1, sizeof(::trade::service::v1::EmptyReply)},
+  { 26, -1, sizeof(::trade::service::v1::DepthData)},
+  { 33, -1, sizeof(::trade::service::v1::EmptyReply)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -190,17 +191,18 @@ const char descriptor_table_protodef_api_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "k_depth\022E\n\tbid_depth\030\006 \003(\0132\027.trade.servi"
   "ce.v1.DepthB\031\342\336\037\010BidDepth\352\336\037\tbid_depth\022)"
   "\n\010is_cover\030\007 \001(\010B\027\342\336\037\007IsCover\352\336\037\010is_cove"
-  "r\"g\n\005Depth\022!\n\005price\030\001 \001(\tB\022\342\336\037\005Price\352\336\037\005"
-  "price\022;\n\004data\030\002 \003(\0132\033.trade.service.v1.D"
-  "epthDataB\020\342\336\037\004Data\352\336\037\004data\"W\n\tDepthData\022"
-  "\036\n\004size\030\001 \001(\002B\020\342\336\037\004Size\352\336\037\004size\022*\n\010excha"
-  "nge\030\002 \001(\tB\030\342\336\037\010Exchange\352\336\037\010exchange\"\014\n\nE"
-  "mptyReply2\260\001\n\005Trade\022O\n\017PutMarketStream\022\""
-  ".trade.service.v1.MarketStreamData\032\026.goo"
-  "gle.protobuf.Empty(\001\022V\n\021ServeMarketStrea"
-  "m\022\026.google.protobuf.Empty\032\'.trade.servic"
-  "e.v1.MultiMarketStreamData0\001B\004Z\002v1b\006prot"
-  "o3"
+  "r\"\215\001\n\005Depth\022!\n\005price\030\001 \001(\tB\022\342\336\037\005Price\352\336\037"
+  "\005price\022;\n\004data\030\002 \003(\0132\033.trade.service.v1."
+  "DepthDataB\020\342\336\037\004Data\352\336\037\004data\022$\n\006volume\030\003 "
+  "\001(\001B\024\342\336\037\006Volume\352\336\037\006volume\"W\n\tDepthData\022\036"
+  "\n\004size\030\001 \001(\002B\020\342\336\037\004Size\352\336\037\004size\022*\n\010exchan"
+  "ge\030\002 \001(\tB\030\342\336\037\010Exchange\352\336\037\010exchange\"\014\n\nEm"
+  "ptyReply2\260\001\n\005Trade\022O\n\017PutMarketStream\022\"."
+  "trade.service.v1.MarketStreamData\032\026.goog"
+  "le.protobuf.Empty(\001\022V\n\021ServeMarketStream"
+  "\022\026.google.protobuf.Empty\032\'.trade.service"
+  ".v1.MultiMarketStreamData0\001B\004Z\002v1b\006proto"
+  "3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_api_2eproto_deps[2] = {
   &::descriptor_table_empty_2eproto,
@@ -215,7 +217,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_api
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_api_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_api_2eproto = {
-  false, false, descriptor_table_protodef_api_2eproto, "api.proto", 962,
+  false, false, descriptor_table_protodef_api_2eproto, "api.proto", 1001,
   &descriptor_table_api_2eproto_once, descriptor_table_api_2eproto_sccs, descriptor_table_api_2eproto_deps, 5, 2,
   schemas, file_default_instances, TableStruct_api_2eproto::offsets,
   file_level_metadata_api_2eproto, 5, file_level_enum_descriptors_api_2eproto, file_level_service_descriptors_api_2eproto,
@@ -847,12 +849,14 @@ Depth::Depth(const Depth& from)
     price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_price(),
       GetArena());
   }
+  volume_ = from.volume_;
   // @@protoc_insertion_point(copy_constructor:trade.service.v1.Depth)
 }
 
 void Depth::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_Depth_api_2eproto.base);
   price_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  volume_ = 0;
 }
 
 Depth::~Depth() {
@@ -889,6 +893,7 @@ void Depth::Clear() {
 
   data_.Clear();
   price_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  volume_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -919,6 +924,13 @@ const char* Depth::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inte
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
+          volume_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else goto handle_unusual;
         continue;
       default: {
@@ -967,6 +979,12 @@ failure:
       InternalWriteMessage(2, this->_internal_data(i), target, stream);
   }
 
+  // double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+  if (!(this->volume() <= 0 && this->volume() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_volume(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -995,6 +1013,11 @@ size_t Depth::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_price());
+  }
+
+  // double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+  if (!(this->volume() <= 0 && this->volume() >= 0)) {
+    total_size += 1 + 8;
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1032,6 +1055,9 @@ void Depth::MergeFrom(const Depth& from) {
   if (from.price().size() > 0) {
     _internal_set_price(from._internal_price());
   }
+  if (!(from.volume() <= 0 && from.volume() >= 0)) {
+    _internal_set_volume(from._internal_volume());
+  }
 }
 
 void Depth::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -1057,6 +1083,7 @@ void Depth::InternalSwap(Depth* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   data_.InternalSwap(&other->data_);
   price_.Swap(&other->price_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(volume_, other->volume_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Depth::GetMetadata() const {
