@@ -32,7 +32,13 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
     }
     
     if( CONFIG->publish_data_ ) {
-        quote_mixer_.on_snap(exchange, symbol, quote);
+        if( CONFIG->mixer_ver_ == 1 ) {
+            quote_mixer_.on_snap(exchange, symbol, quote);
+        } else if( CONFIG->mixer_ver_ == 2 ) {
+            quote_mixer2_.on_snap(exchange, symbol, quote);
+        } else {
+            UT_LOG_ERROR(CONFIG->logger_, "unknown mixer_ver " << CONFIG->mixer_ver_);
+        }
         quote_single_.on_snap(exchange, symbol, quote);
     }
 };
@@ -43,7 +49,13 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
     }
 
     if( CONFIG->publish_data_ ) {
-        quote_mixer_.on_update(exchange, symbol, quote);
+        if( CONFIG->mixer_ver_ == 1 ) {
+            quote_mixer_.on_update(exchange, symbol, quote);
+        } else if( CONFIG->mixer_ver_ == 2 ) {
+            quote_mixer2_.on_update(exchange, symbol, quote);
+        } else {
+            UT_LOG_ERROR(CONFIG->logger_, "unknown mixer_ver " << CONFIG->mixer_ver_);
+        }
         quote_single_.on_update(exchange, symbol, quote);
     }
 };

@@ -198,7 +198,7 @@ struct SDepthPrice {
     }
 };
 
-#define MAX_DEPTH 50
+#define MAX_DEPTH 100
 struct SDepthQuote {
     char Exchange[32];
     char Symbol[32];
@@ -230,7 +230,7 @@ struct SMixDepthPrice {
     }
 };
 
-#define MAX_MIXDEPTH 20
+#define MAX_MIXDEPTH 100
 struct SMixQuote {
     SMixDepthPrice* Asks; // 卖盘
     SMixDepthPrice* Bids; // 买盘

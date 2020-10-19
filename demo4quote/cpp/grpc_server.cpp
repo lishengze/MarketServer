@@ -66,6 +66,14 @@ void GrpcServer::on_mix_snap(const string& symbol, const SMixQuote& quote)
     }
 };
 
+void GrpcServer::on_mix_snap2(const string& symbol, std::shared_ptr<QuoteData> quote)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
+    for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
+        iter->first->add_data(quote);
+    }
+};
+
 void GrpcServer::register_client(CallDataMultiSubscribeQuote* calldata)
 {
     // safe callback on_snap

@@ -53,6 +53,7 @@ public:
 
     void on_snap(const string& exchange, const string& symbol, const SMixQuote& quote);
     void on_mix_snap(const string& symbol, const SMixQuote& quote);
+    void on_mix_snap2(const string& symbol, std::shared_ptr<QuoteData> quote);
 
     void register_client(CallDataMultiSubscribeQuote* calldata);
     void unregister_client(CallDataMultiSubscribeQuote* calldata);

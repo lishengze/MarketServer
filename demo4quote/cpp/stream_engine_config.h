@@ -45,7 +45,7 @@ public:
 
             // grpc
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
-            grpc_push_depth_ = 10;
+            grpc_push_depth_ = js["grpc"]["publish_depth"].get<int>();;
             frequency_ = js["grpc"]["frequency"].get<int>();
 
             // debug
@@ -53,6 +53,7 @@ public:
             publish_data_ = bool(js["debug"]["publish_data"].get<int>());
             dump_binary_ = bool(js["debug"]["dump_binary"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
+            mixer_ver_ = js["debug"]["mixer_ver"].get<int>();
 
             // redis quote
             quote_redis_host_ = js["redis_quote"]["host"].get<string>();
@@ -101,6 +102,7 @@ public:
     bool dump_binary_;
     // [for debug] output to screen
     bool output_to_screen_;
+    int mixer_ver_;
 
     // quote redis config
     string quote_redis_host_;

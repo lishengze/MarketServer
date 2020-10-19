@@ -2,6 +2,7 @@
 
 #include "redis_quote.h"
 #include "quote_mixer.h"
+#include "quote_mixer2.h"
 #include "quote_single.h"
 #include "quote_dumper.h"
 #include "grpc_server.h"
@@ -30,6 +31,7 @@ private:
 
     // mix quotation
     QuoteMixer quote_mixer_;
+    QuoteMixer2 quote_mixer2_;
     QuoteSingle quote_single_;
     QuoteDumper quote_dumper_;
 };

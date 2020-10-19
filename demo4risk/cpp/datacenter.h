@@ -28,6 +28,7 @@ struct SExchangeData {
 };
 
 struct SInnerDepth {
+    bool valid;
     SDecimal price;
     double total_volume;
     SExchangeData exchanges[MAX_EXCHANGE_LENGTH];
@@ -37,6 +38,7 @@ struct SInnerDepth {
     SInnerDepth() {
         total_volume = 0;
         exchange_length = 0;
+        valid = true;
     }
 
     void mix_exchanges(const SInnerDepth& src, double bias) {

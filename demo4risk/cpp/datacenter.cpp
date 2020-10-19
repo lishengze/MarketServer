@@ -22,6 +22,8 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
     // 卖盘
     for( int i = 0 ; i < quote.ask_length ; ++i ) {
         const SInnerDepth& srcDepth = quote.asks[i];
+        if( srcDepth.valid == false )
+            continue;
         Depth* depth = msd->add_ask_depth();        
         depth->set_price(srcDepth.price.GetStrValue());
         depth->set_volume(srcDepth.total_volume);
@@ -34,6 +36,8 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
     // 买盘
     for( int i = 0 ; i < quote.bid_length ; ++i ) {
         const SInnerDepth& srcDepth = quote.bids[i];
+        if( srcDepth.valid == false )
+            continue;
         Depth* depth = msd->add_bid_depth();        
         depth->set_price(srcDepth.price.GetStrValue());
         depth->set_volume(srcDepth.total_volume);
@@ -164,6 +168,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
 
 void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote)
 {
+    //newQuote = quote;
+    //return;
     string symbol = quote.symbol;
     strcpy(newQuote.symbol, quote.symbol);
     newQuote.time = quote.time;
@@ -259,4 +265,41 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
     }
 
     // 加工后聚合行情扣减系统未对冲单的价位
+    auto orderBookIter = params.cache_order.find(symbol);
+    if( orderBookIter != params.cache_order.end() ) 
+    {
+        // 卖盘
+        for( int i = 0 ; i < newQuote.ask_length ; ) {
+            const vector<SOrderPriceLevel>& levels = orderBookIter->second.first;
+            for( auto iter = levels.begin() ; iter != levels.end() ; ) {
+                if( iter->price < newQuote.asks[i].price ) {
+                    iter ++;
+                } else if( iter->price > newQuote.asks[i].price ) {
+                    i++;
+                } else {
+                    newQuote.asks[i].total_volume -= iter->volume;
+                    if( newQuote.asks[i].total_volume < 0 ) {
+                        newQuote.asks[i].valid = false;                        
+                    }
+                }
+            }
+        }
+        // 买盘
+        for( int i = 0 ; i < newQuote.bid_length ; ) {
+            const vector<SOrderPriceLevel>& levels = orderBookIter->second.second;
+            for( auto iter = levels.begin() ; iter != levels.end() ; ) {
+                if( iter->price < newQuote.bids[i].price ) {
+                    iter ++;
+                } else if( iter->price > newQuote.bids[i].price ) {
+                    i++;
+                } else {
+                    newQuote.bids[i].total_volume -= iter->volume;
+                    if( newQuote.bids[i].total_volume < 0 ) {
+                        newQuote.bids[i].valid = false;                        
+                    }
+                }
+            }
+        }
+
+    }
 }

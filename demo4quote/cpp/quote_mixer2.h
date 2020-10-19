@@ -1,26 +1,47 @@
 #pragma once
 
 #include "stream_engine_define.h"
+#include "grpc_server.h"
 
-void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& dst);
-
-class QuoteMixer
+/*
+算法：源头的行情更新全部更新到品种的买卖盘队列中，由独立线程计算买卖盘分水岭位置，保持分水岭相对稳定可用，在发布聚合行情的时候，再基于分水岭位置进行行情价位过滤
+源头更新回调：全量更新、增量更新都需要加锁
+计算线程：快照数据全量加锁
+*/
+class QuoteMixer2
 {
 public:
-    QuoteMixer(){
-    }
+    QuoteMixer2() {
+        thread_loop_ = new std::thread(&QuoteMixer2::_calc_watermark, this);
+    }   
 
+    ~QuoteMixer2() {
+        if (thread_loop_) {
+            if (thread_loop_->joinable()) {
+                thread_loop_->join();
+            }
+            delete thread_loop_;
+        }
+    }
+    
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
-    void publish_quote(const string& symbol, const SMixQuote& quote, bool isSnap);
-
 private:
+    // 独立线程计算watermark
+    mutable std::mutex mutex_snaps_;
+    unordered_map<TSymbol, SDecimal> watermark_;
+    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> snaps_;
+    std::thread*               thread_loop_ = nullptr;
+    void _calc_watermark();
+    void _one_round();
+    bool _get_watermark(const string& symbol, SDecimal& watermark) const;
 
     // symbols
     unordered_map<TSymbol, SMixQuote*> symbols_;
     unordered_map<TSymbol, long long> last_clocks_;
+
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const {
         auto iter = symbols_.find(symbol);
@@ -29,6 +50,8 @@ private:
         ptr = iter->second;
         return true;
     }
+
+    std::shared_ptr<QuoteData> _publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap);
 
     SMixDepthPrice* _clear_pricelevel(const string& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, const int& newLength, bool isAsk) {
         SMixDepthPrice head;
@@ -90,68 +113,15 @@ private:
         return head.Next;
     }
 
-    void _cross_askbid(SMixQuote* mixedQuote, const SDepthQuote& quote) {
-        // 新行情的买1价 大于 聚合行情的卖1价
-        if( mixedQuote->Asks != NULL && quote.BidLength > 0 && mixedQuote->Asks->Price < quote.Bids[0].Price ) {
-            mixedQuote->Watermark = (quote.Bids[0].Price + mixedQuote->Asks->Price) / 2;
-        }
-        // 新行情的卖1价 小于 聚合行情的买1价
-        else if( mixedQuote->Bids != NULL && quote.AskLength > 0 && mixedQuote->Bids->Price > quote.Asks[0].Price ) {
-            mixedQuote->Watermark = (mixedQuote->Bids->Price + quote.Asks[0].Price) / 2;
-        }
-        else {
-            mixedQuote->Watermark = SDecimal();
-        }
-    }
-
     SMixDepthPrice* _mix_exchange(const string& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
         const int& length, const SDecimal& watermark, bool isAsk) { 
         SMixDepthPrice head;
         head.Next = mixedDepths;
         SMixDepthPrice* last = &head;
-
-        // 1. 裁剪聚合行情对应价位（开区间）
         SMixDepthPrice* tmp = mixedDepths;
-        while( tmp != NULL ) {
-            if( watermark.Value == 0 || (isAsk ? (tmp->Price > watermark) : (tmp->Price < watermark)) ) {
-                break;
-            } else {
-                SMixDepthPrice* waitToDel = tmp;
-                // 删除
-                last->Next = tmp->Next;       
-                tmp = tmp->Next;
-                delete waitToDel;
-            }
-        }
-
-        // 2. 裁剪新行情对应价位（闭区间）
-        int filteredLevel = 99999999;
-        double virtualVolume = 0; // 虚拟价位挂单量
-        for( int i = 0 ; i < length ; ++ i ) {
-            const SDepthPrice& depth = depths[i];
-            if( depth.Volume < VOLUME_PRECISE ) {
-                continue;
-            }
-            if( watermark.Value == 0 || (isAsk ? (depth.Price >= watermark) : (depth.Price <= watermark)) ) {
-                filteredLevel = i;
-                break;        
-            } else {
-                virtualVolume += depth.Volume;
-            }
-        }
-
-        // 3. 插入虚拟价位
-        if( virtualVolume > 0 && watermark.Value > 0 ) {
-            SMixDepthPrice* virtualDepth = new SMixDepthPrice();
-            virtualDepth->Price = watermark;
-            virtualDepth->Volume[exchange] = virtualVolume;
-            // 加入链表头部
-            virtualDepth->Next = head.Next;
-            head.Next = virtualDepth;
-        }
 
         // 4. 混合：first + depths
-        int i = filteredLevel;
+        int i = 0;
         for( tmp = head.Next ; i < length && tmp != NULL ; ) {
             const SDepthPrice& depth = depths[i];
             if( depth.Volume < VOLUME_PRECISE ) {
