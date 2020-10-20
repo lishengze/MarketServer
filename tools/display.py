@@ -25,6 +25,7 @@ def CallChangeStreamEngineParams(addr, params):
         request.frequency = params['frequency']
         request.precise = params.get('precise', 0)
         request.symbol = params.get('symbol', "")
+        request.raw_frequency = params['raw_frequency']
         stub.SetParams(request)
 
 
@@ -37,7 +38,8 @@ class GrpcStreamThread(QThread):
         while True:            
             try:
                 with grpc.insecure_channel(self.addr) as channel:
-                    self.run_grpc(channel)
+                    if self.run_grpc(channel) == False:
+                        return
             except Exception as ex:
                 print(ex)
                 time.sleep(5)
@@ -93,7 +95,7 @@ class QueryRawThread(GrpcStreamThread):
         for resp in responses:
             if self.stopped:
                 print("exit single thread @", self.exchange, self.symbol)
-                return
+                return False
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
 
@@ -124,9 +126,11 @@ class AskBidWidget(object):
         for i in range(self.depth):
             lbl_price, lbl_volumes = _create_pricelevel(self.grid, i, "Ask", self.depth-i, self.depth==i+1)
             self.add_ask(lbl_price, lbl_volumes)
+        label = QLabel("---")
+        self.grid.addWidget(label, self.depth, 0)
         # 构造buy档位
         for i in range(self.depth):
-            lbl_price, lbl_volumes = _create_pricelevel(self.grid, i + self.depth, "Bid", i+1, i==0)
+            lbl_price, lbl_volumes = _create_pricelevel(self.grid, i + self.depth + 1, "Bid", i+1, i==0)
             self.add_bid(lbl_price, lbl_volumes)
         self.grid.setColumnStretch(0, 1)
         self.grid.setColumnStretch(1, 1)
@@ -162,6 +166,7 @@ class AskBidWidget(object):
 class DisplayWidget(QWidget):
     DEPTH = 20
     FREQUENCY = 1
+    RAW_FREQUENCY = 1
     STREAMENGINE_ADDR = "172.25.3.207:9000"
     API_ADDR = "172.25.3.207:9900"
     
@@ -217,10 +222,16 @@ class DisplayWidget(QWidget):
         self.precise_combox.addItems(["1", "2", "3", "4"])
         self.precise_combox.currentIndexChanged[str].connect(self.precise_changed)
         ctl_grid.addWidget(self.precise_combox, 3, 1)
-        label = QLabel("-------------------")
+        label = QLabel("设置原始频率")
         ctl_grid.addWidget(label, 4, 0)
-        label = QLabel("RiskController设置:")
+        self.raw_frequecy_combox = QComboBox(self)
+        self.raw_frequecy_combox.addItems(["1", "10", "100"])
+        self.raw_frequecy_combox.currentIndexChanged[str].connect(self.raw_frequency_changed)
+        ctl_grid.addWidget(self.raw_frequecy_combox, 4, 1)
+        label = QLabel("-------------------")
         ctl_grid.addWidget(label, 5, 0)
+        label = QLabel("RiskController设置:")
+        ctl_grid.addWidget(label, 6, 0)
         ctl_panel.setLayout(ctl_grid) 
 
         # stream engine数据显示区域
@@ -374,14 +385,18 @@ class DisplayWidget(QWidget):
 
     def depth_changed(self, depth):
         self.DEPTH = int(depth)
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY})
+        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
 
     def frequency_changed(self, frequency):
         self.FREQUENCY = int(frequency)
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY})
+        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
+
+    def raw_frequency_changed(self, frequency):
+        self.RAW_FREQUENCY = int(frequency)
+        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
 
     def precise_changed(self, precise):
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "precise": int(precise), "symbol": self.current_symbol})
+        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY, "precise": int(precise), "symbol": self.current_symbol})
         
 
 if __name__ == '__main__':
