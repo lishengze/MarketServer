@@ -1,3 +1,4 @@
+#include "stream_engine_config.h"
 #include "grpc_caller.h"
 #include "grpc_server.h"
 
@@ -210,6 +211,34 @@ void CallDataMultiSubscribeQuote::Proceed() {
     } else {
         std::cout << "delete CallDataMultiSubscribeQuote" << std::endl;
         parent_->unregister_client(this);
+        GPR_ASSERT(status_ == FINISH);
+        delete this;
+    }
+};
+
+void CallDataSetParams::Release() {
+    std::cout << "delete CallDataSetParams" << std::endl;
+    delete this;
+}
+
+void CallDataSetParams::Proceed() {
+    if (status_ == CREATE) {
+        status_ = PROCESS;        
+        service_->RequestSetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
+    } else if (status_ == PROCESS) {
+        new CallDataSetParams(service_, cq_, parent_);
+
+        CONFIG->frequency_ = request_.frequency();
+        CONFIG->grpc_publish_depth_ = request_.depth();
+        string current_symbol = request_.symbol();
+        if( current_symbol != "" ) {
+            CONFIG->symbol_precise_[current_symbol] = request_.precise();
+        }
+        
+        status_ = FINISH;
+        responder_.Finish(reply_, Status::OK, this);
+    } else {
+        std::cout << "delete CallDataSetParams" << std::endl;
         GPR_ASSERT(status_ == FINISH);
         delete this;
     }

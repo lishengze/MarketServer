@@ -27,6 +27,7 @@ static const char* StreamEngineService_method_names[] = {
   "/trade.service.v1.StreamEngineService/GetQuote",
   "/trade.service.v1.StreamEngineService/SubscribeOneQuote",
   "/trade.service.v1.StreamEngineService/MultiSubscribeQuote",
+  "/trade.service.v1.StreamEngineService/SetParams",
 };
 
 std::unique_ptr< StreamEngineService::Stub> StreamEngineService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -39,6 +40,7 @@ StreamEngineService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>
   : channel_(channel), rpcmethod_GetQuote_(StreamEngineService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SubscribeOneQuote_(StreamEngineService_method_names[1], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
   , rpcmethod_MultiSubscribeQuote_(StreamEngineService_method_names[2], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
+  , rpcmethod_SetParams_(StreamEngineService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status StreamEngineService::Stub::GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::trade::service::v1::QuoteData* response) {
@@ -101,6 +103,34 @@ void StreamEngineService::Stub::experimental_async::MultiSubscribeQuote(::grpc::
   return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(channel_.get(), cq, rpcmethod_MultiSubscribeQuote_, context, request, false, nullptr);
 }
 
+::grpc::Status StreamEngineService::Stub::SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetParams_, context, request, response);
+}
+
+void StreamEngineService::Stub::experimental_async::SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetParams_, context, request, response, std::move(f));
+}
+
+void StreamEngineService::Stub::experimental_async::SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetParams_, context, request, response, std::move(f));
+}
+
+void StreamEngineService::Stub::experimental_async::SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetParams_, context, request, response, reactor);
+}
+
+void StreamEngineService::Stub::experimental_async::SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetParams_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* StreamEngineService::Stub::AsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::trade::service::v1::SetParamsResp>::Create(channel_.get(), cq, rpcmethod_SetParams_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* StreamEngineService::Stub::PrepareAsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::trade::service::v1::SetParamsResp>::Create(channel_.get(), cq, rpcmethod_SetParams_, context, request, false);
+}
+
 StreamEngineService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       StreamEngineService_method_names[0],
@@ -132,6 +162,16 @@ StreamEngineService::Service::Service() {
              ::grpc_impl::ServerWriter<::trade::service::v1::MultiQuoteData>* writer) {
                return service->MultiSubscribeQuote(ctx, req, writer);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StreamEngineService_method_names[3],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StreamEngineService::Service, ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
+          [](StreamEngineService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::trade::service::v1::SetParamsReq* req,
+             ::trade::service::v1::SetParamsResp* resp) {
+               return service->SetParams(ctx, req, resp);
+             }, this)));
 }
 
 StreamEngineService::Service::~Service() {
@@ -155,6 +195,13 @@ StreamEngineService::Service::~Service() {
   (void) context;
   (void) request;
   (void) writer;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StreamEngineService::Service::SetParams(::grpc::ServerContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response) {
+  (void) context;
+  (void) request;
+  (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 

@@ -48,7 +48,7 @@ struct TableStruct_stream_5fengine_5fserver_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[9]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -76,6 +76,12 @@ extern MultiQuoteDataDefaultTypeInternal _MultiQuoteData_default_instance_;
 class QuoteData;
 class QuoteDataDefaultTypeInternal;
 extern QuoteDataDefaultTypeInternal _QuoteData_default_instance_;
+class SetParamsReq;
+class SetParamsReqDefaultTypeInternal;
+extern SetParamsReqDefaultTypeInternal _SetParamsReq_default_instance_;
+class SetParamsResp;
+class SetParamsRespDefaultTypeInternal;
+extern SetParamsRespDefaultTypeInternal _SetParamsResp_default_instance_;
 class SubscribeQuoteReq;
 class SubscribeQuoteReqDefaultTypeInternal;
 extern SubscribeQuoteReqDefaultTypeInternal _SubscribeQuoteReq_default_instance_;
@@ -89,6 +95,8 @@ template<> ::trade::service::v1::DepthVolume* Arena::CreateMaybeMessage<::trade:
 template<> ::trade::service::v1::GetQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::GetQuoteReq>(Arena*);
 template<> ::trade::service::v1::MultiQuoteData* Arena::CreateMaybeMessage<::trade::service::v1::MultiQuoteData>(Arena*);
 template<> ::trade::service::v1::QuoteData* Arena::CreateMaybeMessage<::trade::service::v1::QuoteData>(Arena*);
+template<> ::trade::service::v1::SetParamsReq* Arena::CreateMaybeMessage<::trade::service::v1::SetParamsReq>(Arena*);
+template<> ::trade::service::v1::SetParamsResp* Arena::CreateMaybeMessage<::trade::service::v1::SetParamsResp>(Arena*);
 template<> ::trade::service::v1::SubscribeQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::SubscribeQuoteReq>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace trade {
@@ -96,6 +104,307 @@ namespace service {
 namespace v1 {
 
 // ===================================================================
+
+class SetParamsReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SetParamsReq) */ {
+ public:
+  inline SetParamsReq() : SetParamsReq(nullptr) {}
+  virtual ~SetParamsReq();
+
+  SetParamsReq(const SetParamsReq& from);
+  SetParamsReq(SetParamsReq&& from) noexcept
+    : SetParamsReq() {
+    *this = ::std::move(from);
+  }
+
+  inline SetParamsReq& operator=(const SetParamsReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SetParamsReq& operator=(SetParamsReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SetParamsReq& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SetParamsReq* internal_default_instance() {
+    return reinterpret_cast<const SetParamsReq*>(
+               &_SetParamsReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    0;
+
+  friend void swap(SetParamsReq& a, SetParamsReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SetParamsReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SetParamsReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SetParamsReq* New() const final {
+    return CreateMaybeMessage<SetParamsReq>(nullptr);
+  }
+
+  SetParamsReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SetParamsReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SetParamsReq& from);
+  void MergeFrom(const SetParamsReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SetParamsReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.SetParamsReq";
+  }
+  protected:
+  explicit SetParamsReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSymbolFieldNumber = 4,
+    kDepthFieldNumber = 1,
+    kFrequencyFieldNumber = 2,
+    kPreciseFieldNumber = 3,
+  };
+  // string symbol = 4;
+  void clear_symbol();
+  const std::string& symbol() const;
+  void set_symbol(const std::string& value);
+  void set_symbol(std::string&& value);
+  void set_symbol(const char* value);
+  void set_symbol(const char* value, size_t size);
+  std::string* mutable_symbol();
+  std::string* release_symbol();
+  void set_allocated_symbol(std::string* symbol);
+  private:
+  const std::string& _internal_symbol() const;
+  void _internal_set_symbol(const std::string& value);
+  std::string* _internal_mutable_symbol();
+  public:
+
+  // int32 depth = 1;
+  void clear_depth();
+  ::PROTOBUF_NAMESPACE_ID::int32 depth() const;
+  void set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_depth() const;
+  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 frequency = 2;
+  void clear_frequency();
+  ::PROTOBUF_NAMESPACE_ID::int32 frequency() const;
+  void set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_frequency() const;
+  void _internal_set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 precise = 3;
+  void clear_precise();
+  ::PROTOBUF_NAMESPACE_ID::int32 precise() const;
+  void set_precise(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_precise() const;
+  void _internal_set_precise(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.SetParamsReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr symbol_;
+  ::PROTOBUF_NAMESPACE_ID::int32 depth_;
+  ::PROTOBUF_NAMESPACE_ID::int32 frequency_;
+  ::PROTOBUF_NAMESPACE_ID::int32 precise_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SetParamsResp PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SetParamsResp) */ {
+ public:
+  inline SetParamsResp() : SetParamsResp(nullptr) {}
+  virtual ~SetParamsResp();
+
+  SetParamsResp(const SetParamsResp& from);
+  SetParamsResp(SetParamsResp&& from) noexcept
+    : SetParamsResp() {
+    *this = ::std::move(from);
+  }
+
+  inline SetParamsResp& operator=(const SetParamsResp& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SetParamsResp& operator=(SetParamsResp&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SetParamsResp& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SetParamsResp* internal_default_instance() {
+    return reinterpret_cast<const SetParamsResp*>(
+               &_SetParamsResp_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(SetParamsResp& a, SetParamsResp& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SetParamsResp* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SetParamsResp* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SetParamsResp* New() const final {
+    return CreateMaybeMessage<SetParamsResp>(nullptr);
+  }
+
+  SetParamsResp* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SetParamsResp>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SetParamsResp& from);
+  void MergeFrom(const SetParamsResp& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SetParamsResp* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.SetParamsResp";
+  }
+  protected:
+  explicit SetParamsResp(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.SetParamsResp)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
 
 class SubscribeQuoteReq PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SubscribeQuoteReq) */ {
@@ -139,7 +448,7 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
                &_SubscribeQuoteReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    0;
+    2;
 
   friend void swap(SubscribeQuoteReq& a, SubscribeQuoteReq& b) {
     a.Swap(&b);
@@ -263,7 +572,7 @@ class GetQuoteReq PROTOBUF_FINAL :
                &_GetQuoteReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    3;
 
   friend void swap(GetQuoteReq& a, GetQuoteReq& b) {
     a.Swap(&b);
@@ -425,7 +734,7 @@ class MultiQuoteData PROTOBUF_FINAL :
                &_MultiQuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    4;
 
   friend void swap(MultiQuoteData& a, MultiQuoteData& b) {
     a.Swap(&b);
@@ -571,7 +880,7 @@ class QuoteData PROTOBUF_FINAL :
                &_QuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    5;
 
   friend void swap(QuoteData& a, QuoteData& b) {
     a.Swap(&b);
@@ -813,7 +1122,7 @@ class DepthLevel PROTOBUF_FINAL :
                &_DepthLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    6;
 
   friend void swap(DepthLevel& a, DepthLevel& b) {
     a.Swap(&b);
@@ -979,7 +1288,7 @@ class Decimal PROTOBUF_FINAL :
                &_Decimal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    7;
 
   friend void swap(Decimal& a, Decimal& b) {
     a.Swap(&b);
@@ -1127,7 +1436,7 @@ class DepthVolume PROTOBUF_FINAL :
                &_DepthVolume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    8;
 
   friend void swap(DepthVolume& a, DepthVolume& b) {
     a.Swap(&b);
@@ -1247,6 +1556,136 @@ class DepthVolume PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// SetParamsReq
+
+// int32 depth = 1;
+inline void SetParamsReq::clear_depth() {
+  depth_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::_internal_depth() const {
+  return depth_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::depth() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SetParamsReq.depth)
+  return _internal_depth();
+}
+inline void SetParamsReq::_internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  depth_ = value;
+}
+inline void SetParamsReq::set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_depth(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SetParamsReq.depth)
+}
+
+// int32 frequency = 2;
+inline void SetParamsReq::clear_frequency() {
+  frequency_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::_internal_frequency() const {
+  return frequency_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::frequency() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SetParamsReq.frequency)
+  return _internal_frequency();
+}
+inline void SetParamsReq::_internal_set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  frequency_ = value;
+}
+inline void SetParamsReq::set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_frequency(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SetParamsReq.frequency)
+}
+
+// int32 precise = 3;
+inline void SetParamsReq::clear_precise() {
+  precise_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::_internal_precise() const {
+  return precise_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::precise() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SetParamsReq.precise)
+  return _internal_precise();
+}
+inline void SetParamsReq::_internal_set_precise(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  precise_ = value;
+}
+inline void SetParamsReq::set_precise(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_precise(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SetParamsReq.precise)
+}
+
+// string symbol = 4;
+inline void SetParamsReq::clear_symbol() {
+  symbol_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SetParamsReq::symbol() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SetParamsReq.symbol)
+  return _internal_symbol();
+}
+inline void SetParamsReq::set_symbol(const std::string& value) {
+  _internal_set_symbol(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SetParamsReq.symbol)
+}
+inline std::string* SetParamsReq::mutable_symbol() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.SetParamsReq.symbol)
+  return _internal_mutable_symbol();
+}
+inline const std::string& SetParamsReq::_internal_symbol() const {
+  return symbol_.Get();
+}
+inline void SetParamsReq::_internal_set_symbol(const std::string& value) {
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SetParamsReq::set_symbol(std::string&& value) {
+  
+  symbol_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.SetParamsReq.symbol)
+}
+inline void SetParamsReq::set_symbol(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.SetParamsReq.symbol)
+}
+inline void SetParamsReq::set_symbol(const char* value,
+    size_t size) {
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.SetParamsReq.symbol)
+}
+inline std::string* SetParamsReq::_internal_mutable_symbol() {
+  
+  return symbol_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SetParamsReq::release_symbol() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.SetParamsReq.symbol)
+  return symbol_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SetParamsReq::set_allocated_symbol(std::string* symbol) {
+  if (symbol != nullptr) {
+    
+  } else {
+    
+  }
+  symbol_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), symbol,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.SetParamsReq.symbol)
+}
+
+// -------------------------------------------------------------------
+
+// SetParamsResp
+
+// -------------------------------------------------------------------
+
 // SubscribeQuoteReq
 
 // -------------------------------------------------------------------
@@ -1987,6 +2426,10 @@ inline void DepthVolume::set_allocated_exchange(std::string* exchange) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

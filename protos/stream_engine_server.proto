@@ -14,11 +14,21 @@ service StreamEngineService {
 
   // 订阅聚合行情
   rpc MultiSubscribeQuote(SubscribeQuoteReq) returns (stream MultiQuoteData);
+
+  // 设置参数
+  rpc SetParams(SetParamsReq) returns (SetParamsResp);
 }
 
-message SubscribeQuoteReq {
-
+message SetParamsReq {
+    int32 depth = 1;
+    int32 frequency = 2;
+    int32 precise = 3;
+    string symbol = 4;
 }
+
+message SetParamsResp {}
+
+message SubscribeQuoteReq {}
 
 message GetQuoteReq {
   string exchange = 1 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];

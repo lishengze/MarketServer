@@ -29,6 +29,8 @@ using grpc::Status;
 using trade::service::v1::StreamEngineService;
 using trade::service::v1::GetQuoteReq;
 using trade::service::v1::SubscribeQuoteReq;
+using trade::service::v1::SetParamsResp;
+using trade::service::v1::SetParamsReq;
 using trade::service::v1::MultiQuoteData;
 using trade::service::v1::QuoteData;
 using trade::service::v1::DepthLevel;
@@ -147,4 +149,23 @@ private:
 
     mutable std::mutex                             mutex_datas_;
     vector<std::shared_ptr<QuoteData>> datas_;
+};
+
+class CallDataSetParams : public CallData{
+public:
+    CallDataSetParams(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
+        : CallData(cq, parent), service_(service), responder_(&ctx_){
+        call_type_ = 4;
+        Proceed();
+    }
+
+    void Release();
+
+    void Proceed();
+
+private:
+    StreamEngineService::AsyncService* service_;
+    SetParamsReq request_;
+    SetParamsResp reply_;
+    ServerAsyncResponseWriter<SetParamsResp> responder_;
 };

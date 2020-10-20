@@ -67,6 +67,7 @@ private:
         new CallDataGetQuote(&service_, cq_.get(), this);
         new CallDataMultiSubscribeQuote(&service_, cq_.get(), this);
         new CallDataSubscribeOneQuote(&service_, cq_.get(), this);
+        new CallDataSetParams(&service_, cq_.get(), this);
         
         void* tag;  // uniquely identifies a request.
         bool ok;
@@ -86,6 +87,8 @@ private:
                     static_cast<CallDataMultiSubscribeQuote*>(tag)->Proceed();
                 } else if( cd->call_type_ == 3 ) {
                     static_cast<CallDataSubscribeOneQuote*>(tag)->Proceed();
+                } else if( cd->call_type_ == 4 ) {
+                    static_cast<CallDataSetParams*>(tag)->Proceed();
                 }
             } else {
                 CallData* cd = static_cast<CallData*>(tag);
@@ -95,6 +98,8 @@ private:
                     static_cast<CallDataMultiSubscribeQuote*>(tag)->Release();
                 } else if( cd->call_type_ == 3 ) {
                     static_cast<CallDataSubscribeOneQuote*>(tag)->Release();
+                } else if( cd->call_type_ == 4 ) {
+                    static_cast<CallDataSetParams*>(tag)->Release();
                 }
             }
         }

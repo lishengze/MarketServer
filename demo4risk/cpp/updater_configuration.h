@@ -12,10 +12,10 @@ struct QuoteConfiguration
 {
     double MakerFee; // 百分比；maker手续费
     double TakerFee; // 百分比；taker手续费
-    int PriceBias; // 百分比；价格偏移量（买卖盘相同）
-    int VolumeBias; // 百分比；单量偏移量（买卖盘相同）
-    int UserPercent; // 百分比；用户账户可动用比例
-    int HedgePercent; // 百分比；对冲账户可动用比例
+    double PriceBias; // 百分比；价格偏移量（买卖盘相同）
+    double VolumeBias; // 百分比；单量偏移量（买卖盘相同）
+    double UserPercent; // 百分比；用户账户可动用比例
+    double HedgePercent; // 百分比；对冲账户可动用比例
 };
 
 class IConfigurationUpdater {
@@ -36,12 +36,12 @@ private:
     void _run(IConfigurationUpdater* callback) {
         while( true ) {
             QuoteConfiguration config;
-            config.MakerFee = 0.2;
+            config.MakerFee = 0.1;
             config.TakerFee = 0.2;
-            config.PriceBias = 10;
-            config.VolumeBias = 10;
-            config.UserPercent = 50;
-            config.HedgePercent = 50;
+            config.PriceBias = 0.2;
+            config.VolumeBias = 50;
+            config.UserPercent = 30;
+            config.HedgePercent = 80;
             callback->on_configuration_update(config);
             std::this_thread::sleep_for(std::chrono::seconds(10));
         }

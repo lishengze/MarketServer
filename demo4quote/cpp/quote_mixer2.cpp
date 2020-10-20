@@ -11,7 +11,7 @@ std::shared_ptr<QuoteData> filter_quote(const string& symbol, const SMixQuote* s
     {
         int depth_count = 0;
         SMixDepthPrice* ptr = src->Asks;
-        while( ptr != NULL && depth_count < CONFIG->grpc_push_depth_ ) {
+        while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
             if( ptr->Price > watermark ) {
                 DepthLevel* depth = msd->add_ask_depth();
                 depth->mutable_price()->set_value(ptr->Price.Value);
@@ -32,7 +32,7 @@ std::shared_ptr<QuoteData> filter_quote(const string& symbol, const SMixQuote* s
     {
         int depth_count = 0;
         SMixDepthPrice* ptr = src->Bids;
-        while( ptr != NULL && depth_count < CONFIG->grpc_push_depth_ ) {
+        while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
             if( ptr->Price < watermark ) {
                 DepthLevel* depth = msd->add_bid_depth();
                 depth->mutable_price()->set_value(ptr->Price.Value);

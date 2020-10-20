@@ -45,7 +45,7 @@ public:
 
             // grpc
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
-            grpc_push_depth_ = js["grpc"]["publish_depth"].get<int>();;
+            grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();;
             frequency_ = js["grpc"]["frequency"].get<int>();
 
             // debug
@@ -93,7 +93,7 @@ public:
     // grpc push
     int frequency_;     // 品种聚合后的更新频率：每秒frequency_次
     string grpc_publish_addr_;
-    int grpc_push_depth_;
+    int grpc_publish_depth_;
 
     // [for debug] sample symbol
     string sample_symbol_;
