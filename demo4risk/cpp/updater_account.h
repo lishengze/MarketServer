@@ -88,7 +88,7 @@ private:
             strcpy(account.user_account_.currencies[1].currency, "ETH");
             account.user_account_.currencies[1].amount = 999999;
             strcpy(account.user_account_.currencies[2].currency, "USDT");
-            account.user_account_.currencies[2].amount = 999999;
+            account.user_account_.currencies[2].amount = 999999999;
             account.user_account_.currency_length = 3;
             callback->on_account_update(account);
             // 定时聚合账户详情回调风控模块

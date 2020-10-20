@@ -19,7 +19,7 @@ void QuoteSingle::publish_quote(const string& exchange, const string& symbol, co
     // 每秒更新频率控制
     auto last = last_clocks_[exchange][symbol];
     auto now = get_miliseconds();
-    if( (now -last) < (1000/CONFIG->frequency_) )
+    if( (now -last) < (1000/CONFIG->grpc_publish_raw_frequency_) )
     {
         return;
     }

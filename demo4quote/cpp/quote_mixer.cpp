@@ -72,7 +72,7 @@ void QuoteMixer::publish_quote(const string& symbol, const SMixQuote& quote, boo
 
     // 每秒更新频率控制
     auto iter = last_clocks_.find(symbol);
-    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->frequency_) )
+    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency_) )
     {
         return;
     }

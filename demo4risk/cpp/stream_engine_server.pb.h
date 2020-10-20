@@ -222,6 +222,7 @@ class SetParamsReq PROTOBUF_FINAL :
     kDepthFieldNumber = 1,
     kFrequencyFieldNumber = 2,
     kPreciseFieldNumber = 3,
+    kRawFrequencyFieldNumber = 5,
   };
   // string symbol = 4;
   void clear_symbol();
@@ -266,6 +267,15 @@ class SetParamsReq PROTOBUF_FINAL :
   void _internal_set_precise(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
+  // int32 raw_frequency = 5;
+  void clear_raw_frequency();
+  ::PROTOBUF_NAMESPACE_ID::int32 raw_frequency() const;
+  void set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_raw_frequency() const;
+  void _internal_set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:trade.service.v1.SetParamsReq)
  private:
   class _Internal;
@@ -277,6 +287,7 @@ class SetParamsReq PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::int32 depth_;
   ::PROTOBUF_NAMESPACE_ID::int32 frequency_;
   ::PROTOBUF_NAMESPACE_ID::int32 precise_;
+  ::PROTOBUF_NAMESPACE_ID::int32 raw_frequency_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
 };
@@ -1678,6 +1689,26 @@ inline void SetParamsReq::set_allocated_symbol(std::string* symbol) {
   symbol_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), symbol,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.SetParamsReq.symbol)
+}
+
+// int32 raw_frequency = 5;
+inline void SetParamsReq::clear_raw_frequency() {
+  raw_frequency_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::_internal_raw_frequency() const {
+  return raw_frequency_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 SetParamsReq::raw_frequency() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SetParamsReq.raw_frequency)
+  return _internal_raw_frequency();
+}
+inline void SetParamsReq::_internal_set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  raw_frequency_ = value;
+}
+inline void SetParamsReq::set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_raw_frequency(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SetParamsReq.raw_frequency)
 }
 
 // -------------------------------------------------------------------

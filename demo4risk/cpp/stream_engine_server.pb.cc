@@ -204,6 +204,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_stream_5fengine_5fserver_2epro
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::SetParamsReq, frequency_),
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::SetParamsReq, precise_),
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::SetParamsReq, symbol_),
+  PROTOBUF_FIELD_OFFSET(::trade::service::v1::SetParamsReq, raw_frequency_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::SetParamsResp, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -263,14 +264,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_stream_5fengine_5fserver_2epro
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::trade::service::v1::SetParamsReq)},
-  { 9, -1, sizeof(::trade::service::v1::SetParamsResp)},
-  { 14, -1, sizeof(::trade::service::v1::SubscribeQuoteReq)},
-  { 19, -1, sizeof(::trade::service::v1::GetQuoteReq)},
-  { 26, -1, sizeof(::trade::service::v1::MultiQuoteData)},
-  { 32, -1, sizeof(::trade::service::v1::QuoteData)},
-  { 44, -1, sizeof(::trade::service::v1::DepthLevel)},
-  { 51, -1, sizeof(::trade::service::v1::Decimal)},
-  { 58, -1, sizeof(::trade::service::v1::DepthVolume)},
+  { 10, -1, sizeof(::trade::service::v1::SetParamsResp)},
+  { 15, -1, sizeof(::trade::service::v1::SubscribeQuoteReq)},
+  { 20, -1, sizeof(::trade::service::v1::GetQuoteReq)},
+  { 27, -1, sizeof(::trade::service::v1::MultiQuoteData)},
+  { 33, -1, sizeof(::trade::service::v1::QuoteData)},
+  { 45, -1, sizeof(::trade::service::v1::DepthLevel)},
+  { 52, -1, sizeof(::trade::service::v1::Decimal)},
+  { 59, -1, sizeof(::trade::service::v1::DepthVolume)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -287,42 +288,42 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_stream_5fengine_5fserver_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\032stream_engine_server.proto\022\020trade.serv"
-  "ice.v1\032\ngogo.proto\"Q\n\014SetParamsReq\022\r\n\005de"
+  "ice.v1\032\ngogo.proto\"h\n\014SetParamsReq\022\r\n\005de"
   "pth\030\001 \001(\005\022\021\n\tfrequency\030\002 \001(\005\022\017\n\007precise\030"
-  "\003 \001(\005\022\016\n\006symbol\030\004 \001(\t\"\017\n\rSetParamsResp\"\023"
-  "\n\021SubscribeQuoteReq\"_\n\013GetQuoteReq\022*\n\010ex"
-  "change\030\001 \001(\tB\030\342\336\037\010Exchange\352\336\037\010exchange\022$"
-  "\n\006symbol\030\002 \001(\tB\024\342\336\037\006Symbol\352\336\037\006symbol\"S\n\016"
-  "MultiQuoteData\022A\n\006quotes\030\001 \003(\0132\033.trade.s"
-  "ervice.v1.QuoteDataB\024\342\336\037\006Quotes\352\336\037\006quote"
-  "s\"\225\003\n\tQuoteData\022$\n\006symbol\030\001 \001(\tB\024\342\336\037\006Sym"
-  "bol\352\336\037\006symbol\022&\n\007msg_seq\030\002 \001(\003B\025\342\336\037\006MsgS"
-  "eq\352\336\037\007msg_seq\0222\n\004time\030\003 \001(\tB$\342\336\037\004Time\352\336\037"
-  "\004time\372\336\037\020wx/pkg/time.Time\022F\n\013time_arrive"
-  "\030\004 \001(\tB1\342\336\037\nTimeArrive\352\336\037\013time_arrive\372\336\037"
-  "\020wx/pkg/time.Time\022J\n\task_depth\030\005 \003(\0132\034.t"
-  "rade.service.v1.DepthLevelB\031\342\336\037\010AskDepth"
-  "\352\336\037\task_depth\022J\n\tbid_depth\030\006 \003(\0132\034.trade"
-  ".service.v1.DepthLevelB\031\342\336\037\010BidDepth\352\336\037\t"
-  "bid_depth\022&\n\007is_snap\030\007 \001(\010B\025\342\336\037\006IsSnap\352\336"
-  "\037\007is_snap\"\211\001\n\nDepthLevel\022<\n\005price\030\001 \001(\0132"
-  "\031.trade.service.v1.DecimalB\022\342\336\037\005Price\352\336\037"
-  "\005price\022=\n\004data\030\002 \003(\0132\035.trade.service.v1."
-  "DepthVolumeB\020\342\336\037\004Data\352\336\037\004data\"L\n\007Decimal"
-  "\022!\n\005value\030\001 \001(\003B\022\342\336\037\005Value\352\336\037\005value\022\036\n\004b"
-  "ase\030\002 \001(\005B\020\342\336\037\004Base\352\336\037\004base\"_\n\013DepthVolu"
-  "me\022$\n\006volume\030\001 \001(\001B\024\342\336\037\006Volume\352\336\037\006volume"
-  "\022*\n\010exchange\030\002 \001(\tB\030\342\336\037\010Exchange\352\336\037\010exch"
-  "ange2\343\002\n\023StreamEngineService\022F\n\010GetQuote"
-  "\022\035.trade.service.v1.GetQuoteReq\032\033.trade."
-  "service.v1.QuoteData\022V\n\021SubscribeOneQuot"
-  "e\022\035.trade.service.v1.GetQuoteReq\032 .trade"
-  ".service.v1.MultiQuoteData0\001\022^\n\023MultiSub"
-  "scribeQuote\022#.trade.service.v1.Subscribe"
-  "QuoteReq\032 .trade.service.v1.MultiQuoteDa"
-  "ta0\001\022L\n\tSetParams\022\036.trade.service.v1.Set"
-  "ParamsReq\032\037.trade.service.v1.SetParamsRe"
-  "spB\004Z\002v1b\006proto3"
+  "\003 \001(\005\022\016\n\006symbol\030\004 \001(\t\022\025\n\rraw_frequency\030\005"
+  " \001(\005\"\017\n\rSetParamsResp\"\023\n\021SubscribeQuoteR"
+  "eq\"_\n\013GetQuoteReq\022*\n\010exchange\030\001 \001(\tB\030\342\336\037"
+  "\010Exchange\352\336\037\010exchange\022$\n\006symbol\030\002 \001(\tB\024\342"
+  "\336\037\006Symbol\352\336\037\006symbol\"S\n\016MultiQuoteData\022A\n"
+  "\006quotes\030\001 \003(\0132\033.trade.service.v1.QuoteDa"
+  "taB\024\342\336\037\006Quotes\352\336\037\006quotes\"\225\003\n\tQuoteData\022$"
+  "\n\006symbol\030\001 \001(\tB\024\342\336\037\006Symbol\352\336\037\006symbol\022&\n\007"
+  "msg_seq\030\002 \001(\003B\025\342\336\037\006MsgSeq\352\336\037\007msg_seq\0222\n\004"
+  "time\030\003 \001(\tB$\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/t"
+  "ime.Time\022F\n\013time_arrive\030\004 \001(\tB1\342\336\037\nTimeA"
+  "rrive\352\336\037\013time_arrive\372\336\037\020wx/pkg/time.Time"
+  "\022J\n\task_depth\030\005 \003(\0132\034.trade.service.v1.D"
+  "epthLevelB\031\342\336\037\010AskDepth\352\336\037\task_depth\022J\n\t"
+  "bid_depth\030\006 \003(\0132\034.trade.service.v1.Depth"
+  "LevelB\031\342\336\037\010BidDepth\352\336\037\tbid_depth\022&\n\007is_s"
+  "nap\030\007 \001(\010B\025\342\336\037\006IsSnap\352\336\037\007is_snap\"\211\001\n\nDep"
+  "thLevel\022<\n\005price\030\001 \001(\0132\031.trade.service.v"
+  "1.DecimalB\022\342\336\037\005Price\352\336\037\005price\022=\n\004data\030\002 "
+  "\003(\0132\035.trade.service.v1.DepthVolumeB\020\342\336\037\004"
+  "Data\352\336\037\004data\"L\n\007Decimal\022!\n\005value\030\001 \001(\003B\022"
+  "\342\336\037\005Value\352\336\037\005value\022\036\n\004base\030\002 \001(\005B\020\342\336\037\004Ba"
+  "se\352\336\037\004base\"_\n\013DepthVolume\022$\n\006volume\030\001 \001("
+  "\001B\024\342\336\037\006Volume\352\336\037\006volume\022*\n\010exchange\030\002 \001("
+  "\tB\030\342\336\037\010Exchange\352\336\037\010exchange2\343\002\n\023StreamEn"
+  "gineService\022F\n\010GetQuote\022\035.trade.service."
+  "v1.GetQuoteReq\032\033.trade.service.v1.QuoteD"
+  "ata\022V\n\021SubscribeOneQuote\022\035.trade.service"
+  ".v1.GetQuoteReq\032 .trade.service.v1.Multi"
+  "QuoteData0\001\022^\n\023MultiSubscribeQuote\022#.tra"
+  "de.service.v1.SubscribeQuoteReq\032 .trade."
+  "service.v1.MultiQuoteData0\001\022L\n\tSetParams"
+  "\022\036.trade.service.v1.SetParamsReq\032\037.trade"
+  ".service.v1.SetParamsRespB\004Z\002v1b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_stream_5fengine_5fserver_2eproto_deps[1] = {
   &::descriptor_table_gogo_2eproto,
@@ -340,7 +341,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_str
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_stream_5fengine_5fserver_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_stream_5fengine_5fserver_2eproto = {
-  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1456,
+  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1479,
   &descriptor_table_stream_5fengine_5fserver_2eproto_once, descriptor_table_stream_5fengine_5fserver_2eproto_sccs, descriptor_table_stream_5fengine_5fserver_2eproto_deps, 9, 1,
   schemas, file_default_instances, TableStruct_stream_5fengine_5fserver_2eproto::offsets,
   file_level_metadata_stream_5fengine_5fserver_2eproto, 9, file_level_enum_descriptors_stream_5fengine_5fserver_2eproto, file_level_service_descriptors_stream_5fengine_5fserver_2eproto,
@@ -375,8 +376,8 @@ SetParamsReq::SetParamsReq(const SetParamsReq& from)
       GetArena());
   }
   ::memcpy(&depth_, &from.depth_,
-    static_cast<size_t>(reinterpret_cast<char*>(&precise_) -
-    reinterpret_cast<char*>(&depth_)) + sizeof(precise_));
+    static_cast<size_t>(reinterpret_cast<char*>(&raw_frequency_) -
+    reinterpret_cast<char*>(&depth_)) + sizeof(raw_frequency_));
   // @@protoc_insertion_point(copy_constructor:trade.service.v1.SetParamsReq)
 }
 
@@ -384,8 +385,8 @@ void SetParamsReq::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_SetParamsReq_stream_5fengine_5fserver_2eproto.base);
   symbol_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&depth_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&precise_) -
-      reinterpret_cast<char*>(&depth_)) + sizeof(precise_));
+      reinterpret_cast<char*>(&raw_frequency_) -
+      reinterpret_cast<char*>(&depth_)) + sizeof(raw_frequency_));
 }
 
 SetParamsReq::~SetParamsReq() {
@@ -422,8 +423,8 @@ void SetParamsReq::Clear() {
 
   symbol_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&depth_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&precise_) -
-      reinterpret_cast<char*>(&depth_)) + sizeof(precise_));
+      reinterpret_cast<char*>(&raw_frequency_) -
+      reinterpret_cast<char*>(&depth_)) + sizeof(raw_frequency_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -462,6 +463,13 @@ const char* SetParamsReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           auto str = _internal_mutable_symbol();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "trade.service.v1.SetParamsReq.symbol"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // int32 raw_frequency = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          raw_frequency_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -521,6 +529,12 @@ failure:
         4, this->_internal_symbol(), target);
   }
 
+  // int32 raw_frequency = 5;
+  if (this->raw_frequency() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(5, this->_internal_raw_frequency(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -563,6 +577,13 @@ size_t SetParamsReq::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_precise());
+  }
+
+  // int32 raw_frequency = 5;
+  if (this->raw_frequency() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_raw_frequency());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -608,6 +629,9 @@ void SetParamsReq::MergeFrom(const SetParamsReq& from) {
   if (from.precise() != 0) {
     _internal_set_precise(from._internal_precise());
   }
+  if (from.raw_frequency() != 0) {
+    _internal_set_raw_frequency(from._internal_raw_frequency());
+  }
 }
 
 void SetParamsReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -633,8 +657,8 @@ void SetParamsReq::InternalSwap(SetParamsReq* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   symbol_.Swap(&other->symbol_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SetParamsReq, precise_)
-      + sizeof(SetParamsReq::precise_)
+      PROTOBUF_FIELD_OFFSET(SetParamsReq, raw_frequency_)
+      + sizeof(SetParamsReq::raw_frequency_)
       - PROTOBUF_FIELD_OFFSET(SetParamsReq, depth_)>(
           reinterpret_cast<char*>(&depth_),
           reinterpret_cast<char*>(&other->depth_));

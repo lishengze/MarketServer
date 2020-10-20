@@ -24,6 +24,7 @@ message SetParamsReq {
     int32 frequency = 2;
     int32 precise = 3;
     string symbol = 4;
+    int32 raw_frequency = 5;
 }
 
 message SetParamsResp {}

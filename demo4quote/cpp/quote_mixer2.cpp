@@ -69,7 +69,7 @@ std::shared_ptr<QuoteData> QuoteMixer2::_publish_quote(const string& symbol, con
 
     // 每秒更新频率控制
     auto iter = last_clocks_.find(symbol);
-    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->frequency_) )
+    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency_) )
     {
         return NULL;
     }
@@ -189,6 +189,6 @@ void QuoteMixer2::_calc_watermark() {
         _one_round();
 
         // 休眠
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 };

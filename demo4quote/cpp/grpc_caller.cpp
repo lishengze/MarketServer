@@ -118,6 +118,7 @@ void CallDataSubscribeOneQuote::Proceed() {
         //std::cout << "CallDataSubscribeOneQuote " << times_ << " " << status_ << std::endl;
         if (times_ == 0)
         {
+            std::cout << "create CallDataSubscribeOneQuote:" << request_.exchange() << "." << request_.symbol() << std::endl;
             parent_->register_client2(this);
             new CallDataSubscribeOneQuote(service_, cq_, parent_);
         }
@@ -228,8 +229,9 @@ void CallDataSetParams::Proceed() {
     } else if (status_ == PROCESS) {
         new CallDataSetParams(service_, cq_, parent_);
 
-        CONFIG->frequency_ = request_.frequency();
+        CONFIG->grpc_publish_frequency_ = request_.frequency();
         CONFIG->grpc_publish_depth_ = request_.depth();
+        CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
         string current_symbol = request_.symbol();
         if( current_symbol != "" ) {
             CONFIG->symbol_precise_[current_symbol] = request_.precise();
