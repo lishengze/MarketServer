@@ -1,3 +1,4 @@
+#include "risk_controller_config.h"
 #include "datacenter.h"
 #include "grpc_caller.h"
 
@@ -20,28 +21,36 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
     sprintf(sequence, "%lld", quote.seq_no);
     msd->set_msg_seq(sequence);
     // 卖盘
-    for( int i = 0 ; i < quote.ask_length ; ++i ) {
+    int count = 0;
+    for( int i = 0 ; i < quote.ask_length && count < CONFIG->grpc_publish_depth_ ; ++i ) {
         const SInnerDepth& srcDepth = quote.asks[i];
-        if( srcDepth.valid == false )
+        if( srcDepth.total_volume <= 0 )
             continue;
+        count++;
         Depth* depth = msd->add_ask_depth();        
         depth->set_price(srcDepth.price.GetStrValue());
         depth->set_volume(srcDepth.total_volume);
         for( int j = 0 ; j < srcDepth.exchange_length ; ++j ) {
+            if( srcDepth.exchanges[j].volume <= 0 )
+                continue;
             DepthData* depthData = depth->add_data();
             depthData->set_exchange(srcDepth.exchanges[j].name);
             depthData->set_size(srcDepth.exchanges[j].volume);
         }
     }
     // 买盘
-    for( int i = 0 ; i < quote.bid_length ; ++i ) {
+    count = 0;
+    for( int i = 0 ; i < quote.bid_length && count < CONFIG->grpc_publish_depth_ ; ++i ) {
         const SInnerDepth& srcDepth = quote.bids[i];
-        if( srcDepth.valid == false )
+        if( srcDepth.total_volume <= 0 )
             continue;
+        count++;
         Depth* depth = msd->add_bid_depth();        
         depth->set_price(srcDepth.price.GetStrValue());
         depth->set_volume(srcDepth.total_volume);
         for( int j = 0 ; j < srcDepth.exchange_length ; ++j ) {
+            if( srcDepth.exchanges[j].volume <= 0 )
+                continue;
             DepthData* depthData = depth->add_data();
             depthData->set_exchange(srcDepth.exchanges[j].name);
             depthData->set_size(srcDepth.exchanges[j].volume);
@@ -157,6 +166,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd(newQuote, ptrData.get());
     
+    std::cout << "publish " << quote.symbol << " " << ptrData->ask_depth_size() << "/"<< ptrData->bid_depth_size() << std::endl;
+
     // send to clients
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
@@ -171,29 +182,10 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
     //newQuote = quote;
     //return;
     string symbol = quote.symbol;
-    strcpy(newQuote.symbol, quote.symbol);
-    newQuote.time = quote.time;
-    newQuote.time_arrive = quote.time_arrive;
-    newQuote.seq_no = quote.seq_no;
-
-    // 获取币种出现次数
-    string sell_currency, buy_currency;
-    if( !getcurrency_from_symbol(symbol, sell_currency, buy_currency) )
-        return;
-    auto iter = currency_count_.find(sell_currency);
-    if( iter == currency_count_.end() )
-        return;
-    int sell_count = iter->second;    
-    auto iter2 = currency_count_.find(buy_currency);
-    if( iter2 == currency_count_.end() )
-        return;
-    int buy_count = iter->second;
-    
-    // 动态调整每个品种的资金分配量
-    double sell_total_amount = (params.cache_account.get_hedge_amount(sell_currency) * params.cache_config.HedgePercent / 100 + 
-        params.cache_account.get_user_amount(sell_currency) * params.cache_config.UserPercent / 100) / sell_count;
-    double buy_total_amount = (params.cache_account.get_hedge_amount(buy_currency) * params.cache_config.HedgePercent / 100 + 
-        params.cache_account.get_user_amount(buy_currency) * params.cache_config.UserPercent / 100) / buy_count;
+    bool debug = false;
+    if( symbol == "ETH_USDT") {
+        debug = true;
+    }
 
     // 动态调整行情价位偏置
     double volumeBias = (1 - params.cache_config.VolumeBias * 1.0/ 100);
@@ -240,28 +232,63 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
         newQuote.bid_length = count;
     }
 
-    // 逐档计算余额消耗量
-    for( int i = 0 ; i < newQuote.ask_length ; ++i ) {
-        newQuote.asks[i].amount_cost = newQuote.asks[i].total_volume;
-    }
-    for( int i = 0 ; i < newQuote.bid_length ; ++i ) {
-        newQuote.bids[i].amount_cost = newQuote.bids[i].price.GetValue() * newQuote.bids[i].total_volume;
-    }
+    // 解析币种信息
+    strcpy(newQuote.symbol, quote.symbol);
+    newQuote.time = quote.time;
+    newQuote.time_arrive = quote.time_arrive;
+    newQuote.seq_no = quote.seq_no;
+
+    // 获取币种出现次数
+    string sell_currency, buy_currency;
+    if( !getcurrency_from_symbol(symbol, sell_currency, buy_currency) )
+        return;
+    auto iter = currency_count_.find(sell_currency);
+    if( iter == currency_count_.end() )
+        return;
+    int sell_count = iter->second; // 卖币种出现次数
+    auto iter2 = currency_count_.find(buy_currency);
+    if( iter2 == currency_count_.end() )
+        return;
+    int buy_count = iter->second; // 买币种出现次数
+    
+    // 动态调整每个品种的资金分配量
+    unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
+    params.cache_account.get_hedge_amounts(sell_currency, params.cache_config.HedgePercent / sell_count, sell_total_amounts);
+    params.cache_account.get_hedge_amounts(buy_currency, params.cache_config.HedgePercent / buy_count, buy_total_amounts);
 
     // 逐档从总余额中扣除资金消耗
     for( int i = 0 ; i < newQuote.ask_length ; ++i ) {
-        if( sell_total_amount < newQuote.asks[i].amount_cost ) {
-            newQuote.ask_length = i; // 缩短行情档位
-            break;
+        SInnerDepth& depth = newQuote.asks[i];
+        depth.total_volume = 0;
+        for( int j = 0 ; j < depth.exchange_length ; ++j ) {
+            string exchange = depth.exchanges[j].name;
+            double remain_amount = sell_total_amounts[exchange];
+            double need_amount = depth.exchanges[j].volume; // 计算需要消耗的资金量
+            if( debug ) {
+                std::cout << std::fixed << exchange << " " << sell_currency << " remain_amount:" << remain_amount << " need_amount:" << need_amount << std::endl;
+            }
+            if( remain_amount < need_amount ) {
+                depth.exchanges[j].volume = 0;
+            } else {
+                sell_total_amounts[exchange] -= need_amount;
+                depth.total_volume += depth.exchanges[j].volume;
+            }
         }
-        sell_total_amount -= newQuote.asks[i].amount_cost;
     }
     for( int i = 0 ; i < newQuote.bid_length ; ++i ) {
-        if( buy_total_amount < newQuote.bids[i].amount_cost ) {
-            newQuote.bid_length = i; // 缩短行情档位
-            break;
+        SInnerDepth& depth = newQuote.bids[i];
+        depth.total_volume = 0;
+        for( int j = 0 ; j < depth.exchange_length ; ++j ) {
+            string exchange = depth.exchanges[j].name;
+            double remain_amount = buy_total_amounts[exchange];
+            double need_amount = depth.price.GetValue() * depth.exchanges[j].volume; // 计算需要消耗的资金量
+            if( remain_amount < need_amount ) {
+                depth.exchanges[j].volume = 0;
+            } else {
+                buy_total_amounts[exchange] -= need_amount;
+                depth.total_volume += depth.exchanges[j].volume;
+            }
         }
-        buy_total_amount -= newQuote.bids[i].amount_cost;
     }
 
     // 加工后聚合行情扣减系统未对冲单的价位
@@ -278,9 +305,6 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
                     i++;
                 } else {
                     newQuote.asks[i].total_volume -= iter->volume;
-                    if( newQuote.asks[i].total_volume < 0 ) {
-                        newQuote.asks[i].valid = false;                        
-                    }
                 }
             }
         }
@@ -294,9 +318,6 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
                     i++;
                 } else {
                     newQuote.bids[i].total_volume -= iter->volume;
-                    if( newQuote.bids[i].total_volume < 0 ) {
-                        newQuote.bids[i].valid = false;                        
-                    }
                 }
             }
         }

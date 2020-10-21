@@ -28,9 +28,8 @@ struct SExchangeData {
 };
 
 struct SInnerDepth {
-    bool valid;
     SDecimal price;
-    double total_volume;
+    double total_volume; // 总挂单量，用于下发行情
     SExchangeData exchanges[MAX_EXCHANGE_LENGTH];
     int exchange_length;
     double amount_cost; // 余额消耗量
@@ -38,13 +37,11 @@ struct SInnerDepth {
     SInnerDepth() {
         total_volume = 0;
         exchange_length = 0;
-        valid = true;
     }
 
     void mix_exchanges(const SInnerDepth& src, double bias) {
         for( int i = 0 ; i < src.exchange_length ; ++i ) {
             double biasedVolume = src.exchanges[i].volume * bias;
-            total_volume += biasedVolume;
             bool found = false;
             for( int j = 0 ; j < exchange_length ; ++j ) {
                 if( string(exchanges[j].name) == string(src.exchanges[i].name) ) {

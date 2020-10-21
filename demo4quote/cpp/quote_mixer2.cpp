@@ -9,6 +9,8 @@ std::shared_ptr<QuoteData> filter_quote(const string& symbol, const SMixQuote* s
 
     // 卖盘
     {
+        bool patched =  false;
+        unordered_map<TExchange, double> patched_volumes;
         int depth_count = 0;
         SMixDepthPrice* ptr = src->Asks;
         while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
@@ -16,20 +18,39 @@ std::shared_ptr<QuoteData> filter_quote(const string& symbol, const SMixQuote* s
                 DepthLevel* depth = msd->add_ask_depth();
                 depth->mutable_price()->set_value(ptr->Price.Value);
                 depth->mutable_price()->set_base(ptr->Price.Base);
-                for(auto &v : ptr->Volume) {
-                    const TExchange& exchange = v.first;
-                    const double volume = v.second;
-                    DepthVolume* depthVolume = depth->add_data();
-                    depthVolume->set_volume(volume);
-                    depthVolume->set_exchange(exchange);
+                if( !patched ) {
+                    patched = true;
+                    for(auto &v : ptr->Volume) {
+                        const TExchange& exchange = v.first;
+                        const double& volume = v.second;
+                        DepthVolume* depthVolume = depth->add_data();
+                        depthVolume->set_volume(patched_volumes[exchange] + volume);
+                        depthVolume->set_exchange(exchange);
+                    }
+                } else {
+                    for(auto &v : ptr->Volume) {
+                        const TExchange& exchange = v.first;
+                        const double& volume = v.second;
+                        DepthVolume* depthVolume = depth->add_data();
+                        depthVolume->set_volume(volume);
+                        depthVolume->set_exchange(exchange);
+                    }
                 }
                 depth_count += 1;
+            } else {
+                for( auto &v : ptr->Volume ) {
+                    const TExchange& exchange = v.first;
+                    const double& volume = v.second;
+                    patched_volumes[exchange] += volume;
+                }
             }
             ptr = ptr->Next;
         }
     }
     // 买盘
     {
+        bool patched =  false;
+        unordered_map<TExchange, double> patched_volumes;
         int depth_count = 0;
         SMixDepthPrice* ptr = src->Bids;
         while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
@@ -37,14 +58,31 @@ std::shared_ptr<QuoteData> filter_quote(const string& symbol, const SMixQuote* s
                 DepthLevel* depth = msd->add_bid_depth();
                 depth->mutable_price()->set_value(ptr->Price.Value);
                 depth->mutable_price()->set_base(ptr->Price.Base);
-                for(auto &v : ptr->Volume) {
-                    const TExchange& exchange = v.first;
-                    const double volume = v.second;
-                    DepthVolume* depthVolume = depth->add_data();
-                    depthVolume->set_volume(volume);
-                    depthVolume->set_exchange(exchange);
+                if( !patched ) {
+                    patched = true;
+                    for(auto &v : ptr->Volume) {
+                        const TExchange& exchange = v.first;
+                        const double& volume = v.second;
+                        DepthVolume* depthVolume = depth->add_data();
+                        depthVolume->set_volume(patched_volumes[exchange] + volume);
+                        depthVolume->set_exchange(exchange);
+                    }
+                } else {
+                    for(auto &v : ptr->Volume) {
+                        const TExchange& exchange = v.first;
+                        const double& volume = v.second;
+                        DepthVolume* depthVolume = depth->add_data();
+                        depthVolume->set_volume(volume);
+                        depthVolume->set_exchange(exchange);
+                    }
                 }
                 depth_count += 1;
+            } else {
+                for( auto &v : ptr->Volume ) {
+                    const TExchange& exchange = v.first;
+                    const double& volume = v.second;
+                    patched_volumes[exchange] += volume;
+                }
             }
             ptr = ptr->Next;
         }

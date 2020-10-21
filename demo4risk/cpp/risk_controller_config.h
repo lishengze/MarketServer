@@ -41,6 +41,7 @@ public:
             // grpc
             grpc_quote_addr_ = js["grpc"]["quote_addr"].get<string>();
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
+            grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();
 
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
@@ -63,6 +64,7 @@ public:
     // grpc quote
     string grpc_quote_addr_;
     string grpc_publish_addr_;
+    int grpc_publish_depth_;
 
     // [for debug] sample symbol
     string sample_symbol_;

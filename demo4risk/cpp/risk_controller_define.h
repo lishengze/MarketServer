@@ -151,7 +151,7 @@ struct SDecimal {
     }
 };
 #define MAX_EXCHANGE_LENGTH 10
-#define MAX_DEPTH_LENGTH 20
+#define MAX_DEPTH_LENGTH 100
 #define MAX_SYMBOLNAME_LENGTH 32
 #define MAX_EXCHANGENAME_LENGTH 32
 #define TSymbol string
