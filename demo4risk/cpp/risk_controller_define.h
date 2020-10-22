@@ -22,19 +22,19 @@ struct SDecimal {
         Base = 0;
     }
 
-    static SDecimal MaxDecimal() {
+    static SDecimal max_decimal() {
         SDecimal ret;
         ret.Value = ULLONG_MAX;
         ret.Base = 0;
         return ret;
     }
 
-    static SDecimal MinDecimal() {
+    static SDecimal min_decimal() {
         SDecimal ret;
         return ret;
     }
 
-    void From(const string& data, int precise = -1, bool ceiling = false) {
+    void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
         Base = data.length() - pos - 1;
         if( precise >= 0 && precise < Base ) { // 精度调整
@@ -48,7 +48,7 @@ struct SDecimal {
         }
     }
 
-    void From(const SDecimal& data, int precise = -1, bool ceiling = false) {
+    void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
         if( precise == -1 || data.Base <= precise ) {
             Value = data.Value;
             Base = data.Base;
@@ -63,11 +63,11 @@ struct SDecimal {
         Base = precise;
     }
 
-    double GetValue() const {
+    double get_value() const {
         return Value * 1.0 / CALC_BASE(Base);
     }
 
-    string GetStrValue() const {
+    string get_str_value() const {
         char precise[25];
         sprintf(precise, "%d", Base+1);
 

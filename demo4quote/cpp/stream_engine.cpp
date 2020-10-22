@@ -7,10 +7,11 @@ const char* config_file = "config.json";
 
 StreamEngine::StreamEngine(){
     
-    // load config here...
+    // init configuration
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
+    // init grpc server
     utrade::pandora::Singleton<GrpcServer>::Instance();
 }
 
@@ -19,8 +20,12 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() {
     // start redis
-    redis_quote_.set_engine(this);
-    redis_quote_.start(CONFIG->quote_redis_host_, CONFIG->quote_redis_port_, CONFIG->quote_redis_password_, CONFIG->logger_);
+    quote_source_.set_engine(this);
+    RedisParams params;
+    params.host = CONFIG->quote_redis_host_;
+    params.port = CONFIG->quote_redis_port_;
+    params.password = CONFIG->quote_redis_password_;
+    quote_source_.start(params, CONFIG->logger_);
 
     // start grpc server
     PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_);
@@ -28,7 +33,7 @@ void StreamEngine::start() {
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
     if( CONFIG->dump_binary_ ) {
-        quote_dumper_.on_mix_snap(exchange, symbol, quote);
+        quote_dumper_.on_snap(exchange, symbol, quote);
     }
     
     if( CONFIG->publish_data_ ) {
@@ -65,17 +70,16 @@ void StreamEngine::on_connected() {
         for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
             const string& symbol = *iterSymbol;
             const string& exchange = *iterExchange;
-            redis_quote_.subscribe("UPDATEx|" + symbol + "." + exchange);            
+            quote_source_.subscribe("UPDATEx|" + symbol + "." + exchange);            
         }
     }
 };
 
 void StreamEngine::signal_handler(int signum)
 {
-    //UT_LOG_INFO(GALAXY_LOGGER, "KernelEngine::signal_handler " << signum);
+    UT_LOG_INFO(CONFIG->logger_, "StreamEngine::signal_handler " << signum);
     //signal_sys = signum;
     // 释放资源
-    //KERNELENGINE->release();
     // 退出
     exit(0);
 }

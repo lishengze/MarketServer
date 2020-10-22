@@ -9,7 +9,7 @@ public:
         f = fopen("dump.dat", "wb");
     }
 
-    void on_mix_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
+    void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
         char v = 1;
         fwrite(&v, 1, 1, f);
         fwrite(&quote, sizeof(quote), 1, f);

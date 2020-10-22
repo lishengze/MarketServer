@@ -3,6 +3,23 @@
 #include "stream_engine_config.h"
 
 
+RedisSnapRequester::RedisSnapRequester() {
+
+}
+
+RedisSnapRequester::~RedisSnapRequester() {
+    if (thread_loop_) {
+        if (thread_loop_->joinable()) {
+            thread_loop_->join();
+        }
+        delete thread_loop_;
+    }
+}
+
+void RedisSnapRequester::start(){
+    thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
+}
+
 void RedisSnapRequester::on_update_symbol(const string& exchange, const string& symbol) {
     
     string combinedSymbol = combine_symbol(exchange, symbol);
@@ -10,7 +27,6 @@ void RedisSnapRequester::on_update_symbol(const string& exchange, const string& 
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
     if( symbols_.find(combinedSymbol) != symbols_.end() )
         return;
-    //cout << "find new symbol:" << combinedSymbol << endl;
     symbols_[combinedSymbol] = 0;
     boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
 }
@@ -22,7 +38,7 @@ void RedisSnapRequester::_get_snap(const string& exchange, const string& symbol)
     auto iter = redis_sync_apis_.find(thread_id);
     if( iter == redis_sync_apis_.end() ) {
         redis_sync_api = RedisApiPtr{new utrade::pandora::CRedisApi{logger_}};
-        redis_sync_api->RegisterRedis(host_, port_, password_, utrade::pandora::RM_GetData);
+        redis_sync_api->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_GetData);
         redis_sync_apis_[thread_id] = redis_sync_api;
     } else {
         redis_sync_api = iter->second;
@@ -43,13 +59,12 @@ void RedisSnapRequester::_thread_loop(){
         unordered_map<string, int> tmp;
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-            // put all symbols to thread pool
             tmp = symbols_;
         }
         // 发送所有任务
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
             string exchange, symbol;
-            if( !split_symbol(iter->first, exchange, symbol) ) {
+            if( !decombine_symbol(iter->first, exchange, symbol) ) {
                 continue;
             }
             boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));

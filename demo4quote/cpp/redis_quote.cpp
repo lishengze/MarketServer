@@ -2,6 +2,35 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
+void redisquote_to_quote_depth(const njson& data, SDepthPrice* depth, unsigned int& depth_length, bool is_ask)
+{
+    map<SDecimal, double> depths;
+    for (auto iter = data.begin() ; iter != data.end() ; ++iter )
+    {
+        const string& price = iter.key();
+        const double& volume = iter.value();
+        SDecimal dPrice;
+        dPrice.from(price, -1);
+        depths[dPrice] = volume;
+    }
+
+    int count = 0;
+    if( is_ask ) {
+        for( auto iter = depths.begin() ; count < MAX_DEPTH && iter != depths.end() ; ++iter, ++count )
+        {
+            depth[count].price = iter->first;
+            depth[count].volume = iter->second;
+        }
+    } else {
+        for( auto iter = depths.rbegin() ; count < MAX_DEPTH && iter != depths.rend() ; ++iter, ++count )
+        {
+            depth[count].price = iter->first;
+            depth[count].volume = iter->second;
+        }
+    }
+    depth_length = count;
+}
+
 bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     njson snap_json = njson::parse(data); 
     string symbol = snap_json["Symbol"].get<std::string>();
@@ -9,66 +38,28 @@ bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
     long long sequence_no = snap_json["Msg_seq"].get<long long>(); 
     
-    vassign(quote.Exchange, exchange);
-    vassign(quote.Symbol, symbol);
-    vassign(quote.SequenceNo, sequence_no);
-    vassign(quote.TimeArrive, timeArrive);
+    vassign(quote.exchange, exchange);
+    vassign(quote.symbol, symbol);
+    vassign(quote.sequence_no, sequence_no);
+    vassign(quote.time_arrive, timeArrive);
     
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
+    redisquote_to_quote_depth(snap_json[askDepth], quote.asks, quote.ask_length, true);
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
+    redisquote_to_quote_depth(snap_json[bidDepth], quote.bids, quote.bid_length, false);
 
-    // sell
-    {
-        map<SDecimal, double> depths;
-        for (auto iter = snap_json[askDepth].begin() ; iter != snap_json[askDepth].end() ; ++iter )
-        {
-            const string& price = iter.key();
-            const double& volume = iter.value();
-            SDecimal dPrice;
-            dPrice.From(price, -1);
-            depths[dPrice] = volume;
-        }
-
-        int count = 0;
-        for( auto iter = depths.begin() ; count < MAX_DEPTH && iter != depths.end() ; ++iter, ++count )
-        {
-            quote.Asks[count].Price = iter->first;
-            quote.Asks[count].Volume = iter->second;
-        }
-        quote.AskLength = count;
-    }
-
-    // buy
-    {
-        map<SDecimal, double> depths;
-        for (auto iter = snap_json[bidDepth].begin() ; iter != snap_json[bidDepth].end() ; ++iter )
-        {
-            const string& price = iter.key();
-            const double& volume = iter.value();
-            SDecimal dPrice;
-            dPrice.From(price, -1);
-            depths[dPrice] = volume;
-        }
-
-        int count = 0;
-        for( auto iter = depths.rbegin() ; count < MAX_DEPTH && iter != depths.rend() ; ++iter, ++count )
-        {
-            quote.Bids[count].Price = iter->first;
-            quote.Bids[count].Volume = iter->second;
-        }
-        quote.BidLength = count;
-    }
     return true;
 }
 
 
-void RedisQuote::start(const string& host, const int& port, const string& password, UTLogPtr logger) {
+void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
+    // 请求增量
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
     redis_api_->RegisterSpi(this);
-    redis_api_->RegisterRedis(host, port, password, utrade::pandora::RM_Subscribe);
+    redis_api_->RegisterRedis(params.host, params.port, params.password, utrade::pandora::RM_Subscribe);
     
-    // request snap 
-    redis_snap_requester_.init(host, port, password, logger);
+    // 请求全量
+    redis_snap_requester_.init(params, logger);
     redis_snap_requester_.set_engine(this);
     redis_snap_requester_.start();
 };
@@ -89,7 +80,7 @@ void RedisQuote::_on_snap(const string& exchange, const string& symbol, const st
     SDepthQuote quote;
     if( !redisquote_to_quote(data, quote, true))
         return;        
-    if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
+    if( symbol != string(quote.symbol) || exchange != string(quote.exchange) ) {
         UT_LOG_ERROR(CONFIG->logger_, "get_snap: not match");
         return;
     }
@@ -101,7 +92,7 @@ void RedisQuote::_on_snap(const string& exchange, const string& symbol, const st
 };
 
 void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
-    if (channel.find(DEPTH_UPDATE_HEAD)!=string::npos)
+    if (channel.find(DEPTH_UPDATE_HEAD) != string::npos)
     {
         // decode exchange and symbol
         int pos = channel.find(DEPTH_UPDATE_HEAD);
@@ -121,27 +112,26 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
             }
         }
 
-        // string -> SDepthQuote
+        // redis结构到内部结构的转换
         SDepthQuote quote;
         if( !redisquote_to_quote(msg, quote, false)) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: redisquote_to_quote failed");
             return;
         }
-        if( symbol != string(quote.Symbol) || exchange != string(quote.Exchange) ) {
+        if( symbol != string(quote.symbol) || exchange != string(quote.exchange) ) {
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: not match");
             return;
         }
 
-        // redis_snap_requester_ add symbol
+        // 添加到全量请求任务中
         redis_snap_requester_.on_update_symbol(exchange, symbol);
 
-        // safe callback update
+        // lock整个后续处理
         std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
         SDepthQuote lastQuote;
         if( !_get_quote(exchange, symbol, lastQuote) )
             return;
-        // filter by SequenceNo
-        if( quote.SequenceNo < lastQuote.SequenceNo )
+        if( quote.sequence_no < lastQuote.sequence_no )
             return;
         engine_interface_->on_update(exchange, symbol, quote);
     }

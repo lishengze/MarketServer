@@ -28,7 +28,7 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
             continue;
         count++;
         Depth* depth = msd->add_ask_depth();        
-        depth->set_price(srcDepth.price.GetStrValue());
+        depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( int j = 0 ; j < srcDepth.exchange_length ; ++j ) {
             if( srcDepth.exchanges[j].volume <= 0 )
@@ -46,7 +46,7 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
             continue;
         count++;
         Depth* depth = msd->add_bid_depth();        
-        depth->set_price(srcDepth.price.GetStrValue());
+        depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( int j = 0 ; j < srcDepth.exchange_length ; ++j ) {
             if( srcDepth.exchanges[j].volume <= 0 )
@@ -191,7 +191,7 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
     double volumeBias = (1 - params.cache_config.VolumeBias * 1.0/ 100);
     {
         int count = 0;
-        SDecimal lastPrice = SDecimal::MinDecimal();
+        SDecimal lastPrice = SDecimal::min_decimal();
         for( int i = 0 ; i < quote.ask_length ; ++i )
         {
             const SInnerDepth& level = quote.asks[i];
@@ -199,7 +199,7 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
             // 缩放然后向上取整
             SDecimal price = level.price * ( 1 + params.cache_config.PriceBias * 1.0 / 100);
             SDecimal scaledPrice;
-            scaledPrice.From(price, -1, true); 
+            scaledPrice.from(price, -1, true); 
 
             if( scaledPrice > lastPrice ) {
                 count++;
@@ -212,7 +212,7 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
     }
     {
         int count = 0;
-        SDecimal lastPrice = SDecimal::MaxDecimal();
+        SDecimal lastPrice = SDecimal::max_decimal();
         for( int i = 0 ; i < quote.bid_length ; ++i )
         {
             const SInnerDepth& level = quote.bids[i];
@@ -220,7 +220,7 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
             // 缩放然后向下取整
             SDecimal price = level.price * ( 1 - params.cache_config.PriceBias * 1.0 / 100);
             SDecimal scaledPrice;
-            scaledPrice.From(price, -1, false); 
+            scaledPrice.from(price, -1, false); 
 
             if( scaledPrice < lastPrice ) {
                 count++;
@@ -281,7 +281,7 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
         for( int j = 0 ; j < depth.exchange_length ; ++j ) {
             string exchange = depth.exchanges[j].name;
             double remain_amount = buy_total_amounts[exchange];
-            double need_amount = depth.price.GetValue() * depth.exchanges[j].volume; // 计算需要消耗的资金量
+            double need_amount = depth.price.get_value() * depth.exchanges[j].volume; // 计算需要消耗的资金量
             if( remain_amount < need_amount ) {
                 depth.exchanges[j].volume = 0;
             } else {

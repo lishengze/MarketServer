@@ -10,11 +10,7 @@ using njson = nlohmann::json;
 
 bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precise);
 
-inline string make_redis_depth_key(const string& exchange, const string& symbol) {
-    return "DEPTHx|" + symbol + "." + exchange;
-};
-
-class QuoteInterface
+class QuoteSourceInterface
 {
 public:
     virtual void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) = 0;
@@ -32,8 +28,8 @@ public:
     ~RedisQuote(){};
 
     // init
-    void start(const string& host, const int& port, const string& password, UTLogPtr logger);
-    void set_engine(QuoteInterface* ptr) { engine_interface_ = ptr; }
+    void start(const RedisParams& params, UTLogPtr logger);
+    void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
     void subscribe(const string& channel);
     
     // callback from RedisSnapRequester
@@ -60,5 +56,5 @@ private:
     unordered_map<TExchange, TMarketQuote> markets_;
     
     // callback
-    QuoteInterface *engine_interface_ = nullptr;
+    QuoteSourceInterface *engine_interface_ = nullptr;
 };

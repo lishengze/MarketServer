@@ -34,36 +34,6 @@ void quote_to_quote(const QuoteData* src, QuoteData* dst) {
     }
 };
 
-void depthquote_to_quote(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd) {
-    msd->set_symbol(symbol);
-    msd->set_msg_seq(quote.SequenceNo);
-
-    // 卖盘
-    {
-        for( int i = 0 ; i < quote.AskLength ; ++i ) {
-            const SDepthPrice& price = quote.Asks[i];
-            DepthLevel* depth = msd->add_ask_depth();
-            depth->mutable_price()->set_value(price.Price.Value);
-            depth->mutable_price()->set_base(price.Price.Base);
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(price.Volume);
-            depthVolume->set_exchange(exchange);
-        }
-    }
-    // 买盘
-    {
-        for( int i = 0 ; i < quote.BidLength ; ++i ) {
-            const SDepthPrice& price = quote.Bids[i];
-            DepthLevel* depth = msd->add_bid_depth();
-            depth->mutable_price()->set_value(price.Price.Value);
-            depth->mutable_price()->set_base(price.Price.Base);
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(price.Volume);
-            depthVolume->set_exchange(exchange);
-        }
-    }
-};
-
 void CallDataGetQuote::Release() {
     std::cout << "delete CallDataGetQuote:" << request_.exchange() << "." << request_.symbol() << std::endl;
     delete this;

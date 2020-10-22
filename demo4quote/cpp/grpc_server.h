@@ -51,9 +51,8 @@ public:
         thread_loop_ = new std::thread(&GrpcServer::_run, this, grpc_addr);
     }
 
-    void on_snap(const string& exchange, const string& symbol, const SMixQuote& quote);
-    void on_mix_snap(const string& symbol, const SMixQuote& quote);
-    void on_mix_snap2(const string& symbol, std::shared_ptr<QuoteData> quote);
+    void on_snap(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> quote);
+    void on_mix_snap(const string& symbol, std::shared_ptr<QuoteData> quote);
 
     void register_client(CallDataMultiSubscribeQuote* calldata);
     void unregister_client(CallDataMultiSubscribeQuote* calldata);
@@ -126,15 +125,18 @@ private:
         _handle_rpcs();
     }
 
+    // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;
     StreamEngineService::AsyncService service_;
     std::unique_ptr<Server> server_;
 
     std::thread*               thread_loop_ = nullptr;
 
+    // 聚合行情推送客户端
     mutable std::mutex                             mutex_clients_;
     unordered_map<CallDataMultiSubscribeQuote*, bool> clients_;
 
+    // 单交易所单品种推送kehduuan
     mutable std::mutex                             mutex_clients2_;
     unordered_map<CallDataSubscribeOneQuote*, bool> clients2_;
 };

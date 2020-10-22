@@ -37,8 +37,6 @@ using trade::service::v1::DepthLevel;
 using trade::service::v1::Decimal;
 using trade::service::v1::DepthVolume;
 
-void depthquote_to_quote(const string& exchange, const string& symbol, const SDepthQuote& quote, QuoteData* msd);
-
 class GrpcServer;
 class CallData {
 public:
@@ -90,6 +88,34 @@ private:
     ServerAsyncResponseWriter<QuoteData> responder_;
 };
 
+class CallDataMultiSubscribeQuote : public CallData{
+public:
+    CallDataMultiSubscribeQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
+        : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
+        call_type_ = 2;
+        Proceed();
+    }
+
+    void Release();
+
+    void Proceed();
+
+    void add_data(std::shared_ptr<QuoteData> pdata) {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        datas_.push_back(pdata);
+    }
+
+private:
+    StreamEngineService::AsyncService* service_;
+    SubscribeQuoteReq request_;
+    ServerAsyncWriter<MultiQuoteData> responder_;
+    int times_;
+    grpc::Alarm alarm_;
+
+    mutable std::mutex                 mutex_datas_;
+    vector<std::shared_ptr<QuoteData>> datas_;
+};
+
 class CallDataSubscribeOneQuote : public CallData{
 public:
     CallDataSubscribeOneQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
@@ -119,35 +145,7 @@ private:
     int times_;
     grpc::Alarm alarm_;
 
-    mutable std::mutex                             mutex_datas_;
-    vector<std::shared_ptr<QuoteData>> datas_;
-};
-
-class CallDataMultiSubscribeQuote : public CallData{
-public:
-    CallDataMultiSubscribeQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
-        : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
-        call_type_ = 2;
-        Proceed();
-    }
-
-    void Release();
-
-    void Proceed();
-
-    void add_data(std::shared_ptr<QuoteData> pdata) {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        datas_.push_back(pdata);
-    }
-
-private:
-    StreamEngineService::AsyncService* service_;
-    SubscribeQuoteReq request_;
-    ServerAsyncWriter<MultiQuoteData> responder_;
-    int times_;
-    grpc::Alarm alarm_;
-
-    mutable std::mutex                             mutex_datas_;
+    mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<QuoteData>> datas_;
 };
 

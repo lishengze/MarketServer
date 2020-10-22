@@ -25,11 +25,6 @@ public:
         // init logger
         logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
 
-        // init precise
-        symbol_precise_["BTC_USDT"] = 1;
-        symbol_precise_["ETH_USDT"] = 2;
-        symbol_precise_["ETH_BTC"] = 6;
-
         try
         {
             // get the running module path
@@ -49,7 +44,7 @@ public:
             grpc_publish_frequency_ = js["grpc"]["frequency"].get<int>();
             grpc_publish_raw_frequency_ = 1;
 
-            // debug
+            // system
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
             publish_data_ = bool(js["debug"]["publish_data"].get<int>());
             dump_binary_ = bool(js["debug"]["dump_binary"].get<int>());
@@ -62,7 +57,7 @@ public:
             quote_redis_password_ = js["redis_quote"]["password"].get<string>();
             quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
-            // include
+            // config center
             for (auto iter = js["include"]["symbols"].begin(); iter != js["include"]["symbols"].end(); ++iter) {
                 const string& symbol = *iter;
                 include_symbols_.insert(symbol);
@@ -71,6 +66,10 @@ public:
                 const string& exchange = *iter;
                 include_exchanges_.insert(exchange);
             }
+            symbol_precise_["BTC_USDT"] = 1;
+            symbol_precise_["ETH_USDT"] = 2;
+            symbol_precise_["ETH_BTC"] = 6;
+
             UT_LOG_INFO(logger_, "Parse Config finish.");
         }
         catch (std::exception& e)
@@ -91,33 +90,30 @@ public:
         return iter->second;
     }
 public:
-    // grpc push
-    string grpc_publish_addr_;
-    int grpc_publish_frequency_;     // 品种聚合后的更新频率：每秒frequency_次
-    int grpc_publish_depth_;
-    int grpc_publish_raw_frequency_;
+    // grpc
+    string grpc_publish_addr_;          // grpc服务发布地址
+    int grpc_publish_frequency_;        // 品种聚合后的更新频率：每秒frequency次
+    int grpc_publish_depth_;            // 品种聚合后的深度
+    int grpc_publish_raw_frequency_;    // 品种原始行情发布频率：每秒frequency次
 
-    // [for debug] sample symbol
-    string sample_symbol_;
-    // [for debug] only dump binary data instead of push
-    bool publish_data_;
-    bool dump_binary_;
-    // [for debug] output to screen
-    bool output_to_screen_;
-    int mixer_ver_;
+    // system
+    string sample_symbol_;              // 采样品种
+    bool publish_data_;                 // 是否发布行情更新
+    bool dump_binary_;                  // 是否保存原始二进制数据
+    bool output_to_screen_;             // 是否打印采样信息到屏幕
+    int mixer_ver_;                     // 聚合行情算法版本
 
-    // quote redis config
+    // redis quotation source
     string quote_redis_host_;
     int quote_redis_port_;
     string quote_redis_password_;
     int quote_redis_snap_interval_;
 
-    // include
-    std::set<string> include_symbols_;
-    std::set<string> include_exchanges_;
+    // from config center
+    std::set<string> include_symbols_;      // 包含的品种
+    std::set<string> include_exchanges_;    // 包含的交易所
+    std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度
 
-    // precise configuration
-    std::unordered_map<string, int> symbol_precise_;
     // logger
     UTLogPtr logger_;
 };

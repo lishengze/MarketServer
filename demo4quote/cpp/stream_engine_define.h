@@ -24,139 +24,139 @@ using TSymbol = string;
 #define CALC_BASE(x) (pow(10, (x)))
 
 struct SDecimal {
-    unsigned long long Value;
-    short Base;
+    unsigned long long value;
+    short base;
 
     SDecimal() {
-        Value = 0;
-        Base = 0;
+        value = 0;
+        base = 0;
     }
 
-    static SDecimal MaxDecimal() {
+    static SDecimal max_decimal() {
         SDecimal ret;
-        ret.Value = ULLONG_MAX;
-        ret.Base = 0;
+        ret.value = ULLONG_MAX;
+        ret.base = 0;
         return ret;
     }
 
-    static SDecimal MinDecimal() {
+    static SDecimal min_decimal() {
         SDecimal ret;
         return ret;
     }
 
-    void From(const string& data, int precise = -1, bool ceiling = false) {
+    void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
-        Base = data.length() - pos - 1;
-        if( precise >= 0 && precise < Base ) { // 精度调整
-            Base = precise;
+        base = data.length() - pos - 1;
+        if( precise >= 0 && precise < base ) { // 精度调整
+            base = precise;
             string newData = data.substr(0, pos + 1 + precise);
-            Value = atof(newData.c_str()) * CALC_BASE(Base);
+            value = atof(newData.c_str()) * CALC_BASE(base);
             if( ceiling )
-                Value += 1;
+                value += 1;
         } else {
-            Value = atof(data.c_str()) * CALC_BASE(Base);
+            value = atof(data.c_str()) * CALC_BASE(base);
         }
     }
 
-    void From(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( precise == -1 || data.Base <= precise ) {
-            Value = data.Value;
-            Base = data.Base;
+    void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
+        if( precise == -1 || data.base <= precise ) {
+            value = data.value;
+            base = data.base;
             return;
         }
 
         if( ceiling ) {
-            Value = ceil(data.Value / CALC_BASE(data.Base - precise));
+            value = ceil(data.value / CALC_BASE(data.base - precise));
         } else {
-            Value = floor(data.Value / CALC_BASE(data.Base - precise));
+            value = floor(data.value / CALC_BASE(data.base - precise));
         }
-        Base = precise;
+        base = precise;
     }
 
-    double GetValue() const {
-        return Value * 1.0 / CALC_BASE(Base);
+    double get_value() const {
+        return value * 1.0 / CALC_BASE(base);
     }
 
-    string GetStrValue() const {
+    string get_str_value() const {
         char precise[25];
-        sprintf(precise, "%d", Base+1);
+        sprintf(precise, "%d", base+1);
 
         char holder[1024];
         string fmt = "%0" + string(precise) + "lld";
-        sprintf(holder, fmt.c_str(), Value);
+        sprintf(holder, fmt.c_str(), value);
         string ret = holder;
-        ret.insert(ret.begin() + ret.length() - Base, '.');
+        ret.insert(ret.begin() + ret.length() - base, '.');
         return ret;
     }
 
     bool operator <(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value < d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value < d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) < d.Value;
+            return value * CALC_BASE(d.base-base) < d.value;
         }
     }
     bool operator >(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value > d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value > d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) > d.Value;
+            return value * CALC_BASE(d.base-base) > d.value;
         }
     }
     bool operator ==(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value == d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value == d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) == d.Value;
+            return value * CALC_BASE(d.base-base) == d.value;
         }
     }
     bool operator <=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value <= d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value <= d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) <= d.Value;
+            return value * CALC_BASE(d.base-base) <= d.value;
         }
     }
     bool operator >=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value >= d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value >= d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) >= d.Value;
+            return value * CALC_BASE(d.base-base) >= d.value;
         }
     }
 
     SDecimal operator + (const SDecimal &d) const {
         SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value + d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            ret.base = base;
+            ret.value = value + d.value * CALC_BASE(base-d.base);
         } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) + d.Value;
+            ret.base = d.base;
+            ret.value = value * CALC_BASE(d.base-base) + d.value;
         }
         return ret;
     }
     SDecimal operator - (const SDecimal &d) const {
         SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value - d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            ret.base = base;
+            ret.value = value - d.value * CALC_BASE(base-d.base);
         } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) - d.Value;
+            ret.base = d.base;
+            ret.value = value * CALC_BASE(d.base-base) - d.value;
         }
         return ret;
     }
     SDecimal operator / (const double &d) const {
         SDecimal ret;
-        ret.Base = Base;
-        ret.Value = Value / d;
+        ret.base = base;
+        ret.value = value / d;
         return ret;
     }
     SDecimal operator * (const double &d) const {
         SDecimal ret;
-        ret.Base = Base;
-        ret.Value = Value * d;
+        ret.base = base;
+        ret.value = value * d;
         return ret;
     }
 };
@@ -190,56 +190,73 @@ inline void vassign(char * r,const std::string &v)
 
 // redis行情二进制结构
 struct SDepthPrice {
-    SDecimal Price;
-    double Volume;
+    SDecimal price;
+    double volume;
 
     SDepthPrice() {
-        Volume = 0;
+        volume = 0;
     }
 };
 
 #define MAX_DEPTH 100
 struct SDepthQuote {
-    char Exchange[32];
-    char Symbol[32];
-    long long SequenceNo;
-    char TimeArrive[64];
-    SDepthPrice Asks[MAX_DEPTH];        // 卖盘
-    int AskLength;
-    SDepthPrice Bids[MAX_DEPTH];        // 买盘
-    int BidLength;
+    char exchange[32];
+    char symbol[32];
+    long long sequence_no;
+    char time_arrive[64];
+    SDepthPrice asks[MAX_DEPTH];        // 卖盘
+    unsigned int ask_length;
+    SDepthPrice bids[MAX_DEPTH];        // 买盘
+    unsigned int bid_length;
 
     SDepthQuote() {
-        vassign(Exchange, "");
-        vassign(Symbol, "");
-        vassign(SequenceNo, 0);
-        vassign(TimeArrive, "");
-        AskLength = 0;
-        BidLength = 0;
+        vassign(exchange, "");
+        vassign(symbol, "");
+        vassign(sequence_no, 0);
+        vassign(time_arrive, "");
+        ask_length = 0;
+        bid_length = 0;
     }
 };
 
 // 内部行情结构（链表）
 struct SMixDepthPrice {
-    SDecimal Price;
-    unordered_map<TExchange, double> Volume;
-    SMixDepthPrice* Next;
+    SDecimal price;
+    unordered_map<TExchange, double> volume;
+    SMixDepthPrice* next;
 
     SMixDepthPrice() {
-        Next = NULL;
+        next = NULL;
     }
 };
 
 #define MAX_MIXDEPTH 100
 struct SMixQuote {
-    SMixDepthPrice* Asks; // 卖盘
-    SMixDepthPrice* Bids; // 买盘
-    SDecimal Watermark;
-    long long SequenceNo;
+    SMixDepthPrice* asks; // 卖盘
+    SMixDepthPrice* bids; // 买盘
+    SDecimal watermark;
+    long long sequence_no;
 
     SMixQuote() {
-        Asks = NULL;
-        Bids = NULL;
+        asks = NULL;
+        bids = NULL;
+    }
+
+    unsigned int ask_length() const {
+        return _get_length(asks);
+    }
+
+    unsigned int bid_length() const {
+        return _get_length(bids);
+    }
+
+    unsigned int _get_length(const SMixDepthPrice* ptr) const {
+        unsigned int ret = 0;
+        while( ptr != NULL ) {
+            ptr = ptr->next;
+            ret ++;
+        }
+        return ret;
     }
 };
 

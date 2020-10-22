@@ -7,7 +7,7 @@
 #include "quote_dumper.h"
 #include "grpc_server.h"
 
-class StreamEngine : public QuoteInterface 
+class StreamEngine : public QuoteSourceInterface 
 {
 public:
     StreamEngine();
@@ -15,7 +15,7 @@ public:
 
     void start();
 
-    // from QuoteInterface
+    // from QuoteSourceInterface
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_connected();
@@ -27,11 +27,13 @@ public:
 private:
 
     // redis quote upstream
-    RedisQuote redis_quote_;
-
+    RedisQuote quote_source_;
     // mix quotation
     QuoteMixer quote_mixer_;
+    // mix quotation version2(current)
     QuoteMixer2 quote_mixer2_;
+    // single symbol quotation
     QuoteSingle quote_single_;
+    // quotation dumper
     QuoteDumper quote_dumper_;
 };

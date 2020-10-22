@@ -13,7 +13,7 @@ inline string combine_symbol(const string& exchange, const string& symbol) {
     return symbol + "." + exchange;
 };
 
-inline bool split_symbol(const string& combined, string& exchange, string& symbol) {
+inline bool decombine_symbol(const string& combined, string& exchange, string& symbol) {
     std::string::size_type pos = combined.find(".");
     if( pos == std::string::npos) 
         return false;
@@ -22,6 +22,15 @@ inline bool split_symbol(const string& combined, string& exchange, string& symbo
     return true;
 };
 
+inline string make_redis_depth_key(const string& exchange, const string& symbol) {
+    return "DEPTHx|" + symbol + "." + exchange;
+};
+
+struct RedisParams {
+    string     host;
+    int        port;
+    string     password;
+};
 class RedisQuote;
 class RedisSnapRequester 
 {
@@ -29,30 +38,17 @@ public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    RedisSnapRequester() {}
+    RedisSnapRequester();
+    ~RedisSnapRequester();
 
-    ~RedisSnapRequester() {
-        if (thread_loop_) {
-            if (thread_loop_->joinable()) {
-                thread_loop_->join();
-            }
-            delete thread_loop_;
-        }
-    }
-
-    // init
-    void init(const string& host, const int& port, const string& password, UTLogPtr logger){
-        host_ = host;
-        port_ = port;
-        password_ = password;
+    void init(const RedisParams& params, UTLogPtr logger){
+        params_ = params;
         logger_ = logger;
     }
 
-    void start(){
-        thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
-    }
-
     void set_engine(RedisQuote* ptr) { quote_interface_ = ptr; }
+
+    void start();
 
     void on_update_symbol(const string& exchange, const string& symbol);
 
@@ -62,16 +58,15 @@ private:
     void _get_snap(const string& exchange, const string& symbol);
 
 private:
-    string host_;
-    int port_;
-    string password_;
-    UTLogPtr logger_;
+    RedisParams                params_;
+    UTLogPtr                   logger_;
     unordered_map<std::thread::id, RedisApiPtr> redis_sync_apis_;
 
+    // 回调对象
+    RedisQuote*                quote_interface_ = nullptr;
+
+    // 维护所有品种列表，作为请求全量的基础
+    std::thread*               thread_loop_ = nullptr;// 请求线程
     std::mutex                 mutex_symbols_;
     unordered_map<string, int> symbols_;
-
-    RedisQuote*                quote_interface_;
-
-    std::thread*               thread_loop_ = nullptr;
 };

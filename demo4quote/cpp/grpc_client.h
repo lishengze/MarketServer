@@ -72,7 +72,7 @@ inline void make_market_stream(const string& symbol, const SMixQuote& quote, Mar
     msd->set_symbol(symbol);
     msd->set_is_cover(true);
     char sequence[256];
-    sprintf(sequence, "%lld", quote.SequenceNo);
+    sprintf(sequence, "%lld", quote.sequence_no);
     msd->set_msg_seq(sequence);
 
     // 卖盘
@@ -81,7 +81,7 @@ inline void make_market_stream(const string& symbol, const SMixQuote& quote, Mar
         SMixDepthPrice* ptr = quote.Asks;
         while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
             Depth* depth = msd->add_ask_depth();
-            depth->set_price(ptr->Price.GetStrValue());
+            depth->set_price(ptr->Price.get_str_value());
             for(auto &v : ptr->Volume) {
                 const TExchange& exchange = v.first;
                 const double volume = v.second;
@@ -99,7 +99,7 @@ inline void make_market_stream(const string& symbol, const SMixQuote& quote, Mar
         SMixDepthPrice* ptr = quote.Bids;
         while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
             Depth* depth = msd->add_bid_depth();
-            depth->set_price(ptr->Price.GetStrValue());
+            depth->set_price(ptr->Price.get_str_value());
             for(auto &v : ptr->Volume) {
                 const TExchange& exchange = v.first;
                 const double volume = v.second;
