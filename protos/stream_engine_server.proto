@@ -15,16 +15,19 @@ service StreamEngineService {
   // 订阅聚合行情
   rpc MultiSubscribeQuote(SubscribeQuoteReq) returns (stream MultiQuoteData);
 
+  // 订阅用于内部对冲的聚合行情
+  rpc MultiSubscribeHedgeQuote(SubscribeQuoteReq) returns (stream MultiQuoteData);
+
   // 设置参数
   rpc SetParams(SetParamsReq) returns (SetParamsResp);
 }
 
 message SetParamsReq {
-    int32 depth = 1;
-    int32 frequency = 2;
-    int32 precise = 3;
-    string symbol = 4;
-    int32 raw_frequency = 5;
+    int32 depth = 1;            // 聚合行情深度
+    int32 frequency = 2;        // 聚合行情频率
+    int32 precise = 3;          // 设置某个品种的深度（和symbol一起使用）
+    string symbol = 4;          // 设置某个品种的深度（和symbol一起使用）
+    int32 raw_frequency = 5;    // 发布原始品种行情频率
 }
 
 message SetParamsResp {}
@@ -63,4 +66,5 @@ message Decimal {
 message DepthVolume {
   double volume = 1 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
   string exchange = 2 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
+  Decimal price = 3 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
 }

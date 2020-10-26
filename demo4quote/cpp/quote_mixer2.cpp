@@ -16,23 +16,57 @@ QuoteMixer2::~QuoteMixer2() {
     }
 }
 
-void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap) {
+bool QuoteMixer2::_check_update_clocks(const string& symbol) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
     // 每秒更新频率控制
     auto iter = last_clocks_.find(symbol);
     if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency_) )
     {
-        return;
+        return false;
     }
+    last_clocks_[symbol] = get_miliseconds();
+    return true;
+}
+
+void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap) {
     // 如果watermark没有，也跳过
     SDecimal watermark;
     if( !_get_watermark(symbol, watermark) ) {
         return;
     }
-    last_clocks_[symbol] = get_miliseconds();
 
+    // 检查发布频率
+    if( !_check_update_clocks(symbol) ) {
+        return;
+    }
+
+    // 发布
     std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote2(symbol, quote, watermark);
     PUBLISHER->on_mix_snap(symbol, ptr);
-};
+}
+
+bool QuoteMixer2::_check_update_hedgeclocks(const string& symbol) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_hedgeclocks_ };
+    // 每秒更新频率控制
+    auto iter = last_hedgeclocks_.find(symbol);
+    if( iter != last_hedgeclocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency4hedge_) )
+    {
+        return false;
+    }
+    last_hedgeclocks_[symbol] = get_miliseconds();
+    return true;
+}
+
+void QuoteMixer2::_publish_hedgequote(const string& symbol, const SMixQuote* quote, bool isSnap) {
+    // 检查发布频率
+    if( !_check_update_clocks(symbol) ) {
+        return;
+    }
+
+    // 发布行情
+    std::shared_ptr<QuoteData> ptr = mixquote4hedge_to_pbquote2(symbol, quote);
+    PUBLISHER->on_mix_snap4hedge(symbol, ptr);
+}
 
 void QuoteMixer2::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
     // compress price precise
@@ -88,6 +122,7 @@ void QuoteMixer2::on_update(const string& exchange, const string& symbol, const 
 
     // 4. 推送结果
     _publish_quote(symbol, ptr, true);
+    _publish_hedgequote(symbol, ptr, true);
     return;
 };
 
@@ -214,7 +249,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const string& exchange, SMixDepthPric
     SMixDepthPrice* last = &head;
     SMixDepthPrice* tmp = mixedDepths;
 
-    // 4. 混合：first + depths
+    // 1. 混合
     int i = 0;
     for( tmp = head.next ; i < length && tmp != NULL ; ) {
         const SDepthPrice& depth = depths[i];
@@ -241,7 +276,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const string& exchange, SMixDepthPric
         }
     }
 
-    // 5. 剩余全部加入队尾
+    // 2. 剩余全部加入队尾
     for( ; i < length ; ++i) {
         const SDepthPrice& depth = depths[i];
         if( depth.volume < VOLUME_PRECISE ) {
@@ -257,7 +292,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const string& exchange, SMixDepthPric
         last = newDepth;
     }
 
-    // 6. 删除多余的价位
+    // 3. 删除多余的价位
     tmp = head.next;
     int count = 0;
     while( tmp != NULL && count < MAX_MIXDEPTH) {

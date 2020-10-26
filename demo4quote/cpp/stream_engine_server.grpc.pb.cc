@@ -27,6 +27,7 @@ static const char* StreamEngineService_method_names[] = {
   "/trade.service.v1.StreamEngineService/GetQuote",
   "/trade.service.v1.StreamEngineService/SubscribeOneQuote",
   "/trade.service.v1.StreamEngineService/MultiSubscribeQuote",
+  "/trade.service.v1.StreamEngineService/MultiSubscribeHedgeQuote",
   "/trade.service.v1.StreamEngineService/SetParams",
 };
 
@@ -40,7 +41,8 @@ StreamEngineService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>
   : channel_(channel), rpcmethod_GetQuote_(StreamEngineService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SubscribeOneQuote_(StreamEngineService_method_names[1], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
   , rpcmethod_MultiSubscribeQuote_(StreamEngineService_method_names[2], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
-  , rpcmethod_SetParams_(StreamEngineService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_MultiSubscribeHedgeQuote_(StreamEngineService_method_names[3], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
+  , rpcmethod_SetParams_(StreamEngineService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status StreamEngineService::Stub::GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::trade::service::v1::QuoteData* response) {
@@ -101,6 +103,22 @@ void StreamEngineService::Stub::experimental_async::MultiSubscribeQuote(::grpc::
 
 ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* StreamEngineService::Stub::PrepareAsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
   return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(channel_.get(), cq, rpcmethod_MultiSubscribeQuote_, context, request, false, nullptr);
+}
+
+::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>* StreamEngineService::Stub::MultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) {
+  return ::grpc_impl::internal::ClientReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(channel_.get(), rpcmethod_MultiSubscribeHedgeQuote_, context, request);
+}
+
+void StreamEngineService::Stub::experimental_async::MultiSubscribeHedgeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) {
+  ::grpc_impl::internal::ClientCallbackReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(stub_->channel_.get(), stub_->rpcmethod_MultiSubscribeHedgeQuote_, context, request, reactor);
+}
+
+::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* StreamEngineService::Stub::AsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
+  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(channel_.get(), cq, rpcmethod_MultiSubscribeHedgeQuote_, context, request, true, tag);
+}
+
+::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* StreamEngineService::Stub::PrepareAsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiQuoteData>::Create(channel_.get(), cq, rpcmethod_MultiSubscribeHedgeQuote_, context, request, false, nullptr);
 }
 
 ::grpc::Status StreamEngineService::Stub::SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) {
@@ -164,6 +182,16 @@ StreamEngineService::Service::Service() {
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       StreamEngineService_method_names[3],
+      ::grpc::internal::RpcMethod::SERVER_STREAMING,
+      new ::grpc::internal::ServerStreamingHandler< StreamEngineService::Service, ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>(
+          [](StreamEngineService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::trade::service::v1::SubscribeQuoteReq* req,
+             ::grpc_impl::ServerWriter<::trade::service::v1::MultiQuoteData>* writer) {
+               return service->MultiSubscribeHedgeQuote(ctx, req, writer);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StreamEngineService_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< StreamEngineService::Service, ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
           [](StreamEngineService::Service* service,
@@ -192,6 +220,13 @@ StreamEngineService::Service::~Service() {
 }
 
 ::grpc::Status StreamEngineService::Service::MultiSubscribeQuote(::grpc::ServerContext* context, const ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer) {
+  (void) context;
+  (void) request;
+  (void) writer;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StreamEngineService::Service::MultiSubscribeHedgeQuote(::grpc::ServerContext* context, const ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer) {
   (void) context;
   (void) request;
   (void) writer;

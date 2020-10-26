@@ -42,6 +42,8 @@ public:
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
             grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();;
             grpc_publish_frequency_ = js["grpc"]["frequency"].get<int>();
+            grpc_publish_depth4hedge_ = js["grpc"]["publish_depth4hedge"].get<int>();;
+            grpc_publish_frequency4hedge_ = js["grpc"]["frequency4hedge"].get<int>();
             grpc_publish_raw_frequency_ = 1;
 
             // system
@@ -95,6 +97,8 @@ public:
     int grpc_publish_frequency_;        // 品种聚合后的更新频率：每秒frequency次
     int grpc_publish_depth_;            // 品种聚合后的深度
     int grpc_publish_raw_frequency_;    // 品种原始行情发布频率：每秒frequency次
+    int grpc_publish_depth4hedge_;      // 品种聚合后的深度（用于对冲行情）
+    int grpc_publish_frequency4hedge_;        // 品种聚合后的更新频率：每秒frequency次（用于对冲行情）
 
     // system
     string sample_symbol_;              // 采样品种

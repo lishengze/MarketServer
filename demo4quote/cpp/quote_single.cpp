@@ -113,7 +113,7 @@ SMixDepthPrice* QuoteSingle::_mix_exchange(const string& exchange, SMixDepthPric
     head.next = mixedDepths;
     SMixDepthPrice* last = &head;
 
-    // 4. 混合：first + depths
+    // 1. 混合
     int i = 0;
     SMixDepthPrice* tmp = mixedDepths;
     for( tmp = head.next ; i < length && tmp != NULL ; ) {
@@ -141,7 +141,7 @@ SMixDepthPrice* QuoteSingle::_mix_exchange(const string& exchange, SMixDepthPric
         }
     }
 
-    // 5. 剩余全部加入队尾
+    // 2. 剩余全部加入队尾
     for( ; i < length ; ++i) {
         const SDepthPrice& depth = depths[i];
         if( depth.volume < VOLUME_PRECISE ) {
@@ -157,7 +157,7 @@ SMixDepthPrice* QuoteSingle::_mix_exchange(const string& exchange, SMixDepthPric
         last = newDepth;
     }
 
-    // 6. 删除多余的价位
+    // 3. 删除多余的价位
     tmp = head.next;
     int count = 0;
     while( tmp != NULL && count < MAX_MIXDEPTH) {

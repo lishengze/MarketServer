@@ -1519,6 +1519,7 @@ class DepthVolume PROTOBUF_FINAL :
 
   enum : int {
     kExchangeFieldNumber = 2,
+    kPriceFieldNumber = 3,
     kVolumeFieldNumber = 1,
   };
   // string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
@@ -1537,6 +1538,24 @@ class DepthVolume PROTOBUF_FINAL :
   std::string* _internal_mutable_exchange();
   public:
 
+  // .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+  bool has_price() const;
+  private:
+  bool _internal_has_price() const;
+  public:
+  void clear_price();
+  const ::trade::service::v1::Decimal& price() const;
+  ::trade::service::v1::Decimal* release_price();
+  ::trade::service::v1::Decimal* mutable_price();
+  void set_allocated_price(::trade::service::v1::Decimal* price);
+  private:
+  const ::trade::service::v1::Decimal& _internal_price() const;
+  ::trade::service::v1::Decimal* _internal_mutable_price();
+  public:
+  void unsafe_arena_set_allocated_price(
+      ::trade::service::v1::Decimal* price);
+  ::trade::service::v1::Decimal* unsafe_arena_release_price();
+
   // double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
   void clear_volume();
   double volume() const;
@@ -1554,6 +1573,7 @@ class DepthVolume PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
+  ::trade::service::v1::Decimal* price_;
   double volume_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
@@ -2452,6 +2472,89 @@ inline void DepthVolume::set_allocated_exchange(std::string* exchange) {
   exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthVolume.exchange)
+}
+
+// .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+inline bool DepthVolume::_internal_has_price() const {
+  return this != internal_default_instance() && price_ != nullptr;
+}
+inline bool DepthVolume::has_price() const {
+  return _internal_has_price();
+}
+inline void DepthVolume::clear_price() {
+  if (GetArena() == nullptr && price_ != nullptr) {
+    delete price_;
+  }
+  price_ = nullptr;
+}
+inline const ::trade::service::v1::Decimal& DepthVolume::_internal_price() const {
+  const ::trade::service::v1::Decimal* p = price_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::trade::service::v1::Decimal*>(
+      &::trade::service::v1::_Decimal_default_instance_);
+}
+inline const ::trade::service::v1::Decimal& DepthVolume::price() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.DepthVolume.price)
+  return _internal_price();
+}
+inline void DepthVolume::unsafe_arena_set_allocated_price(
+    ::trade::service::v1::Decimal* price) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(price_);
+  }
+  price_ = price;
+  if (price) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:trade.service.v1.DepthVolume.price)
+}
+inline ::trade::service::v1::Decimal* DepthVolume::release_price() {
+  
+  ::trade::service::v1::Decimal* temp = price_;
+  price_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::trade::service::v1::Decimal* DepthVolume::unsafe_arena_release_price() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.DepthVolume.price)
+  
+  ::trade::service::v1::Decimal* temp = price_;
+  price_ = nullptr;
+  return temp;
+}
+inline ::trade::service::v1::Decimal* DepthVolume::_internal_mutable_price() {
+  
+  if (price_ == nullptr) {
+    auto* p = CreateMaybeMessage<::trade::service::v1::Decimal>(GetArena());
+    price_ = p;
+  }
+  return price_;
+}
+inline ::trade::service::v1::Decimal* DepthVolume::mutable_price() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.DepthVolume.price)
+  return _internal_mutable_price();
+}
+inline void DepthVolume::set_allocated_price(::trade::service::v1::Decimal* price) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete price_;
+  }
+  if (price) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(price);
+    if (message_arena != submessage_arena) {
+      price = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, price, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  price_ = price;
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthVolume.price)
 }
 
 #ifdef __GNUC__

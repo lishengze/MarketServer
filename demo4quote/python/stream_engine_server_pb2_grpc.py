@@ -30,6 +30,11 @@ class StreamEngineServiceStub(object):
                 request_serializer=stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
                 response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
                 )
+        self.MultiSubscribeHedgeQuote = channel.unary_stream(
+                '/trade.service.v1.StreamEngineService/MultiSubscribeHedgeQuote',
+                request_serializer=stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
+                response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
+                )
         self.SetParams = channel.unary_unary(
                 '/trade.service.v1.StreamEngineService/SetParams',
                 request_serializer=stream__engine__server__pb2.SetParamsReq.SerializeToString,
@@ -61,6 +66,13 @@ class StreamEngineServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def MultiSubscribeHedgeQuote(self, request, context):
+        """订阅用于内部对冲的聚合行情
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def SetParams(self, request, context):
         """设置参数
         """
@@ -83,6 +95,11 @@ def add_StreamEngineServiceServicer_to_server(servicer, server):
             ),
             'MultiSubscribeQuote': grpc.unary_stream_rpc_method_handler(
                     servicer.MultiSubscribeQuote,
+                    request_deserializer=stream__engine__server__pb2.SubscribeQuoteReq.FromString,
+                    response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
+            ),
+            'MultiSubscribeHedgeQuote': grpc.unary_stream_rpc_method_handler(
+                    servicer.MultiSubscribeHedgeQuote,
                     request_deserializer=stream__engine__server__pb2.SubscribeQuoteReq.FromString,
                     response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
             ),
@@ -148,6 +165,23 @@ class StreamEngineService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/MultiSubscribeQuote',
+            stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
+            stream__engine__server__pb2.MultiQuoteData.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def MultiSubscribeHedgeQuote(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/MultiSubscribeHedgeQuote',
             stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
             stream__engine__server__pb2.MultiQuoteData.FromString,
             options, channel_credentials,

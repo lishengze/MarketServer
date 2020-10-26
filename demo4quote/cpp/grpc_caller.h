@@ -167,3 +167,32 @@ private:
     SetParamsResp reply_;
     ServerAsyncResponseWriter<SetParamsResp> responder_;
 };
+
+
+class CallDataMultiSubscribeHedgeQuote : public CallData{
+public:
+    CallDataMultiSubscribeHedgeQuote(StreamEngineService::AsyncService* service, ServerCompletionQueue* cq, GrpcServer* parent)
+        : CallData(cq, parent), service_(service), responder_(&ctx_), times_(0) {
+        call_type_ = 5;
+        Proceed();
+    }
+
+    void Release();
+
+    void Proceed();
+
+    void add_data(std::shared_ptr<QuoteData> pdata) {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        datas_.push_back(pdata);
+    }
+
+private:
+    StreamEngineService::AsyncService* service_;
+    SubscribeQuoteReq request_;
+    ServerAsyncWriter<MultiQuoteData> responder_;
+    int times_;
+    grpc::Alarm alarm_;
+
+    mutable std::mutex                 mutex_datas_;
+    vector<std::shared_ptr<QuoteData>> datas_;
+};

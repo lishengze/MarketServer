@@ -96,6 +96,34 @@ inline std::shared_ptr<QuoteData> mixquote_to_pbquote2(const string& symbol, con
     return msd;
 };
 
+inline void mixquote4hedge_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth func, bool is_ask)
+{
+    int depth_count = 0;
+    const SMixDepthPrice* ptr = depths;
+    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth4hedge_ ) {
+        DepthLevel* depth = func();
+        depth->mutable_price()->set_value(ptr->price.value);
+        depth->mutable_price()->set_base(ptr->price.base);
+        depth_count += 1;
+        ptr = ptr->next;
+    }
+}
+
+inline std::shared_ptr<QuoteData> mixquote4hedge_to_pbquote2(const string& symbol, const SMixQuote* src)
+{
+    std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
+    msd->set_symbol(symbol);
+
+    // 卖盘
+    FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
+    mixquote4hedge_to_pbquote2_depth(src->asks, f1, true);
+    // 买盘
+    FuncAddDepth f2 = std::bind(&QuoteData::add_bid_depth, msd);
+    mixquote4hedge_to_pbquote2_depth(src->bids, f2, false);
+
+    return msd;
+};
+
 inline void compress_quote_depth(const SDepthPrice* src, unsigned int src_length, int precise, SDepthPrice* dst, unsigned int& dst_length, bool is_ask)
 {
     int count = 0;

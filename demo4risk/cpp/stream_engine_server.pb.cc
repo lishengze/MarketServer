@@ -16,7 +16,7 @@
 #include <google/protobuf/port_def.inc>
 extern PROTOBUF_INTERNAL_EXPORT_stream_5fengine_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Decimal_stream_5fengine_5fserver_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_stream_5fengine_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_DepthLevel_stream_5fengine_5fserver_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_stream_5fengine_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DepthVolume_stream_5fengine_5fserver_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_stream_5fengine_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_DepthVolume_stream_5fengine_5fserver_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_stream_5fengine_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_QuoteData_stream_5fengine_5fserver_2eproto;
 namespace trade {
 namespace service {
@@ -101,8 +101,9 @@ static void InitDefaultsscc_info_DepthVolume_stream_5fengine_5fserver_2eproto() 
   ::trade::service::v1::DepthVolume::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DepthVolume_stream_5fengine_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DepthVolume_stream_5fengine_5fserver_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_DepthVolume_stream_5fengine_5fserver_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_DepthVolume_stream_5fengine_5fserver_2eproto}, {
+      &scc_info_Decimal_stream_5fengine_5fserver_2eproto.base,}};
 
 static void InitDefaultsscc_info_GetQuoteReq_stream_5fengine_5fserver_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -261,6 +262,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_stream_5fengine_5fserver_2epro
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::DepthVolume, volume_),
   PROTOBUF_FIELD_OFFSET(::trade::service::v1::DepthVolume, exchange_),
+  PROTOBUF_FIELD_OFFSET(::trade::service::v1::DepthVolume, price_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::trade::service::v1::SetParamsReq)},
@@ -312,18 +314,23 @@ const char descriptor_table_protodef_stream_5fengine_5fserver_2eproto[] PROTOBUF
   "\003(\0132\035.trade.service.v1.DepthVolumeB\020\342\336\037\004"
   "Data\352\336\037\004data\"L\n\007Decimal\022!\n\005value\030\001 \001(\003B\022"
   "\342\336\037\005Value\352\336\037\005value\022\036\n\004base\030\002 \001(\005B\020\342\336\037\004Ba"
-  "se\352\336\037\004base\"_\n\013DepthVolume\022$\n\006volume\030\001 \001("
-  "\001B\024\342\336\037\006Volume\352\336\037\006volume\022*\n\010exchange\030\002 \001("
-  "\tB\030\342\336\037\010Exchange\352\336\037\010exchange2\343\002\n\023StreamEn"
-  "gineService\022F\n\010GetQuote\022\035.trade.service."
-  "v1.GetQuoteReq\032\033.trade.service.v1.QuoteD"
-  "ata\022V\n\021SubscribeOneQuote\022\035.trade.service"
-  ".v1.GetQuoteReq\032 .trade.service.v1.Multi"
-  "QuoteData0\001\022^\n\023MultiSubscribeQuote\022#.tra"
-  "de.service.v1.SubscribeQuoteReq\032 .trade."
-  "service.v1.MultiQuoteData0\001\022L\n\tSetParams"
-  "\022\036.trade.service.v1.SetParamsReq\032\037.trade"
-  ".service.v1.SetParamsRespB\004Z\002v1b\006proto3"
+  "se\352\336\037\004base\"\235\001\n\013DepthVolume\022$\n\006volume\030\001 \001"
+  "(\001B\024\342\336\037\006Volume\352\336\037\006volume\022*\n\010exchange\030\002 \001"
+  "(\tB\030\342\336\037\010Exchange\352\336\037\010exchange\022<\n\005price\030\003 "
+  "\001(\0132\031.trade.service.v1.DecimalB\022\342\336\037\005Pric"
+  "e\352\336\037\005price2\310\003\n\023StreamEngineService\022F\n\010Ge"
+  "tQuote\022\035.trade.service.v1.GetQuoteReq\032\033."
+  "trade.service.v1.QuoteData\022V\n\021SubscribeO"
+  "neQuote\022\035.trade.service.v1.GetQuoteReq\032 "
+  ".trade.service.v1.MultiQuoteData0\001\022^\n\023Mu"
+  "ltiSubscribeQuote\022#.trade.service.v1.Sub"
+  "scribeQuoteReq\032 .trade.service.v1.MultiQ"
+  "uoteData0\001\022c\n\030MultiSubscribeHedgeQuote\022#"
+  ".trade.service.v1.SubscribeQuoteReq\032 .tr"
+  "ade.service.v1.MultiQuoteData0\001\022L\n\tSetPa"
+  "rams\022\036.trade.service.v1.SetParamsReq\032\037.t"
+  "rade.service.v1.SetParamsRespB\004Z\002v1b\006pro"
+  "to3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_stream_5fengine_5fserver_2eproto_deps[1] = {
   &::descriptor_table_gogo_2eproto,
@@ -341,7 +348,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_str
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_stream_5fengine_5fserver_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_stream_5fengine_5fserver_2eproto = {
-  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1479,
+  false, false, descriptor_table_protodef_stream_5fengine_5fserver_2eproto, "stream_engine_server.proto", 1643,
   &descriptor_table_stream_5fengine_5fserver_2eproto_once, descriptor_table_stream_5fengine_5fserver_2eproto_sccs, descriptor_table_stream_5fengine_5fserver_2eproto_deps, 9, 1,
   schemas, file_default_instances, TableStruct_stream_5fengine_5fserver_2eproto::offsets,
   file_level_metadata_stream_5fengine_5fserver_2eproto, 9, file_level_enum_descriptors_stream_5fengine_5fserver_2eproto, file_level_service_descriptors_stream_5fengine_5fserver_2eproto,
@@ -2338,11 +2345,18 @@ void Decimal::InternalSwap(Decimal* other) {
 // ===================================================================
 
 void DepthVolume::InitAsDefaultInstance() {
+  ::trade::service::v1::_DepthVolume_default_instance_._instance.get_mutable()->price_ = const_cast< ::trade::service::v1::Decimal*>(
+      ::trade::service::v1::Decimal::internal_default_instance());
 }
 class DepthVolume::_Internal {
  public:
+  static const ::trade::service::v1::Decimal& price(const DepthVolume* msg);
 };
 
+const ::trade::service::v1::Decimal&
+DepthVolume::_Internal::price(const DepthVolume* msg) {
+  return *msg->price_;
+}
 DepthVolume::DepthVolume(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -2357,6 +2371,11 @@ DepthVolume::DepthVolume(const DepthVolume& from)
     exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_exchange(),
       GetArena());
   }
+  if (from._internal_has_price()) {
+    price_ = new ::trade::service::v1::Decimal(*from.price_);
+  } else {
+    price_ = nullptr;
+  }
   volume_ = from.volume_;
   // @@protoc_insertion_point(copy_constructor:trade.service.v1.DepthVolume)
 }
@@ -2364,7 +2383,9 @@ DepthVolume::DepthVolume(const DepthVolume& from)
 void DepthVolume::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_DepthVolume_stream_5fengine_5fserver_2eproto.base);
   exchange_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  volume_ = 0;
+  ::memset(&price_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&volume_) -
+      reinterpret_cast<char*>(&price_)) + sizeof(volume_));
 }
 
 DepthVolume::~DepthVolume() {
@@ -2376,6 +2397,7 @@ DepthVolume::~DepthVolume() {
 void DepthVolume::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   exchange_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete price_;
 }
 
 void DepthVolume::ArenaDtor(void* object) {
@@ -2400,6 +2422,10 @@ void DepthVolume::Clear() {
   (void) cached_has_bits;
 
   exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && price_ != nullptr) {
+    delete price_;
+  }
+  price_ = nullptr;
   volume_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -2425,6 +2451,13 @@ const char* DepthVolume::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
           auto str = _internal_mutable_exchange();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "trade.service.v1.DepthVolume.exchange"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_price(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -2472,6 +2505,14 @@ failure:
         2, this->_internal_exchange(), target);
   }
 
+  // .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+  if (this->has_price()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::price(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -2493,6 +2534,13 @@ size_t DepthVolume::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_exchange());
+  }
+
+  // .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+  if (this->has_price()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *price_);
   }
 
   // double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
@@ -2534,6 +2582,9 @@ void DepthVolume::MergeFrom(const DepthVolume& from) {
   if (from.exchange().size() > 0) {
     _internal_set_exchange(from._internal_exchange());
   }
+  if (from.has_price()) {
+    _internal_mutable_price()->::trade::service::v1::Decimal::MergeFrom(from._internal_price());
+  }
   if (!(from.volume() <= 0 && from.volume() >= 0)) {
     _internal_set_volume(from._internal_volume());
   }
@@ -2561,7 +2612,12 @@ void DepthVolume::InternalSwap(DepthVolume* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   exchange_.Swap(&other->exchange_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(volume_, other->volume_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(DepthVolume, volume_)
+      + sizeof(DepthVolume::volume_)
+      - PROTOBUF_FIELD_OFFSET(DepthVolume, price_)>(
+          reinterpret_cast<char*>(&price_),
+          reinterpret_cast<char*>(&other->price_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DepthVolume::GetMetadata() const {

@@ -53,11 +53,14 @@ public:
 
     void on_snap(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> quote);
     void on_mix_snap(const string& symbol, std::shared_ptr<QuoteData> quote);
+    void on_mix_snap4hedge(const string& symbol, std::shared_ptr<QuoteData> quote);
 
     void register_client(CallDataMultiSubscribeQuote* calldata);
     void unregister_client(CallDataMultiSubscribeQuote* calldata);
     void register_client2(CallDataSubscribeOneQuote* calldata);
     void unregister_client2(CallDataSubscribeOneQuote* calldata);
+    void register_client3(CallDataMultiSubscribeHedgeQuote* calldata);
+    void unregister_client3(CallDataMultiSubscribeHedgeQuote* calldata);
 private:
 
     // This can be run in multiple threads if needed.
@@ -67,6 +70,7 @@ private:
         new CallDataMultiSubscribeQuote(&service_, cq_.get(), this);
         new CallDataSubscribeOneQuote(&service_, cq_.get(), this);
         new CallDataSetParams(&service_, cq_.get(), this);
+        new CallDataMultiSubscribeHedgeQuote(&service_, cq_.get(), this);
         
         void* tag;  // uniquely identifies a request.
         bool ok;
@@ -88,6 +92,8 @@ private:
                     static_cast<CallDataSubscribeOneQuote*>(tag)->Proceed();
                 } else if( cd->call_type_ == 4 ) {
                     static_cast<CallDataSetParams*>(tag)->Proceed();
+                }else if( cd->call_type_ == 5 ) {
+                    static_cast<CallDataMultiSubscribeHedgeQuote*>(tag)->Proceed();
                 }
             } else {
                 CallData* cd = static_cast<CallData*>(tag);
@@ -99,6 +105,8 @@ private:
                     static_cast<CallDataSubscribeOneQuote*>(tag)->Release();
                 } else if( cd->call_type_ == 4 ) {
                     static_cast<CallDataSetParams*>(tag)->Release();
+                } else if( cd->call_type_ == 5 ) {
+                    static_cast<CallDataMultiSubscribeHedgeQuote*>(tag)->Release();
                 }
             }
         }
@@ -139,4 +147,8 @@ private:
     // 单交易所单品种推送kehduuan
     mutable std::mutex                             mutex_clients2_;
     unordered_map<CallDataSubscribeOneQuote*, bool> clients2_;
+
+    // 聚合对冲行情推送客户端
+    mutable std::mutex                             mutex_clients3_;
+    unordered_map<CallDataMultiSubscribeHedgeQuote*, bool> clients3_;
 };

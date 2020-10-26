@@ -30,9 +30,18 @@ private:
 
     // symbols
     unordered_map<TSymbol, SMixQuote*> symbols_;
-    unordered_map<TSymbol, long long> last_clocks_;
 
+    // 发布聚合行情
+    mutable std::mutex mutex_clocks_;
+    unordered_map<TSymbol, long long> last_clocks_;
+    bool _check_update_clocks(const string& symbol);
     void _publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap);
+
+    // 发布聚合行情（用于对冲）
+    mutable std::mutex mutex_hedgeclocks_;
+    unordered_map<TSymbol, long long> last_hedgeclocks_;
+    bool _check_update_hedgeclocks(const string& symbol);
+    void _publish_hedgequote(const string& symbol, const SMixQuote* quote, bool isSnap);
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const;
 
