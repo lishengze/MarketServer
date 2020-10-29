@@ -24,7 +24,7 @@ public:
     static void signal_handler(int signum);
 
     // 聚合行情回调
-    void on_snap(const QuoteData& quote);
+    void on_snap(const SEData& quote);
 
     // 配置修改回调
     void on_configuration_update(const QuoteConfiguration& config);

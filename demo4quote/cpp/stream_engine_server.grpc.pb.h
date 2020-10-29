@@ -30,7 +30,7 @@ namespace trade {
 namespace service {
 namespace v1 {
 
-// Trade grpc
+// StreamEngineService grpc
 class StreamEngineService final {
  public:
   static constexpr char const* service_full_name() {
@@ -40,49 +40,24 @@ class StreamEngineService final {
    public:
     virtual ~StubInterface() {}
     // 获取单品种行情
-    virtual ::grpc::Status GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::trade::service::v1::QuoteData* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>> AsyncGetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>>(AsyncGetQuoteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>> PrepareAsyncGetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>>(PrepareAsyncGetQuoteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>> SubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request) {
+    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>> SubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request) {
       return std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>>(SubscribeOneQuoteRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> AsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> AsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(AsyncSubscribeOneQuoteRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> PrepareAsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> PrepareAsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncSubscribeOneQuoteRaw(context, request, cq));
     }
     // 订阅聚合行情
-    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>> MultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) {
-      return std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>>(MultiSubscribeQuoteRaw(context, request));
+    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>> MultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request) {
+      return std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(MultiSubscribeQuoteRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> AsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(AsyncMultiSubscribeQuoteRaw(context, request, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>> AsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(AsyncMultiSubscribeQuoteRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> PrepareAsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncMultiSubscribeQuoteRaw(context, request, cq));
-    }
-    // 订阅用于内部对冲的聚合行情
-    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>> MultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) {
-      return std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>>(MultiSubscribeHedgeQuoteRaw(context, request));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> AsyncMultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(AsyncMultiSubscribeHedgeQuoteRaw(context, request, cq, tag));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>> PrepareAsyncMultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncMultiSubscribeHedgeQuoteRaw(context, request, cq));
-    }
-    // 设置参数
-    virtual ::grpc::Status SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>> AsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>>(AsyncSetParamsRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>> PrepareAsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>>(PrepareAsyncSetParamsRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>> PrepareAsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(PrepareAsyncMultiSubscribeQuoteRaw(context, request, cq));
     }
     // demo
     std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::DemoResp>> Demo(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request) {
@@ -94,38 +69,42 @@ class StreamEngineService final {
     std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::DemoResp>> PrepareAsyncDemo(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::DemoResp>>(PrepareAsyncDemoRaw(context, request, cq));
     }
+    // 设置参数
+    virtual ::grpc::Status SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>> AsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>>(AsyncSetParamsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>> PrepareAsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>>(PrepareAsyncSetParamsRaw(context, request, cq));
+    }
+    // 获取参数
+    virtual ::grpc::Status GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::trade::service::v1::GetParamsResp* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>> AsyncGetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>>(AsyncGetParamsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>> PrepareAsyncGetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>>(PrepareAsyncGetParamsRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
       // 获取单品种行情
-      virtual void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
       #else
-      virtual void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
-      #else
-      virtual void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
+      virtual void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
       #endif
       // 订阅聚合行情
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
+      virtual void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) = 0;
       #else
-      virtual void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
+      virtual void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) = 0;
       #endif
-      // 订阅用于内部对冲的聚合行情
+      // demo
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void MultiSubscribeHedgeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
+      virtual void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) = 0;
       #else
-      virtual void MultiSubscribeHedgeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) = 0;
+      virtual void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) = 0;
       #endif
       // 设置参数
       virtual void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
@@ -140,11 +119,18 @@ class StreamEngineService final {
       #else
       virtual void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      // demo
+      // 获取参数
+      virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) = 0;
+      virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
-      virtual void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) = 0;
+      virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -155,66 +141,40 @@ class StreamEngineService final {
     #endif
     virtual class experimental_async_interface* experimental_async() { return nullptr; }
   private:
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>* AsyncGetQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::QuoteData>* PrepareAsyncGetQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* AsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* PrepareAsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>* MultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* AsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* PrepareAsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>* MultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* AsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* PrepareAsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>* AsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>* PrepareAsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* AsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiQuoteData>* PrepareAsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>* MultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>* AsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>* PrepareAsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientReaderInterface< ::trade::service::v1::DemoResp>* DemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request) = 0;
     virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::DemoResp>* AsyncDemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
     virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::DemoResp>* PrepareAsyncDemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>* AsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::SetParamsResp>* PrepareAsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>* AsyncGetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::trade::service::v1::GetParamsResp>* PrepareAsyncGetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
-    ::grpc::Status GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::trade::service::v1::QuoteData* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>> AsyncGetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>>(AsyncGetQuoteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>> PrepareAsyncGetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>>(PrepareAsyncGetQuoteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>> SubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request) {
+    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>> SubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request) {
       return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>>(SubscribeOneQuoteRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> AsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> AsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
       return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(AsyncSubscribeOneQuoteRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> PrepareAsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) {
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> PrepareAsyncSubscribeOneQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncSubscribeOneQuoteRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>> MultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) {
-      return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>>(MultiSubscribeQuoteRaw(context, request));
+    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>> MultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request) {
+      return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>>(MultiSubscribeQuoteRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> AsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(AsyncMultiSubscribeQuoteRaw(context, request, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>> AsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>>(AsyncMultiSubscribeQuoteRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> PrepareAsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncMultiSubscribeQuoteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>> MultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) {
-      return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>>(MultiSubscribeHedgeQuoteRaw(context, request));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> AsyncMultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(AsyncMultiSubscribeHedgeQuoteRaw(context, request, cq, tag));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>> PrepareAsyncMultiSubscribeHedgeQuote(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>>(PrepareAsyncMultiSubscribeHedgeQuoteRaw(context, request, cq));
-    }
-    ::grpc::Status SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>> AsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>>(AsyncSetParamsRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>> PrepareAsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>>(PrepareAsyncSetParamsRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>> PrepareAsyncMultiSubscribeQuote(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>>(PrepareAsyncMultiSubscribeQuoteRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::DemoResp>> Demo(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request) {
       return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::DemoResp>>(DemoRaw(context, request));
@@ -225,35 +185,37 @@ class StreamEngineService final {
     std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::DemoResp>> PrepareAsyncDemo(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::DemoResp>>(PrepareAsyncDemoRaw(context, request, cq));
     }
+    ::grpc::Status SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::trade::service::v1::SetParamsResp* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>> AsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>>(AsyncSetParamsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>> PrepareAsyncSetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>>(PrepareAsyncSetParamsRaw(context, request, cq));
+    }
+    ::grpc::Status GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::trade::service::v1::GetParamsResp* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>> AsyncGetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>>(AsyncGetParamsRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>> PrepareAsyncGetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>>(PrepareAsyncGetParamsRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
-      void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, std::function<void(::grpc::Status)>) override;
-      void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
       #else
-      void GetQuote(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) override;
       #else
-      void GetQuote(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::QuoteData* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) override;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
+      void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) override;
       #else
-      void SubscribeOneQuote(::grpc::ClientContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
-      #else
-      void MultiSubscribeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void MultiSubscribeHedgeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
-      #else
-      void MultiSubscribeHedgeQuote(::grpc::ClientContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiQuoteData>* reactor) override;
+      void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) override;
       #endif
       void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) override;
       void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) override;
@@ -267,10 +229,17 @@ class StreamEngineService final {
       #else
       void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) override;
+      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) override;
+      void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
-      void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) override;
+      void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
      private:
       friend class Stub;
@@ -283,28 +252,24 @@ class StreamEngineService final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class experimental_async async_stub_{this};
-    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>* AsyncGetQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::QuoteData>* PrepareAsyncGetQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* AsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* PrepareAsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetQuoteReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>* MultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* AsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* PrepareAsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>* MultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* AsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* PrepareAsyncMultiSubscribeHedgeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* AsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* PrepareAsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientReader< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request) override;
+    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* AsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiQuoteData>* PrepareAsyncSubscribeOneQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::SubscribeOneQuoteReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>* MultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request) override;
+    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* AsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* PrepareAsyncMultiSubscribeQuoteRaw(::grpc::ClientContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientReader< ::trade::service::v1::DemoResp>* DemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request) override;
     ::grpc::ClientAsyncReader< ::trade::service::v1::DemoResp>* AsyncDemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq, void* tag) override;
     ::grpc::ClientAsyncReader< ::trade::service::v1::DemoResp>* PrepareAsyncDemoRaw(::grpc::ClientContext* context, const ::trade::service::v1::DemoReq& request, ::grpc::CompletionQueue* cq) override;
-    const ::grpc::internal::RpcMethod rpcmethod_GetQuote_;
+    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* AsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::SetParamsResp>* PrepareAsyncSetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>* AsyncGetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::trade::service::v1::GetParamsResp>* PrepareAsyncGetParamsRaw(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SubscribeOneQuote_;
     const ::grpc::internal::RpcMethod rpcmethod_MultiSubscribeQuote_;
-    const ::grpc::internal::RpcMethod rpcmethod_MultiSubscribeHedgeQuote_;
-    const ::grpc::internal::RpcMethod rpcmethod_SetParams_;
     const ::grpc::internal::RpcMethod rpcmethod_Demo_;
+    const ::grpc::internal::RpcMethod rpcmethod_SetParams_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetParams_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -313,36 +278,15 @@ class StreamEngineService final {
     Service();
     virtual ~Service();
     // 获取单品种行情
-    virtual ::grpc::Status GetQuote(::grpc::ServerContext* context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response);
-    virtual ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* context, const ::trade::service::v1::GetQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer);
+    virtual ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* context, const ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer);
     // 订阅聚合行情
-    virtual ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* context, const ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer);
-    // 订阅用于内部对冲的聚合行情
-    virtual ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* context, const ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* writer);
-    // 设置参数
-    virtual ::grpc::Status SetParams(::grpc::ServerContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response);
+    virtual ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* context, const ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* writer);
     // demo
     virtual ::grpc::Status Demo(::grpc::ServerContext* context, const ::trade::service::v1::DemoReq* request, ::grpc::ServerWriter< ::trade::service::v1::DemoResp>* writer);
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_GetQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_GetQuote() {
-      ::grpc::Service::MarkMethodAsync(0);
-    }
-    ~WithAsyncMethod_GetQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestGetQuote(::grpc::ServerContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::ServerAsyncResponseWriter< ::trade::service::v1::QuoteData>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
+    // 设置参数
+    virtual ::grpc::Status SetParams(::grpc::ServerContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response);
+    // 获取参数
+    virtual ::grpc::Status GetParams(::grpc::ServerContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_SubscribeOneQuote : public BaseClass {
@@ -350,18 +294,18 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SubscribeOneQuote() {
-      ::grpc::Service::MarkMethodAsync(1);
+      ::grpc::Service::MarkMethodAsync(0);
     }
     ~WithAsyncMethod_SubscribeOneQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestSubscribeOneQuote(::grpc::ServerContext* context, ::trade::service::v1::GetQuoteReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiQuoteData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
+    void RequestSubscribeOneQuote(::grpc::ServerContext* context, ::trade::service::v1::SubscribeOneQuoteReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiQuoteData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -370,58 +314,18 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_MultiSubscribeQuote() {
-      ::grpc::Service::MarkMethodAsync(2);
+      ::grpc::Service::MarkMethodAsync(1);
     }
     ~WithAsyncMethod_MultiSubscribeQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestMultiSubscribeQuote(::grpc::ServerContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiQuoteData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(2, context, request, writer, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_MultiSubscribeHedgeQuote() {
-      ::grpc::Service::MarkMethodAsync(3);
-    }
-    ~WithAsyncMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMultiSubscribeHedgeQuote(::grpc::ServerContext* context, ::trade::service::v1::SubscribeQuoteReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiQuoteData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(3, context, request, writer, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_SetParams : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_SetParams() {
-      ::grpc::Service::MarkMethodAsync(4);
-    }
-    ~WithAsyncMethod_SetParams() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestSetParams(::grpc::ServerContext* context, ::trade::service::v1::SetParamsReq* request, ::grpc::ServerAsyncResponseWriter< ::trade::service::v1::SetParamsResp>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    void RequestMultiSubscribeQuote(::grpc::ServerContext* context, ::trade::service::v1::MultiSubscribeQuoteReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiMarketStreamData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -430,7 +334,7 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_Demo() {
-      ::grpc::Service::MarkMethodAsync(5);
+      ::grpc::Service::MarkMethodAsync(2);
     }
     ~WithAsyncMethod_Demo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -441,57 +345,50 @@ class StreamEngineService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestDemo(::grpc::ServerContext* context, ::trade::service::v1::DemoReq* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::DemoResp>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(5, context, request, writer, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncServerStreaming(2, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_GetQuote<WithAsyncMethod_SubscribeOneQuote<WithAsyncMethod_MultiSubscribeQuote<WithAsyncMethod_MultiSubscribeHedgeQuote<WithAsyncMethod_SetParams<WithAsyncMethod_Demo<Service > > > > > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetQuote : public BaseClass {
+  class WithAsyncMethod_SetParams : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_GetQuote() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetQuoteReq, ::trade::service::v1::QuoteData>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::trade::service::v1::GetQuoteReq* request, ::trade::service::v1::QuoteData* response) { return this->GetQuote(context, request, response); }));}
-    void SetMessageAllocatorFor_GetQuote(
-        ::grpc::experimental::MessageAllocator< ::trade::service::v1::GetQuoteReq, ::trade::service::v1::QuoteData>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetQuoteReq, ::trade::service::v1::QuoteData>*>(handler)
-              ->SetMessageAllocator(allocator);
+    WithAsyncMethod_SetParams() {
+      ::grpc::Service::MarkMethodAsync(3);
     }
-    ~ExperimentalWithCallbackMethod_GetQuote() override {
+    ~WithAsyncMethod_SetParams() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
+    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* GetQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestSetParams(::grpc::ServerContext* context, ::trade::service::v1::SetParamsReq* request, ::grpc::ServerAsyncResponseWriter< ::trade::service::v1::SetParamsResp>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
+  template <class BaseClass>
+  class WithAsyncMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetParams() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetParams(::grpc::ServerContext* context, ::trade::service::v1::GetParamsReq* request, ::grpc::ServerAsyncResponseWriter< ::trade::service::v1::GetParamsResp>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_SubscribeOneQuote<WithAsyncMethod_MultiSubscribeQuote<WithAsyncMethod_Demo<WithAsyncMethod_SetParams<WithAsyncMethod_GetParams<Service > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SubscribeOneQuote : public BaseClass {
    private:
@@ -503,30 +400,30 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::GetQuoteReq, ::trade::service::v1::MultiQuoteData>(
+        MarkMethodCallback(0,
+          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::trade::service::v1::GetQuoteReq* request) { return this->SubscribeOneQuote(context, request); }));
+                     context, const ::trade::service::v1::SubscribeOneQuoteReq* request) { return this->SubscribeOneQuote(context, request); }));
     }
     ~ExperimentalWithCallbackMethod_SubscribeOneQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/)
+      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/)
     #else
     virtual ::grpc::experimental::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* SubscribeOneQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/)
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/)
     #endif
       { return nullptr; }
   };
@@ -541,115 +438,30 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(2,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>(
+        MarkMethodCallback(1,
+          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::trade::service::v1::SubscribeQuoteReq* request) { return this->MultiSubscribeQuote(context, request); }));
+                     context, const ::trade::service::v1::MultiSubscribeQuoteReq* request) { return this->MultiSubscribeQuote(context, request); }));
     }
     ~ExperimentalWithCallbackMethod_MultiSubscribeQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* MultiSubscribeQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/)
+    virtual ::grpc::ServerWriteReactor< ::trade::service::v1::MultiMarketStreamData>* MultiSubscribeQuote(
+      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/)
     #else
-    virtual ::grpc::experimental::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* MultiSubscribeQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_MultiSubscribeHedgeQuote() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(3,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::trade::service::v1::SubscribeQuoteReq* request) { return this->MultiSubscribeHedgeQuote(context, request); }));
-    }
-    ~ExperimentalWithCallbackMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* MultiSubscribeHedgeQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/)
-    #else
-    virtual ::grpc::experimental::ServerWriteReactor< ::trade::service::v1::MultiQuoteData>* MultiSubscribeHedgeQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetParams : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_SetParams() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response) { return this->SetParams(context, request, response); }));}
-    void SetMessageAllocatorFor_SetParams(
-        ::grpc::experimental::MessageAllocator< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_SetParams() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SetParams(
-      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetParams(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/)
+    virtual ::grpc::experimental::ServerWriteReactor< ::trade::service::v1::MultiMarketStreamData>* MultiSubscribeQuote(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/)
     #endif
       { return nullptr; }
   };
@@ -664,7 +476,7 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(5,
+        MarkMethodCallback(2,
           new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -691,41 +503,118 @@ class StreamEngineService final {
     #endif
       { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_GetQuote<ExperimentalWithCallbackMethod_SubscribeOneQuote<ExperimentalWithCallbackMethod_MultiSubscribeQuote<ExperimentalWithCallbackMethod_MultiSubscribeHedgeQuote<ExperimentalWithCallbackMethod_SetParams<ExperimentalWithCallbackMethod_Demo<Service > > > > > > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_GetQuote<ExperimentalWithCallbackMethod_SubscribeOneQuote<ExperimentalWithCallbackMethod_MultiSubscribeQuote<ExperimentalWithCallbackMethod_MultiSubscribeHedgeQuote<ExperimentalWithCallbackMethod_SetParams<ExperimentalWithCallbackMethod_Demo<Service > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
-  class WithGenericMethod_GetQuote : public BaseClass {
+  class ExperimentalWithCallbackMethod_SetParams : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_GetQuote() {
-      ::grpc::Service::MarkMethodGeneric(0);
+    ExperimentalWithCallbackMethod_SetParams() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(3,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response) { return this->SetParams(context, request, response); }));}
+    void SetMessageAllocatorFor_SetParams(
+        ::grpc::experimental::MessageAllocator< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~WithGenericMethod_GetQuote() override {
+    ~ExperimentalWithCallbackMethod_SetParams() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
+    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetParams(
+      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetParams(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/)
+    #endif
+      { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_GetParams() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response) { return this->GetParams(context, request, response); }));}
+    void SetMessageAllocatorFor_GetParams(
+        ::grpc::experimental::MessageAllocator< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetParams(
+      ::grpc::CallbackServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetParams(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_SubscribeOneQuote<ExperimentalWithCallbackMethod_MultiSubscribeQuote<ExperimentalWithCallbackMethod_Demo<ExperimentalWithCallbackMethod_SetParams<ExperimentalWithCallbackMethod_GetParams<Service > > > > > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_SubscribeOneQuote<ExperimentalWithCallbackMethod_MultiSubscribeQuote<ExperimentalWithCallbackMethod_Demo<ExperimentalWithCallbackMethod_SetParams<ExperimentalWithCallbackMethod_GetParams<Service > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SubscribeOneQuote : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SubscribeOneQuote() {
-      ::grpc::Service::MarkMethodGeneric(1);
+      ::grpc::Service::MarkMethodGeneric(0);
     }
     ~WithGenericMethod_SubscribeOneQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -736,47 +625,13 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_MultiSubscribeQuote() {
-      ::grpc::Service::MarkMethodGeneric(2);
+      ::grpc::Service::MarkMethodGeneric(1);
     }
     ~WithGenericMethod_MultiSubscribeQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_MultiSubscribeHedgeQuote() {
-      ::grpc::Service::MarkMethodGeneric(3);
-    }
-    ~WithGenericMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_SetParams : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_SetParams() {
-      ::grpc::Service::MarkMethodGeneric(4);
-    }
-    ~WithGenericMethod_SetParams() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -787,7 +642,7 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_Demo() {
-      ::grpc::Service::MarkMethodGeneric(5);
+      ::grpc::Service::MarkMethodGeneric(2);
     }
     ~WithGenericMethod_Demo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -799,23 +654,37 @@ class StreamEngineService final {
     }
   };
   template <class BaseClass>
-  class WithRawMethod_GetQuote : public BaseClass {
+  class WithGenericMethod_SetParams : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_GetQuote() {
-      ::grpc::Service::MarkMethodRaw(0);
+    WithGenericMethod_SetParams() {
+      ::grpc::Service::MarkMethodGeneric(3);
     }
-    ~WithRawMethod_GetQuote() override {
+    ~WithGenericMethod_SetParams() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
+    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestGetQuote(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetParams() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
   };
   template <class BaseClass>
@@ -824,18 +693,18 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SubscribeOneQuote() {
-      ::grpc::Service::MarkMethodRaw(1);
+      ::grpc::Service::MarkMethodRaw(0);
     }
     ~WithRawMethod_SubscribeOneQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSubscribeOneQuote(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -844,58 +713,18 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_MultiSubscribeQuote() {
-      ::grpc::Service::MarkMethodRaw(2);
+      ::grpc::Service::MarkMethodRaw(1);
     }
     ~WithRawMethod_MultiSubscribeQuote() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestMultiSubscribeQuote(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(2, context, request, writer, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_MultiSubscribeHedgeQuote() {
-      ::grpc::Service::MarkMethodRaw(3);
-    }
-    ~WithRawMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMultiSubscribeHedgeQuote(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(3, context, request, writer, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_SetParams : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_SetParams() {
-      ::grpc::Service::MarkMethodRaw(4);
-    }
-    ~WithRawMethod_SetParams() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestSetParams(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -904,7 +733,7 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_Demo() {
-      ::grpc::Service::MarkMethodRaw(5);
+      ::grpc::Service::MarkMethodRaw(2);
     }
     ~WithRawMethod_Demo() override {
       BaseClassMustBeDerivedFromService(this);
@@ -915,46 +744,48 @@ class StreamEngineService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestDemo(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(5, context, request, writer, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncServerStreaming(2, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetQuote : public BaseClass {
+  class WithRawMethod_SetParams : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_GetQuote() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetQuote(context, request, response); }));
+    WithRawMethod_SetParams() {
+      ::grpc::Service::MarkMethodRaw(3);
     }
-    ~ExperimentalWithRawCallbackMethod_GetQuote() override {
+    ~WithRawMethod_SetParams() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
+    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* GetQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestSetParams(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetParams() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetParams(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
   template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_SubscribeOneQuote : public BaseClass {
@@ -967,7 +798,7 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(1,
+        MarkMethodRawCallback(0,
           new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -981,7 +812,7 @@ class StreamEngineService final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1005,7 +836,7 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(2,
+        MarkMethodRawCallback(1,
           new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1019,7 +850,7 @@ class StreamEngineService final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1029,82 +860,6 @@ class StreamEngineService final {
     #else
     virtual ::grpc::experimental::ServerWriteReactor< ::grpc::ByteBuffer>* MultiSubscribeQuote(
       ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_MultiSubscribeHedgeQuote() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(3,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const::grpc::ByteBuffer* request) { return this->MultiSubscribeHedgeQuote(context, request); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerWriteReactor< ::grpc::ByteBuffer>* MultiSubscribeHedgeQuote(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/)
-    #else
-    virtual ::grpc::experimental::ServerWriteReactor< ::grpc::ByteBuffer>* MultiSubscribeHedgeQuote(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetParams : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_SetParams() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetParams(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_SetParams() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SetParams(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetParams(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
     #endif
       { return nullptr; }
   };
@@ -1119,7 +874,7 @@ class StreamEngineService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(5,
+        MarkMethodRawCallback(2,
           new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1147,31 +902,80 @@ class StreamEngineService final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_GetQuote : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_SetParams : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithStreamedUnaryMethod_GetQuote() {
-      ::grpc::Service::MarkMethodStreamed(0,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::trade::service::v1::GetQuoteReq, ::trade::service::v1::QuoteData>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
-                     ::trade::service::v1::GetQuoteReq, ::trade::service::v1::QuoteData>* streamer) {
-                       return this->StreamedGetQuote(context,
-                         streamer);
-                  }));
+    ExperimentalWithRawCallbackMethod_SetParams() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(3,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetParams(context, request, response); }));
     }
-    ~WithStreamedUnaryMethod_GetQuote() override {
+    ~ExperimentalWithRawCallbackMethod_SetParams() override {
       BaseClassMustBeDerivedFromService(this);
     }
-    // disable regular version of this method
-    ::grpc::Status GetQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::trade::service::v1::QuoteData* /*response*/) override {
+    // disable synchronous version of this method
+    ::grpc::Status SetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SetParamsReq* /*request*/, ::trade::service::v1::SetParamsResp* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedGetQuote(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::trade::service::v1::GetQuoteReq,::trade::service::v1::QuoteData>* server_unary_streamer) = 0;
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* SetParams(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* SetParams(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_GetParams() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetParams(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetParams(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetParams(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_SetParams : public BaseClass {
@@ -1179,7 +983,7 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetParams() {
-      ::grpc::Service::MarkMethodStreamed(4,
+      ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
             [this](::grpc_impl::ServerContext* context,
@@ -1200,19 +1004,46 @@ class StreamEngineService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetParams(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::trade::service::v1::SetParamsReq,::trade::service::v1::SetParamsResp>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_GetQuote<WithStreamedUnaryMethod_SetParams<Service > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetParams : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetParams() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>* streamer) {
+                       return this->StreamedGetParams(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetParams() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetParams(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetParamsReq* /*request*/, ::trade::service::v1::GetParamsResp* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetParams(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::trade::service::v1::GetParamsReq,::trade::service::v1::GetParamsResp>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_SetParams<WithStreamedUnaryMethod_GetParams<Service > > StreamedUnaryService;
   template <class BaseClass>
   class WithSplitStreamingMethod_SubscribeOneQuote : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithSplitStreamingMethod_SubscribeOneQuote() {
-      ::grpc::Service::MarkMethodStreamed(1,
+      ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::SplitServerStreamingHandler<
-          ::trade::service::v1::GetQuoteReq, ::trade::service::v1::MultiQuoteData>(
+          ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>(
             [this](::grpc_impl::ServerContext* context,
                    ::grpc_impl::ServerSplitStreamer<
-                     ::trade::service::v1::GetQuoteReq, ::trade::service::v1::MultiQuoteData>* streamer) {
+                     ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>* streamer) {
                        return this->StreamedSubscribeOneQuote(context,
                          streamer);
                   }));
@@ -1221,12 +1052,12 @@ class StreamEngineService final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::GetQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status SubscribeOneQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeOneQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with split streamed
-    virtual ::grpc::Status StreamedSubscribeOneQuote(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::GetQuoteReq,::trade::service::v1::MultiQuoteData>* server_split_streamer) = 0;
+    virtual ::grpc::Status StreamedSubscribeOneQuote(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::SubscribeOneQuoteReq,::trade::service::v1::MultiQuoteData>* server_split_streamer) = 0;
   };
   template <class BaseClass>
   class WithSplitStreamingMethod_MultiSubscribeQuote : public BaseClass {
@@ -1234,12 +1065,12 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithSplitStreamingMethod_MultiSubscribeQuote() {
-      ::grpc::Service::MarkMethodStreamed(2,
+      ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::SplitServerStreamingHandler<
-          ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>(
+          ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>(
             [this](::grpc_impl::ServerContext* context,
                    ::grpc_impl::ServerSplitStreamer<
-                     ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>* streamer) {
+                     ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>* streamer) {
                        return this->StreamedMultiSubscribeQuote(context,
                          streamer);
                   }));
@@ -1248,39 +1079,12 @@ class StreamEngineService final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
+    ::grpc::Status MultiSubscribeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::MultiSubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with split streamed
-    virtual ::grpc::Status StreamedMultiSubscribeQuote(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::SubscribeQuoteReq,::trade::service::v1::MultiQuoteData>* server_split_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithSplitStreamingMethod_MultiSubscribeHedgeQuote : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithSplitStreamingMethod_MultiSubscribeHedgeQuote() {
-      ::grpc::Service::MarkMethodStreamed(3,
-        new ::grpc::internal::SplitServerStreamingHandler<
-          ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerSplitStreamer<
-                     ::trade::service::v1::SubscribeQuoteReq, ::trade::service::v1::MultiQuoteData>* streamer) {
-                       return this->StreamedMultiSubscribeHedgeQuote(context,
-                         streamer);
-                  }));
-    }
-    ~WithSplitStreamingMethod_MultiSubscribeHedgeQuote() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status MultiSubscribeHedgeQuote(::grpc::ServerContext* /*context*/, const ::trade::service::v1::SubscribeQuoteReq* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiQuoteData>* /*writer*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with split streamed
-    virtual ::grpc::Status StreamedMultiSubscribeHedgeQuote(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::SubscribeQuoteReq,::trade::service::v1::MultiQuoteData>* server_split_streamer) = 0;
+    virtual ::grpc::Status StreamedMultiSubscribeQuote(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::MultiSubscribeQuoteReq,::trade::service::v1::MultiMarketStreamData>* server_split_streamer) = 0;
   };
   template <class BaseClass>
   class WithSplitStreamingMethod_Demo : public BaseClass {
@@ -1288,7 +1092,7 @@ class StreamEngineService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithSplitStreamingMethod_Demo() {
-      ::grpc::Service::MarkMethodStreamed(5,
+      ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::SplitServerStreamingHandler<
           ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>(
             [this](::grpc_impl::ServerContext* context,
@@ -1309,8 +1113,8 @@ class StreamEngineService final {
     // replace default version of method with split streamed
     virtual ::grpc::Status StreamedDemo(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::trade::service::v1::DemoReq,::trade::service::v1::DemoResp>* server_split_streamer) = 0;
   };
-  typedef WithSplitStreamingMethod_SubscribeOneQuote<WithSplitStreamingMethod_MultiSubscribeQuote<WithSplitStreamingMethod_MultiSubscribeHedgeQuote<WithSplitStreamingMethod_Demo<Service > > > > SplitStreamedService;
-  typedef WithStreamedUnaryMethod_GetQuote<WithSplitStreamingMethod_SubscribeOneQuote<WithSplitStreamingMethod_MultiSubscribeQuote<WithSplitStreamingMethod_MultiSubscribeHedgeQuote<WithStreamedUnaryMethod_SetParams<WithSplitStreamingMethod_Demo<Service > > > > > > StreamedService;
+  typedef WithSplitStreamingMethod_SubscribeOneQuote<WithSplitStreamingMethod_MultiSubscribeQuote<WithSplitStreamingMethod_Demo<Service > > > SplitStreamedService;
+  typedef WithSplitStreamingMethod_SubscribeOneQuote<WithSplitStreamingMethod_MultiSubscribeQuote<WithSplitStreamingMethod_Demo<WithStreamedUnaryMethod_SetParams<WithStreamedUnaryMethod_GetParams<Service > > > > > StreamedService;
 };
 
 }  // namespace v1

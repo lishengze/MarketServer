@@ -1,6 +1,6 @@
 #include "risk_controller_config.h"
 #include "datacenter.h"
-#include "grpc_caller.h"
+#include "grpc_server.h"
 
 WatermarkComputer::WatermarkComputer() 
 {
@@ -114,15 +114,13 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
         if( srcDepth.total_volume <= 0 )
             continue;
         count++;
-        Depth* depth = msd->add_ask_depth();        
+        Depth* depth = msd->add_ask_depths();        
         depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
             if( srcDepth.exchanges[j].volume <= 0 )
                 continue;
-            DepthData* depthData = depth->add_data();
-            depthData->set_exchange(srcDepth.exchanges[j].name);
-            depthData->set_size(srcDepth.exchanges[j].volume);
+            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
         }
     }
     // 买盘
@@ -132,42 +130,14 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
         if( srcDepth.total_volume <= 0 )
             continue;
         count++;
-        Depth* depth = msd->add_bid_depth();        
+        Depth* depth = msd->add_bid_depths();        
         depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
             if( srcDepth.exchanges[j].volume <= 0 )
                 continue;
-            DepthData* depthData = depth->add_data();
-            depthData->set_exchange(srcDepth.exchanges[j].name);
-            depthData->set_size(srcDepth.exchanges[j].volume);
+            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
         }
-    }
-}
-////////////////////////////////////////////////////////////////////////////////////
-
-void ClientManager::add_client(CallDataServeMarketStream* client)
-{
-    // safe callback on_snap
-    std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
-    clients_[client] = true;
-}
-
-void ClientManager::del_client(CallDataServeMarketStream* client)
-{
-    // safe callback on_snap
-    std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
-    auto iter = clients_.find(client);
-    if( iter != clients_.end() ) {
-        clients_.erase(iter);
-    }
-}
-
-void ClientManager::send(std::shared_ptr<MarketStreamData> data)
-{
-    std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
-    for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
-        iter->first->add_data(data);
     }
 }
 
@@ -274,16 +244,6 @@ void DataCenter::change_orders(const string& symbol, const SOrder& order, const 
     _push_to_clients(symbol);
 }
 
-void DataCenter::add_client(CallDataServeMarketStream* client)
-{
-    client_manager_.add_client(client);
-}
-
-void DataCenter::del_client(CallDataServeMarketStream* client)
-{
-    client_manager_.del_client(client);
-}
-
 void DataCenter::_push_to_clients(const TSymbol& symbol) 
 {
     Params params;
@@ -313,19 +273,21 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     SInnerQuote newQuote;
     _calc_newquote(quote, params, newQuote);
 
+    std::cout << "publish(newQuote) " << quote.symbol << " " << newQuote.ask_length << "/"<< newQuote.bid_length << std::endl;
+
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd(newQuote, ptrData.get());
     
-    std::cout << "publish " << quote.symbol << " " << ptrData->ask_depth_size() << "/"<< ptrData->bid_depth_size() << std::endl;
+    std::cout << "publish " << quote.symbol << " " << ptrData->ask_depths_size() << "/"<< ptrData->bid_depths_size() << std::endl;
 
     // send to clients
-    client_manager_.send(ptrData);
+    PUBLISHER->publish(quote.symbol, ptrData, NULL);
 }
 
 void _filter_depth_by_watermark(const SInnerDepth* src_depths, const uint32& src_depth_length, const SDecimal& watermark, SInnerDepth* dst_depths, uint32& dst_depth_length, bool is_ask)
 {
-    unordered_map<TExchange, double> volumes;
     bool patched = false;
+    unordered_map<TExchange, double> volumes;   // 被watermark滤掉的单量自动归到买卖一
 
     dst_depth_length = 0;
     for( uint32 i = 0 ; i < src_depth_length ; ++i )
@@ -341,15 +303,18 @@ void _filter_depth_by_watermark(const SInnerDepth* src_depths, const uint32& src
             dst_depths[dst_depth_length] = depth;
             if( !patched ) {
                 patched = true;
+                
                 SInnerDepth fake;
                 uint32 count = 0;
                 for( auto &v : volumes ) {
-                    strcpy(fake.exchanges[count].name, v.first.c_str());
+                    vassign(fake.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
                     fake.exchanges[count].volume = v.second;
                     count++;
                     if( count >= MAX_EXCHANGE_LENGTH )
                         break;
                 }
+                fake.exchange_length = count;
+
                 dst_depths[dst_depth_length].mix_exchanges(fake, 0);
             }
             dst_depth_length ++;
@@ -374,22 +339,22 @@ void DataCenter::_calc_newquote(const SInnerQuote& quote, const Params& params, 
         debug = true;
     }
 
-    // 获取水位
+    // 按照水位过滤
     SDecimal watermark;
     watermark_computer_.get_watermark(symbol, watermark);
     _filter_by_watermark(quote, watermark, newQuote);
     if( debug ) {
         std::cout << std::fixed << "testdata:" << watermark.get_str_value()
-            << " " << quote.asks[0].price.get_str_value() << "-" << quote.asks[quote.ask_length-1].price.get_str_value() << "/" << quote.bids[0].price.get_str_value() << "-" << quote.bids[quote.bid_length-1].price.get_str_value()
+            //<< " " << quote.asks[0].price.get_str_value() << "-" << quote.asks[quote.ask_length-1].price.get_str_value() << "/" << quote.bids[0].price.get_str_value() << "-" << quote.bids[quote.bid_length-1].price.get_str_value()
             << " " << newQuote.ask_length << "/" << newQuote.bid_length 
             << std::endl;
     }
 
     // 解析币种信息
-    strcpy(newQuote.symbol, quote.symbol);
-    newQuote.time = quote.time;
-    newQuote.time_arrive = quote.time_arrive;
-    newQuote.seq_no = quote.seq_no;
+    vassign(newQuote.symbol, MAX_SYMBOLNAME_LENGTH, quote.symbol);
+    vassign(newQuote.time, quote.time);
+    vassign(newQuote.time_arrive, quote.time_arrive);
+    vassign(newQuote.seq_no, quote.seq_no);
 
     // 获取币种出现次数
     string sell_currency, buy_currency;

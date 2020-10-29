@@ -31,6 +31,9 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/map.h>  // IWYU pragma: export
+#include <google/protobuf/map_entry.h>
+#include <google/protobuf/map_field_inl.h>
 #include <google/protobuf/unknown_field_set.h>
 #include "gogo.pb.h"
 // @@protoc_insertion_point(includes)
@@ -48,7 +51,7 @@ struct TableStruct_stream_5fengine_5fserver_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[11]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[16]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -67,18 +70,33 @@ extern DemoReqDefaultTypeInternal _DemoReq_default_instance_;
 class DemoResp;
 class DemoRespDefaultTypeInternal;
 extern DemoRespDefaultTypeInternal _DemoResp_default_instance_;
+class Depth;
+class DepthDefaultTypeInternal;
+extern DepthDefaultTypeInternal _Depth_default_instance_;
 class DepthLevel;
 class DepthLevelDefaultTypeInternal;
 extern DepthLevelDefaultTypeInternal _DepthLevel_default_instance_;
-class DepthVolume;
-class DepthVolumeDefaultTypeInternal;
-extern DepthVolumeDefaultTypeInternal _DepthVolume_default_instance_;
-class GetQuoteReq;
-class GetQuoteReqDefaultTypeInternal;
-extern GetQuoteReqDefaultTypeInternal _GetQuoteReq_default_instance_;
+class Depth_DataEntry_DoNotUse;
+class Depth_DataEntry_DoNotUseDefaultTypeInternal;
+extern Depth_DataEntry_DoNotUseDefaultTypeInternal _Depth_DataEntry_DoNotUse_default_instance_;
+class GetParamsReq;
+class GetParamsReqDefaultTypeInternal;
+extern GetParamsReqDefaultTypeInternal _GetParamsReq_default_instance_;
+class GetParamsResp;
+class GetParamsRespDefaultTypeInternal;
+extern GetParamsRespDefaultTypeInternal _GetParamsResp_default_instance_;
+class MarketStreamData;
+class MarketStreamDataDefaultTypeInternal;
+extern MarketStreamDataDefaultTypeInternal _MarketStreamData_default_instance_;
+class MultiMarketStreamData;
+class MultiMarketStreamDataDefaultTypeInternal;
+extern MultiMarketStreamDataDefaultTypeInternal _MultiMarketStreamData_default_instance_;
 class MultiQuoteData;
 class MultiQuoteDataDefaultTypeInternal;
 extern MultiQuoteDataDefaultTypeInternal _MultiQuoteData_default_instance_;
+class MultiSubscribeQuoteReq;
+class MultiSubscribeQuoteReqDefaultTypeInternal;
+extern MultiSubscribeQuoteReqDefaultTypeInternal _MultiSubscribeQuoteReq_default_instance_;
 class QuoteData;
 class QuoteDataDefaultTypeInternal;
 extern QuoteDataDefaultTypeInternal _QuoteData_default_instance_;
@@ -88,9 +106,9 @@ extern SetParamsReqDefaultTypeInternal _SetParamsReq_default_instance_;
 class SetParamsResp;
 class SetParamsRespDefaultTypeInternal;
 extern SetParamsRespDefaultTypeInternal _SetParamsResp_default_instance_;
-class SubscribeQuoteReq;
-class SubscribeQuoteReqDefaultTypeInternal;
-extern SubscribeQuoteReqDefaultTypeInternal _SubscribeQuoteReq_default_instance_;
+class SubscribeOneQuoteReq;
+class SubscribeOneQuoteReqDefaultTypeInternal;
+extern SubscribeOneQuoteReqDefaultTypeInternal _SubscribeOneQuoteReq_default_instance_;
 }  // namespace v1
 }  // namespace service
 }  // namespace trade
@@ -98,14 +116,19 @@ PROTOBUF_NAMESPACE_OPEN
 template<> ::trade::service::v1::Decimal* Arena::CreateMaybeMessage<::trade::service::v1::Decimal>(Arena*);
 template<> ::trade::service::v1::DemoReq* Arena::CreateMaybeMessage<::trade::service::v1::DemoReq>(Arena*);
 template<> ::trade::service::v1::DemoResp* Arena::CreateMaybeMessage<::trade::service::v1::DemoResp>(Arena*);
+template<> ::trade::service::v1::Depth* Arena::CreateMaybeMessage<::trade::service::v1::Depth>(Arena*);
 template<> ::trade::service::v1::DepthLevel* Arena::CreateMaybeMessage<::trade::service::v1::DepthLevel>(Arena*);
-template<> ::trade::service::v1::DepthVolume* Arena::CreateMaybeMessage<::trade::service::v1::DepthVolume>(Arena*);
-template<> ::trade::service::v1::GetQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::GetQuoteReq>(Arena*);
+template<> ::trade::service::v1::Depth_DataEntry_DoNotUse* Arena::CreateMaybeMessage<::trade::service::v1::Depth_DataEntry_DoNotUse>(Arena*);
+template<> ::trade::service::v1::GetParamsReq* Arena::CreateMaybeMessage<::trade::service::v1::GetParamsReq>(Arena*);
+template<> ::trade::service::v1::GetParamsResp* Arena::CreateMaybeMessage<::trade::service::v1::GetParamsResp>(Arena*);
+template<> ::trade::service::v1::MarketStreamData* Arena::CreateMaybeMessage<::trade::service::v1::MarketStreamData>(Arena*);
+template<> ::trade::service::v1::MultiMarketStreamData* Arena::CreateMaybeMessage<::trade::service::v1::MultiMarketStreamData>(Arena*);
 template<> ::trade::service::v1::MultiQuoteData* Arena::CreateMaybeMessage<::trade::service::v1::MultiQuoteData>(Arena*);
+template<> ::trade::service::v1::MultiSubscribeQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::MultiSubscribeQuoteReq>(Arena*);
 template<> ::trade::service::v1::QuoteData* Arena::CreateMaybeMessage<::trade::service::v1::QuoteData>(Arena*);
 template<> ::trade::service::v1::SetParamsReq* Arena::CreateMaybeMessage<::trade::service::v1::SetParamsReq>(Arena*);
 template<> ::trade::service::v1::SetParamsResp* Arena::CreateMaybeMessage<::trade::service::v1::SetParamsResp>(Arena*);
-template<> ::trade::service::v1::SubscribeQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::SubscribeQuoteReq>(Arena*);
+template<> ::trade::service::v1::SubscribeOneQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::SubscribeOneQuoteReq>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace trade {
 namespace service {
@@ -699,23 +722,23 @@ class SetParamsResp PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class SubscribeQuoteReq PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SubscribeQuoteReq) */ {
+class GetParamsReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.GetParamsReq) */ {
  public:
-  inline SubscribeQuoteReq() : SubscribeQuoteReq(nullptr) {}
-  virtual ~SubscribeQuoteReq();
+  inline GetParamsReq() : GetParamsReq(nullptr) {}
+  virtual ~GetParamsReq();
 
-  SubscribeQuoteReq(const SubscribeQuoteReq& from);
-  SubscribeQuoteReq(SubscribeQuoteReq&& from) noexcept
-    : SubscribeQuoteReq() {
+  GetParamsReq(const GetParamsReq& from);
+  GetParamsReq(GetParamsReq&& from) noexcept
+    : GetParamsReq() {
     *this = ::std::move(from);
   }
 
-  inline SubscribeQuoteReq& operator=(const SubscribeQuoteReq& from) {
+  inline GetParamsReq& operator=(const GetParamsReq& from) {
     CopyFrom(from);
     return *this;
   }
-  inline SubscribeQuoteReq& operator=(SubscribeQuoteReq&& from) noexcept {
+  inline GetParamsReq& operator=(GetParamsReq&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -733,20 +756,20 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const SubscribeQuoteReq& default_instance();
+  static const GetParamsReq& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const SubscribeQuoteReq* internal_default_instance() {
-    return reinterpret_cast<const SubscribeQuoteReq*>(
-               &_SubscribeQuoteReq_default_instance_);
+  static inline const GetParamsReq* internal_default_instance() {
+    return reinterpret_cast<const GetParamsReq*>(
+               &_GetParamsReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     4;
 
-  friend void swap(SubscribeQuoteReq& a, SubscribeQuoteReq& b) {
+  friend void swap(GetParamsReq& a, GetParamsReq& b) {
     a.Swap(&b);
   }
-  inline void Swap(SubscribeQuoteReq* other) {
+  inline void Swap(GetParamsReq* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -754,7 +777,7 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(SubscribeQuoteReq* other) {
+  void UnsafeArenaSwap(GetParamsReq* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -762,17 +785,17 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline SubscribeQuoteReq* New() const final {
-    return CreateMaybeMessage<SubscribeQuoteReq>(nullptr);
+  inline GetParamsReq* New() const final {
+    return CreateMaybeMessage<GetParamsReq>(nullptr);
   }
 
-  SubscribeQuoteReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<SubscribeQuoteReq>(arena);
+  GetParamsReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GetParamsReq>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const SubscribeQuoteReq& from);
-  void MergeFrom(const SubscribeQuoteReq& from);
+  void CopyFrom(const GetParamsReq& from);
+  void MergeFrom(const GetParamsReq& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -786,13 +809,13 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(SubscribeQuoteReq* other);
+  void InternalSwap(GetParamsReq* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "trade.service.v1.SubscribeQuoteReq";
+    return "trade.service.v1.GetParamsReq";
   }
   protected:
-  explicit SubscribeQuoteReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit GetParamsReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -811,7 +834,7 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:trade.service.v1.SubscribeQuoteReq)
+  // @@protoc_insertion_point(class_scope:trade.service.v1.GetParamsReq)
  private:
   class _Internal;
 
@@ -823,23 +846,23 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GetQuoteReq PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.GetQuoteReq) */ {
+class GetParamsResp PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.GetParamsResp) */ {
  public:
-  inline GetQuoteReq() : GetQuoteReq(nullptr) {}
-  virtual ~GetQuoteReq();
+  inline GetParamsResp() : GetParamsResp(nullptr) {}
+  virtual ~GetParamsResp();
 
-  GetQuoteReq(const GetQuoteReq& from);
-  GetQuoteReq(GetQuoteReq&& from) noexcept
-    : GetQuoteReq() {
+  GetParamsResp(const GetParamsResp& from);
+  GetParamsResp(GetParamsResp&& from) noexcept
+    : GetParamsResp() {
     *this = ::std::move(from);
   }
 
-  inline GetQuoteReq& operator=(const GetQuoteReq& from) {
+  inline GetParamsResp& operator=(const GetParamsResp& from) {
     CopyFrom(from);
     return *this;
   }
-  inline GetQuoteReq& operator=(GetQuoteReq&& from) noexcept {
+  inline GetParamsResp& operator=(GetParamsResp&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -857,20 +880,20 @@ class GetQuoteReq PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const GetQuoteReq& default_instance();
+  static const GetParamsResp& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const GetQuoteReq* internal_default_instance() {
-    return reinterpret_cast<const GetQuoteReq*>(
-               &_GetQuoteReq_default_instance_);
+  static inline const GetParamsResp* internal_default_instance() {
+    return reinterpret_cast<const GetParamsResp*>(
+               &_GetParamsResp_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     5;
 
-  friend void swap(GetQuoteReq& a, GetQuoteReq& b) {
+  friend void swap(GetParamsResp& a, GetParamsResp& b) {
     a.Swap(&b);
   }
-  inline void Swap(GetQuoteReq* other) {
+  inline void Swap(GetParamsResp* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -878,7 +901,7 @@ class GetQuoteReq PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(GetQuoteReq* other) {
+  void UnsafeArenaSwap(GetParamsResp* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -886,17 +909,17 @@ class GetQuoteReq PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline GetQuoteReq* New() const final {
-    return CreateMaybeMessage<GetQuoteReq>(nullptr);
+  inline GetParamsResp* New() const final {
+    return CreateMaybeMessage<GetParamsResp>(nullptr);
   }
 
-  GetQuoteReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GetQuoteReq>(arena);
+  GetParamsResp* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GetParamsResp>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GetQuoteReq& from);
-  void MergeFrom(const GetQuoteReq& from);
+  void CopyFrom(const GetParamsResp& from);
+  void MergeFrom(const GetParamsResp& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -910,13 +933,941 @@ class GetQuoteReq PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(GetQuoteReq* other);
+  void InternalSwap(GetParamsResp* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "trade.service.v1.GetQuoteReq";
+    return "trade.service.v1.GetParamsResp";
   }
   protected:
-  explicit GetQuoteReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit GetParamsResp(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSymbolsFieldNumber = 1,
+    kExchangesFieldNumber = 2,
+    kDepthFieldNumber = 3,
+    kFrequencyFieldNumber = 4,
+    kRawFrequencyFieldNumber = 5,
+  };
+  // repeated string symbols = 1;
+  int symbols_size() const;
+  private:
+  int _internal_symbols_size() const;
+  public:
+  void clear_symbols();
+  const std::string& symbols(int index) const;
+  std::string* mutable_symbols(int index);
+  void set_symbols(int index, const std::string& value);
+  void set_symbols(int index, std::string&& value);
+  void set_symbols(int index, const char* value);
+  void set_symbols(int index, const char* value, size_t size);
+  std::string* add_symbols();
+  void add_symbols(const std::string& value);
+  void add_symbols(std::string&& value);
+  void add_symbols(const char* value);
+  void add_symbols(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& symbols() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_symbols();
+  private:
+  const std::string& _internal_symbols(int index) const;
+  std::string* _internal_add_symbols();
+  public:
+
+  // repeated string exchanges = 2;
+  int exchanges_size() const;
+  private:
+  int _internal_exchanges_size() const;
+  public:
+  void clear_exchanges();
+  const std::string& exchanges(int index) const;
+  std::string* mutable_exchanges(int index);
+  void set_exchanges(int index, const std::string& value);
+  void set_exchanges(int index, std::string&& value);
+  void set_exchanges(int index, const char* value);
+  void set_exchanges(int index, const char* value, size_t size);
+  std::string* add_exchanges();
+  void add_exchanges(const std::string& value);
+  void add_exchanges(std::string&& value);
+  void add_exchanges(const char* value);
+  void add_exchanges(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& exchanges() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_exchanges();
+  private:
+  const std::string& _internal_exchanges(int index) const;
+  std::string* _internal_add_exchanges();
+  public:
+
+  // int32 depth = 3;
+  void clear_depth();
+  ::PROTOBUF_NAMESPACE_ID::int32 depth() const;
+  void set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_depth() const;
+  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 frequency = 4;
+  void clear_frequency();
+  ::PROTOBUF_NAMESPACE_ID::int32 frequency() const;
+  void set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_frequency() const;
+  void _internal_set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 raw_frequency = 5;
+  void clear_raw_frequency();
+  ::PROTOBUF_NAMESPACE_ID::int32 raw_frequency() const;
+  void set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_raw_frequency() const;
+  void _internal_set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.GetParamsResp)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> symbols_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> exchanges_;
+  ::PROTOBUF_NAMESPACE_ID::int32 depth_;
+  ::PROTOBUF_NAMESPACE_ID::int32 frequency_;
+  ::PROTOBUF_NAMESPACE_ID::int32 raw_frequency_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MultiSubscribeQuoteReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.MultiSubscribeQuoteReq) */ {
+ public:
+  inline MultiSubscribeQuoteReq() : MultiSubscribeQuoteReq(nullptr) {}
+  virtual ~MultiSubscribeQuoteReq();
+
+  MultiSubscribeQuoteReq(const MultiSubscribeQuoteReq& from);
+  MultiSubscribeQuoteReq(MultiSubscribeQuoteReq&& from) noexcept
+    : MultiSubscribeQuoteReq() {
+    *this = ::std::move(from);
+  }
+
+  inline MultiSubscribeQuoteReq& operator=(const MultiSubscribeQuoteReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MultiSubscribeQuoteReq& operator=(MultiSubscribeQuoteReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MultiSubscribeQuoteReq& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const MultiSubscribeQuoteReq* internal_default_instance() {
+    return reinterpret_cast<const MultiSubscribeQuoteReq*>(
+               &_MultiSubscribeQuoteReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(MultiSubscribeQuoteReq& a, MultiSubscribeQuoteReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MultiSubscribeQuoteReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MultiSubscribeQuoteReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MultiSubscribeQuoteReq* New() const final {
+    return CreateMaybeMessage<MultiSubscribeQuoteReq>(nullptr);
+  }
+
+  MultiSubscribeQuoteReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MultiSubscribeQuoteReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MultiSubscribeQuoteReq& from);
+  void MergeFrom(const MultiSubscribeQuoteReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MultiSubscribeQuoteReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.MultiSubscribeQuoteReq";
+  }
+  protected:
+  explicit MultiSubscribeQuoteReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.MultiSubscribeQuoteReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MultiMarketStreamData PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.MultiMarketStreamData) */ {
+ public:
+  inline MultiMarketStreamData() : MultiMarketStreamData(nullptr) {}
+  virtual ~MultiMarketStreamData();
+
+  MultiMarketStreamData(const MultiMarketStreamData& from);
+  MultiMarketStreamData(MultiMarketStreamData&& from) noexcept
+    : MultiMarketStreamData() {
+    *this = ::std::move(from);
+  }
+
+  inline MultiMarketStreamData& operator=(const MultiMarketStreamData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MultiMarketStreamData& operator=(MultiMarketStreamData&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MultiMarketStreamData& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const MultiMarketStreamData* internal_default_instance() {
+    return reinterpret_cast<const MultiMarketStreamData*>(
+               &_MultiMarketStreamData_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(MultiMarketStreamData& a, MultiMarketStreamData& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MultiMarketStreamData* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MultiMarketStreamData* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MultiMarketStreamData* New() const final {
+    return CreateMaybeMessage<MultiMarketStreamData>(nullptr);
+  }
+
+  MultiMarketStreamData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MultiMarketStreamData>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MultiMarketStreamData& from);
+  void MergeFrom(const MultiMarketStreamData& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MultiMarketStreamData* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.MultiMarketStreamData";
+  }
+  protected:
+  explicit MultiMarketStreamData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kQuotesFieldNumber = 1,
+  };
+  // repeated .trade.service.v1.MarketStreamData quotes = 1 [(.gogoproto.customname) = "Quotes", (.gogoproto.jsontag) = "quotes"];
+  int quotes_size() const;
+  private:
+  int _internal_quotes_size() const;
+  public:
+  void clear_quotes();
+  ::trade::service::v1::MarketStreamData* mutable_quotes(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::MarketStreamData >*
+      mutable_quotes();
+  private:
+  const ::trade::service::v1::MarketStreamData& _internal_quotes(int index) const;
+  ::trade::service::v1::MarketStreamData* _internal_add_quotes();
+  public:
+  const ::trade::service::v1::MarketStreamData& quotes(int index) const;
+  ::trade::service::v1::MarketStreamData* add_quotes();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::MarketStreamData >&
+      quotes() const;
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.MultiMarketStreamData)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::MarketStreamData > quotes_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MarketStreamData PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.MarketStreamData) */ {
+ public:
+  inline MarketStreamData() : MarketStreamData(nullptr) {}
+  virtual ~MarketStreamData();
+
+  MarketStreamData(const MarketStreamData& from);
+  MarketStreamData(MarketStreamData&& from) noexcept
+    : MarketStreamData() {
+    *this = ::std::move(from);
+  }
+
+  inline MarketStreamData& operator=(const MarketStreamData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MarketStreamData& operator=(MarketStreamData&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MarketStreamData& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const MarketStreamData* internal_default_instance() {
+    return reinterpret_cast<const MarketStreamData*>(
+               &_MarketStreamData_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(MarketStreamData& a, MarketStreamData& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MarketStreamData* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MarketStreamData* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MarketStreamData* New() const final {
+    return CreateMaybeMessage<MarketStreamData>(nullptr);
+  }
+
+  MarketStreamData* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MarketStreamData>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MarketStreamData& from);
+  void MergeFrom(const MarketStreamData& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MarketStreamData* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.MarketStreamData";
+  }
+  protected:
+  explicit MarketStreamData(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kAskDepthsFieldNumber = 5,
+    kBidDepthsFieldNumber = 6,
+    kSymbolFieldNumber = 1,
+    kMsgSeqFieldNumber = 2,
+    kTimeFieldNumber = 3,
+    kTimeArriveFieldNumber = 4,
+    kIsCoverFieldNumber = 7,
+  };
+  // repeated .trade.service.v1.Depth ask_depths = 5 [(.gogoproto.customname) = "AskDepths", (.gogoproto.jsontag) = "ask_depths"];
+  int ask_depths_size() const;
+  private:
+  int _internal_ask_depths_size() const;
+  public:
+  void clear_ask_depths();
+  ::trade::service::v1::Depth* mutable_ask_depths(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >*
+      mutable_ask_depths();
+  private:
+  const ::trade::service::v1::Depth& _internal_ask_depths(int index) const;
+  ::trade::service::v1::Depth* _internal_add_ask_depths();
+  public:
+  const ::trade::service::v1::Depth& ask_depths(int index) const;
+  ::trade::service::v1::Depth* add_ask_depths();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >&
+      ask_depths() const;
+
+  // repeated .trade.service.v1.Depth bid_depths = 6 [(.gogoproto.customname) = "BidDepths", (.gogoproto.jsontag) = "bid_depths"];
+  int bid_depths_size() const;
+  private:
+  int _internal_bid_depths_size() const;
+  public:
+  void clear_bid_depths();
+  ::trade::service::v1::Depth* mutable_bid_depths(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >*
+      mutable_bid_depths();
+  private:
+  const ::trade::service::v1::Depth& _internal_bid_depths(int index) const;
+  ::trade::service::v1::Depth* _internal_add_bid_depths();
+  public:
+  const ::trade::service::v1::Depth& bid_depths(int index) const;
+  ::trade::service::v1::Depth* add_bid_depths();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >&
+      bid_depths() const;
+
+  // string symbol = 1 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
+  void clear_symbol();
+  const std::string& symbol() const;
+  void set_symbol(const std::string& value);
+  void set_symbol(std::string&& value);
+  void set_symbol(const char* value);
+  void set_symbol(const char* value, size_t size);
+  std::string* mutable_symbol();
+  std::string* release_symbol();
+  void set_allocated_symbol(std::string* symbol);
+  private:
+  const std::string& _internal_symbol() const;
+  void _internal_set_symbol(const std::string& value);
+  std::string* _internal_mutable_symbol();
+  public:
+
+  // string msg_seq = 2 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
+  void clear_msg_seq();
+  const std::string& msg_seq() const;
+  void set_msg_seq(const std::string& value);
+  void set_msg_seq(std::string&& value);
+  void set_msg_seq(const char* value);
+  void set_msg_seq(const char* value, size_t size);
+  std::string* mutable_msg_seq();
+  std::string* release_msg_seq();
+  void set_allocated_msg_seq(std::string* msg_seq);
+  private:
+  const std::string& _internal_msg_seq() const;
+  void _internal_set_msg_seq(const std::string& value);
+  std::string* _internal_mutable_msg_seq();
+  public:
+
+  // int64 time = 3 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+  void clear_time();
+  ::PROTOBUF_NAMESPACE_ID::int64 time() const;
+  void set_time(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_time() const;
+  void _internal_set_time(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // int64 time_arrive = 4 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+  void clear_time_arrive();
+  ::PROTOBUF_NAMESPACE_ID::int64 time_arrive() const;
+  void set_time_arrive(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_time_arrive() const;
+  void _internal_set_time_arrive(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // bool is_cover = 7 [(.gogoproto.customname) = "IsCover", (.gogoproto.jsontag) = "is_cover"];
+  void clear_is_cover();
+  bool is_cover() const;
+  void set_is_cover(bool value);
+  private:
+  bool _internal_is_cover() const;
+  void _internal_set_is_cover(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.MarketStreamData)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth > ask_depths_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth > bid_depths_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr symbol_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr msg_seq_;
+  ::PROTOBUF_NAMESPACE_ID::int64 time_;
+  ::PROTOBUF_NAMESPACE_ID::int64 time_arrive_;
+  bool is_cover_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class Depth_DataEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<Depth_DataEntry_DoNotUse, 
+    std::string, double,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_DOUBLE,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<Depth_DataEntry_DoNotUse, 
+    std::string, double,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_DOUBLE,
+    0 > SuperType;
+  Depth_DataEntry_DoNotUse();
+  explicit Depth_DataEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const Depth_DataEntry_DoNotUse& other);
+  static const Depth_DataEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const Depth_DataEntry_DoNotUse*>(&_Depth_DataEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "trade.service.v1.Depth.DataEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[9];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
+class Depth PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.Depth) */ {
+ public:
+  inline Depth() : Depth(nullptr) {}
+  virtual ~Depth();
+
+  Depth(const Depth& from);
+  Depth(Depth&& from) noexcept
+    : Depth() {
+    *this = ::std::move(from);
+  }
+
+  inline Depth& operator=(const Depth& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Depth& operator=(Depth&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Depth& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const Depth* internal_default_instance() {
+    return reinterpret_cast<const Depth*>(
+               &_Depth_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(Depth& a, Depth& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Depth* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Depth* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Depth* New() const final {
+    return CreateMaybeMessage<Depth>(nullptr);
+  }
+
+  Depth* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Depth>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Depth& from);
+  void MergeFrom(const Depth& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Depth* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.Depth";
+  }
+  protected:
+  explicit Depth(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 2,
+    kPriceFieldNumber = 1,
+    kVolumeFieldNumber = 3,
+  };
+  // map<string, double> data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >&
+      _internal_data() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >*
+      _internal_mutable_data();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >&
+      data() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >*
+      mutable_data();
+
+  // string price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+  void clear_price();
+  const std::string& price() const;
+  void set_price(const std::string& value);
+  void set_price(std::string&& value);
+  void set_price(const char* value);
+  void set_price(const char* value, size_t size);
+  std::string* mutable_price();
+  std::string* release_price();
+  void set_allocated_price(std::string* price);
+  private:
+  const std::string& _internal_price() const;
+  void _internal_set_price(const std::string& value);
+  std::string* _internal_mutable_price();
+  public:
+
+  // double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+  void clear_volume();
+  double volume() const;
+  void set_volume(double value);
+  private:
+  double _internal_volume() const;
+  void _internal_set_volume(double value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.Depth)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      Depth_DataEntry_DoNotUse,
+      std::string, double,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_DOUBLE,
+      0 > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr price_;
+  double volume_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SubscribeOneQuoteReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SubscribeOneQuoteReq) */ {
+ public:
+  inline SubscribeOneQuoteReq() : SubscribeOneQuoteReq(nullptr) {}
+  virtual ~SubscribeOneQuoteReq();
+
+  SubscribeOneQuoteReq(const SubscribeOneQuoteReq& from);
+  SubscribeOneQuoteReq(SubscribeOneQuoteReq&& from) noexcept
+    : SubscribeOneQuoteReq() {
+    *this = ::std::move(from);
+  }
+
+  inline SubscribeOneQuoteReq& operator=(const SubscribeOneQuoteReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SubscribeOneQuoteReq& operator=(SubscribeOneQuoteReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SubscribeOneQuoteReq& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SubscribeOneQuoteReq* internal_default_instance() {
+    return reinterpret_cast<const SubscribeOneQuoteReq*>(
+               &_SubscribeOneQuoteReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(SubscribeOneQuoteReq& a, SubscribeOneQuoteReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SubscribeOneQuoteReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SubscribeOneQuoteReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SubscribeOneQuoteReq* New() const final {
+    return CreateMaybeMessage<SubscribeOneQuoteReq>(nullptr);
+  }
+
+  SubscribeOneQuoteReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SubscribeOneQuoteReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SubscribeOneQuoteReq& from);
+  void MergeFrom(const SubscribeOneQuoteReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SubscribeOneQuoteReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.SubscribeOneQuoteReq";
+  }
+  protected:
+  explicit SubscribeOneQuoteReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -971,7 +1922,7 @@ class GetQuoteReq PROTOBUF_FINAL :
   std::string* _internal_mutable_symbol();
   public:
 
-  // @@protoc_insertion_point(class_scope:trade.service.v1.GetQuoteReq)
+  // @@protoc_insertion_point(class_scope:trade.service.v1.SubscribeOneQuoteReq)
  private:
   class _Internal;
 
@@ -1027,7 +1978,7 @@ class MultiQuoteData PROTOBUF_FINAL :
                &_MultiQuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    12;
 
   friend void swap(MultiQuoteData& a, MultiQuoteData& b) {
     a.Swap(&b);
@@ -1173,7 +2124,7 @@ class QuoteData PROTOBUF_FINAL :
                &_QuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    13;
 
   friend void swap(QuoteData& a, QuoteData& b) {
     a.Swap(&b);
@@ -1244,16 +2195,16 @@ class QuoteData PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAskDepthFieldNumber = 5,
-    kBidDepthFieldNumber = 6,
+    kAskDepthFieldNumber = 6,
+    kBidDepthFieldNumber = 7,
     kSymbolFieldNumber = 1,
-    kTimeFieldNumber = 3,
-    kTimeArriveFieldNumber = 4,
-    kExchangeFieldNumber = 8,
-    kMsgSeqFieldNumber = 2,
-    kIsSnapFieldNumber = 7,
+    kExchangeFieldNumber = 2,
+    kTimeFieldNumber = 4,
+    kTimeArriveFieldNumber = 5,
+    kMsgSeqFieldNumber = 3,
+    kIsSnapFieldNumber = 8,
   };
-  // repeated .trade.service.v1.DepthLevel ask_depth = 5 [(.gogoproto.customname) = "AskDepth", (.gogoproto.jsontag) = "ask_depth"];
+  // repeated .trade.service.v1.DepthLevel ask_depth = 6 [(.gogoproto.customname) = "AskDepth", (.gogoproto.jsontag) = "ask_depth"];
   int ask_depth_size() const;
   private:
   int _internal_ask_depth_size() const;
@@ -1271,7 +2222,7 @@ class QuoteData PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthLevel >&
       ask_depth() const;
 
-  // repeated .trade.service.v1.DepthLevel bid_depth = 6 [(.gogoproto.customname) = "BidDepth", (.gogoproto.jsontag) = "bid_depth"];
+  // repeated .trade.service.v1.DepthLevel bid_depth = 7 [(.gogoproto.customname) = "BidDepth", (.gogoproto.jsontag) = "bid_depth"];
   int bid_depth_size() const;
   private:
   int _internal_bid_depth_size() const;
@@ -1305,39 +2256,7 @@ class QuoteData PROTOBUF_FINAL :
   std::string* _internal_mutable_symbol();
   public:
 
-  // string time = 3 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
-  void clear_time();
-  const std::string& time() const;
-  void set_time(const std::string& value);
-  void set_time(std::string&& value);
-  void set_time(const char* value);
-  void set_time(const char* value, size_t size);
-  std::string* mutable_time();
-  std::string* release_time();
-  void set_allocated_time(std::string* time);
-  private:
-  const std::string& _internal_time() const;
-  void _internal_set_time(const std::string& value);
-  std::string* _internal_mutable_time();
-  public:
-
-  // string time_arrive = 4 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
-  void clear_time_arrive();
-  const std::string& time_arrive() const;
-  void set_time_arrive(const std::string& value);
-  void set_time_arrive(std::string&& value);
-  void set_time_arrive(const char* value);
-  void set_time_arrive(const char* value, size_t size);
-  std::string* mutable_time_arrive();
-  std::string* release_time_arrive();
-  void set_allocated_time_arrive(std::string* time_arrive);
-  private:
-  const std::string& _internal_time_arrive() const;
-  void _internal_set_time_arrive(const std::string& value);
-  std::string* _internal_mutable_time_arrive();
-  public:
-
-  // string exchange = 8 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+  // string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
   void clear_exchange();
   const std::string& exchange() const;
   void set_exchange(const std::string& value);
@@ -1353,7 +2272,39 @@ class QuoteData PROTOBUF_FINAL :
   std::string* _internal_mutable_exchange();
   public:
 
-  // int64 msg_seq = 2 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
+  // string time = 4 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+  void clear_time();
+  const std::string& time() const;
+  void set_time(const std::string& value);
+  void set_time(std::string&& value);
+  void set_time(const char* value);
+  void set_time(const char* value, size_t size);
+  std::string* mutable_time();
+  std::string* release_time();
+  void set_allocated_time(std::string* time);
+  private:
+  const std::string& _internal_time() const;
+  void _internal_set_time(const std::string& value);
+  std::string* _internal_mutable_time();
+  public:
+
+  // string time_arrive = 5 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+  void clear_time_arrive();
+  const std::string& time_arrive() const;
+  void set_time_arrive(const std::string& value);
+  void set_time_arrive(std::string&& value);
+  void set_time_arrive(const char* value);
+  void set_time_arrive(const char* value, size_t size);
+  std::string* mutable_time_arrive();
+  std::string* release_time_arrive();
+  void set_allocated_time_arrive(std::string* time_arrive);
+  private:
+  const std::string& _internal_time_arrive() const;
+  void _internal_set_time_arrive(const std::string& value);
+  std::string* _internal_mutable_time_arrive();
+  public:
+
+  // int64 msg_seq = 3 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
   void clear_msg_seq();
   ::PROTOBUF_NAMESPACE_ID::int64 msg_seq() const;
   void set_msg_seq(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -1362,7 +2313,7 @@ class QuoteData PROTOBUF_FINAL :
   void _internal_set_msg_seq(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // bool is_snap = 7 [(.gogoproto.customname) = "IsSnap", (.gogoproto.jsontag) = "is_snap"];
+  // bool is_snap = 8 [(.gogoproto.customname) = "IsSnap", (.gogoproto.jsontag) = "is_snap"];
   void clear_is_snap();
   bool is_snap() const;
   void set_is_snap(bool value);
@@ -1381,9 +2332,9 @@ class QuoteData PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthLevel > ask_depth_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthLevel > bid_depth_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr symbol_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_arrive_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
   ::PROTOBUF_NAMESPACE_ID::int64 msg_seq_;
   bool is_snap_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -1433,7 +2384,7 @@ class DepthLevel PROTOBUF_FINAL :
                &_DepthLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    14;
 
   friend void swap(DepthLevel& a, DepthLevel& b) {
     a.Swap(&b);
@@ -1504,27 +2455,9 @@ class DepthLevel PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDataFieldNumber = 2,
     kPriceFieldNumber = 1,
+    kVolumeFieldNumber = 2,
   };
-  // repeated .trade.service.v1.DepthVolume data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];
-  int data_size() const;
-  private:
-  int _internal_data_size() const;
-  public:
-  void clear_data();
-  ::trade::service::v1::DepthVolume* mutable_data(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthVolume >*
-      mutable_data();
-  private:
-  const ::trade::service::v1::DepthVolume& _internal_data(int index) const;
-  ::trade::service::v1::DepthVolume* _internal_add_data();
-  public:
-  const ::trade::service::v1::DepthVolume& data(int index) const;
-  ::trade::service::v1::DepthVolume* add_data();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthVolume >&
-      data() const;
-
   // .trade.service.v1.Decimal price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
   bool has_price() const;
   private:
@@ -1543,6 +2476,15 @@ class DepthLevel PROTOBUF_FINAL :
       ::trade::service::v1::Decimal* price);
   ::trade::service::v1::Decimal* unsafe_arena_release_price();
 
+  // double volume = 2 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+  void clear_volume();
+  double volume() const;
+  void set_volume(double value);
+  private:
+  double _internal_volume() const;
+  void _internal_set_volume(double value);
+  public:
+
   // @@protoc_insertion_point(class_scope:trade.service.v1.DepthLevel)
  private:
   class _Internal;
@@ -1550,8 +2492,8 @@ class DepthLevel PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthVolume > data_;
   ::trade::service::v1::Decimal* price_;
+  double volume_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
 };
@@ -1599,7 +2541,7 @@ class Decimal PROTOBUF_FINAL :
                &_Decimal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    15;
 
   friend void swap(Decimal& a, Decimal& b) {
     a.Swap(&b);
@@ -1700,181 +2642,6 @@ class Decimal PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::int64 value_;
   ::PROTOBUF_NAMESPACE_ID::int32 base_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
-};
-// -------------------------------------------------------------------
-
-class DepthVolume PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.DepthVolume) */ {
- public:
-  inline DepthVolume() : DepthVolume(nullptr) {}
-  virtual ~DepthVolume();
-
-  DepthVolume(const DepthVolume& from);
-  DepthVolume(DepthVolume&& from) noexcept
-    : DepthVolume() {
-    *this = ::std::move(from);
-  }
-
-  inline DepthVolume& operator=(const DepthVolume& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline DepthVolume& operator=(DepthVolume&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const DepthVolume& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const DepthVolume* internal_default_instance() {
-    return reinterpret_cast<const DepthVolume*>(
-               &_DepthVolume_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    10;
-
-  friend void swap(DepthVolume& a, DepthVolume& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(DepthVolume* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(DepthVolume* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline DepthVolume* New() const final {
-    return CreateMaybeMessage<DepthVolume>(nullptr);
-  }
-
-  DepthVolume* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DepthVolume>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DepthVolume& from);
-  void MergeFrom(const DepthVolume& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(DepthVolume* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "trade.service.v1.DepthVolume";
-  }
-  protected:
-  explicit DepthVolume(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
-    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kExchangeFieldNumber = 2,
-    kPriceFieldNumber = 3,
-    kVolumeFieldNumber = 1,
-  };
-  // string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
-  void clear_exchange();
-  const std::string& exchange() const;
-  void set_exchange(const std::string& value);
-  void set_exchange(std::string&& value);
-  void set_exchange(const char* value);
-  void set_exchange(const char* value, size_t size);
-  std::string* mutable_exchange();
-  std::string* release_exchange();
-  void set_allocated_exchange(std::string* exchange);
-  private:
-  const std::string& _internal_exchange() const;
-  void _internal_set_exchange(const std::string& value);
-  std::string* _internal_mutable_exchange();
-  public:
-
-  // .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
-  bool has_price() const;
-  private:
-  bool _internal_has_price() const;
-  public:
-  void clear_price();
-  const ::trade::service::v1::Decimal& price() const;
-  ::trade::service::v1::Decimal* release_price();
-  ::trade::service::v1::Decimal* mutable_price();
-  void set_allocated_price(::trade::service::v1::Decimal* price);
-  private:
-  const ::trade::service::v1::Decimal& _internal_price() const;
-  ::trade::service::v1::Decimal* _internal_mutable_price();
-  public:
-  void unsafe_arena_set_allocated_price(
-      ::trade::service::v1::Decimal* price);
-  ::trade::service::v1::Decimal* unsafe_arena_release_price();
-
-  // double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
-  void clear_volume();
-  double volume() const;
-  void set_volume(double value);
-  private:
-  double _internal_volume() const;
-  void _internal_set_volume(double value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:trade.service.v1.DepthVolume)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
-  ::trade::service::v1::Decimal* price_;
-  double volume_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
 };
@@ -2085,126 +2852,323 @@ inline void SetParamsReq::set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value
 
 // -------------------------------------------------------------------
 
-// SubscribeQuoteReq
+// GetParamsReq
 
 // -------------------------------------------------------------------
 
-// GetQuoteReq
+// GetParamsResp
 
-// string exchange = 1 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
-inline void GetQuoteReq::clear_exchange() {
-  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// repeated string symbols = 1;
+inline int GetParamsResp::_internal_symbols_size() const {
+  return symbols_.size();
 }
-inline const std::string& GetQuoteReq::exchange() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.GetQuoteReq.exchange)
-  return _internal_exchange();
+inline int GetParamsResp::symbols_size() const {
+  return _internal_symbols_size();
 }
-inline void GetQuoteReq::set_exchange(const std::string& value) {
-  _internal_set_exchange(value);
-  // @@protoc_insertion_point(field_set:trade.service.v1.GetQuoteReq.exchange)
+inline void GetParamsResp::clear_symbols() {
+  symbols_.Clear();
 }
-inline std::string* GetQuoteReq::mutable_exchange() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.GetQuoteReq.exchange)
-  return _internal_mutable_exchange();
+inline std::string* GetParamsResp::add_symbols() {
+  // @@protoc_insertion_point(field_add_mutable:trade.service.v1.GetParamsResp.symbols)
+  return _internal_add_symbols();
 }
-inline const std::string& GetQuoteReq::_internal_exchange() const {
-  return exchange_.Get();
+inline const std::string& GetParamsResp::_internal_symbols(int index) const {
+  return symbols_.Get(index);
 }
-inline void GetQuoteReq::_internal_set_exchange(const std::string& value) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+inline const std::string& GetParamsResp::symbols(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetParamsResp.symbols)
+  return _internal_symbols(index);
 }
-inline void GetQuoteReq::set_exchange(std::string&& value) {
-  
-  exchange_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.GetQuoteReq.exchange)
+inline std::string* GetParamsResp::mutable_symbols(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.GetParamsResp.symbols)
+  return symbols_.Mutable(index);
 }
-inline void GetQuoteReq::set_exchange(const char* value) {
+inline void GetParamsResp::set_symbols(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.symbols)
+  symbols_.Mutable(index)->assign(value);
+}
+inline void GetParamsResp::set_symbols(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.symbols)
+  symbols_.Mutable(index)->assign(std::move(value));
+}
+inline void GetParamsResp::set_symbols(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:trade.service.v1.GetQuoteReq.exchange)
+  symbols_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.GetParamsResp.symbols)
 }
-inline void GetQuoteReq::set_exchange(const char* value,
-    size_t size) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.GetQuoteReq.exchange)
+inline void GetParamsResp::set_symbols(int index, const char* value, size_t size) {
+  symbols_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.GetParamsResp.symbols)
 }
-inline std::string* GetQuoteReq::_internal_mutable_exchange() {
-  
-  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* GetParamsResp::_internal_add_symbols() {
+  return symbols_.Add();
 }
-inline std::string* GetQuoteReq::release_exchange() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.GetQuoteReq.exchange)
-  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline void GetParamsResp::add_symbols(const std::string& value) {
+  symbols_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:trade.service.v1.GetParamsResp.symbols)
 }
-inline void GetQuoteReq::set_allocated_exchange(std::string* exchange) {
-  if (exchange != nullptr) {
-    
-  } else {
-    
-  }
-  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.GetQuoteReq.exchange)
+inline void GetParamsResp::add_symbols(std::string&& value) {
+  symbols_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:trade.service.v1.GetParamsResp.symbols)
+}
+inline void GetParamsResp::add_symbols(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  symbols_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:trade.service.v1.GetParamsResp.symbols)
+}
+inline void GetParamsResp::add_symbols(const char* value, size_t size) {
+  symbols_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:trade.service.v1.GetParamsResp.symbols)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+GetParamsResp::symbols() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.GetParamsResp.symbols)
+  return symbols_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+GetParamsResp::mutable_symbols() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.GetParamsResp.symbols)
+  return &symbols_;
 }
 
-// string symbol = 2 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
-inline void GetQuoteReq::clear_symbol() {
+// repeated string exchanges = 2;
+inline int GetParamsResp::_internal_exchanges_size() const {
+  return exchanges_.size();
+}
+inline int GetParamsResp::exchanges_size() const {
+  return _internal_exchanges_size();
+}
+inline void GetParamsResp::clear_exchanges() {
+  exchanges_.Clear();
+}
+inline std::string* GetParamsResp::add_exchanges() {
+  // @@protoc_insertion_point(field_add_mutable:trade.service.v1.GetParamsResp.exchanges)
+  return _internal_add_exchanges();
+}
+inline const std::string& GetParamsResp::_internal_exchanges(int index) const {
+  return exchanges_.Get(index);
+}
+inline const std::string& GetParamsResp::exchanges(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetParamsResp.exchanges)
+  return _internal_exchanges(index);
+}
+inline std::string* GetParamsResp::mutable_exchanges(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.GetParamsResp.exchanges)
+  return exchanges_.Mutable(index);
+}
+inline void GetParamsResp::set_exchanges(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.exchanges)
+  exchanges_.Mutable(index)->assign(value);
+}
+inline void GetParamsResp::set_exchanges(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.exchanges)
+  exchanges_.Mutable(index)->assign(std::move(value));
+}
+inline void GetParamsResp::set_exchanges(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  exchanges_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.GetParamsResp.exchanges)
+}
+inline void GetParamsResp::set_exchanges(int index, const char* value, size_t size) {
+  exchanges_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.GetParamsResp.exchanges)
+}
+inline std::string* GetParamsResp::_internal_add_exchanges() {
+  return exchanges_.Add();
+}
+inline void GetParamsResp::add_exchanges(const std::string& value) {
+  exchanges_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:trade.service.v1.GetParamsResp.exchanges)
+}
+inline void GetParamsResp::add_exchanges(std::string&& value) {
+  exchanges_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:trade.service.v1.GetParamsResp.exchanges)
+}
+inline void GetParamsResp::add_exchanges(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  exchanges_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:trade.service.v1.GetParamsResp.exchanges)
+}
+inline void GetParamsResp::add_exchanges(const char* value, size_t size) {
+  exchanges_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:trade.service.v1.GetParamsResp.exchanges)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+GetParamsResp::exchanges() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.GetParamsResp.exchanges)
+  return exchanges_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+GetParamsResp::mutable_exchanges() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.GetParamsResp.exchanges)
+  return &exchanges_;
+}
+
+// int32 depth = 3;
+inline void GetParamsResp::clear_depth() {
+  depth_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::_internal_depth() const {
+  return depth_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::depth() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetParamsResp.depth)
+  return _internal_depth();
+}
+inline void GetParamsResp::_internal_set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  depth_ = value;
+}
+inline void GetParamsResp::set_depth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_depth(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.depth)
+}
+
+// int32 frequency = 4;
+inline void GetParamsResp::clear_frequency() {
+  frequency_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::_internal_frequency() const {
+  return frequency_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::frequency() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetParamsResp.frequency)
+  return _internal_frequency();
+}
+inline void GetParamsResp::_internal_set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  frequency_ = value;
+}
+inline void GetParamsResp::set_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_frequency(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.frequency)
+}
+
+// int32 raw_frequency = 5;
+inline void GetParamsResp::clear_raw_frequency() {
+  raw_frequency_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::_internal_raw_frequency() const {
+  return raw_frequency_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 GetParamsResp::raw_frequency() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.GetParamsResp.raw_frequency)
+  return _internal_raw_frequency();
+}
+inline void GetParamsResp::_internal_set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  raw_frequency_ = value;
+}
+inline void GetParamsResp::set_raw_frequency(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_raw_frequency(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.GetParamsResp.raw_frequency)
+}
+
+// -------------------------------------------------------------------
+
+// MultiSubscribeQuoteReq
+
+// -------------------------------------------------------------------
+
+// MultiMarketStreamData
+
+// repeated .trade.service.v1.MarketStreamData quotes = 1 [(.gogoproto.customname) = "Quotes", (.gogoproto.jsontag) = "quotes"];
+inline int MultiMarketStreamData::_internal_quotes_size() const {
+  return quotes_.size();
+}
+inline int MultiMarketStreamData::quotes_size() const {
+  return _internal_quotes_size();
+}
+inline void MultiMarketStreamData::clear_quotes() {
+  quotes_.Clear();
+}
+inline ::trade::service::v1::MarketStreamData* MultiMarketStreamData::mutable_quotes(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MultiMarketStreamData.quotes)
+  return quotes_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::MarketStreamData >*
+MultiMarketStreamData::mutable_quotes() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.MultiMarketStreamData.quotes)
+  return &quotes_;
+}
+inline const ::trade::service::v1::MarketStreamData& MultiMarketStreamData::_internal_quotes(int index) const {
+  return quotes_.Get(index);
+}
+inline const ::trade::service::v1::MarketStreamData& MultiMarketStreamData::quotes(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MultiMarketStreamData.quotes)
+  return _internal_quotes(index);
+}
+inline ::trade::service::v1::MarketStreamData* MultiMarketStreamData::_internal_add_quotes() {
+  return quotes_.Add();
+}
+inline ::trade::service::v1::MarketStreamData* MultiMarketStreamData::add_quotes() {
+  // @@protoc_insertion_point(field_add:trade.service.v1.MultiMarketStreamData.quotes)
+  return _internal_add_quotes();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::MarketStreamData >&
+MultiMarketStreamData::quotes() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.MultiMarketStreamData.quotes)
+  return quotes_;
+}
+
+// -------------------------------------------------------------------
+
+// MarketStreamData
+
+// string symbol = 1 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
+inline void MarketStreamData::clear_symbol() {
   symbol_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& GetQuoteReq::symbol() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.GetQuoteReq.symbol)
+inline const std::string& MarketStreamData::symbol() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.symbol)
   return _internal_symbol();
 }
-inline void GetQuoteReq::set_symbol(const std::string& value) {
+inline void MarketStreamData::set_symbol(const std::string& value) {
   _internal_set_symbol(value);
-  // @@protoc_insertion_point(field_set:trade.service.v1.GetQuoteReq.symbol)
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.symbol)
 }
-inline std::string* GetQuoteReq::mutable_symbol() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.GetQuoteReq.symbol)
+inline std::string* MarketStreamData::mutable_symbol() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MarketStreamData.symbol)
   return _internal_mutable_symbol();
 }
-inline const std::string& GetQuoteReq::_internal_symbol() const {
+inline const std::string& MarketStreamData::_internal_symbol() const {
   return symbol_.Get();
 }
-inline void GetQuoteReq::_internal_set_symbol(const std::string& value) {
+inline void MarketStreamData::_internal_set_symbol(const std::string& value) {
   
   symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void GetQuoteReq::set_symbol(std::string&& value) {
+inline void MarketStreamData::set_symbol(std::string&& value) {
   
   symbol_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.GetQuoteReq.symbol)
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.MarketStreamData.symbol)
 }
-inline void GetQuoteReq::set_symbol(const char* value) {
+inline void MarketStreamData::set_symbol(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
   symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:trade.service.v1.GetQuoteReq.symbol)
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.MarketStreamData.symbol)
 }
-inline void GetQuoteReq::set_symbol(const char* value,
+inline void MarketStreamData::set_symbol(const char* value,
     size_t size) {
   
   symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.GetQuoteReq.symbol)
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.MarketStreamData.symbol)
 }
-inline std::string* GetQuoteReq::_internal_mutable_symbol() {
+inline std::string* MarketStreamData::_internal_mutable_symbol() {
   
   return symbol_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* GetQuoteReq::release_symbol() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.GetQuoteReq.symbol)
+inline std::string* MarketStreamData::release_symbol() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.MarketStreamData.symbol)
   return symbol_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void GetQuoteReq::set_allocated_symbol(std::string* symbol) {
+inline void MarketStreamData::set_allocated_symbol(std::string* symbol) {
   if (symbol != nullptr) {
     
   } else {
@@ -2212,7 +3176,452 @@ inline void GetQuoteReq::set_allocated_symbol(std::string* symbol) {
   }
   symbol_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), symbol,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.GetQuoteReq.symbol)
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.MarketStreamData.symbol)
+}
+
+// string msg_seq = 2 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
+inline void MarketStreamData::clear_msg_seq() {
+  msg_seq_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& MarketStreamData::msg_seq() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.msg_seq)
+  return _internal_msg_seq();
+}
+inline void MarketStreamData::set_msg_seq(const std::string& value) {
+  _internal_set_msg_seq(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.msg_seq)
+}
+inline std::string* MarketStreamData::mutable_msg_seq() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MarketStreamData.msg_seq)
+  return _internal_mutable_msg_seq();
+}
+inline const std::string& MarketStreamData::_internal_msg_seq() const {
+  return msg_seq_.Get();
+}
+inline void MarketStreamData::_internal_set_msg_seq(const std::string& value) {
+  
+  msg_seq_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void MarketStreamData::set_msg_seq(std::string&& value) {
+  
+  msg_seq_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.MarketStreamData.msg_seq)
+}
+inline void MarketStreamData::set_msg_seq(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  msg_seq_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.MarketStreamData.msg_seq)
+}
+inline void MarketStreamData::set_msg_seq(const char* value,
+    size_t size) {
+  
+  msg_seq_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.MarketStreamData.msg_seq)
+}
+inline std::string* MarketStreamData::_internal_mutable_msg_seq() {
+  
+  return msg_seq_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* MarketStreamData::release_msg_seq() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.MarketStreamData.msg_seq)
+  return msg_seq_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void MarketStreamData::set_allocated_msg_seq(std::string* msg_seq) {
+  if (msg_seq != nullptr) {
+    
+  } else {
+    
+  }
+  msg_seq_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), msg_seq,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.MarketStreamData.msg_seq)
+}
+
+// int64 time = 3 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+inline void MarketStreamData::clear_time() {
+  time_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 MarketStreamData::_internal_time() const {
+  return time_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 MarketStreamData::time() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.time)
+  return _internal_time();
+}
+inline void MarketStreamData::_internal_set_time(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  time_ = value;
+}
+inline void MarketStreamData::set_time(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_time(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.time)
+}
+
+// int64 time_arrive = 4 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+inline void MarketStreamData::clear_time_arrive() {
+  time_arrive_ = PROTOBUF_LONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 MarketStreamData::_internal_time_arrive() const {
+  return time_arrive_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 MarketStreamData::time_arrive() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.time_arrive)
+  return _internal_time_arrive();
+}
+inline void MarketStreamData::_internal_set_time_arrive(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  time_arrive_ = value;
+}
+inline void MarketStreamData::set_time_arrive(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_time_arrive(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.time_arrive)
+}
+
+// repeated .trade.service.v1.Depth ask_depths = 5 [(.gogoproto.customname) = "AskDepths", (.gogoproto.jsontag) = "ask_depths"];
+inline int MarketStreamData::_internal_ask_depths_size() const {
+  return ask_depths_.size();
+}
+inline int MarketStreamData::ask_depths_size() const {
+  return _internal_ask_depths_size();
+}
+inline void MarketStreamData::clear_ask_depths() {
+  ask_depths_.Clear();
+}
+inline ::trade::service::v1::Depth* MarketStreamData::mutable_ask_depths(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MarketStreamData.ask_depths)
+  return ask_depths_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >*
+MarketStreamData::mutable_ask_depths() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.MarketStreamData.ask_depths)
+  return &ask_depths_;
+}
+inline const ::trade::service::v1::Depth& MarketStreamData::_internal_ask_depths(int index) const {
+  return ask_depths_.Get(index);
+}
+inline const ::trade::service::v1::Depth& MarketStreamData::ask_depths(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.ask_depths)
+  return _internal_ask_depths(index);
+}
+inline ::trade::service::v1::Depth* MarketStreamData::_internal_add_ask_depths() {
+  return ask_depths_.Add();
+}
+inline ::trade::service::v1::Depth* MarketStreamData::add_ask_depths() {
+  // @@protoc_insertion_point(field_add:trade.service.v1.MarketStreamData.ask_depths)
+  return _internal_add_ask_depths();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >&
+MarketStreamData::ask_depths() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.MarketStreamData.ask_depths)
+  return ask_depths_;
+}
+
+// repeated .trade.service.v1.Depth bid_depths = 6 [(.gogoproto.customname) = "BidDepths", (.gogoproto.jsontag) = "bid_depths"];
+inline int MarketStreamData::_internal_bid_depths_size() const {
+  return bid_depths_.size();
+}
+inline int MarketStreamData::bid_depths_size() const {
+  return _internal_bid_depths_size();
+}
+inline void MarketStreamData::clear_bid_depths() {
+  bid_depths_.Clear();
+}
+inline ::trade::service::v1::Depth* MarketStreamData::mutable_bid_depths(int index) {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.MarketStreamData.bid_depths)
+  return bid_depths_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >*
+MarketStreamData::mutable_bid_depths() {
+  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.MarketStreamData.bid_depths)
+  return &bid_depths_;
+}
+inline const ::trade::service::v1::Depth& MarketStreamData::_internal_bid_depths(int index) const {
+  return bid_depths_.Get(index);
+}
+inline const ::trade::service::v1::Depth& MarketStreamData::bid_depths(int index) const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.bid_depths)
+  return _internal_bid_depths(index);
+}
+inline ::trade::service::v1::Depth* MarketStreamData::_internal_add_bid_depths() {
+  return bid_depths_.Add();
+}
+inline ::trade::service::v1::Depth* MarketStreamData::add_bid_depths() {
+  // @@protoc_insertion_point(field_add:trade.service.v1.MarketStreamData.bid_depths)
+  return _internal_add_bid_depths();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::Depth >&
+MarketStreamData::bid_depths() const {
+  // @@protoc_insertion_point(field_list:trade.service.v1.MarketStreamData.bid_depths)
+  return bid_depths_;
+}
+
+// bool is_cover = 7 [(.gogoproto.customname) = "IsCover", (.gogoproto.jsontag) = "is_cover"];
+inline void MarketStreamData::clear_is_cover() {
+  is_cover_ = false;
+}
+inline bool MarketStreamData::_internal_is_cover() const {
+  return is_cover_;
+}
+inline bool MarketStreamData::is_cover() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.MarketStreamData.is_cover)
+  return _internal_is_cover();
+}
+inline void MarketStreamData::_internal_set_is_cover(bool value) {
+  
+  is_cover_ = value;
+}
+inline void MarketStreamData::set_is_cover(bool value) {
+  _internal_set_is_cover(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.MarketStreamData.is_cover)
+}
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// Depth
+
+// string price = 1 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
+inline void Depth::clear_price() {
+  price_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& Depth::price() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.Depth.price)
+  return _internal_price();
+}
+inline void Depth::set_price(const std::string& value) {
+  _internal_set_price(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.Depth.price)
+}
+inline std::string* Depth::mutable_price() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.Depth.price)
+  return _internal_mutable_price();
+}
+inline const std::string& Depth::_internal_price() const {
+  return price_.Get();
+}
+inline void Depth::_internal_set_price(const std::string& value) {
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void Depth::set_price(std::string&& value) {
+  
+  price_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.Depth.price)
+}
+inline void Depth::set_price(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.Depth.price)
+}
+inline void Depth::set_price(const char* value,
+    size_t size) {
+  
+  price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.Depth.price)
+}
+inline std::string* Depth::_internal_mutable_price() {
+  
+  return price_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* Depth::release_price() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.Depth.price)
+  return price_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Depth::set_allocated_price(std::string* price) {
+  if (price != nullptr) {
+    
+  } else {
+    
+  }
+  price_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), price,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.Depth.price)
+}
+
+// map<string, double> data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];
+inline int Depth::_internal_data_size() const {
+  return data_.size();
+}
+inline int Depth::data_size() const {
+  return _internal_data_size();
+}
+inline void Depth::clear_data() {
+  data_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >&
+Depth::_internal_data() const {
+  return data_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >&
+Depth::data() const {
+  // @@protoc_insertion_point(field_map:trade.service.v1.Depth.data)
+  return _internal_data();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >*
+Depth::_internal_mutable_data() {
+  return data_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, double >*
+Depth::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_map:trade.service.v1.Depth.data)
+  return _internal_mutable_data();
+}
+
+// double volume = 3 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+inline void Depth::clear_volume() {
+  volume_ = 0;
+}
+inline double Depth::_internal_volume() const {
+  return volume_;
+}
+inline double Depth::volume() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.Depth.volume)
+  return _internal_volume();
+}
+inline void Depth::_internal_set_volume(double value) {
+  
+  volume_ = value;
+}
+inline void Depth::set_volume(double value) {
+  _internal_set_volume(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.Depth.volume)
+}
+
+// -------------------------------------------------------------------
+
+// SubscribeOneQuoteReq
+
+// string exchange = 1 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+inline void SubscribeOneQuoteReq::clear_exchange() {
+  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SubscribeOneQuoteReq::exchange() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SubscribeOneQuoteReq.exchange)
+  return _internal_exchange();
+}
+inline void SubscribeOneQuoteReq::set_exchange(const std::string& value) {
+  _internal_set_exchange(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SubscribeOneQuoteReq.exchange)
+}
+inline std::string* SubscribeOneQuoteReq::mutable_exchange() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.SubscribeOneQuoteReq.exchange)
+  return _internal_mutable_exchange();
+}
+inline const std::string& SubscribeOneQuoteReq::_internal_exchange() const {
+  return exchange_.Get();
+}
+inline void SubscribeOneQuoteReq::_internal_set_exchange(const std::string& value) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SubscribeOneQuoteReq::set_exchange(std::string&& value) {
+  
+  exchange_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.SubscribeOneQuoteReq.exchange)
+}
+inline void SubscribeOneQuoteReq::set_exchange(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.SubscribeOneQuoteReq.exchange)
+}
+inline void SubscribeOneQuoteReq::set_exchange(const char* value,
+    size_t size) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.SubscribeOneQuoteReq.exchange)
+}
+inline std::string* SubscribeOneQuoteReq::_internal_mutable_exchange() {
+  
+  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SubscribeOneQuoteReq::release_exchange() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.SubscribeOneQuoteReq.exchange)
+  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SubscribeOneQuoteReq::set_allocated_exchange(std::string* exchange) {
+  if (exchange != nullptr) {
+    
+  } else {
+    
+  }
+  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.SubscribeOneQuoteReq.exchange)
+}
+
+// string symbol = 2 [(.gogoproto.customname) = "Symbol", (.gogoproto.jsontag) = "symbol"];
+inline void SubscribeOneQuoteReq::clear_symbol() {
+  symbol_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SubscribeOneQuoteReq::symbol() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.SubscribeOneQuoteReq.symbol)
+  return _internal_symbol();
+}
+inline void SubscribeOneQuoteReq::set_symbol(const std::string& value) {
+  _internal_set_symbol(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.SubscribeOneQuoteReq.symbol)
+}
+inline std::string* SubscribeOneQuoteReq::mutable_symbol() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.SubscribeOneQuoteReq.symbol)
+  return _internal_mutable_symbol();
+}
+inline const std::string& SubscribeOneQuoteReq::_internal_symbol() const {
+  return symbol_.Get();
+}
+inline void SubscribeOneQuoteReq::_internal_set_symbol(const std::string& value) {
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SubscribeOneQuoteReq::set_symbol(std::string&& value) {
+  
+  symbol_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.SubscribeOneQuoteReq.symbol)
+}
+inline void SubscribeOneQuoteReq::set_symbol(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.SubscribeOneQuoteReq.symbol)
+}
+inline void SubscribeOneQuoteReq::set_symbol(const char* value,
+    size_t size) {
+  
+  symbol_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.SubscribeOneQuoteReq.symbol)
+}
+inline std::string* SubscribeOneQuoteReq::_internal_mutable_symbol() {
+  
+  return symbol_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SubscribeOneQuoteReq::release_symbol() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.SubscribeOneQuoteReq.symbol)
+  return symbol_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SubscribeOneQuoteReq::set_allocated_symbol(std::string* symbol) {
+  if (symbol != nullptr) {
+    
+  } else {
+    
+  }
+  symbol_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), symbol,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.SubscribeOneQuoteReq.symbol)
 }
 
 // -------------------------------------------------------------------
@@ -2324,7 +3733,69 @@ inline void QuoteData::set_allocated_symbol(std::string* symbol) {
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.symbol)
 }
 
-// int64 msg_seq = 2 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
+// string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+inline void QuoteData::clear_exchange() {
+  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& QuoteData::exchange() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.QuoteData.exchange)
+  return _internal_exchange();
+}
+inline void QuoteData::set_exchange(const std::string& value) {
+  _internal_set_exchange(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.exchange)
+}
+inline std::string* QuoteData::mutable_exchange() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.QuoteData.exchange)
+  return _internal_mutable_exchange();
+}
+inline const std::string& QuoteData::_internal_exchange() const {
+  return exchange_.Get();
+}
+inline void QuoteData::_internal_set_exchange(const std::string& value) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void QuoteData::set_exchange(std::string&& value) {
+  
+  exchange_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.QuoteData.exchange)
+}
+inline void QuoteData::set_exchange(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.QuoteData.exchange)
+}
+inline void QuoteData::set_exchange(const char* value,
+    size_t size) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.QuoteData.exchange)
+}
+inline std::string* QuoteData::_internal_mutable_exchange() {
+  
+  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* QuoteData::release_exchange() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.QuoteData.exchange)
+  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void QuoteData::set_allocated_exchange(std::string* exchange) {
+  if (exchange != nullptr) {
+    
+  } else {
+    
+  }
+  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.exchange)
+}
+
+// int64 msg_seq = 3 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
 inline void QuoteData::clear_msg_seq() {
   msg_seq_ = PROTOBUF_LONGLONG(0);
 }
@@ -2344,7 +3815,7 @@ inline void QuoteData::set_msg_seq(::PROTOBUF_NAMESPACE_ID::int64 value) {
   // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.msg_seq)
 }
 
-// string time = 3 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+// string time = 4 [(.gogoproto.customname) = "Time", (.gogoproto.jsontag) = "time", (.gogoproto.casttype) = "wx/pkg/time.Time"];
 inline void QuoteData::clear_time() {
   time_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -2406,7 +3877,7 @@ inline void QuoteData::set_allocated_time(std::string* time) {
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.time)
 }
 
-// string time_arrive = 4 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
+// string time_arrive = 5 [(.gogoproto.customname) = "TimeArrive", (.gogoproto.jsontag) = "time_arrive", (.gogoproto.casttype) = "wx/pkg/time.Time"];
 inline void QuoteData::clear_time_arrive() {
   time_arrive_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -2468,7 +3939,7 @@ inline void QuoteData::set_allocated_time_arrive(std::string* time_arrive) {
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.time_arrive)
 }
 
-// repeated .trade.service.v1.DepthLevel ask_depth = 5 [(.gogoproto.customname) = "AskDepth", (.gogoproto.jsontag) = "ask_depth"];
+// repeated .trade.service.v1.DepthLevel ask_depth = 6 [(.gogoproto.customname) = "AskDepth", (.gogoproto.jsontag) = "ask_depth"];
 inline int QuoteData::_internal_ask_depth_size() const {
   return ask_depth_.size();
 }
@@ -2507,7 +3978,7 @@ QuoteData::ask_depth() const {
   return ask_depth_;
 }
 
-// repeated .trade.service.v1.DepthLevel bid_depth = 6 [(.gogoproto.customname) = "BidDepth", (.gogoproto.jsontag) = "bid_depth"];
+// repeated .trade.service.v1.DepthLevel bid_depth = 7 [(.gogoproto.customname) = "BidDepth", (.gogoproto.jsontag) = "bid_depth"];
 inline int QuoteData::_internal_bid_depth_size() const {
   return bid_depth_.size();
 }
@@ -2546,7 +4017,7 @@ QuoteData::bid_depth() const {
   return bid_depth_;
 }
 
-// bool is_snap = 7 [(.gogoproto.customname) = "IsSnap", (.gogoproto.jsontag) = "is_snap"];
+// bool is_snap = 8 [(.gogoproto.customname) = "IsSnap", (.gogoproto.jsontag) = "is_snap"];
 inline void QuoteData::clear_is_snap() {
   is_snap_ = false;
 }
@@ -2564,68 +4035,6 @@ inline void QuoteData::_internal_set_is_snap(bool value) {
 inline void QuoteData::set_is_snap(bool value) {
   _internal_set_is_snap(value);
   // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.is_snap)
-}
-
-// string exchange = 8 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
-inline void QuoteData::clear_exchange() {
-  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& QuoteData::exchange() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.QuoteData.exchange)
-  return _internal_exchange();
-}
-inline void QuoteData::set_exchange(const std::string& value) {
-  _internal_set_exchange(value);
-  // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.exchange)
-}
-inline std::string* QuoteData::mutable_exchange() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.QuoteData.exchange)
-  return _internal_mutable_exchange();
-}
-inline const std::string& QuoteData::_internal_exchange() const {
-  return exchange_.Get();
-}
-inline void QuoteData::_internal_set_exchange(const std::string& value) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void QuoteData::set_exchange(std::string&& value) {
-  
-  exchange_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.QuoteData.exchange)
-}
-inline void QuoteData::set_exchange(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:trade.service.v1.QuoteData.exchange)
-}
-inline void QuoteData::set_exchange(const char* value,
-    size_t size) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.QuoteData.exchange)
-}
-inline std::string* QuoteData::_internal_mutable_exchange() {
-  
-  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* QuoteData::release_exchange() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.QuoteData.exchange)
-  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void QuoteData::set_allocated_exchange(std::string* exchange) {
-  if (exchange != nullptr) {
-    
-  } else {
-    
-  }
-  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.exchange)
 }
 
 // -------------------------------------------------------------------
@@ -2715,43 +4124,24 @@ inline void DepthLevel::set_allocated_price(::trade::service::v1::Decimal* price
   // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthLevel.price)
 }
 
-// repeated .trade.service.v1.DepthVolume data = 2 [(.gogoproto.customname) = "Data", (.gogoproto.jsontag) = "data"];
-inline int DepthLevel::_internal_data_size() const {
-  return data_.size();
+// double volume = 2 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
+inline void DepthLevel::clear_volume() {
+  volume_ = 0;
 }
-inline int DepthLevel::data_size() const {
-  return _internal_data_size();
+inline double DepthLevel::_internal_volume() const {
+  return volume_;
 }
-inline void DepthLevel::clear_data() {
-  data_.Clear();
+inline double DepthLevel::volume() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.DepthLevel.volume)
+  return _internal_volume();
 }
-inline ::trade::service::v1::DepthVolume* DepthLevel::mutable_data(int index) {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.DepthLevel.data)
-  return data_.Mutable(index);
+inline void DepthLevel::_internal_set_volume(double value) {
+  
+  volume_ = value;
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthVolume >*
-DepthLevel::mutable_data() {
-  // @@protoc_insertion_point(field_mutable_list:trade.service.v1.DepthLevel.data)
-  return &data_;
-}
-inline const ::trade::service::v1::DepthVolume& DepthLevel::_internal_data(int index) const {
-  return data_.Get(index);
-}
-inline const ::trade::service::v1::DepthVolume& DepthLevel::data(int index) const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.DepthLevel.data)
-  return _internal_data(index);
-}
-inline ::trade::service::v1::DepthVolume* DepthLevel::_internal_add_data() {
-  return data_.Add();
-}
-inline ::trade::service::v1::DepthVolume* DepthLevel::add_data() {
-  // @@protoc_insertion_point(field_add:trade.service.v1.DepthLevel.data)
-  return _internal_add_data();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::trade::service::v1::DepthVolume >&
-DepthLevel::data() const {
-  // @@protoc_insertion_point(field_list:trade.service.v1.DepthLevel.data)
-  return data_;
+inline void DepthLevel::set_volume(double value) {
+  _internal_set_volume(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.DepthLevel.volume)
 }
 
 // -------------------------------------------------------------------
@@ -2798,178 +4188,19 @@ inline void Decimal::set_base(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:trade.service.v1.Decimal.base)
 }
 
-// -------------------------------------------------------------------
-
-// DepthVolume
-
-// double volume = 1 [(.gogoproto.customname) = "Volume", (.gogoproto.jsontag) = "volume"];
-inline void DepthVolume::clear_volume() {
-  volume_ = 0;
-}
-inline double DepthVolume::_internal_volume() const {
-  return volume_;
-}
-inline double DepthVolume::volume() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.DepthVolume.volume)
-  return _internal_volume();
-}
-inline void DepthVolume::_internal_set_volume(double value) {
-  
-  volume_ = value;
-}
-inline void DepthVolume::set_volume(double value) {
-  _internal_set_volume(value);
-  // @@protoc_insertion_point(field_set:trade.service.v1.DepthVolume.volume)
-}
-
-// string exchange = 2 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
-inline void DepthVolume::clear_exchange() {
-  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& DepthVolume::exchange() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.DepthVolume.exchange)
-  return _internal_exchange();
-}
-inline void DepthVolume::set_exchange(const std::string& value) {
-  _internal_set_exchange(value);
-  // @@protoc_insertion_point(field_set:trade.service.v1.DepthVolume.exchange)
-}
-inline std::string* DepthVolume::mutable_exchange() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.DepthVolume.exchange)
-  return _internal_mutable_exchange();
-}
-inline const std::string& DepthVolume::_internal_exchange() const {
-  return exchange_.Get();
-}
-inline void DepthVolume::_internal_set_exchange(const std::string& value) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void DepthVolume::set_exchange(std::string&& value) {
-  
-  exchange_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.DepthVolume.exchange)
-}
-inline void DepthVolume::set_exchange(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:trade.service.v1.DepthVolume.exchange)
-}
-inline void DepthVolume::set_exchange(const char* value,
-    size_t size) {
-  
-  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.DepthVolume.exchange)
-}
-inline std::string* DepthVolume::_internal_mutable_exchange() {
-  
-  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* DepthVolume::release_exchange() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.DepthVolume.exchange)
-  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void DepthVolume::set_allocated_exchange(std::string* exchange) {
-  if (exchange != nullptr) {
-    
-  } else {
-    
-  }
-  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthVolume.exchange)
-}
-
-// .trade.service.v1.Decimal price = 3 [(.gogoproto.customname) = "Price", (.gogoproto.jsontag) = "price"];
-inline bool DepthVolume::_internal_has_price() const {
-  return this != internal_default_instance() && price_ != nullptr;
-}
-inline bool DepthVolume::has_price() const {
-  return _internal_has_price();
-}
-inline void DepthVolume::clear_price() {
-  if (GetArena() == nullptr && price_ != nullptr) {
-    delete price_;
-  }
-  price_ = nullptr;
-}
-inline const ::trade::service::v1::Decimal& DepthVolume::_internal_price() const {
-  const ::trade::service::v1::Decimal* p = price_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::trade::service::v1::Decimal*>(
-      &::trade::service::v1::_Decimal_default_instance_);
-}
-inline const ::trade::service::v1::Decimal& DepthVolume::price() const {
-  // @@protoc_insertion_point(field_get:trade.service.v1.DepthVolume.price)
-  return _internal_price();
-}
-inline void DepthVolume::unsafe_arena_set_allocated_price(
-    ::trade::service::v1::Decimal* price) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(price_);
-  }
-  price_ = price;
-  if (price) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:trade.service.v1.DepthVolume.price)
-}
-inline ::trade::service::v1::Decimal* DepthVolume::release_price() {
-  
-  ::trade::service::v1::Decimal* temp = price_;
-  price_ = nullptr;
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::trade::service::v1::Decimal* DepthVolume::unsafe_arena_release_price() {
-  // @@protoc_insertion_point(field_release:trade.service.v1.DepthVolume.price)
-  
-  ::trade::service::v1::Decimal* temp = price_;
-  price_ = nullptr;
-  return temp;
-}
-inline ::trade::service::v1::Decimal* DepthVolume::_internal_mutable_price() {
-  
-  if (price_ == nullptr) {
-    auto* p = CreateMaybeMessage<::trade::service::v1::Decimal>(GetArena());
-    price_ = p;
-  }
-  return price_;
-}
-inline ::trade::service::v1::Decimal* DepthVolume::mutable_price() {
-  // @@protoc_insertion_point(field_mutable:trade.service.v1.DepthVolume.price)
-  return _internal_mutable_price();
-}
-inline void DepthVolume::set_allocated_price(::trade::service::v1::Decimal* price) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete price_;
-  }
-  if (price) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(price);
-    if (message_arena != submessage_arena) {
-      price = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, price, submessage_arena);
-    }
-    
-  } else {
-    
-  }
-  price_ = price;
-  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.DepthVolume.price)
-}
-
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

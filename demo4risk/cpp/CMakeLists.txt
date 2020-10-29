@@ -21,7 +21,7 @@ LINK_DIRECTORIES("../lib")
 LINK_DIRECTORIES("/root/.local/lib")
 
 ###############################################################################################
-add_executable(demo4risk main.cpp risk_controller.cpp datacenter.cpp grpc_server.cpp grpc_caller.cpp empty.pb.cc gogo.pb.cc api.pb.cc api.grpc.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
+add_executable(demo4risk main.cpp risk_controller.cpp datacenter.cpp grpc_server.cpp grpc_entity.cpp empty.pb.cc gogo.pb.cc api.pb.cc api.grpc.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
 target_link_libraries(demo4risk ${Boost_LIBRARIES})
 target_link_libraries(demo4risk pandora)
 target_link_libraries(demo4risk log4cplus)

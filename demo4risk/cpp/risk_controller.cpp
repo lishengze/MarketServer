@@ -6,36 +6,40 @@
 // config file relative path
 const char* config_file = "config.json";
 
-void quotedata_to_innerquote(const QuoteData& src, SInnerQuote& dst) {
-    strcpy(dst.symbol, src.symbol().c_str());
-    dst.seq_no = src.msg_seq();
-    //dst.time = src.time();
-    //dst.time_arrive = src.time_arrive();
+void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
+    vassign(dst.symbol, MAX_SYMBOLNAME_LENGTH, src.symbol());
+    //vassign(dst.seq_no, src.msg_seq());
     // 卖盘
-    for( int i = 0 ; i < src.ask_depth_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
-        const DepthLevel& srcDepth = src.ask_depth(i);
-        dst.asks[i].price.value = srcDepth.price().value();
-        dst.asks[i].price.base = srcDepth.price().base();
-        for( int j = 0 ; j < srcDepth.data_size() && j < MAX_EXCHANGE_LENGTH ; ++j ) {
-            const DepthVolume& srcDepthVolume = srcDepth.data(j);
-            strcpy(dst.asks[i].exchanges[j].name, srcDepthVolume.exchange().c_str());
-            dst.asks[i].exchanges[j].volume = srcDepthVolume.volume();
-            dst.asks[i].exchange_length = j+1;
+    for( int i = 0 ; i < src.ask_depths_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+        const SEDepth& src_depth = src.ask_depths(i);
+        SInnerDepth& dst_depth = dst.asks[i];
+        dst_depth.price.from(src_depth.price());
+        int count = 0;
+        for( auto v : src_depth.data() ) {
+            vassign(dst_depth.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
+            vassign(dst_depth.exchanges[count].volume, v.second);
+            count++;
+            if( count >= MAX_EXCHANGE_LENGTH )
+                break;
         }
-        dst.ask_length = i+1;
+        dst_depth.exchange_length = count;
+        dst.ask_length = i+1; 
     }
     // 买盘
-    for( int i = 0 ; i < src.bid_depth_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
-        const DepthLevel& srcDepth = src.bid_depth(i);
-        dst.bids[i].price.value = srcDepth.price().value();
-        dst.bids[i].price.base = srcDepth.price().base();
-        for( int j = 0 ; j < srcDepth.data_size() && j < MAX_EXCHANGE_LENGTH ; ++j ) {
-            const DepthVolume& srcDepthVolume = srcDepth.data(j);
-            strcpy(dst.bids[i].exchanges[j].name, srcDepthVolume.exchange().c_str());
-            dst.bids[i].exchanges[j].volume = srcDepthVolume.volume();
-            dst.bids[i].exchange_length = j+1;
+    for( int i = 0 ; i < src.bid_depths_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+        const SEDepth& src_depth = src.bid_depths(i);
+        SInnerDepth& dst_depth = dst.bids[i];
+        dst_depth.price.from(src_depth.price());
+        int count = 0;
+        for( auto v : src_depth.data() ) {
+            vassign(dst_depth.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
+            vassign(dst_depth.exchanges[count].volume, v.second);
+            count++;
+            if( count >= MAX_EXCHANGE_LENGTH )
+                break;
         }
-        dst.bid_length = i+1;
+        dst_depth.exchange_length = count;
+        dst.bid_length = i+1; 
     }
 }
 
@@ -45,7 +49,7 @@ RiskController::RiskController(){
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
-    utrade::pandora::Singleton<ServerImpl>::Instance();
+    utrade::pandora::Singleton<GrpcServer>::Instance();
 }
 
 RiskController::~RiskController(){
@@ -57,7 +61,7 @@ void RiskController::start() {
     account_updater_.start(this);
 
     // start grpc server
-    PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_, &datacenter_);
+    PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_);
 }
 
 void RiskController::signal_handler(int signum)
@@ -70,11 +74,12 @@ void RiskController::signal_handler(int signum)
     exit(0);
 }
 
-void RiskController::on_snap(const QuoteData& quote)
+void RiskController::on_snap(const SEData& quote)
 {
     // QuoteData to SInnerQuote
     SInnerQuote raw;
     quotedata_to_innerquote(quote, raw);
+    //std::cout << "update symbol " << quote.symbol() << " " << raw.ask_length << "/" << raw.bid_length << std::endl;
     datacenter_.add_quote(raw);
 }
 

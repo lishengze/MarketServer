@@ -6,7 +6,7 @@ import stream_engine_server_pb2 as stream__engine__server__pb2
 
 
 class StreamEngineServiceStub(object):
-    """Trade grpc
+    """StreamEngineService grpc
     """
 
     def __init__(self, channel):
@@ -15,71 +15,46 @@ class StreamEngineServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetQuote = channel.unary_unary(
-                '/trade.service.v1.StreamEngineService/GetQuote',
-                request_serializer=stream__engine__server__pb2.GetQuoteReq.SerializeToString,
-                response_deserializer=stream__engine__server__pb2.QuoteData.FromString,
-                )
         self.SubscribeOneQuote = channel.unary_stream(
                 '/trade.service.v1.StreamEngineService/SubscribeOneQuote',
-                request_serializer=stream__engine__server__pb2.GetQuoteReq.SerializeToString,
+                request_serializer=stream__engine__server__pb2.SubscribeOneQuoteReq.SerializeToString,
                 response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
                 )
         self.MultiSubscribeQuote = channel.unary_stream(
                 '/trade.service.v1.StreamEngineService/MultiSubscribeQuote',
-                request_serializer=stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-                response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
-                )
-        self.MultiSubscribeHedgeQuote = channel.unary_stream(
-                '/trade.service.v1.StreamEngineService/MultiSubscribeHedgeQuote',
-                request_serializer=stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-                response_deserializer=stream__engine__server__pb2.MultiQuoteData.FromString,
-                )
-        self.SetParams = channel.unary_unary(
-                '/trade.service.v1.StreamEngineService/SetParams',
-                request_serializer=stream__engine__server__pb2.SetParamsReq.SerializeToString,
-                response_deserializer=stream__engine__server__pb2.SetParamsResp.FromString,
+                request_serializer=stream__engine__server__pb2.MultiSubscribeQuoteReq.SerializeToString,
+                response_deserializer=stream__engine__server__pb2.MultiMarketStreamData.FromString,
                 )
         self.Demo = channel.unary_stream(
                 '/trade.service.v1.StreamEngineService/Demo',
                 request_serializer=stream__engine__server__pb2.DemoReq.SerializeToString,
                 response_deserializer=stream__engine__server__pb2.DemoResp.FromString,
                 )
+        self.SetParams = channel.unary_unary(
+                '/trade.service.v1.StreamEngineService/SetParams',
+                request_serializer=stream__engine__server__pb2.SetParamsReq.SerializeToString,
+                response_deserializer=stream__engine__server__pb2.SetParamsResp.FromString,
+                )
+        self.GetParams = channel.unary_unary(
+                '/trade.service.v1.StreamEngineService/GetParams',
+                request_serializer=stream__engine__server__pb2.GetParamsReq.SerializeToString,
+                response_deserializer=stream__engine__server__pb2.GetParamsResp.FromString,
+                )
 
 
 class StreamEngineServiceServicer(object):
-    """Trade grpc
+    """StreamEngineService grpc
     """
 
-    def GetQuote(self, request, context):
+    def SubscribeOneQuote(self, request, context):
         """获取单品种行情
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SubscribeOneQuote(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def MultiSubscribeQuote(self, request, context):
         """订阅聚合行情
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def MultiSubscribeHedgeQuote(self, request, context):
-        """订阅用于内部对冲的聚合行情
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def SetParams(self, request, context):
-        """设置参数
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -92,38 +67,47 @@ class StreamEngineServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SetParams(self, request, context):
+        """设置参数
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetParams(self, request, context):
+        """获取参数
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_StreamEngineServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetQuote': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetQuote,
-                    request_deserializer=stream__engine__server__pb2.GetQuoteReq.FromString,
-                    response_serializer=stream__engine__server__pb2.QuoteData.SerializeToString,
-            ),
             'SubscribeOneQuote': grpc.unary_stream_rpc_method_handler(
                     servicer.SubscribeOneQuote,
-                    request_deserializer=stream__engine__server__pb2.GetQuoteReq.FromString,
+                    request_deserializer=stream__engine__server__pb2.SubscribeOneQuoteReq.FromString,
                     response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
             ),
             'MultiSubscribeQuote': grpc.unary_stream_rpc_method_handler(
                     servicer.MultiSubscribeQuote,
-                    request_deserializer=stream__engine__server__pb2.SubscribeQuoteReq.FromString,
-                    response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
+                    request_deserializer=stream__engine__server__pb2.MultiSubscribeQuoteReq.FromString,
+                    response_serializer=stream__engine__server__pb2.MultiMarketStreamData.SerializeToString,
             ),
-            'MultiSubscribeHedgeQuote': grpc.unary_stream_rpc_method_handler(
-                    servicer.MultiSubscribeHedgeQuote,
-                    request_deserializer=stream__engine__server__pb2.SubscribeQuoteReq.FromString,
-                    response_serializer=stream__engine__server__pb2.MultiQuoteData.SerializeToString,
+            'Demo': grpc.unary_stream_rpc_method_handler(
+                    servicer.Demo,
+                    request_deserializer=stream__engine__server__pb2.DemoReq.FromString,
+                    response_serializer=stream__engine__server__pb2.DemoResp.SerializeToString,
             ),
             'SetParams': grpc.unary_unary_rpc_method_handler(
                     servicer.SetParams,
                     request_deserializer=stream__engine__server__pb2.SetParamsReq.FromString,
                     response_serializer=stream__engine__server__pb2.SetParamsResp.SerializeToString,
             ),
-            'Demo': grpc.unary_stream_rpc_method_handler(
-                    servicer.Demo,
-                    request_deserializer=stream__engine__server__pb2.DemoReq.FromString,
-                    response_serializer=stream__engine__server__pb2.DemoResp.SerializeToString,
+            'GetParams': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetParams,
+                    request_deserializer=stream__engine__server__pb2.GetParamsReq.FromString,
+                    response_serializer=stream__engine__server__pb2.GetParamsResp.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -133,25 +117,8 @@ def add_StreamEngineServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class StreamEngineService(object):
-    """Trade grpc
+    """StreamEngineService grpc
     """
-
-    @staticmethod
-    def GetQuote(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/trade.service.v1.StreamEngineService/GetQuote',
-            stream__engine__server__pb2.GetQuoteReq.SerializeToString,
-            stream__engine__server__pb2.QuoteData.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def SubscribeOneQuote(request,
@@ -165,7 +132,7 @@ class StreamEngineService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/SubscribeOneQuote',
-            stream__engine__server__pb2.GetQuoteReq.SerializeToString,
+            stream__engine__server__pb2.SubscribeOneQuoteReq.SerializeToString,
             stream__engine__server__pb2.MultiQuoteData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -182,13 +149,13 @@ class StreamEngineService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/MultiSubscribeQuote',
-            stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-            stream__engine__server__pb2.MultiQuoteData.FromString,
+            stream__engine__server__pb2.MultiSubscribeQuoteReq.SerializeToString,
+            stream__engine__server__pb2.MultiMarketStreamData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def MultiSubscribeHedgeQuote(request,
+    def Demo(request,
             target,
             options=(),
             channel_credentials=None,
@@ -198,9 +165,9 @@ class StreamEngineService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/MultiSubscribeHedgeQuote',
-            stream__engine__server__pb2.SubscribeQuoteReq.SerializeToString,
-            stream__engine__server__pb2.MultiQuoteData.FromString,
+        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/Demo',
+            stream__engine__server__pb2.DemoReq.SerializeToString,
+            stream__engine__server__pb2.DemoResp.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -222,7 +189,7 @@ class StreamEngineService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Demo(request,
+    def GetParams(request,
             target,
             options=(),
             channel_credentials=None,
@@ -232,8 +199,8 @@ class StreamEngineService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/Demo',
-            stream__engine__server__pb2.DemoReq.SerializeToString,
-            stream__engine__server__pb2.DemoResp.FromString,
+        return grpc.experimental.unary_unary(request, target, '/trade.service.v1.StreamEngineService/GetParams',
+            stream__engine__server__pb2.GetParamsReq.SerializeToString,
+            stream__engine__server__pb2.GetParamsResp.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

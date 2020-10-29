@@ -11,11 +11,9 @@ public:
 
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
-    void publish_quote(const string& exchange, const string& symbol, const SMixQuote* snap, const SDepthQuote* update);
-
 private:
-    unordered_map<TExchange, unordered_map<TSymbol, SMixQuote*>> symbols_;
-    unordered_map<TExchange, unordered_map<TSymbol, long long>> last_clocks_;
+    mutable std::mutex mutex_quotes_;
+    unordered_map<TExchange, unordered_map<TSymbol, SMixQuote*>> quotes_;
 
     bool _get_quote(const string& exchange, const string& symbol, SMixQuote*& ptr) const;
     
@@ -26,4 +24,9 @@ private:
 
     SMixDepthPrice* _mix_exchange(const string& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
         const int& length, bool isAsk);
+        
+    mutable std::mutex mutex_clocks_;
+    unordered_map<TExchange, unordered_map<TSymbol, long long>> last_clocks_;
+    bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
+    void _publish_quote(const TExchange& exchange, const TSymbol& symbol, const SMixQuote* snap, const SDepthQuote* update, bool is_snap);
 };

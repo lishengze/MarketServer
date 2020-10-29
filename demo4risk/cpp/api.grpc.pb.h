@@ -26,49 +26,49 @@
 #include <grpcpp/impl/codegen/stub_options.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
 
-namespace trade {
+namespace broker {
 namespace service {
 namespace v1 {
 
-// Trade grpc
-class Trade final {
+// Broker grpc
+class Broker final {
  public:
   static constexpr char const* service_full_name() {
-    return "trade.service.v1.Trade";
+    return "broker.service.v1.Broker";
   }
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    std::unique_ptr< ::grpc::ClientWriterInterface< ::trade::service::v1::MarketStreamData>> PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
-      return std::unique_ptr< ::grpc::ClientWriterInterface< ::trade::service::v1::MarketStreamData>>(PutMarketStreamRaw(context, response));
+    std::unique_ptr< ::grpc::ClientReaderInterface< ::broker::service::v1::MultiMarketStreamData>> ServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
+      return std::unique_ptr< ::grpc::ClientReaderInterface< ::broker::service::v1::MultiMarketStreamData>>(ServeMarketStreamRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>> AsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>>(AsyncPutMarketStreamRaw(context, response, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>> AsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>>(AsyncServeMarketStreamRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>> PrepareAsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>>(PrepareAsyncPutMarketStreamRaw(context, response, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>> PrepareAsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>>(PrepareAsyncServeMarketStreamRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>> ServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
-      return std::unique_ptr< ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(ServeMarketStreamRaw(context, request));
+    std::unique_ptr< ::grpc::ClientWriterInterface< ::broker::service::v1::MarketStreamData>> PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
+      return std::unique_ptr< ::grpc::ClientWriterInterface< ::broker::service::v1::MarketStreamData>>(PutMarketStreamRaw(context, response));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>> AsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(AsyncServeMarketStreamRaw(context, request, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>> AsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>>(AsyncPutMarketStreamRaw(context, response, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>> PrepareAsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>>(PrepareAsyncServeMarketStreamRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>> PrepareAsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>>(PrepareAsyncPutMarketStreamRaw(context, response, cq));
     }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::ClientWriteReactor< ::trade::service::v1::MarketStreamData>* reactor) = 0;
+      virtual void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::ClientReadReactor< ::broker::service::v1::MultiMarketStreamData>* reactor) = 0;
       #else
-      virtual void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::trade::service::v1::MarketStreamData>* reactor) = 0;
+      virtual void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::broker::service::v1::MultiMarketStreamData>* reactor) = 0;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) = 0;
+      virtual void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::ClientWriteReactor< ::broker::service::v1::MarketStreamData>* reactor) = 0;
       #else
-      virtual void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) = 0;
+      virtual void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::broker::service::v1::MarketStreamData>* reactor) = 0;
       #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -79,46 +79,46 @@ class Trade final {
     #endif
     virtual class experimental_async_interface* experimental_async() { return nullptr; }
   private:
-    virtual ::grpc::ClientWriterInterface< ::trade::service::v1::MarketStreamData>* PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) = 0;
-    virtual ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>* AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncWriterInterface< ::trade::service::v1::MarketStreamData>* PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientReaderInterface< ::trade::service::v1::MultiMarketStreamData>* ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>* AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
-    virtual ::grpc::ClientAsyncReaderInterface< ::trade::service::v1::MultiMarketStreamData>* PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientReaderInterface< ::broker::service::v1::MultiMarketStreamData>* ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>* AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncReaderInterface< ::broker::service::v1::MultiMarketStreamData>* PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientWriterInterface< ::broker::service::v1::MarketStreamData>* PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) = 0;
+    virtual ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>* AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) = 0;
+    virtual ::grpc::ClientAsyncWriterInterface< ::broker::service::v1::MarketStreamData>* PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
-    std::unique_ptr< ::grpc::ClientWriter< ::trade::service::v1::MarketStreamData>> PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
-      return std::unique_ptr< ::grpc::ClientWriter< ::trade::service::v1::MarketStreamData>>(PutMarketStreamRaw(context, response));
+    std::unique_ptr< ::grpc::ClientReader< ::broker::service::v1::MultiMarketStreamData>> ServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
+      return std::unique_ptr< ::grpc::ClientReader< ::broker::service::v1::MultiMarketStreamData>>(ServeMarketStreamRaw(context, request));
     }
-    std::unique_ptr< ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>> AsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>>(AsyncPutMarketStreamRaw(context, response, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>> AsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>>(AsyncServeMarketStreamRaw(context, request, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>> PrepareAsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>>(PrepareAsyncPutMarketStreamRaw(context, response, cq));
+    std::unique_ptr< ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>> PrepareAsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>>(PrepareAsyncServeMarketStreamRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>> ServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
-      return std::unique_ptr< ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>>(ServeMarketStreamRaw(context, request));
+    std::unique_ptr< ::grpc::ClientWriter< ::broker::service::v1::MarketStreamData>> PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
+      return std::unique_ptr< ::grpc::ClientWriter< ::broker::service::v1::MarketStreamData>>(PutMarketStreamRaw(context, response));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>> AsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>>(AsyncServeMarketStreamRaw(context, request, cq, tag));
+    std::unique_ptr< ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>> AsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
+      return std::unique_ptr< ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>>(AsyncPutMarketStreamRaw(context, response, cq, tag));
     }
-    std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>> PrepareAsyncServeMarketStream(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>>(PrepareAsyncServeMarketStreamRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>> PrepareAsyncPutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>>(PrepareAsyncPutMarketStreamRaw(context, response, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::ClientWriteReactor< ::trade::service::v1::MarketStreamData>* reactor) override;
+      void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::ClientReadReactor< ::broker::service::v1::MultiMarketStreamData>* reactor) override;
       #else
-      void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::trade::service::v1::MarketStreamData>* reactor) override;
+      void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::broker::service::v1::MultiMarketStreamData>* reactor) override;
       #endif
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) override;
+      void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::ClientWriteReactor< ::broker::service::v1::MarketStreamData>* reactor) override;
       #else
-      void ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) override;
+      void PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::broker::service::v1::MarketStreamData>* reactor) override;
       #endif
      private:
       friend class Stub;
@@ -131,14 +131,14 @@ class Trade final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class experimental_async async_stub_{this};
-    ::grpc::ClientWriter< ::trade::service::v1::MarketStreamData>* PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) override;
-    ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>* AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>* PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>* ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) override;
-    ::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
-    const ::grpc::internal::RpcMethod rpcmethod_PutMarketStream_;
+    ::grpc::ClientReader< ::broker::service::v1::MultiMarketStreamData>* ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) override;
+    ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>* AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>* PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientWriter< ::broker::service::v1::MarketStreamData>* PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) override;
+    ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>* AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) override;
+    ::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>* PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_ServeMarketStream_;
+    const ::grpc::internal::RpcMethod rpcmethod_PutMarketStream_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -146,28 +146,8 @@ class Trade final {
    public:
     Service();
     virtual ~Service();
-    virtual ::grpc::Status PutMarketStream(::grpc::ServerContext* context, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* reader, ::google::protobuf::Empty* response);
-    virtual ::grpc::Status ServeMarketStream(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* writer);
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_PutMarketStream : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_PutMarketStream() {
-      ::grpc::Service::MarkMethodAsync(0);
-    }
-    ~WithAsyncMethod_PutMarketStream() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestPutMarketStream(::grpc::ServerContext* context, ::grpc::ServerAsyncReader< ::google::protobuf::Empty, ::trade::service::v1::MarketStreamData>* reader, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncClientStreaming(0, context, reader, new_call_cq, notification_cq, tag);
-    }
+    virtual ::grpc::Status ServeMarketStream(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* writer);
+    virtual ::grpc::Status PutMarketStream(::grpc::ServerContext* context, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* reader, ::google::protobuf::Empty* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_ServeMarketStream : public BaseClass {
@@ -175,59 +155,41 @@ class Trade final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_ServeMarketStream() {
-      ::grpc::Service::MarkMethodAsync(1);
+      ::grpc::Service::MarkMethodAsync(0);
     }
     ~WithAsyncMethod_ServeMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestServeMarketStream(::grpc::ServerContext* context, ::google::protobuf::Empty* request, ::grpc::ServerAsyncWriter< ::trade::service::v1::MultiMarketStreamData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
+    void RequestServeMarketStream(::grpc::ServerContext* context, ::google::protobuf::Empty* request, ::grpc::ServerAsyncWriter< ::broker::service::v1::MultiMarketStreamData>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_PutMarketStream<WithAsyncMethod_ServeMarketStream<Service > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_PutMarketStream : public BaseClass {
+  class WithAsyncMethod_PutMarketStream : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_PutMarketStream() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackClientStreamingHandler< ::trade::service::v1::MarketStreamData, ::google::protobuf::Empty>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, ::google::protobuf::Empty* response) { return this->PutMarketStream(context, response); }));
+    WithAsyncMethod_PutMarketStream() {
+      ::grpc::Service::MarkMethodAsync(1);
     }
-    ~ExperimentalWithCallbackMethod_PutMarketStream() override {
+    ~WithAsyncMethod_PutMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerReadReactor< ::trade::service::v1::MarketStreamData>* PutMarketStream(
-      ::grpc::CallbackServerContext* /*context*/, ::google::protobuf::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerReadReactor< ::trade::service::v1::MarketStreamData>* PutMarketStream(
-      ::grpc::experimental::CallbackServerContext* /*context*/, ::google::protobuf::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestPutMarketStream(::grpc::ServerContext* context, ::grpc::ServerAsyncReader< ::google::protobuf::Empty, ::broker::service::v1::MarketStreamData>* reader, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncClientStreaming(1, context, reader, new_call_cq, notification_cq, tag);
+    }
   };
+  typedef WithAsyncMethod_ServeMarketStream<WithAsyncMethod_PutMarketStream<Service > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_ServeMarketStream : public BaseClass {
    private:
@@ -239,8 +201,8 @@ class Trade final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::google::protobuf::Empty, ::trade::service::v1::MultiMarketStreamData>(
+        MarkMethodCallback(0,
+          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::google::protobuf::Empty, ::broker::service::v1::MultiMarketStreamData>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -253,76 +215,94 @@ class Trade final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerWriteReactor< ::trade::service::v1::MultiMarketStreamData>* ServeMarketStream(
+    virtual ::grpc::ServerWriteReactor< ::broker::service::v1::MultiMarketStreamData>* ServeMarketStream(
       ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/)
     #else
-    virtual ::grpc::experimental::ServerWriteReactor< ::trade::service::v1::MultiMarketStreamData>* ServeMarketStream(
+    virtual ::grpc::experimental::ServerWriteReactor< ::broker::service::v1::MultiMarketStreamData>* ServeMarketStream(
       ::grpc::experimental::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/)
     #endif
       { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_PutMarketStream<ExperimentalWithCallbackMethod_ServeMarketStream<Service > > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_PutMarketStream<ExperimentalWithCallbackMethod_ServeMarketStream<Service > > ExperimentalCallbackService;
   template <class BaseClass>
-  class WithGenericMethod_PutMarketStream : public BaseClass {
+  class ExperimentalWithCallbackMethod_PutMarketStream : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_PutMarketStream() {
-      ::grpc::Service::MarkMethodGeneric(0);
+    ExperimentalWithCallbackMethod_PutMarketStream() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(1,
+          new ::grpc_impl::internal::CallbackClientStreamingHandler< ::broker::service::v1::MarketStreamData, ::google::protobuf::Empty>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, ::google::protobuf::Empty* response) { return this->PutMarketStream(context, response); }));
     }
-    ~WithGenericMethod_PutMarketStream() override {
+    ~ExperimentalWithCallbackMethod_PutMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerReadReactor< ::broker::service::v1::MarketStreamData>* PutMarketStream(
+      ::grpc::CallbackServerContext* /*context*/, ::google::protobuf::Empty* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerReadReactor< ::broker::service::v1::MarketStreamData>* PutMarketStream(
+      ::grpc::experimental::CallbackServerContext* /*context*/, ::google::protobuf::Empty* /*response*/)
+    #endif
+      { return nullptr; }
   };
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_ServeMarketStream<ExperimentalWithCallbackMethod_PutMarketStream<Service > > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_ServeMarketStream<ExperimentalWithCallbackMethod_PutMarketStream<Service > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_ServeMarketStream : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_ServeMarketStream() {
-      ::grpc::Service::MarkMethodGeneric(1);
+      ::grpc::Service::MarkMethodGeneric(0);
     }
     ~WithGenericMethod_ServeMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
   };
   template <class BaseClass>
-  class WithRawMethod_PutMarketStream : public BaseClass {
+  class WithGenericMethod_PutMarketStream : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_PutMarketStream() {
-      ::grpc::Service::MarkMethodRaw(0);
+    WithGenericMethod_PutMarketStream() {
+      ::grpc::Service::MarkMethodGeneric(1);
     }
-    ~WithRawMethod_PutMarketStream() override {
+    ~WithGenericMethod_PutMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestPutMarketStream(::grpc::ServerContext* context, ::grpc::ServerAsyncReader< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* reader, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncClientStreaming(0, context, reader, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -331,57 +311,39 @@ class Trade final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_ServeMarketStream() {
-      ::grpc::Service::MarkMethodRaw(1);
+      ::grpc::Service::MarkMethodRaw(0);
     }
     ~WithRawMethod_ServeMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestServeMarketStream(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncWriter< ::grpc::ByteBuffer>* writer, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncServerStreaming(1, context, request, writer, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncServerStreaming(0, context, request, writer, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_PutMarketStream : public BaseClass {
+  class WithRawMethod_PutMarketStream : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_PutMarketStream() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackClientStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, ::grpc::ByteBuffer* response) { return this->PutMarketStream(context, response); }));
+    WithRawMethod_PutMarketStream() {
+      ::grpc::Service::MarkMethodRaw(1);
     }
-    ~ExperimentalWithRawCallbackMethod_PutMarketStream() override {
+    ~WithRawMethod_PutMarketStream() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
+    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerReadReactor< ::grpc::ByteBuffer>* PutMarketStream(
-      ::grpc::CallbackServerContext* /*context*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerReadReactor< ::grpc::ByteBuffer>* PutMarketStream(
-      ::grpc::experimental::CallbackServerContext* /*context*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestPutMarketStream(::grpc::ServerContext* context, ::grpc::ServerAsyncReader< ::grpc::ByteBuffer, ::grpc::ByteBuffer>* reader, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncClientStreaming(1, context, reader, new_call_cq, notification_cq, tag);
+    }
   };
   template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_ServeMarketStream : public BaseClass {
@@ -394,7 +356,7 @@ class Trade final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(1,
+        MarkMethodRawCallback(0,
           new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -408,7 +370,7 @@ class Trade final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -421,6 +383,44 @@ class Trade final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_PutMarketStream : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_PutMarketStream() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(1,
+          new ::grpc_impl::internal::CallbackClientStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, ::grpc::ByteBuffer* response) { return this->PutMarketStream(context, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_PutMarketStream() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status PutMarketStream(::grpc::ServerContext* /*context*/, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* /*reader*/, ::google::protobuf::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerReadReactor< ::grpc::ByteBuffer>* PutMarketStream(
+      ::grpc::CallbackServerContext* /*context*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerReadReactor< ::grpc::ByteBuffer>* PutMarketStream(
+      ::grpc::experimental::CallbackServerContext* /*context*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   typedef Service StreamedUnaryService;
   template <class BaseClass>
   class WithSplitStreamingMethod_ServeMarketStream : public BaseClass {
@@ -428,12 +428,12 @@ class Trade final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithSplitStreamingMethod_ServeMarketStream() {
-      ::grpc::Service::MarkMethodStreamed(1,
+      ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::SplitServerStreamingHandler<
-          ::google::protobuf::Empty, ::trade::service::v1::MultiMarketStreamData>(
+          ::google::protobuf::Empty, ::broker::service::v1::MultiMarketStreamData>(
             [this](::grpc_impl::ServerContext* context,
                    ::grpc_impl::ServerSplitStreamer<
-                     ::google::protobuf::Empty, ::trade::service::v1::MultiMarketStreamData>* streamer) {
+                     ::google::protobuf::Empty, ::broker::service::v1::MultiMarketStreamData>* streamer) {
                        return this->StreamedServeMarketStream(context,
                          streamer);
                   }));
@@ -442,12 +442,12 @@ class Trade final {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* /*writer*/) override {
+    ::grpc::Status ServeMarketStream(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* /*writer*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with split streamed
-    virtual ::grpc::Status StreamedServeMarketStream(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::google::protobuf::Empty,::trade::service::v1::MultiMarketStreamData>* server_split_streamer) = 0;
+    virtual ::grpc::Status StreamedServeMarketStream(::grpc::ServerContext* context, ::grpc::ServerSplitStreamer< ::google::protobuf::Empty,::broker::service::v1::MultiMarketStreamData>* server_split_streamer) = 0;
   };
   typedef WithSplitStreamingMethod_ServeMarketStream<Service > SplitStreamedService;
   typedef WithSplitStreamingMethod_ServeMarketStream<Service > StreamedService;
@@ -455,7 +455,7 @@ class Trade final {
 
 }  // namespace v1
 }  // namespace service
-}  // namespace trade
+}  // namespace broker
 
 
 #endif  // GRPC_api_2eproto__INCLUDED

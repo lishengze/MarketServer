@@ -16,9 +16,6 @@ using namespace std;
 
 #define PRICE_PRECISE 0.000000001
 #define VOLUME_PRECISE 0.000000001
-#define TICK_HEAD "TRADEx|"
-#define DEPTH_UPDATE_HEAD "UPDATEx|"
-#define GET_DEPTH_HEAD "DEPTHx|"
 
 
 // 内部行情结构（链表）

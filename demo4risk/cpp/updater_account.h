@@ -121,6 +121,16 @@ private:
             hedgeOkex.currencies[2].amount = 99999;
             hedgeOkex.currency_length = 3;
             account.hedge_accounts_["OKEX"] = hedgeOkex;
+            // 设置对冲账户(币安)
+            HedgeAccountInfo hedgeBinance;
+            strcpy(hedgeBinance.currencies[0].currency, "BTC");
+            hedgeBinance.currencies[0].amount = 999999;
+            strcpy(hedgeBinance.currencies[1].currency, "ETH");
+            hedgeBinance.currencies[1].amount = 999999;
+            strcpy(hedgeBinance.currencies[2].currency, "USDT");
+            hedgeBinance.currencies[2].amount = 999999999;
+            hedgeBinance.currency_length = 3;
+            account.hedge_accounts_["BINANCE"] = hedgeBinance;            
             callback->on_account_update(account);
             // 定时聚合账户详情回调风控模块
             std::this_thread::sleep_for(std::chrono::seconds(10));

@@ -51,7 +51,7 @@ struct SInnerDepth {
                 }
             }
             if( !found ) {
-                strcpy(exchanges[exchange_length].name, src.exchanges[i].name);
+                vassign(exchanges[exchange_length].name, MAX_EXCHANGENAME_LENGTH, src.exchanges[i].name);
                 exchanges[exchange_length].volume = biasedVolume;
                 exchange_length ++;
             }
@@ -104,18 +104,6 @@ private:
 };
 
 class CallDataServeMarketStream;
-class ClientManager
-{
-    // 推送客户端注册
-    void add_client(CallDataServeMarketStream* client);
-    void del_client(CallDataServeMarketStream* client);
-
-    void send(std::shared_ptr<MarketStreamData> data);
-
-private:
-    mutable std::mutex                              mutex_clients_;
-    unordered_map<CallDataServeMarketStream*, bool> clients_;
-};
 
 class DataCenter {
 public:
@@ -136,10 +124,6 @@ public:
     void change_configuration(const QuoteConfiguration& config);
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
-
-    // 推送客户端注册
-    void add_client(CallDataServeMarketStream* client);
-    void del_client(CallDataServeMarketStream* client);
 private:
     void _add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& params);
 
@@ -158,6 +142,4 @@ private:
     unordered_map<string, int> currency_count_;
 
     WatermarkComputer watermark_computer_;
-
-    ClientManager client_manager_;
 };

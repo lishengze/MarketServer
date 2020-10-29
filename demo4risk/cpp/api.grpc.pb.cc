@@ -19,100 +19,100 @@
 #include <grpcpp/impl/codegen/server_context.h>
 #include <grpcpp/impl/codegen/service_type.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
-namespace trade {
+namespace broker {
 namespace service {
 namespace v1 {
 
-static const char* Trade_method_names[] = {
-  "/trade.service.v1.Trade/PutMarketStream",
-  "/trade.service.v1.Trade/ServeMarketStream",
+static const char* Broker_method_names[] = {
+  "/broker.service.v1.Broker/ServeMarketStream",
+  "/broker.service.v1.Broker/PutMarketStream",
 };
 
-std::unique_ptr< Trade::Stub> Trade::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+std::unique_ptr< Broker::Stub> Broker::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< Trade::Stub> stub(new Trade::Stub(channel));
+  std::unique_ptr< Broker::Stub> stub(new Broker::Stub(channel));
   return stub;
 }
 
-Trade::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel), rpcmethod_PutMarketStream_(Trade_method_names[0], ::grpc::internal::RpcMethod::CLIENT_STREAMING, channel)
-  , rpcmethod_ServeMarketStream_(Trade_method_names[1], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
+Broker::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel), rpcmethod_ServeMarketStream_(Broker_method_names[0], ::grpc::internal::RpcMethod::SERVER_STREAMING, channel)
+  , rpcmethod_PutMarketStream_(Broker_method_names[1], ::grpc::internal::RpcMethod::CLIENT_STREAMING, channel)
   {}
 
-::grpc::ClientWriter< ::trade::service::v1::MarketStreamData>* Trade::Stub::PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
-  return ::grpc_impl::internal::ClientWriterFactory< ::trade::service::v1::MarketStreamData>::Create(channel_.get(), rpcmethod_PutMarketStream_, context, response);
+::grpc::ClientReader< ::broker::service::v1::MultiMarketStreamData>* Broker::Stub::ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
+  return ::grpc_impl::internal::ClientReaderFactory< ::broker::service::v1::MultiMarketStreamData>::Create(channel_.get(), rpcmethod_ServeMarketStream_, context, request);
 }
 
-void Trade::Stub::experimental_async::PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::trade::service::v1::MarketStreamData>* reactor) {
-  ::grpc_impl::internal::ClientCallbackWriterFactory< ::trade::service::v1::MarketStreamData>::Create(stub_->channel_.get(), stub_->rpcmethod_PutMarketStream_, context, response, reactor);
+void Broker::Stub::experimental_async::ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::broker::service::v1::MultiMarketStreamData>* reactor) {
+  ::grpc_impl::internal::ClientCallbackReaderFactory< ::broker::service::v1::MultiMarketStreamData>::Create(stub_->channel_.get(), stub_->rpcmethod_ServeMarketStream_, context, request, reactor);
 }
 
-::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>* Trade::Stub::AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc_impl::internal::ClientAsyncWriterFactory< ::trade::service::v1::MarketStreamData>::Create(channel_.get(), cq, rpcmethod_PutMarketStream_, context, response, true, tag);
+::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>* Broker::Stub::AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
+  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::broker::service::v1::MultiMarketStreamData>::Create(channel_.get(), cq, rpcmethod_ServeMarketStream_, context, request, true, tag);
 }
 
-::grpc::ClientAsyncWriter< ::trade::service::v1::MarketStreamData>* Trade::Stub::PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncWriterFactory< ::trade::service::v1::MarketStreamData>::Create(channel_.get(), cq, rpcmethod_PutMarketStream_, context, response, false, nullptr);
+::grpc::ClientAsyncReader< ::broker::service::v1::MultiMarketStreamData>* Broker::Stub::PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::broker::service::v1::MultiMarketStreamData>::Create(channel_.get(), cq, rpcmethod_ServeMarketStream_, context, request, false, nullptr);
 }
 
-::grpc::ClientReader< ::trade::service::v1::MultiMarketStreamData>* Trade::Stub::ServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request) {
-  return ::grpc_impl::internal::ClientReaderFactory< ::trade::service::v1::MultiMarketStreamData>::Create(channel_.get(), rpcmethod_ServeMarketStream_, context, request);
+::grpc::ClientWriter< ::broker::service::v1::MarketStreamData>* Broker::Stub::PutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response) {
+  return ::grpc_impl::internal::ClientWriterFactory< ::broker::service::v1::MarketStreamData>::Create(channel_.get(), rpcmethod_PutMarketStream_, context, response);
 }
 
-void Trade::Stub::experimental_async::ServeMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::MultiMarketStreamData>* reactor) {
-  ::grpc_impl::internal::ClientCallbackReaderFactory< ::trade::service::v1::MultiMarketStreamData>::Create(stub_->channel_.get(), stub_->rpcmethod_ServeMarketStream_, context, request, reactor);
+void Broker::Stub::experimental_async::PutMarketStream(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::experimental::ClientWriteReactor< ::broker::service::v1::MarketStreamData>* reactor) {
+  ::grpc_impl::internal::ClientCallbackWriterFactory< ::broker::service::v1::MarketStreamData>::Create(stub_->channel_.get(), stub_->rpcmethod_PutMarketStream_, context, response, reactor);
 }
 
-::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* Trade::Stub::AsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiMarketStreamData>::Create(channel_.get(), cq, rpcmethod_ServeMarketStream_, context, request, true, tag);
+::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>* Broker::Stub::AsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq, void* tag) {
+  return ::grpc_impl::internal::ClientAsyncWriterFactory< ::broker::service::v1::MarketStreamData>::Create(channel_.get(), cq, rpcmethod_PutMarketStream_, context, response, true, tag);
 }
 
-::grpc::ClientAsyncReader< ::trade::service::v1::MultiMarketStreamData>* Trade::Stub::PrepareAsyncServeMarketStreamRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncReaderFactory< ::trade::service::v1::MultiMarketStreamData>::Create(channel_.get(), cq, rpcmethod_ServeMarketStream_, context, request, false, nullptr);
+::grpc::ClientAsyncWriter< ::broker::service::v1::MarketStreamData>* Broker::Stub::PrepareAsyncPutMarketStreamRaw(::grpc::ClientContext* context, ::google::protobuf::Empty* response, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncWriterFactory< ::broker::service::v1::MarketStreamData>::Create(channel_.get(), cq, rpcmethod_PutMarketStream_, context, response, false, nullptr);
 }
 
-Trade::Service::Service() {
+Broker::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      Trade_method_names[0],
-      ::grpc::internal::RpcMethod::CLIENT_STREAMING,
-      new ::grpc::internal::ClientStreamingHandler< Trade::Service, ::trade::service::v1::MarketStreamData, ::google::protobuf::Empty>(
-          [](Trade::Service* service,
+      Broker_method_names[0],
+      ::grpc::internal::RpcMethod::SERVER_STREAMING,
+      new ::grpc::internal::ServerStreamingHandler< Broker::Service, ::google::protobuf::Empty, ::broker::service::v1::MultiMarketStreamData>(
+          [](Broker::Service* service,
              ::grpc_impl::ServerContext* ctx,
-             ::grpc_impl::ServerReader<::trade::service::v1::MarketStreamData>* reader,
+             const ::google::protobuf::Empty* req,
+             ::grpc_impl::ServerWriter<::broker::service::v1::MultiMarketStreamData>* writer) {
+               return service->ServeMarketStream(ctx, req, writer);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      Broker_method_names[1],
+      ::grpc::internal::RpcMethod::CLIENT_STREAMING,
+      new ::grpc::internal::ClientStreamingHandler< Broker::Service, ::broker::service::v1::MarketStreamData, ::google::protobuf::Empty>(
+          [](Broker::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             ::grpc_impl::ServerReader<::broker::service::v1::MarketStreamData>* reader,
              ::google::protobuf::Empty* resp) {
                return service->PutMarketStream(ctx, reader, resp);
              }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      Trade_method_names[1],
-      ::grpc::internal::RpcMethod::SERVER_STREAMING,
-      new ::grpc::internal::ServerStreamingHandler< Trade::Service, ::google::protobuf::Empty, ::trade::service::v1::MultiMarketStreamData>(
-          [](Trade::Service* service,
-             ::grpc_impl::ServerContext* ctx,
-             const ::google::protobuf::Empty* req,
-             ::grpc_impl::ServerWriter<::trade::service::v1::MultiMarketStreamData>* writer) {
-               return service->ServeMarketStream(ctx, req, writer);
-             }, this)));
 }
 
-Trade::Service::~Service() {
+Broker::Service::~Service() {
 }
 
-::grpc::Status Trade::Service::PutMarketStream(::grpc::ServerContext* context, ::grpc::ServerReader< ::trade::service::v1::MarketStreamData>* reader, ::google::protobuf::Empty* response) {
-  (void) context;
-  (void) reader;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status Trade::Service::ServeMarketStream(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter< ::trade::service::v1::MultiMarketStreamData>* writer) {
+::grpc::Status Broker::Service::ServeMarketStream(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::grpc::ServerWriter< ::broker::service::v1::MultiMarketStreamData>* writer) {
   (void) context;
   (void) request;
   (void) writer;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
+::grpc::Status Broker::Service::PutMarketStream(::grpc::ServerContext* context, ::grpc::ServerReader< ::broker::service::v1::MarketStreamData>* reader, ::google::protobuf::Empty* response) {
+  (void) context;
+  (void) reader;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
 
-}  // namespace trade
+
+}  // namespace broker
 }  // namespace service
 }  // namespace v1
 

@@ -24,7 +24,7 @@ public:
     }
 
     void publish_single(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update);
-    void publish_mix(const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update);
+    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
    
 private:
 
@@ -62,4 +62,5 @@ private:
     CommonGrpcCall* caller_subscribe_single_;
     CommonGrpcCall* caller_subscribe_mix_;
     CommonGrpcCall* caller_setparams_;
+    CommonGrpcCall* caller_getparams_;
 };

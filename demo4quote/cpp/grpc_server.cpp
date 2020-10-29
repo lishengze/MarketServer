@@ -3,9 +3,10 @@
 void GrpcServer::publish_single(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update)
 {
     caller_subscribe_single_->add_data(snap, update);
+    //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
-void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update)
+void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     caller_subscribe_mix_->add_data(snap, update);
 };
@@ -28,6 +29,10 @@ void GrpcServer::_handle_rpcs() {
 
     caller_setparams_ = new GrpcCall<SetParamsEntity>(call_id, &service_, cq_.get());
     callers[call_id] = caller_setparams_;
+    call_id++;
+
+    caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get());
+    callers[call_id] = caller_getparams_;
     call_id++;
 
     void* tag;

@@ -21,14 +21,19 @@ bool QuoteMixer2::_check_update_clocks(const string& symbol) {
     return true;
 }
 
-void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* snap, const SMixQuote* update) {
+void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* snap, const SMixQuote* update, bool is_snap) {
     // 检查发布频率
     if( !_check_update_clocks(symbol) ) {
         return;
     }
 
     // 发布
-    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote2(symbol, snap);
+    std::shared_ptr<MarketStreamData> ptr = mixquote_to_pbquote2(symbol, snap);
+    if( is_snap ) {
+        std::cout << "publish(snap) " << symbol << " " << ptr->ask_depths_size() << "/" << ptr->bid_depths_size() << std::endl;
+    } else {
+        std::cout << "publish(update) " << symbol << " " << ptr->ask_depths_size() << "/" << ptr->bid_depths_size() << std::endl;
+    }
     PUBLISHER->publish_mix(symbol, ptr, NULL);
 }
 
@@ -41,8 +46,7 @@ void QuoteMixer2::on_snap(const string& exchange, const string& symbol, const SD
     SMixQuote* ptr = _on_snap(exchange, symbol, cpsQuote);
 
     // 推送结果
-    //std::cout << "publish " << symbol << " " << ptr->ask_length() << "/" << ptr->bid_length() << std::endl;
-    _publish_quote(symbol, ptr, NULL);
+    _publish_quote(symbol, ptr, NULL, true);
 }
 
 void QuoteMixer2::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
@@ -56,7 +60,7 @@ void QuoteMixer2::on_update(const string& exchange, const string& symbol, const 
         return;
 
     // 推送结果
-    _publish_quote(symbol, ptr, NULL);
+    _publish_quote(symbol, ptr, NULL, false);
 };
 
 SMixQuote* QuoteMixer2::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote)

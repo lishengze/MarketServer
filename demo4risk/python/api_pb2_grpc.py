@@ -6,8 +6,8 @@ import api_pb2 as api__pb2
 import empty_pb2 as empty__pb2
 
 
-class TradeStub(object):
-    """Trade grpc
+class BrokerStub(object):
+    """Broker grpc
     """
 
     def __init__(self, channel):
@@ -16,27 +16,21 @@ class TradeStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.PutMarketStream = channel.stream_unary(
-                '/trade.service.v1.Trade/PutMarketStream',
-                request_serializer=api__pb2.MarketStreamData.SerializeToString,
-                response_deserializer=empty__pb2.Empty.FromString,
-                )
         self.ServeMarketStream = channel.unary_stream(
-                '/trade.service.v1.Trade/ServeMarketStream',
+                '/broker.service.v1.Broker/ServeMarketStream',
                 request_serializer=empty__pb2.Empty.SerializeToString,
                 response_deserializer=api__pb2.MultiMarketStreamData.FromString,
                 )
+        self.PutMarketStream = channel.stream_unary(
+                '/broker.service.v1.Broker/PutMarketStream',
+                request_serializer=api__pb2.MarketStreamData.SerializeToString,
+                response_deserializer=empty__pb2.Empty.FromString,
+                )
 
 
-class TradeServicer(object):
-    """Trade grpc
+class BrokerServicer(object):
+    """Broker grpc
     """
-
-    def PutMarketStream(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def ServeMarketStream(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -44,46 +38,35 @@ class TradeServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def PutMarketStream(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
-def add_TradeServicer_to_server(servicer, server):
+
+def add_BrokerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'PutMarketStream': grpc.stream_unary_rpc_method_handler(
-                    servicer.PutMarketStream,
-                    request_deserializer=api__pb2.MarketStreamData.FromString,
-                    response_serializer=empty__pb2.Empty.SerializeToString,
-            ),
             'ServeMarketStream': grpc.unary_stream_rpc_method_handler(
                     servicer.ServeMarketStream,
                     request_deserializer=empty__pb2.Empty.FromString,
                     response_serializer=api__pb2.MultiMarketStreamData.SerializeToString,
             ),
+            'PutMarketStream': grpc.stream_unary_rpc_method_handler(
+                    servicer.PutMarketStream,
+                    request_deserializer=api__pb2.MarketStreamData.FromString,
+                    response_serializer=empty__pb2.Empty.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'trade.service.v1.Trade', rpc_method_handlers)
+            'broker.service.v1.Broker', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Trade(object):
-    """Trade grpc
+class Broker(object):
+    """Broker grpc
     """
-
-    @staticmethod
-    def PutMarketStream(request_iterator,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/trade.service.v1.Trade/PutMarketStream',
-            api__pb2.MarketStreamData.SerializeToString,
-            empty__pb2.Empty.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def ServeMarketStream(request,
@@ -96,8 +79,25 @@ class Trade(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.Trade/ServeMarketStream',
+        return grpc.experimental.unary_stream(request, target, '/broker.service.v1.Broker/ServeMarketStream',
             empty__pb2.Empty.SerializeToString,
             api__pb2.MultiMarketStreamData.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PutMarketStream(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(request_iterator, target, '/broker.service.v1.Broker/PutMarketStream',
+            api__pb2.MarketStreamData.SerializeToString,
+            empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

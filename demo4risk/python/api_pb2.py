@@ -17,11 +17,11 @@ import empty_pb2 as empty__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='api.proto',
-  package='trade.service.v1',
+  package='broker.service.v1',
   syntax='proto3',
   serialized_options=b'Z\002v1',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\tapi.proto\x12\x10trade.service.v1\x1a\ngogo.proto\x1a\x0b\x65mpty.proto\"a\n\x15MultiMarketStreamData\x12H\n\x06quotes\x18\x01 \x03(\x0b\x32\".trade.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x95\x03\n\x10MarketStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\tB\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\x03\x42\x31\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x45\n\task_depth\x18\x05 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x41skDepth\xea\xde\x1f\task_depth\x12\x45\n\tbid_depth\x18\x06 \x03(\x0b\x32\x17.trade.service.v1.DepthB\x19\xe2\xde\x1f\x08\x42idDepth\xea\xde\x1f\tbid_depth\x12)\n\x08is_cover\x18\x07 \x01(\x08\x42\x17\xe2\xde\x1f\x07IsCover\xea\xde\x1f\x08is_cover\"\x8d\x01\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12;\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\x1b.trade.service.v1.DepthDataB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x12$\n\x06volume\x18\x03 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\"W\n\tDepthData\x12\x1e\n\x04size\x18\x01 \x01(\x02\x42\x10\xe2\xde\x1f\x04Size\xea\xde\x1f\x04size\x12*\n\x08\x65xchange\x18\x02 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\"\x0c\n\nEmptyReply2\xb0\x01\n\x05Trade\x12O\n\x0fPutMarketStream\x12\".trade.service.v1.MarketStreamData\x1a\x16.google.protobuf.Empty(\x01\x12V\n\x11ServeMarketStream\x12\x16.google.protobuf.Empty\x1a\'.trade.service.v1.MultiMarketStreamData0\x01\x42\x04Z\x02v1b\x06proto3'
+  serialized_pb=b'\n\tapi.proto\x12\x11\x62roker.service.v1\x1a\ngogo.proto\x1a\x0b\x65mpty.proto\"b\n\x15MultiMarketStreamData\x12I\n\x06quotes\x18\x01 \x03(\x0b\x32#.broker.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x9d\x03\n\x10MarketStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12&\n\x07msg_seq\x18\x02 \x01(\tB\x15\xe2\xde\x1f\x06MsgSeq\xea\xde\x1f\x07msg_seq\x12\x32\n\x04time\x18\x03 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x46\n\x0btime_arrive\x18\x04 \x01(\x03\x42\x31\xe2\xde\x1f\nTimeArrive\xea\xde\x1f\x0btime_arrive\xfa\xde\x1f\x10wx/pkg/time.Time\x12I\n\nask_depths\x18\x05 \x03(\x0b\x32\x18.broker.service.v1.DepthB\x1b\xe2\xde\x1f\tAskDepths\xea\xde\x1f\nask_depths\x12I\n\nbid_depths\x18\x06 \x03(\x0b\x32\x18.broker.service.v1.DepthB\x1b\xe2\xde\x1f\tBidDepths\xea\xde\x1f\nbid_depths\x12)\n\x08is_cover\x18\x07 \x01(\x08\x42\x17\xe2\xde\x1f\x07IsCover\xea\xde\x1f\x08is_cover\"\xc1\x01\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12\x42\n\x04\x64\x61ta\x18\x02 \x03(\x0b\x32\".broker.service.v1.Depth.DataEntryB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x12$\n\x06volume\x18\x03 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\x0c\n\nEmptyReply2\xb7\x01\n\x06\x42roker\x12Y\n\x11ServeMarketStream\x12\x16.google.protobuf.Empty\x1a(.broker.service.v1.MultiMarketStreamData\"\x00\x30\x01\x12R\n\x0fPutMarketStream\x12#.broker.service.v1.MarketStreamData\x1a\x16.google.protobuf.Empty\"\x00(\x01\x42\x04Z\x02v1b\x06proto3'
   ,
   dependencies=[gogo__pb2.DESCRIPTOR,empty__pb2.DESCRIPTOR,])
 
@@ -30,14 +30,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _MULTIMARKETSTREAMDATA = _descriptor.Descriptor(
   name='MultiMarketStreamData',
-  full_name='trade.service.v1.MultiMarketStreamData',
+  full_name='broker.service.v1.MultiMarketStreamData',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='quotes', full_name='trade.service.v1.MultiMarketStreamData.quotes', index=0,
+      name='quotes', full_name='broker.service.v1.MultiMarketStreamData.quotes', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -55,63 +55,63 @@ _MULTIMARKETSTREAMDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=56,
-  serialized_end=153,
+  serialized_start=57,
+  serialized_end=155,
 )
 
 
 _MARKETSTREAMDATA = _descriptor.Descriptor(
   name='MarketStreamData',
-  full_name='trade.service.v1.MarketStreamData',
+  full_name='broker.service.v1.MarketStreamData',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='symbol', full_name='trade.service.v1.MarketStreamData.symbol', index=0,
+      name='symbol', full_name='broker.service.v1.MarketStreamData.symbol', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='msg_seq', full_name='trade.service.v1.MarketStreamData.msg_seq', index=1,
+      name='msg_seq', full_name='broker.service.v1.MarketStreamData.msg_seq', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\006MsgSeq\352\336\037\007msg_seq', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='time', full_name='trade.service.v1.MarketStreamData.time', index=2,
+      name='time', full_name='broker.service.v1.MarketStreamData.time', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='time_arrive', full_name='trade.service.v1.MarketStreamData.time_arrive', index=3,
+      name='time_arrive', full_name='broker.service.v1.MarketStreamData.time_arrive', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\nTimeArrive\352\336\037\013time_arrive\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='ask_depth', full_name='trade.service.v1.MarketStreamData.ask_depth', index=4,
+      name='ask_depths', full_name='broker.service.v1.MarketStreamData.ask_depths', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010AskDepth\352\336\037\task_depth', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\342\336\037\tAskDepths\352\336\037\nask_depths', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='bid_depth', full_name='trade.service.v1.MarketStreamData.bid_depth', index=5,
+      name='bid_depths', full_name='broker.service.v1.MarketStreamData.bid_depths', index=5,
       number=6, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010BidDepth\352\336\037\tbid_depth', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+      serialized_options=b'\342\336\037\tBidDepths\352\336\037\nbid_depths', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='is_cover', full_name='trade.service.v1.MarketStreamData.is_cover', index=6,
+      name='is_cover', full_name='broker.service.v1.MarketStreamData.is_cover', index=6,
       number=7, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -129,35 +129,73 @@ _MARKETSTREAMDATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=156,
-  serialized_end=561,
+  serialized_start=158,
+  serialized_end=571,
 )
 
 
-_DEPTH = _descriptor.Descriptor(
-  name='Depth',
-  full_name='trade.service.v1.Depth',
+_DEPTH_DATAENTRY = _descriptor.Descriptor(
+  name='DataEntry',
+  full_name='broker.service.v1.Depth.DataEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='price', full_name='trade.service.v1.Depth.price', index=0,
+      name='key', full_name='broker.service.v1.Depth.DataEntry.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='broker.service.v1.Depth.DataEntry.value', index=1,
+      number=2, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=b'8\001',
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=724,
+  serialized_end=767,
+)
+
+_DEPTH = _descriptor.Descriptor(
+  name='Depth',
+  full_name='broker.service.v1.Depth',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='price', full_name='broker.service.v1.Depth.price', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='data', full_name='trade.service.v1.Depth.data', index=1,
+      name='data', full_name='broker.service.v1.Depth.data', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=b'\342\336\037\004Data\352\336\037\004data', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='volume', full_name='trade.service.v1.Depth.volume', index=2,
+      name='volume', full_name='broker.service.v1.Depth.volume', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
@@ -166,7 +204,7 @@ _DEPTH = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_DEPTH_DATAENTRY, ],
   enum_types=[
   ],
   serialized_options=None,
@@ -175,53 +213,14 @@ _DEPTH = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=564,
-  serialized_end=705,
-)
-
-
-_DEPTHDATA = _descriptor.Descriptor(
-  name='DepthData',
-  full_name='trade.service.v1.DepthData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='size', full_name='trade.service.v1.DepthData.size', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Size\352\336\037\004size', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='exchange', full_name='trade.service.v1.DepthData.exchange', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Exchange\352\336\037\010exchange', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=707,
-  serialized_end=794,
+  serialized_start=574,
+  serialized_end=767,
 )
 
 
 _EMPTYREPLY = _descriptor.Descriptor(
   name='EmptyReply',
-  full_name='trade.service.v1.EmptyReply',
+  full_name='broker.service.v1.EmptyReply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -239,53 +238,54 @@ _EMPTYREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=796,
-  serialized_end=808,
+  serialized_start=769,
+  serialized_end=781,
 )
 
 _MULTIMARKETSTREAMDATA.fields_by_name['quotes'].message_type = _MARKETSTREAMDATA
-_MARKETSTREAMDATA.fields_by_name['ask_depth'].message_type = _DEPTH
-_MARKETSTREAMDATA.fields_by_name['bid_depth'].message_type = _DEPTH
-_DEPTH.fields_by_name['data'].message_type = _DEPTHDATA
+_MARKETSTREAMDATA.fields_by_name['ask_depths'].message_type = _DEPTH
+_MARKETSTREAMDATA.fields_by_name['bid_depths'].message_type = _DEPTH
+_DEPTH_DATAENTRY.containing_type = _DEPTH
+_DEPTH.fields_by_name['data'].message_type = _DEPTH_DATAENTRY
 DESCRIPTOR.message_types_by_name['MultiMarketStreamData'] = _MULTIMARKETSTREAMDATA
 DESCRIPTOR.message_types_by_name['MarketStreamData'] = _MARKETSTREAMDATA
 DESCRIPTOR.message_types_by_name['Depth'] = _DEPTH
-DESCRIPTOR.message_types_by_name['DepthData'] = _DEPTHDATA
 DESCRIPTOR.message_types_by_name['EmptyReply'] = _EMPTYREPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 MultiMarketStreamData = _reflection.GeneratedProtocolMessageType('MultiMarketStreamData', (_message.Message,), {
   'DESCRIPTOR' : _MULTIMARKETSTREAMDATA,
   '__module__' : 'api_pb2'
-  # @@protoc_insertion_point(class_scope:trade.service.v1.MultiMarketStreamData)
+  # @@protoc_insertion_point(class_scope:broker.service.v1.MultiMarketStreamData)
   })
 _sym_db.RegisterMessage(MultiMarketStreamData)
 
 MarketStreamData = _reflection.GeneratedProtocolMessageType('MarketStreamData', (_message.Message,), {
   'DESCRIPTOR' : _MARKETSTREAMDATA,
   '__module__' : 'api_pb2'
-  # @@protoc_insertion_point(class_scope:trade.service.v1.MarketStreamData)
+  # @@protoc_insertion_point(class_scope:broker.service.v1.MarketStreamData)
   })
 _sym_db.RegisterMessage(MarketStreamData)
 
 Depth = _reflection.GeneratedProtocolMessageType('Depth', (_message.Message,), {
+
+  'DataEntry' : _reflection.GeneratedProtocolMessageType('DataEntry', (_message.Message,), {
+    'DESCRIPTOR' : _DEPTH_DATAENTRY,
+    '__module__' : 'api_pb2'
+    # @@protoc_insertion_point(class_scope:broker.service.v1.Depth.DataEntry)
+    })
+  ,
   'DESCRIPTOR' : _DEPTH,
   '__module__' : 'api_pb2'
-  # @@protoc_insertion_point(class_scope:trade.service.v1.Depth)
+  # @@protoc_insertion_point(class_scope:broker.service.v1.Depth)
   })
 _sym_db.RegisterMessage(Depth)
-
-DepthData = _reflection.GeneratedProtocolMessageType('DepthData', (_message.Message,), {
-  'DESCRIPTOR' : _DEPTHDATA,
-  '__module__' : 'api_pb2'
-  # @@protoc_insertion_point(class_scope:trade.service.v1.DepthData)
-  })
-_sym_db.RegisterMessage(DepthData)
+_sym_db.RegisterMessage(Depth.DataEntry)
 
 EmptyReply = _reflection.GeneratedProtocolMessageType('EmptyReply', (_message.Message,), {
   'DESCRIPTOR' : _EMPTYREPLY,
   '__module__' : 'api_pb2'
-  # @@protoc_insertion_point(class_scope:trade.service.v1.EmptyReply)
+  # @@protoc_insertion_point(class_scope:broker.service.v1.EmptyReply)
   })
 _sym_db.RegisterMessage(EmptyReply)
 
@@ -296,48 +296,47 @@ _MARKETSTREAMDATA.fields_by_name['symbol']._options = None
 _MARKETSTREAMDATA.fields_by_name['msg_seq']._options = None
 _MARKETSTREAMDATA.fields_by_name['time']._options = None
 _MARKETSTREAMDATA.fields_by_name['time_arrive']._options = None
-_MARKETSTREAMDATA.fields_by_name['ask_depth']._options = None
-_MARKETSTREAMDATA.fields_by_name['bid_depth']._options = None
+_MARKETSTREAMDATA.fields_by_name['ask_depths']._options = None
+_MARKETSTREAMDATA.fields_by_name['bid_depths']._options = None
 _MARKETSTREAMDATA.fields_by_name['is_cover']._options = None
+_DEPTH_DATAENTRY._options = None
 _DEPTH.fields_by_name['price']._options = None
 _DEPTH.fields_by_name['data']._options = None
 _DEPTH.fields_by_name['volume']._options = None
-_DEPTHDATA.fields_by_name['size']._options = None
-_DEPTHDATA.fields_by_name['exchange']._options = None
 
-_TRADE = _descriptor.ServiceDescriptor(
-  name='Trade',
-  full_name='trade.service.v1.Trade',
+_BROKER = _descriptor.ServiceDescriptor(
+  name='Broker',
+  full_name='broker.service.v1.Broker',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=811,
-  serialized_end=987,
+  serialized_start=784,
+  serialized_end=967,
   methods=[
   _descriptor.MethodDescriptor(
-    name='PutMarketStream',
-    full_name='trade.service.v1.Trade.PutMarketStream',
-    index=0,
-    containing_service=None,
-    input_type=_MARKETSTREAMDATA,
-    output_type=empty__pb2._EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
     name='ServeMarketStream',
-    full_name='trade.service.v1.Trade.ServeMarketStream',
-    index=1,
+    full_name='broker.service.v1.Broker.ServeMarketStream',
+    index=0,
     containing_service=None,
     input_type=empty__pb2._EMPTY,
     output_type=_MULTIMARKETSTREAMDATA,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
+  _descriptor.MethodDescriptor(
+    name='PutMarketStream',
+    full_name='broker.service.v1.Broker.PutMarketStream',
+    index=1,
+    containing_service=None,
+    input_type=_MARKETSTREAMDATA,
+    output_type=empty__pb2._EMPTY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
 ])
-_sym_db.RegisterServiceDescriptor(_TRADE)
+_sym_db.RegisterServiceDescriptor(_BROKER)
 
-DESCRIPTOR.services_by_name['Trade'] = _TRADE
+DESCRIPTOR.services_by_name['Broker'] = _BROKER
 
 # @@protoc_insertion_point(module_scope)

@@ -5,6 +5,7 @@
 #include "stream_engine_config.h"
 
 using FuncAddDepth = std::function<DepthLevel*()>;
+using FuncAddDepth2 = std::function<Depth*()>;
 
 inline void mixquote_to_pbquote_depth(const SMixDepthPrice* depths, FuncAddDepth func)
 {
@@ -15,11 +16,8 @@ inline void mixquote_to_pbquote_depth(const SMixDepthPrice* depths, FuncAddDepth
         depth->mutable_price()->set_value(ptr->price.value);
         depth->mutable_price()->set_base(ptr->price.base);
         for(auto &v : ptr->volume) {
-            const TExchange& exchange = v.first;
             const double volume = v.second;
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(volume);
-            depthVolume->set_exchange(exchange);
+            depth->set_volume(volume);
         }
         depth_count += 1;
         ptr = ptr->next;
@@ -30,6 +28,7 @@ inline std::shared_ptr<QuoteData> mixquote_to_pbquote(const string& exchange, co
     std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
     msd->set_symbol(symbol);
     msd->set_exchange(exchange);
+    msd->set_msg_seq(quote.sequence_no);
 
     // 卖盘
     FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
@@ -41,36 +40,31 @@ inline std::shared_ptr<QuoteData> mixquote_to_pbquote(const string& exchange, co
     return msd;
 };
 
-inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth func, bool is_ask)
+inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, bool is_ask)
 {
     int depth_count = 0;
     const SMixDepthPrice* ptr = depths;
-    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth4hedge_ ) {
-        DepthLevel* depth = func();
-        depth->mutable_price()->set_value(ptr->price.value);
-        depth->mutable_price()->set_base(ptr->price.base);
+    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
+        Depth* depth = func();
+        depth->set_price(ptr->price.get_str_value());
         for(auto &v : ptr->volume) {
-            const TExchange& exchange = v.first;
-            const double& volume = v.second;
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(volume);
-            depthVolume->set_exchange(exchange);
+            (*depth->mutable_data())[v.first] = v.second;
         }
         depth_count += 1;
         ptr = ptr->next;
     }
 }
 
-inline std::shared_ptr<QuoteData> mixquote_to_pbquote2(const string& symbol, const SMixQuote* src)
+inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& symbol, const SMixQuote* src)
 {
-    std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
+    std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_symbol(symbol);
 
     // 卖盘
-    FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
+    FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_ask_depths, msd);
     mixquote_to_pbquote2_depth(src->asks, f1, true);
     // 买盘
-    FuncAddDepth f2 = std::bind(&QuoteData::add_bid_depth, msd);
+    FuncAddDepth2 f2 = std::bind(&MarketStreamData::add_bid_depths, msd);
     mixquote_to_pbquote2_depth(src->bids, f2, false);
 
     return msd;
@@ -107,10 +101,10 @@ inline void process_precise(const TExchange& exchange, const TSymbol& symbol, co
     // 考虑手续费因素
     SymbolFee fee = CONFIG->get_fee(exchange, symbol);
     
-    vassign(dst.exchange, src.exchange);
-    vassign(dst.symbol, src.symbol);
+    vassign(dst.exchange, MAX_EXCHANGE_NAME_LENGTH, src.exchange);
+    vassign(dst.symbol, MAX_SYMBOL_NAME_LENGTH, src.symbol);
     vassign(dst.sequence_no, src.sequence_no);
-    vassign(dst.time_arrive, src.time_arrive);
+    //vassign(dst.time_arrive, src.time_arrive);
 
     process_precise_depth(src.asks, src.ask_length, fee, precise, dst.asks, dst.ask_length, true);
     process_precise_depth(src.bids, src.bid_length, fee, precise, dst.bids, dst.bid_length, false);

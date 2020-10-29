@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <algorithm>
 using namespace std;
 
 
@@ -176,19 +177,18 @@ inline void vassign(T &r, const T v)
 	r = v;
 }
 
-inline void vassign(char * r, char *v)
+inline void vassign(char * r, unsigned int len, const char *v)
 {
-	strcpy(r,v);
+    unsigned int l = std::min(len-1, (unsigned int)strlen(v));
+	strncpy(r, v, l);
+    r[l] = '\0';
 }
 
-inline void vassign(char * r,const char *v)
+inline void vassign(char * r, unsigned int len, const std::string &v)
 {
-	strcpy(r,v);
-}
-
-inline void vassign(char * r,const std::string &v)
-{
-    strcpy(r,v.c_str());
+    unsigned int l = std::min(len-1, (unsigned int)v.length());
+    strncpy(r, v.c_str(), l);
+    r[l] = '\0';
 }
 
 // redis行情二进制结构
@@ -209,17 +209,17 @@ struct SDepthQuote {
     char exchange[MAX_EXCHANGE_NAME_LENGTH];
     char symbol[MAX_SYMBOL_NAME_LENGTH];
     long long sequence_no;
-    char time_arrive[64];
+    //char time_arrive[64];
     SDepthPrice asks[MAX_DEPTH];        // 卖盘
     unsigned int ask_length;
     SDepthPrice bids[MAX_DEPTH];        // 买盘
     unsigned int bid_length;
 
     SDepthQuote() {
-        vassign(exchange, "");
-        vassign(symbol, "");
+        vassign(exchange, MAX_EXCHANGE_NAME_LENGTH, "");
+        vassign(symbol, MAX_SYMBOL_NAME_LENGTH, "");
         vassign(sequence_no, 0);
-        vassign(time_arrive, "");
+        //vassign(time_arrive, "");
         ask_length = 0;
         bid_length = 0;
     }
@@ -228,6 +228,10 @@ struct SDepthQuote {
 using TExchange = string;
 using TSymbol = string;
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
+
+#define TICK_HEAD "TRADEx|"
+#define DEPTH_UPDATE_HEAD "UPDATEx|"
+#define GET_DEPTH_HEAD "DEPTHx|"
 
 inline string combine_symbol(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;

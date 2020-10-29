@@ -3,36 +3,52 @@
 
 void quote_to_quote(const QuoteData* src, QuoteData* dst) {
     dst->set_symbol(src->symbol());
+    dst->set_exchange(src->exchange());
     dst->set_msg_seq(src->msg_seq());
 
     // 卖盘
     for( int i = 0 ; i < src->ask_depth_size() ; ++i ) {
-        const DepthLevel& srcDepth = src->ask_depth(i);
-        DepthLevel* depth = dst->add_ask_depth();
-        depth->mutable_price()->set_value(srcDepth.price().value());
-        depth->mutable_price()->set_base(srcDepth.price().base());
-        for( int j = 0 ; j < srcDepth.data_size() ; ++j ) {
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(srcDepth.data(j).volume());
-            depthVolume->set_exchange(srcDepth.data(j).exchange());
-            
-        }
+        const DepthLevel& src_depth = src->ask_depth(i);
+        DepthLevel* dst_depth = dst->add_ask_depth();
+        dst_depth->mutable_price()->set_value(src_depth.price().value());
+        dst_depth->mutable_price()->set_base(src_depth.price().base());
+        dst_depth->set_volume(src_depth.volume());
     }
     // 买盘
     for( int i = 0 ; i < src->bid_depth_size() ; ++i ) {
-        const DepthLevel& srcDepth = src->bid_depth(i);
-        DepthLevel* depth = dst->add_bid_depth();
-        depth->mutable_price()->set_value(srcDepth.price().value());
-        depth->mutable_price()->set_base(srcDepth.price().base());
-        for( int j = 0 ; j < srcDepth.data_size() ; ++j ) {
-            DepthVolume* depthVolume = depth->add_data();
-            depthVolume->set_volume(srcDepth.data(j).volume());
-            depthVolume->set_exchange(srcDepth.data(j).exchange());
-            
-        }
+        const DepthLevel& src_depth = src->bid_depth(i);
+        DepthLevel* dst_depth = dst->add_bid_depth();
+        dst_depth->mutable_price()->set_value(src_depth.price().value());
+        dst_depth->mutable_price()->set_base(src_depth.price().base());
+        dst_depth->set_volume(src_depth.volume());
     }
 };
 
+void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
+    dst->set_symbol(src->symbol());
+    dst->set_msg_seq(src->msg_seq());
+
+    // 卖盘
+    for( int i = 0 ; i < src->ask_depths_size() ; ++i ) {
+        const Depth& src_depth = src->ask_depths(i);
+        Depth* dst_depth = dst->add_ask_depths();
+        dst_depth->set_price(src_depth.price());
+        dst_depth->set_volume(src_depth.volume());     
+        for( auto v : src_depth.data() ) {
+            (*dst_depth->mutable_data())[v.first] = v.second;
+        }
+    }
+    // 买盘
+    for( int i = 0 ; i < src->bid_depths_size() ; ++i ) {
+        const Depth& src_depth = src->bid_depths(i);
+        Depth* dst_depth = dst->add_bid_depths();
+        dst_depth->set_price(src_depth.price());
+        dst_depth->set_volume(src_depth.volume());     
+        for( auto v : src_depth.data() ) {
+            (*dst_depth->mutable_data())[v.first] = v.second;
+        }
+    }
+};
 
 GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(&ctx_)
 {
@@ -106,13 +122,13 @@ void SubscribeMixQuoteEntity::register_call(){
 
 bool SubscribeMixQuoteEntity::process(){
     
-    MultiQuoteData reply;
+    MultiMarketStreamData reply;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            QuoteData* quote = reply.add_quotes();
-            quote_to_quote((QuoteData*)datas_[i].get(), quote);
+            MarketStreamData* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
         }
         datas_.clear();
     }
@@ -152,5 +168,33 @@ bool SetParamsEntity::process(){
     
     status_ = FINISH;
     responder_.Finish(reply_, Status::OK, this);
+    return true;
+}
+//////////////////////////////////////////////////
+GetParamsEntity::GetParamsEntity(void* service):responder_(&ctx_)
+{
+    service_ = (StreamEngineService::AsyncService*)service;
+}
+
+void GetParamsEntity::register_call(){
+    std::cout << "register GetParamsEntity" << std::endl;
+    service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool GetParamsEntity::process(){
+    
+    GetParamsResp reply;
+    reply.set_depth(CONFIG->grpc_publish_depth_);
+    reply.set_frequency(CONFIG->grpc_publish_frequency_);
+    reply.set_raw_frequency(CONFIG->grpc_publish_raw_frequency_);
+    for( auto v : CONFIG->include_symbols_ ) {
+        reply.add_symbols(v);
+    }
+    for( auto v : CONFIG->include_exchanges_ ) {
+        reply.add_exchanges(v);
+    }
+    
+    status_ = FINISH;
+    responder_.Finish(reply, Status::OK, this);
     return true;
 }

@@ -80,6 +80,7 @@ public:
             }
             if( status_ != FINISH )
                 status_ = PUSH_TO_BACK;
+            status_ = PUSH_TO_BACK;
         } else if(status_ == PUSH_TO_BACK) {
             status_ = PROCESS;
             alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);

@@ -37,10 +37,10 @@ bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
     long long sequence_no = snap_json["Msg_seq"].get<long long>(); 
     
-    vassign(quote.exchange, exchange);
-    vassign(quote.symbol, symbol);
+    vassign(quote.exchange, MAX_EXCHANGE_NAME_LENGTH, exchange);
+    vassign(quote.symbol, MAX_SYMBOL_NAME_LENGTH, symbol);
     vassign(quote.sequence_no, sequence_no);
-    vassign(quote.time_arrive, timeArrive);
+    //vassign(quote.time_arrive, timeArrive); // 暂时不处理
     
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
     redisquote_to_quote_depth(snap_json[askDepth], quote.asks, quote.ask_length, true);
@@ -133,13 +133,18 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
             SDepthQuote lastQuote;
-            if( !_get_quote(exchange, symbol, lastQuote) )
+            if( !_get_quote(exchange, symbol, lastQuote) ) {
+                std::cout << "_get_quote failed" << std::endl;
                 return;
-            if( quote.sequence_no < lastQuote.sequence_no )
+            }
+            if( quote.sequence_no < lastQuote.sequence_no ) {
+                std::cout << "sequence_no failed" << std::endl;
                 return;
+            }
         }
 
         // 回调
+        //std::cout << "on_update " << exchange << " " << symbol << std::endl;
         engine_interface_->on_update(exchange, symbol, quote);
     }
     else if(channel.find(TICK_HEAD)!=string::npos)
