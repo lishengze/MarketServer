@@ -29,6 +29,7 @@ inline void mixquote_to_pbquote_depth(const SMixDepthPrice* depths, FuncAddDepth
 inline std::shared_ptr<QuoteData> mixquote_to_pbquote(const string& exchange, const string& symbol, const SMixQuote& quote) {
     std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
     msd->set_symbol(symbol);
+    msd->set_exchange(exchange);
 
     // 卖盘
     FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
@@ -40,63 +41,7 @@ inline std::shared_ptr<QuoteData> mixquote_to_pbquote(const string& exchange, co
     return msd;
 };
 
-inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, const SDecimal& watermark, FuncAddDepth func, bool is_ask)
-{
-    bool patched =  false;
-    unordered_map<TExchange, double> patched_volumes;
-    int depth_count = 0;
-    const SMixDepthPrice* ptr = depths;
-    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
-        if( is_ask ? (ptr->price > watermark) : (ptr->price < watermark) ) {
-            DepthLevel* depth = func();
-            depth->mutable_price()->set_value(ptr->price.value);
-            depth->mutable_price()->set_base(ptr->price.base);
-            if( !patched ) {
-                patched = true;
-                for(auto &v : ptr->volume) {
-                    const TExchange& exchange = v.first;
-                    const double& volume = v.second;
-                    DepthVolume* depthVolume = depth->add_data();
-                    depthVolume->set_volume(patched_volumes[exchange] + volume);
-                    depthVolume->set_exchange(exchange);
-                }
-            } else {
-                for(auto &v : ptr->volume) {
-                    const TExchange& exchange = v.first;
-                    const double& volume = v.second;
-                    DepthVolume* depthVolume = depth->add_data();
-                    depthVolume->set_volume(volume);
-                    depthVolume->set_exchange(exchange);
-                }
-            }
-            depth_count += 1;
-        } else {
-            for( auto &v : ptr->volume ) {
-                const TExchange& exchange = v.first;
-                const double& volume = v.second;
-                patched_volumes[exchange] += volume;
-            }
-        }
-        ptr = ptr->next;
-    }
-}
-
-inline std::shared_ptr<QuoteData> mixquote_to_pbquote2(const string& symbol, const SMixQuote* src, const SDecimal& watermark)
-{
-    std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
-    msd->set_symbol(symbol);
-
-    // 卖盘
-    FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
-    mixquote_to_pbquote2_depth(src->asks, watermark, f1, true);
-    // 买盘
-    FuncAddDepth f2 = std::bind(&QuoteData::add_bid_depth, msd);
-    mixquote_to_pbquote2_depth(src->bids, watermark, f2, false);
-
-    return msd;
-};
-
-inline void mixquote4hedge_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth func, bool is_ask)
+inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth func, bool is_ask)
 {
     int depth_count = 0;
     const SMixDepthPrice* ptr = depths;
@@ -104,27 +49,34 @@ inline void mixquote4hedge_to_pbquote2_depth(const SMixDepthPrice* depths, FuncA
         DepthLevel* depth = func();
         depth->mutable_price()->set_value(ptr->price.value);
         depth->mutable_price()->set_base(ptr->price.base);
+        for(auto &v : ptr->volume) {
+            const TExchange& exchange = v.first;
+            const double& volume = v.second;
+            DepthVolume* depthVolume = depth->add_data();
+            depthVolume->set_volume(volume);
+            depthVolume->set_exchange(exchange);
+        }
         depth_count += 1;
         ptr = ptr->next;
     }
 }
 
-inline std::shared_ptr<QuoteData> mixquote4hedge_to_pbquote2(const string& symbol, const SMixQuote* src)
+inline std::shared_ptr<QuoteData> mixquote_to_pbquote2(const string& symbol, const SMixQuote* src)
 {
     std::shared_ptr<QuoteData> msd = std::make_shared<QuoteData>();
     msd->set_symbol(symbol);
 
     // 卖盘
     FuncAddDepth f1 = std::bind(&QuoteData::add_ask_depth, msd);
-    mixquote4hedge_to_pbquote2_depth(src->asks, f1, true);
+    mixquote_to_pbquote2_depth(src->asks, f1, true);
     // 买盘
     FuncAddDepth f2 = std::bind(&QuoteData::add_bid_depth, msd);
-    mixquote4hedge_to_pbquote2_depth(src->bids, f2, false);
+    mixquote_to_pbquote2_depth(src->bids, f2, false);
 
     return msd;
 };
 
-inline void compress_quote_depth(const SDepthPrice* src, unsigned int src_length, int precise, SDepthPrice* dst, unsigned int& dst_length, bool is_ask)
+inline void process_precise_depth(const SDepthPrice* src, unsigned int src_length, const SymbolFee& fee, int precise, SDepthPrice* dst, unsigned int& dst_length, bool is_ask)
 {
     int count = 0;
     SDecimal lastPrice = is_ask ? SDecimal::min_decimal() : SDecimal::max_decimal();
@@ -135,7 +87,8 @@ inline void compress_quote_depth(const SDepthPrice* src, unsigned int src_length
 
         // 卖价往上取整
         SDecimal scaledPrice;
-        scaledPrice.from(price, precise, is_ask ? true : false); 
+        fee.compute(price, scaledPrice, is_ask);
+        scaledPrice.from(scaledPrice, precise, is_ask); 
 
         bool is_new_price = is_ask ? (scaledPrice > lastPrice) : (scaledPrice < lastPrice);
         if( is_new_price ) {
@@ -148,14 +101,17 @@ inline void compress_quote_depth(const SDepthPrice* src, unsigned int src_length
     dst_length = count;
 }
 
-inline void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& dst) {
+inline void process_precise(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& src, SDepthQuote& dst) {
+    // 精度统一
     int precise = CONFIG->get_precise(symbol);
+    // 考虑手续费因素
+    SymbolFee fee = CONFIG->get_fee(exchange, symbol);
     
     vassign(dst.exchange, src.exchange);
     vassign(dst.symbol, src.symbol);
     vassign(dst.sequence_no, src.sequence_no);
     vassign(dst.time_arrive, src.time_arrive);
 
-    compress_quote_depth(src.asks, src.ask_length, precise, dst.asks, dst.ask_length, true);
-    compress_quote_depth(src.bids, src.bid_length, precise, dst.bids, dst.bid_length, false);
+    process_precise_depth(src.asks, src.ask_length, fee, precise, dst.asks, dst.ask_length, true);
+    process_precise_depth(src.bids, src.bid_length, fee, precise, dst.bids, dst.bid_length, false);
 };

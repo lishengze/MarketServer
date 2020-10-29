@@ -1,5 +1,4 @@
 #include "redis_quote.h"
-#include "stream_engine.h"
 #include "stream_engine_config.h"
 
 void redisquote_to_quote_depth(const njson& data, SDepthPrice* depth, unsigned int& depth_length, bool is_ask)
@@ -64,7 +63,7 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     redis_snap_requester_.start();
 };
 
-void RedisQuote::_on_snap(const string& exchange, const string& symbol, const string& data) {   
+void RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data) {   
     //if( exchange == "HUOBI" && symbol == "BTC_USDT") {
     //    cout << "redis snap " << exchange << "." << symbol << ":" << data << endl;
     //}
@@ -85,9 +84,13 @@ void RedisQuote::_on_snap(const string& exchange, const string& symbol, const st
         return;
     }
 
-    // safe callback on_snap
-    std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-    markets_[exchange][symbol] = quote;
+    // 保存快照
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
+        markets_[exchange][symbol] = quote;
+    }
+
+    // 回调
     engine_interface_->on_snap(exchange, symbol, quote);
 };
 
@@ -124,15 +127,19 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
         }
 
         // 添加到全量请求任务中
-        redis_snap_requester_.on_update_symbol(exchange, symbol);
+        redis_snap_requester_.add_symbol(exchange, symbol);
 
-        // lock整个后续处理
-        std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-        SDepthQuote lastQuote;
-        if( !_get_quote(exchange, symbol, lastQuote) )
-            return;
-        if( quote.sequence_no < lastQuote.sequence_no )
-            return;
+        // 检查快照和增量间的序号
+        {
+            std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
+            SDepthQuote lastQuote;
+            if( !_get_quote(exchange, symbol, lastQuote) )
+                return;
+            if( quote.sequence_no < lastQuote.sequence_no )
+                return;
+        }
+
+        // 回调
         engine_interface_->on_update(exchange, symbol, quote);
     }
     else if(channel.find(TICK_HEAD)!=string::npos)

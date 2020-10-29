@@ -10,10 +10,35 @@ using njson = nlohmann::json;
 #include <fstream>
 #include <set>
 using namespace std;
+#include "stream_engine_define.h"
 
 #define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
 
 using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
+
+struct SymbolFee
+{
+    int fee_type;       // 0表示fee不需要处理（默认），1表示fee值为比例，2表示fee值为绝对值
+    double maker_fee;
+    double taker_fee;
+
+    SymbolFee() {
+        fee_type = 0;
+        maker_fee = taker_fee = 0;
+    }
+
+    void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const
+    {
+        if( fee_type == 1 ) {
+            dst = src + (is_ask ? maker_fee : taker_fee);
+        } else if( fee_type == 2 ) {
+            dst = src * (100 + is_ask ? maker_fee : taker_fee) / 100.0;
+        } else {
+            dst = src;
+        }
+    }
+};
+
 class Config
 {
 public:
@@ -42,8 +67,8 @@ public:
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
             grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();;
             grpc_publish_frequency_ = js["grpc"]["frequency"].get<int>();
-            grpc_publish_depth4hedge_ = js["grpc"]["publish_depth4hedge"].get<int>();;
-            grpc_publish_frequency4hedge_ = js["grpc"]["frequency4hedge"].get<int>();
+            //grpc_publish_depth4hedge_ = js["grpc"]["publish_depth4hedge"].get<int>();;
+            //grpc_publish_frequency4hedge_ = js["grpc"]["frequency4hedge"].get<int>();
             grpc_publish_raw_frequency_ = 1;
 
             // system
@@ -85,11 +110,17 @@ public:
     }
 
     int get_precise(const string& symbol) const {
+        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         auto iter = symbol_precise_.find(symbol);
         if( iter == symbol_precise_.end() ) {
             return -1;
         }
         return iter->second;
+    }
+
+    SymbolFee get_fee(const string& exchange, const string& symbol) {
+        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
+        return symbol_fee_[exchange][symbol];
     }
 public:
     // grpc
@@ -113,10 +144,12 @@ public:
     string quote_redis_password_;
     int quote_redis_snap_interval_;
 
-    // from config center
+    // from config center    
+    mutable std::mutex mutex_configuration_;
     std::set<string> include_symbols_;      // 包含的品种
     std::set<string> include_exchanges_;    // 包含的交易所
     std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度
+    std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费
 
     // logger
     UTLogPtr logger_;

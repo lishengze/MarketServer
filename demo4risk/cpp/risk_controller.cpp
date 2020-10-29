@@ -14,8 +14,8 @@ void quotedata_to_innerquote(const QuoteData& src, SInnerQuote& dst) {
     // 卖盘
     for( int i = 0 ; i < src.ask_depth_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
         const DepthLevel& srcDepth = src.ask_depth(i);
-        dst.asks[i].price.Value = srcDepth.price().value();
-        dst.asks[i].price.Base = srcDepth.price().base();
+        dst.asks[i].price.value = srcDepth.price().value();
+        dst.asks[i].price.base = srcDepth.price().base();
         for( int j = 0 ; j < srcDepth.data_size() && j < MAX_EXCHANGE_LENGTH ; ++j ) {
             const DepthVolume& srcDepthVolume = srcDepth.data(j);
             strcpy(dst.asks[i].exchanges[j].name, srcDepthVolume.exchange().c_str());
@@ -27,8 +27,8 @@ void quotedata_to_innerquote(const QuoteData& src, SInnerQuote& dst) {
     // 买盘
     for( int i = 0 ; i < src.bid_depth_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
         const DepthLevel& srcDepth = src.bid_depth(i);
-        dst.bids[i].price.Value = srcDepth.price().value();
-        dst.bids[i].price.Base = srcDepth.price().base();
+        dst.bids[i].price.value = srcDepth.price().value();
+        dst.bids[i].price.base = srcDepth.price().base();
         for( int j = 0 ; j < srcDepth.data_size() && j < MAX_EXCHANGE_LENGTH ; ++j ) {
             const DepthVolume& srcDepthVolume = srcDepth.data(j);
             strcpy(dst.bids[i].exchanges[j].name, srcDepthVolume.exchange().c_str());

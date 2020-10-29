@@ -31,7 +31,7 @@ struct SInnerDepth {
     SDecimal price;
     double total_volume; // 总挂单量，用于下发行情
     SExchangeData exchanges[MAX_EXCHANGE_LENGTH];
-    int exchange_length;
+    uint32 exchange_length;
     double amount_cost; // 余额消耗量
 
     SInnerDepth() {
@@ -40,10 +40,10 @@ struct SInnerDepth {
     }
 
     void mix_exchanges(const SInnerDepth& src, double bias) {
-        for( int i = 0 ; i < src.exchange_length ; ++i ) {
-            double biasedVolume = src.exchanges[i].volume * bias;
+        for( uint32 i = 0 ; i < src.exchange_length ; ++i ) {
+            double biasedVolume = src.exchanges[i].volume * ( 100 + bias ) / 100.0;
             bool found = false;
-            for( int j = 0 ; j < exchange_length ; ++j ) {
+            for( unsigned int j = 0 ; j < exchange_length ; ++j ) {
                 if( string(exchanges[j].name) == string(src.exchanges[i].name) ) {
                     exchanges[j].volume += biasedVolume;
                     found = true;
@@ -65,9 +65,9 @@ struct SInnerQuote {
     long long time_arrive;
     long long seq_no;
     SInnerDepth asks[MAX_DEPTH_LENGTH];
-    int ask_length;
+    uint32 ask_length;
     SInnerDepth bids[MAX_DEPTH_LENGTH];
-    int bid_length;
+    uint32 bid_length;
 
     SInnerQuote() {
         strcpy(symbol, "");
@@ -79,7 +79,44 @@ struct SInnerQuote {
     }
 };
 
+struct SymbolWatermark
+{
+    SDecimal watermark;
+    unordered_map<TExchange, SDecimal> asks;
+    unordered_map<TExchange, SDecimal> bids;
+};
+
+class WatermarkComputer
+{
+public:
+    WatermarkComputer();
+    ~WatermarkComputer();
+
+    bool get_watermark(const string& symbol, SDecimal& watermark) const;
+    void set_snap(const SInnerQuote& quote);
+
+private:
+    // 独立线程计算watermark
+    mutable std::mutex mutex_snaps_;
+    unordered_map<TSymbol, SymbolWatermark*> watermark_;
+    std::thread* thread_loop_ = nullptr;
+    void _calc_watermark();
+};
+
 class CallDataServeMarketStream;
+class ClientManager
+{
+    // 推送客户端注册
+    void add_client(CallDataServeMarketStream* client);
+    void del_client(CallDataServeMarketStream* client);
+
+    void send(std::shared_ptr<MarketStreamData> data);
+
+private:
+    mutable std::mutex                              mutex_clients_;
+    unordered_map<CallDataServeMarketStream*, bool> clients_;
+};
+
 class DataCenter {
 public:
     struct Params {
@@ -104,20 +141,23 @@ public:
     void add_client(CallDataServeMarketStream* client);
     void del_client(CallDataServeMarketStream* client);
 private:
+    void _add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& params);
+
     void _publish_quote(const SInnerQuote& quote, const Params& params);
 
-    void _update_clients(const string& symbol = "");
+    void _push_to_clients(const string& symbol = "");
 
     void _calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote);
     
     mutable std::mutex                  mutex_datas_;
     unordered_map<TSymbol, SInnerQuote> datas_;
-    
-    mutable std::mutex                              mutex_clients_;
-    unordered_map<CallDataServeMarketStream*, bool> clients_;
 
     Params params_;
 
     // cache
     unordered_map<string, int> currency_count_;
+
+    WatermarkComputer watermark_computer_;
+
+    ClientManager client_manager_;
 };

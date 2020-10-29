@@ -8,6 +8,7 @@
 源头更新回调：全量更新、增量更新都需要加锁
 计算线程：快照数据全量加锁
 */
+
 class QuoteMixer2
 {
 public:
@@ -19,29 +20,14 @@ public:
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
 private:
-    // 独立线程计算watermark
-    mutable std::mutex mutex_snaps_;
-    unordered_map<TSymbol, SDecimal> watermark_;
-    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> snaps_;
-    std::thread*               thread_loop_ = nullptr;
-    void _calc_watermark();
-    void _one_round();
-    bool _get_watermark(const string& symbol, SDecimal& watermark) const;
+    bool _preprocess(const string& exchange, const string& symbol, const SDepthQuote& src, SDepthQuote& dst);
 
-    // symbols
-    unordered_map<TSymbol, SMixQuote*> symbols_;
+    // quote
+    mutable std::mutex mutex_quotes_;
+    unordered_map<TSymbol, SMixQuote*> quotes_;
 
-    // 发布聚合行情
-    mutable std::mutex mutex_clocks_;
-    unordered_map<TSymbol, long long> last_clocks_;
-    bool _check_update_clocks(const string& symbol);
-    void _publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap);
-
-    // 发布聚合行情（用于对冲）
-    mutable std::mutex mutex_hedgeclocks_;
-    unordered_map<TSymbol, long long> last_hedgeclocks_;
-    bool _check_update_hedgeclocks(const string& symbol);
-    void _publish_hedgequote(const string& symbol, const SMixQuote* quote, bool isSnap);
+    SMixQuote* _on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
+    SMixQuote* _on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const;
 
@@ -52,4 +38,13 @@ private:
 
     SMixDepthPrice* _mix_exchange(const string& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
         const int& length, bool isAsk);
+
+    // 计算水位
+    //WatermarkComputer watermark_computer_;
+
+    // 发布聚合行情
+    mutable std::mutex mutex_clocks_;
+    unordered_map<TSymbol, long long> last_clocks_;
+    bool _check_update_clocks(const string& symbol);
+    void _publish_quote(const string& symbol, const SMixQuote* quote, const SMixQuote* update);
 };

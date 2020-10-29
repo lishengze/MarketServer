@@ -38,7 +38,7 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
     
     if( CONFIG->publish_data_ ) {
         if( CONFIG->mixer_ver_ == 1 ) {
-            quote_mixer_.on_snap(exchange, symbol, quote);
+            //quote_mixer_.on_snap(exchange, symbol, quote);
         } else if( CONFIG->mixer_ver_ == 2 ) {
             quote_mixer2_.on_snap(exchange, symbol, quote);
         } else {
@@ -55,7 +55,7 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
 
     if( CONFIG->publish_data_ ) {
         if( CONFIG->mixer_ver_ == 1 ) {
-            quote_mixer_.on_update(exchange, symbol, quote);
+            //quote_mixer_.on_update(exchange, symbol, quote);
         } else if( CONFIG->mixer_ver_ == 2 ) {
             quote_mixer2_.on_update(exchange, symbol, quote);
         } else {

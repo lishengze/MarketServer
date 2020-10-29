@@ -48,7 +48,7 @@ struct TableStruct_stream_5fengine_5fserver_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[9]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[11]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -61,6 +61,12 @@ namespace v1 {
 class Decimal;
 class DecimalDefaultTypeInternal;
 extern DecimalDefaultTypeInternal _Decimal_default_instance_;
+class DemoReq;
+class DemoReqDefaultTypeInternal;
+extern DemoReqDefaultTypeInternal _DemoReq_default_instance_;
+class DemoResp;
+class DemoRespDefaultTypeInternal;
+extern DemoRespDefaultTypeInternal _DemoResp_default_instance_;
 class DepthLevel;
 class DepthLevelDefaultTypeInternal;
 extern DepthLevelDefaultTypeInternal _DepthLevel_default_instance_;
@@ -90,6 +96,8 @@ extern SubscribeQuoteReqDefaultTypeInternal _SubscribeQuoteReq_default_instance_
 }  // namespace trade
 PROTOBUF_NAMESPACE_OPEN
 template<> ::trade::service::v1::Decimal* Arena::CreateMaybeMessage<::trade::service::v1::Decimal>(Arena*);
+template<> ::trade::service::v1::DemoReq* Arena::CreateMaybeMessage<::trade::service::v1::DemoReq>(Arena*);
+template<> ::trade::service::v1::DemoResp* Arena::CreateMaybeMessage<::trade::service::v1::DemoResp>(Arena*);
 template<> ::trade::service::v1::DepthLevel* Arena::CreateMaybeMessage<::trade::service::v1::DepthLevel>(Arena*);
 template<> ::trade::service::v1::DepthVolume* Arena::CreateMaybeMessage<::trade::service::v1::DepthVolume>(Arena*);
 template<> ::trade::service::v1::GetQuoteReq* Arena::CreateMaybeMessage<::trade::service::v1::GetQuoteReq>(Arena*);
@@ -104,6 +112,280 @@ namespace service {
 namespace v1 {
 
 // ===================================================================
+
+class DemoReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.DemoReq) */ {
+ public:
+  inline DemoReq() : DemoReq(nullptr) {}
+  virtual ~DemoReq();
+
+  DemoReq(const DemoReq& from);
+  DemoReq(DemoReq&& from) noexcept
+    : DemoReq() {
+    *this = ::std::move(from);
+  }
+
+  inline DemoReq& operator=(const DemoReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DemoReq& operator=(DemoReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DemoReq& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const DemoReq* internal_default_instance() {
+    return reinterpret_cast<const DemoReq*>(
+               &_DemoReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    0;
+
+  friend void swap(DemoReq& a, DemoReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DemoReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DemoReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DemoReq* New() const final {
+    return CreateMaybeMessage<DemoReq>(nullptr);
+  }
+
+  DemoReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DemoReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DemoReq& from);
+  void MergeFrom(const DemoReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DemoReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.DemoReq";
+  }
+  protected:
+  explicit DemoReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReqFieldNumber = 1,
+  };
+  // int32 req = 1;
+  void clear_req();
+  ::PROTOBUF_NAMESPACE_ID::int32 req() const;
+  void set_req(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_req() const;
+  void _internal_set_req(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.DemoReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::int32 req_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
+class DemoResp PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.DemoResp) */ {
+ public:
+  inline DemoResp() : DemoResp(nullptr) {}
+  virtual ~DemoResp();
+
+  DemoResp(const DemoResp& from);
+  DemoResp(DemoResp&& from) noexcept
+    : DemoResp() {
+    *this = ::std::move(from);
+  }
+
+  inline DemoResp& operator=(const DemoResp& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DemoResp& operator=(DemoResp&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DemoResp& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const DemoResp* internal_default_instance() {
+    return reinterpret_cast<const DemoResp*>(
+               &_DemoResp_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(DemoResp& a, DemoResp& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DemoResp* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DemoResp* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DemoResp* New() const final {
+    return CreateMaybeMessage<DemoResp>(nullptr);
+  }
+
+  DemoResp* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DemoResp>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DemoResp& from);
+  void MergeFrom(const DemoResp& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DemoResp* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "trade.service.v1.DemoResp";
+  }
+  protected:
+  explicit DemoResp(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_stream_5fengine_5fserver_2eproto);
+    return ::descriptor_table_stream_5fengine_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRespFieldNumber = 1,
+  };
+  // int32 resp = 1;
+  void clear_resp();
+  ::PROTOBUF_NAMESPACE_ID::int32 resp() const;
+  void set_resp(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_resp() const;
+  void _internal_set_resp(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:trade.service.v1.DemoResp)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::int32 resp_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_stream_5fengine_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
 
 class SetParamsReq PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:trade.service.v1.SetParamsReq) */ {
@@ -147,7 +429,7 @@ class SetParamsReq PROTOBUF_FINAL :
                &_SetParamsReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    0;
+    2;
 
   friend void swap(SetParamsReq& a, SetParamsReq& b) {
     a.Swap(&b);
@@ -335,7 +617,7 @@ class SetParamsResp PROTOBUF_FINAL :
                &_SetParamsResp_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    3;
 
   friend void swap(SetParamsResp& a, SetParamsResp& b) {
     a.Swap(&b);
@@ -459,7 +741,7 @@ class SubscribeQuoteReq PROTOBUF_FINAL :
                &_SubscribeQuoteReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    4;
 
   friend void swap(SubscribeQuoteReq& a, SubscribeQuoteReq& b) {
     a.Swap(&b);
@@ -583,7 +865,7 @@ class GetQuoteReq PROTOBUF_FINAL :
                &_GetQuoteReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    5;
 
   friend void swap(GetQuoteReq& a, GetQuoteReq& b) {
     a.Swap(&b);
@@ -745,7 +1027,7 @@ class MultiQuoteData PROTOBUF_FINAL :
                &_MultiQuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    6;
 
   friend void swap(MultiQuoteData& a, MultiQuoteData& b) {
     a.Swap(&b);
@@ -891,7 +1173,7 @@ class QuoteData PROTOBUF_FINAL :
                &_QuoteData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    7;
 
   friend void swap(QuoteData& a, QuoteData& b) {
     a.Swap(&b);
@@ -967,6 +1249,7 @@ class QuoteData PROTOBUF_FINAL :
     kSymbolFieldNumber = 1,
     kTimeFieldNumber = 3,
     kTimeArriveFieldNumber = 4,
+    kExchangeFieldNumber = 8,
     kMsgSeqFieldNumber = 2,
     kIsSnapFieldNumber = 7,
   };
@@ -1054,6 +1337,22 @@ class QuoteData PROTOBUF_FINAL :
   std::string* _internal_mutable_time_arrive();
   public:
 
+  // string exchange = 8 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+  void clear_exchange();
+  const std::string& exchange() const;
+  void set_exchange(const std::string& value);
+  void set_exchange(std::string&& value);
+  void set_exchange(const char* value);
+  void set_exchange(const char* value, size_t size);
+  std::string* mutable_exchange();
+  std::string* release_exchange();
+  void set_allocated_exchange(std::string* exchange);
+  private:
+  const std::string& _internal_exchange() const;
+  void _internal_set_exchange(const std::string& value);
+  std::string* _internal_mutable_exchange();
+  public:
+
   // int64 msg_seq = 2 [(.gogoproto.customname) = "MsgSeq", (.gogoproto.jsontag) = "msg_seq"];
   void clear_msg_seq();
   ::PROTOBUF_NAMESPACE_ID::int64 msg_seq() const;
@@ -1084,6 +1383,7 @@ class QuoteData PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr symbol_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr time_arrive_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr exchange_;
   ::PROTOBUF_NAMESPACE_ID::int64 msg_seq_;
   bool is_snap_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -1133,7 +1433,7 @@ class DepthLevel PROTOBUF_FINAL :
                &_DepthLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    8;
 
   friend void swap(DepthLevel& a, DepthLevel& b) {
     a.Swap(&b);
@@ -1299,7 +1599,7 @@ class Decimal PROTOBUF_FINAL :
                &_Decimal_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    9;
 
   friend void swap(Decimal& a, Decimal& b) {
     a.Swap(&b);
@@ -1447,7 +1747,7 @@ class DepthVolume PROTOBUF_FINAL :
                &_DepthVolume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    10;
 
   friend void swap(DepthVolume& a, DepthVolume& b) {
     a.Swap(&b);
@@ -1587,6 +1887,54 @@ class DepthVolume PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// DemoReq
+
+// int32 req = 1;
+inline void DemoReq::clear_req() {
+  req_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DemoReq::_internal_req() const {
+  return req_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DemoReq::req() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.DemoReq.req)
+  return _internal_req();
+}
+inline void DemoReq::_internal_set_req(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  req_ = value;
+}
+inline void DemoReq::set_req(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_req(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.DemoReq.req)
+}
+
+// -------------------------------------------------------------------
+
+// DemoResp
+
+// int32 resp = 1;
+inline void DemoResp::clear_resp() {
+  resp_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DemoResp::_internal_resp() const {
+  return resp_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 DemoResp::resp() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.DemoResp.resp)
+  return _internal_resp();
+}
+inline void DemoResp::_internal_set_resp(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  resp_ = value;
+}
+inline void DemoResp::set_resp(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_resp(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.DemoResp.resp)
+}
+
+// -------------------------------------------------------------------
+
 // SetParamsReq
 
 // int32 depth = 1;
@@ -2218,6 +2566,68 @@ inline void QuoteData::set_is_snap(bool value) {
   // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.is_snap)
 }
 
+// string exchange = 8 [(.gogoproto.customname) = "Exchange", (.gogoproto.jsontag) = "exchange"];
+inline void QuoteData::clear_exchange() {
+  exchange_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& QuoteData::exchange() const {
+  // @@protoc_insertion_point(field_get:trade.service.v1.QuoteData.exchange)
+  return _internal_exchange();
+}
+inline void QuoteData::set_exchange(const std::string& value) {
+  _internal_set_exchange(value);
+  // @@protoc_insertion_point(field_set:trade.service.v1.QuoteData.exchange)
+}
+inline std::string* QuoteData::mutable_exchange() {
+  // @@protoc_insertion_point(field_mutable:trade.service.v1.QuoteData.exchange)
+  return _internal_mutable_exchange();
+}
+inline const std::string& QuoteData::_internal_exchange() const {
+  return exchange_.Get();
+}
+inline void QuoteData::_internal_set_exchange(const std::string& value) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void QuoteData::set_exchange(std::string&& value) {
+  
+  exchange_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:trade.service.v1.QuoteData.exchange)
+}
+inline void QuoteData::set_exchange(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:trade.service.v1.QuoteData.exchange)
+}
+inline void QuoteData::set_exchange(const char* value,
+    size_t size) {
+  
+  exchange_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:trade.service.v1.QuoteData.exchange)
+}
+inline std::string* QuoteData::_internal_mutable_exchange() {
+  
+  return exchange_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* QuoteData::release_exchange() {
+  // @@protoc_insertion_point(field_release:trade.service.v1.QuoteData.exchange)
+  return exchange_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void QuoteData::set_allocated_exchange(std::string* exchange) {
+  if (exchange != nullptr) {
+    
+  } else {
+    
+  }
+  exchange_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), exchange,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:trade.service.v1.QuoteData.exchange)
+}
+
 // -------------------------------------------------------------------
 
 // DepthLevel
@@ -2560,6 +2970,10 @@ inline void DepthVolume::set_allocated_price(::trade::service::v1::Decimal* pric
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

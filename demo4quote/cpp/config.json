@@ -3,7 +3,7 @@
         "frequency": 1,
         "publish_addr": "0.0.0.0:9000",
         "push_addr_bak": "172.25.1.222:9000",
-        "publish_depth": 100
+        "publish_depth": 200
     },
     "debug": {
         "mixer_ver": 2,

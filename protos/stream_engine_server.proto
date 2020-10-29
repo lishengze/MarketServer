@@ -8,7 +8,7 @@ option go_package = "v1";
 
 // Trade grpc
 service StreamEngineService {
-  // 获取单次行情
+  // 获取单品种行情
   rpc GetQuote(GetQuoteReq) returns (QuoteData);
   rpc SubscribeOneQuote(GetQuoteReq) returns (stream MultiQuoteData);
 
@@ -20,6 +20,17 @@ service StreamEngineService {
 
   // 设置参数
   rpc SetParams(SetParamsReq) returns (SetParamsResp);
+
+  // demo
+  rpc Demo(DemoReq) returns (stream DemoResp);
+}
+
+message DemoReq {
+    int32 req = 1;
+}
+
+message DemoResp {
+    int32 resp = 1;
 }
 
 message SetParamsReq {
@@ -51,6 +62,7 @@ message QuoteData {
   repeated DepthLevel ask_depth = 5 [(gogoproto.customname) = "AskDepth", (gogoproto.jsontag) = "ask_depth"];
   repeated DepthLevel bid_depth = 6 [(gogoproto.customname) = "BidDepth", (gogoproto.jsontag) = "bid_depth"];
   bool is_snap = 7 [(gogoproto.customname) = "IsSnap", (gogoproto.jsontag) = "is_snap"];
+  string exchange = 8 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
 }
 
 message DepthLevel {
@@ -64,7 +76,7 @@ message Decimal {
 }
 
 message DepthVolume {
-  double volume = 1 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
-  string exchange = 2 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
-  Decimal price = 3 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
+    double volume = 1 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
+    string exchange = 2 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
+    Decimal price = 3 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
 }

@@ -1,19 +1,12 @@
 #include "stream_engine_config.h"
 #include "quote_mixer2.h"
-#include "quote_mixer.h"
 #include "converter.h"
 
+/////////////////////////////////////////////////////////////////////
 QuoteMixer2::QuoteMixer2() {
-    thread_loop_ = new std::thread(&QuoteMixer2::_calc_watermark, this);
 }   
 
 QuoteMixer2::~QuoteMixer2() {
-    if (thread_loop_) {
-        if (thread_loop_->joinable()) {
-            thread_loop_->join();
-        }
-        delete thread_loop_;
-    }
 }
 
 bool QuoteMixer2::_check_update_clocks(const string& symbol) {
@@ -28,155 +21,85 @@ bool QuoteMixer2::_check_update_clocks(const string& symbol) {
     return true;
 }
 
-void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* quote, bool isSnap) {
-    // 如果watermark没有，也跳过
-    SDecimal watermark;
-    if( !_get_watermark(symbol, watermark) ) {
-        return;
-    }
-
+void QuoteMixer2::_publish_quote(const string& symbol, const SMixQuote* snap, const SMixQuote* update) {
     // 检查发布频率
     if( !_check_update_clocks(symbol) ) {
         return;
     }
 
     // 发布
-    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote2(symbol, quote, watermark);
-    PUBLISHER->on_mix_snap(symbol, ptr);
-}
-
-bool QuoteMixer2::_check_update_hedgeclocks(const string& symbol) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_hedgeclocks_ };
-    // 每秒更新频率控制
-    auto iter = last_hedgeclocks_.find(symbol);
-    if( iter != last_hedgeclocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency4hedge_) )
-    {
-        return false;
-    }
-    last_hedgeclocks_[symbol] = get_miliseconds();
-    return true;
-}
-
-void QuoteMixer2::_publish_hedgequote(const string& symbol, const SMixQuote* quote, bool isSnap) {
-    // 检查发布频率
-    if( !_check_update_clocks(symbol) ) {
-        return;
-    }
-
-    // 发布行情
-    std::shared_ptr<QuoteData> ptr = mixquote4hedge_to_pbquote2(symbol, quote);
-    PUBLISHER->on_mix_snap4hedge(symbol, ptr);
+    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote2(symbol, snap);
+    PUBLISHER->publish_mix(symbol, ptr, NULL);
 }
 
 void QuoteMixer2::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-    // compress price precise
-    // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
+    // 预处理
     SDepthQuote cpsQuote;
-    compress_quote(symbol, quote, cpsQuote);
-    std::cout << "after compress " << symbol << " " << cpsQuote.ask_length << "/" << cpsQuote.bid_length << std::endl;
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
-        snaps_[symbol][exchange] = quote;
-    }
+    _preprocess(exchange, symbol, quote, cpsQuote);
 
-    std::shared_ptr<QuoteData> msd = NULL;
+    // 更新内存中的行情
+    SMixQuote* ptr = _on_snap(exchange, symbol, cpsQuote);
+
+    // 推送结果
+    //std::cout << "publish " << symbol << " " << ptr->ask_length() << "/" << ptr->bid_length() << std::endl;
+    _publish_quote(symbol, ptr, NULL);
+}
+
+void QuoteMixer2::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
+    // 预处理
+    SDepthQuote cpsQuote;
+    _preprocess(exchange, symbol, quote, cpsQuote);
+
+    // 更新内存中的行情
+    SMixQuote* ptr = _on_update(exchange, symbol, cpsQuote);
+    if( ptr == NULL )
+        return;
+
+    // 推送结果
+    _publish_quote(symbol, ptr, NULL);
+};
+
+SMixQuote* QuoteMixer2::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
     if( !_get_quote(symbol, ptr) ) {
         ptr = new SMixQuote();
-        symbols_[symbol] = ptr;
+        quotes_[symbol] = ptr;
     } else {
         // 1. 清除老的exchange数据
         ptr->asks = _clear_exchange(exchange, ptr->asks);
         ptr->bids = _clear_exchange(exchange, ptr->bids);
     }
-    // 3. 合并价位
-    ptr->asks = _mix_exchange(exchange, ptr->asks, cpsQuote.asks, cpsQuote.ask_length, true);
-    ptr->bids = _mix_exchange(exchange, ptr->bids, cpsQuote.bids, cpsQuote.bid_length, false);
-
-    ptr->sequence_no = cpsQuote.sequence_no;
-
-    // 4. 推送结果
-    std::cout << "publish " << symbol << " " << ptr->ask_length() << "/" << ptr->bid_length() << std::endl;
-    _publish_quote(symbol, ptr, true);
+    // 2. 合并价位
+    ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
+    ptr->sequence_no = quote.sequence_no;
+    return ptr;
 }
 
-void QuoteMixer2::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-    // compress price precise
-    // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
-    SDepthQuote cpsQuote;
-    compress_quote(symbol, quote, cpsQuote);
-
-    std::shared_ptr<QuoteData> msd = NULL;
+SMixQuote* QuoteMixer2::_on_update(const string& exchange, const string& symbol, const SDepthQuote& quote)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
     if( !_get_quote(symbol, ptr) )
-        return;
+        return NULL;
+
     // 1. 需要清除的价位数据
-    ptr->asks = _clear_pricelevel(exchange, ptr->asks, cpsQuote.asks, cpsQuote.ask_length, true);
-    ptr->bids = _clear_pricelevel(exchange, ptr->bids, cpsQuote.bids, cpsQuote.bid_length, false);
+    ptr->asks = _clear_pricelevel(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _clear_pricelevel(exchange, ptr->bids, quote.bids, quote.bid_length, false);
 
-    // 3. 合并价位
-    ptr->asks = _mix_exchange(exchange, ptr->asks, cpsQuote.asks, cpsQuote.ask_length, true);
-    ptr->bids = _mix_exchange(exchange, ptr->bids, cpsQuote.bids, cpsQuote.bid_length, false);
+    // 2. 合并价位
+    ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
 
-    ptr->sequence_no = cpsQuote.sequence_no;
-
-    // 4. 推送结果
-    _publish_quote(symbol, ptr, true);
-    _publish_hedgequote(symbol, ptr, true);
-    return;
-};
-
-bool QuoteMixer2::_get_watermark(const string& symbol, SDecimal& watermark) const 
-{
-    std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };    
-    auto wmIter = watermark_.find(symbol);
-    if( wmIter == watermark_.end() || wmIter->second.value == 0 ) {
-        return false;
-    }
-    watermark = wmIter->second;
-    return true;
-};
-
-void QuoteMixer2::_one_round() {
-
-    std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
-    // 计算watermark
-    for( auto iter = snaps_.begin() ; iter != snaps_.end() ; ++iter ) {
-        const TSymbol& symbol = iter->first;
-        const unordered_map<TExchange, SDepthQuote>& snaps = iter->second;        
-        vector<SDecimal> asks, bids;
-        for( auto snapIter = snaps.begin() ; snapIter != snaps.end() ; ++snapIter ) {
-            const SDepthQuote& quote = snapIter->second;
-            if( quote.ask_length > 0 ) {
-                asks.push_back(quote.asks[0].price);
-            }
-            if( quote.bid_length > 0  ) {
-                bids.push_back(quote.bids[0].price);
-            }
-        }
-        // 排序
-        sort(asks.begin(), asks.end());
-        sort(bids.begin(), bids.end());
-        if( asks.size() > 0 && bids.size() > 0 ) {
-            SDecimal watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
-            watermark_[symbol] = watermark;
-        }
-    }
+    ptr->sequence_no = quote.sequence_no;
+    return ptr;
 }
 
-void QuoteMixer2::_calc_watermark() {
-
-    while( true ) {
-        _one_round();
-
-        // 休眠
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-};
-
 bool QuoteMixer2::_get_quote(const string& symbol, SMixQuote*& ptr) const {
-    auto iter = symbols_.find(symbol);
-    if( iter == symbols_.end() )
+    auto iter = quotes_.find(symbol);
+    if( iter == quotes_.end() )
         return false;
     ptr = iter->second;
     return true;
@@ -310,4 +233,9 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const string& exchange, SMixDepthPric
     }
 
     return head.next;
-};
+}
+
+bool QuoteMixer2::_preprocess(const string& exchange, const string& symbol, const SDepthQuote& src, SDepthQuote& dst) {
+    process_precise(exchange, symbol, src, dst);
+    return true;
+}

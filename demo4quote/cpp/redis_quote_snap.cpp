@@ -1,4 +1,4 @@
-#include "redis_snap.h"
+#include "redis_quote_snap.h"
 #include "redis_quote.h"
 #include "stream_engine_config.h"
 
@@ -20,18 +20,17 @@ void RedisSnapRequester::start(){
     thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
 }
 
-void RedisSnapRequester::on_update_symbol(const string& exchange, const string& symbol) {
+void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& symbol) {
     
     string combinedSymbol = combine_symbol(exchange, symbol);
-
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
     if( symbols_.find(combinedSymbol) != symbols_.end() )
         return;
-    symbols_[combinedSymbol] = 0;
+    symbols_.insert(combinedSymbol);
     boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
 }
 
-void RedisSnapRequester::_get_snap(const string& exchange, const string& symbol) {
+void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& symbol) {
     // 为线程池中每一个对象绑定一个redis_api对象
     std::thread::id thread_id = std::this_thread::get_id();
     RedisApiPtr redis_sync_api;
@@ -56,7 +55,7 @@ void RedisSnapRequester::_thread_loop(){
 
     while( thread_loop_ ) {
         // 获取所有任务
-        unordered_map<string, int> tmp;
+        unordered_set<string> tmp;
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
             tmp = symbols_;
@@ -64,7 +63,7 @@ void RedisSnapRequester::_thread_loop(){
         // 发送所有任务
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
             string exchange, symbol;
-            if( !decombine_symbol(iter->first, exchange, symbol) ) {
+            if( !decombine_symbol(*iter, exchange, symbol) ) {
                 continue;
             }
             boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));

@@ -40,6 +40,11 @@ class StreamEngineServiceStub(object):
                 request_serializer=stream__engine__server__pb2.SetParamsReq.SerializeToString,
                 response_deserializer=stream__engine__server__pb2.SetParamsResp.FromString,
                 )
+        self.Demo = channel.unary_stream(
+                '/trade.service.v1.StreamEngineService/Demo',
+                request_serializer=stream__engine__server__pb2.DemoReq.SerializeToString,
+                response_deserializer=stream__engine__server__pb2.DemoResp.FromString,
+                )
 
 
 class StreamEngineServiceServicer(object):
@@ -47,7 +52,7 @@ class StreamEngineServiceServicer(object):
     """
 
     def GetQuote(self, request, context):
-        """获取单次行情
+        """获取单品种行情
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -80,6 +85,13 @@ class StreamEngineServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Demo(self, request, context):
+        """demo
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_StreamEngineServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -107,6 +119,11 @@ def add_StreamEngineServiceServicer_to_server(servicer, server):
                     servicer.SetParams,
                     request_deserializer=stream__engine__server__pb2.SetParamsReq.FromString,
                     response_serializer=stream__engine__server__pb2.SetParamsResp.SerializeToString,
+            ),
+            'Demo': grpc.unary_stream_rpc_method_handler(
+                    servicer.Demo,
+                    request_deserializer=stream__engine__server__pb2.DemoReq.FromString,
+                    response_serializer=stream__engine__server__pb2.DemoResp.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -201,5 +218,22 @@ class StreamEngineService(object):
         return grpc.experimental.unary_unary(request, target, '/trade.service.v1.StreamEngineService/SetParams',
             stream__engine__server__pb2.SetParamsReq.SerializeToString,
             stream__engine__server__pb2.SetParamsResp.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Demo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/trade.service.v1.StreamEngineService/Demo',
+            stream__engine__server__pb2.DemoReq.SerializeToString,
+            stream__engine__server__pb2.DemoResp.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

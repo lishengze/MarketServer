@@ -1,7 +1,6 @@
 #pragma once
 
 #include "redis_quote.h"
-#include "quote_mixer.h"
 #include "quote_mixer2.h"
 #include "quote_single.h"
 #include "quote_dumper.h"
@@ -29,7 +28,7 @@ private:
     // redis quote upstream
     RedisQuote quote_source_;
     // mix quotation
-    QuoteMixer quote_mixer_;
+    //QuoteMixer quote_mixer_;
     // mix quotation version2(current)
     QuoteMixer2 quote_mixer2_;
     // single symbol quotation

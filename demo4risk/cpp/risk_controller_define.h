@@ -14,18 +14,18 @@ using namespace std;
 #define CALC_BASE(x) (int(pow(10, (x))))
 
 struct SDecimal {
-    unsigned long long Value;
-    unsigned short Base;
+    unsigned long long value;
+    unsigned short base;
 
     SDecimal() {
-        Value = 0;
-        Base = 0;
+        value = 0;
+        base = 0;
     }
 
     static SDecimal max_decimal() {
         SDecimal ret;
-        ret.Value = ULLONG_MAX;
-        ret.Base = 0;
+        ret.value = ULLONG_MAX;
+        ret.base = 0;
         return ret;
     }
 
@@ -36,123 +36,124 @@ struct SDecimal {
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
-        Base = data.length() - pos - 1;
-        if( precise >= 0 && precise < Base ) { // 精度调整
-            Base = precise;
+        base = data.length() - pos - 1;
+        if( precise >= 0 && precise < base ) { // 精度调整
+            base = precise;
             string newData = data.substr(0, pos + 1 + precise);
-            Value = atof(newData.c_str()) * CALC_BASE(Base);
+            value = atof(newData.c_str()) * CALC_BASE(base);
             if( ceiling )
-                Value += 1;
+                value += 1;
         } else {
-            Value = atof(data.c_str()) * CALC_BASE(Base);
+            value = atof(data.c_str()) * CALC_BASE(base);
         }
     }
 
     void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( precise == -1 || data.Base <= precise ) {
-            Value = data.Value;
-            Base = data.Base;
+        if( precise == -1 || data.base <= precise ) {
+            value = data.value;
+            base = data.base;
             return;
         }
 
         if( ceiling ) {
-            Value = ceil(data.Value / CALC_BASE(data.Base - precise));
+            value = ceil(data.value / CALC_BASE(data.base - precise));
         } else {
-            Value = floor(data.Value / CALC_BASE(data.Base - precise));
+            value = floor(data.value / CALC_BASE(data.base - precise));
         }
-        Base = precise;
+        base = precise;
     }
 
     double get_value() const {
-        return Value * 1.0 / CALC_BASE(Base);
+        return value * 1.0 / CALC_BASE(base);
     }
 
     string get_str_value() const {
         char precise[25];
-        sprintf(precise, "%d", Base+1);
+        sprintf(precise, "%d", base+1);
 
         char holder[1024];
         string fmt = "%0" + string(precise) + "lld";
-        sprintf(holder, fmt.c_str(), Value);
+        sprintf(holder, fmt.c_str(), value);
         string ret = holder;
-        ret.insert(ret.begin() + ret.length() - Base, '.');
+        ret.insert(ret.begin() + ret.length() - base, '.');
         return ret;
     }
 
     bool operator <(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value < d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value < d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) < d.Value;
+            return value * CALC_BASE(d.base-base) < d.value;
         }
     }
     bool operator >(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value > d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value > d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) > d.Value;
+            return value * CALC_BASE(d.base-base) > d.value;
         }
     }
     bool operator ==(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value == d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value == d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) == d.Value;
+            return value * CALC_BASE(d.base-base) == d.value;
         }
     }
     bool operator <=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value <= d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value <= d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) <= d.Value;
+            return value * CALC_BASE(d.base-base) <= d.value;
         }
     }
     bool operator >=(const SDecimal& d) const {
-        if( Base > d.Base ) {
-            return Value >= d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            return value >= d.value * CALC_BASE(base-d.base);
         } else {
-            return Value * CALC_BASE(d.Base-Base) >= d.Value;
+            return value * CALC_BASE(d.base-base) >= d.value;
         }
     }
 
     SDecimal operator + (const SDecimal &d) const {
         SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value + d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            ret.base = base;
+            ret.value = value + d.value * CALC_BASE(base-d.base);
         } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) + d.Value;
+            ret.base = d.base;
+            ret.value = value * CALC_BASE(d.base-base) + d.value;
         }
         return ret;
     }
     SDecimal operator - (const SDecimal &d) const {
         SDecimal ret;
-        if( Base > d.Base ) {
-            ret.Base = Base;
-            ret.Value = Value - d.Value * CALC_BASE(Base-d.Base);
+        if( base > d.base ) {
+            ret.base = base;
+            ret.value = value - d.value * CALC_BASE(base-d.base);
         } else {
-            ret.Base = d.Base;
-            ret.Value = Value * CALC_BASE(d.Base-Base) - d.Value;
+            ret.base = d.base;
+            ret.value = value * CALC_BASE(d.base-base) - d.value;
         }
         return ret;
     }
     SDecimal operator / (const double &d) const {
         SDecimal ret;
-        ret.Base = Base;
-        ret.Value = Value / d;
+        ret.base = base;
+        ret.value = value / d;
         return ret;
     }
     SDecimal operator * (const double &d) const {
         SDecimal ret;
-        ret.Base = Base;
-        ret.Value = Value * d;
+        ret.base = base;
+        ret.value = value * d;
         return ret;
     }
 };
 #define MAX_EXCHANGE_LENGTH 10
-#define MAX_DEPTH_LENGTH 100
+#define MAX_DEPTH_LENGTH 200
 #define MAX_SYMBOLNAME_LENGTH 32
 #define MAX_EXCHANGENAME_LENGTH 32
 #define TSymbol string
 #define TExchange string
+using uint32 = unsigned int;

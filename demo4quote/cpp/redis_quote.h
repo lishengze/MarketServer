@@ -5,16 +5,13 @@
 #include "pandora/util/json.hpp"
 using namespace std;
 using njson = nlohmann::json;
-#include "stream_engine_define.h"
-#include "redis_snap.h"
-
-bool parse_quote(const string& data, SDepthQuote& quote, bool isSnap, int precise);
+#include "redis_quote_snap.h"
 
 class QuoteSourceInterface
 {
 public:
-    virtual void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
     virtual void on_connected() = 0;
 };
 
@@ -33,7 +30,7 @@ public:
     void subscribe(const string& channel);
     
     // callback from RedisSnapRequester
-    void _on_snap(const string& exchange, const string& symbol, const string& data);
+    void _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
 
 
     // redis connect notify

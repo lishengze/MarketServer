@@ -2,7 +2,7 @@
 #include "quote_single.h"
 #include "converter.h"
 
-void QuoteSingle::publish_quote(const string& exchange, const string& symbol, const SMixQuote& quote, bool isSnap) {
+void QuoteSingle::publish_quote(const string& exchange, const string& symbol, const SMixQuote* snap, const SDepthQuote* update) {
     // 每秒更新频率控制
     auto last = last_clocks_[exchange][symbol];
     auto now = get_miliseconds();
@@ -13,8 +13,8 @@ void QuoteSingle::publish_quote(const string& exchange, const string& symbol, co
     last_clocks_[exchange][symbol] = now;
 
     // 发送
-    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote(exchange, symbol, quote);
-    PUBLISHER->on_snap(exchange, symbol, ptr);
+    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote(exchange, symbol, *snap);
+    PUBLISHER->publish_single(exchange, symbol, ptr, NULL);
 };
 
 void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
@@ -26,33 +26,31 @@ void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SD
         ptr->asks = _clear_allpricelevel(exchange, ptr->asks);
         ptr->bids = _clear_allpricelevel(exchange, ptr->bids);
     }
-    // 3. 合并价位
+    // 合并价位
     ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
     ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
 
     ptr->sequence_no = quote.sequence_no;
 
-    // 4. 推送结果
-    publish_quote(exchange, symbol, *ptr, true);
-    return;
+    // 推送结果
+    publish_quote(exchange, symbol, ptr, NULL);
 }
 
 void QuoteSingle::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
     SMixQuote* ptr = NULL;
     if( !_get_quote(exchange, symbol, ptr) )
         return;
-    // 1. 需要清除的价位数据
+    // 需要清除的价位数据
     ptr->asks = _clear_pricelevel(exchange, ptr->asks, quote.asks, quote.ask_length, true);
     ptr->bids = _clear_pricelevel(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-    // 3. 合并价位
+    // 合并价位
     ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
     ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-
+    
     ptr->sequence_no = quote.sequence_no;
 
-    // 4. 推送结果
-    publish_quote(exchange, symbol, *ptr, false);
-    return;
+    // 推送结果
+    publish_quote(exchange, symbol, ptr, &quote);
 };
 
 

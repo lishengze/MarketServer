@@ -11,7 +11,7 @@ public:
 
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
-    void publish_quote(const string& exchange, const string& symbol, const SMixQuote& quote, bool isSnap);
+    void publish_quote(const string& exchange, const string& symbol, const SMixQuote* snap, const SDepthQuote* update);
 
 private:
     unordered_map<TExchange, unordered_map<TSymbol, SMixQuote*>> symbols_;

@@ -54,6 +54,7 @@ def run():
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
+    '''
     with grpc.insecure_channel('localhost:9000') as channel:
         stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
         req = stream_engine_server_pb2.GetQuoteReq()
@@ -62,13 +63,19 @@ def run():
         response = stub.GetQuote(req)
         print(response)
     #print("Greeter client received: " + response)
-    
+    '''
     with grpc.insecure_channel('localhost:9000') as channel:
         stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
+        #responses = stub.Demo(stream_engine_server_pb2.DemoReq())
+        #for resp in responses:
+        #    print(resp)
+        request = stream_engine_server_pb2.GetQuoteReq()
+        request.exchange = "HUOBI"
+        request.symbol = "BTC_USDT"
+        #responses = stub.SubscribeOneQuote(request)
         responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.SubscribeQuoteReq())
         for resp in responses:
-            for quote in resp.quotes:
-                print(quote.symbol)
+            print(resp)
 
 if __name__ == '__main__':
     logging.basicConfig()

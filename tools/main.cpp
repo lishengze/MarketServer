@@ -213,7 +213,7 @@ struct SMixQuote {
     }
 };
 
-void compress_quote(const string& symbol, const SDepthQuote& src, SDepthQuote& dst) {
+void process_precise(const string& symbol, const SDepthQuote& src, SDepthQuote& dst) {
     int precise = 1;
     
     vassign(dst.exchange, src.exchange);
@@ -273,7 +273,7 @@ public:
         // compress price precise
         // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
         SDepthQuote cpsQuote;
-        compress_quote(symbol, quote, cpsQuote);
+        process_precise(symbol, quote, cpsQuote);
 
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) ) {
@@ -300,7 +300,7 @@ public:
         // compress price precise
         // 需要进行价格压缩：例如huobi的2位小数压缩为1位小数
         SDepthQuote cpsQuote;
-        compress_quote(symbol, quote, cpsQuote);
+        process_precise(symbol, quote, cpsQuote);
 
         SMixQuote* ptr = NULL;
         if( !_get_quote(symbol, ptr) )
