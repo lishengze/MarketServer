@@ -16,64 +16,79 @@ bool QuoteSingle::_check_update_clocks(const TExchange& exchange, const TSymbol&
     return true;
 }
 
-void QuoteSingle::_publish_quote(const TExchange& exchange, const TSymbol& symbol, const SMixQuote* snap, const SDepthQuote* update, bool is_snap) {
-    // 检查发布频率
-    if( !_check_update_clocks(exchange, symbol) ) {
-        return;
-    }
-
-    // 发送
-    std::shared_ptr<QuoteData> ptr = mixquote_to_pbquote(exchange, symbol, *snap);
-    //if( is_snap ) {
-    //    std::cout << "publish single(snap) " << exchange << ":" << symbol << " " << ptr->ask_depth_size() << "/" << ptr->bid_depth_size() << std::endl;
-    //} else {
-    //    std::cout << "publish single(update) " << exchange << ":" << symbol << " " << ptr->ask_depth_size() << "/" << ptr->bid_depth_size() << std::endl;
-    //}
-    PUBLISHER->publish_single(exchange, symbol, ptr, NULL);
+void QuoteSingle::_publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<QuoteData> pub_snap, std::shared_ptr<QuoteData> pub_diff, bool is_snap) {
+    PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
 };
 
 void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-    SMixQuote* ptr = NULL;
-    {        
-        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        if( !_get_quote(exchange, symbol, ptr) ) {
-            ptr = new SMixQuote();
-            quotes_[exchange][symbol] = ptr;
-        } else {
-            ptr->asks = _clear_allpricelevel(exchange, ptr->asks);
-            ptr->bids = _clear_allpricelevel(exchange, ptr->bids);
-        }
-        // 合并价位
-        ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
-        ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-
-        ptr->sequence_no = quote.sequence_no;
-    }
-
+    // 更新内存中的行情
+    std::shared_ptr<QuoteData> pub_snap;
+    if( !_on_snap(exchange, symbol, quote, pub_snap) )
+        return;
     // 推送结果
-    _publish_quote(exchange, symbol, ptr, NULL, true);
+    _publish_quote(exchange, symbol, pub_snap, NULL, true);
 }
 
 void QuoteSingle::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-    SMixQuote* ptr = NULL;
-    {        
-        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        if( !_get_quote(exchange, symbol, ptr) )
-            return;
-        // 需要清除的价位数据
-        ptr->asks = _clear_pricelevel(exchange, ptr->asks, quote.asks, quote.ask_length, true);
-        ptr->bids = _clear_pricelevel(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-        // 合并价位
-        ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
-        ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-        
-        ptr->sequence_no = quote.sequence_no;
-    }
-
+    std::shared_ptr<QuoteData> pub_snap, pub_diff;
+    if( !_on_update(exchange, symbol, quote, pub_snap, pub_diff) )
+        return;
     // 推送结果
-    _publish_quote(exchange, symbol, ptr, &quote, false);
+    _publish_quote(exchange, symbol, pub_snap, pub_diff, false);
 };
 
+bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+    SMixQuote* ptr = NULL;
+    if( !_get_quote(exchange, symbol, ptr) ) {
+        ptr = new SMixQuote();
+        quotes_[exchange][symbol] = ptr;
+    } else {
+        return false;
+        ptr->asks = _clear_allpricelevel(exchange, ptr->asks);
+        ptr->bids = _clear_allpricelevel(exchange, ptr->bids);
+    }
+    // 合并价位
+    ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
+
+    ptr->sequence_no = quote.sequence_no;
+
+    // 检查发布频率
+    if( !_check_update_clocks(exchange, symbol) ) {
+        return false;
+    }
+
+    // 发送
+    pub_snap = mixquote_to_pbquote(exchange, symbol, *ptr);
+    return true;
+}
+
+bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap, std::shared_ptr<QuoteData>& pub_diff)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+    SMixQuote* ptr = NULL;
+    if( !_get_quote(exchange, symbol, ptr) )
+        return false;
+    // 需要清除的价位数据
+    ptr->asks = _clear_pricelevel(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _clear_pricelevel(exchange, ptr->bids, quote.bids, quote.bid_length, false);
+    // 合并价位
+    ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
+    ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
+    
+    ptr->sequence_no = quote.sequence_no;
+    
+    // 检查发布频率
+    if( !_check_update_clocks(exchange, symbol) ) {
+        return false;
+    }
+
+    // 发送
+    pub_snap = mixquote_to_pbquote(exchange, symbol, *ptr);
+    return true;
+}
 
 bool QuoteSingle::_get_quote(const string& exchange, const string& symbol, SMixQuote*& ptr) const {
     auto iter = quotes_.find(exchange);

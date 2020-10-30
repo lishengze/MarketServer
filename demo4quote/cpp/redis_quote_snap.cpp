@@ -58,7 +58,7 @@ void RedisSnapRequester::_thread_loop(){
         unordered_set<string> tmp;
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-            tmp = symbols_;
+            //tmp = symbols_;
         }
         // 发送所有任务
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {

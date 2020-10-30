@@ -28,6 +28,12 @@ def CallChangeStreamEngineParams(addr, params):
         request.raw_frequency = params['raw_frequency']
         stub.SetParams(request)
 
+def CallGetStreamEngineParams(addr):
+    with grpc.insecure_channel(addr) as channel:
+        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
+        request = stream_engine_server_pb2.GetParamsReq()
+        return stub.GetParams(request)
+
 
 class GrpcStreamThread(QThread):
     def __init__(self, addr, parent=None):
@@ -54,21 +60,21 @@ class QueryApiThread(GrpcStreamThread):
         super().__init__(addr, parent)
   
     def run_grpc(self, channel):
-        stub = api_pb2_grpc.TradeStub(channel)
+        stub = api_pb2_grpc.BrokerStub(channel)
         responses = stub.ServeMarketStream(empty_pb2.Empty())
         for resp in responses:
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
 
 class QueryStreamEngineThread(GrpcStreamThread):
-    breakSignal = pyqtSignal(stream_engine_server_pb2.QuoteData)
+    breakSignal = pyqtSignal(stream_engine_server_pb2.MarketStreamData)
   
     def __init__(self, addr, parent=None):
         super().__init__(addr, parent)
   
     def run_grpc(self, channel):
         stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.SubscribeQuoteReq())
+        responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.MultiSubscribeQuoteReq())
         for resp in responses:
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
@@ -88,7 +94,7 @@ class QueryRawThread(GrpcStreamThread):
 
     def run_grpc(self, channel):
         stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        request = stream_engine_server_pb2.GetQuoteReq()
+        request = stream_engine_server_pb2.SubscribeOneQuoteReq()
         request.exchange = self.exchange
         request.symbol = self.symbol
         responses = stub.SubscribeOneQuote(request)
@@ -172,14 +178,17 @@ class DisplayWidget(QWidget):
     
     def __init__(self):
         super().__init__()
-        # 当前选定的品种
-        self.current_symbol = ""
-        # 当前选定的交易所（原始行情）
-        self.current_exchange = ""
+
+        self.stream_engine_params = CallGetStreamEngineParams(self.STREAMENGINE_ADDR)
+        print(self.stream_engine_params)
         # 所有聚合行情品种：来自api接口
-        self.all_symbols = set()
+        self.all_symbols = self.stream_engine_params.symbols
         # 所有聚合行情品种对一个的交易所，来自api接口
-        self.all_exchanges = collections.defaultdict(set)
+        self.all_exchanges = self.stream_engine_params.exchanges
+        # 当前选定的品种
+        self.current_symbol = self.all_symbols[0]
+        # 当前选定的交易所（原始行情）
+        self.current_exchange = self.all_exchanges[0]
         
         # 初始化ui
         self.initUI()
@@ -195,7 +204,9 @@ class DisplayWidget(QWidget):
         self.streamengine_thread.start()
 
         # 原始行情聚合接口需要动态获取
-        self.raw_thread = None
+        self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
+        self.raw_thread.breakSignal.connect(self.update_raw_data)
+        self.raw_thread.start()
 
     def initUI(self):
         # 风控参数调整区域（暂未使用）
@@ -254,6 +265,7 @@ class DisplayWidget(QWidget):
         wlayout = QGridLayout()
         # 0行 - 0列
         self.symbol_combox = QComboBox(self)
+        self.symbol_combox.addItems(self.stream_engine_params.symbols)
         self.symbol_combox.currentIndexChanged[str].connect(self.symbol_changed)
         wlayout.addWidget(self.symbol_combox, 0, 0)
         # 0行 - 1列
@@ -262,6 +274,7 @@ class DisplayWidget(QWidget):
         wlayout.addWidget(QLabel("风控后行情"), 0, 2)
         # 0行 - 3列
         self.exchange_combox = QComboBox(self)
+        self.exchange_combox.addItems(self.stream_engine_params.exchanges)
         self.exchange_combox.currentIndexChanged[str].connect(self.exchange_changed)
         wlayout.addWidget(self.exchange_combox, 0, 3)
         # 1行 - 0列
@@ -302,22 +315,18 @@ class DisplayWidget(QWidget):
                 # 价位数据
                 txt_price = depth.price
                 # 挂单数据
-                total = 0
+                total = depth.volume
                 desc = ""
-                for data in depth.data:
-                    self._add_exchange(data.exchange, msg.symbol)
-                    total += data.size
-                    desc += "{0}:{1:.04f},".format(data.exchange, data.size)
+                for exchange, volume in depth.data.items():
+                    desc += "{0}:{1:.04f},".format(exchange, volume)
                 txt_volumes = "{0:.04f}(".format(total) + desc + ")"
                 # 添加数据
                 ret.append((txt_price, txt_volumes))
             return ret
-        # 添加品种
-        self._add_symbol(msg.symbol)
         if msg.symbol != self.current_symbol:
             return
-        ask_data = _make_data(msg.ask_depth)
-        bid_data = _make_data(msg.bid_depth)
+        ask_data = _make_data(msg.ask_depths)
+        bid_data = _make_data(msg.bid_depths)
         self.api_widget.bind_data(ask_data, bid_data)
 
     def update_streamengine_data(self, msg):
@@ -325,23 +334,25 @@ class DisplayWidget(QWidget):
             ret = []
             for depth in depths:
                 # 价位数据
-                fmt = "{0:.0" + str(depth.price.base) + "f}"
-                txt_price = fmt.format(depth.price.value/(10**depth.price.base))
+                txt_price = depth.price
                 # 挂单数据
                 total = 0
                 desc = ""
-                for data in depth.data:
-                    total += data.volume
-                    desc += "{0}:{1:.04f},".format(data.exchange, data.volume)
+                for exchange, volume in depth.data.items():
+                    #self._add_exchange(data.exchange, msg.symbol)
+                    total += volume
+                    desc += "{0}:{1:.04f},".format(exchange, volume)
                 txt_volumes = "{0:.04f} - ".format(total) + desc
                 # 添加数据
                 ret.append((txt_price, txt_volumes))
             return ret
 
+        # 添加品种
+        #self._add_symbol(msg.symbol)
         if msg.symbol != self.current_symbol:
             return
-        ask_data = _make_data(msg.ask_depth)
-        bid_data = _make_data(msg.bid_depth)        
+        ask_data = _make_data(msg.ask_depths)
+        bid_data = _make_data(msg.bid_depths)        
         self.streamengine_widget.bind_data(ask_data, bid_data)
 
     def update_raw_data(self, msg):
@@ -352,9 +363,7 @@ class DisplayWidget(QWidget):
                 fmt = "{0:.0" + str(depth.price.base) + "f}"
                 txt_price = fmt.format(depth.price.value/(10**depth.price.base))
                 # 挂单数据
-                txt_volumes = ""
-                if len(depth.data) > 0 :
-                    txt_volumes = "{0:.04f}".format(depth.data[0].volume)
+                txt_volumes = str(depth.volume)
                 # 添加数据
                 ret.append((txt_price, txt_volumes))
             return ret
@@ -367,9 +376,9 @@ class DisplayWidget(QWidget):
         self.current_symbol = symbol
 
         # 品种变化的时候，动态更新原始行情的交易所列表
-        exchanges = self.all_exchanges[symbol]
-        self.exchange_combox.clear()
-        self.exchange_combox.addItems(list(exchanges))
+        #exchanges = self.all_exchanges[symbol]
+        #self.exchange_combox.clear()
+        #self.exchange_combox.addItems(list(exchanges))
 
     def exchange_changed(self, exchange):
         self.current_exchange = exchange

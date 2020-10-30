@@ -138,7 +138,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
                 return;
             }
             if( quote.sequence_no < lastQuote.sequence_no ) {
-                std::cout << "sequence_no failed" << std::endl;
+                std::cout << "sequence_no check failed:" << exchange << ":" << symbol << " " << quote.sequence_no << "/" << lastQuote.sequence_no << std::endl;
                 return;
             }
         }

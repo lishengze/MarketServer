@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stream_engine_define.h"
+#include "grpc_entity.h"
 
 class QuoteMixer2
 {
@@ -19,8 +20,8 @@ private:
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, SMixQuote*> quotes_;
 
-    SMixQuote* _on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
-    SMixQuote* _on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
+    bool _on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap);
+    bool _on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff);
 
     bool _get_quote(const string& symbol, SMixQuote*& ptr) const;
 
@@ -36,5 +37,5 @@ private:
     mutable std::mutex mutex_clocks_;
     unordered_map<TSymbol, long long> last_clocks_;
     bool _check_update_clocks(const string& symbol);
-    void _publish_quote(const string& symbol, const SMixQuote* quote, const SMixQuote* update, bool is_snap);
+    void _publish_quote(const string& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap);
 };

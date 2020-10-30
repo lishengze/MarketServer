@@ -29,7 +29,7 @@ struct SMixDepthPrice {
     }
 };
 
-#define MAX_MIXDEPTH 200
+#define MAX_MIXDEPTH 999999
 struct SMixQuote {
     SMixDepthPrice* asks; // 卖盘
     SMixDepthPrice* bids; // 买盘

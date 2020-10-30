@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stream_engine_define.h"
+#include "grpc_entity.h"
 
 class QuoteSingle
 {
@@ -12,6 +13,9 @@ public:
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
 
 private:
+    bool _on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap);
+    bool _on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap, std::shared_ptr<QuoteData>& pub_diff);
+
     mutable std::mutex mutex_quotes_;
     unordered_map<TExchange, unordered_map<TSymbol, SMixQuote*>> quotes_;
 
@@ -28,5 +32,5 @@ private:
     mutable std::mutex mutex_clocks_;
     unordered_map<TExchange, unordered_map<TSymbol, long long>> last_clocks_;
     bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
-    void _publish_quote(const TExchange& exchange, const TSymbol& symbol, const SMixQuote* snap, const SDepthQuote* update, bool is_snap);
+    void _publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<QuoteData> pub_snap, std::shared_ptr<QuoteData> pub_diff, bool is_snap);
 };
