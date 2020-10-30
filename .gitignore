@@ -1,2 +1,7 @@
+# 过滤cmake生成的内容
 demo4quote/cpp/cmake/*
 demo4risk/cpp/cmake/*
+# .vscode
+*/.vscode
+# __pycache_
+*/__pycache_
