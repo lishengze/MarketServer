@@ -30,6 +30,12 @@ void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& sy
     boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
 }
 
+void RedisSnapRequester::reset_symbol() 
+{    
+    std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
+    symbols_.clear();
+}
+
 void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& symbol) {
     // 为线程池中每一个对象绑定一个redis_api对象
     std::thread::id thread_id = std::this_thread::get_id();

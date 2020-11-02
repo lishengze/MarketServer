@@ -75,9 +75,12 @@ public:
                 caller_->on_connect(this);
             }
             
+            // process返回true表示有消息发送，返回false表示无消息，需要手动插入一个事件
             if( !process() ) {
                 alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
             }
+
+            // 
             if( status_ != FINISH )
                 status_ = PUSH_TO_BACK;
         } else if(status_ == PUSH_TO_BACK) {
@@ -97,11 +100,7 @@ class GrpcCall : public CommonGrpcCall
 public:
     GrpcCall(int call_id, void* service, ServerCompletionQueue* cq): call_id_(call_id), service_(service), cq_(cq)
     {
-        ENTITY* ptr = new ENTITY(service);
-        ptr->set_callid(call_id);
-        ptr->set_completequeue(cq);
-        ptr->set_parent(this);
-        ptr->register_call();
+        _register();
     }
 
     void release(void* entity) {
@@ -112,16 +111,12 @@ public:
         ((ENTITY*)entity)->proceed();
     }
 
-    void on_connect(void* entity) {    
+    void on_connect(void* entity) {
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             clients_.insert((ENTITY*)entity);
         }
-        ENTITY* ptr = new ENTITY(service_);
-        ptr->set_callid(call_id_);
-        ptr->set_completequeue(cq_);
-        ptr->set_parent(this);
-        ptr->register_call();
+        _register();
     }
 
     void on_disconnect(void* entity) {
@@ -138,6 +133,7 @@ public:
             (*iter)->add_data(snap, update);
         }
     }
+
 private:
     int call_id_;
     void* service_;
@@ -145,4 +141,12 @@ private:
 
     mutable std::mutex mutex_clients_;
     std::unordered_set<ENTITY*> clients_;
+
+    void _register() {
+        ENTITY* ptr = new ENTITY(service_);
+        ptr->set_callid(call_id_);
+        ptr->set_completequeue(cq_);
+        ptr->set_parent(this);
+        ptr->register_call();
+    }
 };

@@ -65,13 +65,17 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
     }
 };
 
-void StreamEngine::on_connected() {    
-    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+void StreamEngine::on_connected() {
+    /*for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
         for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
             const string& symbol = *iterSymbol;
             const string& exchange = *iterExchange;
             quote_source_.subscribe("UPDATEx|" + symbol + "." + exchange);            
         }
+    }*/
+    for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
+        const string& exchange = *iterExchange;
+        quote_source_.psubscribe("UPDATEx|*." + exchange);
     }
 };
 

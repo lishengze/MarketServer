@@ -181,8 +181,7 @@ void GetParamsEntity::register_call(){
     service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool GetParamsEntity::process(){
-    
+bool GetParamsEntity::process(){    
     GetParamsResp reply;
     reply.set_depth(CONFIG->grpc_publish_depth_);
     reply.set_frequency(CONFIG->grpc_publish_frequency_);

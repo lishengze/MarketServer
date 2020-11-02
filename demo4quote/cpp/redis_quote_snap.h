@@ -29,6 +29,8 @@ public:
 
     void add_symbol(const TExchange& exchange, const TSymbol& symbol);
 
+    void reset_symbol();
+
 private:
     void _thread_loop();
 
