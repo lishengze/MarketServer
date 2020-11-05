@@ -5,3 +5,9 @@ demo4risk/cpp/cmake/*
 */.vscode
 # __pycache_
 */__pycache_
+
+build/
+cmake-build-debug/
+cmake-build-release/
+
+*.pb.*

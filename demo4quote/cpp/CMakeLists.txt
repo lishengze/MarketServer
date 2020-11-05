@@ -3,6 +3,8 @@ PROJECT(demo4quote)
 
 ###############################################################################################
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+set(BOOST_ROOT /usr/local/boost_1_68)
+
 FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
 INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 
@@ -10,21 +12,28 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 # for general include
 INCLUDE_DIRECTORIES("../..")
 # for include pandora
-INCLUDE_DIRECTORIES("../../pandora")
+INCLUDE_DIRECTORIES("../../component/pandora")
+
 # for grpc
-INCLUDE_DIRECTORIES("/root/.local/include")
+# INCLUDE_DIRECTORIES("/root/.local/include")
 # for gogo
-INCLUDE_DIRECTORIES("/home/mk/go/src")
+# INCLUDE_DIRECTORIES("/home/mk/go/src")
 # for search lib pandora
-LINK_DIRECTORIES("../lib")
+# LINK_DIRECTORIES("../lib")
 # for search lib grpc
-LINK_DIRECTORIES("/root/.local/lib")
+# LINK_DIRECTORIES("/root/.local/lib")
+
+# INCLUDE_DIRECTORIES("/usr/local/include")
+
+LINK_DIRECTORIES("/opt/component/lib/pandora/")
+
+# ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
 add_executable(demo4quote main.cpp stream_engine.cpp grpc_server.cpp grpc_entity.cpp quote_mixer2.cpp quote_single.cpp redis_quote.cpp redis_quote_snap.cpp empty.pb.cc gogo.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
 target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
-target_link_libraries(demo4quote grpc++_reflection grpc++ gpr)
+target_link_libraries(demo4quote grpc++_reflection grpc++ gpr protobuf protoc protobuf-lite)
 
 ###############################################################################################

@@ -108,29 +108,17 @@ class StreamEngineService final {
       #endif
       // 设置参数
       virtual void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       // 获取参数
       virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -218,28 +206,16 @@ class StreamEngineService final {
       void Demo(::grpc::ClientContext* context, ::trade::service::v1::DemoReq* request, ::grpc::experimental::ClientReadReactor< ::trade::service::v1::DemoResp>* reactor) override;
       #endif
       void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) override;
-      void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
       void SetParams(::grpc::ClientContext* context, const ::trade::service::v1::SetParamsReq* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::SetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) override;
-      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
       void GetParams(::grpc::ClientContext* context, const ::trade::service::v1::GetParamsReq* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetParams(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::trade::service::v1::GetParamsResp* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
      private:
       friend class Stub;
@@ -401,7 +377,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -439,7 +415,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -477,7 +453,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(2,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -515,7 +491,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
+          new ::grpc::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -530,7 +506,7 @@ class StreamEngineService final {
     #else
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
     #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>*>(handler)
               ->SetMessageAllocator(allocator);
     }
     ~ExperimentalWithCallbackMethod_SetParams() override {
@@ -562,7 +538,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>(
+          new ::grpc::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -577,7 +553,7 @@ class StreamEngineService final {
     #else
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
     #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>*>(handler)
               ->SetMessageAllocator(allocator);
     }
     ~ExperimentalWithCallbackMethod_GetParams() override {
@@ -799,7 +775,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -837,7 +813,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodRawCallback(1,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -875,7 +851,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodRawCallback(2,
-          new ::grpc_impl::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackServerStreamingHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -913,7 +889,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodRawCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -951,7 +927,7 @@ class StreamEngineService final {
       ::grpc::Service::experimental().
     #endif
         MarkMethodRawCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
@@ -986,8 +962,8 @@ class StreamEngineService final {
       ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::trade::service::v1::SetParamsReq, ::trade::service::v1::SetParamsResp>* streamer) {
                        return this->StreamedSetParams(context,
                          streamer);
@@ -1013,8 +989,8 @@ class StreamEngineService final {
       ::grpc::Service::MarkMethodStreamed(4,
         new ::grpc::internal::StreamedUnaryHandler<
           ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::trade::service::v1::GetParamsReq, ::trade::service::v1::GetParamsResp>* streamer) {
                        return this->StreamedGetParams(context,
                          streamer);
@@ -1041,8 +1017,8 @@ class StreamEngineService final {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::SplitServerStreamingHandler<
           ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerSplitStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerSplitStreamer<
                      ::trade::service::v1::SubscribeOneQuoteReq, ::trade::service::v1::MultiQuoteData>* streamer) {
                        return this->StreamedSubscribeOneQuote(context,
                          streamer);
@@ -1068,8 +1044,8 @@ class StreamEngineService final {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::SplitServerStreamingHandler<
           ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerSplitStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerSplitStreamer<
                      ::trade::service::v1::MultiSubscribeQuoteReq, ::trade::service::v1::MultiMarketStreamData>* streamer) {
                        return this->StreamedMultiSubscribeQuote(context,
                          streamer);
@@ -1095,8 +1071,8 @@ class StreamEngineService final {
       ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::SplitServerStreamingHandler<
           ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerSplitStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerSplitStreamer<
                      ::trade::service::v1::DemoReq, ::trade::service::v1::DemoResp>* streamer) {
                        return this->StreamedDemo(context,
                          streamer);
