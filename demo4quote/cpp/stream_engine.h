@@ -1,6 +1,7 @@
 #pragma once
 
 #include "redis_quote.h"
+#include "redis_quote_replay.h"
 #include "quote_mixer2.h"
 #include "quote_single.h"
 #include "quote_dumper.h"
@@ -24,7 +25,8 @@ public:
     static void signal_handler(int signum);
 
 private:
-
+    // redis quote replay
+    RedisQuoteReplay quote_replay_;
     // redis quote upstream
     RedisQuote quote_source_;
     // mix quotation

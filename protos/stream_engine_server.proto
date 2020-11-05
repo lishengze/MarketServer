@@ -90,19 +90,19 @@ message MultiQuoteData {
 }
 
 message QuoteData {
-  string symbol = 1 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
-  string exchange = 2 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
-  int64 msg_seq = 3 [(gogoproto.customname) = "MsgSeq", (gogoproto.jsontag) = "msg_seq"];
-  string time = 4 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
-  string time_arrive = 5 [(gogoproto.customname) = "TimeArrive", (gogoproto.jsontag) = "time_arrive", (gogoproto.casttype) = "wx/pkg/time.Time"];
-  repeated DepthLevel ask_depth = 6 [(gogoproto.customname) = "AskDepth", (gogoproto.jsontag) = "ask_depth"];
-  repeated DepthLevel bid_depth = 7 [(gogoproto.customname) = "BidDepth", (gogoproto.jsontag) = "bid_depth"];
-  bool is_snap = 8 [(gogoproto.customname) = "IsSnap", (gogoproto.jsontag) = "is_snap"];
+  string symbol = 1;
+  string exchange = 2;
+  int64 msg_seq = 3;
+  string time = 4;
+  string time_arrive = 5;
+  repeated DepthLevel ask_depth = 6;
+  repeated DepthLevel bid_depth = 7;
+  bool is_snap = 8;
 }
 
 message DepthLevel {
-  Decimal price = 1 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
-  double volume = 2 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
+  string price = 1;
+  float volume = 2;
 }
 
 message Decimal {

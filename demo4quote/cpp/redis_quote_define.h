@@ -204,12 +204,12 @@ struct SDepthPrice {
 #define MAX_DEPTH 200
 #define MAX_EXCHANGE_NAME_LENGTH 32
 #define MAX_SYMBOL_NAME_LENGTH 32
-using seq_no = unsigned long long;
+using type_seqno = unsigned long long;
 
 struct SDepthQuote {
     char exchange[MAX_EXCHANGE_NAME_LENGTH];
     char symbol[MAX_SYMBOL_NAME_LENGTH];
-    seq_no sequence_no;
+    type_seqno sequence_no;
     //char time_arrive[64];
     SDepthPrice asks[MAX_DEPTH];        // 卖盘
     unsigned int ask_length;
@@ -229,6 +229,7 @@ struct SDepthQuote {
 using TExchange = string;
 using TSymbol = string;
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
+using type_tick = int64_t;
 
 #define TICK_HEAD "TRADEx|"
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
@@ -255,4 +256,12 @@ struct RedisParams {
     string     host;
     int        port;
     string     password;
+};
+
+class QuoteSourceInterface
+{
+public:
+    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_connected() = 0;
 };

@@ -13,8 +13,9 @@ inline void mixquote_to_pbquote_depth(const SMixDepthPrice* depths, FuncAddDepth
     const SMixDepthPrice* ptr = depths;
     while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
         DepthLevel* depth = func();
-        depth->mutable_price()->set_value(ptr->price.value);
-        depth->mutable_price()->set_base(ptr->price.base);
+        //depth->mutable_price()->set_value(ptr->price.value);
+        //depth->mutable_price()->set_base(ptr->price.base);
+        depth->set_price(ptr->price.get_str_value());
         for(auto &v : ptr->volume) {
             const double volume = v.second;
             depth->set_volume(volume);

@@ -35,7 +35,7 @@ private:
 
     // 发布聚合行情
     mutable std::mutex mutex_clocks_;
-    unordered_map<TSymbol, long long> last_clocks_;
+    unordered_map<TSymbol, type_tick> last_clocks_;
     bool _check_update_clocks(const string& symbol);
     void _publish_quote(const string& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap);
 };

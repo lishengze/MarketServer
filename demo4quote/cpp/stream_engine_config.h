@@ -74,7 +74,8 @@ public:
             publish_data_ = bool(js["debug"]["publish_data"].get<int>());
             dump_binary_ = bool(js["debug"]["dump_binary"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
-            mixer_ver_ = js["debug"]["mixer_ver"].get<int>();
+            replay_mode_ = bool(js["debug"]["replay_mode"].get<int>());
+            replay_ratio_ = js["debug"]["replay_ratio"].get<int>();
 
             // redis quote
             quote_redis_host_ = js["redis_quote"]["host"].get<string>();
@@ -132,7 +133,8 @@ public:
     bool publish_data_;                 // 是否发布行情更新
     bool dump_binary_;                  // 是否保存原始二进制数据
     bool output_to_screen_;             // 是否打印采样信息到屏幕
-    int mixer_ver_;                     // 聚合行情算法版本
+    bool replay_mode_;                   // 回放模式
+    int replay_ratio_;                  // 回放速度：倍速
 
     // redis quotation source
     string quote_redis_host_;
