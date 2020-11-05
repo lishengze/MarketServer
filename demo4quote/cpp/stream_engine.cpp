@@ -13,54 +13,51 @@ StreamEngine::StreamEngine(){
     
     // init grpc server
     utrade::pandora::Singleton<GrpcServer>::Instance();
+    PUBLISHER->init(CONFIG->grpc_publish_addr_);
 }
 
 StreamEngine::~StreamEngine(){
 }
 
 void StreamEngine::start() {
-    // start redis
-    quote_source_.set_engine(this);
-    RedisParams params;
-    params.host = CONFIG->quote_redis_host_;
-    params.port = CONFIG->quote_redis_port_;
-    params.password = CONFIG->quote_redis_password_;
-    quote_source_.start(params, CONFIG->logger_);
+    if( !CONFIG->replay_mode_ ) {
+        // start redis
+        quote_source_.set_engine(this);
+        RedisParams params;
+        params.host = CONFIG->quote_redis_host_;
+        params.port = CONFIG->quote_redis_port_;
+        params.password = CONFIG->quote_redis_password_;
+        quote_source_.start(params, CONFIG->logger_);
+
+        // 启动录数据线程
+        quote_dumper_.start();
+    } else {
+        quote_replay_.set_engine(this);
+        quote_replay_.start(CONFIG->replay_ratio_);
+    }
 
     // start grpc server
-    PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_);
+    PUBLISHER->run_in_thread();
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
-    if( CONFIG->dump_binary_ ) {
+    if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_snap(exchange, symbol, quote);
     }
     
     if( CONFIG->publish_data_ ) {
-        if( CONFIG->mixer_ver_ == 1 ) {
-            //quote_mixer_.on_snap(exchange, symbol, quote);
-        } else if( CONFIG->mixer_ver_ == 2 ) {
-            quote_mixer2_.on_snap(exchange, symbol, quote);
-        } else {
-            UT_LOG_ERROR(CONFIG->logger_, "unknown mixer_ver " << CONFIG->mixer_ver_);
-        }
+        quote_mixer2_.on_snap(exchange, symbol, quote);
         quote_single_.on_snap(exchange, symbol, quote);
     }
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
-    if( CONFIG->dump_binary_ ) {
-        quote_dumper_.on_mix_update(exchange, symbol, quote);
+    if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
+        quote_dumper_.on_update(exchange, symbol, quote);
     }
 
     if( CONFIG->publish_data_ ) {
-        if( CONFIG->mixer_ver_ == 1 ) {
-            //quote_mixer_.on_update(exchange, symbol, quote);
-        } else if( CONFIG->mixer_ver_ == 2 ) {
-            quote_mixer2_.on_update(exchange, symbol, quote);
-        } else {
-            UT_LOG_ERROR(CONFIG->logger_, "unknown mixer_ver " << CONFIG->mixer_ver_);
-        }
+        quote_mixer2_.on_update(exchange, symbol, quote);
         quote_single_.on_update(exchange, symbol, quote);
     }
 };

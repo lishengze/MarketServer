@@ -87,6 +87,7 @@ bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const
 
     // 发送
     pub_snap = mixquote_to_pbquote(exchange, symbol, *ptr);
+    //pub_diff = mixquote_to_pbquote(exchange, symbol, quote);
     return true;
 }
 

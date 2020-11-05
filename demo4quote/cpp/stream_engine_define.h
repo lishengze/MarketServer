@@ -59,7 +59,7 @@ struct SMixQuote {
     }
 };
 
-inline long long get_miliseconds() {
+inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();
 	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
     return duration_in_ms.count();

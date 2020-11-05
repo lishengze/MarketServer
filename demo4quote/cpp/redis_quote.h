@@ -7,12 +7,30 @@ using namespace std;
 using njson = nlohmann::json;
 #include "redis_quote_snap.h"
 
-class QuoteSourceInterface
+struct ExchangeStatistics
 {
-public:
-    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_connected() = 0;
+    int pkg_count;
+    int pkg_size;
+
+    ExchangeStatistics() {
+        reset();
+    }
+
+    string get() const {
+        char content[1024];
+        sprintf(content, "%d\t\t%d\t\t%d", pkg_count, pkg_size, int(pkg_size/pkg_count));
+        return content;
+    }
+
+    void accumlate(const ExchangeStatistics& stat) {
+        pkg_count += stat.pkg_count;
+        pkg_size += stat.pkg_size;
+    }
+
+    void reset() {
+        pkg_count = 0;
+        pkg_size = 0;
+    }
 };
 
 class RedisQuote : public utrade::pandora::CRedisSpi
@@ -46,13 +64,13 @@ private:
     // redis api
     RedisApiPtr     redis_api_;
     // 市场序号
-    unordered_map<TExchange, seq_no> exchange_seqs_;
+    unordered_map<TExchange, type_seqno> exchange_seqs_;
 
     // redis snap requester
     RedisSnapRequester    redis_snap_requester_;
 
     // sync snap and updater
-    bool _update_seqno(const TExchange& exchange, seq_no sequence_no);
+    bool _update_seqno(const TExchange& exchange, type_seqno sequence_no);
     bool _check_snap_received(const TExchange& exchange, const TSymbol& symbol) const;
     void _set(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
@@ -64,7 +82,13 @@ private:
 
     // 独立线程检查redis数据通道
     //std::mutex mutex_checker_;
-    long long last_time_;    
+    type_tick last_time_;    
     std::thread* checker_loop_ = nullptr;
     void _check_heartbeat();
+
+    // 统计信息
+    mutable std::mutex mutex_statistics_;
+    type_tick last_statistic_time_;    
+    unordered_map<TExchange, ExchangeStatistics> statistics_;
+    void _update_statistics(const TExchange& exchange, const string& msg, const SDepthQuote& quote);
 };

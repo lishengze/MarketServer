@@ -75,15 +75,16 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
 
     // 检查连接状态
-    last_time_ = 0;
+    long long now = get_miliseconds();
+    last_time_ = now;
+    last_statistic_time_ = now;
     checker_loop_ = new std::thread(&RedisQuote::_check_heartbeat, this);
 };
 
 void RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data) {   
-    //if( exchange == "HUOBI" && symbol == "BTC_USDT") {
-    //    cout << "redis snap " << exchange << "." << symbol << ":" << data << endl;
-    //}
-    // string ->  SDepthQuote
+    
+    std::cout << "json-size:" << data.length() << std::endl;
+    UT_LOG_INFO_FMT(CONFIG->logger_, "%s:%s %s", exchange.c_str(), symbol.c_str(), data.c_str());
     SDepthQuote quote;
     if( !redisquote_to_quote(data, quote, true))
         return;
@@ -112,6 +113,9 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
             UT_LOG_ERROR(CONFIG->logger_, "redis OnMessage: redisquote_to_quote failed");
             return;
         }
+
+        // 更新统计信息
+        _update_statistics(quote.exchange, msg, quote);
 
         // 更新检查包连续性
         if( !_update_seqno(quote.exchange, quote.sequence_no) ) {
@@ -145,7 +149,7 @@ void RedisQuote::OnConnected() {
     engine_interface_->on_connected();
 };
 
-bool RedisQuote::_update_seqno(const TExchange& exchange, seq_no sequence_no) {
+bool RedisQuote::_update_seqno(const TExchange& exchange, type_seqno sequence_no) {
     auto iter = exchange_seqs_.find(exchange);
     if( iter == exchange_seqs_.end() )
         return true;
@@ -192,11 +196,12 @@ void RedisQuote::_check_heartbeat()
         // 休眠
         std::this_thread::sleep_for(std::chrono::seconds(30));
 
+        type_tick now = get_miliseconds();
+        // 检查心跳
         {
-            long long now = get_miliseconds();
-            if( (now - last_time_) > 10 ) {
+            if( (now - last_time_) > 10 * 1000 ) {
                 char content[1024];
-                sprintf(content, "heartbeat expired. %lld:%lld", now, last_time_);
+                sprintf(content, "heartbeat expired. %ld:%ld", now, last_time_);
                 std::cout << content << std::endl;
 
                 // 重置
@@ -206,9 +211,41 @@ void RedisQuote::_check_heartbeat()
                 redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
                 redis_api_->RegisterSpi(this);
                 redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
+
+                last_time_ = now;
+                last_statistic_time_ = now;
             } else {
                 std::cout << "heartbeat check ok." << std::endl;
             }
         }
+
+        // 打印统计信息
+        if( (now - last_statistic_time_) > 30*1000 ) 
+        {
+            unordered_map<TExchange, ExchangeStatistics> statistics;
+            {
+                std::unique_lock<std::mutex> inner_lock{ mutex_statistics_ };
+                statistics = statistics_;
+                for( auto& v : statistics_ ) {
+                    v.second.reset();
+                }
+            }
+            std::cout << "-------------" << std::endl;
+            ExchangeStatistics total;
+            for( const auto& v : statistics ) {
+                std::cout << v.first << "\t" << v.second.get() << std::endl;
+                total.accumlate(v.second);
+            }
+            std::cout << "total" << "\t" << total.get() << std::endl;
+            std::cout << "-------------" << std::endl;
+            last_statistic_time_ = now;
+        }
     }
 };
+
+void RedisQuote::_update_statistics(const TExchange& exchange, const string& msg, const SDepthQuote& quote)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_statistics_ };
+    statistics_[exchange].pkg_count += 1;
+    statistics_[exchange].pkg_size += msg.length();
+}

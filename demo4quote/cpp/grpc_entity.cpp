@@ -10,16 +10,18 @@ void quote_to_quote(const QuoteData* src, QuoteData* dst) {
     for( int i = 0 ; i < src->ask_depth_size() ; ++i ) {
         const DepthLevel& src_depth = src->ask_depth(i);
         DepthLevel* dst_depth = dst->add_ask_depth();
-        dst_depth->mutable_price()->set_value(src_depth.price().value());
-        dst_depth->mutable_price()->set_base(src_depth.price().base());
+        //dst_depth->mutable_price()->set_value(src_depth.price().value());
+        //dst_depth->mutable_price()->set_base(src_depth.price().base());
+        dst_depth->set_price(src_depth.price());
         dst_depth->set_volume(src_depth.volume());
     }
     // 买盘
     for( int i = 0 ; i < src->bid_depth_size() ; ++i ) {
         const DepthLevel& src_depth = src->bid_depth(i);
         DepthLevel* dst_depth = dst->add_bid_depth();
-        dst_depth->mutable_price()->set_value(src_depth.price().value());
-        dst_depth->mutable_price()->set_base(src_depth.price().base());
+        //dst_depth->mutable_price()->set_value(src_depth.price().value());
+        //dst_depth->mutable_price()->set_base(src_depth.price().base());
+        dst_depth->set_price(src_depth.price());
         dst_depth->set_volume(src_depth.volume());
     }
 };
@@ -79,6 +81,66 @@ void SubscribeSingleQuoteEntity::register_call(){
     service_->RequestSubscribeOneQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
+void compare_pb_json2(const QuoteData& quote)
+{
+    std::cout << "---------------------" << std::endl;
+
+    string a;
+    quote.SerializeToString(&a);
+    long long tbegin, tend;
+    
+    tbegin = get_miliseconds();
+    for( int i = 0 ; i < 1000 ; ++i ) {
+        string tmp;
+        quote.SerializeToString(&tmp);
+    }
+    tend = get_miliseconds();
+    std::cout << "serialize pb use:" << (tend - tbegin) << std::endl;
+    
+    tbegin = get_miliseconds();
+    for( int i = 0 ; i < 1000 ; ++i ) {
+        QuoteData tmp;
+        if( !tmp.ParseFromString(a) )
+            std::cout << "parse fail" << std::endl;
+    }
+    tend = get_miliseconds();
+    std::cout << "parse pb use:" << (tend - tbegin) << std::endl;
+
+    std::cout << "pb-size:" << a.length() << std::endl;
+    // 转为json
+    njson obj;
+    obj["symbol"] = quote.symbol();
+    obj["exchange"] = quote.exchange();
+    obj["msg_seq"] = quote.msg_seq();
+    obj["time"] = quote.time();
+    obj["time_arrive"] = quote.time_arrive();
+    obj["is_snap"] = quote.is_snap();
+    for( int i = 0 ; i < quote.ask_depth_size() ; ++i ) {
+        obj["ask_depth"][quote.ask_depth(i).price()] = quote.ask_depth(i).volume();
+    }
+    for( int i = 0 ; i < quote.bid_depth_size() ; ++i ) {
+        obj["bid_depth"][quote.bid_depth(i).price()] = quote.bid_depth(i).volume();
+    }
+
+    a = obj.dump();
+    std::cout << "json-size:" << a.length() << std::endl;
+
+    tbegin = get_miliseconds();
+    for( int i = 0 ; i < 1000 ; ++i ) {
+        obj.dump();
+    }
+    tend = get_miliseconds();
+    std::cout << "serialize json use:" << (tend - tbegin) << std::endl;
+    
+    tbegin = get_miliseconds();
+    for( int i = 0 ; i < 1000 ; ++i ) {
+        njson js = njson::parse(a);
+    }
+    tend = get_miliseconds();
+    std::cout << "parse json use:" << (tend - tbegin) << std::endl;
+    std::cout << "---------------------" << std::endl;
+}
+
 bool SubscribeSingleQuoteEntity::process(){
     
     MultiQuoteData reply;
@@ -88,6 +150,7 @@ bool SubscribeSingleQuoteEntity::process(){
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
             QuoteData* quote = reply.add_quotes();
             quote_to_quote((QuoteData*)datas_[i].get(), quote);
+            //compare_pb_json2(*quote);
         }
         datas_.clear();
     }
