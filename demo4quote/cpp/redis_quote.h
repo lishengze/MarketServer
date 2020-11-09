@@ -55,7 +55,7 @@ public:
     // redis connect notify
     virtual void OnConnected();    
     // redis disconnect notify
-    virtual void OnDisconnected(int status){ cout << "\n##### Redis MarketDispatcher::OnDisconnected ####\n" << endl; }
+    virtual void OnDisconnected(int status);
     // redis message notify
     virtual void OnMessage(const std::string& channel, const std::string& msg);
 
@@ -64,13 +64,13 @@ private:
     // redis api
     RedisApiPtr     redis_api_;
     // 市场序号
-    unordered_map<TExchange, type_seqno> exchange_seqs_;
+    unordered_map<TSymbolKey, type_seqno> symbol_seqs_;
 
     // redis snap requester
     RedisSnapRequester    redis_snap_requester_;
 
     // sync snap and updater
-    bool _update_seqno(const TExchange& exchange, type_seqno sequence_no);
+    bool _update_seqno(const TExchange& exchange, const TSymbol& symbol, type_seqno sequence_no);
     bool _check_snap_received(const TExchange& exchange, const TSymbol& symbol) const;
     void _set(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 

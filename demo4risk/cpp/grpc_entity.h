@@ -1,20 +1,19 @@
 #pragma once
 #include "grpc_call.h"
-#include "api.grpc.pb.h"
+#include "risk_controller.grpc.pb.h"
 
 using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
-using broker::service::v1::MultiMarketStreamData;
-using broker::service::v1::MarketStreamData;
-using broker::service::v1::Depth;
-using broker::service::v1::EmptyReply;
-using broker::service::v1::Broker;
+using quote::service::v1::MultiMarketStreamData;
+using quote::service::v1::MarketStreamData;
+using quote::service::v1::Depth;
+using GrpcRiskControllerService = quote::service::v1::RiskController;
 
 
-class MarketStreamEntity : public BaseGrpcEntity
+class MarketStream4BrokerEntity : public BaseGrpcEntity
 {
 public:
-    MarketStreamEntity(void* service);
+    MarketStream4BrokerEntity(void* service);
 
     void register_call();
 
@@ -23,7 +22,55 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
 
 private:
-    Broker::AsyncService* service_;
+    GrpcRiskControllerService::AsyncService* service_;
+
+    ServerContext ctx_;
+
+    google::protobuf::Empty request_;
+    ServerAsyncWriter<MultiMarketStreamData> responder_;
+
+    // 
+    mutable std::mutex            mutex_datas_;
+    vector<std::shared_ptr<void>> datas_;
+};
+
+class MarketStream4HedgeEntity : public BaseGrpcEntity
+{
+public:
+    MarketStream4HedgeEntity(void* service);
+
+    void register_call();
+
+    bool process();
+
+    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+
+private:
+    GrpcRiskControllerService::AsyncService* service_;
+
+    ServerContext ctx_;
+
+    google::protobuf::Empty request_;
+    ServerAsyncWriter<MultiMarketStreamData> responder_;
+
+    // 
+    mutable std::mutex            mutex_datas_;
+    vector<std::shared_ptr<void>> datas_;
+};
+
+class MarketStream4ClientEntity : public BaseGrpcEntity
+{
+public:
+    MarketStream4ClientEntity(void* service);
+
+    void register_call();
+
+    bool process();
+
+    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+
+private:
+    GrpcRiskControllerService::AsyncService* service_;
 
     ServerContext ctx_;
 

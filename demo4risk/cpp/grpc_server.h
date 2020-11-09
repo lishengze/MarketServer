@@ -19,41 +19,31 @@ public:
         cq_->Shutdown();
     }
 
-    void run_in_thread(const string& grpc_addr) {
-        thread_loop_ = new std::thread(&GrpcServer::_run, this, grpc_addr);
+    void init(const string& grpc_addr);
+
+    void run_in_thread() {
+        thread_loop_ = new std::thread(&GrpcServer::_handle_rpcs, this);
     }
 
-    void publish(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+    void publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+    void publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+    void publish4Client(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
 private:
 
     void _handle_rpcs();
-
-    // There is no shutdown handling in this code.
-    void _run(const string& grpc_addr) {
-        std::string server_address(grpc_addr);
-
-        ServerBuilder builder;
-        // Listen on the given address without any authentication mechanism.
-        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-        // Register "service_" as the instance through which we'll communicate with
-        // clients. In this case it corresponds to an *asynchronous* service.
-        builder.RegisterService(&service_);
-        // Get hold of the completion queue used for the asynchronous communication
-        // with the gRPC runtime.
-        cq_ = builder.AddCompletionQueue();
-        // Finally assemble the server.
-        server_ = builder.BuildAndStart();
-        std::cout << "Server listening on " << server_address << std::endl;
-
-        // Proceed to the server's main loop.
-        _handle_rpcs();
-    }
-
+    
+    // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;
-    Broker::AsyncService service_;
+    GrpcRiskControllerService::AsyncService service_;
     std::unique_ptr<Server> server_;
 
-    std::thread*               thread_loop_ = nullptr;
+    std::thread* thread_loop_ = nullptr;
 
-    CommonGrpcCall* caller_marketstream_;
+    // 不做价位交叉处理
+    CommonGrpcCall* caller_marketstream4broker_;
+    // 做价位交叉处理
+    CommonGrpcCall* caller_marketstream4hedge_;
+    // 只需要各档总挂单量
+    CommonGrpcCall* caller_marketstream4client_;
+    unordered_map<int, CommonGrpcCall*> callers_;
 };

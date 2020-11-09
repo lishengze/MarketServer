@@ -102,11 +102,11 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
 void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd) 
 {
     msd->set_symbol(quote.symbol);
-    msd->set_time(quote.time);
-    msd->set_time_arrive(quote.time_arrive);
-    char sequence[256];
-    sprintf(sequence, "%lld", quote.seq_no);
-    msd->set_msg_seq(sequence);
+    //msd->set_time(quote.time);
+    //msd->set_time_arrive(quote.time_arrive);
+    //char sequence[256];
+    //sprintf(sequence, "%lld", quote.seq_no);
+    //msd->set_msg_seq(sequence);
     // 卖盘
     int count = 0;
     for( uint32 i = 0 ; i < quote.ask_length && count < CONFIG->grpc_publish_depth_ ; ++i ) {
@@ -114,7 +114,7 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
         if( srcDepth.total_volume <= 0 )
             continue;
         count++;
-        Depth* depth = msd->add_ask_depths();        
+        Depth* depth = msd->add_asks();        
         depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
@@ -130,7 +130,7 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
         if( srcDepth.total_volume <= 0 )
             continue;
         count++;
-        Depth* depth = msd->add_bid_depths();        
+        Depth* depth = msd->add_bids();        
         depth->set_price(srcDepth.price.get_str_value());
         depth->set_volume(srcDepth.total_volume);
         for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
@@ -278,10 +278,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd(newQuote, ptrData.get());
     
-    std::cout << "publish " << quote.symbol << " " << ptrData->ask_depths_size() << "/"<< ptrData->bid_depths_size() << std::endl;
+    std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
 
     // send to clients
-    PUBLISHER->publish(quote.symbol, ptrData, NULL);
+    PUBLISHER->publish4Hedge(quote.symbol, ptrData, NULL);
 }
 
 void _filter_depth_by_watermark(const SInnerDepth* src_depths, const uint32& src_depth_length, const SDecimal& watermark, SInnerDepth* dst_depths, uint32& dst_depth_length, bool is_ask)

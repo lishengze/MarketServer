@@ -1,23 +1,30 @@
-# stream_engine_server.proto
+mkdir -p protos/cpp
+mkdir -p protos/python
+
+# gogo.proro
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp gogo.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python gogo.proto
+# empty.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp empty.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python empty.proto
+
+# quote_data.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp quote_data.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python quote_data.proto
+
+# stream_engine.proto
 # generate protobuf
-protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=demo4quote/cpp stream_engine_server.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp stream_engine.proto
 # generate grpc 
-protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=demo4quote/cpp stream_engine_server.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=protos/cpp stream_engine.proto
 # generate for python3
-python3 -m grpc_tools.protoc -I protos --python_out=demo4quote/python --grpc_python_out=demo4quote/python stream_engine_server.proto
-# generate protobuf
-protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=demo4risk/cpp stream_engine_server.proto
-# generate grpc 
-protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=demo4risk/cpp stream_engine_server.proto
-# generate for python3
-python3 -m grpc_tools.protoc -I protos --python_out=demo4risk/python --grpc_python_out=demo4risk/python stream_engine_server.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python --grpc_python_out=protos/python stream_engine.proto
 
 
-
-# api.proto
+# risk_controller.proto
 # generate protobuf
-protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=demo4risk/cpp api.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp risk_controller.proto
 # generate grpc 
-protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=demo4risk/cpp api.proto
+protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=protos/cpp risk_controller.proto
 # generate for python3
-python3 -m grpc_tools.protoc -I protos --python_out=demo4risk/python --grpc_python_out=demo4risk/python api.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python --grpc_python_out=protos/python risk_controller.proto

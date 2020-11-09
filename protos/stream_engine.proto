@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+import "quote_data.proto";
+package quote.service.v1;
+
+// Stream Engine API
+service StreamEngine {
+    // 订阅行情
+    rpc SubscribeQuote(SubscribeQuoteReq) returns (stream MultiMarketStreamData);
+
+    // 订阅聚合行情
+    rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamData);
+
+    // demo
+    rpc Demo(DemoReq) returns (stream DemoResp);
+
+    // 设置参数
+    rpc SetParams(SetParamsReq) returns (SetParamsResp);
+
+    // 获取参数
+    rpc GetParams(GetParamsReq) returns (GetParamsResp);
+}
+
+message SubscribeQuoteReq {
+  string exchange = 1;
+  string symbol = 2;
+}
+
+message SubscribeMixQuoteReq {
+}
+
+// demo
+message DemoReq {
+    int32 req = 1;
+}
+
+message DemoResp {
+    int32 resp = 1;
+}
+
+// 设置参数
+message SetParamsReq {
+    int32 depth = 1;            // 聚合行情深度
+    int32 frequency = 2;        // 聚合行情频率
+    int32 precise = 3;          // 设置某个品种的深度（和symbol一起使用）
+    string symbol = 4;          // 设置某个品种的深度（和symbol一起使用）
+    int32 raw_frequency = 5;    // 发布原始品种行情频率
+}
+
+message SetParamsResp {}
+
+// 获取参数
+message GetParamsReq {
+}
+
+message GetParamsResp {
+    repeated string symbols = 1;
+    repeated string exchanges = 2;
+    int32 depth = 3;            // 聚合行情深度
+    int32 frequency = 4;        // 聚合行情频率
+    int32 raw_frequency = 5;    // 发布原始品种行情频率
+}

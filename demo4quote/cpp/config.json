@@ -7,17 +7,23 @@
         "publish_depth": 200
     },
     "debug": {
-        "replay_mode": 1,
+        "replay_mode": 0,
         "replay_ratio": 2,
         "sample_symbol": "BTC_USDT",
         "output_to_screen": 0,
         "publish_data": 1,
         "dump_binary": 0
     },
-    "redis_quote": {
+    "redis_quote_": {
         "host": "45.249.244.59",
         "port": 6666,
         "password": "rkqFB4,wpoMmHqT6he}r",
+        "snap_interval": 10
+    },
+    "redis_quote": {
+        "host": "36.255.220.139",
+        "port": 6379,
+        "password": "tradingtest",
         "snap_interval": 10
     },
     "include": {

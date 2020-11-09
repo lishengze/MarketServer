@@ -10,8 +10,8 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     vassign(dst.symbol, MAX_SYMBOLNAME_LENGTH, src.symbol());
     //vassign(dst.seq_no, src.msg_seq());
     // 卖盘
-    for( int i = 0 ; i < src.ask_depths_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
-        const SEDepth& src_depth = src.ask_depths(i);
+    for( int i = 0 ; i < src.asks_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+        const SEDepth& src_depth = src.asks(i);
         SInnerDepth& dst_depth = dst.asks[i];
         dst_depth.price.from(src_depth.price());
         int count = 0;
@@ -19,15 +19,15 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
             vassign(dst_depth.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
             vassign(dst_depth.exchanges[count].volume, v.second);
             count++;
-            if( count >= MAX_EXCHANGE_LENGTH )
+            if( count >= MAX_EXCHANGE_LENGTH )          
                 break;
         }
         dst_depth.exchange_length = count;
         dst.ask_length = i+1; 
     }
     // 买盘
-    for( int i = 0 ; i < src.bid_depths_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
-        const SEDepth& src_depth = src.bid_depths(i);
+    for( int i = 0 ; i < src.bids_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+        const SEDepth& src_depth = src.bids(i);
         SInnerDepth& dst_depth = dst.bids[i];
         dst_depth.price.from(src_depth.price());
         int count = 0;
@@ -50,6 +50,7 @@ RiskController::RiskController(){
     CONFIG->parse_config(config_file);
     
     utrade::pandora::Singleton<GrpcServer>::Instance();
+    PUBLISHER->init(CONFIG->grpc_publish_addr_);
 }
 
 RiskController::~RiskController(){
@@ -61,7 +62,7 @@ void RiskController::start() {
     account_updater_.start(this);
 
     // start grpc server
-    PUBLISHER->run_in_thread(CONFIG->grpc_publish_addr_);
+    PUBLISHER->run_in_thread();
 }
 
 void RiskController::signal_handler(int signum)

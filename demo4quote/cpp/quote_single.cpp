@@ -16,13 +16,13 @@ bool QuoteSingle::_check_update_clocks(const TExchange& exchange, const TSymbol&
     return true;
 }
 
-void QuoteSingle::_publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<QuoteData> pub_snap, std::shared_ptr<QuoteData> pub_diff, bool is_snap) {
+void QuoteSingle::_publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) {
     PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
 };
 
 void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
     // 更新内存中的行情
-    std::shared_ptr<QuoteData> pub_snap;
+    std::shared_ptr<MarketStreamData> pub_snap;
     if( !_on_snap(exchange, symbol, quote, pub_snap) )
         return;
     // 推送结果
@@ -30,14 +30,14 @@ void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SD
 }
 
 void QuoteSingle::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
-    std::shared_ptr<QuoteData> pub_snap, pub_diff;
+    std::shared_ptr<MarketStreamData> pub_snap, pub_diff;
     if( !_on_update(exchange, symbol, quote, pub_snap, pub_diff) )
         return;
     // 推送结果
     _publish_quote(exchange, symbol, pub_snap, pub_diff, false);
 };
 
-bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap)
+bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
@@ -61,11 +61,11 @@ bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const S
     }
 
     // 发送
-    pub_snap = mixquote_to_pbquote(exchange, symbol, *ptr);
+    pub_snap = mixquote_to_pbquote2(exchange, symbol, ptr);
     return true;
 }
 
-bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<QuoteData>& pub_snap, std::shared_ptr<QuoteData>& pub_diff)
+bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
@@ -86,7 +86,7 @@ bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const
     }
 
     // 发送
-    pub_snap = mixquote_to_pbquote(exchange, symbol, *ptr);
+    pub_snap = mixquote_to_pbquote2(exchange, symbol, ptr);
     //pub_diff = mixquote_to_pbquote(exchange, symbol, quote);
     return true;
 }

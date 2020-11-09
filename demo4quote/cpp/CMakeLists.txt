@@ -11,8 +11,13 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 ###############################################################################################
 # for general include
 INCLUDE_DIRECTORIES("../..")
+# for protos
+INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
 INCLUDE_DIRECTORIES("../../component/pandora")
+
+AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # INCLUDE_DIRECTORIES("/root/.local/include")
@@ -25,15 +30,16 @@ INCLUDE_DIRECTORIES("../../component/pandora")
 
 # INCLUDE_DIRECTORIES("/usr/local/include")
 
-LINK_DIRECTORIES("/opt/component/lib/pandora/")
+# LINK_DIRECTORIES("/opt/component/lib/pandora/")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_executable(demo4quote main.cpp stream_engine.cpp grpc_server.cpp grpc_entity.cpp quote_mixer2.cpp quote_single.cpp redis_quote.cpp redis_quote_snap.cpp empty.pb.cc gogo.pb.cc stream_engine_server.grpc.pb.cc stream_engine_server.pb.cc)
+add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS})
 target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
-target_link_libraries(demo4quote grpc++_reflection grpc++ gpr protobuf protoc protobuf-lite)
+#target_link_libraries(demo4quote protobuf protoc protobuf-lite)
+target_link_libraries(demo4quote grpc++_reflection grpc++ gpr ssl crypto)
 
 ###############################################################################################

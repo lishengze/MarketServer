@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "gogo.proto";
+import "empty.proto";
+package quote.service.v1;
+
+message MultiMarketStreamData {
+    repeated MarketStreamData quotes = 1 [(gogoproto.customname) = "Quotes", (gogoproto.jsontag) = "quotes"];
+}
+
+message MarketStreamData {
+    // 交易所
+    string exchange = 1 [(gogoproto.customname) = "Exchange", (gogoproto.jsontag) = "exchange"];
+    // 代码
+    string symbol = 2 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+    // 序号（内部生成）
+    int64 seq_no = 3 [(gogoproto.customname) = "Seqno", (gogoproto.jsontag) = "seqno"];
+    // 行情时间（来自交易所）
+    int64 time = 4 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
+    // 是否快照
+    bool is_snap = 5 [(gogoproto.customname) = "IsSnap", (gogoproto.jsontag) = "is_snap"];
+    // 卖盘
+    repeated Depth asks = 6 [(gogoproto.customname) = "Asks", (gogoproto.jsontag) = "asks"];
+    // 买盘
+    repeated Depth bids = 7 [(gogoproto.customname) = "Bids", (gogoproto.jsontag) = "bids"];
+}
+
+message Depth {
+    // 价格
+    string price = 1 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
+    // 挂单量
+    double volume = 2 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
+    // 聚合行情各交易所挂单量
+    map<string, double> data = 3 [(gogoproto.customname) = "Data", (gogoproto.jsontag) = "data"];
+}

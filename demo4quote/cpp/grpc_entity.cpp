@@ -1,39 +1,15 @@
 #include "stream_engine_config.h"
 #include "grpc_entity.h"
 
-void quote_to_quote(const QuoteData* src, QuoteData* dst) {
-    dst->set_symbol(src->symbol());
-    dst->set_exchange(src->exchange());
-    dst->set_msg_seq(src->msg_seq());
-
-    // 卖盘
-    for( int i = 0 ; i < src->ask_depth_size() ; ++i ) {
-        const DepthLevel& src_depth = src->ask_depth(i);
-        DepthLevel* dst_depth = dst->add_ask_depth();
-        //dst_depth->mutable_price()->set_value(src_depth.price().value());
-        //dst_depth->mutable_price()->set_base(src_depth.price().base());
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());
-    }
-    // 买盘
-    for( int i = 0 ; i < src->bid_depth_size() ; ++i ) {
-        const DepthLevel& src_depth = src->bid_depth(i);
-        DepthLevel* dst_depth = dst->add_bid_depth();
-        //dst_depth->mutable_price()->set_value(src_depth.price().value());
-        //dst_depth->mutable_price()->set_base(src_depth.price().base());
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());
-    }
-};
-
 void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
+    dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
-    dst->set_msg_seq(src->msg_seq());
+    dst->set_seq_no(src->seq_no());
 
     // 卖盘
-    for( int i = 0 ; i < src->ask_depths_size() ; ++i ) {
-        const Depth& src_depth = src->ask_depths(i);
-        Depth* dst_depth = dst->add_ask_depths();
+    for( int i = 0 ; i < src->asks_size() ; ++i ) {
+        const Depth& src_depth = src->asks(i);
+        Depth* dst_depth = dst->add_asks();
         dst_depth->set_price(src_depth.price());
         dst_depth->set_volume(src_depth.volume());     
         for( auto v : src_depth.data() ) {
@@ -41,9 +17,9 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
         }
     }
     // 买盘
-    for( int i = 0 ; i < src->bid_depths_size() ; ++i ) {
-        const Depth& src_depth = src->bid_depths(i);
-        Depth* dst_depth = dst->add_bid_depths();
+    for( int i = 0 ; i < src->bids_size() ; ++i ) {
+        const Depth& src_depth = src->bids(i);
+        Depth* dst_depth = dst->add_bids();
         dst_depth->set_price(src_depth.price());
         dst_depth->set_volume(src_depth.volume());     
         for( auto v : src_depth.data() ) {
@@ -54,7 +30,7 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
 
 GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(&ctx_)
 {
-    service_ = (StreamEngineService::AsyncService*)service;
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
 void GrpcDemoEntity::register_call(){
@@ -73,15 +49,15 @@ bool GrpcDemoEntity::process(){
 //////////////////////////////////////////////////
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service):responder_(&ctx_)
 {
-    service_ = (StreamEngineService::AsyncService*)service;
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
 void SubscribeSingleQuoteEntity::register_call(){
     std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
-    service_->RequestSubscribeOneQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
+    service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-void compare_pb_json2(const QuoteData& quote)
+void compare_pb_json2(const MarketStreamData& quote)
 {
     std::cout << "---------------------" << std::endl;
 
@@ -99,7 +75,7 @@ void compare_pb_json2(const QuoteData& quote)
     
     tbegin = get_miliseconds();
     for( int i = 0 ; i < 1000 ; ++i ) {
-        QuoteData tmp;
+        MarketStreamData tmp;
         if( !tmp.ParseFromString(a) )
             std::cout << "parse fail" << std::endl;
     }
@@ -111,15 +87,12 @@ void compare_pb_json2(const QuoteData& quote)
     njson obj;
     obj["symbol"] = quote.symbol();
     obj["exchange"] = quote.exchange();
-    obj["msg_seq"] = quote.msg_seq();
-    obj["time"] = quote.time();
-    obj["time_arrive"] = quote.time_arrive();
     obj["is_snap"] = quote.is_snap();
-    for( int i = 0 ; i < quote.ask_depth_size() ; ++i ) {
-        obj["ask_depth"][quote.ask_depth(i).price()] = quote.ask_depth(i).volume();
+    for( int i = 0 ; i < quote.asks_size() ; ++i ) {
+        obj["ask_depth"][quote.asks(i).price()] = quote.asks(i).volume();
     }
-    for( int i = 0 ; i < quote.bid_depth_size() ; ++i ) {
-        obj["bid_depth"][quote.bid_depth(i).price()] = quote.bid_depth(i).volume();
+    for( int i = 0 ; i < quote.bids_size() ; ++i ) {
+        obj["bid_depth"][quote.bids(i).price()] = quote.bids(i).volume();
     }
 
     a = obj.dump();
@@ -143,13 +116,13 @@ void compare_pb_json2(const QuoteData& quote)
 
 bool SubscribeSingleQuoteEntity::process(){
     
-    MultiQuoteData reply;
+    MultiMarketStreamData reply;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            QuoteData* quote = reply.add_quotes();
-            quote_to_quote((QuoteData*)datas_[i].get(), quote);
+            MarketStreamData* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
             //compare_pb_json2(*quote);
         }
         datas_.clear();
@@ -163,7 +136,7 @@ bool SubscribeSingleQuoteEntity::process(){
 }
 
 void SubscribeSingleQuoteEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
-    QuoteData* pdata = (QuoteData*)snap.get();    
+    MarketStreamData* pdata = (MarketStreamData*)snap.get();    
     if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != string(pdata->exchange()) ) {
         //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
         return;
@@ -175,12 +148,12 @@ void SubscribeSingleQuoteEntity::add_data(std::shared_ptr<void> snap, std::share
 //////////////////////////////////////////////////
 SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service):responder_(&ctx_)
 {
-    service_ = (StreamEngineService::AsyncService*)service;
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
 void SubscribeMixQuoteEntity::register_call(){
     std::cout << "register SubscribeMixQuoteEntity" << std::endl;
-    service_->RequestMultiSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
+    service_->RequestSubscribeMixQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
 bool SubscribeMixQuoteEntity::process(){
@@ -211,7 +184,7 @@ void SubscribeMixQuoteEntity::add_data(std::shared_ptr<void> snap, std::shared_p
 //////////////////////////////////////////////////
 SetParamsEntity::SetParamsEntity(void* service):responder_(&ctx_)
 {
-    service_ = (StreamEngineService::AsyncService*)service;
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
 void SetParamsEntity::register_call(){
@@ -236,7 +209,7 @@ bool SetParamsEntity::process(){
 //////////////////////////////////////////////////
 GetParamsEntity::GetParamsEntity(void* service):responder_(&ctx_)
 {
-    service_ = (StreamEngineService::AsyncService*)service;
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
 void GetParamsEntity::register_call(){

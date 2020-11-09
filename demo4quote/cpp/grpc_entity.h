@@ -2,25 +2,21 @@
 
 #include "grpc_call.h"
 #include "stream_engine_define.h"
-#include "stream_engine_server.grpc.pb.h"
+#include "stream_engine.grpc.pb.h"
 using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
-using trade::service::v1::StreamEngineService;
-using trade::service::v1::SetParamsResp;
-using trade::service::v1::SetParamsReq;
-using trade::service::v1::GetParamsResp;
-using trade::service::v1::GetParamsReq;
-using trade::service::v1::DemoReq;
-using trade::service::v1::DemoResp;
-using trade::service::v1::MultiSubscribeQuoteReq;
-using trade::service::v1::MultiMarketStreamData;
-using trade::service::v1::MarketStreamData;
-using trade::service::v1::Depth;
-using trade::service::v1::SubscribeOneQuoteReq;
-using trade::service::v1::MultiQuoteData;
-using trade::service::v1::QuoteData;
-using trade::service::v1::DepthLevel;
-using trade::service::v1::Decimal;
+using GrpcStreamEngineService = quote::service::v1::StreamEngine;
+using quote::service::v1::SetParamsResp;
+using quote::service::v1::SetParamsReq;
+using quote::service::v1::GetParamsResp;
+using quote::service::v1::GetParamsReq;
+using quote::service::v1::DemoReq;
+using quote::service::v1::DemoResp;
+using quote::service::v1::SubscribeQuoteReq;
+using quote::service::v1::MultiMarketStreamData;
+using quote::service::v1::MarketStreamData;
+using quote::service::v1::Depth;
+using quote::service::v1::SubscribeMixQuoteReq;
 
 class GrpcDemoEntity : public BaseGrpcEntity
 {
@@ -34,7 +30,7 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
 
 private:
-    StreamEngineService::AsyncService* service_;
+    GrpcStreamEngineService::AsyncService* service_;
 
     ServerContext ctx_;
 
@@ -57,12 +53,12 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
 
 private:
-    StreamEngineService::AsyncService* service_;
+    GrpcStreamEngineService::AsyncService* service_;
 
     ServerContext ctx_;
 
-    SubscribeOneQuoteReq request_;
-    ServerAsyncWriter<MultiQuoteData> responder_;
+    SubscribeQuoteReq request_;
+    ServerAsyncWriter<MultiMarketStreamData> responder_;
 
     // 
     mutable std::mutex                 mutex_datas_;
@@ -82,10 +78,10 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
 
 private:
-    StreamEngineService::AsyncService* service_;
+    GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
 
-    MultiSubscribeQuoteReq request_;
+    SubscribeMixQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
 
     // 
@@ -106,7 +102,7 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
 
 private:
-    StreamEngineService::AsyncService* service_;
+    GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
 
     SetParamsReq request_;
@@ -127,7 +123,7 @@ public:
     void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
 
 private:
-    StreamEngineService::AsyncService* service_;
+    GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
 
     GetParamsReq request_;

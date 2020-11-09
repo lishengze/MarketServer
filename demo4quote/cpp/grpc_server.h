@@ -26,7 +26,7 @@ public:
         thread_loop_ = new std::thread(&GrpcServer::_handle_rpcs, this);
     }
 
-    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update);
+    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
     void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
    
 private:
@@ -34,7 +34,7 @@ private:
     
     // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;
-    StreamEngineService::AsyncService service_;
+    GrpcStreamEngineService::AsyncService service_;
     std::unique_ptr<Server> server_;
 
     std::thread* thread_loop_ = nullptr;

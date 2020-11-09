@@ -22,7 +22,7 @@ void RedisSnapRequester::start(){
 
 void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& symbol) {
     
-    string combinedSymbol = combine_symbol(exchange, symbol);
+    string combinedSymbol = make_symbolkey(exchange, symbol);
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
     if( symbols_.find(combinedSymbol) != symbols_.end() )
         return;
@@ -69,7 +69,7 @@ void RedisSnapRequester::_thread_loop(){
         // 发送所有任务
         for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
             string exchange, symbol;
-            if( !decombine_symbol(*iter, exchange, symbol) ) {
+            if( !extract_symbolkey(*iter, exchange, symbol) ) {
                 continue;
             }
             boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));

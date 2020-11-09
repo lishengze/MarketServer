@@ -2,11 +2,12 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import api_pb2 as api__pb2
 import empty_pb2 as empty__pb2
+import quote_data_pb2 as quote__data__pb2
+import risk_controller_pb2 as risk__controller__pb2
 
 
-class RiskControllerServiceStub(object):
+class RiskControllerStub(object):
     """Risk Controller API
     """
 
@@ -17,28 +18,28 @@ class RiskControllerServiceStub(object):
             channel: A grpc.Channel.
         """
         self.ServeMarketStream4Broker = channel.unary_stream(
-                '/quote.service.v1.RiskControllerService/ServeMarketStream4Broker',
+                '/quote.service.v1.RiskController/ServeMarketStream4Broker',
                 request_serializer=empty__pb2.Empty.SerializeToString,
-                response_deserializer=api__pb2.MultiMarketStreamData.FromString,
+                response_deserializer=quote__data__pb2.MultiMarketStreamData.FromString,
                 )
         self.ServeMarketStream4Hedge = channel.unary_stream(
-                '/quote.service.v1.RiskControllerService/ServeMarketStream4Hedge',
+                '/quote.service.v1.RiskController/ServeMarketStream4Hedge',
                 request_serializer=empty__pb2.Empty.SerializeToString,
-                response_deserializer=api__pb2.MultiMarketStreamData.FromString,
+                response_deserializer=quote__data__pb2.MultiMarketStreamData.FromString,
                 )
         self.ServeMarketStream4Client = channel.unary_stream(
-                '/quote.service.v1.RiskControllerService/ServeMarketStream4Client',
+                '/quote.service.v1.RiskController/ServeMarketStream4Client',
                 request_serializer=empty__pb2.Empty.SerializeToString,
-                response_deserializer=api__pb2.MultiMarketStreamData.FromString,
+                response_deserializer=quote__data__pb2.MultiMarketStreamData.FromString,
                 )
         self.PutOrderStream = channel.stream_unary(
-                '/quote.service.v1.RiskControllerService/PutOrderStream',
-                request_serializer=api__pb2.MultiOrderStreamData.SerializeToString,
+                '/quote.service.v1.RiskController/PutOrderStream',
+                request_serializer=risk__controller__pb2.MultiOrderStreamData.SerializeToString,
                 response_deserializer=empty__pb2.Empty.FromString,
                 )
 
 
-class RiskControllerServiceServicer(object):
+class RiskControllerServicer(object):
     """Risk Controller API
     """
 
@@ -71,36 +72,36 @@ class RiskControllerServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_RiskControllerServiceServicer_to_server(servicer, server):
+def add_RiskControllerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ServeMarketStream4Broker': grpc.unary_stream_rpc_method_handler(
                     servicer.ServeMarketStream4Broker,
                     request_deserializer=empty__pb2.Empty.FromString,
-                    response_serializer=api__pb2.MultiMarketStreamData.SerializeToString,
+                    response_serializer=quote__data__pb2.MultiMarketStreamData.SerializeToString,
             ),
             'ServeMarketStream4Hedge': grpc.unary_stream_rpc_method_handler(
                     servicer.ServeMarketStream4Hedge,
                     request_deserializer=empty__pb2.Empty.FromString,
-                    response_serializer=api__pb2.MultiMarketStreamData.SerializeToString,
+                    response_serializer=quote__data__pb2.MultiMarketStreamData.SerializeToString,
             ),
             'ServeMarketStream4Client': grpc.unary_stream_rpc_method_handler(
                     servicer.ServeMarketStream4Client,
                     request_deserializer=empty__pb2.Empty.FromString,
-                    response_serializer=api__pb2.MultiMarketStreamData.SerializeToString,
+                    response_serializer=quote__data__pb2.MultiMarketStreamData.SerializeToString,
             ),
             'PutOrderStream': grpc.stream_unary_rpc_method_handler(
                     servicer.PutOrderStream,
-                    request_deserializer=api__pb2.MultiOrderStreamData.FromString,
+                    request_deserializer=risk__controller__pb2.MultiOrderStreamData.FromString,
                     response_serializer=empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'quote.service.v1.RiskControllerService', rpc_method_handlers)
+            'quote.service.v1.RiskController', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class RiskControllerService(object):
+class RiskController(object):
     """Risk Controller API
     """
 
@@ -115,9 +116,9 @@ class RiskControllerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskControllerService/ServeMarketStream4Broker',
+        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskController/ServeMarketStream4Broker',
             empty__pb2.Empty.SerializeToString,
-            api__pb2.MultiMarketStreamData.FromString,
+            quote__data__pb2.MultiMarketStreamData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -132,9 +133,9 @@ class RiskControllerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskControllerService/ServeMarketStream4Hedge',
+        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskController/ServeMarketStream4Hedge',
             empty__pb2.Empty.SerializeToString,
-            api__pb2.MultiMarketStreamData.FromString,
+            quote__data__pb2.MultiMarketStreamData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -149,9 +150,9 @@ class RiskControllerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskControllerService/ServeMarketStream4Client',
+        return grpc.experimental.unary_stream(request, target, '/quote.service.v1.RiskController/ServeMarketStream4Client',
             empty__pb2.Empty.SerializeToString,
-            api__pb2.MultiMarketStreamData.FromString,
+            quote__data__pb2.MultiMarketStreamData.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -166,8 +167,8 @@ class RiskControllerService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/quote.service.v1.RiskControllerService/PutOrderStream',
-            api__pb2.MultiOrderStreamData.SerializeToString,
+        return grpc.experimental.stream_unary(request_iterator, target, '/quote.service.v1.RiskController/PutOrderStream',
+            risk__controller__pb2.MultiOrderStreamData.SerializeToString,
             empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

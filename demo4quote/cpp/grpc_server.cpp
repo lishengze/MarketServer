@@ -42,7 +42,7 @@ void GrpcServer::init(const string& grpc_addr)
     call_id++;
 }
 
-void GrpcServer::publish_single(const string& exchange, const string& symbol, std::shared_ptr<QuoteData> snap, std::shared_ptr<QuoteData> update)
+void GrpcServer::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     caller_subscribe_single_->add_data(snap, update);
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;

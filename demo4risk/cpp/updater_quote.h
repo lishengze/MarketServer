@@ -13,7 +13,7 @@
 #include "grpcpp/create_channel.h"
 #include "grpcpp/security/credentials.h"
 
-#include "stream_engine_server.grpc.pb.h"
+#include "stream_engine.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -21,11 +21,11 @@ using grpc::ClientReader;
 using grpc::ClientReaderWriter;
 using grpc::ClientWriter;
 using grpc::Status;
-using trade::service::v1::StreamEngineService;
-using trade::service::v1::MultiSubscribeQuoteReq;
-using SEMultiData = trade::service::v1::MultiMarketStreamData;
-using SEData = trade::service::v1::MarketStreamData;
-using SEDepth = trade::service::v1::Depth;
+using quote::service::v1::StreamEngine;
+using quote::service::v1::SubscribeMixQuoteReq;
+using SEMultiData = quote::service::v1::MultiMarketStreamData;
+using SEData = quote::service::v1::MarketStreamData;
+using SEDepth = quote::service::v1::Depth;
 
 
 class IQuoteUpdater {
@@ -47,13 +47,13 @@ private:
 
     void _request(const string& addr, IQuoteUpdater* callback) {
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
-        std::unique_ptr<StreamEngineService::Stub> stub = StreamEngineService::NewStub(channel);
+        std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
 
-        MultiSubscribeQuoteReq req;
+        SubscribeMixQuoteReq req;
         SEMultiData multiQuote;
         ClientContext context;
 
-        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->MultiSubscribeQuote(&context, req));
+        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeMixQuote(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
                 std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
@@ -81,7 +81,7 @@ private:
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
             for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
                 const SEData& quote = multiQuote.quotes(i);
-                std::cout << "update symbol " << quote.symbol() << " " << quote.ask_depths_size() << "/" << quote.bid_depths_size() << std::endl;
+                std::cout << "update symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
                 callback->on_snap(quote);
             }
         }

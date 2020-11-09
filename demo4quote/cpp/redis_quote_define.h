@@ -18,6 +18,13 @@ using namespace std;
 // SDecimal
 #define CALC_BASE(x) (pow(10, (x)))
 
+#define _println_(fmt, ...)                                             \
+    do {                                                                \
+        char content[1024];                                             \
+        sprintf(content, fmt, __VA_ARGS__);                             \
+        std::cout << content << std::endl;                              \
+    } while(0)                                                          \
+
 struct SDecimal {
     unsigned long long value;
     short base;
@@ -228,6 +235,7 @@ struct SDepthQuote {
 
 using TExchange = string;
 using TSymbol = string;
+using TSymbolKey = string;
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
 using type_tick = int64_t;
 
@@ -235,11 +243,11 @@ using type_tick = int64_t;
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
 
-inline string combine_symbol(const TExchange& exchange, const TSymbol& symbol) {
+inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;
 };
 
-inline bool decombine_symbol(const string& combined, TExchange& exchange, TSymbol& symbol) {
+inline bool extract_symbolkey(const string& combined, TExchange& exchange, TSymbol& symbol) {
     std::string::size_type pos = combined.find(".");
     if( pos == std::string::npos) 
         return false;
@@ -263,5 +271,6 @@ class QuoteSourceInterface
 public:
     virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
     virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_connected() = 0;
+    virtual void on_connected(){};
+    virtual void on_disconnected(){};
 };

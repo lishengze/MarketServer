@@ -23,9 +23,9 @@ bool QuoteMixer2::_check_update_clocks(const string& symbol) {
 
 void QuoteMixer2::_publish_quote(const string& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) {
     if( is_snap ) {
-        std::cout << "publish(snap) " << symbol << " " << pub_snap->ask_depths_size() << "/" << pub_snap->bid_depths_size() << std::endl;
+        std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     } else {
-        std::cout << "publish(update) " << symbol << " " << pub_snap->ask_depths_size() << "/" << pub_snap->bid_depths_size() << std::endl;
+        std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     }
     PUBLISHER->publish_mix(symbol, pub_snap, pub_diff);
 }
@@ -81,7 +81,7 @@ bool QuoteMixer2::_on_snap(const string& exchange, const string& symbol, const S
         return false;
     }
 
-    pub_snap = mixquote_to_pbquote2(symbol, ptr);
+    pub_snap = mixquote_to_pbquote2("", symbol, ptr);
     return true;
 }
 
@@ -108,7 +108,7 @@ bool QuoteMixer2::_on_update(const string& exchange, const string& symbol, const
     }
 
     std::cout << "update " << symbol << " " << ptr->ask_length() << "/" << ptr->bid_length() << std::endl;
-    pub_snap = mixquote_to_pbquote2(symbol, ptr);
+    pub_snap = mixquote_to_pbquote2("", symbol, ptr);
     return true;
 }
 

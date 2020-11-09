@@ -1,13 +1,13 @@
 #include "grpc_entity.h"
 
 void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
+    dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
-    dst->set_msg_seq(src->msg_seq());
 
     // 卖盘
-    for( int i = 0 ; i < src->ask_depths_size() ; ++i ) {
-        const Depth& src_depth = src->ask_depths(i);
-        Depth* depth = dst->add_ask_depths();
+    for( int i = 0 ; i < src->asks_size() ; ++i ) {
+        const Depth& src_depth = src->asks(i);
+        Depth* depth = dst->add_asks();
         depth->set_price(src_depth.price());
         depth->set_volume(src_depth.volume());        
         for( auto v : src_depth.data() ) {
@@ -15,9 +15,9 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
         }
     }
     // 买盘
-    for( int i = 0 ; i < src->bid_depths_size() ; ++i ) {
-        const Depth& src_depth = src->bid_depths(i);
-        Depth* depth = dst->add_bid_depths();
+    for( int i = 0 ; i < src->bids_size() ; ++i ) {
+        const Depth& src_depth = src->bids(i);
+        Depth* depth = dst->add_bids();
         depth->set_price(src_depth.price());
         depth->set_volume(src_depth.volume());        
         for( auto v : src_depth.data() ) {
@@ -27,17 +27,17 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
 };
 
 //////////////////////////////////////////////////
-MarketStreamEntity::MarketStreamEntity(void* service):responder_(&ctx_)
+MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service):responder_(&ctx_)
 {
-    service_ = (Broker::AsyncService*)service;
+    service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
-void MarketStreamEntity::register_call(){
-    std::cout << "register MarketStreamEntity" << std::endl;
-    service_->RequestServeMarketStream(&ctx_, &request_, &responder_, cq_, cq_, this);
+void MarketStream4BrokerEntity::register_call(){
+    std::cout << "register MarketStream4BrokerEntity" << std::endl;
+    service_->RequestServeMarketStream4Broker(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool MarketStreamEntity::process(){
+bool MarketStream4BrokerEntity::process(){
     
     MultiMarketStreamData reply;
     {
@@ -57,7 +57,81 @@ bool MarketStreamEntity::process(){
     }
 }
 
-void MarketStreamEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+void MarketStream4BrokerEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(snap);
 }
+
+//////////////////////////////////////////////////
+MarketStream4HedgeEntity::MarketStream4HedgeEntity(void* service):responder_(&ctx_)
+{
+    service_ = (GrpcRiskControllerService::AsyncService*)service;
+}
+
+void MarketStream4HedgeEntity::register_call(){
+    std::cout << "register MarketStream4HedgeEntity" << std::endl;
+    service_->RequestServeMarketStream4Hedge(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool MarketStream4HedgeEntity::process(){
+    
+    MultiMarketStreamData reply;
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+
+        for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+            MarketStreamData* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+        }
+        datas_.clear();
+    }
+    if( reply.quotes_size() > 0 ) {
+        responder_.Write(reply, this);      
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void MarketStream4HedgeEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    datas_.push_back(snap);
+}
+
+//////////////////////////////////////////////////
+MarketStream4ClientEntity::MarketStream4ClientEntity(void* service):responder_(&ctx_)
+{
+    service_ = (GrpcRiskControllerService::AsyncService*)service;
+}
+
+void MarketStream4ClientEntity::register_call(){
+    std::cout << "register MarketStream4ClientEntity" << std::endl;
+    service_->RequestServeMarketStream4Client(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool MarketStream4ClientEntity::process(){
+    
+    MultiMarketStreamData reply;
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+
+        for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+            MarketStreamData* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+        }
+        datas_.clear();
+    }
+    if( reply.quotes_size() > 0 ) {
+        responder_.Write(reply, this);      
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void MarketStream4ClientEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    datas_.push_back(snap);
+}
+
+
