@@ -49,7 +49,7 @@ public:
     void psubscribe(const string& pchannel);
     
     // callback from RedisSnapRequester
-    void _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
+    bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
 
 
     // redis connect notify

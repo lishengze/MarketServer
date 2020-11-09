@@ -52,7 +52,9 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
     // 请求redis key
     string depth_key = make_redis_depth_key(exchange, symbol);
     string depthData = redis_sync_api->SyncGet(depth_key);
-    quote_interface_->_on_snap(exchange, symbol, depthData);
+    if( !quote_interface_->_on_snap(exchange, symbol, depthData) ){
+        boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+    }
 }
 
 void RedisSnapRequester::_thread_loop(){

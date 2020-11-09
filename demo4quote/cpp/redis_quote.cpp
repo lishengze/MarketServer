@@ -81,22 +81,24 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     checker_loop_ = new std::thread(&RedisQuote::_check_heartbeat, this);
 };
 
-void RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data) 
+bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data) 
 {
      _println_("on_snap %s:%s size = %ld", exchange.c_str(), symbol.c_str(), data.length());
     if( data.length() == 0 )
-        return;
+        return false;
 
     UT_LOG_INFO_FMT(CONFIG->logger_, "%s:%s %s", exchange.c_str(), symbol.c_str(), data.c_str());
     SDepthQuote quote;
     if( !redisquote_to_quote(data, quote, true))
-        return;
+        return false;
 
     // 保存快照
     _set(quote.exchange, quote.symbol, quote);
 
     // 回调
     engine_interface_->on_snap(quote.exchange, quote.symbol, quote);
+
+    return true;
 };
 
 bool filter_by_config(const TExchange& exchange, const TSymbol& symbol)
