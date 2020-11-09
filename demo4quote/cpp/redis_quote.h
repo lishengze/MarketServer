@@ -18,7 +18,11 @@ struct ExchangeStatistics
 
     string get() const {
         char content[1024];
-        sprintf(content, "%d\t\t%d\t\t%d", pkg_count, pkg_size, int(pkg_size/pkg_count));
+        if( pkg_count > 0 ) {
+            sprintf(content, "%d\t\t%d\t\t%d", pkg_count, pkg_size, int(pkg_size/pkg_count));
+        } else {
+            sprintf(content, "%d\t\t%d\t\t-", pkg_count, pkg_size);
+        }
         return content;
     }
 
