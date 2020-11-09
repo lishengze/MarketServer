@@ -10,4 +10,7 @@ build/
 cmake-build-debug/
 cmake-build-release/
 
+# grpc生成的文件
+protos/cpp/*
+protos/python/*
 *.pb.*
