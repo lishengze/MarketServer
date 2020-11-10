@@ -200,7 +200,11 @@ void DataCenter::_add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& pa
 }
 
 void DataCenter::add_quote(const SInnerQuote& quote)
-{
+{    
+    std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
+    innerquote_to_msd(quote, ptrData.get());
+    PUBLISHER->publish4Broker(quote.symbol, ptrData, NULL);
+
     Params params;
     SInnerQuote new_quote;
 
@@ -282,6 +286,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
 
     // send to clients
     PUBLISHER->publish4Hedge(quote.symbol, ptrData, NULL);
+    // send to clients
+    PUBLISHER->publish4Client(quote.symbol, ptrData, NULL);
 }
 
 void _filter_depth_by_watermark(const SInnerDepth* src_depths, const uint32& src_depth_length, const SDecimal& watermark, SInnerDepth* dst_depths, uint32& dst_depth_length, bool is_ask)
