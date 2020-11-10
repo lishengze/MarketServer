@@ -7,6 +7,7 @@
 #include <set>
 #include <vector>
 using namespace std;
+#include "risk_controller_define.h"
 
 struct QuoteConfiguration
 {

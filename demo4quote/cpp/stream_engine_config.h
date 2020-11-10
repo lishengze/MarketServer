@@ -23,16 +23,24 @@ struct SymbolFee
     double taker_fee;
 
     SymbolFee() {
-        fee_type = 0;
-        maker_fee = taker_fee = 0;
+        fee_type = 2;
+        maker_fee = taker_fee = 0.2;
     }
 
     void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const
     {
         if( fee_type == 1 ) {
-            dst = src + (is_ask ? maker_fee : taker_fee);
+            if( is_ask ) {
+                dst = src + maker_fee;
+            } else {
+                dst = src - taker_fee;
+            }
         } else if( fee_type == 2 ) {
-            dst = src * (100 + is_ask ? maker_fee : taker_fee) / 100.0;
+            if( is_ask ) {
+                dst = src * (100 + maker_fee) / 100.0;
+            } else {
+                dst = src * (100 - taker_fee) / 100.0;
+            }
         } else {
             dst = src;
         }

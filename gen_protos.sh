@@ -5,8 +5,8 @@ mkdir -p protos/python
 protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp gogo.proto
 python3 -m grpc_tools.protoc -I protos --python_out=protos/python gogo.proto
 # empty.proto
-protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp empty.proto
-python3 -m grpc_tools.protoc -I protos --python_out=protos/python empty.proto
+#protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp empty.proto
+#python3 -m grpc_tools.protoc -I protos --python_out=protos/python empty.proto
 
 # quote_data.proto
 protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp quote_data.proto

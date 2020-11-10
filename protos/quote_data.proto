@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "gogo.proto";
-import "empty.proto";
 package quote.service.v1;
 
 message MultiMarketStreamData {

@@ -35,6 +35,7 @@ add_executable(demo4risk ${DIR_SRCS} ${PROTO_SRCS})
 target_link_libraries(demo4risk ${Boost_LIBRARIES})
 target_link_libraries(demo4risk pandora)
 target_link_libraries(demo4risk log4cplus)
+target_link_libraries(demo4risk protobuf protoc protobuf-lite)
 target_link_libraries(demo4risk grpc++_reflection grpc++ gpr ssl crypto)
 
 ###############################################################################################

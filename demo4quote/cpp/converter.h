@@ -40,7 +40,7 @@ inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exch
     return msd;
 };
 
-inline void process_precise_depth(const SDepthPrice* src, unsigned int src_length, int precise, SDepthPrice* dst, unsigned int& dst_length, bool is_ask)
+inline void process_precise_depth(const SDepthPrice* src, unsigned int src_length, int precise, const SymbolFee& fee, SDepthPrice* dst, unsigned int& dst_length, bool is_ask)
 {
     int count = 0;
     SDecimal lastPrice = is_ask ? SDecimal::min_decimal() : SDecimal::max_decimal();
@@ -51,8 +51,8 @@ inline void process_precise_depth(const SDepthPrice* src, unsigned int src_lengt
 
         // 卖价往上取整
         SDecimal scaledPrice;
-        //fee.compute(price, scaledPrice, is_ask);
-        scaledPrice.from(price, precise, is_ask); 
+        fee.compute(price, scaledPrice, is_ask);
+        scaledPrice.from(scaledPrice, precise, is_ask); 
 
         bool is_new_price = is_ask ? (scaledPrice > lastPrice) : (scaledPrice < lastPrice);
         if( is_new_price ) {
@@ -69,13 +69,13 @@ inline void process_precise(const TExchange& exchange, const TSymbol& symbol, co
     // 精度统一
     int precise = CONFIG->get_precise(symbol);
     // 考虑手续费因素
-    // SymbolFee fee = CONFIG->get_fee(exchange, symbol);
+    SymbolFee fee = CONFIG->get_fee(exchange, symbol);
     
     vassign(dst.exchange, MAX_EXCHANGE_NAME_LENGTH, src.exchange);
     vassign(dst.symbol, MAX_SYMBOL_NAME_LENGTH, src.symbol);
     vassign(dst.sequence_no, src.sequence_no);
     //vassign(dst.time_arrive, src.time_arrive);
 
-    process_precise_depth(src.asks, src.ask_length, precise, dst.asks, dst.ask_length, true);
-    process_precise_depth(src.bids, src.bid_length, precise, dst.bids, dst.bid_length, false);
+    process_precise_depth(src.asks, src.ask_length, precise, fee, dst.asks, dst.ask_length, true);
+    process_precise_depth(src.bids, src.bid_length, precise, fee, dst.bids, dst.bid_length, false);
 };
