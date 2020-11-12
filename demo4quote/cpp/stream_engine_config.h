@@ -23,7 +23,7 @@ struct SymbolFee
     double taker_fee;
 
     SymbolFee() {
-        fee_type = 2;
+        fee_type = 0;
         maker_fee = taker_fee = 0.2;
     }
 

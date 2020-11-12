@@ -5,6 +5,7 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
     dst->set_seq_no(src->seq_no());
+    dst->set_is_snap(src->is_snap());
 
     // 卖盘
     for( int i = 0 ; i < src->asks_size() ; ++i ) {

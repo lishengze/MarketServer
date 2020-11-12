@@ -79,18 +79,98 @@ struct SInnerQuote {
     }
 };
 
+class CallDataServeMarketStream;
+
+
+
+struct Params {
+    AccountInfo cache_account;
+    QuoteConfiguration cache_config;
+    unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
+};
+
+
+// 流水线模型
+struct PipelineContent
+{
+    Params params;
+    bool is_sample_;
+};
+
+class Worker
+{
+public:
+    Worker() {}
+    virtual ~Worker() {}
+
+    void add_worker(Worker* w) {
+        this->next_ = w;
+    }
+
+    SInnerQuote* run(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out) {
+        SInnerQuote* tmp = this->process(src, ctx, out);
+        if( next_ ) {
+            return next_->run(tmp, ctx, out);
+        } else {
+            return tmp;
+        }
+    }
+
+    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out) = 0;
+private:
+    Worker *next_ = nullptr;
+};
+
+class QuotePipeline
+{
+public:
+    QuotePipeline(){}
+    virtual ~QuotePipeline(){}
+
+    void add_worker(Worker* w) {
+        if( head_ == nullptr ) {
+            head_ = w;
+        }
+        if( tail_ == nullptr ) {
+            tail_ = w;
+        } else {
+            tail_->add_worker(w);
+            tail_ = w;
+        }
+    }
+
+    void run(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote) {
+        PipelineContent ctx;
+        ctx.params = params;
+        if( quote.symbol == CONFIG->sample_symbol_ ) {
+            ctx.is_sample_ = true;
+        } else {
+            ctx.is_sample_ = false;
+        }
+
+        if( !head_ )
+            return;
+
+        SInnerQuote tmp = quote;
+        SInnerQuote* ret = head_->run(&tmp, ctx, &newQuote);
+        newQuote = *ret;
+    }
+private:
+    Worker *head_ = nullptr, *tail_ = nullptr;
+};
+
+// worker： 处理买卖一价位交叉问题
 struct SymbolWatermark
 {
     SDecimal watermark;
     unordered_map<TExchange, SDecimal> asks;
     unordered_map<TExchange, SDecimal> bids;
 };
-
-class WatermarkComputer
+class WatermarkComputerWorker : public Worker
 {
 public:
-    WatermarkComputer();
-    ~WatermarkComputer();
+    WatermarkComputerWorker();
+    ~WatermarkComputerWorker();
 
     bool get_watermark(const string& symbol, SDecimal& watermark) const;
     void set_snap(const SInnerQuote& quote);
@@ -101,17 +181,38 @@ private:
     unordered_map<TSymbol, SymbolWatermark*> watermark_;
     std::thread* thread_loop_ = nullptr;
     void _calc_watermark();
+
+    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
 };
 
-class CallDataServeMarketStream;
+// worker：处理对冲账户资金量风控
+class AccountAjdustWorker: public Worker
+{
+public:
+    AccountAjdustWorker(){}
+    ~AccountAjdustWorker(){};
+    void set_snap(const SInnerQuote& quote);
+private:
+    // cache
+    mutable std::mutex mutex_snaps_;
+    unordered_map<TSymbol, int> currency_count_;
+    unordered_set<TSymbol> symbols_;
+    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
+
+    bool get_currency(const SInnerQuote& quote, string& sell_currency, int& sell_count, string& buy_currency, int& buy_count) const;
+};
+
+// worker：处理订单簿风控
+class OrderBookWorker : public Worker
+{
+public:
+    OrderBookWorker(){}
+    ~OrderBookWorker(){}
+private:
+    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
+};
 
 class DataCenter {
-public:
-    struct Params {
-        AccountInfo cache_account;
-        QuoteConfiguration cache_config;
-        unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
-    };
 public:
     DataCenter();
     ~DataCenter();
@@ -131,15 +232,16 @@ private:
 
     void _push_to_clients(const string& symbol = "");
 
-    void _calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote);
+    //void _calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote);
     
     mutable std::mutex                  mutex_datas_;
     unordered_map<TSymbol, SInnerQuote> datas_;
 
     Params params_;
 
-    // cache
-    unordered_map<string, int> currency_count_;
-
-    WatermarkComputer watermark_computer_;
+    // 处理流水线
+    QuotePipeline pipeline_;
+    WatermarkComputerWorker watermark_worker_;
+    AccountAjdustWorker account_worker_;
+    OrderBookWorker orderbook_worker_;
 };

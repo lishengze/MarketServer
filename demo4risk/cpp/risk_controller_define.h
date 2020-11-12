@@ -7,12 +7,21 @@
 #include <string>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <iostream>
 #include <cstring>
+#include <chrono>
 #include <algorithm>
 using namespace std;
 
 #define CALC_BASE(x) (int(pow(10, (x))))
+
+#define _println_(...)                                             \
+    do {                                                           \
+        char content[1024];                                        \
+        sprintf(content, __VA_ARGS__);                             \
+        std::cout << std::fixed << content << std::endl;                         \
+    } while(0)                                                          
 
 struct SDecimal {
     unsigned long long value;

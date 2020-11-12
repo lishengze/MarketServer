@@ -28,3 +28,11 @@ protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp ris
 protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=protos/cpp risk_controller.proto
 # generate for python3
 python3 -m grpc_tools.protoc -I protos --python_out=protos/python --grpc_python_out=protos/python risk_controller.proto
+
+# account.proto
+# generate protobuf
+protoc --proto_path=/home/mk/go/src --proto_path=protos --cpp_out=protos/cpp account.proto
+# generate grpc 
+protoc --proto_path=/home/mk/go/src --proto_path=protos --plugin=protoc-gen-grpc=/root/.local/bin/grpc_cpp_plugin --grpc_out=protos/cpp account.proto
+# generate for python3
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python --grpc_python_out=protos/python account.proto

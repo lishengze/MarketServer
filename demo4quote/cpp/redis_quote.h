@@ -65,7 +65,9 @@ public:
 
 private:
     RedisParams params_;
-    // redis api
+    // 上一次连接时间
+    type_tick last_redis_time_;
+    // redis接口对象
     RedisApiPtr     redis_api_;
     // 市场序号
     unordered_map<TSymbolKey, type_seqno> symbol_seqs_;
@@ -86,13 +88,13 @@ private:
 
     // 独立线程检查redis数据通道
     //std::mutex mutex_checker_;
-    type_tick last_time_;    
+    type_tick last_time_; // 上一次从redis收到行情的时间
     std::thread* checker_loop_ = nullptr;
     void _check_heartbeat();
 
     // 统计信息
     mutable std::mutex mutex_statistics_;
-    type_tick last_statistic_time_;    
-    unordered_map<TExchange, ExchangeStatistics> statistics_;
+    type_tick last_statistic_time_; // 上一次计算统计信息时间
+    unordered_map<TExchange, ExchangeStatistics> statistics_; // 各交易所统计信息
     void _update_statistics(const TExchange& exchange, const string& msg, const SDepthQuote& quote);
 };

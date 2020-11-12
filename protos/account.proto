@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "gogo.proto";
+import "google/protobuf/empty.proto";
+
+package asset.service.v1;
+
+option go_package = "v1";
+
+// Broker grpc
+service Asset {
+  rpc GetAccountStream(.google.protobuf.Empty) returns (stream AccountStreamData){} // 服务端推流
+  rpc ChangeAccountData(AccountChangeData) returns (.google.protobuf.Empty){}
+  //  rpc PutMarketStream(stream MarketStreamData) returns (.google.protobuf.Empty){} // 客户端推流
+}
+
+message AccountStreamData {
+  repeated AccountData account_data = 1 [(gogoproto.customname) = "AccountData", (gogoproto.jsontag) = "account_data"];
+}
+
+message AccountData {
+  string exchange_id = 1 [(gogoproto.customname) = "ExchangeID", (gogoproto.jsontag) = "exchange_id"];
+  int32 account_type = 2 [(gogoproto.customname) = "AccountType", (gogoproto.jsontag) = "account_type"];
+  string currency = 3 [(gogoproto.customname) = "Currency", (gogoproto.jsontag) = "currency"];
+  double available = 4 [(gogoproto.customname) = "Available", (gogoproto.jsontag) = "available"];
+}
+
+message AccountChangeData {
+  string exchange_id = 1 [(gogoproto.customname) = "ExchangeID", (gogoproto.jsontag) = "exchange_id"];
+  int32 account_type = 2 [(gogoproto.customname) = "AccountType", (gogoproto.jsontag) = "account_type"];
+  string currency = 3 [(gogoproto.customname) = "Currency", (gogoproto.jsontag) = "currency"];
+  double amount = 4 [(gogoproto.customname) = "Amount", (gogoproto.jsontag) = "amount"];
+}
+

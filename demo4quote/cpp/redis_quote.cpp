@@ -231,6 +231,7 @@ void RedisQuote::_check_heartbeat()
 
                 last_time_ = now;
                 last_statistic_time_ = now;
+                last_redis_time_ = now;
                 std::cout << "reconnect redis ok." << std::endl;
             } else {
                 std::cout << "heartbeat check ok." << std::endl;

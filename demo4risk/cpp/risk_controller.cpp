@@ -59,7 +59,7 @@ RiskController::~RiskController(){
 void RiskController::start() {
     quote_updater_.start(CONFIG->grpc_quote_addr_, this);
     configuration_updater_.start(this);
-    account_updater_.start(this);
+    account_updater_.start(CONFIG->grpc_account_addr_, this);
 
     // start grpc server
     PUBLISHER->run_in_thread();

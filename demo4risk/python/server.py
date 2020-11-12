@@ -5,9 +5,8 @@ import logging
 
 import grpc
 
-import api_pb2
-import api_pb2_grpc
-import empty_pb2
+import risk_controller_pb2
+import risk_controller_pb2_grpc
 
 
 def convert_depth(depths):
@@ -35,7 +34,7 @@ def run():
     # used in circumstances in which the with statement does not fit the needs
     # of the code.    
     with grpc.insecure_channel('localhost:9900') as channel:
-        stub = api_pb2_grpc.TradeStub(channel)
+        stub = risk_controller_pb2_grpc.s(channel)
         responses = stub.ServeMarketStream(empty_pb2.Empty())
         for resp in responses:
             for quote in resp.quotes:

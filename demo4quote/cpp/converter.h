@@ -29,6 +29,7 @@ inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exch
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
+    msd->set_is_snap(true);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);

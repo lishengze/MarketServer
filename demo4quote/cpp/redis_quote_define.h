@@ -18,12 +18,12 @@ using namespace std;
 // SDecimal
 #define CALC_BASE(x) (pow(10, (x)))
 
-#define _println_(fmt, ...)                                             \
-    do {                                                                \
-        char content[1024];                                             \
-        sprintf(content, fmt, __VA_ARGS__);                             \
-        std::cout << content << std::endl;                              \
-    } while(0)                                                          \
+#define _println_(...)                                             \
+    do {                                                           \
+        char content[1024];                                        \
+        sprintf(content, __VA_ARGS__);                             \
+        std::cout << content << std::endl;                         \
+    } while(0)                                                     
 
 struct SDecimal {
     unsigned long long value;

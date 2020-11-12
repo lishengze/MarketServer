@@ -40,6 +40,7 @@ public:
 
             // grpc
             grpc_quote_addr_ = js["grpc"]["quote_addr"].get<string>();
+            grpc_account_addr_ = js["grpc"]["account_addr"].get<string>();
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
             grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();
 
@@ -63,6 +64,7 @@ public:
 public:
     // grpc quote
     string grpc_quote_addr_;
+    string grpc_account_addr_;
     string grpc_publish_addr_;
     int grpc_publish_depth_;
 
@@ -76,3 +78,9 @@ public:
     // logger
     UTLogPtr logger_;
 };
+
+#define _log_and_print(...)                                             \
+    do {                                                                \
+        UT_LOG_INFO_FMT(CONFIG->logger_, __VA_ARGS__);                  \
+        _println_(__VA_ARGS__);                                         \
+    } while(0)                                                          
