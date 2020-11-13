@@ -45,7 +45,7 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
         quote_dumper_.on_snap(exchange, symbol, quote);
     }
     
-    if( CONFIG->publish_data_ ) {
+    if( CONFIG->publish_data_ || !CONFIG->is_forbidden_exchage(exchange) ) {
         quote_mixer2_.on_snap(exchange, symbol, quote);
         quote_single_.on_snap(exchange, symbol, quote);
     }
@@ -56,13 +56,14 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
         quote_dumper_.on_update(exchange, symbol, quote);
     }
 
-    if( CONFIG->publish_data_ ) {
+    if( CONFIG->publish_data_ || !CONFIG->is_forbidden_exchage(exchange) ) {
         quote_mixer2_.on_update(exchange, symbol, quote);
         quote_single_.on_update(exchange, symbol, quote);
     }
 };
 
-void StreamEngine::on_connected() {
+void StreamEngine::on_connected() 
+{
     for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
         for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
             const string& symbol = *iterSymbol;
@@ -70,11 +71,12 @@ void StreamEngine::on_connected() {
             quote_source_.subscribe("UPDATEx|" + symbol + "." + exchange);            
         }
     }
-    /*for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
-        const string& exchange = *iterExchange;
-        quote_source_.psubscribe("UPDATEx|*." + exchange);
-    }*/
 };
+
+void StreamEngine::on_nodata_exchange(const TExchange& exchange) {
+    quote_mixer2_.clear_exchange(exchange);
+    quote_single_.clear_exchange(exchange);
+}
 
 void StreamEngine::signal_handler(int signum)
 {

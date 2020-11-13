@@ -77,7 +77,6 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     // 检查连接状态
     long long now = get_miliseconds();
     last_time_ = now;
-    last_statistic_time_ = now;
     checker_loop_ = new std::thread(&RedisQuote::_check_heartbeat, this);
 };
 
@@ -127,18 +126,13 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg){
 
         // 更新检查包连续性
         if( !_update_seqno(quote.exchange, quote.symbol, quote.sequence_no) ) {
+            redis_snap_requester_.add_symbol(quote.exchange, quote.symbol);
             return;
         }
 
         // 根据配置过滤不需要的行情品种
         if( filter_by_config(quote.exchange, quote.symbol) )
             return;
-
-        // 添加到全量请求任务中
-        if( !_check_snap_received(quote.exchange, quote.symbol) ) {
-            redis_snap_requester_.add_symbol(quote.exchange, quote.symbol);
-            return;
-        }
 
         // 回调
         engine_interface_->on_update(quote.exchange, quote.symbol, quote);
@@ -165,36 +159,19 @@ void RedisQuote::OnDisconnected(int status) {
 };
 
 bool RedisQuote::_update_seqno(const TExchange& exchange, const TSymbol& symbol, type_seqno sequence_no) {
-    string symbolkey = make_symbolkey(exchange, symbol);
-    auto iter = symbol_seqs_.find(symbolkey);
-    if( iter == symbol_seqs_.end() )
-        return true;
-    if( sequence_no != (iter->second + 1) ) {
-        char content[1024];
-        sprintf(content,  "%s sequence skip %llu - %llu", symbolkey.c_str(), iter->second, sequence_no);
-        std:: cout << content << std::endl;
+    type_seqno last = symbol_seqs_[exchange][symbol];
+    if( last == 0 ) {
         return false;
-    }    
-    symbol_seqs_[symbolkey] = sequence_no;
+    }
+    symbol_seqs_[exchange][symbol] = sequence_no;
+    if( last != 0 && (last +1) != sequence_no )
+        _log_and_print("%s-%s sequence skip %llu - %llu", exchange.c_str(), symbol.c_str(), last, sequence_no);
     return true;
 };
 
-bool RedisQuote::_check_snap_received(const TExchange& exchange, const TSymbol& symbol) const
-{
-    std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-    auto iter = markets_.find(exchange);
-    if( iter == markets_.end() )
-        return false;
-    const TMarketQuote& quotes = iter->second;
-    auto iter2 = quotes.find(symbol);
-    if( iter2 == quotes.end() )
-        return false;
-    return true;
-}
-
 void RedisQuote::_set(const string& exchange, const string& symbol, const SDepthQuote& quote) {
     std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
-    markets_[exchange][symbol] = quote;
+    symbol_seqs_[exchange][symbol] = quote.sequence_no;
 }
 
 void RedisQuote::subscribe(const string& channel) {
@@ -207,6 +184,9 @@ void RedisQuote::psubscribe(const string& pchannel) {
 
 void RedisQuote::_check_heartbeat() 
 {
+    last_statistic_time_ = get_miliseconds();
+    last_nodata_time_ = get_miliseconds();
+
     while( true ) 
     {
         // 休眠
@@ -238,6 +218,46 @@ void RedisQuote::_check_heartbeat()
             }
         }
 
+        // 检查异常没有数据的交易所
+        if( (now - last_nodata_time_) > 30*1000 ) 
+        {
+            unordered_set<TExchange> nodata_exchanges;
+            {
+                std::unique_lock<std::mutex> inner_lock{ mutex_statistics_ };
+                for( const auto& v : statistics_ ) {
+                    if( v.second.pkg_count == 0 ) {
+                        nodata_exchanges.insert(v.first);
+                        _log_and_print("_check: clear exchange %s", v.first.c_str());
+                    }
+                }
+
+                for( const auto& v : nodata_exchanges ) {
+                    statistics_.erase(v);
+                }
+            }
+
+            {
+                // 清除序号
+                // 清除snap请求
+                std::unique_lock<std::mutex> inner_lock{ mutex_markets_ };
+                for( const auto& v : nodata_exchanges ) {
+                    auto iter = symbol_seqs_.find(v);
+                    if( iter != symbol_seqs_.end() ) {
+                        for( auto& symbol : iter->second ) {
+                            redis_snap_requester_.del_symbol(v, symbol.first);
+                        }
+                        symbol_seqs_.erase(iter);
+                    }
+                }
+            }
+
+            // 通知下游模块删除交易所
+            for( const auto& v : nodata_exchanges ) {
+                engine_interface_->on_nodata_exchange(v);
+            }
+            last_nodata_time_ = now;
+        }
+
         // 打印统计信息
         if( (now - last_statistic_time_) > 10*1000 ) 
         {
@@ -249,14 +269,15 @@ void RedisQuote::_check_heartbeat()
                     v.second.reset();
                 }
             }
-            std::cout << "-------------" << std::endl;
+
+            _println_("-------------");
             ExchangeStatistics total;
             for( const auto& v : statistics ) {
-                std::cout << v.first << "\t" << v.second.get() << std::endl;
+                _println_("%s\t\t%s", v.first.c_str(), v.second.get().c_str());
                 total.accumlate(v.second);
             }
-            std::cout << "total" << "\t" << total.get() << std::endl;
-            std::cout << "-------------" << std::endl;
+            _println_("total\t\t%s", total.get().c_str());
+            _println_("-------------");
             last_statistic_time_ = now;
         }
     }

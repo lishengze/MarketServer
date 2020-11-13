@@ -28,6 +28,7 @@ public:
     void start();
 
     void add_symbol(const TExchange& exchange, const TSymbol& symbol);
+    void del_symbol(const TExchange& exchange, const TSymbol& symbol);  // 用于删除交易所的时候
 
     void reset_symbol();
 

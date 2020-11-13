@@ -273,4 +273,5 @@ public:
     virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
     virtual void on_connected(){};
     virtual void on_disconnected(){};
+    virtual void on_nodata_exchange(const TExchange& exchange){};
 };

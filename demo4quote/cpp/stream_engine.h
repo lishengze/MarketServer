@@ -19,6 +19,7 @@ public:
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_connected();
+    void on_nodata_exchange(const TSymbol& symbol);
 
     // signal handler function
     static volatile int signal_sys;

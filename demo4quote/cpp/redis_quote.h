@@ -70,7 +70,7 @@ private:
     // redis接口对象
     RedisApiPtr     redis_api_;
     // 市场序号
-    unordered_map<TSymbolKey, type_seqno> symbol_seqs_;
+    unordered_map<TExchange, unordered_map<TSymbol, type_seqno>> symbol_seqs_;
 
     // redis snap requester
     RedisSnapRequester    redis_snap_requester_;
@@ -95,6 +95,7 @@ private:
     // 统计信息
     mutable std::mutex mutex_statistics_;
     type_tick last_statistic_time_; // 上一次计算统计信息时间
+    type_tick last_nodata_time_; // 上一次检查交易所数据的时间
     unordered_map<TExchange, ExchangeStatistics> statistics_; // 各交易所统计信息
     void _update_statistics(const TExchange& exchange, const string& msg, const SDepthQuote& quote);
 };

@@ -18,9 +18,29 @@ bool QuoteSingle::_check_update_clocks(const TExchange& exchange, const TSymbol&
 
 void QuoteSingle::_publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) {
     PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
-};
+}
 
-void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote) {
+void QuoteSingle::clear_exchange(const TExchange& exchange)
+{
+    unordered_map<TSymbol, std::shared_ptr<MarketStreamData>> snaps;
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+        auto iter = quotes_.find(exchange);
+        if( iter != quotes_.end() ) {
+            for( const auto& v : iter->second ) {
+                SMixQuote empty;
+                snaps[v.first] = mixquote_to_pbquote2(exchange, v.first, &empty);
+            }
+            quotes_.erase(iter);
+        }
+    }
+
+    for( auto& v : snaps ) {
+        _publish_quote(exchange, v.first, v.second, NULL, true);
+    }
+}
+
+void QuoteSingle::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) {
     // 更新内存中的行情
     std::shared_ptr<MarketStreamData> pub_snap;
     if( !_on_snap(exchange, symbol, quote, pub_snap) )
@@ -29,7 +49,7 @@ void QuoteSingle::on_snap(const string& exchange, const string& symbol, const SD
     _publish_quote(exchange, symbol, pub_snap, NULL, true);
 }
 
-void QuoteSingle::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote) {
+void QuoteSingle::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) {
     std::shared_ptr<MarketStreamData> pub_snap, pub_diff;
     if( !_on_update(exchange, symbol, quote, pub_snap, pub_diff) )
         return;
@@ -37,7 +57,7 @@ void QuoteSingle::on_update(const string& exchange, const string& symbol, const 
     _publish_quote(exchange, symbol, pub_snap, pub_diff, false);
 };
 
-bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
+bool QuoteSingle::_on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
@@ -65,7 +85,7 @@ bool QuoteSingle::_on_snap(const string& exchange, const string& symbol, const S
     return true;
 }
 
-bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff)
+bool QuoteSingle::_on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
     SMixQuote* ptr = NULL;
@@ -91,7 +111,7 @@ bool QuoteSingle::_on_update(const string& exchange, const string& symbol, const
     return true;
 }
 
-bool QuoteSingle::_get_quote(const string& exchange, const string& symbol, SMixQuote*& ptr) const {
+bool QuoteSingle::_get_quote(const TExchange& exchange, const TSymbol& symbol, SMixQuote*& ptr) const {
     auto iter = quotes_.find(exchange);
     if( iter == quotes_.end() )
         return false;
@@ -102,7 +122,7 @@ bool QuoteSingle::_get_quote(const string& exchange, const string& symbol, SMixQ
     return true;
 }
 
-SMixDepthPrice* QuoteSingle::_clear_allpricelevel(const string& exchange, SMixDepthPrice* depths) {
+SMixDepthPrice* QuoteSingle::_clear_allpricelevel(const TExchange& exchange, SMixDepthPrice* depths) {
     SMixDepthPrice *tmp = depths;
     while( tmp != NULL ) {
         // 删除             
@@ -113,7 +133,7 @@ SMixDepthPrice* QuoteSingle::_clear_allpricelevel(const string& exchange, SMixDe
     return NULL;
 }
 
-SMixDepthPrice* QuoteSingle::_clear_pricelevel(const string& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, const int& newLength, bool isAsk) {
+SMixDepthPrice* QuoteSingle::_clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, const int& newLength, bool isAsk) {
     SMixDepthPrice head;
     head.next = depths;        
     SMixDepthPrice *tmp = depths, *last = &head;
@@ -142,7 +162,7 @@ SMixDepthPrice* QuoteSingle::_clear_pricelevel(const string& exchange, SMixDepth
     return head.next;
 }
 
-SMixDepthPrice* QuoteSingle::_mix_exchange(const string& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
+SMixDepthPrice* QuoteSingle::_mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
     const int& length, bool isAsk) { 
     SMixDepthPrice head;
     head.next = mixedDepths;

@@ -171,63 +171,18 @@ private:
     void _run(const string& addr, IAccountUpdater* callback) {
 
         // 手动加入测试数据
-        account_.hedge_accounts_["ALAMEDA"].currencies["BTC"].amount = 99999999;
+        /*account_.hedge_accounts_["ALAMEDA"].currencies["BTC"].amount = 99999999;
         account_.hedge_accounts_["ALAMEDA"].currencies["USDT"].amount = 99999999;
         account_.hedge_accounts_["HUOBI"].currencies["BTC"].amount = 99999999;
         account_.hedge_accounts_["HUOBI"].currencies["USDT"].amount = 99999999;
         account_.hedge_accounts_["BINANCE"].currencies["BTC"].amount = 99999999;
         account_.hedge_accounts_["BINANCE"].currencies["USDT"].amount = 99999999;
-        callback->on_account_update(account_);
+        callback->on_account_update(account_);*/
         
         while( 1 ) {            
             _request(addr, callback);
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
-        /*
-        while( true ) {
-            AccountInfo account;
-            // 设置用户账户
-            strcpy(account.user_account_.currencies[0].currency, "BTC");
-            account.user_account_.currencies[0].amount = 999999;
-            strcpy(account.user_account_.currencies[1].currency, "ETH");
-            account.user_account_.currencies[1].amount = 999999;
-            strcpy(account.user_account_.currencies[2].currency, "USDT");
-            account.user_account_.currencies[2].amount = 999999999;
-            account.user_account_.currency_length = 0; // 暂时不考虑用户账户
-            // 设置对冲账户(火币)
-            HedgeAccountInfo hedgeHuobi;
-            strcpy(hedgeHuobi.currencies[0].currency, "BTC");
-            hedgeHuobi.currencies[0].amount = 999999;
-            strcpy(hedgeHuobi.currencies[1].currency, "ETH");
-            hedgeHuobi.currencies[1].amount = 999999;
-            strcpy(hedgeHuobi.currencies[2].currency, "USDT");
-            hedgeHuobi.currencies[2].amount = 999999999;
-            hedgeHuobi.currency_length = 3;
-            account.hedge_accounts_["HUOBI"] = hedgeHuobi;
-            // 设置对冲账户(okex)
-            HedgeAccountInfo hedgeOkex;
-            strcpy(hedgeOkex.currencies[0].currency, "BTC");
-            hedgeOkex.currencies[0].amount = 999;
-            strcpy(hedgeOkex.currencies[1].currency, "ETH");
-            hedgeOkex.currencies[1].amount = 999;
-            strcpy(hedgeOkex.currencies[2].currency, "USDT");
-            hedgeOkex.currencies[2].amount = 99999;
-            hedgeOkex.currency_length = 3;
-            account.hedge_accounts_["OKEX"] = hedgeOkex;
-            // 设置对冲账户(币安)
-            HedgeAccountInfo hedgeBinance;
-            strcpy(hedgeBinance.currencies[0].currency, "BTC");
-            hedgeBinance.currencies[0].amount = 999999;
-            strcpy(hedgeBinance.currencies[1].currency, "ETH");
-            hedgeBinance.currencies[1].amount = 999999;
-            strcpy(hedgeBinance.currencies[2].currency, "USDT");
-            hedgeBinance.currencies[2].amount = 999999999;
-            hedgeBinance.currency_length = 3;
-            account.hedge_accounts_["BINANCE"] = hedgeBinance;            
-            callback->on_account_update(account);
-            // 定时聚合账户详情回调风控模块
-            std::this_thread::sleep_for(std::chrono::seconds(10));
-        }*/
     }
 
     std::thread*               thread_loop_ = nullptr;

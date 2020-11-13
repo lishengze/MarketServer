@@ -30,6 +30,6 @@
         "symbols_bak": ["BTC_USDT"],
         "symbols": ["BTC_USDT", "ETH_USDT", "ETH_BTC"],
         "exchanges_bak": ["OKEX"],
-        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX"]
+        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX", "ART"]
     }
 }

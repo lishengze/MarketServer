@@ -30,6 +30,16 @@ void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& sy
     boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
 }
 
+void RedisSnapRequester::del_symbol(const TExchange& exchange, const TSymbol& symbol) {
+    
+    string combinedSymbol = make_symbolkey(exchange, symbol);
+    std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
+    auto iter = symbols_.find(combinedSymbol);
+    if( iter != symbols_.end() ) {
+        symbols_.erase(iter);
+    }
+}
+
 void RedisSnapRequester::reset_symbol() 
 {    
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
@@ -51,6 +61,7 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
     
     // 请求redis key
     string depth_key = make_redis_depth_key(exchange, symbol);
+    _log_and_print("RedisSnapRequester: get snap %s", depth_key.c_str());
     string depthData = redis_sync_api->SyncGet(depth_key);
     if( !quote_interface_->_on_snap(exchange, symbol, depthData) ){
         boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));

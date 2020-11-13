@@ -129,6 +129,11 @@ public:
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         return symbol_fee_[exchange][symbol];
     }
+
+    bool is_forbidden_exchage(const TExchange& exchange) {
+        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
+        return forbidden_exchanges_.find(exchange) != forbidden_exchanges_.end();
+    }
 public:
     // grpc
     string grpc_publish_addr_;          // grpc服务发布地址
@@ -154,9 +159,16 @@ public:
     mutable std::mutex mutex_configuration_;
     std::set<string> include_symbols_;      // 包含的品种
     std::set<string> include_exchanges_;    // 包含的交易所
+    std::set<string> forbidden_exchanges_;  // 设置关闭的交易所
     std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度
     std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费
 
     // logger
     UTLogPtr logger_;
 };
+
+#define _log_and_print(...)                                             \
+    do {                                                                \
+        UT_LOG_INFO_FMT(CONFIG->logger_, __VA_ARGS__);                  \
+        _println_(__VA_ARGS__);                                         \
+    } while(0)                                                          
