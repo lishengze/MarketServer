@@ -6,6 +6,7 @@
 #include "quote_single.h"
 #include "quote_dumper.h"
 #include "grpc_server.h"
+#include "nacos_client.h"
 
 class StreamEngine : public QuoteSourceInterface 
 {
@@ -38,4 +39,6 @@ private:
     QuoteSingle quote_single_;
     // quotation dumper
     QuoteDumper quote_dumper_;
+    // nacos client
+    NacosClient nacos_client_;
 };

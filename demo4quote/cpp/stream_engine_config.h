@@ -92,6 +92,7 @@ public:
             quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
             // config center
+            nacos_addr_ = js["nacos"]["addr"].get<string>();
             for (auto iter = js["include"]["symbols"].begin(); iter != js["include"]["symbols"].end(); ++iter) {
                 const string& symbol = *iter;
                 include_symbols_.insert(symbol);
@@ -99,11 +100,7 @@ public:
             for (auto iter = js["include"]["exchanges"].begin(); iter != js["include"]["exchanges"].end(); ++iter) {
                 const string& exchange = *iter;
                 include_exchanges_.insert(exchange);
-            }
-            symbol_precise_["BTC_USDT"] = 1;
-            symbol_precise_["ETH_USDT"] = 2;
-            symbol_precise_["ETH_BTC"] = 6;
-
+            }                
             UT_LOG_INFO(logger_, "Parse Config finish.");
         }
         catch (std::exception& e)
@@ -134,6 +131,18 @@ public:
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         return forbidden_exchanges_.find(exchange) != forbidden_exchanges_.end();
     }
+
+    void set_configuration_precise(const std::unordered_map<string, int>& vals)
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
+        symbol_precise_ = vals;
+    }
+
+    void set_configuration_fee(const std::unordered_map<string, std::unordered_map<string, SymbolFee>>& vals)
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
+        symbol_fee_ = vals;
+    }
 public:
     // grpc
     string grpc_publish_addr_;          // grpc服务发布地址
@@ -155,13 +164,16 @@ public:
     string quote_redis_password_;
     int quote_redis_snap_interval_;
 
-    // from config center    
+    // from database
+    std::set<string> include_symbols_;      // 包含的品种 CFG_INCLUDE_SYMBOLS
+    std::set<string> include_exchanges_;    // 包含的交易所 CFG_INCLUDE_EXCHANGES
+    std::set<string> forbidden_exchanges_;  // 设置（临时）关闭的交易所 CFG_FORBIDDEN_EXCHANGES
+
+    // from config center
+    string nacos_addr_;
     mutable std::mutex mutex_configuration_;
-    std::set<string> include_symbols_;      // 包含的品种
-    std::set<string> include_exchanges_;    // 包含的交易所
-    std::set<string> forbidden_exchanges_;  // 设置关闭的交易所
-    std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度
-    std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费
+    std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度 CFG_SYMBOL_PRECISE
+    std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费 CFG_SYMBOL_FEE
 
     // logger
     UTLogPtr logger_;
