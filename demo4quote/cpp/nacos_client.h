@@ -64,6 +64,9 @@ public:
             njson js = njson::parse(configInfo);
 
             std::unordered_map<string, int> precise;
+            precise["BTC_USDT"] = 1;
+            precise["ETH_USDT"] = 2;
+            precise["ETH_BTC"] = 6;
             std::unordered_map<string, std::unordered_map<string, SymbolFee>> fee;
             CONFIG->set_configuration_precise(precise);
             CONFIG->set_configuration_fee(fee);
@@ -92,8 +95,8 @@ public:
         ConfigService *n = factory->CreateConfigService();
         ResourceGuard <ConfigService> _serviceFactory(n);
 
-        NacosListener *listener1 = new NacosListener(n, "parameter", "currency");//You don't need to free it, since it will be deleted by the function removeListener
-        n->addListener("currency", "parameter", listener1);//All changes on the key dqid will be received by MyListener
+        //NacosListener *listener1 = new NacosListener(n, "parameter", "currency");//You don't need to free it, since it will be deleted by the function removeListener
+        //n->addListener("currency", "parameter", listener1);//All changes on the key dqid will be received by MyListener
     }
 private:
 

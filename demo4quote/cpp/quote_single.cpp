@@ -107,7 +107,7 @@ bool QuoteSingle::_on_update(const TExchange& exchange, const TSymbol& symbol, c
 
     // 发送
     pub_snap = mixquote_to_pbquote2(exchange, symbol, ptr);
-    //pub_diff = mixquote_to_pbquote(exchange, symbol, quote);
+    pub_diff = depth_to_pbquote2(exchange, symbol, quote);
     return true;
 }
 

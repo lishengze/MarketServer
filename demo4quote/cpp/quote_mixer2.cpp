@@ -44,6 +44,27 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     _publish_quote(symbol, pub_snap, NULL, true);
 }
 
+void QuoteMixer2::change_precise(const TSymbol& symbol, int precise)
+{
+    std::shared_ptr<MarketStreamData> pub_snap;
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+        auto iter = quotes_.find(symbol);
+        if( iter == quotes_.end() )
+            return;
+        // 转为depthquote
+        const SMixQuote* last = iter->second;
+        iter->second = new SMixQuote();
+        compress_mixquote(symbol, *iter->second, *last);
+        delete last;
+        // 缩放价位
+        pub_snap = mixquote_to_pbquote2("", symbol, iter->second);
+    }
+
+    // 广播snap
+    _publish_quote(symbol, pub_snap, NULL, true);
+}
+
 void QuoteMixer2::clear_exchange(const TExchange& exchange)
 {    
     unordered_map<TSymbol, std::shared_ptr<MarketStreamData>> snaps;

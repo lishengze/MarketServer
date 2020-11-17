@@ -11,16 +11,17 @@ import time
 import math
 import logging
 import grpc
-import api_pb2
-import api_pb2_grpc
-import stream_engine_server_pb2
-import stream_engine_server_pb2_grpc
+import quote_data_pb2
+import risk_controller_pb2
+import risk_controller_pb2_grpc
+import stream_engine_pb2
+import stream_engine_pb2_grpc
 import empty_pb2
 
 def CallChangeStreamEngineParams(addr, params):
     with grpc.insecure_channel(addr) as channel:
-        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        request = stream_engine_server_pb2.SetParamsReq()
+        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+        request = stream_engine_pb2.SetParamsReq()
         request.depth = params['depth']
         request.frequency = params['frequency']
         request.precise = params.get('precise', 0)
@@ -30,8 +31,8 @@ def CallChangeStreamEngineParams(addr, params):
 
 def CallGetStreamEngineParams(addr):
     with grpc.insecure_channel(addr) as channel:
-        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        request = stream_engine_server_pb2.GetParamsReq()
+        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+        request = stream_engine_pb2.GetParamsReq()
         return stub.GetParams(request)
 
 
@@ -54,33 +55,34 @@ class GrpcStreamThread(QThread):
         pass
 
 class QueryApiThread(GrpcStreamThread):
-    breakSignal = pyqtSignal(api_pb2.MarketStreamData)
+    breakSignal = pyqtSignal(quote_data_pb2.MarketStreamData)
   
     def __init__(self, addr, parent=None):
         super().__init__(addr, parent)
   
     def run_grpc(self, channel):
-        stub = api_pb2_grpc.BrokerStub(channel)
-        responses = stub.ServeMarketStream(empty_pb2.Empty())
+        stub = risk_controller_pb2_grpc.RiskControllerStub(channel)
+        responses = stub.ServeMarketStream4Client(empty_pb2.Empty())
         for resp in responses:
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
 
 class QueryStreamEngineThread(GrpcStreamThread):
-    breakSignal = pyqtSignal(stream_engine_server_pb2.MarketStreamData)
+    breakSignal = pyqtSignal(quote_data_pb2.MarketStreamData)
   
     def __init__(self, addr, parent=None):
         super().__init__(addr, parent)
   
     def run_grpc(self, channel):
-        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        responses = stub.MultiSubscribeQuote(stream_engine_server_pb2.MultiSubscribeQuoteReq())
+        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+        responses = stub.SubscribeMixQuote(stream_engine_pb2.SubscribeMixQuoteReq())
         for resp in responses:
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
 
 class QueryRawThread(GrpcStreamThread):
-    breakSignal = pyqtSignal(stream_engine_server_pb2.QuoteData)
+    #breakSignal = pyqtSignal(quote_data_pb2.MarketStreamData)
+    breakSignal = pyqtSignal(dict)
   
     def __init__(self, exchange, symbol, addr, parent=None):
         super().__init__(addr, parent)
@@ -93,17 +95,40 @@ class QueryRawThread(GrpcStreamThread):
         self.stopped = True
 
     def run_grpc(self, channel):
-        stub = stream_engine_server_pb2_grpc.StreamEngineServiceStub(channel)
-        request = stream_engine_server_pb2.SubscribeOneQuoteReq()
+        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+        request = stream_engine_pb2.SubscribeQuoteReq()
         request.exchange = self.exchange
         request.symbol = self.symbol
-        responses = stub.SubscribeOneQuote(request)
+        responses = stub.SubscribeQuote(request)
+        cache = collections.defaultdict(dict)
         for resp in responses:
             if self.stopped:
                 print("exit single thread @", self.exchange, self.symbol)
                 return False
             for quote in resp.quotes:
-                self.breakSignal.emit(quote)
+                if quote.is_snap:
+                    for depth in quote.asks:
+                        cache['ask'][float(depth.price)] = depth.volume
+                    for depth in quote.bids:
+                        cache['bid'][float(depth.price)] = depth.volume
+                else:
+                    for depth in quote.asks:
+                        if depth.volume == 0:
+                            try:
+                                del cache['ask'][float(depth.price)]
+                            except:
+                                pass
+                        else:
+                            cache['ask'][float(depth.price)] = depth.volume
+                    for depth in quote.bids:
+                        if depth.volume == 0:
+                            try:
+                                del cache['bid'][float(depth.price)]
+                            except:
+                                pass
+                        else:
+                            cache['bid'][float(depth.price)] = depth.volume
+                self.breakSignal.emit(cache)
 
 class AskBidWidget(object):
     def __init__(self, depth):
@@ -170,6 +195,7 @@ class AskBidWidget(object):
             lbl_volumes.setText(txt_volumes)        
 
 class DisplayWidget(QWidget):
+    DISPLAY_DEPTH = 20 # 这个值固定不变
     DEPTH = 20
     FREQUENCY = 1
     RAW_FREQUENCY = 1
@@ -189,6 +215,12 @@ class DisplayWidget(QWidget):
         self.current_symbol = self.all_symbols[0]
         # 当前选定的交易所（原始行情）
         self.current_exchange = self.all_exchanges[0]
+        # 聚合行情深度
+        self.DEPTH = self.stream_engine_params.depth
+        # 聚合行情发布频率
+        self.FREQUENCY = self.stream_engine_params.frequency
+        # 原始行情发布频率
+        self.RAW_FREQUENCY = self.stream_engine_params.raw_frequency
         
         # 初始化ui
         self.initUI()
@@ -209,7 +241,6 @@ class DisplayWidget(QWidget):
         self.raw_thread.start()
 
     def initUI(self):
-        # 风控参数调整区域（暂未使用）
         ctl_panel = QWidget()
         ctl_grid = QGridLayout()
         ctl_grid.setAlignment(QtCore.Qt.AlignTop)
@@ -218,13 +249,15 @@ class DisplayWidget(QWidget):
         label = QLabel("设置深度")
         ctl_grid.addWidget(label, 1, 0)
         self.depth_combox = QComboBox(self)
-        self.depth_combox.addItems(["20", "10", "5"])
+        self.depth_combox.addItems(["200", "10", "5"])
+        self.depth_combox.setCurrentText(str(self.stream_engine_params.depth))
         self.depth_combox.currentIndexChanged[str].connect(self.depth_changed)
         ctl_grid.addWidget(self.depth_combox, 1, 1)
         label = QLabel("设置频率")
         ctl_grid.addWidget(label, 2, 0)
         self.frequecy_combox = QComboBox(self)
-        self.frequecy_combox.addItems(["1", "2", "10", "100"])
+        self.frequecy_combox.addItems(["1", "2", "100", "0.1"])
+        self.frequecy_combox.setCurrentText(str(self.stream_engine_params.frequency))
         self.frequecy_combox.currentIndexChanged[str].connect(self.frequency_changed)
         ctl_grid.addWidget(self.frequecy_combox, 2, 1)
         label = QLabel("设置精度")
@@ -236,7 +269,8 @@ class DisplayWidget(QWidget):
         label = QLabel("设置原始频率")
         ctl_grid.addWidget(label, 4, 0)
         self.raw_frequecy_combox = QComboBox(self)
-        self.raw_frequecy_combox.addItems(["1", "10", "100"])
+        self.raw_frequecy_combox.addItems(["1", "100", "0.1"])
+        self.raw_frequecy_combox.setCurrentText(str(self.stream_engine_params.raw_frequency))
         self.raw_frequecy_combox.currentIndexChanged[str].connect(self.raw_frequency_changed)
         ctl_grid.addWidget(self.raw_frequecy_combox, 4, 1)
         label = QLabel("-------------------")
@@ -247,18 +281,18 @@ class DisplayWidget(QWidget):
 
         # stream engine数据显示区域
         streamengine_panel = QWidget()
-        self.streamengine_widget = AskBidWidget(self.DEPTH)
+        self.streamengine_widget = AskBidWidget(self.DISPLAY_DEPTH)
         streamengine_panel.setLayout(self.streamengine_widget.grid) 
 
         # api数据显示区域
         api_panel = QWidget()
-        self.api_widget = AskBidWidget(self.DEPTH)
+        self.api_widget = AskBidWidget(self.DISPLAY_DEPTH)
         api_panel.setTabOrder
         api_panel.setLayout(self.api_widget.grid)
 
         # 原始数据显示区域
         raw_panel = QWidget()
-        self.raw_widget = AskBidWidget(self.DEPTH)
+        self.raw_widget = AskBidWidget(self.DISPLAY_DEPTH)
         raw_panel.setLayout(self.raw_widget.grid) 
 
         # 主layout区域
@@ -325,14 +359,16 @@ class DisplayWidget(QWidget):
             return ret
         if msg.symbol != self.current_symbol:
             return
-        ask_data = _make_data(msg.ask_depths)
-        bid_data = _make_data(msg.bid_depths)
+        ask_data = _make_data(msg.asks)
+        bid_data = _make_data(msg.bids)
         self.api_widget.bind_data(ask_data, bid_data)
 
     def update_streamengine_data(self, msg):
         def _make_data(depths):
             ret = []
-            for depth in depths:
+            for i, depth in enumerate(depths):
+                if i == 0:
+                    print(depth)
                 # 价位数据
                 txt_price = depth.price
                 # 挂单数据
@@ -351,25 +387,20 @@ class DisplayWidget(QWidget):
         #self._add_symbol(msg.symbol)
         if msg.symbol != self.current_symbol:
             return
-        ask_data = _make_data(msg.ask_depths)
-        bid_data = _make_data(msg.bid_depths)        
+        ask_data = _make_data(msg.asks)
+        bid_data = _make_data(msg.bids)
         self.streamengine_widget.bind_data(ask_data, bid_data)
 
     def update_raw_data(self, msg):
         def _make_data(depths):
             ret = []
-            for depth in depths:
-                # 价位数据
-                fmt = "{0:.0" + str(depth.price.base) + "f}"
-                txt_price = fmt.format(depth.price.value/(10**depth.price.base))
-                # 挂单数据
-                txt_volumes = str(depth.volume)
-                # 添加数据
-                ret.append((txt_price, txt_volumes))
+            keys = sorted(depths.keys())
+            for price in keys:
+                ret.append((str(price), str(depths[price])))
             return ret
 
-        ask_data = _make_data(msg.ask_depth)
-        bid_data = _make_data(msg.bid_depth)
+        ask_data = _make_data(msg['ask'])
+        bid_data = _make_data(msg['bid'])
         self.raw_widget.bind_data(ask_data, bid_data)
 
     def symbol_changed(self, symbol):
@@ -397,11 +428,11 @@ class DisplayWidget(QWidget):
         CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
 
     def frequency_changed(self, frequency):
-        self.FREQUENCY = int(frequency)
+        self.FREQUENCY = float(frequency)
         CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
 
     def raw_frequency_changed(self, frequency):
-        self.RAW_FREQUENCY = int(frequency)
+        self.RAW_FREQUENCY = float(frequency)
         CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
 
     def precise_changed(self, precise):

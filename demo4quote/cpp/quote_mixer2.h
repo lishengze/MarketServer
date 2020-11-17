@@ -14,6 +14,8 @@ public:
     void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
     void clear_exchange(const TExchange& exchange);
+
+    void change_precise(const TSymbol& symbol, int precise);
 private:
     bool _preprocess(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& src, SDepthQuote& dst);
 

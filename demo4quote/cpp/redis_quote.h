@@ -7,15 +7,37 @@ using namespace std;
 using njson = nlohmann::json;
 #include "redis_quote_snap.h"
 
-struct ExchangeStatistics
-{
-    int pkg_count;
-    int pkg_size;
+struct SymbolMeta
+{    
+    int pkg_count; // 收到包的数量
+    type_seqno seq_no; // 最近一次有效的序列号
+    list<SDepthQuote> caches; // 缓存中的序列号 
 
-    ExchangeStatistics() {
+    static const int MAX_SIZE = 1000;
+
+    SymbolMeta() {
+        pkg_count = 0;
+        seq_no = 0;
+    }
+};
+
+struct ExchangeMeta
+{
+    int pkg_count; // 收到包的数量
+    int pkg_size;  // 收到包的大小
+    int pkg_skip_count; // 丢包次数
+    unordered_map<TSymbol, SymbolMeta> symbols;
+
+    ExchangeMeta() {
         reset();
     }
 
+    void reset() {
+        pkg_count = 0;
+        pkg_size = 0;
+        pkg_skip_count = 0;
+    }
+    
     string get() const {
         char content[1024];
         if( pkg_count > 0 ) {
@@ -26,14 +48,9 @@ struct ExchangeStatistics
         return content;
     }
 
-    void accumlate(const ExchangeStatistics& stat) {
+    void accumlate(const ExchangeMeta& stat) {
         pkg_count += stat.pkg_count;
         pkg_size += stat.pkg_size;
-    }
-
-    void reset() {
-        pkg_count = 0;
-        pkg_size = 0;
     }
 };
 
@@ -69,19 +86,18 @@ private:
     type_tick last_redis_time_;
     // redis接口对象
     RedisApiPtr     redis_api_;
-    // 市场序号
-    unordered_map<TExchange, unordered_map<TSymbol, type_seqno>> symbol_seqs_;
+
+    // 管理exchange+symbol的基础信息
+    mutable std::mutex mutex_metas_;
+    unordered_map<TExchange, ExchangeMeta> metas_;
 
     // redis snap requester
     RedisSnapRequester    redis_snap_requester_;
 
     // sync snap and updater
-    bool _update_seqno(const TExchange& exchange, const TSymbol& symbol, type_seqno sequence_no);
+    bool _update_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
     bool _check_snap_received(const TExchange& exchange, const TSymbol& symbol) const;
-    void _set(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
-    mutable std::mutex mutex_markets_;
-    unordered_map<TExchange, TMarketQuote> markets_;
     
     // callback
     QuoteSourceInterface *engine_interface_ = nullptr;
@@ -90,12 +106,9 @@ private:
     //std::mutex mutex_checker_;
     type_tick last_time_; // 上一次从redis收到行情的时间
     std::thread* checker_loop_ = nullptr;
-    void _check_heartbeat();
+    void _check();
 
     // 统计信息
-    mutable std::mutex mutex_statistics_;
     type_tick last_statistic_time_; // 上一次计算统计信息时间
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
-    unordered_map<TExchange, ExchangeStatistics> statistics_; // 各交易所统计信息
-    void _update_statistics(const TExchange& exchange, const string& msg, const SDepthQuote& quote);
 };

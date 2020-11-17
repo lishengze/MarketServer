@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <string>
 #include <map>
+#include <list>
 #include <unordered_map>
 #include <unordered_set>
 #include <iostream>
@@ -211,9 +212,10 @@ struct SDepthPrice {
 #define MAX_DEPTH 200
 #define MAX_EXCHANGE_NAME_LENGTH 32
 #define MAX_SYMBOL_NAME_LENGTH 32
-using type_seqno = unsigned long long;
+using type_seqno = unsigned long;
 
 struct SDepthQuote {
+    int raw_length;
     char exchange[MAX_EXCHANGE_NAME_LENGTH];
     char symbol[MAX_SYMBOL_NAME_LENGTH];
     type_seqno sequence_no;
@@ -230,6 +232,7 @@ struct SDepthQuote {
         //vassign(time_arrive, "");
         ask_length = 0;
         bid_length = 0;
+        raw_length = 0;
     }
 };
 

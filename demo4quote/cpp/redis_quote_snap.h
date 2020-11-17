@@ -28,14 +28,13 @@ public:
     void start();
 
     void add_symbol(const TExchange& exchange, const TSymbol& symbol);
-    void del_symbol(const TExchange& exchange, const TSymbol& symbol);  // 用于删除交易所的时候
-
-    void reset_symbol();
 
 private:
     void _thread_loop();
 
     void _get_snap(const TExchange& exchange, const TSymbol& symbol);
+
+    void on_timer(const TExchange& exchange, const TSymbol& symbol, int seconds);
 
 private:
     // redis api对象
@@ -48,6 +47,16 @@ private:
 
     // 维护所有品种列表，作为请求全量的基础
     std::thread*               thread_loop_ = nullptr;// 请求线程
-    std::mutex                 mutex_symbols_;
+    mutable std::mutex         mutex_symbols_;
     unordered_set<TSymbol>     symbols_;
+    
+    // 触发事件的队列
+    struct EventData{
+        TExchange exchange;
+        TSymbol symbol;
+        type_tick event_time;
+    };
+    mutable std::mutex         mutex_events_;
+    list<EventData>            events_;
+    void _add_event(const TExchange& exchange, const TSymbol& symbol, int seconds);
 };

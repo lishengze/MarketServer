@@ -4,7 +4,6 @@
 
 
 RedisSnapRequester::RedisSnapRequester() {
-
 }
 
 RedisSnapRequester::~RedisSnapRequester() {
@@ -20,33 +19,28 @@ void RedisSnapRequester::start(){
     thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
 }
 
-void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& symbol) {
-    
+void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& symbol) 
+{    
     string combinedSymbol = make_symbolkey(exchange, symbol);
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
     if( symbols_.find(combinedSymbol) != symbols_.end() )
         return;
     symbols_.insert(combinedSymbol);
-    boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+    _add_event(exchange, symbol, 1);
 }
 
-void RedisSnapRequester::del_symbol(const TExchange& exchange, const TSymbol& symbol) {
-    
-    string combinedSymbol = make_symbolkey(exchange, symbol);
-    std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-    auto iter = symbols_.find(combinedSymbol);
-    if( iter != symbols_.end() ) {
-        symbols_.erase(iter);
-    }
+void RedisSnapRequester::_add_event(const TExchange& exchange, const TSymbol& symbol, int seconds)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_events_ };
+    EventData evt;
+    evt.exchange = exchange;
+    evt.symbol = symbol;
+    evt.event_time = seconds * 1000 + get_miliseconds();
+    events_.push_back(evt);
 }
 
-void RedisSnapRequester::reset_symbol() 
-{    
-    std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-    symbols_.clear();
-}
-
-void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& symbol) {
+void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& symbol) 
+{
     // 为线程池中每一个对象绑定一个redis_api对象
     std::thread::id thread_id = std::this_thread::get_id();
     RedisApiPtr redis_sync_api;
@@ -63,34 +57,53 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
     string depth_key = make_redis_depth_key(exchange, symbol);
     _log_and_print("RedisSnapRequester: get snap %s", depth_key.c_str());
     string depthData = redis_sync_api->SyncGet(depth_key);
-    if( !quote_interface_->_on_snap(exchange, symbol, depthData) ){
-        boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+    if( !quote_interface_->_on_snap(exchange, symbol, depthData) ) {
+        _add_event(exchange, symbol, 1);
+        //boost::asio::steady_timer t(io, std::chrono::steady_clock::now() + std::chrono::seconds(10));
+       // t.async_wait(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+        //boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+    } else {        
+        std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
+        string combinedSymbol = make_symbolkey(exchange, symbol);
+        symbols_.erase(combinedSymbol);
     }
 }
 
-void RedisSnapRequester::_thread_loop(){
+void RedisSnapRequester::_thread_loop()
+{
     // 初始化线程池
     boost::asio::thread_pool pool(4);
 
-    while( thread_loop_ ) {
-        // 获取所有任务
-        unordered_set<string> tmp;
+    vector<EventData> evts;
+    while( thread_loop_ ) 
+    {
+        type_tick now = get_miliseconds();
         {
-            std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
-            //tmp = symbols_;
-        }
-        // 发送所有任务
-        for (auto iter = tmp.begin(); iter != tmp.end(); ++iter) {
-            string exchange, symbol;
-            if( !extract_symbolkey(*iter, exchange, symbol) ) {
-                continue;
+            std::unique_lock<std::mutex> inner_lock{ mutex_events_ };
+            while( events_.size() > 0 ) {
+                EventData& evt = events_.front();
+                //cout << evt.event_time << " " << now << endl;
+                if( evt.event_time <= now ) {
+                    evts.push_back(evt);
+                    events_.pop_front();
+                } else {
+                    break;
+                }
             }
-            boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
+        }
+
+        if( evts.size() > 0 ) {
+            // 发送所有任务
+            for (const auto& v : evts) {
+                boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, v.exchange, v.symbol));
+            }
+            evts.clear();
         }
 
         // 休眠
-        std::this_thread::sleep_for(std::chrono::seconds(CONFIG->quote_redis_snap_interval_));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+
 
     pool.join();
 }

@@ -80,6 +80,11 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange) {
     quote_single_.clear_exchange(exchange);
 }
 
+void StreamEngine::on_precise_changed(const TSymbol& symbol, int precise) 
+{
+    quote_mixer2_.change_precise(symbol, precise);
+}
+
 void StreamEngine::signal_handler(int signum)
 {
     UT_LOG_INFO(CONFIG->logger_, "StreamEngine::signal_handler " << signum);

@@ -63,6 +63,7 @@ private:
     // 
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
+    bool snap_sended_;
 };
 
 //////////////////////////////////////////////////
@@ -87,6 +88,7 @@ private:
     // 
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
+    bool snap_sended_;
 };
 
 //////////////////////////////////////////////////

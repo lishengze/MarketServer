@@ -8,6 +8,8 @@
 #include "grpc_server.h"
 #include "nacos_client.h"
 
+#define STREAMENGINE utrade::pandora::Singleton<StreamEngine>::GetInstance()
+
 class StreamEngine : public QuoteSourceInterface 
 {
 public:
@@ -21,6 +23,7 @@ public:
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_connected();
     void on_nodata_exchange(const TSymbol& symbol);
+    void on_precise_changed(const TSymbol& symbol, int precise);
 
     // signal handler function
     static volatile int signal_sys;

@@ -51,6 +51,7 @@ bool GrpcDemoEntity::process(){
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service):responder_(&ctx_)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
+    snap_sended_ = false;
 }
 
 void SubscribeSingleQuoteEntity::register_call(){
@@ -143,13 +144,19 @@ void SubscribeSingleQuoteEntity::add_data(std::shared_ptr<void> snap, std::share
         return;
     }
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
+    if( snap_sended_ && update ) {
+        datas_.push_back(update);
+    } else {
+        snap_sended_ = true;
+        datas_.push_back(snap);
+    }
 }
 
 //////////////////////////////////////////////////
 SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service):responder_(&ctx_)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
+    snap_sended_ = false;
 }
 
 void SubscribeMixQuoteEntity::register_call(){
@@ -200,7 +207,7 @@ bool SetParamsEntity::process(){
     CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
     string current_symbol = request_.symbol();
     if( current_symbol != "" ) {
-        CONFIG->symbol_precise_[current_symbol] = request_.precise();
+        CONFIG->set_precise(current_symbol, request_.precise());
     }
     
     status_ = FINISH;

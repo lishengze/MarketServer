@@ -14,6 +14,9 @@
         "publish_data": 1,
         "dump_binary": 0
     },
+    "nacos": {
+        "addr": "36.255.220.139:8848"
+    },
     "redis_quote_": {
         "host": "45.249.244.59",
         "port": 6666,

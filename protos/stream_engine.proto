@@ -41,10 +41,10 @@ message DemoResp {
 // 设置参数
 message SetParamsReq {
     int32 depth = 1;            // 聚合行情深度
-    int32 frequency = 2;        // 聚合行情频率
+    float frequency = 2;        // 聚合行情频率
     int32 precise = 3;          // 设置某个品种的深度（和symbol一起使用）
     string symbol = 4;          // 设置某个品种的深度（和symbol一起使用）
-    int32 raw_frequency = 5;    // 发布原始品种行情频率
+    float raw_frequency = 5;    // 发布原始品种行情频率
 }
 
 message SetParamsResp {}
