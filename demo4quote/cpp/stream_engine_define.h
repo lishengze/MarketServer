@@ -57,6 +57,23 @@ struct SMixQuote {
         }
         return ret;
     }
+
+    void release() {
+        _release(asks);
+        _release(bids);
+        asks = NULL;
+        bids = NULL;
+    }
+
+    void _release(SMixDepthPrice* ptr) {            
+        SMixDepthPrice *tmp = ptr;
+        while( tmp != NULL ) {
+            // 删除             
+            SMixDepthPrice* waitToDel = tmp;
+            tmp = tmp->next;
+            delete waitToDel;
+        }
+    }
 };
 
 inline type_tick get_miliseconds() {

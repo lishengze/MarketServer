@@ -76,19 +76,13 @@ public:
         return forbidden_exchanges_.find(exchange) != forbidden_exchanges_.end();
     }
 
-    void set_configuration_precise(const std::unordered_map<string, int>& vals)
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
-        symbol_precise_ = vals;
-    }
+    void set_configuration_precise(const std::unordered_map<string, int>& vals);
 
     void set_configuration_fee(const std::unordered_map<string, std::unordered_map<string, SymbolFee>>& vals)
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         symbol_fee_ = vals;
     }
-
-    void set_precise(const string& symbol, int precise);
 public:
     // grpc
     string grpc_publish_addr_;          // grpc服务发布地址

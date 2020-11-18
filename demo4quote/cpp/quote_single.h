@@ -22,16 +22,9 @@ private:
 
     bool _get_quote(const TExchange& exchange, const TSymbol& symbol, SMixQuote*& ptr) const;
     
-    SMixDepthPrice* _clear_allpricelevel(const TExchange& exchange, SMixDepthPrice* depths);
-    
     SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, 
         const int& newLength, bool isAsk);
 
     SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
         const int& length, bool isAsk);
-        
-    mutable std::mutex mutex_clocks_;
-    unordered_map<TExchange, unordered_map<TSymbol, long long>> last_clocks_;
-    bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
-    void _publish_quote(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap);
 };

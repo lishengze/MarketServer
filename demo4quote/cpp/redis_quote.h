@@ -12,6 +12,7 @@ struct SymbolMeta
     int pkg_count; // 收到包的数量
     type_seqno seq_no; // 最近一次有效的序列号
     list<SDepthQuote> caches; // 缓存中的序列号 
+    SDepthQuote snap;
 
     static const int MAX_SIZE = 1000;
 
@@ -27,6 +28,7 @@ struct ExchangeMeta
     int pkg_size;  // 收到包的大小
     int pkg_skip_count; // 丢包次数
     unordered_map<TSymbol, SymbolMeta> symbols;
+    
 
     ExchangeMeta() {
         reset();
@@ -96,6 +98,7 @@ private:
 
     // sync snap and updater
     bool _update_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
+    bool _snap_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& wait_to_send);
     bool _check_snap_received(const TExchange& exchange, const TSymbol& symbol) const;
 
     
@@ -111,4 +114,14 @@ private:
     // 统计信息
     type_tick last_statistic_time_; // 上一次计算统计信息时间
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
+
+    // 行情源头下发速度控制
+    struct _UpdateDepth{
+        map<SDecimal, double> asks;
+        map<SDecimal, double> bids;
+    };
+    unordered_map<TExchange, unordered_map<TSymbol, _UpdateDepth>> updates_;
+    unordered_map<TExchange, unordered_map<TSymbol, type_tick>> last_clocks_;
+    bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
+    bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 };

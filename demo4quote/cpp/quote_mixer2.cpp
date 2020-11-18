@@ -21,7 +21,8 @@ bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol) {
     return true;
 }
 
-void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) {
+void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) 
+{
     if( is_snap ) {
         std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     } else {
@@ -53,12 +54,14 @@ void QuoteMixer2::change_precise(const TSymbol& symbol, int precise)
         if( iter == quotes_.end() )
             return;
         // 转为depthquote
-        const SMixQuote* last = iter->second;
+        SMixQuote* last = iter->second;
         iter->second = new SMixQuote();
         compress_mixquote(symbol, *iter->second, *last);
+        // 清理旧的对象
+        last->release();
         delete last;
         // 缩放价位
-        pub_snap = mixquote_to_pbquote2("", symbol, iter->second);
+        pub_snap = mixquote_to_pbquote2("", symbol, iter->second, true);
     }
 
     // 广播snap
@@ -75,7 +78,7 @@ void QuoteMixer2::clear_exchange(const TExchange& exchange)
             v.second->asks = _clear_exchange(exchange, v.second->asks);
             v.second->bids = _clear_exchange(exchange, v.second->bids);
             //_println_("QuoteMixer2 clear exchange %s: %s after clear ...", exchange.c_str(), v.first.c_str());
-            snaps[v.first] = mixquote_to_pbquote2("", v.first, v.second);
+            snaps[v.first] = mixquote_to_pbquote2("", v.first, v.second, true);
             //_println_("QuoteMixer2 clear exchange %s: %s", exchange.c_str(), v.first.c_str());
         }
     }
@@ -85,7 +88,8 @@ void QuoteMixer2::clear_exchange(const TExchange& exchange)
     }
 }
 
-void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) {
+void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
+{
     // 预处理
     SDepthQuote cpsQuote;
     _preprocess(exchange, symbol, quote, cpsQuote);
@@ -97,7 +101,7 @@ void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, co
 
     // 推送结果
     _publish_quote(symbol, pub_snap, pub_diff, false);
-};
+}
 
 bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
 {
@@ -125,7 +129,7 @@ bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, con
         return false;
     }
 
-    pub_snap = mixquote_to_pbquote2("", symbol, ptr);
+    pub_snap = mixquote_to_pbquote2("", symbol, ptr, true);
     return true;
 }
 
@@ -143,7 +147,6 @@ bool QuoteMixer2::_on_update(const TExchange& exchange, const TSymbol& symbol, c
     // 2. 合并价位
     ptr->asks = _mix_exchange(exchange, ptr->asks, quote.asks, quote.ask_length, true);
     ptr->bids = _mix_exchange(exchange, ptr->bids, quote.bids, quote.bid_length, false);
-
     ptr->sequence_no = quote.sequence_no;
 
     // 检查发布频率
@@ -156,7 +159,7 @@ bool QuoteMixer2::_on_update(const TExchange& exchange, const TSymbol& symbol, c
     }
 
     std::cout << "update " << symbol << " " << ptr->ask_length() << "/" << ptr->bid_length() << std::endl;
-    pub_snap = mixquote_to_pbquote2("", symbol, ptr);
+    pub_snap = mixquote_to_pbquote2("", symbol, ptr, true);
     return true;
 }
 

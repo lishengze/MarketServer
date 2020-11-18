@@ -20,7 +20,7 @@ StreamEngine::~StreamEngine(){
 }
 
 void StreamEngine::start() {
-    nacos_client_.start();
+    //nacos_client_.start();
     
     if( !CONFIG->replay_mode_ ) {
         // start redis

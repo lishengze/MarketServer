@@ -64,21 +64,17 @@ void Config::parse_config(const std::string& file_name)
     }
 }
 
-void Config::set_precise(const string& symbol, int precise) 
-{        
-    bool changed = false;
+void Config::set_configuration_precise(const std::unordered_map<string, int>& vals)
+{
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
-        int last_precise = symbol_precise_[symbol];
-        if( last_precise != precise ) {
-            symbol_precise_[symbol] = precise;
-            cout << "set precise: " << symbol << " " << precise << endl;
-            changed = true;
+        for( const auto& v : vals ) {
+            symbol_precise_[v.first] = v.second;
+            _log_and_print("set precise: %s %d", v.first.c_str(), v.second);
         }
     }
 
-    if( changed ){
-        STREAMENGINE->on_precise_changed(symbol, precise);
+    for( const auto& v : vals ) {
+        STREAMENGINE->on_precise_changed(v.first, v.second);
     }
 }
-

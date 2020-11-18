@@ -64,6 +64,7 @@ private:
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
     bool snap_sended_;
+    type_seqno last_seqno;
 };
 
 //////////////////////////////////////////////////
@@ -89,6 +90,7 @@ private:
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
     bool snap_sended_;
+    type_seqno last_seqno;
 };
 
 //////////////////////////////////////////////////

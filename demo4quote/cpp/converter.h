@@ -17,19 +17,20 @@ inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDept
         for(auto &v : ptr->volume) {
             (*depth->mutable_data())[v.first] = v.second;
             total_volume += v.second;
-        }
+        }        
         depth->set_volume(total_volume);
         depth_count += 1;
         ptr = ptr->next;
     }
 }
 
-inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exchange, const string& symbol, const SMixQuote* src)
+inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exchange, const string& symbol, const SMixQuote* src, bool is_snap)
 {
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
-    msd->set_is_snap(true);
+    msd->set_seq_no(src->sequence_no);
+    msd->set_is_snap(is_snap);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);
@@ -55,6 +56,7 @@ inline std::shared_ptr<MarketStreamData> depth_to_pbquote2(const string& exchang
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
+    msd->set_seq_no(src.sequence_no);
     msd->set_is_snap(false);
 
     // 卖盘

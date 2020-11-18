@@ -52,6 +52,7 @@ SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service):responder_
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     snap_sended_ = false;
+    last_seqno = 0;
 }
 
 void SubscribeSingleQuoteEntity::register_call(){
@@ -125,6 +126,11 @@ bool SubscribeSingleQuoteEntity::process(){
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
             MarketStreamData* quote = reply.add_quotes();
             quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+            // 检查seq_no
+            //if( last_seqno != 0 && (1+last_seqno) != quote->seq_no() ) {
+            //    cout << "lost !!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+            //}
+            last_seqno = quote->seq_no();
             //compare_pb_json2(*quote);
         }
         datas_.clear();
@@ -207,7 +213,9 @@ bool SetParamsEntity::process(){
     CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
     string current_symbol = request_.symbol();
     if( current_symbol != "" ) {
-        CONFIG->set_precise(current_symbol, request_.precise());
+        unordered_map<string, int> vals;
+        vals[current_symbol] = request_.precise();
+        CONFIG->set_configuration_precise(vals);
     }
     
     status_ = FINISH;

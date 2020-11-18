@@ -95,52 +95,16 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         return false;
     }
 
-    // 检查全量和增量
-    list<SDepthQuote> wait_to_send; // 第一个为全量包，后续为增量包
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
-        SymbolMeta& meta = metas_[exchange].symbols[symbol];
-        // cache中的数据保证是连续的！
-        if( meta.caches.size() == 0 ) 
-        {
-            _log_and_print("RedisQuote::_on_snap: %s-%s cache is empty.", exchange.c_str(), symbol.c_str());
-            return false;
+    // 更新meta信息
+    list<SDepthQuote> wait_to_send;
+    if( _snap_meta(quote.exchange, quote.symbol, quote, wait_to_send) ){
+        // 执行发送
+        engine_interface_->on_snap(exchange, symbol, quote);
+        for( const auto& v: wait_to_send ) {
+            //engine_interface_->on_update(exchange, symbol, v);
+            _ctrl_update(exchange, symbol, v);
         }
-        if( meta.caches.back().sequence_no < quote.sequence_no ) 
-        {
-            _log_and_print("RedisQuote::_on_snap: %s-%s cache seqno lay back. cache=%lu quote=%lu", exchange.c_str(), symbol.c_str(), meta.caches.back().sequence_no, quote.sequence_no);
-            meta.caches.clear();
-            return false;
-        }
-        if( meta.caches.front().sequence_no > (quote.sequence_no+1) )
-        {
-            _log_and_print("RedisQuote::_on_snap: %s-%s snap seqno lay back.", exchange.c_str(), symbol.c_str());
-            return false;
-        }
-
-        // 逐个查找增量位置
-        _log_and_print("RedisQuote::_on_snap: %s-%s get cache seqno from %lu to %lu, snap seqno=%lu.", exchange.c_str(), symbol.c_str(), 
-            meta.caches.front().sequence_no, meta.caches.back().sequence_no, quote.sequence_no);
-        wait_to_send.push_back(quote);
-        for( const auto& v : meta.caches ) 
-        {
-            if( v.sequence_no >= (quote.sequence_no + 1 ) ) {
-                wait_to_send.push_back(v);
-            }
-        }
-        meta.caches.clear();
-        meta.seq_no = wait_to_send.back().sequence_no;
-    }
-
-    _log_and_print("RedisQuote::_on_snap: %s-%s cached %lu records.", exchange.c_str(), symbol.c_str(), wait_to_send.size() - 1);
-    bool is_first = true;
-    for( const auto& v: wait_to_send ) {
-        if( is_first ) {
-            engine_interface_->on_snap(exchange, symbol, v);
-            is_first = false;
-        } else {
-            engine_interface_->on_update(exchange, symbol, v);
-        }
+        return true;
     }
 
     return true;
@@ -172,12 +136,15 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
         // 更新meta信息
         if( !_update_meta(quote.exchange, quote.symbol, quote) ) {
-            redis_snap_requester_.add_symbol(quote.exchange, quote.symbol);
             return;
         }
 
         // 回调
-        engine_interface_->on_update(quote.exchange, quote.symbol, quote);
+        //engine_interface_->on_update(quote.exchange, quote.symbol, quote);
+        if( !_ctrl_update(quote.exchange, quote.symbol, quote) ) {         
+            _log_and_print("RedisQuote::OnMessage: channel=%s update too many depth.", channel.c_str());   
+            redis_snap_requester_.add_symbol(quote.exchange, quote.symbol);
+        }
     }
     else if(channel.find(TICK_HEAD) != string::npos)
     {
@@ -198,6 +165,65 @@ void RedisQuote::OnDisconnected(int status) {
     engine_interface_->on_disconnected();
 };
 
+bool RedisQuote::_snap_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& wait_to_send)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
+
+    ExchangeMeta& meta = metas_[exchange];
+    SymbolMeta& symbol_meta = meta.symbols[symbol];
+
+    if( symbol_meta.seq_no > 0 ) {
+        // 已经开始推送
+        _log_and_print("RedisQuote::_snap_meta: %s-%s recv snap again.", exchange.c_str(), symbol.c_str());
+        symbol_meta.seq_no = 0;
+        symbol_meta.snap = quote;
+        return false;
+    } else {
+        // 未开始推送
+        if( symbol_meta.caches.size() == 0 ) {
+            // 没有缓存
+            _log_and_print("RedisQuote::_snap_meta: %s-%s updates is empty.", exchange.c_str(), symbol.c_str());
+            symbol_meta.snap = quote;
+            return false;
+        } else {
+            _log_and_print("RedisQuote::_snap_meta: %s-%s updates=%lu-%lu snap=%lu", exchange.c_str(), symbol.c_str(), 
+                symbol_meta.caches.front().sequence_no,
+                symbol_meta.caches.back().sequence_no, 
+                quote.sequence_no);
+
+            if( quote.sequence_no < (symbol_meta.caches.front().sequence_no-1) ) {
+                // snap < head 
+                _log_and_print("RedisQuote::_snap_meta: %s-%s snap too late.", exchange.c_str(), symbol.c_str());
+                redis_snap_requester_.add_symbol(exchange, symbol);
+                return false;
+            } else if( quote.sequence_no <= symbol_meta.caches.back().sequence_no ) {
+                // snap < tail
+                list<SDepthQuote> wait_to_send; // 第一个为全量包，后续为增量包
+                for( const auto& v : symbol_meta.caches ) 
+                {
+                    if( v.sequence_no >= (quote.sequence_no + 1 ) ) {
+                        wait_to_send.push_back(v);
+                    }
+                }
+                _log_and_print("RedisQuote::_snap_meta: %s-%s updates %lu records.", exchange.c_str(), symbol.c_str(), wait_to_send.size());
+                symbol_meta.caches.clear();
+                symbol_meta.seq_no = wait_to_send.size() == 0 ? quote.sequence_no : wait_to_send.back().sequence_no;
+                symbol_meta.snap = quote;
+                return true;
+            } else {
+                // snap > tail
+                _log_and_print("RedisQuote::_snap_meta: %s-%s updates too late.", exchange.c_str(), symbol.c_str());
+                symbol_meta.snap = quote;
+                symbol_meta.caches.clear();
+                return false;
+            }
+        } 
+    }
+
+    // never reach here
+    return true;
+}
+
 bool RedisQuote::_update_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
@@ -209,37 +235,72 @@ bool RedisQuote::_update_meta(const TExchange& exchange, const TSymbol& symbol, 
     meta.pkg_count += 1;
     meta.pkg_size += quote.raw_length;
 
-    type_seqno last_available_seqno = symbol_meta.seq_no;
-    // 还没有快照，放入缓存
-    if( last_available_seqno == 0 ) 
-    {
-        type_seqno back_seqno = symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.back().sequence_no;
-        if( back_seqno > 0 && (back_seqno+1) != quote.sequence_no ) 
-        {
-            _log_and_print("RedisQuote::_update_meta: %s-%s sequence skip from %lu to %lu", exchange.c_str(), symbol.c_str(), last_available_seqno, quote.sequence_no);
-            meta.pkg_skip_count += 1;
+    if( symbol_meta.seq_no > 0 )
+    {   // 已经开始下发
+        if( quote.sequence_no == (symbol_meta.seq_no + 1) ) {
+            // 序号连续
+            symbol_meta.seq_no = quote.sequence_no;
+            return true;
+        } else {
+            // 序号不连续
+            redis_snap_requester_.add_symbol(exchange, symbol);
             symbol_meta.caches.clear();
+            symbol_meta.caches.push_back(quote);
+            symbol_meta.seq_no = 0;
+            symbol_meta.snap.sequence_no = 0;
+
+            meta.pkg_skip_count += 1;
+            _log_and_print("RedisQuote::_update_meta: %s-%s sequence skip from %lu to %lu", exchange.c_str(), symbol.c_str(), symbol_meta.seq_no, quote.sequence_no);
+        
+            return false;
         }
+    }
+    else
+    {   // 未开始下发
+        auto last_snap_seqno = symbol_meta.snap.sequence_no;
+        if( last_snap_seqno == 0 ) {
+            // snap还没有到
+            auto last_seqno = symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.back().sequence_no;
+            if( last_seqno == 0 || (last_seqno+1) == quote.sequence_no ) {
+                // 连续
+                redis_snap_requester_.add_symbol(exchange, symbol);
+                symbol_meta.caches.push_back(quote);
+                return false;
+            } else {
+                // 不连续
+                _log_and_print("RedisQuote::_update_meta: %s-%s sequence skip from %lu to %lu", exchange.c_str(), symbol.c_str(), last_seqno, quote.sequence_no);
+                symbol_meta.caches.clear();
+                symbol_meta.caches.push_back(quote);
 
-        symbol_meta.caches.push_back(quote);
-        if( symbol_meta.caches.size() > SymbolMeta::MAX_SIZE ) {
-            symbol_meta.caches.pop_front();
+                meta.pkg_skip_count += 1;
+        
+                return false;
+            }
+        } else {
+            _log_and_print("RedisQuote::_update_meta: %s-%s snap=%lu update=%lu", exchange.c_str(), symbol.c_str(), last_snap_seqno, quote.sequence_no);
+            if( (last_snap_seqno+1) == quote.sequence_no ) {
+                _log_and_print("RedisQuote::_update_meta: %s-%s match.", exchange.c_str(), symbol.c_str());
+                // 等于snap+1
+                symbol_meta.seq_no = quote.sequence_no;
+                symbol_meta.caches.clear();
+                // 释放锁，发送snap
+                inner_lock.unlock();
+                engine_interface_->on_snap(exchange, symbol, symbol_meta.snap);
+                return true;
+            } else if( (last_snap_seqno+1) > quote.sequence_no ) {
+                // 小于snap+1
+                return false;
+            } else {
+                // 大于snap+1
+                redis_snap_requester_.add_symbol(exchange, symbol);
+                symbol_meta.caches.clear();
+                symbol_meta.caches.push_back(quote);
+                return false;
+            }
         }
-
-        return false;
     }
-
-    // 发生丢包，重新请求snap
-    if( (last_available_seqno +1) != quote.sequence_no )
-    {
-        _log_and_print("RedisQuote::_update_meta: %s-%s sequence skip from %lu to %lu", exchange.c_str(), symbol.c_str(), last_available_seqno, quote.sequence_no);
-        symbol_meta.seq_no = 0;
-        meta.pkg_skip_count += 1;
-        return false;
-    }
-
-    // 设置最新有效序号
-    symbol_meta.seq_no = quote.sequence_no;
+    
+    // never reach here
     return true;
 };
 
@@ -325,4 +386,64 @@ void RedisQuote::_check()
             last_statistic_time_ = now;
         }
     }
-};
+}
+
+bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
+{
+    _UpdateDepth& update = updates_[exchange][symbol];
+    for( unsigned int i = 0 ; i < quote.ask_length ; ++i ) {
+        const SDepthPrice& depth = quote.asks[i];
+        update.asks[depth.price] = depth.volume;
+    }
+    for( unsigned int i = 0 ; i < quote.bid_length ; ++i ) {
+        const SDepthPrice& depth = quote.bids[i];
+        update.bids[depth.price] = depth.volume;
+    }
+    if( !_check_update_clocks(exchange, symbol) ) {
+        return true;
+    }
+
+    // 数据太多
+    if( update.asks.size() >= MAX_DEPTH || update.bids.size() >= MAX_DEPTH ) {
+        update.asks.clear();
+        update.bids.clear();
+        return false;
+    }
+
+    SDepthQuote tmp;
+    vassign(tmp.exchange, MAX_EXCHANGE_NAME_LENGTH, exchange);
+    vassign(tmp.symbol, MAX_SYMBOL_NAME_LENGTH, symbol);
+    int count = 0;
+    for( auto iter = update.asks.begin() ; iter != update.asks.end() ; ++iter, ++count )
+    {
+        tmp.asks[count].price = iter->first;
+        tmp.asks[count].volume = iter->second;
+    }
+    tmp.ask_length = count;
+    count = 0;
+    for( auto iter = update.bids.rbegin() ; iter != update.bids.rend() ; ++iter, ++count )
+    {
+        tmp.bids[count].price = iter->first;
+        tmp.bids[count].volume = iter->second;
+    }
+    tmp.bid_length = count;
+    engine_interface_->on_update(exchange, symbol, tmp);
+
+    update.asks.clear();
+    update.bids.clear();
+    return true;
+}
+
+bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& symbol) {
+    if( CONFIG->grpc_publish_raw_frequency_ == 0 )
+        return true;
+
+    // 每秒更新频率控制
+    auto last = last_clocks_[exchange][symbol];
+    auto now = get_miliseconds();
+    if( (now - last) < (1000/CONFIG->grpc_publish_raw_frequency_) ) {
+        return false;
+    }
+    last_clocks_[exchange][symbol] = now;
+    return true;
+}
