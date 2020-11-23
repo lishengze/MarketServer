@@ -16,6 +16,8 @@ struct SymbolMeta
 
     static const int MAX_SIZE = 1000;
 
+    bool publish_started() const { return seq_no > 0 ; }
+    
     SymbolMeta() {
         pkg_count = 0;
         seq_no = 0;
@@ -88,6 +90,7 @@ private:
     type_tick last_redis_time_;
     // redis接口对象
     RedisApiPtr     redis_api_;
+    set<string>     subscribed_topics_;
 
     // 管理exchange+symbol的基础信息
     mutable std::mutex mutex_metas_;
@@ -97,8 +100,8 @@ private:
     RedisSnapRequester    redis_snap_requester_;
 
     // sync snap and updater
-    bool _update_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
-    bool _snap_meta(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& wait_to_send);
+    bool _update_meta_by_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
+    bool _update_meta_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& wait_to_send);
     bool _check_snap_received(const TExchange& exchange, const TSymbol& symbol) const;
 
     
