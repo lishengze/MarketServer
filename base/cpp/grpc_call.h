@@ -52,8 +52,6 @@ public:
 public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
-    template<class ENTITY>
-    BaseGrpcEntity* spawn(void* service) { return new ENTITY(service); };
 
     BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1){}
     virtual ~BaseGrpcEntity(){}
@@ -119,12 +117,12 @@ public:
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             clients_.insert((ENTITY*)entity);
         }
-        /*ENTITY* last = (ENTITY*)entity;
-        ENTITY* ptr = last->spawn<ENTITY>(service_);
+        ENTITY* last = (ENTITY*)entity;
+        ENTITY* ptr = last->spawn();
         ptr->set_callid(call_id_);
         ptr->set_completequeue(cq_);
         ptr->set_parent(this);
-        ptr->register_call();*/
+        ptr->register_call();
     }
 
     void on_disconnect(void* entity) {

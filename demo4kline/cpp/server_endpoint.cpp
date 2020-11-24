@@ -49,6 +49,7 @@ void ServerEndpoint::init()
 void ServerEndpoint::_handle_rpcs() 
 {
     std::cout << "_handle_rpcs running on ..." << std::endl;
+    std::cout << sizeof(KlineData) << endl;
     void* tag;
     bool ok;
     while(true) {

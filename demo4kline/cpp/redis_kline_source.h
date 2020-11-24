@@ -10,6 +10,7 @@ using njson = nlohmann::json;
 
 #define MIN1_KLINE_PREFIX "KLINEx|"
 
+#pragma pack(1)
 struct KlineData
 {
     type_tick index;
@@ -24,6 +25,7 @@ struct KlineData
         volume = 0;
     }
 };
+#pragma pack()
 
 struct RedisParams {
     string     host;

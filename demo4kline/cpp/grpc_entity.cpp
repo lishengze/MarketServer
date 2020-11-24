@@ -46,18 +46,18 @@ bool GetLastEntity::process()
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     if( datas_.size() == 0 )
         return false;
-
+        
+    GetKlinesResponse reply;
+    //发送最后一根
     KlineData tmp = datas_.front();
     datas_.pop_front();
-    inner_lock.unlock();
-
-    
-    GetKlinesResponse reply;
     reply.set_symbol("BTC_USDT");
     reply.set_total_num(1);
     reply.set_num(1);
     reply.set_resolution(60);
     reply.set_data(&tmp, sizeof(tmp));
+
+    inner_lock.unlock();
     responder_.Write(reply, this);      
     return true;
 }

@@ -4,8 +4,9 @@
 
 #define CALC_BASE(x) (int(pow(10, (x))))
 
+#pragma pack(1)
 struct SDecimal {
-    unsigned long long value;
+    unsigned long value;
     unsigned short base;
 
     SDecimal() {
@@ -155,3 +156,4 @@ struct SDecimal {
         return ret;
     }
 };
+#pragma pack()
