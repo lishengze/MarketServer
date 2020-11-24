@@ -52,6 +52,9 @@ void Config::parse_config(const std::string& file_name)
         symbol_precise_["BTC_USDT"] = 1;
         symbol_precise_["ETH_USDT"] = 2;
         symbol_precise_["ETH_BTC"] = 6;
+        symbol_precise_["XLM_BTC"] = 6;
+        symbol_precise_["XLM_ETH"] = 6;
+        symbol_precise_["IRIS_USDT"] = 6;
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)

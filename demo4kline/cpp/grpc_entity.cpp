@@ -5,6 +5,7 @@
 GetKlinesEntity::GetKlinesEntity(void* service, IDataProvider* provider):responder_(&ctx_)
 {
     service_ = (GrpcKlineService::AsyncService*)service;
+    provider_ = provider;
 }
 
 void GetKlinesEntity::register_call(){
@@ -12,10 +13,17 @@ void GetKlinesEntity::register_call(){
     service_->RequestGetKlines(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool GetKlinesEntity::process(){
-    
+bool GetKlinesEntity::process()
+{
+    vector<KlineData> klines;
+    provider_->get_kline(request_.symbol(), request_.resolution(), request_.start_time(), request_.end_time(), klines);
+
     GetKlinesResponse reply;
-    
+    reply.set_symbol("BTC_USDT");
+    reply.set_resolution(request_.resolution());
+    reply.set_total_num(klines.size());
+    reply.set_num(klines.size());
+    reply.set_data(&*klines.begin(), klines.size() * sizeof(KlineData));
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);
     return true;
@@ -25,6 +33,7 @@ bool GetKlinesEntity::process(){
 GetLastEntity::GetLastEntity(void* service, IDataProvider* provider):responder_(&ctx_)
 {
     service_ = (GrpcKlineService::AsyncService*)service;
+    provider_ = provider;
 }
 
 void GetLastEntity::register_call(){
@@ -32,22 +41,23 @@ void GetLastEntity::register_call(){
     service_->RequestGetLast(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool GetLastEntity::process(){
+bool GetLastEntity::process()
+{    
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    if( datas_.size() == 0 )
+        return false;
+
+    KlineData tmp = datas_.front();
+    datas_.pop_front();
+    inner_lock.unlock();
+
     
     GetKlinesResponse reply;
-    {
-        /*std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-        for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamData* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
-        }
-        datas_.clear();*/
-    }
+    reply.set_symbol("BTC_USDT");
+    reply.set_total_num(1);
+    reply.set_num(1);
+    reply.set_resolution(60);
+    reply.set_data(&tmp, sizeof(tmp));
+    responder_.Write(reply, this);      
     return true;
-}
-
-void GetLastEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
 }

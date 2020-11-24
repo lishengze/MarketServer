@@ -36,12 +36,7 @@ struct SDecimal {
     }
 
     SDecimal(double v, double bias = 0.00001) {
-        int count = 0, limit = 100;
-        while( count >= limit && abs(get_value() - v)/v > bias ) {
-            base += 1;
-            count += 1;
-            value = v * CALC_BASE(base);
-        }
+        from(v, bias);
     }
 
     static SDecimal max_decimal() {
@@ -54,6 +49,15 @@ struct SDecimal {
     static SDecimal min_decimal() {
         SDecimal ret;
         return ret;
+    }
+
+    void from(double v, double bias = 0.00001) {
+        int count = 0, limit = 100;
+        while( count >= limit && abs(get_value() - v)/v > bias ) {
+            base += 1;
+            count += 1;
+            value = v * CALC_BASE(base);
+        }
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {

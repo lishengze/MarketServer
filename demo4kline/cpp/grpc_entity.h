@@ -18,8 +18,6 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
-
 private:
     GrpcKlineService::AsyncService* service_;
     ServerContext ctx_;
@@ -27,6 +25,8 @@ private:
     GetKlinesRequest request_;
     GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
+
+    IDataProvider* provider_;
 };
 
 class GetLastEntity : public BaseGrpcEntity
@@ -38,7 +38,10 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    void add_data(const KlineData& kline) {        
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        datas_.push_back(kline);
+    }
 
 private:
     GrpcKlineService::AsyncService* service_;
@@ -50,5 +53,7 @@ private:
 
     // 
     mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    list<KlineData> datas_;
+    
+    IDataProvider* provider_;
 };

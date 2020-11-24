@@ -32,7 +32,6 @@ public:
     virtual void on_disconnect(void*) = 0;
     virtual void release(void*) = 0;
     virtual void process(void*) = 0;
-    virtual void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) = 0;
 };
 
 class BaseGrpcEntity
@@ -53,7 +52,6 @@ public:
 public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
-    virtual void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) = 0;
     template<class ENTITY>
     BaseGrpcEntity* spawn(void* service) { return new ENTITY(service); };
 
@@ -137,10 +135,11 @@ public:
         }
     }
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+    template<class DATA_TYPE>
+    void add_data(const DATA_TYPE& data) {
         std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
         for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
-            (*iter)->add_data(snap, update);
+            (*iter)->add_data(data);
         }
     }
 private:

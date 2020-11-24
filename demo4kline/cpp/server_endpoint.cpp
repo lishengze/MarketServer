@@ -3,7 +3,6 @@
 
 ServerEndpoint::ServerEndpoint()
 {
-
 }
 
 ServerEndpoint::~ServerEndpoint()
@@ -13,7 +12,8 @@ ServerEndpoint::~ServerEndpoint()
 
 void ServerEndpoint::start()
 {
-
+    init();
+    thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
 }
 
 void ServerEndpoint::init()
@@ -48,6 +48,7 @@ void ServerEndpoint::init()
 
 void ServerEndpoint::_handle_rpcs() 
 {
+    std::cout << "_handle_rpcs running on ..." << std::endl;
     void* tag;
     bool ok;
     while(true) {
@@ -64,7 +65,16 @@ void ServerEndpoint::_handle_rpcs()
     }
 }
 
-void ServerEndpoint::on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+void ServerEndpoint::on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
-
+    for( const auto& v : klines ) {
+        _log_and_print("%s index=%lu open=%s high=%s low=%s close=%s", symbol.c_str(), 
+            v.index,
+            v.px_open.get_str_value().c_str(),
+            v.px_high.get_str_value().c_str(),
+            v.px_low.get_str_value().c_str(),
+            v.px_close.get_str_value().c_str()
+            );            
+        caller_getlast_->add_data(v);
+    }
 }

@@ -4,7 +4,6 @@
 #include "pandora/redis/redis_api.h"
 #include "pandora/util/json.hpp"
 
-#include "kline_server_define.h"
 #include "redis_kline_source.h"
 #include "kline_mixer.h"
 #include "kline_database.h"

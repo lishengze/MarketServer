@@ -25,7 +25,7 @@ void KlineServer::start()
     kline_mixer_.set_db_interface(&kline_db_);
     kline_mixer_.start();
 
-    kline_source_.register_callbakc(&kline_mixer_);
+    kline_source_.register_callback(&kline_mixer_);
     kline_source_.start();
 }
 

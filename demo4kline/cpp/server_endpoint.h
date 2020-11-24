@@ -17,7 +17,7 @@ public:
     void set_provider(IDataProvider* provider) { provider_ = provider; }
 
     // IMixerKlinePusher
-    void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+    void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
 private:
 
     std::thread* thread_loop_ = nullptr;
@@ -29,7 +29,7 @@ private:
     std::unique_ptr<ServerCompletionQueue> cq_;
     GrpcKlineService::AsyncService service_;
     std::unique_ptr<Server> server_;
-    CommonGrpcCall* caller_getklines_;
-    CommonGrpcCall* caller_getlast_;
+    GrpcCall<GetKlinesEntity>* caller_getklines_;
+    GrpcCall<GetLastEntity>* caller_getlast_;
     unordered_map<int, CommonGrpcCall*> callers_;
 };

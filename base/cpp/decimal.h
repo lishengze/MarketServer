@@ -1,19 +1,6 @@
 #pragma once
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <math.h>
-#include <limits.h>
-#include <string>
-#include <map>
-#include <vector>
-#include <unordered_map>
-#include <unordered_set>
-#include <iostream>
-#include <cstring>
-#include <chrono>
-#include <algorithm>
-using namespace std;
+#include "basic.h"
 
 #define CALC_BASE(x) (int(pow(10, (x))))
 
@@ -26,6 +13,10 @@ struct SDecimal {
         base = 0;
     }
 
+    SDecimal(double v, double bias = 0.00001) {
+        from(v, bias);
+    }
+
     static SDecimal max_decimal() {
         SDecimal ret;
         ret.value = ULLONG_MAX;
@@ -36,6 +27,16 @@ struct SDecimal {
     static SDecimal min_decimal() {
         SDecimal ret;
         return ret;
+    }
+
+    void from(double v, double bias = 0.0000001) {
+        //cout << fixed << v << endl;
+        int count = 0, limit = 100;
+        while( count <= limit && abs(get_value() - v)/v > bias ) {
+            base += 1;
+            count += 1;
+            value = v * CALC_BASE(base);
+        }
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {

@@ -8,6 +8,8 @@ using njson = nlohmann::json;
 #include "base/cpp/decimal.h"
 #include "base/cpp/quote.h"
 
+#define MIN1_KLINE_PREFIX "KLINEx|"
+
 struct KlineData
 {
     type_tick index;
@@ -16,6 +18,11 @@ struct KlineData
     SDecimal px_low;
     SDecimal px_close;
     double volume;
+
+    KlineData(){
+        index = 0;
+        volume = 0;
+    }
 };
 
 struct RedisParams {
@@ -30,7 +37,7 @@ public:
 };
 
 
-class RedisKlineSource 
+class RedisKlineSource : public utrade::pandora::CRedisSpi
 {
 public:
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
@@ -40,7 +47,7 @@ public:
     ~RedisKlineSource();
 
     void start();
-    void register_callbakc(IRedisKlineSource* ptr) { callbacks_.insert(ptr); }
+    void register_callback(IRedisKlineSource* ptr) { callbacks_.insert(ptr); }
 
     // redis connect notify
     virtual void OnConnected();    
@@ -50,7 +57,6 @@ public:
     virtual void OnMessage(const std::string& channel, const std::string& msg);
 
 private:
-    RedisParams params_;
     // 上一次连接时间
     type_tick last_redis_time_;
     // redis接口对象
@@ -58,4 +64,7 @@ private:
     
     // callback
     set<IRedisKlineSource*> callbacks_;
+
+    // 上一次从redis收到行情的时间
+    type_tick last_time_; 
 };

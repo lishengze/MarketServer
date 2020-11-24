@@ -1,7 +1,9 @@
 #pragma once
 
+#include "basic.h"
+
 #define TSymbol string
 #define TExchange string
-using uint32 = unsigned int;
-using type_seqno = unsigned long;
-using type_tick = unsigned long;
+
+#define PRICE_PRECISE 0.000000001
+#define VOLUME_PRECISE 0.000000001
