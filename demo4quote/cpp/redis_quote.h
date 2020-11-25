@@ -72,6 +72,9 @@ public:
     void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
     void subscribe(const string& channel);
     void psubscribe(const string& pchannel);
+
+    // 精度变更，重新获取数据
+    void change_precise(const TSymbol& symbol, int precise);
     
     // callback from RedisSnapRequester
     bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
@@ -123,7 +126,8 @@ private:
         map<SDecimal, double> asks;
         map<SDecimal, double> bids;
     };
-    unordered_map<TExchange, unordered_map<TSymbol, _UpdateDepth>> updates_;
+    mutable std::mutex mutex_clocks_;
+    unordered_map<TExchange, unordered_map<TSymbol, _UpdateDepth>> updates_;  // 增量更新数据
     unordered_map<TExchange, unordered_map<TSymbol, type_tick>> last_clocks_;
     bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
     bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);

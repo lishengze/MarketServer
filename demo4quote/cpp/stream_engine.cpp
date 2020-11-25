@@ -73,9 +73,10 @@ void StreamEngine::on_connected()
             quote_source_.subscribe("UPDATEx|" + symbol + "." + exchange);            
         }
     }
-};
+}
 
-void StreamEngine::on_nodata_exchange(const TExchange& exchange) {
+void StreamEngine::on_nodata_exchange(const TExchange& exchange) 
+{
     quote_mixer2_.clear_exchange(exchange);
     quote_single_.clear_exchange(exchange);
 }
@@ -83,6 +84,7 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange) {
 void StreamEngine::on_precise_changed(const TSymbol& symbol, int precise) 
 {
     quote_mixer2_.change_precise(symbol, precise);
+    quote_source_.change_precise(symbol, precise);
 }
 
 void StreamEngine::signal_handler(int signum)

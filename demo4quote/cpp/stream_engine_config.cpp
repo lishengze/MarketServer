@@ -55,6 +55,7 @@ void Config::parse_config(const std::string& file_name)
         symbol_precise_["XLM_BTC"] = 6;
         symbol_precise_["XLM_ETH"] = 6;
         symbol_precise_["IRIS_USDT"] = 6;
+        symbol_precise_["HT_USDT"] = 4;
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)

@@ -116,6 +116,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
     last_time_ = get_miliseconds();
     //cout << channel << endl;
     
+    _log_and_print("%s update json size %lu", channel.c_str(), msg.length());
     //std::cout << "update json size:" << msg.length() << std::endl;
     if (channel.find(DEPTH_UPDATE_HEAD) != string::npos)
     {
@@ -408,6 +409,8 @@ void RedisQuote::_check()
 
 bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
+    std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+
     _UpdateDepth& update = updates_[exchange][symbol];
     for( unsigned int i = 0 ; i < quote.ask_length ; ++i ) {
         const SDepthPrice& depth = quote.asks[i];
@@ -418,6 +421,7 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
         update.bids[depth.price] = depth.volume;
     }
     if( !_check_update_clocks(exchange, symbol) ) {
+        _log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
         return true;
     }
 
@@ -464,4 +468,39 @@ bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& 
     }
     last_clocks_[exchange][symbol] = now;
     return true;
+}
+
+void RedisQuote::change_precise(const TSymbol& symbol, int precise)
+{
+    // 清除频率记号
+    {        
+        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+        for( auto& v : last_clocks_ ) {
+            unordered_map<TSymbol, type_tick>& ticks = v.second;
+            auto iter = ticks.find(symbol);
+            if( iter != ticks.end() ) {
+                ticks.erase(iter);
+            }
+        }
+        for( auto& v : updates_ ) {
+            unordered_map<TSymbol, _UpdateDepth>& updates = v.second;
+            auto iter = updates.find(symbol);
+            if( iter != updates.end() ) {
+                updates.erase(iter);
+            }
+        }
+    }
+
+    // 清除数据
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
+        for( auto& v : metas_ ) {
+            ExchangeMeta& meta = v.second;
+            auto iter = meta.symbols.find(symbol);
+            if( iter != meta.symbols.end() ) {
+                meta.symbols.erase(iter);
+            }
+            redis_snap_requester_.add_symbol(v.first, symbol);
+        }
+    }
 }

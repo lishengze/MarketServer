@@ -10,6 +10,9 @@ QuoteMixer2::~QuoteMixer2() {
 }
 
 bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol) {
+    if( CONFIG->grpc_publish_frequency_ == 0 )
+        return true;
+
     std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
     // 每秒更新频率控制
     auto iter = last_clocks_.find(symbol);
@@ -48,20 +51,28 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 void QuoteMixer2::change_precise(const TSymbol& symbol, int precise)
 {
     std::shared_ptr<MarketStreamData> pub_snap;
+
+    // 清除行情数据
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
         auto iter = quotes_.find(symbol);
-        if( iter == quotes_.end() )
-            return;
-        // 转为depthquote
-        SMixQuote* last = iter->second;
-        iter->second = new SMixQuote();
-        compress_mixquote(symbol, *iter->second, *last);
-        // 清理旧的对象
-        last->release();
-        delete last;
-        // 缩放价位
-        pub_snap = mixquote_to_pbquote2("", symbol, iter->second, true);
+        if( iter != quotes_.end() )
+        {
+            iter->second->release();
+            pub_snap = mixquote_to_pbquote2("", symbol, iter->second, true);
+        } else {
+            SMixQuote tmp;
+            pub_snap = mixquote_to_pbquote2("", symbol, &tmp, true);
+        }
+    }
+
+    // 清除频率记号
+    {        
+        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+        auto iter = last_clocks_.find(symbol);
+        if( iter != last_clocks_.end() ) {
+            last_clocks_.erase(iter);
+        }
     }
 
     // 广播snap

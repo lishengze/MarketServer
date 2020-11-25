@@ -19,10 +19,10 @@ public:
 private:
     bool _preprocess(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& src, SDepthQuote& dst);
 
-    // quote
+    // 行情数据
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, SMixQuote*> quotes_;
-    unordered_map<TSymbol, SMixQuote*> quote_updates_;
+    unordered_map<TSymbol, SMixQuote*> quote_updates_; // 控制频率的增量，目前没有使用
 
     bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap);
     bool _on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff);
