@@ -1,0 +1,38 @@
+{
+    "grpc": {
+        "frequency": 1,
+        "raw_frequency": 100,
+        "publish_addr": "0.0.0.0:9000",
+        "push_addr_bak": "172.25.1.222:9000",
+        "publish_depth": 200
+    },
+    "debug": {
+        "replay_mode": 0,
+        "replay_ratio": 2,
+        "sample_symbol": "BTC_USDT",
+        "output_to_screen": 0,
+        "publish_data": 1,
+        "dump_binary": 0
+    },
+    "nacos": {
+        "addr": "36.255.220.139:8848"
+    },
+    "redis_quote_": {
+        "host": "45.249.244.59",
+        "port": 6666,
+        "password": "rkqFB4,wpoMmHqT6he}r",
+        "snap_interval": 10
+    },
+    "redis_quote": {
+        "host": "36.255.220.139",
+        "port": 6379,
+        "password": "tradingtest",
+        "snap_interval": 10
+    },
+    "include": {
+        "symbols_bak": ["BTC_USDT"],
+        "symbols": ["BTC_USDT", "ETH_USDT", "ETH_BTC"],
+        "exchanges_bak": ["OKEX"],
+        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX", "ART"]
+    }
+}
