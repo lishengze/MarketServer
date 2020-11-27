@@ -4,7 +4,7 @@
 int main()
 {
     while(true){
-        cout << "hello" << endl;
+        std::cout << "hello" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return 0;
