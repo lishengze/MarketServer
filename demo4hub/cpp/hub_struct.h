@@ -51,6 +51,7 @@ struct KlineData
 
 class HubCallback
 {
+public:
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
 

@@ -14,6 +14,7 @@ int HubInterface::stop()
 
 int HubInterface::set_callback(HubCallback* callback) 
 {
+    utrade::pandora::Singleton<HubEntity>::Instance();
     return HUB->set_callback(callback);
 }
 

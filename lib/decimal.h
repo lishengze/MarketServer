@@ -18,6 +18,10 @@ struct SDecimal {
         from(v, bias);
     }
 
+    SDecimal(const string& s) {
+        from(s);
+    }
+
     static SDecimal max_decimal() {
         SDecimal ret;
         ret.value = ULLONG_MAX;
