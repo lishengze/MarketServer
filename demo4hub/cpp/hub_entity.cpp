@@ -1,6 +1,8 @@
 #include "hub_config.h"
 #include "hub_entity.h"
 #include "hub_interface.h"
+#include <iostream>
+using std::endl;
 
 // config file relative path
 const char* config_file = "config.json";
@@ -19,6 +21,7 @@ HubEntity::~HubEntity()
 
 int HubEntity::start()
 {
+    cout << "HubEntity::start "<< endl;
     quote_updater_.start(CONFIG->grpc_server_addr_, this);
     return 0;
 }

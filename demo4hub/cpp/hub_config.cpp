@@ -1,12 +1,20 @@
 #include "hub_config.h"
 
+#include <iostream>
+using std::cout;
+using std::endl;
+
 void Config::parse_config(const std::string& file_name)
 {
     // init logger
-    logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
+    
 
     try
     {
+        cout << "Config File Name : " << file_name << endl;
+
+        logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
+
         // get the running module path
         //string WorkFolder = utrade::pandora::get_module_path();
         // append the prefix
@@ -20,7 +28,9 @@ void Config::parse_config(const std::string& file_name)
 
         // grpc
         grpc_server_addr_ = js["hub"]["addr"].get<string>();
-        UT_LOG_INFO(logger_, "Parse Config finish.");
+        UT_LOG_INFO(logger_, "Parse Config finish , grpc_server_addr_: " << grpc_server_addr_);
+
+        cout << "grpc_server_addr_: " << grpc_server_addr_ << endl;
     }
     catch (std::exception& e)
     {

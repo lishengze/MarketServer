@@ -4,7 +4,9 @@
 #include "pandora/util/singleton.hpp"
 #include "updater_quote.h"
 
-#define HUB utrade::pandora::Singleton<HubEntity>::GetInstance()
+#include "pandora/util/thread_safe_singleton.hpp"
+
+#define HUB utrade::pandora::ThreadSafeSingleton<HubEntity>::DoubleCheckInstance()
 
 class HubEntity final : public IQuoteUpdater
 {
