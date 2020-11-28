@@ -8,13 +8,9 @@ volatile int ServerEngine::signal_sys = -1;
 
 ServerEngine::ServerEngine(utrade::pandora::io_service_pool& pool)
 {
-    package_manager_ = boost::make_shared<utrade::pandora::PackageManager>();
-
     data_receiver_ = boost::make_shared<DataReceive>(pool);
     data_processer_ = boost::make_shared<DataProcess>(pool, data_receiver_.get());
-    front_server_ = boost::make_shared<FrontServer>(pool, data_processer_.get());
-    
-    
+    front_server_ = boost::make_shared<FrontServer>(pool, data_processer_.get());        
 }
 
 ServerEngine::~ServerEngine()

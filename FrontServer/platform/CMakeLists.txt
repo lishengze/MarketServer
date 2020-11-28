@@ -17,10 +17,12 @@ AUX_SOURCE_DIRECTORY(. MAIN_SRC)
 AUX_SOURCE_DIRECTORY(./data_process DATA_PROCESS_SRC)
 AUX_SOURCE_DIRECTORY(./data_receive DATA_RECEIVE_SRC)
 AUX_SOURCE_DIRECTORY(./front_server FRONT_SERVER_SRC)
+AUX_SOURCE_DIRECTORY(./util UTIL_SRC)
 
 ###############################################################################################
 INCLUDE_DIRECTORIES(".")
-INCLUDE_DIRECTORIES("./uWebsockets")
+INCLUDE_DIRECTORIES("../include")
+INCLUDE_DIRECTORIES("../include/uWebsockets")
 # for include package.h and channel.h
 INCLUDE_DIRECTORIES("../../component/pandora/package")
 # for include assign.h
@@ -53,7 +55,12 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/asio_httpclient")
 
 LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
 
-ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC} ${DATA_PROCESS_SRC} ${DATA_RECEIVE_SRC} ${FRONT_SERVER_SRC})
+LINK_DIRECTORIES("../lib")
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} asio_httpclient quark pandora log4cplus crypto comm uv ssl z uSockets ${Boost_LIBRARIES})
+ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC} ${DATA_PROCESS_SRC} ${DATA_RECEIVE_SRC} ${FRONT_SERVER_SRC} ${UTIL_SRC})
+
+TARGET_LINK_LIBRARIES(${BIN_NAME} ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto uv z uSockets )
+TARGET_LINK_LIBRARIES(${BIN_NAME} demo4hub)
+TARGET_LINK_LIBRARIES(${BIN_NAME} asio_httpclient quark pandora comm log4cplus)
 

@@ -27,6 +27,8 @@ public:
 
     void process_rtn_depth_package(PackagePtr package);
 
+    void process_sdepth_package(PackagePtr package);
+
 private:
     WBServerPtr         wb_server_;    
 };

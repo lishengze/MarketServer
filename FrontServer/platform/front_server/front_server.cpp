@@ -1,5 +1,7 @@
 #include "front_server.h"
 #include "quark/cxx/ut/UtPrintUtils.h"
+#include "hub_struct.h"
+#include "../util/tools.h"
 
 FrontServer::FrontServer(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
@@ -48,11 +50,27 @@ void FrontServer::handle_response_message(PackagePtr package)
         case UT_FID_RtnDepth:
             process_rtn_depth_package(package);
             break;  
-        
+
+        case UT_FID_SDepthData:
+            process_sdepth_package(package);
+            break;
         default:
             cout << "Unknow Package" << endl;
             break;
     }    
+}
+
+void FrontServer::process_sdepth_package(PackagePtr package)
+{
+    cout << "FrontServer::process_sdepth_package " << endl;
+    
+    auto* psdepth = GET_FIELD(package, SDepthData);
+
+    string send_str = SDepthDataToJsonStr(*psdepth);
+
+    cout << send_str << endl;
+
+    wb_server_->broadcast(send_str);
 }
 
 void FrontServer::process_rtn_depth_package(PackagePtr package)
