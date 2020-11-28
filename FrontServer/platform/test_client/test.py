@@ -2,17 +2,17 @@ import websocket
 
 
 def on_message(ws, message):
-    print(ws)
+    print("New Message")
     print(message)
 
 
 def on_error(ws, error):
-    print(ws)
+    print("Error")
     print(error)
 
 
 def on_close(ws):
-    print(ws)
+    print("Server Closed")
     print("### closed ###")
 
 def on_open(ws):

@@ -4,6 +4,7 @@
 #include "pandora/util/singleton.hpp"
 #include "pandora/util/thread_basepool.h"
 
+#include "../front_server_declare.h"
 #include "wb_server.h"
 
 
@@ -23,6 +24,8 @@ public:
 
     void handle_request_message(PackagePtr package);
     void handle_response_message(PackagePtr package);
+
+    void process_rtn_depth_package(PackagePtr package);
 
 private:
     WBServerPtr         wb_server_;    

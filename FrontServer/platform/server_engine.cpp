@@ -1,18 +1,20 @@
 #include "server_engine.h"
-
-//
-// Created by wanghuaiyu on 2020/3/25.
-//
+#include "front_server_declare.h"
 
 #include "server_engine.h"
 
 volatile int ServerEngine::signal_sys = -1;
 
+
 ServerEngine::ServerEngine(utrade::pandora::io_service_pool& pool)
 {
-    front_server_ = boost::make_shared<FrontServer>(pool);
-    data_processer_ = boost::make_shared<DataProcess>(pool, front_server_.get());
-    data_receiver_ = boost::make_shared<DataReceive>(pool, data_processer_.get());
+    package_manager_ = boost::make_shared<utrade::pandora::PackageManager>();
+
+    data_receiver_ = boost::make_shared<DataReceive>(pool);
+    data_processer_ = boost::make_shared<DataProcess>(pool, data_receiver_.get());
+    front_server_ = boost::make_shared<FrontServer>(pool, data_processer_.get());
+    
+    
 }
 
 ServerEngine::~ServerEngine()
@@ -39,7 +41,7 @@ void ServerEngine::signal_handler(int signum)
     printf("[ServerEngine], signal_handler:%d", signum);
     signal_sys = signum;
     // 释放资源
-    SERVER_EENGINE->release();
+    SERVER_EENGINE.release();
     // 退出
     exit(0);
 }

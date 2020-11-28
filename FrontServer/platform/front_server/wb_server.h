@@ -46,16 +46,24 @@ class WBServer
 
     void on_close(uWS::WebSocket<false, true> * );
 
+    void listen();
+
     void launch();
+
+    void release();
+
+    void broadcast(string msg);
 
     private:
         us_socket_context_options_t             socket_options_;
-        uWS::App::WebSocketBehavior             websocket_behavior_;        
-        boost::shared_ptr<uWS::SSLApp>          ssl_app_;
-        uWS::App                                wss_server_;
-        int                                     server_port_{9000};
+        uWS::App::WebSocketBehavior             websocket_behavior_;
 
+        uWS::App                                wss_server_;
+
+        int                                     server_port_{9002};
         std::set<uWS::WebSocket<false, true> *> wss_con_set_;
+
+        boost::shared_ptr<std::thread>          listen_thread_;
 };
 
 FORWARD_DECLARE_PTR(WBServer);

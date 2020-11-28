@@ -19,18 +19,15 @@ int main()
 
         utrade::pandora::io_service_pool engine_pool(3);
 
-        utrade::pandora::Singleton<ServerEngine>::Instance(engine_pool);
-
-        SERVER_EENGINE->launch();
+        utrade::pandora::ThreadSafeSingleton<ServerEngine>::DoubleCheckInstance(engine_pool);
 
         // start pool
         engine_pool.start();
 
+        SERVER_EENGINE.launch();
+
         // launch the engine
         engine_pool.block();
-
-        // destroy config object
-        DESTROY_SERVER_ENGINE;
     }
     catch (std::exception& e)
     {
