@@ -2,8 +2,11 @@
 
 #include "hub_struct.h"
 #include "pandora/util/singleton.hpp"
+#include "pandora/util/thread_safe_singleton.hpp"
 
-#define HUB utrade::pandora::Singleton<HubEntity>::GetInstance()
+// #define HUB utrade::pandora::Singleton<HubEntity>::GetInstance()
+
+#define HUB utrade::pandora::ThreadSafeSingleton<HubEntity>::DoubleCheckInstance()
 
 class HubEntity final 
 {
