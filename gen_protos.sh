@@ -1,3 +1,5 @@
+#!/bin/bash
+
 mkdir -p protos/cpp
 mkdir -p protos/python
 
