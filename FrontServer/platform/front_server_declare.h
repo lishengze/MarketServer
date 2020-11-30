@@ -20,9 +20,13 @@
 #include "pandora/package/package_manager.h"
 #include "pandora/util/thread_safe_singleton.hpp"
 
+#include "util/id.hpp"
+
 #include <iostream>
 
 #define PACKAGE_MANAGER utrade::pandora::ThreadSafeSingleton<utrade::pandora::PackageManager>::DoubleCheckInstance()
+
+#define ID_MANAGER utrade::pandora::ThreadSafeSingleton<ID>::DoubleCheckInstance()
 
 using namespace std;
 using nlohmann::json;

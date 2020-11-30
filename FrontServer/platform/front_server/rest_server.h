@@ -6,24 +6,30 @@
 #include "App.h"
 #include "libusockets.h"
 
+class FrontServer;
+
 class RestServer
 {
-    RestServer();
-    ~RestServer();
+    public:
+        RestServer();
+        
+        ~RestServer();
 
-    void launch();
+        void launch();
 
-    void listen();
+        void listen();
 
-    void release();
+        void release();
 
-    void process_get(uWS::HttpResponse<false> *, uWS::HttpRequest *);
+        void process_get(uWS::HttpResponse<false> *, uWS::HttpRequest *);
 
-    void process_post(uWS::HttpResponse<false> *, uWS::HttpRequest *);
+        void process_post(uWS::HttpResponse<false> *, uWS::HttpRequest *);
 
-    void process_del(uWS::HttpResponse<false> *, uWS::HttpRequest *);
+        void process_del(uWS::HttpResponse<false> *, uWS::HttpRequest *);
 
-    void process_put(uWS::HttpResponse<false> *, uWS::HttpRequest *);
+        void process_put(uWS::HttpResponse<false> *, uWS::HttpRequest *);
+
+        void set_front_server(FrontServer* front_server);
 
     private:
 
@@ -31,7 +37,9 @@ class RestServer
 
         int                                     server_port_{9001};
 
-        std::set<uWS::WebSocket<false, true> *> wss_con_set_;
-
         boost::shared_ptr<std::thread>          listen_thread_;
-    };
+
+        FrontServer*                            front_server_;
+};
+
+FORWARD_DECLARE_PTR(RestServer);

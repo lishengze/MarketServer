@@ -18,6 +18,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+class FrontServer;
 
 struct PerSocketData {
     /* Fill with user data */
@@ -48,6 +49,8 @@ class WBServer
 
     void listen();
 
+    void set_front_server(FrontServer*);
+
     void launch();
 
     void release();
@@ -64,6 +67,8 @@ class WBServer
         std::set<uWS::WebSocket<false, true> *> wss_con_set_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
+
+        FrontServer*                            front_server_{nullptr};
 };
 
 FORWARD_DECLARE_PTR(WBServer);

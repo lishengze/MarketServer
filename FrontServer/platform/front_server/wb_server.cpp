@@ -1,6 +1,9 @@
 #include <boost/shared_ptr.hpp>
 #include <functional>
 #include "wb_server.h"
+#include "front_server.h"
+#include "pandora/util/json.hpp"
+#include "../util/tools.h"
 
 using namespace std::placeholders;
 
@@ -50,6 +53,10 @@ void WBServer::init_websocket_server()
 void WBServer::on_open(uWS::WebSocket<false, true> * ws)
 {
     wss_con_set_.emplace(ws);
+
+    // front_server_->request_all_symbol();
+
+    ws->send(front_server_->get_symbols_str(), uWS::OpCode::TEXT);
 }
 
 // 处理各种请求
@@ -87,6 +94,11 @@ void WBServer::listen()
             std::cout << "Listening on port " << server_port_ << std::endl;
         }
     }).run();
+}
+
+void WBServer::set_front_server(FrontServer* front_server)
+{
+    front_server_ = front_server;
 }
 
 void WBServer::launch()

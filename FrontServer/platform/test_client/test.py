@@ -22,7 +22,7 @@ def on_open(ws):
 
 def test():
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://localhost:9000",
+    ws = websocket.WebSocketApp("ws://localhost:9002",
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)

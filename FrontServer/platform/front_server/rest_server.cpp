@@ -1,4 +1,5 @@
 #include "rest_server.h"
+#include "front_server.h"
 
 RestServer::RestServer()
 {
@@ -58,4 +59,9 @@ void RestServer::process_del(uWS::HttpResponse<false> * response, uWS::HttpReque
 void RestServer::process_put(uWS::HttpResponse<false> * response, uWS::HttpRequest *request)
 {
 
+}
+
+void RestServer::set_front_server(FrontServer* front_server)
+{
+    front_server_ = front_server;
 }

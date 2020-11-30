@@ -24,7 +24,7 @@ int main()
         // start pool
         engine_pool.start();
 
-        SERVER_EENGINE.launch();
+        SERVER_EENGINE->launch();
 
         // launch the engine
         engine_pool.block();

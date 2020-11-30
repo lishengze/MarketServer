@@ -37,7 +37,7 @@ void ServerEngine::signal_handler(int signum)
     printf("[ServerEngine], signal_handler:%d", signum);
     signal_sys = signum;
     // 释放资源
-    SERVER_EENGINE.release();
+    SERVER_EENGINE->release();
     // 退出
     exit(0);
 }

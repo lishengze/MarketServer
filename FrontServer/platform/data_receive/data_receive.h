@@ -6,7 +6,6 @@
 
 #include <thread>
 #include <memory>
-#include <atomic>
 
 #include "hub_interface.h"
 #include "hub_struct.h"
@@ -48,6 +47,4 @@ public:
 
     std::shared_ptr<std::thread>  test_thread_{nullptr};
     bool                          is_test_{false};
-
-    std::atomic_ullong            pakcage_id_{0};
 };

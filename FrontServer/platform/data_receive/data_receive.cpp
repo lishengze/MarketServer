@@ -50,7 +50,7 @@ void DataReceive::test_main()
     {
         cout << "Send Message " << endl;
 
-        PackagePtr package_new = PACKAGE_MANAGER.AllocateRtnDepth();
+        PackagePtr package_new = PACKAGE_MANAGER->AllocateRtnDepth();
 
         auto p_rtn_depth = GET_NON_CONST_FIELD(package_new, CUTRtnDepthField);
         package_new->prepare_response(UT_FID_RtnDepth, ++response_id);
@@ -107,7 +107,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 {
     cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
-    PackagePtr package = GetNewSDepthDataPackage(depth, pakcage_id_++);
+    PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     package->prepare_response(UT_FID_SDepthData, package->PackageID());
 
