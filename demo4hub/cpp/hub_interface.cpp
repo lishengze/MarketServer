@@ -10,19 +10,19 @@ int HubInterface::start()
 {
     cout << "HubInterface Start " << endl;
 
-    return HUB.start();
+    return HUB->start();
 }
 
 int HubInterface::stop()
 {
 
     cout << "HubInterface stop " << endl;
-    return HUB.stop();
+    return HUB->stop();
 }
 
 int HubInterface::set_callback(HubCallback* callback) 
 {
-    return HUB.set_callback(callback);
+    return HUB->set_callback(callback);
 }
 
 // K线数据（请求）
@@ -30,5 +30,5 @@ int HubInterface::get_kline(const char* exchange, const char* symbol, type_resol
 {
     cout << "HubInterface get_kline " << endl;
 
-    return HUB.get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+    return HUB->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
 }
