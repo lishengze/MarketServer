@@ -30,7 +30,7 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # INCLUDE_DIRECTORIES("/usr/local/include")
 
-# LINK_DIRECTORIES("/opt/component/lib/pandora/")
+LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 

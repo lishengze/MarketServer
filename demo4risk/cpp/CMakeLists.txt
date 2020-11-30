@@ -28,7 +28,7 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 # for search lib pandora
 # LINK_DIRECTORIES("../lib")
 # for search lib grpc
-# LINK_DIRECTORIES("/root/.local/lib")
+LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
 add_executable(demo4risk ${DIR_SRCS} ${PROTO_SRCS})
