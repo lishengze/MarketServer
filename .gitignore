@@ -6,6 +6,10 @@ demo4risk/cpp/cmake/*
 # __pycache_
 */__pycache_
 
+lib/
+
+*.so
+
 build/
 cmake-build-debug/
 cmake-build-release/
@@ -14,3 +18,4 @@ cmake-build-release/
 protos/cpp/*
 protos/python/*
 *.pb.*
+*.so

@@ -42,6 +42,60 @@ inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exch
     return msd;
 };
 
+inline void mixquote_to_pbquote3_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, int precise, const SymbolFee& fee, bool is_ask)
+{
+    unsigned int depth_count = 0;
+    SDecimal lastPrice = is_ask ? SDecimal::min_decimal() : SDecimal::max_decimal();
+    const SMixDepthPrice* ptr = depths;
+    Depth* current_depth = NULL;
+    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
+        const SDecimal& price = ptr->price;
+
+        // 卖价往上取整
+        SDecimal scaledPrice;
+        fee.compute(price, scaledPrice, is_ask);
+        scaledPrice.from(scaledPrice, precise, is_ask); 
+
+        bool is_new_price = is_ask ? (scaledPrice > lastPrice) : (scaledPrice < lastPrice);
+        if( is_new_price ) {
+            depth_count ++;
+            current_depth = func();
+            current_depth->set_price(scaledPrice.get_str_value());
+            lastPrice = scaledPrice;
+        }
+        double total_volume = current_depth->volume();
+        for(auto &v : ptr->volume) {
+            (*current_depth->mutable_data())[v.first] += v.second;
+            total_volume += v.second;
+        }        
+        current_depth->set_volume(total_volume);
+        ptr = ptr->next;
+    }
+}
+
+inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote3(const string& exchange, const string& symbol, const SMixQuote* src, bool is_snap)
+{
+    // 精度统一
+    int precise = CONFIG->get_precise(symbol);
+    // 考虑手续费因素
+    SymbolFee fee = CONFIG->get_fee(exchange, symbol);
+
+    std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
+    msd->set_exchange(exchange);
+    msd->set_symbol(symbol);
+    msd->set_seq_no(src->sequence_no);
+    msd->set_is_snap(is_snap);
+
+    // 卖盘
+    FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);
+    mixquote_to_pbquote3_depth(src->asks, f1, precise, fee, true);
+    // 买盘
+    FuncAddDepth2 f2 = std::bind(&MarketStreamData::add_bids, msd);
+    mixquote_to_pbquote3_depth(src->bids, f2, precise, fee, false);
+
+    return msd;
+};
+
 inline void depth_to_pbquote2_depth(const SDepthPrice* depths, unsigned int len, FuncAddDepth2 func, bool is_ask)
 {
     for( unsigned int i = 0 ; i < len && i < CONFIG->grpc_publish_depth_ ; i++ ) {
@@ -77,6 +131,7 @@ inline void process_precise_depth(const SDepthPrice* src, unsigned int src_lengt
     {
         const SDecimal& price = src[i].price;
         const double& volume = src[i].volume;
+        cout << price.get_str_value() << " " << volume << endl;
 
         // 卖价往上取整
         SDecimal scaledPrice;
