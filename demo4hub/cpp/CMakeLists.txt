@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES("../../base/cpp")
 INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
 INCLUDE_DIRECTORIES("../../component/pandora")
+INCLUDE_DIRECTORIES("../../component")
 
 INCLUDE_DIRECTORIES("../../component")
 
