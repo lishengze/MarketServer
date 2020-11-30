@@ -358,7 +358,7 @@ void RedisQuote::_check()
         }
 
         // 检查异常没有数据的交易所
-        if( (now - last_nodata_time_) > 30*1000 ) 
+        if( false && (now - last_nodata_time_) > 30*1000 ) 
         {
             unordered_set<TExchange> nodata_exchanges;
             {
