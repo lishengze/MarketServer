@@ -4,6 +4,14 @@
 
 #define CALC_BASE(x) (int(pow(10, (x))))
 
+template<typename T>
+inline T labs( const T & x ){return x<0?-x:x;}
+ 
+template<typename T>
+inline int sgn( const T & x ){return x<0?-1:(x?1:0);}
+
+inline int d_round( const double & x ){return (int)(sgn(x)*(labs(x)+0.50001));}
+
 #pragma pack(1)
 struct SDecimal {
     unsigned long value;
@@ -50,7 +58,7 @@ struct SDecimal {
         if( precise >= 0 && precise < base ) { // 精度调整
             base = precise;
             string newData = data.substr(0, pos + 1 + precise);
-            value = atof(newData.c_str()) * CALC_BASE(base);
+            value = d_round(atof(newData.c_str()) * CALC_BASE(base));
             if( ceiling )
                 value += 1;
         } else {
@@ -65,12 +73,7 @@ struct SDecimal {
             return;
         }
 
-        if( ceiling ) {
-            value = ceil(data.value / CALC_BASE(data.base - precise));
-        } else {
-            value = floor(data.value / CALC_BASE(data.base - precise));
-        }
-        base = precise;
+        from(data.get_str_value(), precise, ceiling);
     }
 
     double get_value() const {
