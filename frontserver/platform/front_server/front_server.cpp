@@ -38,7 +38,9 @@ void FrontServer::request_message(PackagePtr package)
 
 void FrontServer::response_message(PackagePtr package)
 {
-    get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
+    // get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
+
+    handle_response_message(package);
 }
 
 void FrontServer::handle_request_message(PackagePtr package)
