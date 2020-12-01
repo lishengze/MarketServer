@@ -32,7 +32,9 @@ void DataProcess::request_message(PackagePtr package)
 
 void DataProcess::response_message(PackagePtr package)
 {
-    get_io_service().post(std::bind(&DataProcess::handle_response_message, this, package));
+    handle_response_message(package);
+
+    // get_io_service().post(std::bind(&DataProcess::handle_response_message, this, package));
 }
 
 void DataProcess::handle_request_message(PackagePtr package)
@@ -94,8 +96,8 @@ void DataProcess::process_sdepth_package(PackagePtr package)
 
             cout << "DataProcess::process_sdepth_package 3" << endl;
 
-            depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
-            
+            // depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
+
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
                 cout << "DataProcess::process_sdepth_package 4.1" << endl;
@@ -103,7 +105,7 @@ void DataProcess::process_sdepth_package(PackagePtr package)
                 cout << "DataProcess::process_sdepth_package 4.2" << endl;
             }
 
-            // depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
+            depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
 
             cout << "DataProcess::process_sdepth_package 5" << endl;
 
