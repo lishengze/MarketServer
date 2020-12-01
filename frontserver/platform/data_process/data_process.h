@@ -32,6 +32,6 @@ public:
     void request_symbol_data();
 
 private:
-    std::map<std::string, boost::shared_ptr<EnhancedDepthData>>     depth_data_;
+    std::map<std::string, EnhancedDepthData*>     depth_data_;
 };
 

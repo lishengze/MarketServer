@@ -44,9 +44,14 @@ class SymbolData
             symbols_.emplace(symbol);
         }
 
-        void set_symbols(std::set<std::string> symbols)
+        void set_symbols(std::set<std::string>& symbols)
         {
-            symbols_.swap(symbols);
+            // symbols_.merge(symbols);
+
+            for (auto symbol:symbols)
+            {
+                symbols_.emplace(symbol);
+            }
         }
 
         std::set<std::string>& get_symbols() { return symbols_;}
