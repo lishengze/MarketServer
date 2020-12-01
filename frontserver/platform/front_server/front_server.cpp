@@ -112,11 +112,11 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     cout << "FrontServer::process_symbols_package 1" << endl;
 
-    string updated_symbols_str = p_symbol_data->get_json_str();
+    // string updated_symbols_str = p_symbol_data->get_json_str();
 
     cout << "FrontServer::process_symbols_package 2" << endl;
 
-    cout << "updated_symbols_str: " << updated_symbols_str << endl;
+    // cout << "updated_symbols_str: " << updated_symbols_str << endl;
 
     cout << "FrontServer::process_symbols_package 3" << endl;
 
