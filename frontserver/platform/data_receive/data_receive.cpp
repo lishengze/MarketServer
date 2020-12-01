@@ -105,7 +105,14 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
 {
+    if (depth.symbol.length() == 0 || depth.symbol == "") 
+    {
+        cout << "symbol is null " << endl;
+        return;
+    }
+
     cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -115,7 +122,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     cout << pDepthData->exchange << " " << pDepthData->symbol << " " << pDepthData->ask_length << " " << pDepthData->bid_length << endl;
 
-    if (pDepthData->symbol.length() == 0 || pDepthData->symbol == "") return;
+    
 
     // string json_str = SDepthDataToJsonStr(*pDepthData);
 
