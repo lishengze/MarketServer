@@ -50,6 +50,8 @@ class SymbolData
             std::lock_guard<std::mutex> lg(mutex_);
 
             symbols_ = symbols;
+
+            set_json_str();
         }
 
         std::set<std::string>& get_symbols() { return symbols_;}

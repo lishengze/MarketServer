@@ -67,7 +67,7 @@ void SymbolData::set_json_str()
     try
     {
         std::lock_guard<std::mutex> lg(mutex_);
-        
+
         nlohmann::json json_data;
         nlohmann::json symbol_json;
 
@@ -98,6 +98,6 @@ void SymbolData::set_json_str()
 
 string SymbolData::get_json_str()
 {
-    set_json_str();
+    // set_json_str();
     return json_str_;
 }
