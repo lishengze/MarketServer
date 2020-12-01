@@ -116,11 +116,10 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    // package->prepare_response(UT_FID_SDepthData,ID_MANAGER->get_id());
+    package->prepare_response(UT_FID_SDepthData,ID_MANAGER->get_id());
 
     // SDepthData* pDepthData = GET_NON_CONST_FIELD(package, SDepthData);
     
-
     // string json_str = SDepthDataToJsonStr(*pDepthData);
 
     // cout << "json_str: " << json_str << endl;
