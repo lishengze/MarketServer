@@ -3,7 +3,6 @@
 #include "redis_quote.h"
 #include "redis_quote_replay.h"
 #include "quote_mixer2.h"
-#include "quote_single.h"
 #include "quote_dumper.h"
 #include "grpc_server.h"
 #include "nacos_client.h"
@@ -21,7 +20,6 @@ public:
     // from QuoteSourceInterface
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
-    void on_connected();
     void on_nodata_exchange(const TSymbol& symbol);
     void on_precise_changed(const TSymbol& symbol, int precise);
 
@@ -39,7 +37,7 @@ private:
     // mix quotation version2(current)
     QuoteMixer2 quote_mixer2_;
     // single symbol quotation
-    QuoteSingle quote_single_;
+    //QuoteSingle quote_single_;
     // quotation dumper
     QuoteDumper quote_dumper_;
     // nacos client

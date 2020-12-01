@@ -14,10 +14,6 @@ using namespace std;
 #include "redis_quote_define.h"
 
 
-#define PRICE_PRECISE 0.000000001
-#define VOLUME_PRECISE 0.000000001
-
-
 // 内部行情结构（链表）
 struct SMixDepthPrice {
     SDecimal price;
@@ -75,9 +71,3 @@ struct SMixQuote {
         }
     }
 };
-
-inline type_tick get_miliseconds() {
-    auto time_now = chrono::system_clock::now();
-	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
-    return duration_in_ms.count();
-}
