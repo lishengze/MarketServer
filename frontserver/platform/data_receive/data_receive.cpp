@@ -114,14 +114,11 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
 
-    PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
+    // PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    package->prepare_response(UT_FID_SDepthData, package->PackageID());
+    // package->prepare_response(UT_FID_SDepthData,ID_MANAGER->get_id());
 
-    SDepthData* pDepthData = GET_NON_CONST_FIELD(package, SDepthData);
-
-    cout << pDepthData->exchange << " " << pDepthData->symbol << " " << pDepthData->ask_length << " " << pDepthData->bid_length << endl;
-
+    // SDepthData* pDepthData = GET_NON_CONST_FIELD(package, SDepthData);
     
 
     // string json_str = SDepthDataToJsonStr(*pDepthData);
