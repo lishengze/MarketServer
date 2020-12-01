@@ -108,21 +108,19 @@ void FrontServer::process_rtn_depth_package(PackagePtr package)
 
 void FrontServer::process_symbols_package(PackagePtr package)
 {
-    cout << "FrontServer::process_symbols_package 0" << endl;
+    // cout << "FrontServer::process_symbols_package 0" << endl;
 
     SymbolData* p_symbol_data = GET_NON_CONST_FIELD(package, SymbolData);
 
-    cout << "FrontServer::process_symbols_package 1" << endl;
-
-    // string updated_symbols_str = p_symbol_data->get_json_str();
+    // cout << "FrontServer::process_symbols_package 1" << endl;
 
     std::set<std::string>& symbols = p_symbol_data->get_symbols();
 
     string updated_symbols_str = SymbolsToJsonStr(symbols);
 
-    cout << "FrontServer::process_symbols_package 2" << endl;
+    // cout << "FrontServer::process_symbols_package 2" << endl;
 
-    // cout << "updated_symbols_str: " << updated_symbols_str << endl;
+    cout << "updated_symbols_str: " << updated_symbols_str << endl;
 
     cout << "FrontServer::process_symbols_package 3" << endl;
 
@@ -130,7 +128,7 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     cout << "FrontServer::process_symbols_package 4" << endl;
 
-    // wb_server_->broadcast(updated_symbols_str);
+    wb_server_->broadcast(updated_symbols_str);
 }
 
 void FrontServer::process_enhanceddata_package(PackagePtr package)
