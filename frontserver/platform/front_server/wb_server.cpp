@@ -156,17 +156,19 @@ void WBServer::process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws
 
 void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 {
+    cout << "WBServer::broadcast_enhanced_data " << endl;
+
     string update_symbol = en_depth_data.depth_data_.symbol;
 
     if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
     {
-        string send_str = en_depth_data.get_json_str();
-        
-        cout << "send_str: " << send_str << endl;
+        // string send_str = en_depth_data.get_json_str();
 
-        for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
-        {
-            ws->send(send_str, uWS::OpCode::TEXT);
-        }
+        // cout << "send_str: " << send_str << endl;
+
+        // for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
+        // {
+        //     ws->send(send_str, uWS::OpCode::TEXT);
+        // }
     }
 }
