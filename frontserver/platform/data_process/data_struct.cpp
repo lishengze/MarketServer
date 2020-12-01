@@ -66,17 +66,13 @@ void SymbolData::set_json_str()
         nlohmann::json symbol_json;
 
         int i = 0;
-        cout << 0 << endl;
         for (string symbol:symbols_)
         {
             cout << "symbol: " << symbol << endl;
             symbol_json[i++] = symbol;
         }
-        cout << 1 << endl;
         json_data["symbols"] = symbol_json;    
-        cout << 2 << endl;
-        // json_str_ = json_data.dump();
-        cout << 3 << endl;
+        json_str_ = json_data.dump();
     }
     catch(const std::exception& e)
     {
