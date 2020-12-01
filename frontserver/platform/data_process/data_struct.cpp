@@ -8,6 +8,8 @@ EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data)
 
 void EnhancedDepthData::init(const SDepthData* depth_data)
 {
+    std::lock_guard<std::mutex> lg(mutex_);
+
     memcpy(&depth_data_, depth_data, sizeof(SDepthData));
 
     for (int i = 0; i < depth_data_.ask_length; ++i)
@@ -19,6 +21,8 @@ void EnhancedDepthData::init(const SDepthData* depth_data)
     {
         bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
     }
+
+    set_json_str();
 }
 
 void EnhancedDepthData::set_json_str()
@@ -54,12 +58,6 @@ void EnhancedDepthData::set_json_str()
     json_data["bids"] = bids_json;
 
     json_str_ = json_data.dump(); 
-}
-
-string EnhancedDepthData::get_json_str()
-{
-    set_json_str();
-    return json_str_;
 }
 
 void SymbolData::set_json_str()

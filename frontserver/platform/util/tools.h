@@ -22,3 +22,5 @@ PackagePtr GetNewSymbolDataPackage(std::set<string> symbol, int package_id);
 string SDepthDataToJsonStr(const SDepthData& depth);
 
 string SymbolsToJsonStr(std::set<std::string>& symboles);
+
+string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data);

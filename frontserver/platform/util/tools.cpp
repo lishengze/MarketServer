@@ -138,3 +138,10 @@ string SymbolsToJsonStr(std::set<std::string>& symbols)
 
     return json_data.dump();
 }
+
+string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data)
+{
+    string result;
+
+    return result;
+}

@@ -22,7 +22,7 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
         }
 
         void set_json_str();
-        string get_json_str();
+        string get_json_str() {return json_str_;}
 
         double ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
         double bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
@@ -32,7 +32,8 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
         static const long Fid = UT_FID_EnhancedDepthData;  
 
     private:
-        string  json_str_;
+        string                    json_str_;
+        std::mutex                mutex_;
 
 };
 
