@@ -4,11 +4,14 @@
 #include "front_server.h"
 #include "pandora/util/json.hpp"
 #include "../util/tools.h"
+#include "../config/config.h"
 
 using namespace std::placeholders;
 
 WBServer::WBServer()
 {
+    server_port_ = CONFIG->get_ws_port();
+
     init_websocket_options();
 
     init_websocket_behavior();
@@ -87,11 +90,11 @@ void WBServer::on_close(uWS::WebSocket<false, true> * ws)
 
 void WBServer::listen()
 {
-    cout << "Start Listen: " << server_port_ << endl;
+    cout << "WServer Start Listen: " << server_port_ << endl;
 
     uWS::App().ws<PerSocketData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
         if (token) {
-            std::cout << "Listening on port " << server_port_ << std::endl;
+            std::cout << "WS Listening on port " << server_port_ << std::endl;
         }
     }).run();
 }

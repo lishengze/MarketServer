@@ -1,8 +1,10 @@
 #include "rest_server.h"
 #include "front_server.h"
+#include "../config/config.h"
 
 RestServer::RestServer()
 {
+    server_port_ = CONFIG->get_rest_port();
     rest_server_ = boost::make_shared<uWS::App>();
 }
 
@@ -23,7 +25,7 @@ void RestServer::listen()
 {
     rest_server_->listen(server_port_, [this](auto* token){
         if (token) {
-            std::cout << "Listening on port " << server_port_ << std::endl;
+            std::cout << "Rest Listening on port " << server_port_ << std::endl;
         }
     }).get("/*", [this](uWS::HttpResponse<false> * response, uWS::HttpRequest * request){
         process_get(response, request);

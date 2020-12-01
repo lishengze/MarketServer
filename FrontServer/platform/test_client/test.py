@@ -22,7 +22,12 @@ def on_open(ws):
 
 def test():
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://localhost:9002",
+    ip = "ws://localhost"
+    port = 9114
+    url = ip + ":" + str(port)
+    print("\n\n***** Connect %s *****" % (url))
+    
+    ws = websocket.WebSocketApp(url,
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)
