@@ -1,6 +1,7 @@
 #pragma once
 #include "../front_server_declare.h"
 #include "hub_struct.h"
+#include <mutex>
 
 #include <boost/shared_ptr.hpp>
 
@@ -46,12 +47,11 @@ class SymbolData
 
         void set_symbols(std::set<std::string>& symbols)
         {
-            // symbols_.merge(symbols);
+            std::lock_guard<std::mutex> lg(mutex_);
 
-            for (auto symbol:symbols)
-            {
-                symbols_.emplace(symbol);
-            }
+            symbols_ = symbols;
+
+            set_json_str();
         }
 
         std::set<std::string>& get_symbols() { return symbols_;}
@@ -63,6 +63,7 @@ class SymbolData
 
 
     private:
+        std::mutex                mutex_;
         std::set<std::string>     symbols_;
         string                    json_str_;
 };
