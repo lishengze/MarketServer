@@ -20,15 +20,22 @@ void copy_enhanced_data(EnhancedDepthData* des, const EnhancedDepthData* src)
 
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
 {
+    cout << 0 << endl;
     PackagePtr package =PackagePtr{new Package{}};
+
+    cout << 1 << endl;
     package->SetPackageID(package_id);
 
+    cout << 2 << endl;
     CREATE_FIELD(package, SDepthData);
 
+    cout << 3 << endl;
     SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
 
+    cout << 4 << endl;
     copy_sdepthdata(pSDepthData, &depth);
 
+    cout << 5 << endl;
     return package;
 }
 

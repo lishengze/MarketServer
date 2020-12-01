@@ -80,12 +80,10 @@ void DataProcess::process_sdepth_package(PackagePtr package)
 {
     try
     {
-        // cout << "DataProcess::process_sdepth_package 0" << endl;
+        cout << "DataProcess::process_sdepth_package 0" << endl;
         SDepthData* p_depth_data = GET_NON_CONST_FIELD(package, SDepthData);
 
-        // cout << "DataProcess::process_sdepth_package 1" << endl;
-
-        // cout << SDepthDataToJsonStr(*p_depth_data) << endl;
+        cout << "DataProcess::process_sdepth_package 1" << endl;
 
         if (p_depth_data)
         {

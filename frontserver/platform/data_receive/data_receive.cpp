@@ -114,7 +114,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
 
-    // PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
+    PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     // package->prepare_response(UT_FID_SDepthData,ID_MANAGER->get_id());
 
@@ -125,7 +125,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     // cout << "json_str: " << json_str << endl;
 
-    // deliver_response(package);
+    deliver_response(package);
 }
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline)
