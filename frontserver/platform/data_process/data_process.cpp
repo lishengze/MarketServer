@@ -94,12 +94,13 @@ void DataProcess::process_sdepth_package(PackagePtr package)
 
             cout << "DataProcess::process_sdepth_package 3" << endl;
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
-            {
-                depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
+            {                
                 cout << "DataProcess::process_sdepth_package 4.1" << endl;
-                // process_new_symbol(en_depth_data->depth_data_.symbol);
+                process_new_symbol(en_depth_data->depth_data_.symbol);
                 cout << "DataProcess::process_sdepth_package 4.2" << endl;
             }
+
+            depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
 
             cout << "DataProcess::process_sdepth_package 5" << endl;
 
