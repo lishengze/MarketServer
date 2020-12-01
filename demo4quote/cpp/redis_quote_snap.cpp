@@ -101,7 +101,7 @@ void RedisSnapRequester::_thread_loop()
         }
 
         // 休眠
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
 
 

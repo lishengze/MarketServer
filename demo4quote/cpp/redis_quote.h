@@ -122,12 +122,8 @@ private:
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
 
     // 行情源头下发速度控制
-    struct _UpdateDepth{
-        map<SDecimal, double> asks;
-        map<SDecimal, double> bids;
-    };
     mutable std::mutex mutex_clocks_;
-    unordered_map<TExchange, unordered_map<TSymbol, _UpdateDepth>> updates_;  // 增量更新数据
+    unordered_map<TExchange, unordered_map<TSymbol, SDepthQuote>> updates_;  // 增量更新数据
     unordered_map<TExchange, unordered_map<TSymbol, type_tick>> last_clocks_;
     bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
     bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);

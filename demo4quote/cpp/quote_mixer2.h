@@ -17,10 +17,12 @@ public:
 
     void change_precise(const TSymbol& symbol, int precise);
 private:
-    bool _preprocess(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& src, SDepthQuote& dst);
-
     // 行情数据
     mutable std::mutex mutex_quotes_;
+    unordered_map<TExchange, unordered_map<TSymbol, SDepthQuote>> singles_;
+    void _snap_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
+    void _update_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
+    void _precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
     unordered_map<TSymbol, SMixQuote*> quotes_;
     unordered_map<TSymbol, SMixQuote*> quote_updates_; // 控制频率的增量，目前没有使用
 
@@ -29,13 +31,11 @@ private:
 
     bool _get_quote(const TSymbol& symbol, SMixQuote*& ptr) const;
 
-    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const SDepthPrice* newDepths, 
-        const int& newLength, bool isAsk);
+    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, double>& newDepths, bool isAsk);
 
     SMixDepthPrice* _clear_exchange(const TExchange& exchange, SMixDepthPrice* depths);
 
-    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const SDepthPrice* depths, 
-        const int& length, bool isAsk);
+    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, double>>& depths, bool isAsk);
 
     // 发布聚合行情
     mutable std::mutex mutex_clocks_;

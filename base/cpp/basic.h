@@ -27,6 +27,7 @@ using type_seqno = unsigned long;
 using type_tick = unsigned long;
 using type_resolution = int;
 using type_length = unsigned short;
+using type_uint32 = unsigned int;
 
 inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();

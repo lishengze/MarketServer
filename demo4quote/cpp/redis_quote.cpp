@@ -1,9 +1,8 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
 
-void redisquote_to_quote_depth(const njson& data, SDepthPrice* depth, unsigned int& depth_length, bool is_ask)
+void redisquote_to_quote_depth(const njson& data, map<SDecimal, double>& depths)
 {
-    map<SDecimal, double> depths;
     for (auto iter = data.begin() ; iter != data.end() ; ++iter )
     {
         const string& price = iter.key();
@@ -12,22 +11,6 @@ void redisquote_to_quote_depth(const njson& data, SDepthPrice* depth, unsigned i
         dPrice.from(price, -1);
         depths[dPrice] = volume;
     }
-
-    int count = 0;
-    if( is_ask ) {
-        for( auto iter = depths.begin() ; count < MAX_DEPTH && iter != depths.end() ; ++iter, ++count )
-        {
-            depth[count].price = iter->first;
-            depth[count].volume = iter->second;
-        }
-    } else {
-        for( auto iter = depths.rbegin() ; count < MAX_DEPTH && iter != depths.rend() ; ++iter, ++count )
-        {
-            depth[count].price = iter->first;
-            depth[count].volume = iter->second;
-        }
-    }
-    depth_length = count;
 }
 
 bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
@@ -37,15 +20,15 @@ bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
     long long sequence_no = snap_json["Msg_seq_symbol"].get<long long>(); 
     
-    vassign(quote.exchange, MAX_EXCHANGE_NAME_LENGTH, exchange);
-    vassign(quote.symbol, MAX_SYMBOL_NAME_LENGTH, symbol);
+    quote.exchange = exchange;
+    quote.symbol = symbol;
     vassign(quote.sequence_no, sequence_no);
     //vassign(quote.time_arrive, timeArrive); // 暂时不处理
     
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
-    redisquote_to_quote_depth(snap_json[askDepth], quote.asks, quote.ask_length, true);
+    redisquote_to_quote_depth(snap_json[askDepth], quote.asks);
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
-    redisquote_to_quote_depth(snap_json[bidDepth], quote.bids, quote.bid_length, false);
+    redisquote_to_quote_depth(snap_json[bidDepth], quote.bids);
 
     quote.raw_length = data.length();
     return true;
@@ -68,6 +51,13 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     redis_snap_requester_.init(params, logger);
     redis_snap_requester_.set_engine(this);
     redis_snap_requester_.start();
+    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
+            const string& symbol = *iterSymbol;
+            const string& exchange = *iterExchange;
+            redis_snap_requester_.add_symbol(exchange, symbol);
+        }
+    }
 
     // 请求增量
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
@@ -116,7 +106,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
     last_time_ = get_miliseconds();
     //cout << channel << endl;
     
-    _log_and_print("%s update json size %lu", channel.c_str(), msg.length());
+    //_log_and_print("%s update json size %lu", channel.c_str(), msg.length());
     //std::cout << "update json size:" << msg.length() << std::endl;
     if (channel.find(DEPTH_UPDATE_HEAD) != string::npos)
     {
@@ -142,10 +132,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
         // 回调
         //engine_interface_->on_update(quote.exchange, quote.symbol, quote);
-        if( !_ctrl_update(quote.exchange, quote.symbol, quote) ) {         
-            _log_and_print("channel=%s update too many depth. request snap again.", channel.c_str());   
-            redis_snap_requester_.add_symbol(quote.exchange, quote.symbol);
-        }
+        _ctrl_update(quote.exchange, quote.symbol, quote) ;
     }
     else if(channel.find(TICK_HEAD) != string::npos)
     {
@@ -158,12 +145,18 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
 void RedisQuote::OnConnected() {
     _log_and_print("Redis RedisQuote::OnConnected");
-    engine_interface_->on_connected();
+    
+    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
+            const string& symbol = *iterSymbol;
+            const string& exchange = *iterExchange;
+            subscribe("UPDATEx|" + symbol + "." + exchange);            
+        }
+    }
 };
 
 void RedisQuote::OnDisconnected(int status) {
     _log_and_print("Redis RedisQuote::OnDisconnected");
-    engine_interface_->on_disconnected();
 };
 
 bool RedisQuote::_update_meta_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& wait_to_send)
@@ -335,11 +328,43 @@ void RedisQuote::_check()
     while( true ) 
     {
         // 休眠
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
 
         type_tick now = get_miliseconds();
+
+        // 强制刷出没有后续更新的品种
+        vector<SDepthQuote> forced_to_update;
+        {
+            std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+            for( auto& v : last_clocks_ )
+            {
+                for( auto& u : v.second )
+                {
+                    if( (now - u.second) < (1000/CONFIG->grpc_publish_raw_frequency_) ) {
+                        continue;
+                    }
+                    u.second = now;
+                    
+                    SDepthQuote& quote = updates_[v.first][u.first];
+                    SDepthQuote tmp;
+                    tmp.exchange = v.first;
+                    tmp.symbol = u.first;
+                    tmp.arrive_time = quote.arrive_time;
+                    tmp.asks.swap(quote.asks);
+                    tmp.bids.swap(quote.bids);
+                    if( tmp.asks.size() == 0 && tmp.bids.size() == 0 ) {
+                        continue;
+                    }
+                    forced_to_update.push_back(tmp);
+                }
+            }
+        }
+        for( const auto& v : forced_to_update ) {            
+            engine_interface_->on_update(v.exchange, v.symbol, v);
+        }
+
         // 检查心跳
-        if( (now - last_time_) > 10 * 1000 ) {
+        if( now > last_time_ && (now - last_time_) > 10 * 1000 ) {
             _log_and_print("heartbeat expired. now is %ld, last is %ld", now, last_time_);
 
             // 请求增量
@@ -411,48 +436,32 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
 
-    _UpdateDepth& update = updates_[exchange][symbol];
-    for( unsigned int i = 0 ; i < quote.ask_length ; ++i ) {
-        const SDepthPrice& depth = quote.asks[i];
-        update.asks[depth.price] = depth.volume;
+    // 保留更新
+    SDepthQuote& update = updates_[exchange][symbol];
+    update.arrive_time = quote.arrive_time;
+    for( const auto& v : quote.asks )
+    {
+        update.asks[v.first] = v.second;
     }
-    for( unsigned int i = 0 ; i < quote.bid_length ; ++i ) {
-        const SDepthPrice& depth = quote.bids[i];
-        update.bids[depth.price] = depth.volume;
+    for( const auto& v : quote.bids )
+    {
+        update.bids[v.first] = v.second;
     }
+
+    // 检查频率
     if( !_check_update_clocks(exchange, symbol) ) {
-        _log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
+        //_log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
         return true;
     }
 
-    // 数据太多
-    if( update.asks.size() >= MAX_DEPTH || update.bids.size() >= MAX_DEPTH ) {
-        update.asks.clear();
-        update.bids.clear();
-        return false;
-    }
-
+    // 生成新的增量
     SDepthQuote tmp;
-    vassign(tmp.exchange, MAX_EXCHANGE_NAME_LENGTH, exchange);
-    vassign(tmp.symbol, MAX_SYMBOL_NAME_LENGTH, symbol);
-    int count = 0;
-    for( auto iter = update.asks.begin() ; iter != update.asks.end() ; ++iter, ++count )
-    {
-        tmp.asks[count].price = iter->first;
-        tmp.asks[count].volume = iter->second;
-    }
-    tmp.ask_length = count;
-    count = 0;
-    for( auto iter = update.bids.rbegin() ; iter != update.bids.rend() ; ++iter, ++count )
-    {
-        tmp.bids[count].price = iter->first;
-        tmp.bids[count].volume = iter->second;
-    }
-    tmp.bid_length = count;
+    tmp.exchange = exchange;
+    tmp.symbol = symbol;
+    tmp.arrive_time = update.arrive_time;
+    tmp.asks.swap(update.asks);
+    tmp.bids.swap(update.bids);
     engine_interface_->on_update(exchange, symbol, tmp);
-
-    update.asks.clear();
-    update.bids.clear();
     return true;
 }
 
@@ -483,7 +492,7 @@ void RedisQuote::change_precise(const TSymbol& symbol, int precise)
             }
         }
         for( auto& v : updates_ ) {
-            unordered_map<TSymbol, _UpdateDepth>& updates = v.second;
+            unordered_map<TSymbol, SDepthQuote>& updates = v.second;
             auto iter = updates.find(symbol);
             if( iter != updates.end() ) {
                 updates.erase(iter);
