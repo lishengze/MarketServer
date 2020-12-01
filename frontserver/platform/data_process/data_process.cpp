@@ -82,32 +82,32 @@ void DataProcess::process_sdepth_package(PackagePtr package)
 {
     try
     {
-        cout << "DataProcess::process_sdepth_package 0" << endl;
+        // cout << "DataProcess::process_sdepth_package 0" << endl;
         SDepthData* p_depth_data = GET_NON_CONST_FIELD(package, SDepthData);
 
-        cout << "DataProcess::process_sdepth_package 1" << endl;
+        // cout << "DataProcess::process_sdepth_package 1" << endl;
 
         if (p_depth_data)
         {
             PackagePtr package_new = GetNewEnhancedDepthDataPackage(*p_depth_data, package->PackageID());
 
-            cout << "DataProcess::process_sdepth_package 2" << endl;
+            // cout << "DataProcess::process_sdepth_package 2" << endl;
             EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(package_new, EnhancedDepthData);
 
-            cout << "DataProcess::process_sdepth_package 3" << endl;
+            // cout << "DataProcess::process_sdepth_package 3" << endl;
 
             // depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
 
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
-                cout << "DataProcess::process_sdepth_package 4.1" << endl;
+                // cout << "DataProcess::process_sdepth_package 4.1" << endl;
                 process_new_symbol(en_depth_data->depth_data_.symbol);
-                cout << "DataProcess::process_sdepth_package 4.2" << endl;
+                // cout << "DataProcess::process_sdepth_package 4.2" << endl;
             }
 
             depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data;
 
-            cout << "DataProcess::process_sdepth_package 5" << endl;
+            // cout << "DataProcess::process_sdepth_package 5" << endl;
 
             deliver_response(package_new);
         }

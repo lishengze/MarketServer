@@ -161,6 +161,7 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
     if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
     {
         string send_str = en_depth_data.get_json_str();
+        
         cout << "send_str: " << send_str << endl;
 
         for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
