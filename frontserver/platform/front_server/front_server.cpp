@@ -125,11 +125,7 @@ void FrontServer::process_enhanceddata_package(PackagePtr package)
     
     auto enhanced_data = GET_NON_CONST_FIELD(package, EnhancedDepthData);
 
-    string send_str = enhanced_data->get_json_str();
-
-    cout << "send_str: " << send_str << endl;
-
-    wb_server_->broadcast(send_str);
+    wb_server_->broadcast_enhanced_data(*enhanced_data);
 }
 
 string FrontServer::get_symbols_str()

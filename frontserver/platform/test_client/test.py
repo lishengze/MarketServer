@@ -1,4 +1,5 @@
 import websocket
+import json
 
 
 def on_message(ws, message):
@@ -17,7 +18,14 @@ def on_close(ws):
 
 def on_open(ws):
     print("Connected")
-    ws.send("This is Python!")
+    sub_info = {
+        "symbol":["ETH_BTC"]
+    }
+    sub_info_str = json.dumps(sub_info)
+
+    print(sub_info_str)
+
+    ws.send(sub_info_str)
 
 
 def test():

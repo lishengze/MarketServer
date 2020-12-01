@@ -5,6 +5,8 @@
 #include "pandora/util/json.hpp"
 #include "../util/tools.h"
 #include "../config/config.h"
+#include "../log/log.h"
+#include <sstream>
 
 using namespace std::placeholders;
 
@@ -67,6 +69,11 @@ void WBServer::on_message(uWS::WebSocket<false, true> * ws, std::string_view msg
 {
     cout << "Req Msg: " << msg << endl;
     ws->send("This is Cplus", code);
+    string trans_msg(msg.data(), msg.size());
+
+    cout << "trans_msg: " << trans_msg << endl;
+
+    process_sub_info(trans_msg, ws);
 }
 
 void WBServer::on_ping(uWS::WebSocket<false, true> * ws)
@@ -119,5 +126,46 @@ void WBServer::broadcast(string msg)
     for (uWS::WebSocket<false, true> * ws: wss_con_set_)
     {
         ws->send(msg, uWS::OpCode::TEXT);
+    }
+}
+
+void WBServer::process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws)
+{
+    try
+    {
+        cout << "ori_msg: " << ori_msg << endl;
+        nlohmann::json js = nlohmann::json::parse(ori_msg);
+        if (!js["symbol"].is_null())
+        {
+            nlohmann::json symbol_list = js["symbol"];
+            for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
+            {
+                string cur_symbol = *it;
+                ws_sub_map_[cur_symbol].insert(ws);
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+
+        stream_msg << "WBServer::process_sub_info " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }
+}
+
+void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
+{
+    string update_symbol = en_depth_data.depth_data_.symbol;
+
+    if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
+    {
+        string send_str = en_depth_data.get_json_str();
+        cout << "send_str: " << send_str << endl;
+
+        for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
+        {
+            ws->send(send_str, uWS::OpCode::TEXT);
+        }
     }
 }

@@ -12,6 +12,7 @@
 #include <set>
 
 #include "../front_server_declare.h"
+#include "../data_process/data_struct.h"
 
 using std::string;
 using std::cout;
@@ -57,6 +58,10 @@ class WBServer
 
     void broadcast(string msg);
 
+    void broadcast_enhanced_data(EnhancedDepthData& en_depth_data);
+
+    void process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws);
+
     private:
         us_socket_context_options_t             socket_options_;
         uWS::App::WebSocketBehavior             websocket_behavior_;
@@ -69,6 +74,8 @@ class WBServer
         boost::shared_ptr<std::thread>          listen_thread_;
 
         FrontServer*                            front_server_{nullptr};
+
+        std::map<string, std::set<uWS::WebSocket<false, true> *>> ws_sub_map_;
 };
 
 FORWARD_DECLARE_PTR(WBServer);

@@ -115,6 +115,8 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     cout << pDepthData->exchange << " " << pDepthData->symbol << " " << pDepthData->ask_length << " " << pDepthData->bid_length << endl;
 
+    if (pDepthData->symbol.length() == 0 || pDepthData->symbol == "") return;
+
     // string json_str = SDepthDataToJsonStr(*pDepthData);
 
     // cout << "json_str: " << json_str << endl;

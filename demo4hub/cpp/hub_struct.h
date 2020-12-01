@@ -17,6 +17,8 @@ struct SDepthLevelData
 
 struct SDepthData
 {
+    string symbol;
+    string exchange;
     type_tick tick;
     type_seqno seqno;
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];

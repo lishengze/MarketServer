@@ -53,6 +53,7 @@ void HubEntity::on_snap(const SEData& quote)
         quote_depth.bids[i].volume = depth.volume();
         quote_depth.bid_length = i+1;
     }
-
+    quote_depth.symbol = quote.symbol();
+    quote_depth.exchange = quote.exchange();
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
 }
