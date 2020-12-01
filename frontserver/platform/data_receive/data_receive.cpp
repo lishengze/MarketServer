@@ -125,7 +125,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     // cout << "json_str: " << json_str << endl;
 
-    deliver_response(package);
+    // deliver_response(package);
 }
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline)
