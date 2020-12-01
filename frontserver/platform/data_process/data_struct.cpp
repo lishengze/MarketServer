@@ -81,7 +81,7 @@ void SymbolData::set_json_str()
         cout << 2 << endl;
         // json_str_ = json_data.dump();
 
-        json_str_ = symbol_json.dump();
+        // json_str_ = symbol_json.dump();
         cout << 3 << endl;
     }
     catch(const std::exception& e)
