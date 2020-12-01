@@ -1,0 +1,3 @@
+/mnt/dev/bcts_quote/demo4quote/cpp/test/CMakeFiles/edit_cache.dir
+/mnt/dev/bcts_quote/demo4quote/cpp/test/CMakeFiles/rebuild_cache.dir
+/mnt/dev/bcts_quote/demo4quote/cpp/test/CMakeFiles/demo4quote.dir
