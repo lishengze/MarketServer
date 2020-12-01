@@ -1,7 +1,6 @@
 #pragma once
 
 #include "hub_struct.h"
-#include "pandora/util/singleton.hpp"
 #include "pandora/util/thread_safe_singleton.hpp"
 
 #include "updater_quote.h"
