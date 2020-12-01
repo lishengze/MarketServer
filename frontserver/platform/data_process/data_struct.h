@@ -50,13 +50,6 @@ class SymbolData
             std::lock_guard<std::mutex> lg(mutex_);
 
             symbols_ = symbols;
-
-            // symbols_.merge(symbols);
-
-            // for (auto symbol:symbols)
-            // {
-            //     symbols_.emplace(symbol);
-            // }
         }
 
         std::set<std::string>& get_symbols() { return symbols_;}
