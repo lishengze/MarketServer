@@ -120,7 +120,7 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     cout << "FrontServer::process_symbols_package 3" << endl;
 
-    symbols_.merge(p_symbol_data->get_symbols());
+    // symbols_.merge(p_symbol_data->get_symbols());
 
     cout << "FrontServer::process_symbols_package 4" << endl;
 
