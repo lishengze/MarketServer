@@ -97,7 +97,7 @@ void DataProcess::process_sdepth_package(PackagePtr package)
             {
                 depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
                 cout << "DataProcess::process_sdepth_package 4.1" << endl;
-                process_new_symbol(en_depth_data->depth_data_.symbol);
+                // process_new_symbol(en_depth_data->depth_data_.symbol);
                 cout << "DataProcess::process_sdepth_package 4.2" << endl;
             }
 
