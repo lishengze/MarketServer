@@ -142,6 +142,37 @@ string SymbolsToJsonStr(std::set<std::string>& symbols)
 string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data)
 {
     string result;
+    nlohmann::json json_data;
+    json_data["symbol"] = en_data.depth_data_.symbol;
+    json_data["exchange"] = en_data.depth_data_.exchange;
+    json_data["tick"] = en_data.depth_data_.tick;
+    json_data["seqno"] = en_data.depth_data_.seqno;
+    json_data["ask_length"] = en_data.depth_data_.ask_length;
+    json_data["bid_length"] = en_data.depth_data_.bid_length;   
 
+    nlohmann::json asks_json;
+    for (int i = 0; i < en_data.depth_data_.ask_length; ++i)
+    {
+        nlohmann::json depth_level_atom;
+        depth_level_atom[0] = en_data.depth_data_.asks[i].price.get_value();
+        depth_level_atom[1] = en_data.depth_data_.asks[i].volume;
+        depth_level_atom[2] = en_data.ask_accumulated_volume_[i];
+        asks_json[i] = depth_level_atom;
+    }
+    json_data["asks"] = asks_json;
+
+    nlohmann::json bids_json;
+    for (int i = 0; i < en_data.depth_data_.bid_length; ++i)
+    {
+        nlohmann::json depth_level_atom;
+        depth_level_atom[0] = en_data.depth_data_.bids[i].price.get_value();
+        depth_level_atom[1] = en_data.depth_data_.bids[i].volume;
+        depth_level_atom[2] = en_data.bid_accumulated_volume_[i];
+        bids_json[i] = depth_level_atom;
+    }
+    json_data["bids"] = bids_json;
+
+    result = json_data.dump(); 
+    
     return result;
 }

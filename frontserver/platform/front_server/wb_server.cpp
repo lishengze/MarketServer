@@ -162,7 +162,7 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
     if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
     {
-        string send_str = en_depth_data.get_json_str();
+        string send_str = EnhancedDepthDataToJsonStr(en_depth_data);
 
         cout << "send_str: " << send_str << endl;
 
