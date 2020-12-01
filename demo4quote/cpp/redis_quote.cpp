@@ -364,7 +364,7 @@ void RedisQuote::_check()
         }
 
         // 检查心跳
-        if( (now - last_time_) > 10 * 1000 ) {
+        if( now <= last_time_ || (now - last_time_) > 10 * 1000 ) {
             _log_and_print("heartbeat expired. now is %ld, last is %ld", now, last_time_);
 
             // 请求增量
