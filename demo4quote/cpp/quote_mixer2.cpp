@@ -334,9 +334,9 @@ void process_depths(const map<SDecimal, double>& src, map<SDecimal, double>& dst
             // 卖价往上取整
             SDecimal scaledPrice;
             fee.compute(iter->first, scaledPrice, true);
-            cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
+            //cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
             scaledPrice.from(scaledPrice, precise, true); 
-            cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
+            //cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
 
             bool is_new_price = scaledPrice > lastPrice;
             if( is_new_price ) {
