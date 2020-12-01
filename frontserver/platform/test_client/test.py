@@ -29,7 +29,7 @@ def on_open(ws):
 
 
 def test():
-    websocket.enableTrace(True)
+    # websocket.enableTrace(True)
     ip = "ws://localhost"
     port = 9114
     url = ip + ":" + str(port)
