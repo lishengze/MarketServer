@@ -329,7 +329,7 @@ void process_depths(const map<SDecimal, double>& src, map<SDecimal, double>& dst
 {
     if( is_ask ) {
         SDecimal lastPrice = SDecimal::min_decimal();
-        for( auto iter = dst.begin() ; iter != dst.end() ; iter++ ) 
+        for( auto iter = src.begin() ; iter != src.end() ; iter++ ) 
         {
             // 卖价往上取整
             SDecimal scaledPrice;
@@ -346,7 +346,7 @@ void process_depths(const map<SDecimal, double>& src, map<SDecimal, double>& dst
         }
     } else {
         SDecimal lastPrice = SDecimal::max_decimal();
-        for( auto iter = dst.rbegin() ; iter != dst.rend() ; iter++ ) 
+        for( auto iter = src.rbegin() ; iter != src.rend() ; iter++ ) 
         {
             // 买价往下取整
             SDecimal scaledPrice;
