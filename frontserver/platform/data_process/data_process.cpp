@@ -93,6 +93,9 @@ void DataProcess::process_sdepth_package(PackagePtr package)
             EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(package_new, EnhancedDepthData);
 
             cout << "DataProcess::process_sdepth_package 3" << endl;
+
+            depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data->get_object();
+            
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
                 cout << "DataProcess::process_sdepth_package 4.1" << endl;
