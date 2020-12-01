@@ -19,8 +19,6 @@ void EnhancedDepthData::init(const SDepthData* depth_data)
     {
         bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
     }
-
-    set_json_str();
 }
 
 void EnhancedDepthData::set_json_str()
@@ -60,7 +58,7 @@ void EnhancedDepthData::set_json_str()
 
 string EnhancedDepthData::get_json_str()
 {
-    // set_json_str();
+    set_json_str();
     return json_str_;
 }
 
