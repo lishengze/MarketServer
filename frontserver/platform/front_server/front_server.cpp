@@ -110,11 +110,13 @@ void FrontServer::process_symbols_package(PackagePtr package)
 {
     cout << "FrontServer::process_symbols_package 0" << endl;
 
-    auto* p_symbol_data = GET_NON_CONST_FIELD(package, SymbolData);
+    SymbolData* p_symbol_data = GET_NON_CONST_FIELD(package, SymbolData);
 
     cout << "FrontServer::process_symbols_package 1" << endl;
 
-    string updated_symbols_str = p_symbol_data->get_json_str();
+    // string updated_symbols_str = p_symbol_data->get_json_str();
+
+    std::set<std::string>& symbols = p_symbol_data->get_symbols();
 
     cout << "FrontServer::process_symbols_package 2" << endl;
 
