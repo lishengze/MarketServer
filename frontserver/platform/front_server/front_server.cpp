@@ -120,11 +120,11 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     // cout << "FrontServer::process_symbols_package 3" << endl;
 
-    symbols_.merge(p_symbol_data->get_symbols());
+    // symbols_.merge(p_symbol_data->get_symbols());
 
     // cout << "FrontServer::process_symbols_package 4" << endl;
 
-    wb_server_->broadcast(p_symbol_data->get_json_str());
+    wb_server_->broadcast(updated_symbols_str);
 }
 
 void FrontServer::process_enhanceddata_package(PackagePtr package)
