@@ -22,7 +22,10 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
         }
 
         void set_json_str();
-        string get_json_str() {return json_str_;}
+        string get_json_str() {
+            set_json_str();
+            return json_str_;
+        }
 
         double ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
         double bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
