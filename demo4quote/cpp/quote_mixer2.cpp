@@ -27,9 +27,9 @@ bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol, float frequency) {
 void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) 
 {
     if( is_snap ) {
-        //std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
+        std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     } else {
-        //std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
+        std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     }
     PUBLISHER->publish_mix(symbol, pub_snap, pub_diff);
 }
