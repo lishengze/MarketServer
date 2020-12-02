@@ -180,9 +180,11 @@ bool RedisQuote::_update_meta_by_snap(const TExchange& exchange, const TSymbol& 
         if( symbol_meta.caches.size() == 0 ) 
         {
             // 没有缓存
-            _log_and_print("%s-%s updates is empty. wait for updates ...", exchange.c_str(), symbol.c_str());
+            //_log_and_print("%s-%s updates is empty. wait for updates ...", exchange.c_str(), symbol.c_str());
+            _log_and_print("%s-%s start to publish.", exchange.c_str(), symbol.c_str());
             symbol_meta.snap = quote;
-            return false;
+            symbol_meta.seq_no = quote.sequence_no;
+            return true;
         } 
         else 
         {
