@@ -62,6 +62,8 @@ class WBServer
 
     void process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws);
 
+    void clean_client(uWS::WebSocket<false, true> * ws);
+
     private:
         us_socket_context_options_t             socket_options_;
         uWS::App::WebSocketBehavior             websocket_behavior_;
