@@ -116,7 +116,7 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     std::set<std::string>& symbols = p_symbol_data->get_symbols();
 
-    string updated_symbols_str = SymbolsToJsonStr(symbols);
+    string updated_symbols_str = SymbolsToJsonStr(*p_symbol_data, SYMBOL_UPDATE);
 
     // cout << "FrontServer::process_symbols_package 2" << endl;
 
@@ -142,5 +142,5 @@ void FrontServer::process_enhanceddata_package(PackagePtr package)
 
 string FrontServer::get_symbols_str()
 {
-    return SymbolsToJsonStr(symbols_);
+    return SymbolsToJsonStr(symbols_, SYMBOL_LIST);
 }

@@ -9,6 +9,7 @@ const long UT_FID_EnhancedDepthData = 0x10002;
 class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
 {
     public:
+        EnhancedDepthData():type_{"market_data"} {}
         EnhancedDepthData(const SDepthData* depth_data);
 
         void init(const SDepthData* depth_data);
@@ -34,9 +35,12 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
 
         static const long Fid = UT_FID_EnhancedDepthData;  
 
+        string                    type_{"market_data"};
+
     private:
         string                    json_str_;
         std::mutex                mutex_;
+        
 
 };
 
@@ -44,6 +48,7 @@ const long UT_FID_SymbolData = 0x10003;
 class SymbolData
 {
     public:
+        SymbolData():type_{"symbol_update"} {}
         void add_symbol(string symbol)
         {
             symbols_.emplace(symbol);
@@ -58,14 +63,18 @@ class SymbolData
 
         std::set<std::string>& get_symbols() { return symbols_;}
 
+        void set_type(string type_str) { type_ = type_str;}
+
         static const long Fid = UT_FID_SymbolData; 
 
         void set_json_str();
         string get_json_str();
 
+        string                    type_;
 
     private:
         std::mutex                mutex_;
         std::set<std::string>     symbols_;
         string                    json_str_;
+        
 };

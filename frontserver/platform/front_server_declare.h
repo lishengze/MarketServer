@@ -32,3 +32,7 @@ using namespace std;
 using nlohmann::json;
 using std::pair;
 using boost::weak_ptr;
+
+#define MARKET_DATA_UPDATE "market_data_update"
+#define SYMBOL_LIST "symbol_list"
+#define SYMBOL_UPDATE "symbol_update"
