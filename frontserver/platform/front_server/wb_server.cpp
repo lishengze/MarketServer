@@ -61,14 +61,17 @@ void WBServer::on_open(uWS::WebSocket<false, true> * ws)
 
     // front_server_->request_all_symbol();
 
-    ws->send(front_server_->get_symbols_str(), uWS::OpCode::TEXT);
+    string symbols_str = front_server_->get_symbols_str();
+
+    cout << "all symbols str: " << symbols_str << endl;
+
+    ws->send(symbols_str, uWS::OpCode::TEXT);
 }
 
 // 处理各种请求
 void WBServer::on_message(uWS::WebSocket<false, true> * ws, std::string_view msg, uWS::OpCode code)
 {
     cout << "Req Msg: " << msg << endl;
-    ws->send("This is Cplus", code);
     string trans_msg(msg.data(), msg.size());
 
     cout << "trans_msg: " << trans_msg << endl;

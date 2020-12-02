@@ -23,15 +23,15 @@ def on_open(ws):
     }
     sub_info_str = json.dumps(sub_info)
 
-    print(sub_info_str)
+    print("sub_info_str: %s" % (sub_info_str))
 
     ws.send(sub_info_str)
 
 
 def test():
     # websocket.enableTrace(True)
-    # ip = "ws://localhost"
-    ip = "ws://127.0.0.1"
+    ip = "ws://36.255.220.139"
+    # ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
