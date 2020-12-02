@@ -43,6 +43,9 @@ struct SDecimal {
     }
 
     void from(double v, double bias = 0.0000001) {
+        if( v == 0 )
+            return;
+            
         //cout << fixed << v << endl;
         int count = 0, limit = 100;
         while( count <= limit && abs(get_value() - v)/v > bias ) {
