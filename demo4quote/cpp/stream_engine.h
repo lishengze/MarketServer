@@ -9,7 +9,7 @@
 
 #define STREAMENGINE utrade::pandora::Singleton<StreamEngine>::GetInstance()
 
-class StreamEngine : public QuoteSourceInterface 
+class StreamEngine : public QuoteSourceInterface, public INacosCallback
 {
 public:
     StreamEngine();
@@ -22,6 +22,9 @@ public:
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
     void on_precise_changed(const TSymbol& symbol, int precise);
+
+    // from INacosCallback
+    void on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols);
 
     // signal handler function
     static volatile int signal_sys;

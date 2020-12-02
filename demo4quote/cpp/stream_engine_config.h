@@ -16,6 +16,7 @@ using namespace std;
 
 using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 
+
 struct SymbolFee
 {
     int fee_type;       // 0表示fee不需要处理（默认），1表示fee值为比例，2表示fee值为绝对值

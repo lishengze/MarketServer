@@ -20,7 +20,7 @@ StreamEngine::~StreamEngine(){
 }
 
 void StreamEngine::start() {
-    //nacos_client_.start();
+    nacos_client_.start(CONFIG->nacos_addr_, this);
     
     if( !CONFIG->replay_mode_ ) {
         // start redis
@@ -83,4 +83,10 @@ void StreamEngine::signal_handler(int signum)
     // 释放资源
     // 退出
     exit(0);
+} 
+
+void StreamEngine::on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols)
+{
+
 }
+
