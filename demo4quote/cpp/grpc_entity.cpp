@@ -235,7 +235,7 @@ void GetParamsEntity::register_call(){
 
 bool GetParamsEntity::process(){    
     GetParamsResp reply;
-    //reply.set_depth(CONFIG->grpc_publish_depth_);
+    reply.set_depth(200);
     //reply.set_frequency(CONFIG->grpc_publish_frequency_);
     //reply.set_raw_frequency(CONFIG->grpc_publish_raw_frequency_);
     /*for( auto v : CONFIG->include_symbols_ ) {

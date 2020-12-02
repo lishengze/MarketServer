@@ -55,6 +55,9 @@ public:
             {
                 const TSymbol& symbol = iter.key();
                 const njson& symbol_cfgs = iter.value();
+                int enable = symbol_cfgs["enable"].get<int>();
+                if( enable < 1 )
+                    continue;
                 SNacosConfig cfg;
                 cfg.precise = symbol_cfgs["precise"].get<int>();
                 cfg.depth = symbol_cfgs["depth"].get<unsigned int>();

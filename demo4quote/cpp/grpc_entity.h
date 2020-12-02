@@ -140,7 +140,10 @@ public:
 
     bool process();
 
-    void add_data(const std::unordered_map<TSymbol, SNacosConfig>& symbols){ symbols_ = symbols; }
+    void add_data(const std::unordered_map<TSymbol, SNacosConfig>& symbols){ 
+        cout << "params setted." << endl;
+        symbols_ = symbols; 
+    }
 
     GetParamsEntity* spawn() {
         return new GetParamsEntity(service_);
