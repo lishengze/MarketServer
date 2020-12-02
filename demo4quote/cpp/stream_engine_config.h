@@ -57,7 +57,7 @@ public:
     // pasrse utrade.config.json file
     void parse_config(const std::string& file_name);
 
-    int get_precise(const string& symbol) const {
+    /*(int get_precise(const string& symbol) const {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         auto iter = symbol_precise_.find(symbol);
         if( iter == symbol_precise_.end() ) {
@@ -70,26 +70,26 @@ public:
     SymbolFee get_fee(const string& exchange, const string& symbol) {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         return symbol_fee_[exchange][symbol];
-    }
+    }*/
 
-    bool is_forbidden_exchage(const TExchange& exchange) {
+    /*bool is_forbidden_exchage(const TExchange& exchange) {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         return forbidden_exchanges_.find(exchange) != forbidden_exchanges_.end();
-    }
+    }*/
 
-    void set_configuration_precise(const std::unordered_map<string, int>& vals);
+    //void set_configuration_precise(const std::unordered_map<string, int>& vals);
 
-    void set_configuration_fee(const std::unordered_map<string, std::unordered_map<string, SymbolFee>>& vals)
+    /*void set_configuration_fee(const std::unordered_map<string, std::unordered_map<string, SymbolFee>>& vals)
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         symbol_fee_ = vals;
-    }
+    }*/
 public:
     // grpc
     string grpc_publish_addr_;          // grpc服务发布地址
-    float grpc_publish_frequency_;        // 品种聚合后的更新频率：每秒frequency次
-    unsigned int grpc_publish_depth_;            // 品种聚合后的深度
-    float grpc_publish_raw_frequency_;    // 品种原始行情发布频率：每秒frequency次
+    //float grpc_publish_frequency_;        // 品种聚合后的更新频率：每秒frequency次
+    //unsigned int grpc_publish_depth_;            // 品种聚合后的深度
+    //float grpc_publish_raw_frequency_;    // 品种原始行情发布频率：每秒frequency次
 
     // system
     string sample_symbol_;              // 采样品种
@@ -106,15 +106,15 @@ public:
     int quote_redis_snap_interval_;
 
     // from database
-    std::set<string> include_symbols_;      // 包含的品种 CFG_INCLUDE_SYMBOLS
-    std::set<string> include_exchanges_;    // 包含的交易所 CFG_INCLUDE_EXCHANGES
-    std::set<string> forbidden_exchanges_;  // 设置（临时）关闭的交易所 CFG_FORBIDDEN_EXCHANGES
+    //std::set<string> include_symbols_;      // 包含的品种 CFG_INCLUDE_SYMBOLS
+    //std::set<string> include_exchanges_;    // 包含的交易所 CFG_INCLUDE_EXCHANGES
+    //std::set<string> forbidden_exchanges_;  // 设置（临时）关闭的交易所 CFG_FORBIDDEN_EXCHANGES
 
     // from config center
     string nacos_addr_;
-    mutable std::mutex mutex_configuration_;
-    std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度 CFG_SYMBOL_PRECISE
-    std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费 CFG_SYMBOL_FEE
+    //mutable std::mutex mutex_configuration_;
+    //std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度 CFG_SYMBOL_PRECISE
+    //std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费 CFG_SYMBOL_FEE
 
     // logger
     UTLogPtr logger_;

@@ -15,14 +15,21 @@ public:
 
     void clear_exchange(const TExchange& exchange);
 
-    void change_precise(const TSymbol& symbol, int precise);
+    void set_publish_params(const TSymbol& symbol, float frequency);
+    void set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const map<TExchange, SymbolFee>& fees);
 private:
     // 行情数据
+    struct _compute_param{
+        type_uint32 depth;
+        int precise;
+        map<TExchange, SymbolFee> fees;
+    };
     mutable std::mutex mutex_quotes_;
-    unordered_map<TExchange, unordered_map<TSymbol, SDepthQuote>> singles_;
+    unordered_map<TSymbol, _compute_param> _compute_params_; 
+    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> singles_;
     void _snap_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
     void _update_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
-    void _precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
+    void _precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, int precise, const SymbolFee& fee, SDepthQuote& output);
     unordered_map<TSymbol, SMixQuote*> quotes_;
     unordered_map<TSymbol, SMixQuote*> quote_updates_; // 控制频率的增量，目前没有使用
 
@@ -38,8 +45,12 @@ private:
     SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, double>>& depths, bool isAsk);
 
     // 发布聚合行情
+    struct _publish_param{
+        float frequency;
+    };
     mutable std::mutex mutex_clocks_;
+    unordered_map<TSymbol, _publish_param> publish_params_; 
     unordered_map<TSymbol, type_tick> last_clocks_;
-    bool _check_update_clocks(const TSymbol& symbol);
+    bool _check_update_clocks(const TSymbol& symbol, float frequency);
     void _publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap);
 };

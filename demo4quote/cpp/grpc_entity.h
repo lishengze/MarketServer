@@ -1,6 +1,7 @@
 #pragma once
 
-#include "grpc_call.h"
+#include "base/cpp/grpc_call.h"
+//#include "grpc_call.h"
 #include "stream_engine_define.h"
 #include "stream_engine.grpc.pb.h"
 using grpc::ServerAsyncWriter;
@@ -18,6 +19,11 @@ using quote::service::v1::MarketStreamData;
 using quote::service::v1::Depth;
 using quote::service::v1::SubscribeMixQuoteReq;
 
+struct SnapAndUpdate{
+    std::shared_ptr<void> snap;
+    std::shared_ptr<void> update;
+};
+
 class GrpcDemoEntity : public BaseGrpcEntity
 {
 public:
@@ -27,8 +33,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
+    void add_data(SnapAndUpdate data){}
 
+    GrpcDemoEntity* spawn() {
+        return new GrpcDemoEntity(service_);
+    }
 private:
     GrpcStreamEngineService::AsyncService* service_;
 
@@ -50,8 +59,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    void add_data(SnapAndUpdate data);
 
+    SubscribeSingleQuoteEntity* spawn() {
+        return new SubscribeSingleQuoteEntity(service_);
+    }
 private:
     GrpcStreamEngineService::AsyncService* service_;
 
@@ -77,8 +89,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    void add_data(SnapAndUpdate data);
 
+    SubscribeMixQuoteEntity* spawn() {
+        return new SubscribeMixQuoteEntity(service_);
+    }
 private:
     GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
@@ -103,8 +118,9 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
-
+    SetParamsEntity* spawn() {
+        return new SetParamsEntity(service_);
+    }
 private:
     GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
@@ -124,8 +140,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update){}
+    void add_data(const std::unordered_map<TSymbol, SNacosConfig>& symbols){ symbols_ = symbols; }
 
+    GetParamsEntity* spawn() {
+        return new GetParamsEntity(service_);
+    }
 private:
     GrpcStreamEngineService::AsyncService* service_;
     ServerContext ctx_;
@@ -133,6 +152,8 @@ private:
     GetParamsReq request_;
     GetParamsResp reply_;
     ServerAsyncResponseWriter<GetParamsResp> responder_;
+
+    std::unordered_map<TSymbol, SNacosConfig> symbols_;
 };
 
 

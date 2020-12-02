@@ -6,6 +6,7 @@
 using namespace std;
 using njson = nlohmann::json;
 #include "redis_quote_snap.h"
+#include "nacos_client.h"
 
 struct SymbolMeta
 {    
@@ -67,18 +68,22 @@ public:
     RedisQuote(){};
     ~RedisQuote();
 
+    // 动态修改配置
+    void set_frequency(const TSymbol& symbol, float frequency);
+    void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+
     // init
     void start(const RedisParams& params, UTLogPtr logger);
     void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
-    void subscribe(const string& channel);
-    void psubscribe(const string& pchannel);
-
-    // 精度变更，重新获取数据
-    void change_precise(const TSymbol& symbol, int precise);
+    void subscribe(const TExchange& exchange, const TSymbol& symbol) {
+        redis_api_->SubscribeTopic("UPDATEx|" + symbol + "." + exchange);
+    }
+    void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
+        redis_api_->UnSubscribeTopic("UPDATEx|" + symbol + "." + exchange);
+    }
     
     // callback from RedisSnapRequester
     bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
-
 
     // redis connect notify
     virtual void OnConnected();    
@@ -121,10 +126,14 @@ private:
     type_tick last_statistic_time_; // 上一次计算统计信息时间
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
 
-    // 行情源头下发速度控制
-    mutable std::mutex mutex_clocks_;
-    unordered_map<TExchange, unordered_map<TSymbol, SDepthQuote>> updates_;  // 增量更新数据
-    unordered_map<TExchange, unordered_map<TSymbol, type_tick>> last_clocks_;
-    bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol);
+    // 行情源头下发速度控制    
+    mutable std::mutex mutex_clocks_;   
+    unordered_map<TSymbol, float> frequecy_; 
+    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> updates_;  // 增量更新数据
+    unordered_map<TSymbol, unordered_map<TExchange, type_tick>> last_clocks_;
+    bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol, float frequency);
     bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
+
+    // 订阅的交易币种换粗
+    unordered_map<TSymbol, unordered_set<TExchange>> symbols_;
 };

@@ -143,18 +143,18 @@ bool SubscribeSingleQuoteEntity::process(){
     } 
 }
 
-void SubscribeSingleQuoteEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
-    MarketStreamData* pdata = (MarketStreamData*)snap.get();    
+void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
+    MarketStreamData* pdata = (MarketStreamData*)data.snap.get();    
     if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != string(pdata->exchange()) ) {
         //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
         return;
     }
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    if( snap_sended_ && update ) {
-        datas_.push_back(update);
+    if( snap_sended_ && data.update ) {
+        datas_.push_back(data.update);
     } else {
         snap_sended_ = true;
-        datas_.push_back(snap);
+        datas_.push_back(data.snap);
     }
 }
 
@@ -190,9 +190,9 @@ bool SubscribeMixQuoteEntity::process(){
     }
 }
 
-void SubscribeMixQuoteEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+void SubscribeMixQuoteEntity::add_data(SnapAndUpdate data) {
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
+    datas_.push_back(data.snap);
 }
 
 //////////////////////////////////////////////////
@@ -208,7 +208,7 @@ void SetParamsEntity::register_call(){
 
 bool SetParamsEntity::process(){
     
-    CONFIG->grpc_publish_frequency_ = request_.frequency();
+    /*CONFIG->grpc_publish_frequency_ = request_.frequency();
     CONFIG->grpc_publish_depth_ = request_.depth();
     CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
     string current_symbol = request_.symbol();
@@ -216,7 +216,7 @@ bool SetParamsEntity::process(){
         unordered_map<string, int> vals;
         vals[current_symbol] = request_.precise();
         CONFIG->set_configuration_precise(vals);
-    }
+    }*/
     
     status_ = FINISH;
     responder_.Finish(reply_, Status::OK, this);
@@ -235,15 +235,15 @@ void GetParamsEntity::register_call(){
 
 bool GetParamsEntity::process(){    
     GetParamsResp reply;
-    reply.set_depth(CONFIG->grpc_publish_depth_);
-    reply.set_frequency(CONFIG->grpc_publish_frequency_);
-    reply.set_raw_frequency(CONFIG->grpc_publish_raw_frequency_);
-    for( auto v : CONFIG->include_symbols_ ) {
+    //reply.set_depth(CONFIG->grpc_publish_depth_);
+    //reply.set_frequency(CONFIG->grpc_publish_frequency_);
+    //reply.set_raw_frequency(CONFIG->grpc_publish_raw_frequency_);
+    /*for( auto v : CONFIG->include_symbols_ ) {
         reply.add_symbols(v);
     }
     for( auto v : CONFIG->include_exchanges_ ) {
         reply.add_exchanges(v);
-    }
+    }*/
     
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);

@@ -9,14 +9,14 @@ QuoteMixer2::QuoteMixer2() {
 QuoteMixer2::~QuoteMixer2() {
 }
 
-bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol) {
-    if( CONFIG->grpc_publish_frequency_ == 0 )
+bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol, float frequency) {
+    if( frequency == 0 )
         return true;
 
     std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
     // 每秒更新频率控制
     auto iter = last_clocks_.find(symbol);
-    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/CONFIG->grpc_publish_frequency_) )
+    if( iter != last_clocks_.end() && (get_miliseconds() -iter->second) < (1000/frequency) )
     {
         return false;
     }
@@ -27,9 +27,9 @@ bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol) {
 void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap) 
 {
     if( is_snap ) {
-        std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
+        //std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     } else {
-        std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
+        //std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     }
     PUBLISHER->publish_mix(symbol, pub_snap, pub_diff);
 }
@@ -49,37 +49,6 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     _publish_quote(symbol, pub_snap, NULL, true);
 }
 
-void QuoteMixer2::change_precise(const TSymbol& symbol, int precise)
-{
-    std::shared_ptr<MarketStreamData> pub_snap;
-
-    // 清除行情数据
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        auto iter = quotes_.find(symbol);
-        if( iter != quotes_.end() )
-        {
-            iter->second->release();
-            pub_snap = mixquote_to_pbquote3("", symbol, iter->second, true);
-        } else {
-            SMixQuote tmp;
-            pub_snap = mixquote_to_pbquote3("", symbol, &tmp, true);
-        }
-    }
-
-    // 清除频率记号
-    {        
-        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
-        auto iter = last_clocks_.find(symbol);
-        if( iter != last_clocks_.end() ) {
-            last_clocks_.erase(iter);
-        }
-    }
-
-    // 广播snap
-    _publish_quote(symbol, pub_snap, NULL, true);
-}
-
 void QuoteMixer2::clear_exchange(const TExchange& exchange)
 {    
     unordered_map<TSymbol, std::shared_ptr<MarketStreamData>> snaps;
@@ -90,7 +59,7 @@ void QuoteMixer2::clear_exchange(const TExchange& exchange)
             v.second->asks = _clear_exchange(exchange, v.second->asks);
             v.second->bids = _clear_exchange(exchange, v.second->bids);
             //_println_("QuoteMixer2 clear exchange %s: %s after clear ...", exchange.c_str(), v.first.c_str());
-            snaps[v.first] = mixquote_to_pbquote3("", v.first, v.second, true);
+            snaps[v.first] = mixquote_to_pbquote2("", v.first, v.second, _compute_params_[v.first].depth, true);
             //_println_("QuoteMixer2 clear exchange %s: %s", exchange.c_str(), v.first.c_str());
         }
     }
@@ -146,11 +115,11 @@ bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, con
     //    std::cout << quote.exchange << " " << quote.ask_length << " " << quote.asks[0].price.get_str_value() << " " << 
     //    ptr->asks->price.get_str_value() << " " << ptr->asks->next->price.get_str_value() << " " << ptr->asks->next->next->price.get_str_value() << std::endl;
     //}
-    if( !_check_update_clocks(symbol) ) {
+    if( !_check_update_clocks(symbol, publish_params_[symbol].frequency) ) {
         return false;
     }
 
-    pub_snap = mixquote_to_pbquote3("", symbol, ptr, true);
+    pub_snap = mixquote_to_pbquote2("", symbol, ptr, _compute_params_[symbol].depth, true);
     return true;
 }
 
@@ -371,20 +340,20 @@ void QuoteMixer2::_snap_singles_(const TExchange& exchange, const TSymbol& symbo
     std::shared_ptr<MarketStreamData> pub_snap;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        singles_[exchange][symbol] = quote;
-        _precess_singles_(exchange, symbol, quote, output);
-        pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
+        singles_[symbol][exchange] = quote;
+        _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], output);
+        pub_snap = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, true);
     }
     
     PUBLISHER->publish_single(exchange, symbol, pub_snap, NULL);
 }
 
-void QuoteMixer2::_precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output)
+void QuoteMixer2::_precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, int precise, const SymbolFee& fee, SDepthQuote& output)
 {    
     // 精度统一
-    int precise = CONFIG->get_precise(symbol);
+    //int precise = CONFIG->get_precise(symbol);
     // 考虑手续费因素
-    SymbolFee fee = CONFIG->get_fee(exchange, symbol);
+    //SymbolFee fee = CONFIG->get_fee(exchange, symbol);
 
     // 直接根据quote转成output
     output.exchange = exchange;
@@ -414,12 +383,82 @@ void QuoteMixer2::_update_singles_(const TExchange& exchange, const TSymbol& sym
     std::shared_ptr<MarketStreamData> pub_snap, pub_diff;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        SDepthQuote& update = singles_[exchange][symbol];
+        SDepthQuote& update = singles_[symbol][exchange];
         update_depth_diff(quote.asks, update.asks);        
         update_depth_diff(quote.bids, update.bids);
-        _precess_singles_(exchange, symbol, update, output);
-        pub_snap = depth_to_pbquote2(exchange, symbol, update, true);
-        pub_diff = depth_to_pbquote2(exchange, symbol, quote, false);
+        _precess_singles_(exchange, symbol, update, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], output);
+        pub_snap = depth_to_pbquote2(exchange, symbol, update, _compute_params_[symbol].depth, true);
+        pub_diff = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, false);
     }
     PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
 }
+
+void QuoteMixer2::set_publish_params(const TSymbol& symbol, float frequency)
+{
+    _log_and_print("%s mix_frequency=%.03f", symbol.c_str(), frequency);
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+    publish_params_[symbol].frequency = frequency;
+}
+
+void QuoteMixer2::set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const map<TExchange, SymbolFee>& fees)
+{
+    _log_and_print("%s precise=%d mix_depth=%u", symbol.c_str(), precise, depth);
+    
+    std::shared_ptr<MarketStreamData> pub_snap;
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+    // 设置参数
+    _compute_params_[symbol].precise = precise;
+    _compute_params_[symbol].fees = fees;
+    _compute_params_[symbol].depth = depth;
+
+    // 触发重新计算
+    auto iter = singles_.find(symbol);
+    if( iter != singles_.end() )
+    {
+        for( const auto& v : iter->second ) {
+            const TExchange& exchange = v.first;
+            const SDepthQuote& quote = v.second;
+            SDepthQuote processed_quote;
+            _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], processed_quote);                
+            _on_snap(exchange, symbol, processed_quote, pub_snap);
+        }
+
+        // 推送结果
+        inner_lock.release();
+        _publish_quote(symbol, pub_snap, NULL, true);
+    }
+}
+
+/*
+void QuoteMixer2::change_precise(const TSymbol& symbol, int precise)
+{
+    std::shared_ptr<MarketStreamData> pub_snap;
+
+    // 清除行情数据
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+        auto iter = quotes_.find(symbol);
+        if( iter != quotes_.end() )
+        {
+            iter->second->release();
+            pub_snap = mixquote_to_pbquote3("", symbol, iter->second, true);
+        } else {
+            SMixQuote tmp;
+            pub_snap = mixquote_to_pbquote3("", symbol, &tmp, true);
+        }
+    }
+
+    // 清除频率记号
+    {        
+        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+        auto iter = last_clocks_.find(symbol);
+        if( iter != last_clocks_.end() ) {
+            last_clocks_.erase(iter);
+        }
+    }
+
+    // 广播snap
+    _publish_quote(symbol, pub_snap, NULL, true);
+}*/

@@ -28,7 +28,7 @@ public:
 
     void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
     void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
-   
+    void publish_config(const std::unordered_map<TSymbol, SNacosConfig>& symbols);
 private:
     void _handle_rpcs();
     
@@ -39,10 +39,10 @@ private:
 
     std::thread* thread_loop_ = nullptr;
 
-    CommonGrpcCall* caller_demo_;
-    CommonGrpcCall* caller_subscribe_single_;
-    CommonGrpcCall* caller_subscribe_mix_;
-    CommonGrpcCall* caller_setparams_;
-    CommonGrpcCall* caller_getparams_;
+    GrpcCall<GrpcDemoEntity>* caller_demo_;
+    GrpcCall<SubscribeSingleQuoteEntity>* caller_subscribe_single_;
+    GrpcCall<SubscribeMixQuoteEntity>* caller_subscribe_mix_;
+    GrpcCall<SetParamsEntity>* caller_setparams_;
+    GrpcCall<GetParamsEntity>* caller_getparams_;
     unordered_map<int, CommonGrpcCall*> callers_;
 };
