@@ -75,7 +75,7 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     if( data.length() == 0 )
     {
         _log_and_print("%s-%s size=0.", exchange.c_str(), symbol.c_str());
-        return false;
+        return true;
     }
 
     SDepthQuote quote;
