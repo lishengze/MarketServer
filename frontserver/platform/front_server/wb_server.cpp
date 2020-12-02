@@ -93,10 +93,8 @@ void WBServer::on_pong(uWS::WebSocket<false, true> * ws)
 void WBServer::on_close(uWS::WebSocket<false, true> * ws)
 {
     cout << "one connection closed " << endl;
-    if (wss_con_set_.find(ws) != wss_con_set_.end())
-    {
-        wss_con_set_.erase(ws);
-    }    
+
+    clean_client(ws);
 }
 
 void WBServer::listen()
@@ -131,6 +129,8 @@ void WBServer::broadcast(string msg)
     {
         ws->send(msg, uWS::OpCode::TEXT);
     }
+
+
 }
 
 void WBServer::process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws)
@@ -176,3 +176,16 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
         }
     }
 }
+
+ void WBServer::clean_client(uWS::WebSocket<false, true> * ws)
+ {
+    if (wss_con_set_.find(ws) != wss_con_set_.end())
+    {
+        wss_con_set_.erase(ws);
+    }    
+
+    for (string symbol: ws_sub_map_)
+    {
+        ws_sub_map_[symbol].erase(ws);
+    }         
+ }
