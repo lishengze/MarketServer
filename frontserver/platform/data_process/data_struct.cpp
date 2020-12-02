@@ -1,7 +1,7 @@
 #include "data_struct.h"
 
 
-EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data)
+EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data):type_{"market_data"}
 {
     init(depth_data);
 }

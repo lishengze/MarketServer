@@ -7,6 +7,7 @@
 #include "../config/config.h"
 #include "../log/log.h"
 #include <sstream>
+#include "../front_server_declare.h"
 
 using namespace std::placeholders;
 
@@ -165,7 +166,7 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
     if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
     {
-        string send_str = EnhancedDepthDataToJsonStr(en_depth_data);
+        string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);
 
         cout << "send_str: " << send_str << endl;
 

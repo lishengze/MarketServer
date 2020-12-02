@@ -124,7 +124,26 @@ PackagePtr GetNewSymbolDataPackage(std::set<string> symbols, int package_id)
     return package;       
 }
 
-string SymbolsToJsonStr(std::set<std::string>& symbols)
+string SymbolsToJsonStr(SymbolData& symbol_data, string type)
+{
+    std::set<std::string>& symbols = symbol_data.get_symbols();
+
+    nlohmann::json json_data;
+    nlohmann::json symbol_json;
+
+    int i = 0;
+    for (string symbol:symbols)
+    {
+        symbol_json[i++] = symbol;
+    }
+    json_data["symbol"] = symbol_json;    
+
+    json_data["type"] = type;
+
+    return json_data.dump();
+}
+
+string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
 {
     nlohmann::json json_data;
     nlohmann::json symbol_json;
@@ -136,10 +155,12 @@ string SymbolsToJsonStr(std::set<std::string>& symbols)
     }
     json_data["symbol"] = symbol_json;    
 
+    json_data["type"] = type;
+
     return json_data.dump();
 }
 
-string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data)
+string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
 {
     string result;
     nlohmann::json json_data;
@@ -171,6 +192,7 @@ string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data)
         bids_json[i] = depth_level_atom;
     }
     json_data["bids"] = bids_json;
+    json_data["type"] = type;
 
     result = json_data.dump(); 
     
