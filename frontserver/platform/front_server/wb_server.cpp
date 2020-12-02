@@ -170,6 +170,8 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
         cout << "send_str: " << send_str << endl;
 
+        cout << "send ws numb: " << ws_sub_map_[update_symbol].size() << endl;
+
         for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
         {
             ws->send(send_str, uWS::OpCode::TEXT);
@@ -184,8 +186,9 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
         wss_con_set_.erase(ws);
     }    
 
-    for (string symbol: ws_sub_map_)
+    for (auto iter: ws_sub_map_)
     {
+        string symbol = iter.first;
         ws_sub_map_[symbol].erase(ws);
     }         
  }
