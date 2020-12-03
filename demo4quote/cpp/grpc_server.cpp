@@ -1,6 +1,7 @@
+#include "stream_engine_config.h"
 #include "grpc_server.h"
 
-void GrpcServer::init(const string& grpc_addr)
+void ServerEndpoint::init(const string& grpc_addr)
 {
     std::string server_address(grpc_addr);
 
@@ -40,9 +41,17 @@ void GrpcServer::init(const string& grpc_addr)
     caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get());
     callers_[call_id] = caller_getparams_;
     call_id++;
+
+    caller_getklines_ = new GrpcCall<GetKlinesEntity>(call_id, &service_, cq_.get(), provider_);
+    callers_[call_id] = caller_getklines_;
+    call_id++;
+
+    caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), provider_);
+    callers_[call_id] = caller_getlast_;
+    call_id++;
 }
 
-void GrpcServer::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     SnapAndUpdate data;
     data.snap = snap;
@@ -51,7 +60,7 @@ void GrpcServer::publish_single(const string& exchange, const string& symbol, st
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
-void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     SnapAndUpdate data;
     data.snap = snap;
@@ -59,7 +68,7 @@ void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<MarketStreamD
     caller_subscribe_mix_->add_data(data);
 };
 
-void GrpcServer::_handle_rpcs() 
+void ServerEndpoint::_handle_rpcs() 
 {
     std::cout << "_handle_rpcs running on ..." << std::endl;
     void* tag;
@@ -77,3 +86,18 @@ void GrpcServer::_handle_rpcs()
         }
     }
 }
+
+void ServerEndpoint::on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
+{
+    for( const auto& v : klines ) {
+        _log_and_print("%s index=%lu open=%s high=%s low=%s close=%s", symbol.c_str(), 
+            v.index,
+            v.px_open.get_str_value().c_str(),
+            v.px_high.get_str_value().c_str(),
+            v.px_low.get_str_value().c_str(),
+            v.px_close.get_str_value().c_str()
+            );            
+        caller_getlast_->add_data(v);
+    }
+}
+

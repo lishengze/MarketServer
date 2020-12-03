@@ -12,9 +12,9 @@
 
 #define PUBLISHER utrade::pandora::Singleton<GrpcServer>::GetInstance()
 
-class GrpcServer final {
+class ServerEndpoint final {
 public:
-    ~GrpcServer() {
+    ~ServerEndpoint() {
         server_->Shutdown();
         cq_->Shutdown();
     }
@@ -22,7 +22,7 @@ public:
     void init(const string& grpc_addr);
 
     void run_in_thread() {
-        thread_loop_ = new std::thread(&GrpcServer::_handle_rpcs, this);
+        thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
 
     void publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);

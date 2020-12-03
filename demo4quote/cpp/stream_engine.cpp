@@ -12,16 +12,18 @@ StreamEngine::StreamEngine(){
     CONFIG->parse_config(config_file);
     
     // init grpc server
-    utrade::pandora::Singleton<GrpcServer>::Instance();
+    utrade::pandora::Singleton<ServerEndpoint>::Instance();
     PUBLISHER->init(CONFIG->grpc_publish_addr_);
 }
 
 StreamEngine::~StreamEngine(){
 }
 
-void StreamEngine::start() {
+void StreamEngine::start() 
+{
+    
     if( !CONFIG->replay_mode_ ) {
-        // start redis
+        // 启动redis
         quote_source_.set_engine(this);
         RedisParams params;
         params.host = CONFIG->quote_redis_host_;
@@ -31,6 +33,15 @@ void StreamEngine::start() {
 
         // 启动录数据线程
         quote_dumper_.start();
+
+        // 启动db线程
+        kline_db_.start();
+
+        // 启动聚合K线计算线程
+        kline_mixer_.register_callback(&kline_db_);
+        kline_mixer_.register_callback(&server_endpoint_);
+        kline_mixer_.set_db_interface(&kline_db_);
+        kline_mixer_.start();
     } else {
         quote_replay_.set_engine(this);
         quote_replay_.start(CONFIG->replay_ratio_);
@@ -75,6 +86,11 @@ void StreamEngine::on_precise_changed(const TSymbol& symbol, int precise)
 {
     quote_mixer2_.change_precise(symbol, precise);
 }*/
+
+void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+{
+    kline_mixer_.on_kline(exchange, symbol, resolution, kline);
+}
 
 void StreamEngine::signal_handler(int signum)
 {

@@ -134,8 +134,39 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         //engine_interface_->on_update(quote.exchange, quote.symbol, quote);
         _ctrl_update(quote.exchange, quote.symbol, quote) ;
     }
-    else if(channel.find(TICK_HEAD) != string::npos)
+    else if(channel.find(KLINE_1MIN_HEAD) != string::npos)
     {
+        // decode exchange and symbol
+        int pos = channel.find(KLINE_1MIN_HEAD);
+        int pos2 = channel.find(".");
+        string symbol = channel.substr(pos+strlen(KLINE_1MIN_HEAD), pos2-pos-strlen(KLINE_1MIN_HEAD));
+        string exchange = channel.substr(pos2+1);
+
+        njson snap_json = njson::parse(msg); 
+
+        for (auto iter = snap_json.rbegin(); iter != snap_json.rend(); ++iter) {
+            // 取最后一根
+            const njson& data = *iter;
+            KlineData kline;
+            kline.index = int(data[0].get<float>());
+            kline.px_open.from(data[1].get<double>());
+            kline.px_high.from(data[2].get<double>());
+            kline.px_low.from(data[3].get<double>());
+            kline.px_close.from(data[4].get<double>());
+            kline.volume.from(data[5].get<double>());
+            _log_and_print("get kline %s index=%lu open=%s high=%s low=%s close=%s volume=%s", channel.c_str(), 
+                kline.index,
+                kline.px_open.get_str_value().c_str(),
+                kline.px_high.get_str_value().c_str(),
+                kline.px_low.get_str_value().c_str(),
+                kline.px_close.get_str_value().c_str(),
+                kline.volume.get_str_value().c_str()
+                );
+            vector<KlineData> datas;
+            datas.push_back(kline);
+            engine_interface_->on_kline(exchange, symbol, 60, datas);
+            break;
+        }
     }
     else
     {
