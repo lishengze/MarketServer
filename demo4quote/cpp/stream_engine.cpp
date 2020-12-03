@@ -116,7 +116,7 @@ bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolF
 
 void StreamEngine::on_symbol_channged(const NacosString& configInfo)
 {
-    njson js = njson::parse(configInfo);
+    njson js = njson::parse(configInfo);        
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     for (auto iter = js.begin() ; iter != js.end() ; ++iter )
     {

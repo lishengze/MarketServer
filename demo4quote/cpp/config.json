@@ -1,10 +1,6 @@
 {
     "grpc": {
-        "frequency": 1,
-        "raw_frequency": 100,
-        "publish_addr": "0.0.0.0:9000",
-        "push_addr_bak": "172.25.1.222:9000",
-        "publish_depth": 200
+        "publish_addr": "0.0.0.0:9000"
     },
     "debug": {
         "replay_mode": 0,
@@ -28,11 +24,5 @@
         "port": 6379,
         "password": "tradingtest",
         "snap_interval": 10
-    },
-    "include": {
-        "symbols_bak": ["BTC_USDT"],
-        "symbols": ["BTC_USDT", "ETH_USDT", "ETH_BTC"],
-        "exchanges_bak": ["OKEX"],
-        "exchanges": ["XDAEX", "HUOBI", "OKEX", "HITBTC", "BINANCE", "FTX", "POLONIEX", "ART"]
     }
 }
