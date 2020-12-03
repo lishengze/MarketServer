@@ -443,17 +443,14 @@ void QuoteMixer2::set_compute_params(const TSymbol& symbol, int precise, type_ui
     {
         SMixQuote* ptr = quotes_[symbol];
         for( const auto& v : iter->second ) {
-            cout << "recalc start " << endl;
             const TExchange& exchange = v.first;
             const SDepthQuote& quote = v.second;
             SDepthQuote processed_quote;
             _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], processed_quote);       
             _inner_process(exchange, symbol, processed_quote, ptr);
-            cout << "recalc end " << exchange << endl;
         }
         pub_snap = mixquote_to_pbquote2("", symbol, ptr, _compute_params_[symbol].depth, true);
-        inner_lock.unlock();
-        cout << "release lock" << endl;
+        inner_lock.unlock(); // 释放锁
 
         // 推送结果
         _publish_quote(symbol, pub_snap, NULL, true);
