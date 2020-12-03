@@ -236,6 +236,7 @@ private:
     
     mutable std::mutex                  mutex_datas_;
     unordered_map<TSymbol, SInnerQuote> datas_;
+    unordered_map<TSymbol, SInnerQuote> last_datas_;
 
     Params params_;
 

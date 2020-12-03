@@ -438,6 +438,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 
 void DataCenter::change_account(const AccountInfo& info)
 {
+    cout << "change_account" << endl;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.cache_account = info;
@@ -448,6 +449,7 @@ void DataCenter::change_account(const AccountInfo& info)
 
 void DataCenter::change_configuration(const QuoteConfiguration& config)
 {
+    cout << "change_configuration" << endl;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.cache_config = config;
@@ -458,6 +460,7 @@ void DataCenter::change_configuration(const QuoteConfiguration& config)
 
 void DataCenter::change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
 {
+    cout << "change_orders" << endl;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.cache_order[symbol] = make_pair(asks, bids);
@@ -495,6 +498,14 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     SInnerQuote newQuote;
     pipeline_.run(quote, params, newQuote);
 
+    // 检查是否发生变化
+    auto iter = last_datas_.find(quote.symbol);
+    if( iter != last_datas_.end() ) {
+        const SInnerQuote& last_quote = iter->second;
+        if( memcmp(&last_quote, &quote, sizeof(SInnerQuote)) == 0 )
+            return;
+    }
+
     std::cout << "publish(raw) " << quote.symbol << " " << newQuote.ask_length << "/"<< newQuote.bid_length << std::endl;
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd(newQuote, ptrData.get());    
@@ -504,4 +515,6 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     PUBLISHER->publish4Broker(quote.symbol, ptrData, NULL);
     // send to clients
     PUBLISHER->publish4Client(quote.symbol, ptrData, NULL);
+
+    last_datas_[quote.symbol] = newQuote;
 }
