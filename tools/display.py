@@ -16,7 +16,17 @@ import risk_controller_pb2
 import risk_controller_pb2_grpc
 import stream_engine_pb2
 import stream_engine_pb2_grpc
+import kline_server_pb2
+import kline_server_pb2_grpc
 import empty_pb2
+import struct
+import json
+
+def get_combox_data(combox):
+    ret = set()
+    for i in range(combox.count()):
+        ret.add(combox.itemData(i))
+    return ret
 
 def CallChangeStreamEngineParams(addr, params):
     with grpc.insecure_channel(addr) as channel:
@@ -33,7 +43,8 @@ def CallGetStreamEngineParams(addr):
     with grpc.insecure_channel(addr) as channel:
         stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
         request = stream_engine_pb2.GetParamsReq()
-        return stub.GetParams(request)
+        resp = stub.GetParams(request)
+        return resp
 
 
 class GrpcStreamThread(QThread):
@@ -67,6 +78,19 @@ class QueryApiThread(GrpcStreamThread):
             for quote in resp.quotes:
                 self.breakSignal.emit(quote)
 
+class SubscribeKlineThread(GrpcStreamThread):
+    breakSignal = pyqtSignal(kline_server_pb2.GetKlinesResponse)
+  
+    def __init__(self, addr, parent=None):
+        super().__init__(addr, parent)
+  
+    def run_grpc(self, channel):
+        print("SubscribeKlineThread running...")
+        stub = kline_server_pb2_grpc.KlineServerStub(channel)
+        responses = stub.GetLast(kline_server_pb2.GetKlinesRequest())
+        for resp in responses:
+            print(struct.unpack("=QQHQHQHQHd", resp.data))
+
 class QueryStreamEngineThread(GrpcStreamThread):
     breakSignal = pyqtSignal(quote_data_pb2.MarketStreamData)
   
@@ -78,10 +102,23 @@ class QueryStreamEngineThread(GrpcStreamThread):
         responses = stub.SubscribeMixQuote(stream_engine_pb2.SubscribeMixQuoteReq())
         for resp in responses:
             for quote in resp.quotes:
+                #print(quote)
                 self.breakSignal.emit(quote)
 
+class QueryConfigThread(QThread):
+    breakSignal = pyqtSignal(str)
+
+    def __init__(self, addr, parent=None):
+        super().__init__(parent)
+        self.addr = addr
+
+    def run(self):
+        while True:
+            resp = CallGetStreamEngineParams(self.addr)
+            self.breakSignal.emit(resp.json_data)
+            time.sleep(5)
+
 class QueryRawThread(GrpcStreamThread):
-    #breakSignal = pyqtSignal(quote_data_pb2.MarketStreamData)
     breakSignal = pyqtSignal(dict)
   
     def __init__(self, exchange, symbol, addr, parent=None):
@@ -106,14 +143,18 @@ class QueryRawThread(GrpcStreamThread):
                 print("exit single thread @", self.exchange, self.symbol)
                 return False
             for quote in resp.quotes:
+                last_seqno = quote.seq_no
                 if quote.is_snap:
+                    cache['ask'] = {}
                     for depth in quote.asks:
                         cache['ask'][float(depth.price)] = depth.volume
+                    cache['bid'] = {}
                     for depth in quote.bids:
                         cache['bid'][float(depth.price)] = depth.volume
                 else:
                     for depth in quote.asks:
-                        if depth.volume == 0:
+                        #print('quote.asks', depth)
+                        if depth.volume < 0.000001:
                             try:
                                 del cache['ask'][float(depth.price)]
                             except:
@@ -121,7 +162,7 @@ class QueryRawThread(GrpcStreamThread):
                         else:
                             cache['ask'][float(depth.price)] = depth.volume
                     for depth in quote.bids:
-                        if depth.volume == 0:
+                        if depth.volume < 0.000001:
                             try:
                                 del cache['bid'][float(depth.price)]
                             except:
@@ -199,29 +240,19 @@ class DisplayWidget(QWidget):
     DEPTH = 20
     FREQUENCY = 1
     RAW_FREQUENCY = 1
-    STREAMENGINE_ADDR = "172.25.3.207:9000"
-    API_ADDR = "172.25.3.207:9900"
+    #STREAMENGINE_ADDR = "172.25.3.207:9000"
+    #API_ADDR = "172.25.3.207:9900"
+    #KLINESERVER_ADDR = "172.25.3.207:9990"
+    STREAMENGINE_ADDR = "36.255.220.139:9110"
+    API_ADDR = "36.255.220.139:9111"
+    KLINESERVER_ADDR = "36.255.220.139:9110"
     
     def __init__(self):
         super().__init__()
 
-        self.stream_engine_params = CallGetStreamEngineParams(self.STREAMENGINE_ADDR)
-        print(self.stream_engine_params)
-        # 所有聚合行情品种：来自api接口
-        self.all_symbols = self.stream_engine_params.symbols
-        # 所有聚合行情品种对一个的交易所，来自api接口
-        self.all_exchanges = self.stream_engine_params.exchanges
-        # 当前选定的品种
-        self.current_symbol = self.all_symbols[0]
-        # 当前选定的交易所（原始行情）
-        self.current_exchange = self.all_exchanges[0]
-        # 聚合行情深度
-        self.DEPTH = self.stream_engine_params.depth
-        # 聚合行情发布频率
-        self.FREQUENCY = self.stream_engine_params.frequency
-        # 原始行情发布频率
-        self.RAW_FREQUENCY = self.stream_engine_params.raw_frequency
-        
+        self.current_symbol = ''
+        self.current_exchange = ''
+
         # 初始化ui
         self.initUI()
         
@@ -236,9 +267,29 @@ class DisplayWidget(QWidget):
         self.streamengine_thread.start()
 
         # 原始行情聚合接口需要动态获取
-        self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
+        #self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
+        self.raw_thread = QueryRawThread('', '', self.STREAMENGINE_ADDR)
         self.raw_thread.breakSignal.connect(self.update_raw_data)
         self.raw_thread.start()
+
+        # 查询服务器配置参数
+        self.cfg_thread = QueryConfigThread(self.STREAMENGINE_ADDR)
+        self.cfg_thread.breakSignal.connect(self.update_config_data)
+        self.cfg_thread.start()
+
+        # 启动K线更新接口
+        self.kline_thread = SubscribeKlineThread(self.KLINESERVER_ADDR)
+        #self.kline_thread.start()
+
+    def _create_combobox(self, options, init_val=None):
+        ret = QComboBox(self)
+        ret.addItems([str(d) for d in options])
+        if init_val != None:
+            for i, d in enumerate(options):
+                if math.isclose(d, init_val, rel_tol=1e-5):
+                    ret.setCurrentIndex(i)
+                    break
+        return ret
 
     def initUI(self):
         ctl_panel = QWidget()
@@ -246,33 +297,27 @@ class DisplayWidget(QWidget):
         ctl_grid.setAlignment(QtCore.Qt.AlignTop)
         label = QLabel("StreamEngine设置:")
         ctl_grid.addWidget(label, 0, 0)
-        label = QLabel("设置深度")
-        ctl_grid.addWidget(label, 1, 0)
-        self.depth_combox = QComboBox(self)
-        self.depth_combox.addItems(["200", "10", "5"])
-        self.depth_combox.setCurrentText(str(self.stream_engine_params.depth))
-        self.depth_combox.currentIndexChanged[str].connect(self.depth_changed)
-        ctl_grid.addWidget(self.depth_combox, 1, 1)
-        label = QLabel("设置频率")
-        ctl_grid.addWidget(label, 2, 0)
-        self.frequecy_combox = QComboBox(self)
-        self.frequecy_combox.addItems(["1", "2", "100", "0.1"])
-        self.frequecy_combox.setCurrentText(str(self.stream_engine_params.frequency))
-        self.frequecy_combox.currentIndexChanged[str].connect(self.frequency_changed)
-        ctl_grid.addWidget(self.frequecy_combox, 2, 1)
-        label = QLabel("设置精度")
-        ctl_grid.addWidget(label, 3, 0)
-        self.precise_combox = QComboBox(self)
-        self.precise_combox.addItems(["1", "2", "3", "4"])
-        self.precise_combox.currentIndexChanged[str].connect(self.precise_changed)
-        ctl_grid.addWidget(self.precise_combox, 3, 1)
+
         label = QLabel("设置原始频率")
+        ctl_grid.addWidget(label, 1, 0)
+        self.frequency_lbl = QLabel()
+        ctl_grid.addWidget(self.frequency_lbl, 1, 1)
+
+        label = QLabel("设置精度")
+        ctl_grid.addWidget(label, 2, 0)
+        self.precise_lbl = QLabel()
+        ctl_grid.addWidget(self.precise_lbl, 2, 1)
+
+        label = QLabel("设置聚合频率")
+        ctl_grid.addWidget(label, 3, 0)
+        self.mixfrequency_lbl = QLabel()
+        ctl_grid.addWidget(self.mixfrequency_lbl, 3, 1)
+
+        label = QLabel("设置聚合深度")
         ctl_grid.addWidget(label, 4, 0)
-        self.raw_frequecy_combox = QComboBox(self)
-        self.raw_frequecy_combox.addItems(["1", "100", "0.1"])
-        self.raw_frequecy_combox.setCurrentText(str(self.stream_engine_params.raw_frequency))
-        self.raw_frequecy_combox.currentIndexChanged[str].connect(self.raw_frequency_changed)
-        ctl_grid.addWidget(self.raw_frequecy_combox, 4, 1)
+        self.mixdepth_lbl = QLabel()
+        ctl_grid.addWidget(self.mixdepth_lbl, 4, 1)
+
         label = QLabel("-------------------")
         ctl_grid.addWidget(label, 5, 0)
         label = QLabel("RiskController设置:")
@@ -293,14 +338,13 @@ class DisplayWidget(QWidget):
         # 原始数据显示区域
         raw_panel = QWidget()
         self.raw_widget = AskBidWidget(self.DISPLAY_DEPTH)
-        raw_panel.setLayout(self.raw_widget.grid) 
+        raw_panel.setLayout(self.raw_widget.grid)   
 
         # 主layout区域
         wlayout = QGridLayout()
         # 0行 - 0列
         self.symbol_combox = QComboBox(self)
-        self.symbol_combox.addItems(self.stream_engine_params.symbols)
-        self.symbol_combox.currentIndexChanged[str].connect(self.symbol_changed)
+        self.symbol_combox.activated[str].connect(self.symbol_changed)
         wlayout.addWidget(self.symbol_combox, 0, 0)
         # 0行 - 1列
         wlayout.addWidget(QLabel("风控前行情"), 0, 1)
@@ -308,8 +352,7 @@ class DisplayWidget(QWidget):
         wlayout.addWidget(QLabel("风控后行情"), 0, 2)
         # 0行 - 3列
         self.exchange_combox = QComboBox(self)
-        self.exchange_combox.addItems(self.stream_engine_params.exchanges)
-        self.exchange_combox.currentIndexChanged[str].connect(self.exchange_changed)
+        self.exchange_combox.activated[str].connect(self.exchange_changed)
         wlayout.addWidget(self.exchange_combox, 0, 3)
         # 1行 - 0列
         wlayout.addWidget(ctl_panel, 1, 0)
@@ -329,18 +372,6 @@ class DisplayWidget(QWidget):
         self.move(300, 150)
         self.setWindowTitle('聚合行情展示')
         self.show()
-
-    def _add_symbol(self, symbol):
-        # add to combobox
-        if symbol not in self.all_symbols:
-            self.all_symbols.add(symbol)
-            self.symbol_combox.addItem(symbol)
-
-    def _add_exchange(self, exchange, symbol):
-        # add to combobox
-        if exchange not in self.all_exchanges[symbol]:
-            self.all_exchanges[symbol].add(exchange)
-            self.exchange_combox.addItem(exchange)
 
     def update_api_data(self, msg):
         def _make_data(depths):
@@ -367,8 +398,6 @@ class DisplayWidget(QWidget):
         def _make_data(depths):
             ret = []
             for i, depth in enumerate(depths):
-                if i == 0:
-                    print(depth)
                 # 价位数据
                 txt_price = depth.price
                 # 挂单数据
@@ -392,26 +421,79 @@ class DisplayWidget(QWidget):
         self.streamengine_widget.bind_data(ask_data, bid_data)
 
     def update_raw_data(self, msg):
-        def _make_data(depths):
+        def _make_data(depths, is_ask):
             ret = []
             keys = sorted(depths.keys())
+            if not is_ask:
+                keys = keys[::-1]
             for price in keys:
                 ret.append((str(price), str(depths[price])))
             return ret
 
-        ask_data = _make_data(msg['ask'])
-        bid_data = _make_data(msg['bid'])
+        ask_data = _make_data(msg['ask'], True)
+        bid_data = _make_data(msg['bid'], False)
         self.raw_widget.bind_data(ask_data, bid_data)
 
+    def update_config_data(self, msg):
+        # 解析完整的配置信息
+        self.configs = json.loads(msg)
+        print(self.configs)
+
+        # 解析符号和交易所信息，用于列表展示
+        symbols = {}
+        for symbol, symbol_configs in self.configs.items():
+            symbols[symbol] = list(symbol_configs['exchanges'].keys())
+
+        # symbol_combox
+        if get_combox_data(self.symbol_combox) != set(symbols.keys()):
+            self.symbol_combox.clear()
+            self.symbol_combox.addItems(list(symbols.keys()))
+            if self.current_symbol in symbols: # 重新设置选中项
+                self.symbol_combox.setCurrentText(self.current_symbol)
+            elif symbols: # 默认设置第一个
+                self.current_symbol = list(symbols.keys())[0]
+                self.symbol_combox.activated[str].emit(self.current_symbol)
+
+        # exchange_combox
+        exchanges = symbols[self.current_symbol]
+        if get_combox_data(self.exchange_combox) != set(exchanges):
+            self.exchange_combox.clear()
+            self.exchange_combox.addItems(exchanges)
+            if self.current_exchange in exchanges: # 重新设置选中项
+                self.exchange_combox.setCurrentText(self.current_exchange)
+            elif exchanges: # 默认设置第一个
+                self.current_exchange = exchanges[0]
+                self.exchange_combox.activated[str].emit(self.current_exchange)
+
+        # 设置其他
+        self.precise_lbl.setText(str(self.configs[self.current_symbol]['precise']))
+        self.frequency_lbl.setText(str(self.configs[self.current_symbol]['frequency']))
+        self.mixdepth_lbl.setText(str(self.configs[self.current_symbol]['mix_depth']))
+        self.mixfrequency_lbl.setText(str(self.configs[self.current_symbol]['mix_frequency']))
+
     def symbol_changed(self, symbol):
+        print('symbol_changed', symbol)
         self.current_symbol = symbol
 
-        # 品种变化的时候，动态更新原始行情的交易所列表
-        #exchanges = self.all_exchanges[symbol]
-        #self.exchange_combox.clear()
-        #self.exchange_combox.addItems(list(exchanges))
+        exchanges = list(self.configs[self.current_symbol]['exchanges'].keys())
+        # exchange_combox
+        if get_combox_data(self.exchange_combox) != set(exchanges):
+            self.exchange_combox.clear()
+            self.exchange_combox.addItems(exchanges)
+            if self.current_exchange in exchanges: # 重新设置选中项
+                self.exchange_combox.setCurrentText(self.current_exchange)
+            elif exchanges: # 默认设置第一个
+                self.current_exchange = exchanges[0]
+                self.exchange_combox.activated[str].emit(self.current_exchange)
+                
+        # 设置其他
+        self.precise_lbl.setText(str(self.configs[self.current_symbol]['precise']))
+        self.frequency_lbl.setText(str(self.configs[self.current_symbol]['frequency']))
+        self.mixdepth_lbl.setText(str(self.configs[self.current_symbol]['mix_depth']))
+        self.mixfrequency_lbl.setText(str(self.configs[self.current_symbol]['mix_frequency']))
 
     def exchange_changed(self, exchange):
+        print('exchange_changed', exchange)
         self.current_exchange = exchange
 
         # 停止之前的数据线程
@@ -422,22 +504,6 @@ class DisplayWidget(QWidget):
         self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
         self.raw_thread.breakSignal.connect(self.update_raw_data)
         self.raw_thread.start()
-
-    def depth_changed(self, depth):
-        self.DEPTH = int(depth)
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
-
-    def frequency_changed(self, frequency):
-        self.FREQUENCY = float(frequency)
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
-
-    def raw_frequency_changed(self, frequency):
-        self.RAW_FREQUENCY = float(frequency)
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY})
-
-    def precise_changed(self, precise):
-        CallChangeStreamEngineParams(self.STREAMENGINE_ADDR, {"depth": self.DEPTH, "frequency": self.FREQUENCY, "raw_frequency": self.RAW_FREQUENCY, "precise": int(precise), "symbol": self.current_symbol})
-        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

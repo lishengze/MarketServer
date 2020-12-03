@@ -21,10 +21,10 @@ public:
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
-    void on_precise_changed(const TSymbol& symbol, int precise);
+    //void on_precise_changed(const TSymbol& symbol, int precise);
 
     // from INacosCallback
-    void on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols);
+    void on_symbol_channged(const NacosString& symbols);
 
     // signal handler function
     static volatile int signal_sys;
@@ -45,4 +45,7 @@ private:
     QuoteDumper quote_dumper_;
     // nacos client
     NacosClient nacos_client_;
+
+    // 动态配置信息
+    std::unordered_map<TSymbol, SNacosConfig> symbols_;
 };

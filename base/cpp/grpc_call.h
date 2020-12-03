@@ -73,12 +73,14 @@ public:
                 caller_->on_connect(this);
             }
             
+            // process返回true表示有消息发送，返回false表示无消息，需要手动插入一个事件
             if( !process() ) {
                 alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
             }
+
+            //
             if( status_ != FINISH )
                 status_ = PUSH_TO_BACK;
-            status_ = PUSH_TO_BACK;
         } else if(status_ == PUSH_TO_BACK) {
             status_ = PROCESS;
             alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
@@ -119,6 +121,7 @@ public:
         }
         ENTITY* last = (ENTITY*)entity;
         ENTITY* ptr = last->spawn();
+        //ENTITY* ptr = new ENTITY(service_);
         ptr->set_callid(call_id_);
         ptr->set_completequeue(cq_);
         ptr->set_parent(this);

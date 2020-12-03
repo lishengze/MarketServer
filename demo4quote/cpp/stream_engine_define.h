@@ -71,3 +71,28 @@ struct SMixQuote {
         }
     }
 };
+
+struct SNacosConfigFee
+{
+    int fee_type;
+    float fee_maker;
+    float fee_taker;
+};
+
+struct SNacosConfig
+{
+    int precise;
+    type_uint32 depth;
+    float frequency;
+    type_uint32 mix_depth;
+    float mix_frequecy;
+    map<TExchange, SNacosConfigFee> exchanges;    
+
+    unordered_set<TExchange> get_exchanges() const {
+        unordered_set<TExchange> ret;
+        for( const auto& v : exchanges ) {
+            ret.insert(v.first);
+        }
+        return ret;
+    }
+};

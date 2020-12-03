@@ -54,9 +54,5 @@ message GetParamsReq {
 }
 
 message GetParamsResp {
-    repeated string symbols = 1;
-    repeated string exchanges = 2;
-    int32 depth = 3;            // 聚合行情深度
-    float frequency = 4;        // 聚合行情频率
-    float raw_frequency = 5;    // 发布原始品种行情频率
+    string json_data = 1;
 }

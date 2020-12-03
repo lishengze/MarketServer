@@ -44,17 +44,24 @@ void GrpcServer::init(const string& grpc_addr)
 
 void GrpcServer::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
-    caller_subscribe_single_->add_data(snap, update);
+    SnapAndUpdate data;
+    data.snap = snap;
+    data.update = update;
+    caller_subscribe_single_->add_data(data);
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
 void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
-    caller_subscribe_mix_->add_data(snap, update);
+    SnapAndUpdate data;
+    data.snap = snap;
+    data.update = update;
+    caller_subscribe_mix_->add_data(data);
 };
 
 void GrpcServer::_handle_rpcs() 
 {
+    std::cout << "_handle_rpcs running on ..." << std::endl;
     void* tag;
     bool ok;
     while(true) {

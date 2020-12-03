@@ -43,26 +43,39 @@ struct SDecimal {
     }
 
     void from(double v, double bias = 0.0000001) {
-        //cout << fixed << v << endl;
-        int count = 0, limit = 100;
-        while( count <= limit && abs(get_value() - v)/v > bias ) {
+        if( v == 0 ) {
+            base = 0;
+            value = 0;
+            return;
+        }
+            
+        int limit = 100;
+        while( base <= limit && abs(get_value() - v)/v > bias ) {
             base += 1;
-            count += 1;
             value = v * CALC_BASE(base);
         }
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
+        // 没有小数
+        if( pos == string::npos ) {
+            base = 0;
+            value = atoi(data.c_str());
+            return;
+        }
+
         base = data.length() - pos - 1;
         if( precise >= 0 && precise < base ) { // 精度调整
             base = precise;
             string newData = data.substr(0, pos + 1 + precise);
-            value = d_round(atof(newData.c_str()) * CALC_BASE(base));
-            if( ceiling )
+            float origin = atof(data.c_str());
+            float cutted = atof(newData.c_str());
+            value = d_round(cutted * CALC_BASE(base));
+            if( ceiling && origin > cutted )
                 value += 1;
         } else {
-            value = atof(data.c_str()) * CALC_BASE(base);
+            value = d_round(atof(data.c_str()) * CALC_BASE(base));
         }
     }
 

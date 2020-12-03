@@ -51,13 +51,13 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     redis_snap_requester_.init(params, logger);
     redis_snap_requester_.set_engine(this);
     redis_snap_requester_.start();
-    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+    /*for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
         for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
             const string& symbol = *iterSymbol;
             const string& exchange = *iterExchange;
             redis_snap_requester_.add_symbol(exchange, symbol);
         }
-    }
+    }*/
 
     // 请求增量
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
@@ -146,13 +146,13 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 void RedisQuote::OnConnected() {
     _log_and_print("Redis RedisQuote::OnConnected");
     
-    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
+    /*for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
         for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
             const string& symbol = *iterSymbol;
             const string& exchange = *iterExchange;
             subscribe("UPDATEx|" + symbol + "." + exchange);            
         }
-    }
+    }*/
 };
 
 void RedisQuote::OnDisconnected(int status) {
@@ -163,8 +163,8 @@ bool RedisQuote::_update_meta_by_snap(const TExchange& exchange, const TSymbol& 
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
 
-    ExchangeMeta& meta = metas_[exchange];
-    SymbolMeta& symbol_meta = meta.symbols[symbol];
+    ExchangeMeta& meta = metas_[symbol];
+    SymbolMeta& symbol_meta = meta.symbols[exchange];
 
     if( symbol_meta.publish_started() ) 
     {
@@ -235,8 +235,8 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
 
-    ExchangeMeta& meta = metas_[exchange];
-    SymbolMeta& symbol_meta = meta.symbols[symbol];
+    ExchangeMeta& meta = metas_[symbol];
+    SymbolMeta& symbol_meta = meta.symbols[exchange];
 
     // 更新统计信息
     meta.pkg_count += 1;
@@ -313,15 +313,6 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
     return true;
 };
 
-void RedisQuote::subscribe(const string& channel) {
-    redis_api_->SubscribeTopic(channel);
-    subscribed_topics_.insert(channel);
-};
-
-void RedisQuote::psubscribe(const string& pchannel) {
-    redis_api_->PSubscribeTopic(pchannel);
-};
-
 void RedisQuote::_check() 
 {
     last_statistic_time_ = get_miliseconds();
@@ -336,21 +327,24 @@ void RedisQuote::_check()
 
         // 强制刷出没有后续更新的品种
         vector<SDepthQuote> forced_to_update;
-        {
+        if( false ) {
             std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
             for( auto& v : last_clocks_ )
             {
+                const TSymbol& symbol = v.first;
                 for( auto& u : v.second )
-                {
-                    if( (now - u.second) < (1000/CONFIG->grpc_publish_raw_frequency_) ) {
+                {                    
+                    const TExchange& exchange = u.first;
+                    float frequency = frequecy_[symbol];
+                    if( frequency != 0 && (now - u.second) < (1000/frequency) ) {
                         continue;
                     }
                     u.second = now;
                     
-                    SDepthQuote& quote = updates_[v.first][u.first];
+                    SDepthQuote& quote = updates_[symbol][exchange];
                     SDepthQuote tmp;
-                    tmp.exchange = v.first;
-                    tmp.symbol = u.first;
+                    tmp.exchange = exchange;
+                    tmp.symbol = symbol;
                     tmp.arrive_time = quote.arrive_time;
                     tmp.asks.swap(quote.asks);
                     tmp.bids.swap(quote.bids);
@@ -439,7 +433,7 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
 
     // 保留更新
-    SDepthQuote& update = updates_[exchange][symbol];
+    SDepthQuote& update = updates_[symbol][exchange];
     update.arrive_time = quote.arrive_time;
     for( const auto& v : quote.asks )
     {
@@ -451,7 +445,8 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     }
 
     // 检查频率
-    if( !_check_update_clocks(exchange, symbol) ) {
+    float frequency = frequecy_[symbol];
+    if( !_check_update_clocks(exchange, symbol, frequency) ) {
         //_log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
         return true;
     }
@@ -467,51 +462,51 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     return true;
 }
 
-bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& symbol) {
-    if( CONFIG->grpc_publish_raw_frequency_ == 0 )
+bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& symbol, float frequency) {
+    if( frequency == 0 )
         return true;
 
     // 每秒更新频率控制
-    auto last = last_clocks_[exchange][symbol];
+    auto last = last_clocks_[symbol][exchange];
     auto now = get_miliseconds();
-    if( (now - last) < (1000/CONFIG->grpc_publish_raw_frequency_) ) {
+    if( (now - last) < (1000/frequency) ) {
         return false;
     }
-    last_clocks_[exchange][symbol] = now;
+    last_clocks_[symbol][exchange] = now;
     return true;
 }
 
-void RedisQuote::change_precise(const TSymbol& symbol, int precise)
+void RedisQuote::set_frequency(const TSymbol& symbol, float frequency)
 {
-    // 清除频率记号
-    {        
-        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
-        for( auto& v : last_clocks_ ) {
-            unordered_map<TSymbol, type_tick>& ticks = v.second;
-            auto iter = ticks.find(symbol);
-            if( iter != ticks.end() ) {
-                ticks.erase(iter);
-            }
-        }
-        for( auto& v : updates_ ) {
-            unordered_map<TSymbol, SDepthQuote>& updates = v.second;
-            auto iter = updates.find(symbol);
-            if( iter != updates.end() ) {
-                updates.erase(iter);
-            }
+    _log_and_print("%s frequency=%.03f", symbol.c_str(), frequency);
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+    frequecy_[symbol] = frequency;
+}
+
+void RedisQuote::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+{
+    string desc = "";
+    for( const auto& v : exchanges ) {
+        desc += v + ",";
+    }
+    _log_and_print("%s exchanges=%s", symbol.c_str(), desc.c_str());
+
+    // 删除老的
+    const auto& iter = symbols_.find(symbol);
+    if( iter != symbols_.end() )
+    {
+        for( const auto& v : iter->second ) {
+            unsubscribe(v, symbol);
         }
     }
 
-    // 清除数据
+    // 添加新的    
+    for( const auto& v : exchanges )
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_metas_ };
-        for( auto& v : metas_ ) {
-            ExchangeMeta& meta = v.second;
-            auto iter = meta.symbols.find(symbol);
-            if( iter != meta.symbols.end() ) {
-                meta.symbols.erase(iter);
-            }
-            redis_snap_requester_.add_symbol(v.first, symbol);
-        }
+        subscribe(v, symbol);
     }
+
+    // 赋值
+    symbols_[symbol] = exchanges;
 }

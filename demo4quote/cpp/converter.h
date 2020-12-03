@@ -6,11 +6,11 @@
 
 using FuncAddDepth2 = std::function<Depth*()>;
 
-inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, bool is_ask)
+inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask)
 {
     unsigned int depth_count = 0;
     const SMixDepthPrice* ptr = depths;
-    while( ptr != NULL && depth_count < CONFIG->grpc_publish_depth_ ) {
+    while( ptr != NULL && depth_count < depth ) {
         Depth* depth = func();
         depth->set_price(ptr->price.get_str_value());
         double total_volume = 0;
@@ -24,7 +24,7 @@ inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDept
     }
 }
 
-inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exchange, const string& symbol, const SMixQuote* src, bool is_snap)
+inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exchange, const string& symbol, const SMixQuote* src, type_uint32 depth, bool is_snap)
 {
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
@@ -34,16 +34,17 @@ inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote2(const string& exch
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);
-    mixquote_to_pbquote2_depth(src->asks, f1, true);
+    mixquote_to_pbquote2_depth(src->asks, f1, depth, true);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamData::add_bids, msd);
-    mixquote_to_pbquote2_depth(src->bids, f2, false);
+    mixquote_to_pbquote2_depth(src->bids, f2, depth, false);
 
     return msd;
 };
 
-inline void mixquote_to_pbquote3_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, int precise, const SymbolFee& fee, bool is_ask)
+inline void mixquote_to_pbquote3_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, bool is_ask)
 {
+    /*
     unsigned int depth_count = 0;
     SDecimal lastPrice = is_ask ? SDecimal::min_decimal() : SDecimal::max_decimal();
     const SMixDepthPrice* ptr = depths;
@@ -70,15 +71,15 @@ inline void mixquote_to_pbquote3_depth(const SMixDepthPrice* depths, FuncAddDept
         }        
         current_depth->set_volume(total_volume);
         ptr = ptr->next;
-    }
+    }*/
 }
 
 inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote3(const string& exchange, const string& symbol, const SMixQuote* src, bool is_snap)
 {
     // 精度统一
-    int precise = CONFIG->get_precise(symbol);
+    //int precise = CONFIG->get_precise(symbol);
     // 考虑手续费因素
-    SymbolFee fee = CONFIG->get_fee(exchange, symbol);
+    //SymbolFee fee = CONFIG->get_fee(exchange, symbol);
 
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
@@ -88,25 +89,25 @@ inline std::shared_ptr<MarketStreamData> mixquote_to_pbquote3(const string& exch
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);
-    mixquote_to_pbquote3_depth(src->asks, f1, precise, fee, true);
+    mixquote_to_pbquote3_depth(src->asks, f1, true);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamData::add_bids, msd);
-    mixquote_to_pbquote3_depth(src->bids, f2, precise, fee, false);
+    mixquote_to_pbquote3_depth(src->bids, f2, false);
 
     return msd;
 };
 
-inline void depth_to_pbquote2_depth(const map<SDecimal, double>& depths, FuncAddDepth2 func, bool is_ask)
+inline void depth_to_pbquote2_depth(const map<SDecimal, double>& depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask)
 {
     type_uint32 count = 0;
     if( is_ask ) {
-        for( auto iter = depths.begin() ; iter != depths.end() && count < CONFIG->grpc_publish_depth_ ; iter ++, count ++) {
+        for( auto iter = depths.begin() ; iter != depths.end() && count < depth ; iter ++, count ++) {
             Depth* depth = func();
             depth->set_price(iter->first.get_str_value());
             depth->set_volume(iter->second);
         }
     } else {
-        for( auto iter = depths.rbegin() ; iter != depths.rend() && count < CONFIG->grpc_publish_depth_ ; iter ++, count ++) {
+        for( auto iter = depths.rbegin() ; iter != depths.rend() && count < depth ; iter ++, count ++) {
             Depth* depth = func();
             depth->set_price(iter->first.get_str_value());
             depth->set_volume(iter->second);
@@ -114,7 +115,7 @@ inline void depth_to_pbquote2_depth(const map<SDecimal, double>& depths, FuncAdd
     }
 }
 
-inline std::shared_ptr<MarketStreamData> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, bool is_snap)
+inline std::shared_ptr<MarketStreamData> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, type_uint32 depth, bool is_snap)
 {
     std::shared_ptr<MarketStreamData> msd = std::make_shared<MarketStreamData>();
     msd->set_exchange(exchange);
@@ -125,10 +126,10 @@ inline std::shared_ptr<MarketStreamData> depth_to_pbquote2(const string& exchang
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamData::add_asks, msd);
-    depth_to_pbquote2_depth(src.asks, f1, true);
+    depth_to_pbquote2_depth(src.asks, f1, depth, true);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamData::add_bids, msd);
-    depth_to_pbquote2_depth(src.bids, f2, false);
+    depth_to_pbquote2_depth(src.bids, f2, depth, false);
 
     return msd;
 };
@@ -207,15 +208,4 @@ inline void process_precise_mixdepth(SMixDepthPrice* dst, int precise, const SMi
 
         src = src->next;
     }
-}
-
-inline void compress_mixquote(const TSymbol& symbol, SMixQuote& dst, const SMixQuote& src)
-{
-    // 精度统一
-    int precise = CONFIG->get_precise(symbol);
-    
-    vassign(dst.sequence_no, src.sequence_no);
-
-    process_precise_mixdepth(dst.asks, precise, src.asks, true);
-    process_precise_mixdepth(dst.bids, precise, src.bids, false);
 }
