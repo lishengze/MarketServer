@@ -13,6 +13,7 @@
 
 #include "../front_server_declare.h"
 #include "../data_process/data_struct.h"
+#include <thread>
 
 using std::string;
 using std::cout;
@@ -27,6 +28,8 @@ struct PerSocketData {
 
 class WBServer
 {
+    using websocket_class = uWS::WebSocket<false, true>;
+    
     public:
 
     WBServer();
@@ -38,15 +41,15 @@ class WBServer
     void init_websocket_ssl_server();
     void init_websocket_server();
 
-    void on_open(uWS::WebSocket<false, true> * );
+    void on_open(websocket_class * );
 
-    void on_message(uWS::WebSocket<false, true> *, std::string_view, uWS::OpCode);
+    void on_message(websocket_class *, std::string_view, uWS::OpCode);
 
-    void on_ping(uWS::WebSocket<false, true> * );
+    void on_ping(websocket_class * );
 
-    void on_pong(uWS::WebSocket<false, true> * );
+    void on_pong(websocket_class * );
 
-    void on_close(uWS::WebSocket<false, true> * );
+    void on_close(websocket_class * );
 
     void listen();
 
@@ -60,24 +63,35 @@ class WBServer
 
     void broadcast_enhanced_data(EnhancedDepthData& en_depth_data);
 
-    void process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws);
+    void process_sub_info(string ori_msg, websocket_class * ws);
 
-    void clean_client(uWS::WebSocket<false, true> * ws);
+    void clean_client(websocket_class * ws);
+
+    void heartbeat_run();
+
+    void start_heartbeat();
+
+    void check_heartbeat();
 
     private:
         us_socket_context_options_t             socket_options_;
+
         uWS::App::WebSocketBehavior             websocket_behavior_;
 
         uWS::App                                wss_server_;
 
         int                                     server_port_{9002};
-        std::set<uWS::WebSocket<false, true> *> wss_con_set_;
+        std::set<websocket_class *> wss_con_set_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
 
         FrontServer*                            front_server_{nullptr};
 
-        std::map<string, std::set<uWS::WebSocket<false, true> *>> ws_sub_map_;
+        std::map<string, std::set<websocket_class *>> ws_sub_map_;
+
+        boost::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
+
+        int                                     heartbeat_seconds_{5};                         
 };
 
 FORWARD_DECLARE_PTR(WBServer);

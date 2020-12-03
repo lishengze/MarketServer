@@ -22,6 +22,8 @@ WBServer::WBServer()
     init_websocket_ssl_server();
 
     init_websocket_server();
+
+    start_heartbeat();
 }
 
 WBServer::~WBServer()
@@ -30,6 +32,11 @@ WBServer::~WBServer()
     {
         listen_thread_->join();
     }
+
+    if (!heartbeat_thread_ && heartbeat_thread_->joinable())
+    {
+        heartbeat_thread_->join();
+    }    
 }
 
 void WBServer::init_websocket_options()
@@ -55,8 +62,7 @@ void WBServer::init_websocket_server()
     // wss_server_(std::move(uWS::App().ws<PerSocketData>("/*", std::move(websocket_behavior_))));
 }
 
-
-void WBServer::on_open(uWS::WebSocket<false, true> * ws)
+void WBServer::on_open(websocket_class * ws)
 {
     wss_con_set_.emplace(ws);
 
@@ -70,7 +76,7 @@ void WBServer::on_open(uWS::WebSocket<false, true> * ws)
 }
 
 // 处理各种请求
-void WBServer::on_message(uWS::WebSocket<false, true> * ws, std::string_view msg, uWS::OpCode code)
+void WBServer::on_message(websocket_class * ws, std::string_view msg, uWS::OpCode code)
 {
     cout << "Req Msg: " << msg << endl;
     string trans_msg(msg.data(), msg.size());
@@ -80,17 +86,17 @@ void WBServer::on_message(uWS::WebSocket<false, true> * ws, std::string_view msg
     process_sub_info(trans_msg, ws);
 }
 
-void WBServer::on_ping(uWS::WebSocket<false, true> * ws)
+void WBServer::on_ping(websocket_class * ws)
 {
 
 }
 
-void WBServer::on_pong(uWS::WebSocket<false, true> * ws)
+void WBServer::on_pong(websocket_class * ws)
 {
 
 }
 
-void WBServer::on_close(uWS::WebSocket<false, true> * ws)
+void WBServer::on_close(websocket_class * ws)
 {
     cout << "one connection closed " << endl;
 
@@ -125,15 +131,13 @@ void WBServer::release()
 
 void WBServer::broadcast(string msg)
 {
-    for (uWS::WebSocket<false, true> * ws: wss_con_set_)
+    for (websocket_class * ws: wss_con_set_)
     {
         ws->send(msg, uWS::OpCode::TEXT);
     }
-
-
 }
 
-void WBServer::process_sub_info(string ori_msg, uWS::WebSocket<false, true> * ws)
+void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
 {
     try
     {
@@ -172,15 +176,15 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
         cout << "send ws numb: " << ws_sub_map_[update_symbol].size() << endl;
 
-        for (uWS::WebSocket<false, true>* ws:ws_sub_map_[update_symbol])
+        for (websocket_class* ws:ws_sub_map_[update_symbol])
         {
             ws->send(send_str, uWS::OpCode::TEXT);
         }
     }
 }
 
- void WBServer::clean_client(uWS::WebSocket<false, true> * ws)
- {
+void WBServer::clean_client(websocket_class * ws)
+{
     if (wss_con_set_.find(ws) != wss_con_set_.end())
     {
         wss_con_set_.erase(ws);
@@ -191,4 +195,27 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
         string symbol = iter.first;
         ws_sub_map_[symbol].erase(ws);
     }         
- }
+}
+
+void WBServer::start_heartbeat()
+{
+    heartbeat_thread_ = boost::make_shared<std::thread>(&WBServer::heartbeat_run, this);
+}
+
+void WBServer::heartbeat_run()
+{
+    while(true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(heartbeat_seconds_));
+
+        check_heartbeat();
+    }
+}
+
+void WBServer::check_heartbeat()
+{
+    for(websocket_class * ws:wss_con_set_)
+    {
+        // ws->send();
+    }
+}
