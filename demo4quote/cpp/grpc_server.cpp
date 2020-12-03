@@ -59,13 +59,9 @@ void GrpcServer::publish_mix(const string& symbol, std::shared_ptr<MarketStreamD
     caller_subscribe_mix_->add_data(data);
 };
 
-void GrpcServer::publish_config(const std::unordered_map<TSymbol, SNacosConfig>& symbols)
-{
-    caller_getparams_->add_data(symbols);
-};
-
 void GrpcServer::_handle_rpcs() 
 {
+    std::cout << "_handle_rpcs running on ..." << std::endl;
     void* tag;
     bool ok;
     while(true) {

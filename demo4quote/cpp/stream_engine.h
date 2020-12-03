@@ -24,7 +24,7 @@ public:
     //void on_precise_changed(const TSymbol& symbol, int precise);
 
     // from INacosCallback
-    void on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols);
+    void on_symbol_channged(const NacosString& symbols);
 
     // signal handler function
     static volatile int signal_sys;

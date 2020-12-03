@@ -30,6 +30,7 @@ private:
     void _snap_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
     void _update_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output);
     void _precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, int precise, const SymbolFee& fee, SDepthQuote& output);
+    void _inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr);
     unordered_map<TSymbol, SMixQuote*> quotes_;
     unordered_map<TSymbol, SMixQuote*> quote_updates_; // 控制频率的增量，目前没有使用
 

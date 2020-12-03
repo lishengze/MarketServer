@@ -114,8 +114,36 @@ bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolF
     return true;
 }
 
-void StreamEngine::on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols)
+void StreamEngine::on_symbol_channged(const NacosString& configInfo)
 {
+    njson js = njson::parse(configInfo);
+    std::unordered_map<TSymbol, SNacosConfig> symbols;
+    for (auto iter = js.begin() ; iter != js.end() ; ++iter )
+    {
+        const TSymbol& symbol = iter.key();
+        const njson& symbol_cfgs = iter.value();
+        int enable = symbol_cfgs["enable"].get<int>();
+        if( enable < 1 )
+            continue;
+        SNacosConfig cfg;
+        cfg.precise = symbol_cfgs["precise"].get<int>();
+        cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
+        cfg.frequency = symbol_cfgs["frequency"].get<float>();
+        cfg.mix_depth = symbol_cfgs["mix_depth"].get<unsigned int>();
+        cfg.mix_frequecy = symbol_cfgs["mix_frequency"].get<float>();
+        for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
+        {
+            const TExchange& exchange = iter2.key();
+            const njson& exchange_cfgs = iter2.value();
+            SNacosConfigFee exchange_cfg;
+            exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
+            exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
+            exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
+            cfg.exchanges[exchange] = exchange_cfg;
+        } 
+        symbols[symbol] = cfg;
+    }
+    
     // quote_source_ 涉及交易所+交易币种，原始行情更新频率
     // quote_mixer2_ 涉及交易币种的精度，深度，频率，各交易所手续费
     for( const auto& v : symbols )
@@ -163,5 +191,6 @@ void StreamEngine::on_symbol_channged(const std::unordered_map<TSymbol, SNacosCo
 
     // 赋值
     symbols_ = symbols;
-}
 
+    CONFIG->set_config(configInfo);
+}

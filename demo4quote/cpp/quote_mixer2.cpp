@@ -84,18 +84,12 @@ void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, co
     _publish_quote(symbol, pub_snap, NULL, true);
 }
 
-bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
+void QuoteMixer2::_inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr)
 {
-    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-    SMixQuote* ptr = NULL;
-    if( !_get_quote(symbol, ptr) ) {
-        ptr = new SMixQuote();
-        quotes_[symbol] = ptr;
-    } else {
-        // 1. 清除老的exchange数据
-        ptr->asks = _clear_exchange(exchange, ptr->asks);
-        ptr->bids = _clear_exchange(exchange, ptr->bids);
-    }
+    // 1. 清除老的exchange数据
+    ptr->asks = _clear_exchange(exchange, ptr->asks);
+    ptr->bids = _clear_exchange(exchange, ptr->bids);
+
     // 2. 合并价位
     vector<pair<SDecimal, double>> depths;
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
@@ -109,7 +103,37 @@ bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, con
     }
     ptr->bids = _mix_exchange(exchange, ptr->bids, depths, false);
     ptr->sequence_no = quote.sequence_no;
-    
+}
+
+bool QuoteMixer2::_on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
+    SMixQuote* ptr = NULL;
+    if( !_get_quote(symbol, ptr) ) {
+        ptr = new SMixQuote();
+        quotes_[symbol] = ptr;
+    } else {
+        // 1. 清除老的exchange数据
+        //ptr->asks = _clear_exchange(exchange, ptr->asks);
+        //ptr->bids = _clear_exchange(exchange, ptr->bids);
+    }
+
+    _inner_process(exchange, symbol, quote, ptr);
+    /*
+    // 2. 合并价位
+    vector<pair<SDecimal, double>> depths;
+    for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
+        depths.push_back(make_pair(iter->first, iter->second));
+    }
+    ptr->asks = _mix_exchange(exchange, ptr->asks, depths, true);
+
+    depths.clear();
+    for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
+        depths.push_back(make_pair(iter->first, iter->second));        
+    }
+    ptr->bids = _mix_exchange(exchange, ptr->bids, depths, false);
+    ptr->sequence_no = quote.sequence_no;
+    */
     // 检查发布频率
     //if( symbol == "BTC_USDT" ) {
     //    std::cout << quote.exchange << " " << quote.ask_length << " " << quote.asks[0].price.get_str_value() << " " << 
@@ -417,16 +441,21 @@ void QuoteMixer2::set_compute_params(const TSymbol& symbol, int precise, type_ui
     auto iter = singles_.find(symbol);
     if( iter != singles_.end() )
     {
+        SMixQuote* ptr = quotes_[symbol];
         for( const auto& v : iter->second ) {
+            cout << "recalc start " << endl;
             const TExchange& exchange = v.first;
             const SDepthQuote& quote = v.second;
             SDepthQuote processed_quote;
-            _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], processed_quote);                
-            _on_snap(exchange, symbol, processed_quote, pub_snap);
+            _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], processed_quote);       
+            _inner_process(exchange, symbol, processed_quote, ptr);
+            cout << "recalc end " << exchange << endl;
         }
+        pub_snap = mixquote_to_pbquote2("", symbol, ptr, _compute_params_[symbol].depth, true);
+        inner_lock.unlock();
+        cout << "release lock" << endl;
 
         // 推送结果
-        inner_lock.release();
         _publish_quote(symbol, pub_snap, NULL, true);
     }
 }

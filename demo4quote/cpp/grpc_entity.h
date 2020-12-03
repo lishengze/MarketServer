@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base/cpp/grpc_call.h"
-//#include "grpc_call.h"
+//#include "base/cpp/grpc_call.h"
+#include "grpc_call.h"
 #include "stream_engine_define.h"
 #include "stream_engine.grpc.pb.h"
 using grpc::ServerAsyncWriter;
@@ -140,11 +140,6 @@ public:
 
     bool process();
 
-    void add_data(const std::unordered_map<TSymbol, SNacosConfig>& symbols){ 
-        cout << "params setted." << endl;
-        symbols_ = symbols; 
-    }
-
     GetParamsEntity* spawn() {
         return new GetParamsEntity(service_);
     }
@@ -155,8 +150,6 @@ private:
     GetParamsReq request_;
     GetParamsResp reply_;
     ServerAsyncResponseWriter<GetParamsResp> responder_;
-
-    std::unordered_map<TSymbol, SNacosConfig> symbols_;
 };
 
 

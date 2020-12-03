@@ -69,6 +69,19 @@ void Config::parse_config(const std::string& file_name)
     }
 }
 
+string Config::get_config() const 
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_faw_config_ };
+    return faw_config_;
+}
+
+void Config::set_config(const string& config)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_faw_config_ };
+    faw_config_ = config;
+}
+
+
 /*
 void Config::set_configuration_precise(const std::unordered_map<string, int>& vals)
 {

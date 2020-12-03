@@ -235,15 +235,7 @@ void GetParamsEntity::register_call(){
 
 bool GetParamsEntity::process(){    
     GetParamsResp reply;
-    reply.set_depth(200);
-    //reply.set_frequency(CONFIG->grpc_publish_frequency_);
-    //reply.set_raw_frequency(CONFIG->grpc_publish_raw_frequency_);
-    /*for( auto v : CONFIG->include_symbols_ ) {
-        reply.add_symbols(v);
-    }
-    for( auto v : CONFIG->include_exchanges_ ) {
-        reply.add_exchanges(v);
-    }*/
+    reply.set_json_data(CONFIG->get_config());
     
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);

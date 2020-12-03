@@ -16,7 +16,7 @@ using namespace nacos;
 
 class INacosCallback {
 public:
-    virtual void on_symbol_channged(const std::unordered_map<TSymbol, SNacosConfig>& symbols) = 0;
+    virtual void on_symbol_channged(const NacosString& symbols) = 0;
 };
 
 class NacosListener : public Listener {
@@ -48,35 +48,7 @@ public:
     void receiveConfigInfo(const NacosString &configInfo) {
         if( group_ == "quotation" && dataid_ == "symbols" ) {
             _log_and_print("quotation:symbols changed. %s", configInfo.c_str());
-
-            njson js = njson::parse(configInfo);
-            std::unordered_map<TSymbol, SNacosConfig> symbols;
-            for (auto iter = js.begin() ; iter != js.end() ; ++iter )
-            {
-                const TSymbol& symbol = iter.key();
-                const njson& symbol_cfgs = iter.value();
-                int enable = symbol_cfgs["enable"].get<int>();
-                if( enable < 1 )
-                    continue;
-                SNacosConfig cfg;
-                cfg.precise = symbol_cfgs["precise"].get<int>();
-                cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
-                cfg.frequency = symbol_cfgs["frequency"].get<float>();
-                cfg.mix_depth = symbol_cfgs["mix_depth"].get<unsigned int>();
-                cfg.mix_frequecy = symbol_cfgs["mix_frequency"].get<float>();
-                for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
-                {
-                    const TExchange& exchange = iter2.key();
-                    const njson& exchange_cfgs = iter2.value();
-                    SNacosConfigFee exchange_cfg;
-                    exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
-                    exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
-                    exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
-                    cfg.exchanges[exchange] = exchange_cfg;
-                } 
-                symbols[symbol] = cfg;
-            }
-            callback_->on_symbol_channged(symbols);
+            callback_->on_symbol_channged(configInfo);
         }
     }
 };
@@ -115,5 +87,10 @@ private:
                 "Reason:" << e.what() << endl;
             return;
         }
+
+        while( true ) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        cout << "nacos listener exit" << endl;
     }
 };

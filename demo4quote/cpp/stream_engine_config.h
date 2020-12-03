@@ -84,6 +84,9 @@ public:
         std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
         symbol_fee_ = vals;
     }*/
+    string get_config() const;
+    void set_config(const string& config);
+
 public:
     // grpc
     string grpc_publish_addr_;          // grpc服务发布地址
@@ -116,6 +119,8 @@ public:
     //std::unordered_map<string, int> symbol_precise_;    // 各品种统一精度 CFG_SYMBOL_PRECISE
     //std::unordered_map<string, std::unordered_map<string, SymbolFee>> symbol_fee_;  // 各品种手续费 CFG_SYMBOL_FEE
 
+    mutable std::mutex mutex_faw_config_;   
+    string faw_config_;
     // logger
     UTLogPtr logger_;
 };

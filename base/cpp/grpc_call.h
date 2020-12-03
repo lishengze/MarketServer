@@ -117,8 +117,9 @@ public:
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             clients_.insert((ENTITY*)entity);
         }
-        ENTITY* last = (ENTITY*)entity;
-        ENTITY* ptr = last->spawn();
+        //ENTITY* last = (ENTITY*)entity;
+        //ENTITY* ptr = last->spawn();
+        ENTITY* ptr = new ENTITY(service_);
         ptr->set_callid(call_id_);
         ptr->set_completequeue(cq_);
         ptr->set_parent(this);
