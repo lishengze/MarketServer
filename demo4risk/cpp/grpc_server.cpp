@@ -1,6 +1,6 @@
 #include "grpc_server.h"
 
-void GrpcServer::init(const string& grpc_addr)
+void ServerEndpoint::init(const string& grpc_addr)
 {
     std::string server_address(grpc_addr);
 
@@ -34,22 +34,22 @@ void GrpcServer::init(const string& grpc_addr)
     call_id++;
 }
 
-void GrpcServer::publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     caller_marketstream4hedge_->add_data(snap, update);
 }
 
-void GrpcServer::publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     caller_marketstream4broker_->add_data(snap, update);
 }
 
-void GrpcServer::publish4Client(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish4Client(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
     caller_marketstream4client_->add_data(snap, update);
 }
 
-void GrpcServer::_handle_rpcs() 
+void ServerEndpoint::_handle_rpcs() 
 {
     void* tag;
     bool ok;

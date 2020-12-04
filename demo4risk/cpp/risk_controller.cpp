@@ -49,7 +49,7 @@ RiskController::RiskController(){
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
-    utrade::pandora::Singleton<GrpcServer>::Instance();
+    utrade::pandora::Singleton<ServerEndpoint>::Instance();
     PUBLISHER->init(CONFIG->grpc_publish_addr_);
 }
 

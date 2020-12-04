@@ -49,6 +49,7 @@ using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
 #define TICK_HEAD "TRADEx|"
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
+#define KLINE_1MIN_HEAD "KLINEx|"
 
 inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;
@@ -67,6 +68,23 @@ inline string make_redis_depth_key(const TExchange& exchange, const TSymbol& sym
     return "DEPTHx|" + symbol + "." + exchange;
 };
 
+#pragma pack(1)
+struct KlineData
+{
+    type_tick index;
+    SDecimal px_open;
+    SDecimal px_high;
+    SDecimal px_low;
+    SDecimal px_close;
+    SDecimal volume;
+
+    KlineData(){
+        index = 0;
+        volume = 0;
+    }
+};
+#pragma pack()
+
 struct RedisParams {
     string     host;
     int        port;
@@ -76,7 +94,11 @@ struct RedisParams {
 class QuoteSourceInterface
 {
 public:
+    // 行情接口
     virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
     virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
     virtual void on_nodata_exchange(const TExchange& exchange){};
+
+    // K线接口
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline) = 0;
 };

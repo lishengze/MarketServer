@@ -1,0 +1,177 @@
+#include "stream_engine_config.h"
+#include "kline_mixer.h"
+
+
+KlineData calc_mixed_kline(type_tick index, const vector<KlineData>& datas) 
+{
+    KlineData ret;
+    ret.index = index;
+    ret.volume = 0;
+    for( const auto& v : datas ) {
+        ret.volume = ret.volume + v.volume;
+    }
+    for( const auto& v : datas ) {
+        ret.px_open = ret.px_open + v.px_open * v.volume.get_value();
+        ret.px_high = ret.px_high + v.px_high * v.volume.get_value();
+        ret.px_low = ret.px_low + v.px_low * v.volume.get_value();
+        ret.px_close = ret.px_close + v.px_close * v.volume.get_value();
+    }
+    ret.px_open = ret.px_open / ret.volume.get_value();
+    ret.px_low = ret.px_low / ret.volume.get_value();
+    ret.px_high = ret.px_high / ret.volume.get_value();
+    ret.px_close = ret.px_close / ret.volume.get_value();
+    return ret;
+}
+
+MixCalculator::MixCalculator()
+{
+
+}
+
+MixCalculator::~MixCalculator()
+{
+
+}
+
+void MixCalculator::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+
+    auto iter = caches_.find(symbol);
+    if( iter == caches_.end() ) {
+        for( const auto& exchange : exchanges ) {
+            caches_[symbol][exchange] = new CalcCache();
+        }
+        return;
+    }
+
+    unordered_map<TExchange, CalcCache*>& symbol_cache = iter->second;
+    for( const auto& exchange : exchanges ) 
+    {
+        auto iter2 = symbol_cache.find(exchange);
+        if( iter2 == symbol_cache.end() ) {
+            caches_[symbol][exchange] = new CalcCache();
+        }
+    }
+
+    for(auto iter3 = symbol_cache.begin() ; iter3 != symbol_cache.end() ;)
+    {
+        const TExchange& exchange = iter3->first;
+        auto iter2 = exchanges.find(exchange);
+        if( iter2 == exchanges.end() ) {
+            symbol_cache.erase(iter3++);
+        } else {
+            iter3++;
+        }
+    }
+}
+
+bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& input, vector<KlineData>& output)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+    
+    // 寻找对应的cache
+    auto iter_symbol_cache = caches_.find(symbol);
+    if( iter_symbol_cache == caches_.end() )
+        return false;
+    unordered_map<TExchange, CalcCache*>& symbol_cache = iter_symbol_cache->second;
+    auto iter_exchange_cache = symbol_cache.find(exchange);
+    if( iter_exchange_cache == symbol_cache.end() )
+        return false;
+    CalcCache* cache = iter_exchange_cache->second;
+
+    // 
+    for( const auto& kline : input ) {
+        // 缓存最新K线
+        type_tick last_index = cache->get_last_index();
+        if( last_index == INVALID_INDEX || kline.index > last_index ) {
+            cache->klines.push_back(kline);
+        } else if ( last_index == kline.index ) {
+            cache->klines.back() = kline;
+        } else {
+            // 倒着走
+            _log_and_print("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, kline.index);
+            return false;
+        }
+
+        // 更新了时间为 kline.index 的K线
+        // 1. 检查是否可以计算，计算条件：所有市场时间>=kline.index
+        // 2. 如果可以计算，则清除所有市场时间<kline.index的数据
+        bool can_calculate = true;
+        vector<KlineData> datas;
+        for( const auto& cache : symbol_cache ) 
+        {
+            const TExchange& exchange = cache.first;
+            const CalcCache* c = cache.second;
+            if( c->klines.size() ==0 || c->get_last_index() < kline.index ) {
+                _log_and_print("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
+                can_calculate = false;
+                break;
+            }
+            KlineData tmp = c->klines.front();
+            if( tmp.volume < VOLUME_PRECISE )
+                continue;
+            datas.push_back(tmp);
+        }
+        if( !can_calculate ){
+            continue;
+        }
+
+        // 开始计算
+        KlineData mixed_kline = calc_mixed_kline(kline.index, datas);
+        output.push_back(mixed_kline);
+
+        // 开始清理
+        for( auto& cache : symbol_cache ) 
+        {
+            CalcCache* c = cache.second;
+            c->clear(kline.index);
+        }
+    }
+
+    return true;
+}
+
+
+//////////////////////////////////////////////////////////////////
+KlineMixer::KlineMixer()
+{
+
+}
+
+KlineMixer::~KlineMixer()
+{
+
+}
+
+void KlineMixer::start()
+{
+}
+
+void KlineMixer::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+{
+    min1_kline_calculator_.set_symbol(symbol, exchanges);
+    min60_kline_calculator_.set_symbol(symbol, exchanges);
+}
+
+void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+{
+    if( resolution == 60 ) {
+        vector<KlineData> output;
+        min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
+        for( const auto& v : callbacks_) {
+            v->on_kline(symbol, 60, output);
+        }
+    } else if( resolution == 3600 ) {
+        vector<KlineData> output;
+        min60_kline_calculator_.add_kline(exchange, symbol, kline, output);
+        for( const auto& v : callbacks_) {
+            v->on_kline(symbol, 3600, output);
+        }
+    }
+}
+
+bool KlineMixer::get_kline(const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
+{
+    return db_interface_->get_kline(symbol, resolution, start_time, end_time, klines);
+}

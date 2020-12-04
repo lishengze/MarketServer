@@ -77,9 +77,11 @@ public:
     void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
         redis_api_->SubscribeTopic("UPDATEx|" + symbol + "." + exchange);
+        redis_api_->SubscribeTopic("KLINEx|" + symbol + "." + exchange);
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
         redis_api_->UnSubscribeTopic("UPDATEx|" + symbol + "." + exchange);
+        redis_api_->UnSubscribeTopic("KLINEx|" + symbol + "." + exchange);
     }
     
     // callback from RedisSnapRequester

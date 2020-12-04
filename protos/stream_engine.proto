@@ -19,6 +19,12 @@ service StreamEngine {
 
     // 获取参数
     rpc GetParams(GetParamsReq) returns (GetParamsResp);
+
+    // 请求K线数据
+    rpc GetKlines(GetKlinesRequest) returns (GetKlinesResponse){}
+
+    // 订阅K线数据
+    rpc GetLast(GetKlinesRequest) returns (stream GetKlinesResponse){}
 }
 
 message SubscribeQuoteReq {
@@ -55,4 +61,23 @@ message GetParamsReq {
 
 message GetParamsResp {
     string json_data = 1;
+}
+
+message GetKlinesRequest {
+    string exchange = 1;
+    string symbol = 2;
+    int32 resolution = 3;
+    int32 start_time = 4;
+    int32 end_time = 5;
+}
+
+message GetKlinesResponse {
+    string exchange = 1;
+    string symbol = 2;
+    int32 resolution = 3;
+    int32 start_time = 4;
+    int32 end_time = 5;
+    int32 total_num = 6;
+    int32 num = 7;
+    bytes data = 8;
 }
