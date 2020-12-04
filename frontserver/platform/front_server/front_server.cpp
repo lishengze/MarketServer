@@ -3,6 +3,7 @@
 #include "hub_struct.h"
 #include "../util/tools.h"
 #include "../front_server_declare.h"
+#include "pandora/util/json.hpp"
 
 FrontServer::FrontServer(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
@@ -143,4 +144,11 @@ void FrontServer::process_enhanceddata_package(PackagePtr package)
 string FrontServer::get_symbols_str()
 {
     return SymbolsToJsonStr(symbols_, SYMBOL_LIST);
+}
+
+string FrontServer::get_heartbeat_str()
+{
+    nlohmann::json json_obj;
+    json_obj["type"] = "heartbeat";
+    return json_obj.dump();
 }

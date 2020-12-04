@@ -1,13 +1,20 @@
 #include <boost/shared_ptr.hpp>
 #include <functional>
+#include <sstream>
+
+#include "pandora/util/json.hpp"
+#include "pandora/util/time_util.h"
+
 #include "wb_server.h"
 #include "front_server.h"
-#include "pandora/util/json.hpp"
+
 #include "../util/tools.h"
 #include "../config/config.h"
 #include "../log/log.h"
-#include <sstream>
+
 #include "../front_server_declare.h"
+#include "../ErrorDefine.hpp"
+
 
 using namespace std::placeholders;
 
@@ -64,9 +71,10 @@ void WBServer::init_websocket_server()
 
 void WBServer::on_open(websocket_class * ws)
 {
-    wss_con_set_.emplace(ws);
+    wss_con_map_[ws] = true;
 
-    // front_server_->request_all_symbol();
+    PerSocketData* cur_ws_data =(PerSocketData*)ws->getUserData();
+    cur_ws_data->socket_id = socket_id_++;
 
     string symbols_str = front_server_->get_symbols_str();
 
@@ -83,7 +91,7 @@ void WBServer::on_message(websocket_class * ws, std::string_view msg, uWS::OpCod
 
     cout << "trans_msg: " << trans_msg << endl;
 
-    process_sub_info(trans_msg, ws);
+    process_on_message(trans_msg, ws);
 }
 
 void WBServer::on_ping(websocket_class * ws)
@@ -131,10 +139,39 @@ void WBServer::release()
 
 void WBServer::broadcast(string msg)
 {
-    for (websocket_class * ws: wss_con_set_)
+    for (auto iter:wss_con_map_)
     {
-        ws->send(msg, uWS::OpCode::TEXT);
+        iter.first->send(msg, uWS::OpCode::TEXT);
     }
+}
+
+void WBServer::process_on_message(string ori_msg, websocket_class * ws)
+{
+    try
+    {
+        nlohmann::json js = nlohmann::json::parse(ori_msg);
+
+        if (js["type"].is_null())
+        {
+            ws->send(get_error_send_rsp_string(), uWS::OpCode::TEXT);
+        }
+        else
+        {
+            if (js["type"].get<string>() == "sub_symbol")
+            {
+                process_sub_info(ori_msg, ws);
+            }
+
+            if (js["type"].get<string>() == "heartbeat")
+            {
+                process_heartbeat(ws);
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }        
 }
 
 void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
@@ -149,7 +186,7 @@ void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
             for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
             {
                 string cur_symbol = *it;
-                ws_sub_map_[cur_symbol].insert(ws);
+                ws_sub_map_[cur_symbol].insert(ws);                
             }
         }
     }
@@ -162,9 +199,30 @@ void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
     }
 }
 
+void WBServer::process_heartbeat(websocket_class* ws)
+{
+    try
+    {
+        if (wss_con_map_.find(ws) == wss_con_map_.end())
+        {
+            LOG_ERROR("WBServer::process_heartbeat Receive UnKnown Heartbeat");
+        }
+        else
+        {
+            wss_con_map_[ws] = true;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+        stream_msg << "WBServer::process_heartbeat " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }    
+}
+
 void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 {
-    cout << "WBServer::broadcast_enhanced_data " << endl;
+    // cout << "WBServer::broadcast_enhanced_data " << endl;
 
     string update_symbol = en_depth_data.depth_data_.symbol;
 
@@ -185,15 +243,21 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
 void WBServer::clean_client(websocket_class * ws)
 {
-    if (wss_con_set_.find(ws) != wss_con_set_.end())
+    PerSocketData* cur_socket_data = (PerSocketData*)ws->getUserData();
+    cout << "clean ws: " << cur_socket_data->socket_id << endl;
+
+    if (wss_con_map_.find(ws) != wss_con_map_.end())
     {
-        wss_con_set_.erase(ws);
+        wss_con_map_.erase(ws);
     }    
 
     for (auto iter: ws_sub_map_)
     {
         string symbol = iter.first;
-        ws_sub_map_[symbol].erase(ws);
+        if (ws_sub_map_[symbol].find(ws) != ws_sub_map_[symbol].end())
+        {
+            ws_sub_map_[symbol].erase(ws);
+        }        
     }         
 }
 
@@ -214,8 +278,49 @@ void WBServer::heartbeat_run()
 
 void WBServer::check_heartbeat()
 {
-    for(websocket_class * ws:wss_con_set_)
+    std::set<websocket_class *> dead_ws_set;
+    for (auto iter:wss_con_map_)
     {
-        // ws->send();
+        if (!iter.second)
+        {
+            dead_ws_set.emplace(iter.first);            
+        }        
     }
+
+    for (websocket_class * ws:dead_ws_set)
+    {
+        clean_client(ws);
+        ws->end();
+    }
+
+    string heartbeat_str = get_heartbeat_str();
+    cout << "heartbeat_str: " << heartbeat_str << endl;
+
+    for (auto& iter:wss_con_map_)
+    {
+        iter.second = false;
+        iter.first->send(heartbeat_str, uWS::OpCode::TEXT);
+    }
+
+    for (auto iter:wss_con_map_)
+    {
+        cout << "iter.second: " << iter.second << endl;
+    }
+}
+
+string WBServer::get_error_send_rsp_string()
+{
+    nlohmann::json json_obj;
+    json_obj["type"] = "error";
+    json_obj["error_id"] = LOST_TYPE_ITEM;
+    json_obj["error_msg"] = "Send Message lost type item!";
+    return json_obj.dump();
+}
+
+string WBServer::get_heartbeat_str()
+{
+    nlohmann::json json_obj;
+    json_obj["type"] = "heartbeat";
+    json_obj["time"] = utrade::pandora::NanoTimeStr();
+    return json_obj.dump();
 }
