@@ -9,11 +9,12 @@
 
 #include "pandora/util/singleton.hpp"
 #include "kline_mixer.h"
+#include "quote_mixer2.h"
 #include "grpc_entity.h"
 
-#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
+//#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
 
-class ServerEndpoint : public IMixerKlinePusher 
+class ServerEndpoint : public IMixerKlinePusher, public IMixerQuotePusher
 {
 public:
     ServerEndpoint(){}
@@ -24,17 +25,16 @@ public:
 
     void init(const string& grpc_addr);
 
-    void run_in_thread() {
+    void start() {
         thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
-
-    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
-    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
-    void publish_config(const std::unordered_map<TSymbol, SNacosConfig>& symbols);
 
     void set_provider(IDataProvider* provider) { provider_ = provider; }
     // IMixerKlinePusher
     void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
+    // IMixerKlinePusher
+    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
 private:
     void _handle_rpcs();
 

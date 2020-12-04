@@ -3,6 +3,13 @@
 #include "stream_engine_define.h"
 #include "grpc_entity.h"
 
+class IMixerQuotePusher
+{
+public:
+    virtual void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
+    virtual void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
+};
+
 class QuoteMixer2
 {
 public:
@@ -15,9 +22,13 @@ public:
 
     void clear_exchange(const TExchange& exchange);
 
+    void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
+
     void set_publish_params(const TSymbol& symbol, float frequency);
     void set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const map<TExchange, SymbolFee>& fees);
 private:
+    set<IMixerQuotePusher*> callbacks_;
+
     // 行情数据
     struct _compute_param{
         type_uint32 depth;
