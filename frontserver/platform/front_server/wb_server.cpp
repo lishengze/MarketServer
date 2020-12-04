@@ -251,6 +251,8 @@ void WBServer::clean_client(websocket_class * ws)
         wss_con_map_.erase(ws);
     }    
 
+    std::set<std::string>   empty_symbol_set;
+
     for (auto iter: ws_sub_map_)
     {
         string symbol = iter.first;
@@ -258,7 +260,17 @@ void WBServer::clean_client(websocket_class * ws)
         {
             ws_sub_map_[symbol].erase(ws);
         }        
+
+        if (ws_sub_map_[symbol].size() == 0)
+        {
+            empty_symbol_set.emplace(symbol);
+        }
     }         
+
+    for(string symbol:empty_symbol_set)
+    {
+        ws_sub_map_.erase(symbol);
+    }
 }
 
 void WBServer::start_heartbeat()
