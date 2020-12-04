@@ -40,6 +40,8 @@ public:
 
     string get_symbols_str();
 
+    string get_heartbeat_str();
+
 
 private:
     WBServerPtr         wb_server_;    

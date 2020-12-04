@@ -14,6 +14,7 @@
 #include "../front_server_declare.h"
 #include "../data_process/data_struct.h"
 #include <thread>
+#include <atomic>
 
 using std::string;
 using std::cout;
@@ -24,6 +25,7 @@ class FrontServer;
 
 struct PerSocketData {
     /* Fill with user data */
+    long socket_id{0};
 };
 
 class WBServer
@@ -63,7 +65,12 @@ class WBServer
 
     void broadcast_enhanced_data(EnhancedDepthData& en_depth_data);
 
+    
+    void process_on_message(string ori_msg, websocket_class * ws);
+    
     void process_sub_info(string ori_msg, websocket_class * ws);
+
+    void process_heartbeat(websocket_class* ws);
 
     void clean_client(websocket_class * ws);
 
@@ -73,6 +80,12 @@ class WBServer
 
     void check_heartbeat();
 
+    string get_error_send_rsp_string();
+
+    string get_heartbeat_str();
+
+    
+
     private:
         us_socket_context_options_t             socket_options_;
 
@@ -81,7 +94,10 @@ class WBServer
         uWS::App                                wss_server_;
 
         int                                     server_port_{9002};
-        std::set<websocket_class *> wss_con_set_;
+
+        std::set<websocket_class *>             wss_con_set_;
+
+        std::map<websocket_class *, bool>       wss_con_map_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
 
@@ -91,7 +107,9 @@ class WBServer
 
         boost::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
 
-        int                                     heartbeat_seconds_{5};                         
+        int                                     heartbeat_seconds_{5};    
+
+        std::atomic_ullong                      socket_id_{0};
 };
 
 FORWARD_DECLARE_PTR(WBServer);
