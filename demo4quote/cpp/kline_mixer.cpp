@@ -33,17 +33,44 @@ MixCalculator::~MixCalculator()
 
 }
 
-void MixCalculator::init(const set<TSymbol>& symbols, const set<TExchange>& exchanges)
+void MixCalculator::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
 {
-    for( const auto& symbol : symbols ) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+
+    auto iter = caches_.find(symbol);
+    if( iter == caches_.end() ) {
         for( const auto& exchange : exchanges ) {
             caches_[symbol][exchange] = new CalcCache();
+        }
+        return;
+    }
+
+    unordered_map<TExchange, CalcCache*>& symbol_cache = iter->second;
+    for( const auto& exchange : exchanges ) 
+    {
+        auto iter2 = symbol_cache.find(exchange);
+        if( iter2 == symbol_cache.end() ) {
+            caches_[symbol][exchange] = new CalcCache();
+        }
+    }
+
+    for(auto iter3 = symbol_cache.begin() ; iter3 != symbol_cache.end() ;)
+    {
+        const TExchange& exchange = iter3->first;
+        auto iter2 = exchanges.find(exchange);
+        if( iter2 == exchanges.end() ) {
+            symbol_cache.erase(iter3++);
+        } else {
+            iter3++;
         }
     }
 }
 
 bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& input, vector<KlineData>& output)
 {
+    std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+    
+    // 寻找对应的cache
     auto iter_symbol_cache = caches_.find(symbol);
     if( iter_symbol_cache == caches_.end() )
         return false;
@@ -53,23 +80,9 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
         return false;
     CalcCache* cache = iter_exchange_cache->second;
 
-    // 计算除了自己之外最小可计算位置
-    type_tick tail_min = INVALID_INDEX;
-    for( const auto& cache : symbol_cache ) {
-        if( cache.first == exchange )
-            continue;
-        type_tick tail = cache.second->get_last_index();
-        if( tail == INVALID_INDEX ) {
-            tail_min = INVALID_INDEX;
-            break;
-        }
-        if( tail < tail_min ) {
-            tail_min = tail;
-        }
-    }
-
     // 
     for( const auto& kline : input ) {
+        // 缓存最新K线
         type_tick last_index = cache->get_last_index();
         if( last_index == INVALID_INDEX || kline.index > last_index ) {
             cache->klines.push_back(kline);
@@ -77,20 +90,42 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
             cache->klines.back() = kline;
         } else {
             // 倒着走
+            _log_and_print("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, kline.index);
             return false;
         }
 
-        if( tail_min != INVALID_INDEX && kline.index <= tail_min ) {
-            // 触发计算&清理数据 时间戳=kline.index
-            vector<KlineData> datas;
-            for( auto& cache : symbol_cache ) {
-                KlineData tmp = cache.second->get_index(kline.index);
-                if( tmp.volume < VOLUME_PRECISE )
-                    continue;
-                datas.push_back(tmp);
+        // 更新了时间为 kline.index 的K线
+        // 1. 检查是否可以计算，计算条件：所有市场时间>=kline.index
+        // 2. 如果可以计算，则清除所有市场时间<kline.index的数据
+        bool can_calculate = true;
+        vector<KlineData> datas;
+        for( const auto& cache : symbol_cache ) 
+        {
+            const TExchange& exchange = cache.first;
+            const CalcCache* c = cache.second;
+            if( c->klines.size() ==0 || c->get_last_index() < kline.index ) {
+                _log_and_print("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
+                can_calculate = false;
+                break;
             }
-            KlineData mixed_kline = calc_mixed_kline(kline.index, datas);
-            output.push_back(mixed_kline);
+            KlineData tmp = c->klines.front();
+            if( tmp.volume < VOLUME_PRECISE )
+                continue;
+            datas.push_back(tmp);
+        }
+        if( !can_calculate ){
+            continue;
+        }
+
+        // 开始计算
+        KlineData mixed_kline = calc_mixed_kline(kline.index, datas);
+        output.push_back(mixed_kline);
+
+        // 开始清理
+        for( auto& cache : symbol_cache ) 
+        {
+            CalcCache* c = cache.second;
+            c->clear(kline.index);
         }
     }
 
@@ -111,17 +146,12 @@ KlineMixer::~KlineMixer()
 
 void KlineMixer::start()
 {
-    set<TExchange> exchanges;
-    /*for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
-        exchanges.insert(*iterExchange);
-    }*/
-    set<TSymbol> symbols;
-    /*
-    for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
-        symbols.insert(*iterSymbol);
-    }*/
-    min1_kline_calculator_.init(symbols, exchanges);
-    min60_kline_calculator_.init(symbols, exchanges);
+}
+
+void KlineMixer::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+{
+    min1_kline_calculator_.set_symbol(symbol, exchanges);
+    min60_kline_calculator_.set_symbol(symbol, exchanges);
 }
 
 void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)

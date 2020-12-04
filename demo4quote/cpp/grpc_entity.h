@@ -188,7 +188,7 @@ public:
 
     bool process();
 
-    void add_data(const KlineData& kline) {        
+    void add_data(const KlineData& kline) {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         datas_.push_back(kline);
         if( total_.size() == 0 || total_.back().index < kline.index ) {

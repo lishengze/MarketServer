@@ -171,6 +171,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
         {
             quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fees(config.exchanges));
             quote_mixer2_.set_publish_params(symbol, config.mix_frequecy);
+            kline_mixer_.set_symbol(symbol, config.get_exchanges());
             quote_source_.set_frequency(symbol, config.frequency);
             quote_source_.set_symbol(symbol, config.get_exchanges());
         }
@@ -184,6 +185,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
             }
             // 交易所数量变更
             if( last_config.get_exchanges() != config.get_exchanges() ) {
+                kline_mixer_.set_symbol(symbol, config.get_exchanges());
                 quote_source_.set_symbol(symbol, config.get_exchanges());
             }
             // 精度，各交易所手续费 

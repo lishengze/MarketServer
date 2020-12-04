@@ -25,6 +25,18 @@ public:
         type_tick get_last_index() const {
             return klines.size() > 0 ? klines.back().index : INVALID_INDEX;
         }
+        type_tick get_first_index() const {
+            return klines.size() > 0 ? klines.front().index : INVALID_INDEX;
+        }
+        void clear(type_tick index) {
+            while( klines.size() > 0 ) {
+                if( klines.front().index < index ) {
+                    klines.pop_front();
+                } else {
+                    break;
+                }
+            }
+        }
 
         KlineData get_index(type_tick index) {
             while( klines.size() > 0 ) {
@@ -47,9 +59,10 @@ public:
     MixCalculator();
     ~MixCalculator();
 
-    void init(const set<TSymbol>& symbols, const set<TExchange>& exchanges);
+    void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
     bool add_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& input, vector<KlineData>& output);
 private:
+    mutable std::mutex mutex_cache_;
     unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>> caches_;
 };
 
@@ -60,6 +73,8 @@ public:
     ~KlineMixer();
 
     void start();
+
+    void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
 
     void register_callback(IMixerKlinePusher* callback) { callbacks_.insert(callback); }
 
