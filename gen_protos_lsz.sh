@@ -36,8 +36,8 @@ protoc --proto_path=protos --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plug
 
 # kline_server.proto
 # generate protobuf
-protoc --proto_path=protos --cpp_out=protos/cpp kline_server.proto
+# protoc --proto_path=protos --cpp_out=protos/cpp kline_server.proto
 # generate grpc 
-protoc --proto_path=protos --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --grpc_out=protos/cpp kline_server.proto
+# protoc --proto_path=protos --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --grpc_out=protos/cpp kline_server.proto
 # generate for # python3
 # python3 -m grpc_tools.protoc -I protos --python_out=protos/python --grpc_python_out=protos/python kline_server.proto
