@@ -10,7 +10,7 @@
 #include "grpc_entity.h"
 #include "pandora/util/singleton.hpp"
 
-#define PUBLISHER utrade::pandora::Singleton<GrpcServer>::GetInstance()
+#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
 
 class ServerEndpoint final {
 public:

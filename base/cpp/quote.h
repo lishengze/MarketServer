@@ -8,3 +8,4 @@
 #define PRICE_PRECISE 0.000000001
 #define VOLUME_PRECISE 0.000000001
 
+#pragma pack()

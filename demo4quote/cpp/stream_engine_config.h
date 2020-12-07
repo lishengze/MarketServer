@@ -30,13 +30,13 @@ struct SymbolFee
 
     void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const
     {
-        if( fee_type == 1 ) {
+        if( fee_type == 2 ) {
             if( is_ask ) {
                 dst = src + maker_fee;
             } else {
                 dst = src - taker_fee;
             }
-        } else if( fee_type == 2 ) {
+        } else if( fee_type == 1 ) {
             if( is_ask ) {
                 dst = src * (100 + maker_fee) / 100.0;
             } else {

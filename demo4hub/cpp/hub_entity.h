@@ -4,10 +4,11 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 
 #include "updater_quote.h"
+#include "update_kline.h"
 
 #define HUB utrade::pandora::ThreadSafeSingleton<HubEntity>::DoubleCheckInstance()
 
-class HubEntity final : public IQuoteUpdater
+class HubEntity final : public IQuoteUpdater, public IKlineUpdater
 {
 public:
     HubEntity();
@@ -23,10 +24,16 @@ public:
 
     // IQuoteUpdater
     virtual void on_snap(const SEData& quote);
+
+    // IKlineUpdater
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const KlineData& kline);
 private:
     // 回调接口
     HubCallback* callback_;
 
     // 行情接入
     QuoteUpdater quote_updater_;
+
+    // K线接入
+    KlineUpdater kline_updater_;
 };

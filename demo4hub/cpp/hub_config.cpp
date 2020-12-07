@@ -27,10 +27,13 @@ void Config::parse_config(const std::string& file_name)
         njson js = njson::parse(contents);
 
         // grpc
-        grpc_server_addr_ = js["hub"]["addr"].get<string>();
-        UT_LOG_INFO(logger_, "Parse Config finish , grpc_server_addr_: " << grpc_server_addr_);
+        risk_controller_addr_ = js["hub"]["risk_controller_addr"].get<string>();
+        stream_engine_addr_ = js["hub"]["stream_enginne_addr"].get<string>();
 
-        cout << "grpc_server_addr_: " << grpc_server_addr_ << endl;
+        cout << "risk_controller_addr_: " << risk_controller_addr_ << endl;
+        cout << "stream_engine_addr_: " << stream_engine_addr_ << endl;
+        
+        UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)
     {

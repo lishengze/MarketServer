@@ -41,11 +41,10 @@ struct KlineData
     SDecimal px_high;
     SDecimal px_low;
     SDecimal px_close;
-    double volume;
+    SDecimal volume;
 
     KlineData(){
         index = 0;
-        volume = 0;
     }
 };
 

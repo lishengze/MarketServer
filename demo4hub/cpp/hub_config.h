@@ -26,7 +26,8 @@ public:
 
 public:
     // grpc
-    string grpc_server_addr_;          // grpc服务发布地址
+    string risk_controller_addr_;          // grpc服务发布地址
+    string stream_engine_addr_;
 
     // logger
     UTLogPtr logger_;
