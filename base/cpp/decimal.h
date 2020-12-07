@@ -43,9 +43,9 @@ struct SDecimal {
     }
 
     void from(double v, double bias = 0.0000001) {
+        base = 0;
+        value = 0;
         if( v == 0 ) {
-            base = 0;
-            value = 0;
             return;
         }
             
