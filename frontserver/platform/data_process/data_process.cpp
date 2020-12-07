@@ -1,6 +1,6 @@
 #include "data_process.h"
 #include "hub_interface.h"
-#include "data_struct.h"
+#include "../data_structure/data_struct.h"
 #include "../util/tools.h"
 #include "../front_server_declare.h"
 

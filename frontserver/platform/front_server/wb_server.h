@@ -12,7 +12,7 @@
 #include <set>
 
 #include "../front_server_declare.h"
-#include "../data_process/data_struct.h"
+#include "../data_structure/data_struct.h"
 #include <thread>
 #include <atomic>
 
@@ -29,9 +29,7 @@ struct PerSocketData {
 };
 
 class WBServer
-{
-    using websocket_class = uWS::WebSocket<false, true>;
-    
+{       
     public:
 
     WBServer();
@@ -43,15 +41,15 @@ class WBServer
     void init_websocket_ssl_server();
     void init_websocket_server();
 
-    void on_open(websocket_class * );
+    void on_open(WebsocketClass * );
 
-    void on_message(websocket_class *, std::string_view, uWS::OpCode);
+    void on_message(WebsocketClass *, std::string_view, uWS::OpCode);
 
-    void on_ping(websocket_class * );
+    void on_ping(WebsocketClass * );
 
-    void on_pong(websocket_class * );
+    void on_pong(WebsocketClass * );
 
-    void on_close(websocket_class * );
+    void on_close(WebsocketClass * );
 
     void listen();
 
@@ -64,15 +62,14 @@ class WBServer
     void broadcast(string msg);
 
     void broadcast_enhanced_data(EnhancedDepthData& en_depth_data);
-
     
-    void process_on_message(string ori_msg, websocket_class * ws);
+    void process_on_message(string ori_msg, WebsocketClass * ws);
     
-    void process_sub_info(string ori_msg, websocket_class * ws);
+    void process_sub_info(string ori_msg, WebsocketClass * ws);
 
-    void process_heartbeat(websocket_class* ws);
+    void process_heartbeat(WebsocketClass* ws);
 
-    void clean_client(websocket_class * ws);
+    void clean_client(WebsocketClass * ws);
 
     void heartbeat_run();
 
@@ -84,7 +81,12 @@ class WBServer
 
     string get_heartbeat_str();
 
-    
+    struct WSData
+    {
+        bool              is_alive{false};
+        std::set<string>  sub_symbol_set;
+        std::string       id;
+    };
 
     private:
         us_socket_context_options_t             socket_options_;
@@ -95,15 +97,11 @@ class WBServer
 
         int                                     server_port_{9002};
 
-        std::set<websocket_class *>             wss_con_set_;
-
-        std::map<websocket_class *, bool>       wss_con_map_;
+        std::map<WebsocketClass *, WSData>      wss_con_map_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
 
         FrontServer*                            front_server_{nullptr};
-
-        std::map<string, std::set<websocket_class *>> ws_sub_map_;
 
         boost::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
 

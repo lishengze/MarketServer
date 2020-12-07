@@ -24,6 +24,10 @@
 
 #include <iostream>
 
+#include "App.h"
+
+#include "libusockets.h"
+
 #define PACKAGE_MANAGER utrade::pandora::ThreadSafeSingleton<utrade::pandora::PackageManager>::DoubleCheckInstance()
 
 #define ID_MANAGER utrade::pandora::ThreadSafeSingleton<ID>::DoubleCheckInstance()
@@ -33,6 +37,11 @@ using nlohmann::json;
 using std::pair;
 using boost::weak_ptr;
 
+using HttpResponse = uWS::HttpResponse<false> ;
+using HttpRequest = uWS::HttpRequest;
+using WebsocketClass = uWS::WebSocket<false, true>;
+
 #define MARKET_DATA_UPDATE "market_data_update"
 #define SYMBOL_LIST "symbol_list"
 #define SYMBOL_UPDATE "symbol_update"
+

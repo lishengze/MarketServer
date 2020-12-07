@@ -5,6 +5,27 @@
 
 #include <boost/shared_ptr.hpp>
 
+enum class COMM_TYPE {
+    HTTP = 0,
+    HTTPS,
+    WEBSOCKET,
+    WEBSECKETS,
+};
+
+
+struct Socket
+{
+    Socket(HttpResponse* res, HttpRequest* req):comm_type{COMM_TYPE::HTTP}, http_response_{res}, http_request_{req}
+    {}
+
+    Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
+
+    COMM_TYPE comm_type = COMM_TYPE::HTTP;
+    HttpResponse*       http_response_;
+    HttpRequest*        http_request_;
+    WebsocketClass*     websocket_;
+};
+
 const long UT_FID_EnhancedDepthData = 0x10002;
 class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
 {

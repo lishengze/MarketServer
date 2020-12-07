@@ -1,5 +1,9 @@
 import websocket
 import json
+import urllib.request
+import http.client
+import time
+import _thread
 
 def process_heartbeat(ws):
     heartbeat_info = {
@@ -29,6 +33,18 @@ def on_close(ws):
     print("Server Closed")
     print("### closed ###")
 
+
+def sub_btc_usdt(ws, sub_symbol):
+    time.sleep(10)
+
+    sub_info = {
+        "type":"sub_symbol",
+        "symbol":[sub_symbol]
+    }
+    sub_info_str = json.dumps(sub_info)
+    print("sub_info_str: %s" % (sub_info_str))
+    ws.send(sub_info_str)    
+
 def on_open(ws):
     print("Connected")
     sub_info = {
@@ -36,13 +52,13 @@ def on_open(ws):
         "symbol":["XRP_USDT"]
     }
     sub_info_str = json.dumps(sub_info)
-
     print("sub_info_str: %s" % (sub_info_str))
-
     ws.send(sub_info_str)
 
+    _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
 
-def test():
+
+def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.255.220.139"
     ip = "ws://127.0.0.1"
@@ -56,7 +72,27 @@ def test():
                                 on_close=on_close)
     ws.on_open = on_open
     ws.run_forever()
+
+def test_http_restful():
+    # test_urllib()
+    test_http_client()
+
+def test_http_client():
+    uri = "http://127.0.0.1:9115"
+    conn = http.client.HTTPConnection(uri)  
+    conn.request("GET", "/v1/test_client")
+    r1 =conn.getresponse()
+    print(r1)  
+
+def test_urllib():
+    uri = "http://127.0.0.1:9115"
+    response = urllib.request.urlopen(uri)
+    html = response.read()
+    print("Http Response: \n%s" % (html))    
+
     
 if __name__ == "__main__":
-    test()
+    test_websocket()
+
+    # test_http_restful()
 

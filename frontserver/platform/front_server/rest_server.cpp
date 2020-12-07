@@ -45,7 +45,13 @@ void RestServer::release()
 
 void RestServer::process_get(uWS::HttpResponse<false> * response, uWS::HttpRequest * request)
 {
+    cout << "getUrl: " << request->getUrl() << "; \n"
+         << "getMethod: " << request->getMethod() << "; \n"
+         << "getQuery: " << request->getQuery() << "; \n"
+         << "getParameter: " << request->getParameter(1) << endl;
 
+    response->writeStatus(uWS::HTTP_200_OK);
+    response->end("This is RestServer!");
 }
 
 void RestServer::process_post(uWS::HttpResponse<false> * response, uWS::HttpRequest *request)

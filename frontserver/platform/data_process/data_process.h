@@ -6,7 +6,7 @@
 #include "../front_server_declare.h"
 
 #include <boost/shared_ptr.hpp>
-#include "data_struct.h"
+#include "../data_structure/data_struct.h"
 
 // 用于处理数据: 为 front-server 提供全量或增量的更新;
 // 设置缓冲;

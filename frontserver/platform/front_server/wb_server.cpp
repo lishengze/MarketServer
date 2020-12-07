@@ -69,9 +69,9 @@ void WBServer::init_websocket_server()
     // wss_server_(std::move(uWS::App().ws<PerSocketData>("/*", std::move(websocket_behavior_))));
 }
 
-void WBServer::on_open(websocket_class * ws)
+void WBServer::on_open(WebsocketClass * ws)
 {
-    wss_con_map_[ws] = true;
+    wss_con_map_[ws].is_alive = true;
 
     PerSocketData* cur_ws_data =(PerSocketData*)ws->getUserData();
     cur_ws_data->socket_id = socket_id_++;
@@ -84,7 +84,7 @@ void WBServer::on_open(websocket_class * ws)
 }
 
 // 处理各种请求
-void WBServer::on_message(websocket_class * ws, std::string_view msg, uWS::OpCode code)
+void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode code)
 {
     cout << "Req Msg: " << msg << endl;
     string trans_msg(msg.data(), msg.size());
@@ -94,17 +94,17 @@ void WBServer::on_message(websocket_class * ws, std::string_view msg, uWS::OpCod
     process_on_message(trans_msg, ws);
 }
 
-void WBServer::on_ping(websocket_class * ws)
+void WBServer::on_ping(WebsocketClass * ws)
 {
 
 }
 
-void WBServer::on_pong(websocket_class * ws)
+void WBServer::on_pong(WebsocketClass * ws)
 {
 
 }
 
-void WBServer::on_close(websocket_class * ws)
+void WBServer::on_close(WebsocketClass * ws)
 {
     cout << "one connection closed " << endl;
 
@@ -145,7 +145,7 @@ void WBServer::broadcast(string msg)
     }
 }
 
-void WBServer::process_on_message(string ori_msg, websocket_class * ws)
+void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 {
     try
     {
@@ -174,7 +174,7 @@ void WBServer::process_on_message(string ori_msg, websocket_class * ws)
     }        
 }
 
-void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
+void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
 {
     try
     {
@@ -183,10 +183,12 @@ void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
         if (!js["symbol"].is_null())
         {
             nlohmann::json symbol_list = js["symbol"];
+            wss_con_map_[ws].sub_symbol_set.clear();
+
             for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
             {
                 string cur_symbol = *it;
-                ws_sub_map_[cur_symbol].insert(ws);                
+                wss_con_map_[ws].sub_symbol_set.insert(cur_symbol);
             }
         }
     }
@@ -199,7 +201,7 @@ void WBServer::process_sub_info(string ori_msg, websocket_class * ws)
     }
 }
 
-void WBServer::process_heartbeat(websocket_class* ws)
+void WBServer::process_heartbeat(WebsocketClass* ws)
 {
     try
     {
@@ -209,7 +211,7 @@ void WBServer::process_heartbeat(websocket_class* ws)
         }
         else
         {
-            wss_con_map_[ws] = true;
+            wss_con_map_[ws].is_alive = true;
         }
     }
     catch(const std::exception& e)
@@ -225,23 +227,18 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
     // cout << "WBServer::broadcast_enhanced_data " << endl;
 
     string update_symbol = en_depth_data.depth_data_.symbol;
+    string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
 
-    if (ws_sub_map_.find(update_symbol) != ws_sub_map_.end())
+    for (auto iter:wss_con_map_)
     {
-        string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);
-
-        cout << "send_str: " << send_str << endl;
-
-        cout << "send ws numb: " << ws_sub_map_[update_symbol].size() << endl;
-
-        for (websocket_class* ws:ws_sub_map_[update_symbol])
+        if (iter.second.sub_symbol_set.find(update_symbol) != iter.second.sub_symbol_set.end())
         {
-            ws->send(send_str, uWS::OpCode::TEXT);
+            iter.first->send(send_str, uWS::OpCode::TEXT);
         }
     }
 }
 
-void WBServer::clean_client(websocket_class * ws)
+void WBServer::clean_client(WebsocketClass * ws)
 {
     PerSocketData* cur_socket_data = (PerSocketData*)ws->getUserData();
     cout << "clean ws: " << cur_socket_data->socket_id << endl;
@@ -252,25 +249,6 @@ void WBServer::clean_client(websocket_class * ws)
     }    
 
     std::set<std::string>   empty_symbol_set;
-
-    for (auto iter: ws_sub_map_)
-    {
-        string symbol = iter.first;
-        if (ws_sub_map_[symbol].find(ws) != ws_sub_map_[symbol].end())
-        {
-            ws_sub_map_[symbol].erase(ws);
-        }        
-
-        if (ws_sub_map_[symbol].size() == 0)
-        {
-            empty_symbol_set.emplace(symbol);
-        }
-    }         
-
-    for(string symbol:empty_symbol_set)
-    {
-        ws_sub_map_.erase(symbol);
-    }
 }
 
 void WBServer::start_heartbeat()
@@ -290,16 +268,16 @@ void WBServer::heartbeat_run()
 
 void WBServer::check_heartbeat()
 {
-    std::set<websocket_class *> dead_ws_set;
+    std::set<WebsocketClass *> dead_ws_set;
     for (auto iter:wss_con_map_)
     {
-        if (!iter.second)
+        if (!iter.second.is_alive)
         {
             dead_ws_set.emplace(iter.first);            
         }        
     }
 
-    for (websocket_class * ws:dead_ws_set)
+    for (WebsocketClass * ws:dead_ws_set)
     {
         clean_client(ws);
         ws->end();
@@ -310,13 +288,13 @@ void WBServer::check_heartbeat()
 
     for (auto& iter:wss_con_map_)
     {
-        iter.second = false;
+        iter.second.is_alive = false;
         iter.first->send(heartbeat_str, uWS::OpCode::TEXT);
     }
 
     for (auto iter:wss_con_map_)
     {
-        cout << "iter.second: " << iter.second << endl;
+        cout << "iter.second: " << iter.second.is_alive << endl;
     }
 }
 

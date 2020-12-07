@@ -2,7 +2,7 @@
 
 #include "pandora/package/package.h"
 #include "hub_struct.h"
-#include "../data_process/data_struct.h"
+#include "../data_structure/data_struct.h"
 #include "../front_server_declare.h"
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src);
