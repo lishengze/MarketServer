@@ -4,6 +4,14 @@
 
 #define CALC_BASE(x) (int(pow(10, (x))))
 
+template<typename T>
+inline T labs( const T & x ){return x<0?-x:x;}
+ 
+template<typename T>
+inline int sgn( const T & x ){return x<0?-1:(x?1:0);}
+
+inline int d_round( const double & x ){return (int)(sgn(x)*(labs(x)+0.50001));}
+
 #pragma pack(1)
 struct SDecimal {
     unsigned long value;
@@ -35,26 +43,39 @@ struct SDecimal {
     }
 
     void from(double v, double bias = 0.0000001) {
-        //cout << fixed << v << endl;
-        int count = 0, limit = 100;
-        while( count <= limit && abs(get_value() - v)/v > bias ) {
+        base = 0;
+        value = 0;
+        if( v == 0 ) {
+            return;
+        }
+            
+        int limit = 100;
+        while( base <= limit && abs(get_value() - v)/v > bias ) {
             base += 1;
-            count += 1;
             value = v * CALC_BASE(base);
         }
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
+        // 没有小数
+        if( pos == string::npos ) {
+            base = 0;
+            value = atoi(data.c_str());
+            return;
+        }
+
         base = data.length() - pos - 1;
         if( precise >= 0 && precise < base ) { // 精度调整
             base = precise;
             string newData = data.substr(0, pos + 1 + precise);
-            value = atof(newData.c_str()) * CALC_BASE(base);
-            if( ceiling )
+            float origin = atof(data.c_str());
+            float cutted = atof(newData.c_str());
+            value = d_round(cutted * CALC_BASE(base));
+            if( ceiling && origin > cutted )
                 value += 1;
         } else {
-            value = atof(data.c_str()) * CALC_BASE(base);
+            value = d_round(atof(data.c_str()) * CALC_BASE(base));
         }
     }
 
@@ -65,12 +86,7 @@ struct SDecimal {
             return;
         }
 
-        if( ceiling ) {
-            value = ceil(data.value / CALC_BASE(data.base - precise));
-        } else {
-            value = floor(data.value / CALC_BASE(data.base - precise));
-        }
-        base = precise;
+        from(data.get_str_value(), precise, ceiling);
     }
 
     double get_value() const {

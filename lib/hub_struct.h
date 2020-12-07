@@ -17,6 +17,8 @@ struct SDepthLevelData
 
 struct SDepthData
 {
+    string symbol;
+    string exchange;
     type_tick tick;
     type_seqno seqno;
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];
@@ -39,11 +41,10 @@ struct KlineData
     SDecimal px_high;
     SDecimal px_low;
     SDecimal px_close;
-    double volume;
+    SDecimal volume;
 
     KlineData(){
         index = 0;
-        volume = 0;
     }
 };
 

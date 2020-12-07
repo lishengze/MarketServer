@@ -97,7 +97,18 @@ void ServerEndpoint::on_kline(const TSymbol& symbol, int resolution, const vecto
             v.px_low.get_str_value().c_str(),
             v.px_close.get_str_value().c_str()
             );            
-        caller_getlast_->add_data(v);
+
+        WrapperKlineData tmp;
+        vassign(tmp.exchange, 16, "bcts");
+        vassign(tmp.symbol, 16, symbol.c_str());
+        vassign(tmp.resolution, resolution);
+        vassign(tmp.index, v.index);
+        vassign(tmp.px_open, v.px_open);
+        vassign(tmp.px_high, v.px_high);
+        vassign(tmp.px_low, v.px_low);
+        vassign(tmp.px_close, v.px_close);
+        vassign(tmp.volume, v.volume);
+        caller_getlast_->add_data(tmp);
     }
 }
 

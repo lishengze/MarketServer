@@ -12,8 +12,9 @@ StreamEngine::StreamEngine(){
     CONFIG->parse_config(config_file);
     
     // init grpc server
-    utrade::pandora::Singleton<ServerEndpoint>::Instance();
-    PUBLISHER->init(CONFIG->grpc_publish_addr_);
+    //utrade::pandora::Singleton<ServerEndpoint>::Instance();
+    //PUBLISHER->init(CONFIG->grpc_publish_addr_);
+    server_endpoint_.init(CONFIG->grpc_publish_addr_);
 }
 
 StreamEngine::~StreamEngine(){
@@ -21,7 +22,8 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() 
 {
-    
+    quote_mixer2_.register_callback(&server_endpoint_);
+
     if( !CONFIG->replay_mode_ ) {
         // 启动redis
         quote_source_.set_engine(this);
@@ -48,7 +50,8 @@ void StreamEngine::start()
     }
 
     // start grpc server
-    PUBLISHER->run_in_thread();
+    server_endpoint_.start();
+    //PUBLISHER->run_in_thread();
 
     // 连接配置服务器
     nacos_client_.start(CONFIG->nacos_addr_, this);    

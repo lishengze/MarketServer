@@ -289,14 +289,9 @@ bool GetLastEntity::process()
         return false;
         
     GetKlinesResponse reply;
-    //发送最后一根
-    KlineData tmp = datas_.front();
-    datas_.pop_front();
-    reply.set_symbol("BTC_USDT");
-    reply.set_total_num(1);
-    reply.set_num(1);
-    reply.set_resolution(60);
-    reply.set_data(&tmp, sizeof(tmp));
+    reply.set_num(datas_.size());
+    reply.set_data(&*datas_.begin(), sizeof(WrapperKlineData) * datas_.size());
+    datas_.clear();
 
     inner_lock.unlock();
     responder_.Write(reply, this);      

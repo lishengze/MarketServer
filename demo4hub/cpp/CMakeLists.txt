@@ -16,9 +16,6 @@ INCLUDE_DIRECTORIES("../../base/cpp")
 # for protos
 INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
-INCLUDE_DIRECTORIES("../../component/pandora")
-INCLUDE_DIRECTORIES("../../component")
-
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)

@@ -31,7 +31,10 @@ void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketSt
     } else {
         std::cout << "publish(update) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     }
-    PUBLISHER->publish_mix(symbol, pub_snap, pub_diff);
+    for( const auto& v : callbacks_) {
+        v->publish_mix(symbol, pub_snap, pub_diff);
+    }
+    //PUBLISHER->publish_mix(symbol, pub_snap, pub_diff);
 }
 
 void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
@@ -369,7 +372,10 @@ void QuoteMixer2::_snap_singles_(const TExchange& exchange, const TSymbol& symbo
         pub_snap = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, true);
     }
     
-    PUBLISHER->publish_single(exchange, symbol, pub_snap, NULL);
+    for( const auto& v : callbacks_) {
+        v->publish_single(exchange, symbol, pub_snap, NULL);
+    }
+    //PUBLISHER->publish_single(exchange, symbol, pub_snap, NULL);
 }
 
 void QuoteMixer2::_precess_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, int precise, const SymbolFee& fee, SDepthQuote& output)
@@ -414,7 +420,11 @@ void QuoteMixer2::_update_singles_(const TExchange& exchange, const TSymbol& sym
         pub_snap = depth_to_pbquote2(exchange, symbol, update, _compute_params_[symbol].depth, true);
         pub_diff = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, false);
     }
-    PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
+
+    for( const auto& v : callbacks_) {
+        v->publish_single(exchange, symbol, pub_snap, pub_diff);
+    }
+    //PUBLISHER->publish_single(exchange, symbol, pub_snap, pub_diff);
 }
 
 void QuoteMixer2::set_publish_params(const TSymbol& symbol, float frequency)

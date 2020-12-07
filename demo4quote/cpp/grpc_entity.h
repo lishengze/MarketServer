@@ -179,6 +179,13 @@ private:
     IDataProvider* provider_;
 };
 
+struct WrapperKlineData: KlineData
+{
+    char exchange[16];
+    char symbol[16];
+    int resolution;
+};
+
 class GetLastEntity : public BaseGrpcEntity
 {
 public:
@@ -188,7 +195,7 @@ public:
 
     bool process();
 
-    void add_data(const KlineData& kline) {
+    void add_data(const WrapperKlineData& kline) {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         datas_.push_back(kline);
         if( total_.size() == 0 || total_.back().index < kline.index ) {
@@ -211,8 +218,8 @@ private:
 
     // 
     mutable std::mutex            mutex_datas_;
-    list<KlineData> datas_;
-    list<KlineData> total_;
+    list<WrapperKlineData> datas_;
+    list<WrapperKlineData> total_;
     
     IDataProvider* provider_;
 };

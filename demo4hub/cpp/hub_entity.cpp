@@ -22,7 +22,8 @@ HubEntity::~HubEntity()
 int HubEntity::start()
 {
     cout << "HubEntity::start "<< endl;
-    quote_updater_.start(CONFIG->grpc_server_addr_, this);
+    quote_updater_.start(CONFIG->risk_controller_addr_, this);
+    kline_updater_.start(CONFIG->stream_engine_addr_, this);
     return 0;
 }
 
@@ -56,4 +57,9 @@ void HubEntity::on_snap(const SEData& quote)
     quote_depth.symbol = quote.symbol();
     quote_depth.exchange = quote.exchange();
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
+}
+
+void HubEntity::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const KlineData& kline)
+{
+    callback_->on_kline(exchange.c_str(), symbol.c_str(), resolution, kline);
 }
