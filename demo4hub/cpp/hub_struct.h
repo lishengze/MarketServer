@@ -36,6 +36,8 @@ struct SDepthData
 
 struct KlineData
 {
+    string symbol;
+    string exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

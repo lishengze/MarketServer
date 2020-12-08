@@ -42,16 +42,17 @@ struct SDepthData
 const long UT_FID_KlineData = 0x10001;
 struct KlineData
 {
+    string symbol;
+    string exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;
     SDecimal px_low;
     SDecimal px_close;
-    double volume;
+    SDecimal volume;
 
     KlineData(){
         index = 0;
-        volume = 0;
     }
     static const long Fid = UT_FID_KlineData;
 };

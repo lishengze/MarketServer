@@ -25,13 +25,20 @@ public:
     void handle_request_message(PackagePtr package);
     void handle_response_message(PackagePtr package);
 
-    void process_sdepth_package(PackagePtr package);
+    void response_sdepth_package(PackagePtr package);
 
-    void process_new_symbol(string symbol);
+    void response_src_kline_package(PackagePtr package);
 
-    void request_symbol_data();
+    void response_new_symbol(string symbol);
+
+    void request_symbol_data(PackagePtr package);
+
+    void request_kline_package(PackagePtr package);
+
+    PackagePtr get_kline_package(PackagePtr package);
 
 private:
-    std::map<std::string, EnhancedDepthData*>     depth_data_;
+    std::map<std::string, EnhancedDepthData*>                       depth_data_;
+    std::map<std::string, std::map<type_tick, KlineData*>>          kline_data_;
 };
 

@@ -7,6 +7,7 @@
 #include "../front_server_declare.h"
 #include "wb_server.h"
 #include "rest_server.h"
+#include "../data_structure/data_struct.h"
 
 
 // 用于处理数据: 为 front-server 提供全量或增量的更新;
@@ -28,9 +29,12 @@ public:
 
     void request_all_symbol();
 
+    void request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
+                            HttpRequest* http_req, HttpResponse* http_res);
+
     void process_rtn_depth_package(PackagePtr package);
 
-    void process_sdepth_package(PackagePtr package);
+    void response_sdepth_package(PackagePtr package);
 
     void process_symbols_package(PackagePtr package);
 

@@ -1,9 +1,10 @@
 #include "front_server.h"
 #include "quark/cxx/ut/UtPrintUtils.h"
+#include "pandora/util/json.hpp"
 #include "hub_struct.h"
 #include "../util/tools.h"
 #include "../front_server_declare.h"
-#include "pandora/util/json.hpp"
+#include "../log/log.h"
 
 FrontServer::FrontServer(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
@@ -67,7 +68,7 @@ void FrontServer::handle_response_message(PackagePtr package)
             break;  
 
         case UT_FID_SDepthData:
-            process_sdepth_package(package);
+            response_sdepth_package(package);
             break;
 
         case UT_FID_SymbolData:
@@ -83,9 +84,9 @@ void FrontServer::handle_response_message(PackagePtr package)
     }    
 }
 
-void FrontServer::process_sdepth_package(PackagePtr package)
+void FrontServer::response_sdepth_package(PackagePtr package)
 {
-    cout << "FrontServer::process_sdepth_package " << endl;
+    cout << "FrontServer::response_sdepth_package " << endl;
     
     auto* psdepth = GET_FIELD(package, SDepthData);
 
@@ -151,4 +152,43 @@ string FrontServer::get_heartbeat_str()
     nlohmann::json json_obj;
     json_obj["type"] = "heartbeat";
     return json_obj.dump();
+}
+
+void FrontServer::request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
+                        HttpRequest* http_req, HttpResponse* http_res)
+{
+    try
+    {
+        PackagePtr package = PackagePtr{new Package{}};
+  
+        package->SetPackageID(ID_MANAGER->get_id());
+
+        CREATE_FIELD(package, ReqKLineData);
+
+        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+        if (p_req_kline_data)
+        {
+            p_req_kline_data->comm_type = COMM_TYPE::HTTP;
+            p_req_kline_data->http_request_ = http_req;
+            p_req_kline_data->http_response_ = http_res;
+            p_req_kline_data->symbol_ = symbol;
+            p_req_kline_data->start_time_ = start_time_secs;
+            p_req_kline_data->end_time_ = end_time_secs;
+            p_req_kline_data->frequency_ = frequency;
+
+            deliver_request(package);
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::request_kline_data Create ReqKLineData Failed!");
+        }        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    
 }

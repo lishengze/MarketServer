@@ -19,6 +19,8 @@
 #include "boost/enable_shared_from_this.hpp"
 #include "pandora/package/package_manager.h"
 #include "pandora/util/thread_safe_singleton.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include "util/id.hpp"
 
@@ -44,4 +46,7 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define MARKET_DATA_UPDATE "market_data_update"
 #define SYMBOL_LIST "symbol_list"
 #define SYMBOL_UPDATE "symbol_update"
+
+#define MAX_DOUBLE 10000000000000
+#define MIN_DOUBLE -10000000000000
 

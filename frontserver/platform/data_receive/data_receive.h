@@ -43,6 +43,8 @@ public:
     // K线数据（推送）
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline);
 
+    void request_kline_package(PackagePtr package);
+
     void test_main();
 
     std::shared_ptr<std::thread>  test_thread_{nullptr};

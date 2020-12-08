@@ -21,9 +21,9 @@ struct Socket
     Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
 
     COMM_TYPE comm_type = COMM_TYPE::HTTP;
-    HttpResponse*       http_response_;
-    HttpRequest*        http_request_;
-    WebsocketClass*     websocket_;
+    HttpResponse*       http_response_{nullptr};
+    HttpRequest*        http_request_{nullptr};
+    WebsocketClass*     websocket_{nullptr};
 };
 
 const long UT_FID_EnhancedDepthData = 0x10002;
@@ -98,4 +98,52 @@ class SymbolData
         std::set<std::string>     symbols_;
         string                    json_str_;
         
+};
+
+struct AtomKlineData
+{
+    AtomKlineData(KlineData& kline_data)
+    {
+        open_ = kline_data.px_open.get_value();
+        high_ = kline_data.px_high.get_value();
+        low_ = kline_data.px_low.get_value();
+        close_ = kline_data.px_close.get_value();
+        volume_ = kline_data.volume.get_value();
+        tick_ = kline_data.index;
+    }
+
+    double open_;
+    double high_;
+    double low_;
+    double close_;
+    double volume_;    
+    type_tick tick_;
+};
+FORWARD_DECLARE_PTR(AtomKlineData);
+
+const long UT_FID_ReqKLineData = 0x10004;
+class ReqKLineData:public Socket
+{
+    public: 
+        string              symbol_;
+        type_tick           start_time_;
+        type_tick           end_time_;
+        type_tick           append_end_time_;
+
+        int                 frequency_;
+
+        static const long Fid = UT_FID_ReqKLineData;
+};
+
+const long UT_FID_RspKLineData = 0x10005;
+class RspKLineData:public Socket
+{
+    public: 
+        string                              symbol_;
+        type_tick                           start_time_;
+        type_tick                           end_time_;
+        int                                 frequency_;
+        std::vector<AtomKlineDataPtr>       kline_data_vec_;
+
+        static const long Fid = UT_FID_RspKLineData;
 };

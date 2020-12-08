@@ -4,9 +4,10 @@
 #include "pandora/util/time_util.h"
 #include "pandora/package/package.h"
 #include "../util/tools.h"
+#include "../log/log.h"
 
 #include <chrono>
-
+#include <sstream>
 
 DataReceive::DataReceive(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
@@ -81,7 +82,36 @@ void DataReceive::response_message(PackagePtr package)
 
 void DataReceive::handle_request_message(PackagePtr package)
 {
+    switch (package->Tid())
+    {
+        case UT_FID_ReqKLineData:
+            request_kline_package(package);
+            return;
+        default:
+            break;
+    }
+}
 
+void DataReceive::request_kline_package(PackagePtr package)
+{
+    try
+    {
+        ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
+        if (pReqKlineData)
+        {
+
+        }
+        else
+        {
+            LOG_ERROR("DataReceive::request_kline_package ReqKLineData NULL!");
+        }        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] DataReceive::request_kline_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
 }
 
 void DataReceive::handle_response_message(PackagePtr package)
@@ -107,16 +137,15 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 {
     if (depth.symbol.length() == 0 || depth.symbol == "") 
     {
-        cout << "symbol is null " << endl;
+        LOG_INFO("DataReceive::handle_depth_data symbol is null!");
         return;
     }
 
     cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
-
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    package->prepare_response(UT_FID_SDepthData,ID_MANAGER->get_id());
+    package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
 
     // SDepthData* pDepthData = GET_NON_CONST_FIELD(package, SDepthData);
     
@@ -129,6 +158,23 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline)
 {
+    if (kline.symbol.length() == 0 || kline.symbol == "") 
+    {
+        LOG_INFO("DataReceive::handle_kline_data symbol is null!");
+        return;
+    }
 
+    std::stringstream stream_obj;
+    stream_obj << "symbol: " << symbol << ", exchange: " << exchange << ", \n"
+                << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+                << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
+
+    LOG_INFO(stream_obj.str());
+
+    PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
+
+    package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
+
+    deliver_response(package);
 }
 

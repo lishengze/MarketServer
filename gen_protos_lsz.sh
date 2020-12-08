@@ -7,6 +7,7 @@ protoc --proto_path=protos --cpp_out=protos/cpp gogo.proto
 
 # quote_data.proto
 protoc --proto_path=protos --cpp_out=protos/cpp quote_data.proto
+
 # python3 -m grpc_tools.protoc -I protos --python_out=protos/python quote_data.proto
 
 # stream_engine.proto

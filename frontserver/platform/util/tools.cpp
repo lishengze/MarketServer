@@ -1,6 +1,7 @@
 #include "tools.h"
 #include "../front_server_declare.h"
 #include "pandora/util/json.hpp"
+#include "../log/log.h"
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src)
 {
@@ -33,7 +34,7 @@ PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
     return package;
 }
 
-PackagePtr GetNewKlineDataPackage(const KlineData& depth, int package_id)
+PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_id)
 {
     PackagePtr package =PackagePtr{new Package{}};
     package->SetPackageID(package_id);
@@ -41,7 +42,7 @@ PackagePtr GetNewKlineDataPackage(const KlineData& depth, int package_id)
 
     KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
 
-    copy_klinedata(pklineData, &depth);
+    copy_klinedata(pklineData, &ori_kline_data);
 
     return package;
 }
@@ -197,4 +198,71 @@ string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
     result = json_data.dump(); 
     
     return result;
+}
+
+std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
+{
+    std::vector<AtomKlineDataPtr> result;
+
+    if (kline_data.size() == 0) return result;
+
+    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*kline_data[0]);
+    result.push_back(cur_data); 
+
+    double low = MAX_DOUBLE;
+    double high = MIN_DOUBLE;
+
+    kline_data.erase(kline_data.begin());
+
+    for (KlineData* atom : kline_data)
+    {
+        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+
+        if (atom->index - (*result.rbegin())->tick_ >= frequency)
+        {            
+            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+            cur_data->low_ = low;
+            cur_data->high_ = high;
+            result.push_back(cur_data); 
+
+            low = MAX_DOUBLE;
+            high = MIN_DOUBLE;
+        }
+    }
+
+    return result;
+}
+
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id)
+{
+    PackagePtr package = PackagePtr{new Package{}};
+    try
+    {    
+        package->SetPackageID(package_id);
+
+        CREATE_FIELD(package, RspKLineData);
+
+        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+
+        p_rsp_kline_data->comm_type = pReqKlineData->comm_type;
+        p_rsp_kline_data->http_request_ = pReqKlineData->http_request_;
+        p_rsp_kline_data->http_response_ = pReqKlineData->http_response_;
+        p_rsp_kline_data->websocket_ = pReqKlineData->websocket_;
+
+        p_rsp_kline_data->symbol_ = pReqKlineData->symbol_;
+        p_rsp_kline_data->start_time_ = pReqKlineData->start_time_;
+        p_rsp_kline_data->end_time_ = pReqKlineData->end_time_;
+        p_rsp_kline_data->frequency_ = pReqKlineData->frequency_;
+
+        p_rsp_kline_data->kline_data_vec_ = main_data;
+
+        return package;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "GetNewSymbolDataPackage: " << e.what() << '\n';
+    }
+    
+    return package;        
 }
