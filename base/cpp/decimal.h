@@ -85,6 +85,10 @@ struct SDecimal {
         return ret;
     }
 
+    bool is_zero() const {
+        return data_.real_.value_ == 0;
+    }
+
     void from(double v, int precise = -1, bool ceiling = false) {
         if( precise == -1 ) {
             char value[1024];

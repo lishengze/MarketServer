@@ -299,7 +299,7 @@ void QuoteMixer2::_precess_singles_(const TExchange& exchange, const TSymbol& sy
 void update_depth_diff(const map<SDecimal, SDecimal>& update, map<SDecimal, SDecimal>& dst)
 {
     for( const auto& v : update ) {
-        if( v.second < VOLUME_PRECISE ) {
+        if( v.second.is_zero() ) {
             auto iter = dst.find(v.first);
             if( iter != dst.end() ) {
                 dst.erase(iter);
