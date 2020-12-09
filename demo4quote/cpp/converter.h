@@ -103,6 +103,7 @@ inline void depth_to_pbquote2_depth(const map<SDecimal, SDecimal>& depths, FuncA
     if( is_ask ) {
         for( auto iter = depths.begin() ; iter != depths.end() && count < depth ; iter ++, count ++) {
             DepthWithDecimal* depth = func();
+            cout << iter->first.get_str_value() << "\t" << iter->second.get_str_value();
             depth->set_price(iter->first.get_raw());
             depth->set_volume(iter->second.get_raw());
         }

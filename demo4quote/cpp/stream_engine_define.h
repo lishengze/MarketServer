@@ -80,7 +80,8 @@ struct SNacosConfigFee
 
 struct SNacosConfig
 {
-    int precise;
+    int precise;    // 最小价格单位
+    int vprecise;   // 最小挂单量单位
     type_uint32 depth;
     float frequency;
     type_uint32 mix_depth;

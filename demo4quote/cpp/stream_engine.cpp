@@ -124,7 +124,17 @@ bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolF
 
 void StreamEngine::on_symbol_channged(const NacosString& configInfo)
 {
-    njson js = njson::parse(configInfo);        
+    njson js;
+    
+    try{
+        js = njson::parse(configInfo);
+    }
+    catch(nlohmann::detail::exception& e)
+    {
+        _log_and_print("parse json fail %s", e.what());
+        return;
+    }
+
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     for (auto iter = js.begin() ; iter != js.end() ; ++iter )
     {
@@ -135,6 +145,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
             continue;
         SNacosConfig cfg;
         cfg.precise = symbol_cfgs["precise"].get<int>();
+        //cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
         cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
         cfg.frequency = symbol_cfgs["frequency"].get<float>();
         cfg.mix_depth = symbol_cfgs["mix_depth"].get<unsigned int>();
