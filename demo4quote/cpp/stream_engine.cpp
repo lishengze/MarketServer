@@ -147,7 +147,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
             continue;
         SNacosConfig cfg;
         cfg.precise = symbol_cfgs["precise"].get<int>();
-        //cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
+        cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
         cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
         cfg.frequency = symbol_cfgs["frequency"].get<float>();
         cfg.mix_depth = symbol_cfgs["mix_depth"].get<unsigned int>();

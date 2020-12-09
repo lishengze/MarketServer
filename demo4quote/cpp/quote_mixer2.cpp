@@ -41,7 +41,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     // 更新单个品种 & 手续费率和精度处理
     SDepthQuote cpsQuote;
     this->_snap_singles_(exchange, symbol, quote, cpsQuote);
-    cpsQuote.print();
+    //cpsQuote.print();
 
     // 更新内存中的行情
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap;
@@ -77,7 +77,7 @@ void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, co
     // 更新单个品种 & 手续费率和精度处理
     SDepthQuote cpsQuote;
     this->_update_singles_(exchange, symbol, quote, cpsQuote);
-    cpsQuote.print();
+    //cpsQuote.print();
 
     // 更新内存中的行情
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap;
@@ -310,17 +310,17 @@ void update_depth_diff(const map<SDecimal, SDecimal>& update, map<SDecimal, SDec
     }
 }
 
-void QuoteMixer2::_update_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& output)
+void QuoteMixer2::_update_singles_(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& update, SDepthQuote& output)
 {
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap, pub_diff;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_quotes_ };
-        SDepthQuote& update = singles_[symbol][exchange];
-        update_depth_diff(quote.asks, update.asks);        
-        update_depth_diff(quote.bids, update.bids);
-        _precess_singles_(exchange, symbol, update, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], output);
-        pub_snap = depth_to_pbquote2(exchange, symbol, update, _compute_params_[symbol].depth, true);
-        pub_diff = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, false);
+        SDepthQuote& quote = singles_[symbol][exchange];
+        update_depth_diff(update.asks, quote.asks);        
+        update_depth_diff(update.bids, quote.bids);
+        _precess_singles_(exchange, symbol, quote, _compute_params_[symbol].precise, _compute_params_[symbol].fees[exchange], output);
+        pub_snap = depth_to_pbquote2(exchange, symbol, quote, _compute_params_[symbol].depth, true);
+        pub_diff = depth_to_pbquote2(exchange, symbol, update, _compute_params_[symbol].depth, false);
     }
 
     for( const auto& v : callbacks_) {

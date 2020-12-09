@@ -49,7 +49,6 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
     if( is_ask ) {
         for( auto iter = depths.begin() ; iter != depths.end() && count < depth ; iter ++, count ++) {
             DepthWithDecimal* depth = func();
-            //cout << exchange << "\t" << symbol << "\t" << iter->first.get_str_value() << "\t" << iter->second.get_str_value() << "\t" << iter->second.data_.real_.value_ << "\t" << iter->second.data_.value_ << endl;
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second);
         }
