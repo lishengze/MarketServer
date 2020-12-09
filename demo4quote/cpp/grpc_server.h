@@ -33,8 +33,8 @@ public:
     // IMixerKlinePusher
     void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
     // IMixerKlinePusher
-    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
-    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
+    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
 private:
     void _handle_rpcs();
 

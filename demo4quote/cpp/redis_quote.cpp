@@ -1,15 +1,14 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
 
-void redisquote_to_quote_depth(const njson& data, map<SDecimal, double>& depths)
+void redisquote_to_quote_depth(const njson& data, map<SDecimal, SDecimal>& depths)
 {
     for (auto iter = data.begin() ; iter != data.end() ; ++iter )
     {
         const string& price = iter.key();
         const double& volume = iter.value();
-        SDecimal dPrice;
-        dPrice.from(price, -1);
-        depths[dPrice] = volume;
+        SDecimal dPrice = SDecimal::parse(price);
+        depths[dPrice] = SDecimal::parse(volume);
     }
 }
 
@@ -51,13 +50,6 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
     redis_snap_requester_.init(params, logger);
     redis_snap_requester_.set_engine(this);
     redis_snap_requester_.start();
-    /*for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
-        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
-            const string& symbol = *iterSymbol;
-            const string& exchange = *iterExchange;
-            redis_snap_requester_.add_symbol(exchange, symbol);
-        }
-    }*/
 
     // 请求增量
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
@@ -176,14 +168,6 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
 void RedisQuote::OnConnected() {
     _log_and_print("Redis RedisQuote::OnConnected");
-    
-    /*for( auto iterSymbol = CONFIG->include_symbols_.begin() ; iterSymbol != CONFIG->include_symbols_.end() ; ++iterSymbol ) {
-        for( auto iterExchange = CONFIG->include_exchanges_.begin() ; iterExchange != CONFIG->include_exchanges_.end() ; ++iterExchange ) {
-            const string& symbol = *iterSymbol;
-            const string& exchange = *iterExchange;
-            subscribe("UPDATEx|" + symbol + "." + exchange);            
-        }
-    }*/
 };
 
 void RedisQuote::OnDisconnected(int status) {

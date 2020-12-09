@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(demo4hub_demo)
 
 ###############################################################################################
+INCLUDE_DIRECTORIES("../")
 INCLUDE_DIRECTORIES("../lib")
 LINK_DIRECTORIES("../lib")
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)

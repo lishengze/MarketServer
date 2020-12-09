@@ -23,6 +23,7 @@ using namespace std;
     } while(0)
 
 using uint32 = unsigned int;
+using uint64 = unsigned long;
 using type_seqno = unsigned long;
 using type_tick = unsigned long;
 using type_resolution = int;

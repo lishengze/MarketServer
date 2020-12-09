@@ -14,7 +14,7 @@ service RiskController {
     rpc ServeMarketStream4Hedge(.google.protobuf.Empty) returns (stream MultiMarketStreamData){}
 
     // 发布聚合行情（用于客户端显示）
-    rpc ServeMarketStream4Client(.google.protobuf.Empty) returns (stream MultiMarketStreamData){}
+    rpc ServeMarketStream4Client(.google.protobuf.Empty) returns (stream MultiMarketStreamDataWithDecimal){}
 
     // 客户端 对冲订单推流
     rpc PutOrderStream(stream MultiOrderStreamData) returns (.google.protobuf.Empty){} 

@@ -1,7 +1,6 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-
 // config file relative path
 const char* config_file = "config.json";
 
@@ -12,8 +11,6 @@ StreamEngine::StreamEngine(){
     CONFIG->parse_config(config_file);
     
     // init grpc server
-    //utrade::pandora::Singleton<ServerEndpoint>::Instance();
-    //PUBLISHER->init(CONFIG->grpc_publish_addr_);
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
 }
 
@@ -64,7 +61,6 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
     
     if( CONFIG->publish_data_ ) {
         quote_mixer2_.on_snap(exchange, symbol, quote);
-        //quote_single_.on_snap(exchange, symbol, quote);
     }
 };
 
@@ -75,20 +71,13 @@ void StreamEngine::on_update(const string& exchange, const string& symbol, const
 
     if( CONFIG->publish_data_ ) {
         quote_mixer2_.on_update(exchange, symbol, quote);
-        //quote_single_.on_update(exchange, symbol, quote);
     }
 };
 
 void StreamEngine::on_nodata_exchange(const TExchange& exchange) 
 {
     quote_mixer2_.clear_exchange(exchange);
-    //quote_single_.clear_exchange(exchange);
 }
-/*
-void StreamEngine::on_precise_changed(const TSymbol& symbol, int precise) 
-{
-    quote_mixer2_.change_precise(symbol, precise);
-}*/
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
 {

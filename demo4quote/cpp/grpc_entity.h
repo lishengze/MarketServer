@@ -15,9 +15,9 @@ using quote::service::v1::GetParamsReq;
 using quote::service::v1::DemoReq;
 using quote::service::v1::DemoResp;
 using quote::service::v1::SubscribeQuoteReq;
-using quote::service::v1::MultiMarketStreamData;
-using quote::service::v1::MarketStreamData;
-using quote::service::v1::Depth;
+using quote::service::v1::MultiMarketStreamDataWithDecimal;
+using quote::service::v1::MarketStreamDataWithDecimal;
+using quote::service::v1::DepthWithDecimal;
 using quote::service::v1::SubscribeMixQuoteReq;
 using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::GetKlinesRequest;
@@ -73,7 +73,7 @@ private:
     ServerContext ctx_;
 
     SubscribeQuoteReq request_;
-    ServerAsyncWriter<MultiMarketStreamData> responder_;
+    ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     // 
     mutable std::mutex                 mutex_datas_;
@@ -102,7 +102,7 @@ private:
     ServerContext ctx_;
 
     SubscribeMixQuoteReq request_;
-    ServerAsyncWriter<MultiMarketStreamData> responder_;
+    ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     // 
     mutable std::mutex                 mutex_datas_;

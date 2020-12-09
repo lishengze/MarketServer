@@ -34,8 +34,8 @@ struct SDepthQuote {
     string symbol;
     type_seqno sequence_no;
     type_tick arrive_time;
-    map<SDecimal, double> asks; // 买盘
-    map<SDecimal, double> bids; // 卖盘
+    map<SDecimal, SDecimal> asks; // 买盘
+    map<SDecimal, SDecimal> bids; // 卖盘
 
     SDepthQuote() {
         raw_length = 0;

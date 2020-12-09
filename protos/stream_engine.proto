@@ -6,10 +6,10 @@ package quote.service.v1;
 // Stream Engine API
 service StreamEngine {
     // 订阅行情
-    rpc SubscribeQuote(SubscribeQuoteReq) returns (stream MultiMarketStreamData);
+    rpc SubscribeQuote(SubscribeQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
 
     // 订阅聚合行情
-    rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamData);
+    rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
 
     // demo
     rpc Demo(DemoReq) returns (stream DemoResp);
