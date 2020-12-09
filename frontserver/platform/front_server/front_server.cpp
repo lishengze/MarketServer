@@ -40,9 +40,9 @@ void FrontServer::request_message(PackagePtr package)
 
 void FrontServer::response_message(PackagePtr package)
 {
-    // get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
+    get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
 
-    handle_response_message(package);
+    // handle_response_message(package);
 }
 
 void FrontServer::handle_request_message(PackagePtr package)
@@ -188,6 +188,35 @@ void FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
     {
         std::stringstream stream_obj;
         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    
+}
+
+void FrontServer::response_kline_data_package(PackagePtr package)
+{
+    try
+    {
+        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+
+        if (p_rsp_kline_data)
+        {
+            string response_data = RspKlinDataToJsonStr(*p_rsp_kline_data);
+            if (p_rsp_kline_data->http_response_)
+            {
+                p_rsp_kline_data->http_response_->end(response_data);
+            }
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+        }
+        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_kline_data_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }
     

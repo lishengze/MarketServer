@@ -141,7 +141,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    // cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 

@@ -36,6 +36,8 @@ public:
 
     void response_sdepth_package(PackagePtr package);
 
+    void response_kline_data_package(PackagePtr package);
+
     void process_symbols_package(PackagePtr package);
 
     void process_enhanceddata_package(PackagePtr package);

@@ -4,6 +4,7 @@ import urllib.request
 import http.client
 import time
 import _thread
+import time
 
 def process_heartbeat(ws):
     heartbeat_info = {
@@ -78,11 +79,21 @@ def test_http_restful():
     test_http_client()
 
 def test_http_client():
-    uri = "http://127.0.0.1:9115"
-    conn = http.client.HTTPConnection(uri)  
-    conn.request("GET", "/v1/test_client")
-    r1 =conn.getresponse()
-    print(r1)  
+    uri = "127.0.0.1:9115"
+    # uri = "http://127.0.0.1"
+    conn = http.client.HTTPConnection(uri)
+    symbol = "BTC_USDT"
+    frequency = 60
+    end_time = int(time.time())
+    end_time = end_time - end_time % frequency
+    start_time = end_time - 60 * 60 *5
+    query_str = ("v1/kline_request/symbol=%s&start_time=%d&end_time=%d&frequency=%d" \
+                % (symbol, start_time, end_time, frequency))
+
+    conn.request("GET", query_str)
+    res =conn.getresponse()
+    print(res.read().decode("utf-8"))
+    # print(r1.text)  
 
 def test_urllib():
     uri = "http://127.0.0.1:9115"
@@ -92,7 +103,7 @@ def test_urllib():
 
     
 if __name__ == "__main__":
-    test_websocket()
+    # test_websocket()
 
-    # test_http_restful()
+    test_http_restful()
 

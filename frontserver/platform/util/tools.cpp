@@ -234,6 +234,37 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
     return result;
 }
 
+PackagePtr GetNewReqKLineDataPackage(string symbol, type_tick start_time, type_tick end_time,  int frequency, int package_id, 
+                                    HttpResponse * response, HttpRequest *request)
+{
+    PackagePtr package{nullptr};
+    try
+    {    
+        package = PackagePtr{new Package{}};
+        package->SetPackageID(package_id);
+
+        CREATE_FIELD(package, ReqKLineData);
+
+        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+        p_req_kline_data->http_response_ = response;
+        p_req_kline_data->http_request_ = request;
+
+        p_req_kline_data->symbol_ = symbol;
+        p_req_kline_data->start_time_ = start_time;
+        p_req_kline_data->end_time_ = end_time;
+        p_req_kline_data->frequency_ = frequency;
+
+        return package;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "GetNewSymbolDataPackage: " << e.what() << '\n';
+    }
+    
+    return package;   
+}
+
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id)
 {
     PackagePtr package = PackagePtr{new Package{}};
@@ -265,4 +296,40 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
     }
     
     return package;        
+}
+
+string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type=KLINE_UPDATE)
+{
+    try
+    {
+        string result;
+        nlohmann::json json_data;        
+        json_data["symbol"] = rsp_kline_data.symbol_;
+        json_data["start_time"] = rsp_kline_data.start_time_;
+        json_data["end_time"] = rsp_kline_data.end_time_;
+        json_data["frequency"] = rsp_kline_data.frequency_;
+
+        int i = 0;
+        nlohmann::json detail_data;
+        for (AtomKlineDataPtr atom_data:rsp_kline_data.kline_data_vec_)
+        {
+            nlohmann::json tmp_json;
+            tmp_json["open"] = atom_data->open_;
+            tmp_json["high"] = atom_data->high_;
+            tmp_json["low"] = atom_data->low_;
+            tmp_json["close"] = atom_data->close_;
+            tmp_json["volume"] = atom_data->volume_;
+            tmp_json["tick"] = atom_data->tick_;
+            detail_data[i++] = tmp_json;
+        }
+        json_data["data"] = detail_data;
+        return json_data.dump();
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] RspKlinDataToJsonStr: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    
 }

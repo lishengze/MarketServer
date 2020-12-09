@@ -34,7 +34,7 @@ void ServerEngine::release()
 void ServerEngine::signal_handler(int signum)
 {
 //    UT_LOG_INFO(WORMHOLE_LOGGER, "[ServerEngine], signal_handler " << signum);
-    printf("[ServerEngine], signal_handler:%d", signum);
+    printf("\n[ServerEngine], signal_handler:%d \n", signum);
     signal_sys = signum;
     // 释放资源
     SERVER_EENGINE->release();

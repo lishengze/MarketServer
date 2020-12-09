@@ -120,6 +120,8 @@ void WBServer::listen()
             std::cout << "WS Listening on port " << server_port_ << std::endl;
         }
     }).run();
+
+    cout << "WServer Listen End!" << endl;
 }
 
 void WBServer::set_front_server(FrontServer* front_server)
@@ -284,7 +286,7 @@ void WBServer::check_heartbeat()
     }
 
     string heartbeat_str = get_heartbeat_str();
-    cout << "heartbeat_str: " << heartbeat_str << endl;
+    // cout << "heartbeat_str: " << heartbeat_str << endl;
 
     for (auto& iter:wss_con_map_)
     {
