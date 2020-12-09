@@ -27,6 +27,34 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
     }
 };
 
+void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWithDecimal* dst) {
+    dst->set_exchange(src->exchange());
+    dst->set_symbol(src->symbol());
+    dst->set_seq_no(src->seq_no());
+    dst->set_is_snap(src->is_snap());
+
+    // 卖盘
+    for( int i = 0 ; i < src->asks_size() ; ++i ) {
+        const DepthWithDecimal& src_depth = src->asks(i);
+        DepthWithDecimal* dst_depth = dst->add_asks();
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
+        for( auto v : src_depth.data() ) {
+            (*dst_depth->mutable_data())[v.first] = v.second;
+        }
+    }
+    // 买盘
+    for( int i = 0 ; i < src->bids_size() ; ++i ) {
+        const DepthWithDecimal& src_depth = src->bids(i);
+        DepthWithDecimal* dst_depth = dst->add_bids();
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
+        for( auto v : src_depth.data() ) {
+            (*dst_depth->mutable_data())[v.first] = v.second;
+        }
+    }
+};
+
 //////////////////////////////////////////////////
 MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service):responder_(&ctx_)
 {
@@ -112,13 +140,13 @@ void MarketStream4ClientEntity::register_call(){
 
 bool MarketStream4ClientEntity::process(){
     
-    MultiMarketStreamData reply;
+    MultiMarketStreamDataWithDecimal reply;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamData* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
         }
         datas_.clear();
     }

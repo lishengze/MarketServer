@@ -44,7 +44,7 @@ void ServerEndpoint::publish4Broker(const string& symbol, std::shared_ptr<Market
     caller_marketstream4broker_->add_data(snap, update);
 }
 
-void ServerEndpoint::publish4Client(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish4Client(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
     caller_marketstream4client_->add_data(snap, update);
 }

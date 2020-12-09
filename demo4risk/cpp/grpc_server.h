@@ -25,9 +25,18 @@ public:
         thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
 
+    // 发布聚合行情（用于撮合）
+    // 发布风控处理后的行情
     void publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+
+    // 发布聚合行情（用于对冲）
+    // 发送风控处理前的行情
     void publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
-    void publish4Client(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update);
+
+    // 发布聚合行情（用于客户端显示）
+    // 发布风控处理后的行情
+    // 使用精确价格和量，只需要total
+    void publish4Client(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
 private:
 
     void _handle_rpcs();

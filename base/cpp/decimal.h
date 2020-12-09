@@ -64,9 +64,10 @@ struct SDecimal {
         return ret;
     }
     
-    static SDecimal parse_by_raw(uint64 v) {
+    static SDecimal parse_by_raw(uint64 base, uint64 prec) {
         SDecimal ret;
-        ret.data_.value_ = v;
+        ret.data_.real_.value_ = base;
+        ret.data_.real_.prec_ = prec;
         return ret;
     }
 
@@ -231,16 +232,26 @@ struct SDecimal {
         return *this;
     }
 
-    SDecimal operator / (const double &d) const {;
+    const SDecimal operator / (const double &d) const {
         SDecimal ret = *this;
         ret.data_.real_.value_ /= d;
         return ret;
     }
 
-    SDecimal operator * (const double &d) const {
+    SDecimal & operator/=(const double &rhs) {
+        data_.real_.value_ /= rhs;
+        return *this;
+    }
+
+    const SDecimal operator * (const double &d) const {
         SDecimal ret = *this;
         ret.data_.real_.value_ *= d;
         return ret;
+    }
+
+    SDecimal & operator*=(const double &rhs) {
+        data_.real_.value_ *= rhs;
+        return *this;
     }
 };
 #pragma pack()
