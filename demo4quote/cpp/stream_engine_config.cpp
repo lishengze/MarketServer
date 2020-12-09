@@ -21,9 +21,6 @@ void Config::parse_config(const std::string& file_name)
 
         // grpc
         grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
-        //grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();;
-        //grpc_publish_frequency_ = js["grpc"]["frequency"].get<int>();
-        //grpc_publish_raw_frequency_ = js["grpc"]["raw_frequency"].get<int>();
 
         // system
         sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
@@ -40,23 +37,6 @@ void Config::parse_config(const std::string& file_name)
         quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
         nacos_addr_ = js["nacos"]["addr"].get<string>();
-        // config center
-        /*
-        for (auto iter = js["include"]["symbols"].begin(); iter != js["include"]["symbols"].end(); ++iter) {
-            const string& symbol = *iter;
-            include_symbols_.insert(symbol);
-        }
-        for (auto iter = js["include"]["exchanges"].begin(); iter != js["include"]["exchanges"].end(); ++iter) {
-            const string& exchange = *iter;
-            include_exchanges_.insert(exchange);
-        } */               
-        /*symbol_precise_["BTC_USDT"] = 1;
-        symbol_precise_["ETH_USDT"] = 2;
-        symbol_precise_["ETH_BTC"] = 6;
-        symbol_precise_["XLM_BTC"] = 6;
-        symbol_precise_["XLM_ETH"] = 6;
-        symbol_precise_["IRIS_USDT"] = 4;
-        symbol_precise_["HT_USDT"] = 4;*/
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)
@@ -80,21 +60,3 @@ void Config::set_config(const string& config)
     std::unique_lock<std::mutex> inner_lock{ mutex_faw_config_ };
     faw_config_ = config;
 }
-
-
-/*
-void Config::set_configuration_precise(const std::unordered_map<string, int>& vals)
-{
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_configuration_ };
-        for( const auto& v : vals ) {
-            symbol_precise_[v.first] = v.second;
-            _log_and_print("set precise: %s %d", v.first.c_str(), v.second);
-        }
-    }
-
-    for( const auto& v : vals ) {
-        STREAMENGINE->on_precise_changed(v.first, v.second);
-    }
-}
-*/

@@ -34,14 +34,23 @@ struct SDepthQuote {
     string symbol;
     type_seqno sequence_no;
     type_tick arrive_time;
-    map<SDecimal, double> asks; // 买盘
-    map<SDecimal, double> bids; // 卖盘
+    map<SDecimal, SDecimal> asks; // 买盘
+    map<SDecimal, SDecimal> bids; // 卖盘
 
     SDepthQuote() {
         raw_length = 0;
         exchange = "";
         symbol = "";
         sequence_no = 0;
+    }
+
+    void print() const {
+        for( const auto&v : asks ) {
+            cout << "asks\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+        }
+        for( const auto&v : bids ) {
+            cout << "bids\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+        }
     }
 };
 

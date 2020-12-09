@@ -59,9 +59,6 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
     string depthData = redis_sync_api->SyncGet(depth_key);
     if( !quote_interface_->_on_snap(exchange, symbol, depthData) ) {
         _add_event(exchange, symbol, 1);
-        //boost::asio::steady_timer t(io, std::chrono::steady_clock::now() + std::chrono::seconds(10));
-       // t.async_wait(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
-        //boost::asio::post(boost::bind(&RedisSnapRequester::_get_snap, this, exchange, symbol));
     } else {        
         std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };
         string combinedSymbol = make_symbolkey(exchange, symbol);

@@ -9,8 +9,6 @@
 #include "kline_mixer.h"
 #include "kline_database.h"
 
-#define STREAMENGINE utrade::pandora::Singleton<StreamEngine>::GetInstance()
-
 class StreamEngine : public QuoteSourceInterface, public INacosCallback
 {
 public:
@@ -24,7 +22,6 @@ public:
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
-    //void on_precise_changed(const TSymbol& symbol, int precise);
 
     // from INacosCallback
     void on_symbol_channged(const NacosString& symbols);
@@ -36,16 +33,16 @@ public:
 private:
     // redis quote replay
     RedisQuoteReplay quote_replay_;
-    // redis quote upstream
-    RedisQuote quote_source_;
-    // mix quotation
-    //QuoteMixer quote_mixer_;
-    // mix quotation version2(current)
-    QuoteMixer2 quote_mixer2_;
-    // single symbol quotation
-    //QuoteSingle quote_single_;
+
     // quotation dumper
     QuoteDumper quote_dumper_;
+
+    // redis quote upstream
+    RedisQuote quote_source_;
+
+    // mix quotation
+    QuoteMixer2 quote_mixer2_;
+
     // nacos client
     NacosClient nacos_client_;
 

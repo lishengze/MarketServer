@@ -1,7 +1,7 @@
 #include "stream_engine_config.h"
 #include "grpc_entity.h"
 
-void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
+void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWithDecimal* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
     dst->set_seq_no(src->seq_no());
@@ -9,20 +9,20 @@ void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
 
     // 卖盘
     for( int i = 0 ; i < src->asks_size() ; ++i ) {
-        const Depth& src_depth = src->asks(i);
-        Depth* dst_depth = dst->add_asks();
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());     
+        const DepthWithDecimal& src_depth = src->asks(i);
+        DepthWithDecimal* dst_depth = dst->add_asks();
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
         for( auto v : src_depth.data() ) {
             (*dst_depth->mutable_data())[v.first] = v.second;
         }
     }
     // 买盘
     for( int i = 0 ; i < src->bids_size() ; ++i ) {
-        const Depth& src_depth = src->bids(i);
-        Depth* dst_depth = dst->add_bids();
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());     
+        const DepthWithDecimal& src_depth = src->bids(i);
+        DepthWithDecimal* dst_depth = dst->add_bids();
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
         for( auto v : src_depth.data() ) {
             (*dst_depth->mutable_data())[v.first] = v.second;
         }
@@ -59,8 +59,8 @@ void SubscribeSingleQuoteEntity::register_call(){
     std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
     service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
-
-void compare_pb_json2(const MarketStreamData& quote)
+/*
+void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 {
     std::cout << "---------------------" << std::endl;
 
@@ -78,7 +78,7 @@ void compare_pb_json2(const MarketStreamData& quote)
     
     tbegin = get_miliseconds();
     for( int i = 0 ; i < 1000 ; ++i ) {
-        MarketStreamData tmp;
+        MarketStreamDataWithDecimal tmp;
         if( !tmp.ParseFromString(a) )
             std::cout << "parse fail" << std::endl;
     }
@@ -116,16 +116,16 @@ void compare_pb_json2(const MarketStreamData& quote)
     std::cout << "parse json use:" << (tend - tbegin) << std::endl;
     std::cout << "---------------------" << std::endl;
 }
-
+*/
 bool SubscribeSingleQuoteEntity::process(){
     
-    MultiMarketStreamData reply;
+    MultiMarketStreamDataWithDecimal reply;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamData* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
             // 检查seq_no
             //if( last_seqno != 0 && (1+last_seqno) != quote->seq_no() ) {
             //    cout << "lost !!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
@@ -144,7 +144,7 @@ bool SubscribeSingleQuoteEntity::process(){
 }
 
 void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
-    MarketStreamData* pdata = (MarketStreamData*)data.snap.get();    
+    MarketStreamDataWithDecimal* pdata = (MarketStreamDataWithDecimal*)data.snap.get();    
     if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != string(pdata->exchange()) ) {
         //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
         return;
@@ -172,13 +172,13 @@ void SubscribeMixQuoteEntity::register_call(){
 
 bool SubscribeMixQuoteEntity::process(){
     
-    MultiMarketStreamData reply;
+    MultiMarketStreamDataWithDecimal reply;
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamData* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamData*)datas_[i].get(), quote);
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
         }
         datas_.clear();
     }
@@ -206,18 +206,8 @@ void SetParamsEntity::register_call(){
     service_->RequestSetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool SetParamsEntity::process(){
-    
-    /*CONFIG->grpc_publish_frequency_ = request_.frequency();
-    CONFIG->grpc_publish_depth_ = request_.depth();
-    CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
-    string current_symbol = request_.symbol();
-    if( current_symbol != "" ) {
-        unordered_map<string, int> vals;
-        vals[current_symbol] = request_.precise();
-        CONFIG->set_configuration_precise(vals);
-    }*/
-    
+bool SetParamsEntity::process()
+{    
     status_ = FINISH;
     responder_.Finish(reply_, Status::OK, this);
     return true;

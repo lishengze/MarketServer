@@ -6,8 +6,8 @@
 class IMixerQuotePusher
 {
 public:
-    virtual void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
-    virtual void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
+    virtual void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update) = 0;
+    virtual void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update) = 0;
 };
 
 class QuoteMixer2
@@ -45,16 +45,16 @@ private:
     unordered_map<TSymbol, SMixQuote*> quotes_;
     unordered_map<TSymbol, SMixQuote*> quote_updates_; // 控制频率的增量，目前没有使用
 
-    bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap);
-    bool _on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamData>& pub_snap, std::shared_ptr<MarketStreamData>& pub_diff);
+    bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamDataWithDecimal>& pub_snap);
+    bool _on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, std::shared_ptr<MarketStreamDataWithDecimal>& pub_snap, std::shared_ptr<MarketStreamDataWithDecimal>& pub_diff);
 
     bool _get_quote(const TSymbol& symbol, SMixQuote*& ptr) const;
 
-    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, double>& newDepths, bool isAsk);
+    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, SDecimal>& newDepths, bool isAsk);
 
     SMixDepthPrice* _clear_exchange(const TExchange& exchange, SMixDepthPrice* depths);
 
-    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, double>>& depths, bool isAsk);
+    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDecimal>>& depths, bool isAsk);
 
     // 发布聚合行情
     struct _publish_param{
@@ -64,5 +64,5 @@ private:
     unordered_map<TSymbol, _publish_param> publish_params_; 
     unordered_map<TSymbol, type_tick> last_clocks_;
     bool _check_update_clocks(const TSymbol& symbol, float frequency);
-    void _publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamData> pub_snap, std::shared_ptr<MarketStreamData> pub_diff, bool is_snap);
+    void _publish_quote(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> pub_snap, std::shared_ptr<MarketStreamDataWithDecimal> pub_diff, bool is_snap);
 };

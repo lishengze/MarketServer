@@ -16,8 +16,8 @@ int main(int argc, char** argv) {
     // setup the signal here
     setup_signal_handler_callback();
 
-    utrade::pandora::Singleton<StreamEngine>::Instance();
-    STREAMENGINE->start();
+    StreamEngine streamEngine;
+    streamEngine.start();
     
     utrade::pandora::io_service_pool engine_pool(3);
     // start pool

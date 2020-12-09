@@ -1,7 +1,6 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-
 // config file relative path
 const char* config_file = "config.json";
 
@@ -12,8 +11,6 @@ StreamEngine::StreamEngine(){
     CONFIG->parse_config(config_file);
     
     // init grpc server
-    //utrade::pandora::Singleton<ServerEndpoint>::Instance();
-    //PUBLISHER->init(CONFIG->grpc_publish_addr_);
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
 }
 
@@ -58,37 +55,31 @@ void StreamEngine::start()
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
+    //quote.print();
     if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_snap(exchange, symbol, quote);
     }
     
     if( CONFIG->publish_data_ ) {
         quote_mixer2_.on_snap(exchange, symbol, quote);
-        //quote_single_.on_snap(exchange, symbol, quote);
     }
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
+    //quote.print();
     if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_update(exchange, symbol, quote);
     }
 
     if( CONFIG->publish_data_ ) {
         quote_mixer2_.on_update(exchange, symbol, quote);
-        //quote_single_.on_update(exchange, symbol, quote);
     }
 };
 
 void StreamEngine::on_nodata_exchange(const TExchange& exchange) 
 {
     quote_mixer2_.clear_exchange(exchange);
-    //quote_single_.clear_exchange(exchange);
 }
-/*
-void StreamEngine::on_precise_changed(const TSymbol& symbol, int precise) 
-{
-    quote_mixer2_.change_precise(symbol, precise);
-}*/
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
 {
@@ -135,7 +126,17 @@ bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolF
 
 void StreamEngine::on_symbol_channged(const NacosString& configInfo)
 {
-    njson js = njson::parse(configInfo);        
+    njson js;
+    
+    try{
+        js = njson::parse(configInfo);
+    }
+    catch(nlohmann::detail::exception& e)
+    {
+        _log_and_print("parse json fail %s", e.what());
+        return;
+    }
+
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     for (auto iter = js.begin() ; iter != js.end() ; ++iter )
     {
@@ -146,6 +147,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
             continue;
         SNacosConfig cfg;
         cfg.precise = symbol_cfgs["precise"].get<int>();
+        cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
         cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
         cfg.frequency = symbol_cfgs["frequency"].get<float>();
         cfg.mix_depth = symbol_cfgs["mix_depth"].get<unsigned int>();

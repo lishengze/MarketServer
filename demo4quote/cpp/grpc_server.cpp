@@ -51,7 +51,7 @@ void ServerEndpoint::init(const string& grpc_addr)
     call_id++;
 }
 
-void ServerEndpoint::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
     SnapAndUpdate data;
     data.snap = snap;
@@ -60,7 +60,7 @@ void ServerEndpoint::publish_single(const string& exchange, const string& symbol
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
-void ServerEndpoint::publish_mix(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
+void ServerEndpoint::publish_mix(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
     SnapAndUpdate data;
     data.snap = snap;

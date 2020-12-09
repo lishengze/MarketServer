@@ -1,9 +1,11 @@
 #include "hub_interface.h"
+#include "base/cpp/pl_decimal.h"
 #include <thread>
 
 #include <iostream>
 using std::cout;
 using std::endl;
+using namespace dec;
 
 class Client : public HubCallback
 {
@@ -22,6 +24,18 @@ public:
 };
 
 int main(){
+
+    char value[1024];
+    sprintf(value, "%f", 0.165);
+    cout << value << endl;
+    SDecimal pp = SDecimal::parse(value);
+    cout << pp.get_str_value() << endl;
+
+    decimal<4> v1 = fromString<decimal<4>>("0.6068");
+    decimal<3, ceiling_round_policy> v = fromString<decimal<3, ceiling_round_policy>>(toString(v1));
+    //decimal<4, floor_round_policy> v = fromString<decimal<4, floor_round_policy>>("0.606");
+    //v *= 1.05;
+    cout << sizeof(v) << "\t" << v.getDecimalPoints() << "\t" << v.getUnbiased() << "\t" << v.getAsInteger() << "\t" << toString(v) << endl;
 
     Client client;
     HubInterface::set_callback(&client);

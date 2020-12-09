@@ -14,10 +14,10 @@ using namespace std;
 #include "redis_quote_define.h"
 
 
-// 内部行情结构（链表）
+// 内部行情结构
 struct SMixDepthPrice {
     SDecimal price;
-    unordered_map<TExchange, double> volume;
+    unordered_map<TExchange, SDecimal> volume;
     SMixDepthPrice* next;
 
     SMixDepthPrice() {
@@ -25,7 +25,6 @@ struct SMixDepthPrice {
     }
 };
 
-#define MAX_MIXDEPTH 999999
 struct SMixQuote {
     SMixDepthPrice* asks; // 卖盘
     SMixDepthPrice* bids; // 买盘
@@ -81,7 +80,8 @@ struct SNacosConfigFee
 
 struct SNacosConfig
 {
-    int precise;
+    int precise;    // 最小价格单位
+    int vprecise;   // 最小挂单量单位
     type_uint32 depth;
     float frequency;
     type_uint32 mix_depth;
@@ -94,5 +94,36 @@ struct SNacosConfig
             ret.insert(v.first);
         }
         return ret;
+    }
+};
+
+struct SymbolFee
+{
+    int fee_type;       // 0表示fee不需要处理（默认），1表示fee值为比例，2表示fee值为绝对值
+    double maker_fee;
+    double taker_fee;
+
+    SymbolFee() {
+        fee_type = 0;
+        maker_fee = taker_fee = 0.2;
+    }
+
+    void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const
+    {
+        if( fee_type == 2 ) {
+            if( is_ask ) {
+                dst = src + maker_fee;
+            } else {
+                dst = src - taker_fee;
+            }
+        } else if( fee_type == 1 ) {
+            if( is_ask ) {
+                dst = src * (100 + maker_fee) / 100.0;
+            } else {
+                dst = src * (100 - taker_fee) / 100.0;
+            }
+        } else {
+            dst = src;
+        }
     }
 };
