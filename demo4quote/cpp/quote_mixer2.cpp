@@ -41,6 +41,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     // 更新单个品种 & 手续费率和精度处理
     SDepthQuote cpsQuote;
     this->_snap_singles_(exchange, symbol, quote, cpsQuote);
+    cpsQuote.print();
 
     // 更新内存中的行情
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap;
@@ -76,6 +77,7 @@ void QuoteMixer2::on_update(const TExchange& exchange, const TSymbol& symbol, co
     // 更新单个品种 & 手续费率和精度处理
     SDepthQuote cpsQuote;
     this->_update_singles_(exchange, symbol, quote, cpsQuote);
+    cpsQuote.print();
 
     // 更新内存中的行情
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap;

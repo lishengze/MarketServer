@@ -2,15 +2,24 @@
 
 #include "basic.h"
 
-#define CALC_BASE(x) (int(pow(10, (x))))
+#define CALC_BASE(x) (uint64(pow(10, (x))))
 
 template<typename T>
 inline T labs( const T & x ){return x<0?-x:x;}
  
 template<typename T>
-inline int sgn( const T & x ){return x<0?-1:(x?1:0);}
+inline int64 sgn( const T & x ){return x<0?-1:(x?1:0);}
 
-inline int d_round( const double & x ){return (int)(sgn(x)*(labs(x)+0.50001));}
+inline int64 d_round( const double & x ){return (int64)(sgn(x)*(labs(x)+0.50001));}
+
+inline int64 str_to_int64(const char* s) {
+#ifdef WIN32
+    return _atoi64(s);
+#else
+    char *endptr = NULL;
+    return strtoll(s, &endptr, 10);
+#endif
+}
 
 #pragma pack(1)
 struct SDecimal {
@@ -93,21 +102,21 @@ struct SDecimal {
         // 没有小数
         if( pos == string::npos ) {
             data_.real_.prec_ = 0;
-            data_.real_.value_ = atoi(data.c_str());
+            data_.real_.value_ = str_to_int64(data.c_str());
             return;
         }
 
         int point = data.length() - pos - 1;
         data_.real_.prec_ = precise == -1 ? point : precise;
         if( precise >= 0 && data_.real_.prec_ < point ) { // 精度调整
-            string newData = data.substr(0, pos + 1 + precise);
-            float origin = atof(data.c_str());
-            float cutted = atof(newData.c_str());
-            data_.real_.value_ = d_round(cutted * CALC_BASE(data_.real_.prec_));
-            if( ceiling && origin > cutted )
+            string newData = data.substr(0, pos) + data.substr(pos+1, precise);
+            data_.real_.value_ = str_to_int64(newData.c_str());
+            // todo       
+            if( ceiling )
                 data_.real_.value_ += 1;
-        } else {
-            data_.real_.value_ = d_round(atof(data.c_str()) * CALC_BASE(data_.real_.prec_));
+        } else { // 不需要精度调整
+            string newData = data.substr(0, pos) + data.substr(pos+1, data.length()- pos - 1);
+            data_.real_.value_ = str_to_int64(newData.c_str());
         }
     }
 
@@ -126,11 +135,14 @@ struct SDecimal {
     }
 
     string get_str_value() const {
+        if( data_.real_.value_ == 0 )
+            return "0";
+
         char precise[25];
         sprintf(precise, "%d", data_.real_.prec_+1);
 
         char holder[1024];
-        string fmt = "%0" + string(precise) + "lld";
+        string fmt = "%0" + string(precise) + "lu";
         sprintf(holder, fmt.c_str(), data_.real_.value_);
         string ret = holder;
         ret.insert(ret.begin() + ret.length() - data_.real_.prec_, '.');

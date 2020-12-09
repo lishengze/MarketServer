@@ -11,8 +11,8 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     for( int i = 0 ; i < src->asks_size() ; ++i ) {
         const DepthWithDecimal& src_depth = src->asks(i);
         DepthWithDecimal* dst_depth = dst->add_asks();
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());     
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
         for( auto v : src_depth.data() ) {
             (*dst_depth->mutable_data())[v.first] = v.second;
         }
@@ -21,8 +21,8 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     for( int i = 0 ; i < src->bids_size() ; ++i ) {
         const DepthWithDecimal& src_depth = src->bids(i);
         DepthWithDecimal* dst_depth = dst->add_bids();
-        dst_depth->set_price(src_depth.price());
-        dst_depth->set_volume(src_depth.volume());     
+        set_decimal(dst_depth->mutable_price(), src_depth.price());
+        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
         for( auto v : src_depth.data() ) {
             (*dst_depth->mutable_data())[v.first] = v.second;
         }
@@ -59,7 +59,7 @@ void SubscribeSingleQuoteEntity::register_call(){
     std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
     service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
-
+/*
 void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 {
     std::cout << "---------------------" << std::endl;
@@ -116,7 +116,7 @@ void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
     std::cout << "parse json use:" << (tend - tbegin) << std::endl;
     std::cout << "---------------------" << std::endl;
 }
-
+*/
 bool SubscribeSingleQuoteEntity::process(){
     
     MultiMarketStreamDataWithDecimal reply;
@@ -206,18 +206,8 @@ void SetParamsEntity::register_call(){
     service_->RequestSetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool SetParamsEntity::process(){
-    
-    /*CONFIG->grpc_publish_frequency_ = request_.frequency();
-    CONFIG->grpc_publish_depth_ = request_.depth();
-    CONFIG->grpc_publish_raw_frequency_ = request_.raw_frequency();
-    string current_symbol = request_.symbol();
-    if( current_symbol != "" ) {
-        unordered_map<string, int> vals;
-        vals[current_symbol] = request_.precise();
-        CONFIG->set_configuration_precise(vals);
-    }*/
-    
+bool SetParamsEntity::process()
+{    
     status_ = FINISH;
     responder_.Finish(reply_, Status::OK, this);
     return true;

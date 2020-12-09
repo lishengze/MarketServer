@@ -55,6 +55,7 @@ void StreamEngine::start()
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
+    //quote.print();
     if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_snap(exchange, symbol, quote);
     }
@@ -65,6 +66,7 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
 };
 
 void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
+    //quote.print();
     if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_update(exchange, symbol, quote);
     }

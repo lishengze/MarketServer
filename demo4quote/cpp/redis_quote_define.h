@@ -43,6 +43,15 @@ struct SDepthQuote {
         symbol = "";
         sequence_no = 0;
     }
+
+    void print() const {
+        for( const auto&v : asks ) {
+            cout << "asks\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+        }
+        for( const auto&v : bids ) {
+            cout << "bids\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+        }
+    }
 };
 
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;

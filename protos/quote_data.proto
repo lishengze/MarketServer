@@ -3,6 +3,11 @@ syntax = "proto3";
 import "gogo.proto";
 package quote.service.v1;
 
+message Decimal {
+    int64 base = 1;
+    int32 prec = 2;
+}
+
 message MultiMarketStreamDataWithDecimal {
     repeated MarketStreamDataWithDecimal quotes = 1 [(gogoproto.customname) = "Quotes", (gogoproto.jsontag) = "quotes"];
 }
@@ -26,11 +31,11 @@ message MarketStreamDataWithDecimal {
 
 message DepthWithDecimal {
     // 价格
-    int64 price = 1 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
+    Decimal price = 1 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
     // 挂单量
-    int64 volume = 2 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
+    Decimal volume = 2 [(gogoproto.customname) = "Volume", (gogoproto.jsontag) = "volume"];
     // 聚合行情各交易所挂单量
-    map<string, int64> data = 3 [(gogoproto.customname) = "Data", (gogoproto.jsontag) = "data"];
+    map<string, Decimal> data = 3 [(gogoproto.customname) = "Data", (gogoproto.jsontag) = "data"];
 }
 
 

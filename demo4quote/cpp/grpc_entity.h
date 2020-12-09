@@ -18,9 +18,22 @@ using quote::service::v1::SubscribeQuoteReq;
 using quote::service::v1::MultiMarketStreamDataWithDecimal;
 using quote::service::v1::MarketStreamDataWithDecimal;
 using quote::service::v1::DepthWithDecimal;
+using quote::service::v1::Decimal;
 using quote::service::v1::SubscribeMixQuoteReq;
 using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::GetKlinesRequest;
+
+inline void set_decimal(Decimal* dst, const SDecimal& src)
+{
+    dst->set_base(src.data_.real_.value_);
+    dst->set_prec(src.data_.real_.prec_);
+}
+
+inline void set_decimal(Decimal* dst, const Decimal& src)
+{
+    dst->set_base(src.base());
+    dst->set_prec(src.prec());
+}
 
 struct SnapAndUpdate{
     std::shared_ptr<void> snap;
