@@ -181,7 +181,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 datas.push_back(kline);
                 break;
             }
-            engine_interface_->on_kline(exchange, symbol, 60, datas);
+            engine_interface_->on_kline(exchange, symbol, 60, datas, false);
         }
         // 首次更新取所有数据
         else 
@@ -193,7 +193,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 datas.push_back(kline);
             }
             _log_and_print("get kline %s firsttime, update %lu records.", channel.c_str(), datas.size());
-            engine_interface_->on_kline(exchange, symbol, 60, datas);
+            engine_interface_->on_kline(exchange, symbol, 60, datas, true);
             kline1min_firsttime_[symbol][exchange] = true;
         }
     }
@@ -226,7 +226,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 datas.push_back(kline);
                 break;
             }
-            engine_interface_->on_kline(exchange, symbol, 3600, datas);
+            engine_interface_->on_kline(exchange, symbol, 3600, datas, false);
         }
         // 首次更新取所有数据
         else 
@@ -238,7 +238,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 datas.push_back(kline);
             }
             _log_and_print("get kline60 %s firsttime, update %lu records.", channel.c_str(), datas.size());
-            engine_interface_->on_kline(exchange, symbol, 3600, datas);
+            engine_interface_->on_kline(exchange, symbol, 3600, datas, true);
             kline60min_firsttime_[symbol][exchange] = true;
         }
     }
