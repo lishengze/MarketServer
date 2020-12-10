@@ -46,9 +46,11 @@ private:
     // nacos client
     NacosClient nacos_client_;
 
-    // 聚合K线
+    // 聚合K线，K线缓存
     // 缓存短期K线，计算聚合结果
     KlineMixer kline_mixer_;
+
+    KlineHubber kline_hubber_;
 
     // 数据库功能实现
     // 入数据库接口

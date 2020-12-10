@@ -31,10 +31,10 @@ public:
 
     void set_provider(IDataProvider* provider) { provider_ = provider; }
     // IMixerKlinePusher
-    void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
     // IMixerKlinePusher
-    void publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
-    void publish_mix(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
+    void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
+    void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
 private:
     void _handle_rpcs();
 

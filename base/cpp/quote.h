@@ -4,6 +4,7 @@
 
 #define TSymbol string
 #define TExchange string
+#define TExchangeSymbol string
 
 #define PRICE_PRECISE 0.000000001
 #define VOLUME_PRECISE 0.000000001

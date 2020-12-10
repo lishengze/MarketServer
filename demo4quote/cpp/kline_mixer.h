@@ -5,13 +5,14 @@
 class IMixerKlinePusher
 {
 public:
-    virtual void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
 };
 
 class IDataProvider
 {
 public:
-    virtual bool get_kline(const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines) = 0;
+    virtual bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
 };
 
 
@@ -66,15 +67,51 @@ private:
     unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>> caches_;
 };
 
+#define KLINE_CACHE_MIN1 1440
+#define KLINE_CACHE_MIN60 240
+
+class KlineCache
+{
+public:
+    KlineCache();
+    ~KlineCache();
+
+    void set_limit(size_t limit) { limit_ = limit; }
+
+    void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines);
+private:
+    size_t limit_;
+
+    void _shorten(vector<KlineData>& datas);
+
+    mutable std::mutex mutex_data_;
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_;
+};
+
 class KlineMixer
 {
 public:
     KlineMixer();
     ~KlineMixer();
 
-    void start();
+    void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
 
     void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+private:
+    // callback
+    QuoteSourceInterface *engine_interface_ = nullptr;
+    
+    MixCalculator min1_kline_calculator_;
+    MixCalculator min60_kline_calculator_;
+};
+
+class KlineHubber
+{
+public:
+    KlineHubber();
+    ~KlineHubber();
 
     void register_callback(IMixerKlinePusher* callback) { callbacks_.insert(callback); }
 
@@ -83,13 +120,12 @@ public:
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
 
     // IDataProvider
-    bool get_kline(const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
+    bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
 
 private:
     set<IMixerKlinePusher*> callbacks_;
     IDataProvider* db_interface_;
 
-    MixCalculator min1_kline_calculator_;
-    MixCalculator min60_kline_calculator_;
-
+    KlineCache min1_cache_;
+    KlineCache min60_cache_;
 };

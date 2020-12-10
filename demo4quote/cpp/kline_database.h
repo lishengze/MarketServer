@@ -2,7 +2,7 @@
 
 #include "kline_mixer.h"
 
-class KlineDatabase : public IMixerKlinePusher, public IDataProvider
+class KlineDatabase : public IDataProvider
 {
 public:
     KlineDatabase();
@@ -10,11 +10,10 @@ public:
 
     void start();
 
-    // IMixerKlinePusher
-    void on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
 
     // IDataProvider
-    bool get_kline(const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
+    bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
 private:
 
     mutable std::mutex mutex_caches_;

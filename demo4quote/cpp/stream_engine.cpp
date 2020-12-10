@@ -37,10 +37,11 @@ void StreamEngine::start()
         kline_db_.start();
 
         // 启动聚合K线计算线程
-        kline_mixer_.register_callback(&kline_db_);
-        kline_mixer_.register_callback(&server_endpoint_);
-        kline_mixer_.set_db_interface(&kline_db_);
-        kline_mixer_.start();
+        kline_mixer_.set_engine(this);
+        
+        // 
+        kline_hubber_.register_callback(&server_endpoint_);
+        kline_hubber_.set_db_interface(&kline_db_);
     } else {
         quote_replay_.set_engine(this);
         quote_replay_.start(CONFIG->replay_ratio_);
@@ -83,7 +84,18 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange)
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
 {
+    for( const auto& v : kline ) {        
+        _log_and_print("get %s-%s kline %d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
+            v.index,
+            v.px_open.get_str_value().c_str(),
+            v.px_high.get_str_value().c_str(),
+            v.px_low.get_str_value().c_str(),
+            v.px_close.get_str_value().c_str(),
+            v.volume.get_str_value().c_str()
+        );
+    }
     kline_mixer_.on_kline(exchange, symbol, resolution, kline);
+    kline_hubber_.on_kline(exchange, symbol, resolution, kline);
 }
 
 void StreamEngine::signal_handler(int signum)
@@ -128,7 +140,8 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
 {
     njson js;
     
-    try{
+    try
+    {
         js = njson::parse(configInfo);
     }
     catch(nlohmann::detail::exception& e)

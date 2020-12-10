@@ -247,7 +247,7 @@ void GetKlinesEntity::register_call(){
 bool GetKlinesEntity::process()
 {
     vector<KlineData> klines;
-    provider_->get_kline(request_.symbol(), request_.resolution(), request_.start_time(), request_.end_time(), klines);
+    provider_->get_kline("", request_.symbol(), request_.resolution(), request_.start_time(), request_.end_time(), klines);
 
     GetKlinesResponse reply;
     reply.set_symbol("BTC_USDT");

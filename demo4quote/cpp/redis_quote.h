@@ -138,4 +138,8 @@ private:
 
     // 订阅的交易币种换粗
     unordered_map<TSymbol, unordered_set<TExchange>> symbols_;
+
+    // K线源头首次获取的tag
+    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline1min_firsttime_;
+    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline60min_firsttime_;
 };

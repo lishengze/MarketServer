@@ -51,7 +51,7 @@ void ServerEndpoint::init(const string& grpc_addr)
     call_id++;
 }
 
-void ServerEndpoint::publish_single(const string& exchange, const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
+void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
     SnapAndUpdate data;
     data.snap = snap;
@@ -60,7 +60,7 @@ void ServerEndpoint::publish_single(const string& exchange, const string& symbol
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
-void ServerEndpoint::publish_mix(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
+void ServerEndpoint::publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
     SnapAndUpdate data;
     data.snap = snap;
@@ -87,7 +87,7 @@ void ServerEndpoint::_handle_rpcs()
     }
 }
 
-void ServerEndpoint::on_kline(const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
+void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
     for( const auto& v : klines ) {
         _log_and_print("%s index=%lu open=%s high=%s low=%s close=%s", symbol.c_str(), 
