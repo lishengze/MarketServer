@@ -239,7 +239,7 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
             SDecimal scaledPrice;
             fee.compute(iter->first, scaledPrice, true);
             //cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
-            scaledPrice = SDecimal::parse(scaledPrice.get_str_value(), precise, true);
+            scaledPrice.scale(precise, true);
             //scaledPrice.from(scaledPrice, precise, true); 
             //cout << iter->first.get_str_value() << " " << precise << " " << scaledPrice.value << " " << scaledPrice.base << endl;
 
@@ -258,7 +258,7 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
             // 买价往下取整
             SDecimal scaledPrice;
             fee.compute(iter->first, scaledPrice, false);
-            scaledPrice = SDecimal::parse(scaledPrice.get_str_value(), precise, false);
+            scaledPrice.scale(precise, false);
             //scaledPrice.from(scaledPrice, precise, false); 
 
             bool is_new_price = scaledPrice < lastPrice;
