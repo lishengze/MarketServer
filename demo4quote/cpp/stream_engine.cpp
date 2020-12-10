@@ -94,7 +94,8 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
             v.volume.get_str_value().c_str()
         );
     }
-    kline_mixer_.on_kline(exchange, symbol, resolution, kline);
+    if( exchange != "" )
+        kline_mixer_.on_kline(exchange, symbol, resolution, kline);
     kline_hubber_.on_kline(exchange, symbol, resolution, kline);
 }
 
