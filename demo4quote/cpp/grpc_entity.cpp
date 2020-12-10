@@ -278,9 +278,16 @@ bool GetLastEntity::process()
     if( datas_.size() == 0 )
         return false;
         
-    GetKlinesResponse reply;
-    reply.set_num(datas_.size());
-    reply.set_data(&*datas_.begin(), sizeof(WrapperKlineData) * datas_.size());
+    MultiGetKlinesResponse reply;
+    for( const auto& v : datas_ )
+    {
+        GetKlinesResponse* resp = reply.add_data();
+        resp->set_exchange(v.exchange);
+        resp->set_symbol(v.symbol);
+        resp->set_resolution(v.resolution);
+        resp->set_num(v.klines.size());
+        resp->set_data(&*v.klines.begin(), sizeof(KlineData) * v.klines.size());
+    }
     datas_.clear();
 
     inner_lock.unlock();

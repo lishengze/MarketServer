@@ -12,7 +12,7 @@ class IDataProvider
 {
 public:
     virtual bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines) = 0;
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init) = 0;
 };
 
 
@@ -105,6 +105,9 @@ private:
     
     MixCalculator min1_kline_calculator_;
     MixCalculator min60_kline_calculator_;
+
+    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline1min_firsttime_;
+    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline60min_firsttime_;
 };
 
 class KlineHubber

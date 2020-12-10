@@ -222,14 +222,24 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
         {
             vector<KlineData> output;
             min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
-            engine_interface_->on_kline("", symbol, resolution, output);
+            if( kline1min_firsttime_[symbol][exchange] == true ){
+                engine_interface_->on_kline("", symbol, resolution, output, false);
+            } else {
+                engine_interface_->on_kline("", symbol, resolution, output, true);
+                kline1min_firsttime_[symbol][exchange] = true;
+            }
             break;
         }
         case 3600:
         {
             vector<KlineData> output;
             min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
-            engine_interface_->on_kline("", symbol, resolution, output);
+            if( kline60min_firsttime_[symbol][exchange] == true ){
+                engine_interface_->on_kline("", symbol, resolution, output, false);
+            } else {
+                engine_interface_->on_kline("", symbol, resolution, output, true);
+                kline60min_firsttime_[symbol][exchange] = true;
+            }
             break;
         }
         default:

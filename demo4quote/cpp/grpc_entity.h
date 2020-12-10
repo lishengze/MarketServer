@@ -22,6 +22,7 @@ using quote::service::v1::Decimal;
 using quote::service::v1::SubscribeMixQuoteReq;
 using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::GetKlinesRequest;
+using quote::service::v1::MultiGetKlinesResponse;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -194,9 +195,11 @@ private:
 
 struct WrapperKlineData: KlineData
 {
-    char exchange[16];
-    char symbol[16];
+    string exchange;
+    string symbol;
     int resolution;
+
+    vector<KlineData> klines;
 };
 
 class GetLastEntity : public BaseGrpcEntity
@@ -208,14 +211,9 @@ public:
 
     bool process();
 
-    void add_data(const WrapperKlineData& kline) {
+    void add_data(const WrapperKlineData& data) {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        datas_.push_back(kline);
-        if( total_.size() == 0 || total_.back().index < kline.index ) {
-            total_.push_back(kline);
-        } else if( total_.back().index == kline.index ) {
-            total_.back() = kline;
-        }
+        datas_.push_back(data);
     }
 
     GetLastEntity* spawn() {
@@ -227,12 +225,11 @@ private:
     ServerContext ctx_;
 
     GetKlinesRequest request_;
-    ServerAsyncWriter<GetKlinesResponse> responder_;
+    ServerAsyncWriter<MultiGetKlinesResponse> responder_;
 
     // 
     mutable std::mutex            mutex_datas_;
     list<WrapperKlineData> datas_;
-    list<WrapperKlineData> total_;
     
     IDataProvider* provider_;
 };

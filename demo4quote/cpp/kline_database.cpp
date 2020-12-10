@@ -16,7 +16,7 @@ void KlineDatabase::start()
 
 }
 
-void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
+void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_caches_ };
     vector<KlineData>& data = caches_[symbol][resolution];
