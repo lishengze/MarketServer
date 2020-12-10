@@ -90,14 +90,15 @@ void ServerEndpoint::_handle_rpcs()
 void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
     for( const auto& v : klines ) {
-        _log_and_print("%s index=%lu open=%s high=%s low=%s close=%s", symbol.c_str(), 
+        
+        _log_and_print("publish %s-%s resolution=%d index=%lu open=%s high=%s low=%s close=%s", exchange.c_str(), symbol.c_str(), resolution,
             v.index,
             v.px_open.get_str_value().c_str(),
             v.px_high.get_str_value().c_str(),
             v.px_low.get_str_value().c_str(),
             v.px_close.get_str_value().c_str()
             );            
-
+            
         WrapperKlineData tmp;
         vassign(tmp.exchange, 16, "bcts");
         vassign(tmp.symbol, 16, symbol.c_str());

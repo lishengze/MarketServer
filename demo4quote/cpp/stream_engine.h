@@ -21,7 +21,7 @@ public:
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 
     // from INacosCallback
     void on_symbol_channged(const NacosString& symbols);

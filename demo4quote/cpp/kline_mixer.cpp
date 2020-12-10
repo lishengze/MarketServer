@@ -252,12 +252,12 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
 {
     // 写入cache
     // 写入db 缓存区
     // 写入计算模块
-    db_interface_->on_kline(exchange, symbol, resolution, kline);
+    db_interface_->on_kline(exchange, symbol, resolution, kline, is_init);
     switch( resolution ) 
     {
         case 60:
@@ -276,8 +276,12 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
             break;
         }
     }
-    for( const auto& v : callbacks_) {
-        v->on_kline(exchange, symbol, resolution, kline);
+
+    if( !is_init )
+    {
+        for( const auto& v : callbacks_) {
+            v->on_kline(exchange, symbol, resolution, kline);
+        }
     }
 }
 

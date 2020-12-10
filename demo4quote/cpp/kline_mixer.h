@@ -117,7 +117,7 @@ public:
 
     void set_db_interface(IDataProvider* db_interfacce) { db_interface_ = db_interfacce; }
 
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 
     // IDataProvider
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);

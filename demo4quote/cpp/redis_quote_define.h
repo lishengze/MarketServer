@@ -85,5 +85,5 @@ public:
     virtual void on_nodata_exchange(const TExchange& exchange){};
 
     // K线接口
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
 };

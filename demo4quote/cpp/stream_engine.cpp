@@ -82,7 +82,7 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange)
     quote_mixer2_.clear_exchange(exchange);
 }
 
-void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
 {
     for( const auto& v : kline ) {        
         _log_and_print("get %s-%s kline %d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
@@ -96,7 +96,7 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
     }
     if( exchange != "" )
         kline_mixer_.on_kline(exchange, symbol, resolution, kline);
-    kline_hubber_.on_kline(exchange, symbol, resolution, kline);
+    kline_hubber_.on_kline(exchange, symbol, resolution, kline, is_init);
 }
 
 void StreamEngine::signal_handler(int signum)
