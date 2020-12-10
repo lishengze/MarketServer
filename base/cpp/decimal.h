@@ -109,9 +109,9 @@ struct SDecimal {
         if( data_.real_.prec_ < precise )
             return;
 
-        data_.real_.prec_ = precise;
         uint64 v = CALC_BASE(data_.real_.prec_ - precise);
         uint64 remain = data_.real_.prec_ % v;
+        data_.real_.prec_ = precise;
         data_.real_.value_ /= v;
         if( ceiling && remain > 0 )
             data_.real_.value_ += 1;
