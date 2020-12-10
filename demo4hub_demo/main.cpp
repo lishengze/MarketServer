@@ -23,8 +23,9 @@ public:
     }
 };
 
-int main(){
-
+int main()
+{
+    /*
     char value[1024];
     sprintf(value, "%f", 0.165);
     cout << value << endl;
@@ -36,7 +37,7 @@ int main(){
     //decimal<4, floor_round_policy> v = fromString<decimal<4, floor_round_policy>>("0.606");
     //v *= 1.05;
     cout << sizeof(v) << "\t" << v.getDecimalPoints() << "\t" << v.getUnbiased() << "\t" << v.getAsInteger() << "\t" << toString(v) << endl;
-
+    */
     Client client;
     HubInterface::set_callback(&client);
     HubInterface::start();

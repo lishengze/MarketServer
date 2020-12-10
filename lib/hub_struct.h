@@ -8,10 +8,9 @@
 struct SDepthLevelData
 {
     SDecimal price;
-    double volume;
+    SDecimal volume;
 
     SDepthLevelData() {
-        volume = 0;
     }
 };
 
@@ -36,6 +35,8 @@ struct SDepthData
 
 struct KlineData
 {
+    string symbol;
+    string exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

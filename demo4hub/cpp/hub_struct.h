@@ -8,10 +8,9 @@
 struct SDepthLevelData
 {
     SDecimal price;
-    double volume;
+    SDecimal volume;
 
     SDepthLevelData() {
-        volume = 0;
     }
 };
 

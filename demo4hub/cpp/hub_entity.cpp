@@ -44,14 +44,14 @@ void HubEntity::on_snap(const SEData& quote)
     quote_depth.tick = quote.time();
     for( int i = 0 ; i < quote.asks_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = quote.asks(i);
-        quote_depth.asks[i].price = SDecimal(depth.price());
-        quote_depth.asks[i].volume = depth.volume();
+        quote_depth.asks[i].price = SDecimal::parse_by_raw(depth.price().base(), depth.price().prec());
+        quote_depth.asks[i].volume = SDecimal::parse_by_raw(depth.volume().base(), depth.volume().prec());
         quote_depth.ask_length = i+1;
     }
     for( int i = 0 ; i < quote.bids_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = quote.bids(i);
-        quote_depth.bids[i].price = SDecimal(depth.price());
-        quote_depth.bids[i].volume = depth.volume();
+        quote_depth.bids[i].price = SDecimal::parse_by_raw(depth.price().base(), depth.price().prec());
+        quote_depth.bids[i].volume = SDecimal::parse_by_raw(depth.volume().base(), depth.volume().prec());
         quote_depth.bid_length = i+1;
     }
     quote_depth.symbol = quote.symbol();
