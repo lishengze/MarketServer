@@ -380,7 +380,12 @@ bool GetLastEntity::process()
         } 
 
         MultiGetKlinesResponse reply;
-        return _fill_data(reply);
+        if( _fill_data(reply) ) {
+            responder_.Write(reply, this);      
+            return true;
+        } else {
+            return false;
+        }
     }
 
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
