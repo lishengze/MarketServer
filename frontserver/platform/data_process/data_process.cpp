@@ -1,5 +1,6 @@
 #include "data_process.h"
 #include "hub_interface.h"
+#include "pandora/util/time_util.h"
 #include "../data_structure/data_struct.h"
 #include "../util/tools.h"
 #include "../front_server_declare.h"
@@ -8,7 +9,10 @@
 DataProcess::DataProcess(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
 {
-
+    if (test_kline_data_)
+    {
+        init_test_kline_data();
+    }
 }
 
 DataProcess::~DataProcess()
@@ -40,6 +44,8 @@ void DataProcess::response_message(PackagePtr package)
 
 void DataProcess::handle_request_message(PackagePtr package)
 {
+    cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
+
     switch (package->Tid())
     {
         case UT_FID_SymbolData:
@@ -52,7 +58,7 @@ void DataProcess::handle_request_message(PackagePtr package)
         default:
             break;
     }
-    deliver_request(package);
+    // deliver_request(package);
 }
 
 void DataProcess::request_symbol_data(PackagePtr package)
@@ -73,8 +79,13 @@ void DataProcess::handle_response_message(PackagePtr package)
     switch (package->Tid())
     {
         case UT_FID_SDepthData:
-            response_sdepth_package(package);
+            response_src_sdepth_package(package);
             return;
+
+        case UT_FID_KlineData:
+            response_src_kline_package(package);
+            return;
+
         default:
             cout << "Unknow Package" << endl;
             break;
@@ -83,7 +94,7 @@ void DataProcess::handle_response_message(PackagePtr package)
     deliver_response(package);
 }
 
-void DataProcess::response_sdepth_package(PackagePtr package)
+void DataProcess::response_src_sdepth_package(PackagePtr package)
 {
     try
     {
@@ -107,7 +118,7 @@ void DataProcess::response_sdepth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"DataProcess::response_sdepth_package: " << e.what() << '\n';
+        std::cerr <<"DataProcess::response_src_sdepth_package: " << e.what() << '\n';
     }
 }
 
@@ -123,6 +134,7 @@ void DataProcess::request_kline_package(PackagePtr package)
 {
     try
     {
+        cout << "DataProcess::request_kline_package " << endl;
         ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
         if (pReqKlineData)
         {
@@ -130,6 +142,7 @@ void DataProcess::request_kline_package(PackagePtr package)
 
             if (rsp_package)
             {
+                cout << "deliver_response " << endl;
                 deliver_response(rsp_package);
             }
             else
@@ -154,6 +167,8 @@ void DataProcess::response_src_kline_package(PackagePtr package)
 {
     try
     {
+        if (test_kline_data_) return;
+
         KlineData* p_depth_data = GET_NON_CONST_FIELD(package, KlineData);
 
         if (p_depth_data)
@@ -176,36 +191,66 @@ void DataProcess::response_src_kline_package(PackagePtr package)
 
 PackagePtr DataProcess::get_kline_package(PackagePtr package)
 {
+    cout << "DataProcess::get_kline_package  " << endl;
     try
     {    
         ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
 
-        if (kline_data_.find(pReqKlineData->symbol_) == kline_data_.end())
+        if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
             std::map<type_tick, KlineData*>& symbol_kline_data = kline_data_[pReqKlineData->symbol_];
 
+            cout << "\n" << pReqKlineData->symbol_ << ", \n"
+                 << "kline_data start_time: " << symbol_kline_data.begin()->first << ", \n"
+                 << "kline_data end_time: " << symbol_kline_data.rbegin()->first << ", \n"
+                 << "request start_time: " << pReqKlineData->start_time_ << ", \n"
+                 << "request end_time: " << pReqKlineData->end_time_ << ", \n"
+                 << endl;
+
             if (symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_)
             {
+                LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_");
                 return nullptr;
             }
             else if (symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_)
             {
+                LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
                 pReqKlineData->append_end_time_ = symbol_kline_data.begin()->first;
                 return nullptr;
             }
             else
             {
+                cout << " Compute!  " << endl;
+
                 std::vector< KlineData*> src_kline_data;
+
                 std::map<type_tick, KlineData*>::iterator  iter = symbol_kline_data.find(pReqKlineData->start_time_);
-                while (iter->first <= pReqKlineData->end_time_)
+
+                if (iter == symbol_kline_data.end())
                 {
-                    src_kline_data.emplace_back(iter->second);
+                    LOG_ERROR("Kline Data Error");
+                    return nullptr;
+                }
+
+                int test_numb = 10;
+                while (iter->first <= pReqKlineData->end_time_ && iter != symbol_kline_data.end())
+                {
+                    src_kline_data.emplace_back(iter->second);                    
+                    cout << iter->first << endl;                    
                     ++iter;
                 }
 
+                cout << "src_kline_data data numb: " << src_kline_data.size() << endl;
+
                 std::vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
+                cout << "compute_target_kline_data done " << endl;
+
                 PackagePtr rsp_package = GetNewRspKLineDataPackage(pReqKlineData, target_kline_data, ID_MANAGER->get_id());
+
+                cout << "GetNewRspKLineDataPackage done " << endl;
+
+                rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
 
                 return rsp_package;                
             }        
@@ -220,5 +265,40 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
         std::stringstream stream_obj;
         stream_obj << "[E] DataProcess::get_kline_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
+    }
+}
+
+// Creaet Last Hour Test Data For BTC_USDT
+void DataProcess::init_test_kline_data()
+{
+    string symbol = "BTC_USDT";
+    int frequency_secs = 60;
+    type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
+    end_time_secs = mod_secs(end_time_secs, frequency_secs);
+
+    int test_time_len = 60* 60 *2;
+
+    double test_max = 100;
+    double test_min = 10;
+    std::random_device rd;  
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(test_min, test_max);    
+    std::uniform_real_distribution<> offset(1,10);
+
+    for (int i = 0; i < test_time_len; ++i)
+    {
+        type_tick cur_time = end_time_secs - i * frequency_secs;
+
+        double open = dis(gen);
+        double close = dis(gen);
+        double high = std::max(open, close) + offset(gen);
+        double low = std::min(open, close) - offset(gen);
+        double volume = dis(gen) * 5;
+
+        // boost::shared_ptr<KlineData> cur_kline_data = boost::make_shared<KlineData>(symbol, cur_time, open, high, low, close,volume);
+
+        // kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};
+
+        kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};   
     }
 }

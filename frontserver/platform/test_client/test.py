@@ -86,9 +86,11 @@ def test_http_client():
     frequency = 60
     end_time = int(time.time())
     end_time = end_time - end_time % frequency
-    start_time = end_time - 60 * 60 *5
+    start_time = end_time - 60 * 5
     query_str = ("v1/kline_request/symbol=%s&start_time=%d&end_time=%d&frequency=%d" \
                 % (symbol, start_time, end_time, frequency))
+
+    print("query_str: %s" % (query_str))
 
     conn.request("GET", query_str)
     res =conn.getresponse()

@@ -1,0 +1,81 @@
+# originating https://github.com/TheNetAdmin/Makefile-Templates
+# tool marcros
+CC := g++
+CCFLAG := -std=c++11 -O0
+DBGFLAG := -g
+CCOBJFLAG := -c -fPIC
+LINKFLAG := -shared -fPIC 
+LINKLIB := -lpthread -lssl -lcrypto -luv
+
+# path marcros
+BIN_PATH := bin
+LIB_PATH := lib
+OBJ_PATH := obj
+SRC_PATH := src src/eventing src/crypto
+SRC_CUR_PATH := src
+SRC_CRYPTO_PATH := src/crypto
+SRC_EVENT_PATH := src/eventing
+
+DBG_PATH := debug
+
+# compile marcros
+TARGET_NAME := libuSockets.so
+
+TARGET := $(LIB_PATH)/$(TARGET_NAME)
+
+# src files & obj files
+SRC := $(foreach x, $(SRC_PATH), $(wildcard $(addprefix $(x)/*,.c*)))
+OBJ := $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
+
+$(warning SRC is $(SRC)) 
+$(warning OBJ is $(OBJ)) 
+$(warning TARGET is $(TARGET))
+
+# clean files list
+DISTCLEAN_LIST := $(OBJ) \
+                  $(OBJ_DEBUG)
+
+CLEAN_LIST := $(TARGET) \
+			  $(TARGET_DEBUG) \
+			  $(DISTCLEAN_LIST)
+
+# default rule
+default: all
+
+$(TARGET): $(OBJ)
+	$(CC) $(CCFLAG) $(LINKFLAG) -o $@ $? $(LINKLIB)
+
+# $(OBJ_PATH)/%.o: $(SRC_EVENT_PATH)/%.cpp 
+# 	$(CC) $(CCFLAG) $(CCOBJFLAG) -o $@ $< 
+
+# $(OBJ_PATH)/%.o: $(SRC_CUR_PATH)/%.cpp 
+# 	$(CC) $(CCFLAG) $(CCOBJFLAG) -o $@ $<  	
+
+# $(OBJ_PATH)/%.o: $(SRC_CRYPTO_PATH)/%.cpp 
+# 	$(CC) $(CCFLAG) $(CCOBJFLAG) -o $@ $<  	
+
+# $(DBG_PATH)/%.o: $(SRC_PATH)/%.cpp
+# 	$(CC) $(CCOBJFLAG) $(DBGFLAG) -o $@ $< $(CCFLAG)
+
+# $(DBG_PATH)/%.o: $(CURR_SRC_PATH)/%.cpp
+# 	$(CC) $(CCFLAG) $(CCOBJFLAG) -o $@ $< 
+
+# $(TARGET_DEBUG): $(OBJ_DEBUG)
+# 	$(CC) $(CCFLAG) $(DBGFLAG) $(LINKFLAG)  $? -o $@
+
+# phony rules
+.PHONY: all
+all: $(TARGET)
+
+# .PHONY: debug
+debug: $(TARGET_DEBUG)
+
+# .PHONY: clean
+clean:
+	@echo CLEAN $(CLEAN_LIST)
+	@rm -f $(CLEAN_LIST)
+
+# .PHONY: distclean
+distclean:
+	@echo CLEAN $(CLEAN_LIST)
+	@rm -f $(DISTCLEAN_LIST)

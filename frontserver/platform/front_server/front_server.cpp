@@ -10,8 +10,8 @@ FrontServer::FrontServer(utrade::pandora::io_service_pool& pool, IPackageStation
     :ThreadBasePool(pool), IPackageStation(next_station)
 {
     wb_server_ = boost::make_shared<WBServer>();
-
-    rest_server_ = boost::make_shared<RestServer>();
+    
+    rest_server_ = boost::make_shared<RestServer>(pool);
 }
 
 FrontServer::~FrontServer()
@@ -59,7 +59,7 @@ void FrontServer::request_all_symbol()
 
 void FrontServer::handle_response_message(PackagePtr package)
 {
-    // cout << "FrontServer::handle_response_message" << endl;
+    cout << "FrontServer::handle_response_message" << endl;
 
     switch (package->Tid())
     {
@@ -154,16 +154,23 @@ string FrontServer::get_heartbeat_str()
     return json_obj.dump();
 }
 
-void FrontServer::request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
-                        HttpRequest* http_req, HttpResponse* http_res)
+bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
+                                     HttpResponse* http_res, HttpRequest* http_req)
 {
     try
     {
+        cout << "FrontServer::request_kline_data " << endl;
+        
+
         PackagePtr package = PackagePtr{new Package{}};
   
         package->SetPackageID(ID_MANAGER->get_id());
 
+        package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
         CREATE_FIELD(package, ReqKLineData);
+
+        
 
         ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
 
@@ -181,14 +188,18 @@ void FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
         }
         else
         {
+            return false;
             LOG_ERROR("FrontServer::request_kline_data Create ReqKLineData Failed!");
         }        
+        return true;
     }
     catch(const std::exception& e)
     {
         std::stringstream stream_obj;
         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
+
+        return false;
     }
     
 }
@@ -197,15 +208,18 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
     {
+        cout << "FrontServer::response_kline_data_package " << endl;
+
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
         if (p_rsp_kline_data)
         {
             string response_data = RspKlinDataToJsonStr(*p_rsp_kline_data);
-            if (p_rsp_kline_data->http_response_)
-            {
-                p_rsp_kline_data->http_response_->end(response_data);
-            }
+            cout << "response_data: " << response_data << endl;
+            // if (p_rsp_kline_data->http_response_)
+            // {
+            //     p_rsp_kline_data->http_response_->end(response_data);
+            // }
         }
         else
         {

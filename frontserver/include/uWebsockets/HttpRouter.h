@@ -153,6 +153,8 @@ private:
     /* Executes as many handlers it can */
     bool executeHandlers(Node *parent, int urlSegment, USERDATA &userData) {
 
+        std::cout << "[HttpRouter] executeHandlers " << endl;
+
         auto [segment, isStop] = getUrlSegment(urlSegment);
 
         /* If we are on STOP, return where we may stand */
@@ -229,15 +231,21 @@ public:
     /* Adds the corresponding entires in matching tree and handler list */
     void add(std::vector<std::string> methods, std::string pattern, fu2::unique_function<bool(HttpRouter *)> &&handler, uint32_t priority = MEDIUM_PRIORITY) {
         for (std::string method : methods) {
+            std::cout << "add method: " << method << std::endl;
             /* Lookup method */
             Node *node = getNode(&root, method, false);
+
+            std::cout << "add method 1" << std::endl;
             /* Iterate over all segments */
             setUrl(pattern);
             for (int i = 0; !getUrlSegment(i).second; i++) {
                 node = getNode(node, std::string(getUrlSegment(i).first), priority == HIGH_PRIORITY);
             }
+             std::cout << "add method 2" << std::endl;
             /* Insert handler in order sorted by priority (most significant 1 byte) */
             node->handlers.insert(std::upper_bound(node->handlers.begin(), node->handlers.end(), (uint32_t) (priority | handlers.size())), (uint32_t) (priority | handlers.size()));
+
+            std::cout << "add method 3" << std::endl;
         }
 
         /* Alloate this handler */

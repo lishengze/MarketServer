@@ -102,6 +102,9 @@ class SymbolData
 
 struct AtomKlineData
 {
+    AtomKlineData(double open, double high, double low, double close, double volume):
+        open_{open}, close_{close}, high_{high}, low_{low}, volume_{volume} {}
+        
     AtomKlineData(KlineData& kline_data)
     {
         open_ = kline_data.px_open.get_value();

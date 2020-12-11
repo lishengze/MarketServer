@@ -364,6 +364,7 @@ public:
 
     /* Register an HTTP route handler acording to URL pattern */
     void onHttp(std::string method, std::string pattern, fu2::unique_function<void(HttpResponse<SSL> *, HttpRequest *)> &&handler, bool upgrade = false) {
+        cout << "On Http :" << endl;
         HttpContextData<SSL> *httpContextData = getSocketContextData();
 
         /* Todo: This is ugly, fix */
@@ -375,9 +376,12 @@ public:
         }
 
         httpContextData->router.add(methods, pattern, [handler = std::move(handler)](auto *r) mutable {
+            cout << "Add Hander" << endl;
             auto user = r->getUserData();
             user.httpRequest->setYield(false);
             user.httpRequest->setParameters(r->getParameters());
+
+            
 
             /* Middleware? Automatically respond to expectations */
             std::string_view expect = user.httpRequest->getHeader("expect");
@@ -385,6 +389,7 @@ public:
                 user.httpResponse->writeContinue();
             }
 
+            cout << "Process Handler!" << endl;
             handler(user.httpResponse, user.httpRequest);
 
             /* If any handler yielded, the router will keep looking for a suitable handler. */

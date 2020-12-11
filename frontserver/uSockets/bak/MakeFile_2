@@ -1,0 +1,28 @@
+GCC := gcc
+LIB_NAME := libuSockets
+
+ifeq ($(OS),Windows_NT)
+    uname_S := Windows
+else
+    uname_S := $(shell uname -s)
+endif
+
+
+ifeq ($(uname_S), Linux)
+    SHARE_LIB   := $(LIB_NAME).so
+    CFLAGS  := -fPIC -shared -shared -fPIC -lpthread -lssl -lcrypto -luv
+endif
+
+DIR_SRC := src src/eventing src/crypto
+DIR_OBJ := obj
+DIR_LIB := lib
+
+SRC := $(wildcard ${DIR_SRC}/*.c)
+OBJ := $(patsubst %.c, ${DIR_OBJ}/%.o, $(notdir ${SRC}))
+
+$(warning SRC is $(SRC)) 
+
+all:$(OBJ)
+    $(GCC) -o $(DIR_LIB)/$(SHARE_LIB) $(SRC) $(CFLAGS)
+clean:
+    rm -rf $(DIR_OBJ)/*.o $(DIR_LIB)/*

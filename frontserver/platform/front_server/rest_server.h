@@ -5,13 +5,14 @@
 
 #include "App.h"
 #include "libusockets.h"
+#include "pandora/util/thread_basepool.h"
 
 class FrontServer;
 
-class RestServer
+class RestServer:public utrade::pandora::ThreadBasePool
 {
     public:
-        RestServer();
+        RestServer(utrade::pandora::io_service_pool& pool);
         
         ~RestServer();
 
@@ -33,6 +34,15 @@ class RestServer
 
         bool process_v1_request_kline(string& query_param, string& err_msg, HttpResponse *, HttpRequest *);
 
+        void send_err_msg(HttpResponse *, string msg);
+
+        void test_response_multithread_run(HttpResponse * rsp);
+
+        void test_response_multithread(HttpResponse * rsp);
+
+        void process_main();
+
+        // void httpResponseOnAborted();
 
     private:
         int                                     server_port_{9001};
@@ -48,6 +58,9 @@ class RestServer
         static string                           KLINE_REQUEST_STARTTIME;
         static string                           KLINE_REQUEST_ENDTIME;
         static string                           KLINE_REQUEST_FREQUENCY;
+
+        std::thread                             process_thread_;
+
 };
 
 FORWARD_DECLARE_PTR(RestServer);

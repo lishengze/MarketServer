@@ -25,7 +25,7 @@ public:
     void handle_request_message(PackagePtr package);
     void handle_response_message(PackagePtr package);
 
-    void response_sdepth_package(PackagePtr package);
+    void response_src_sdepth_package(PackagePtr package);
 
     void response_src_kline_package(PackagePtr package);
 
@@ -37,8 +37,12 @@ public:
 
     PackagePtr get_kline_package(PackagePtr package);
 
+    void init_test_kline_data();
+
 private:
     std::map<std::string, EnhancedDepthData*>                       depth_data_;
     std::map<std::string, std::map<type_tick, KlineData*>>          kline_data_;
+
+    bool                                                            test_kline_data_{true};
 };
 

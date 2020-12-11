@@ -11,6 +11,9 @@
 #include <sstream>
 #include <vector>
 #include <string.h>
+#include <random>
+#include <algorithm>
+
 #include "pandora/util/json.hpp"
 #include "pandora/util/thread_basepool.h"
 #include "quark/cxx/assign.h"

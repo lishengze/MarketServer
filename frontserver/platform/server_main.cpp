@@ -17,7 +17,7 @@ int main()
     {
         setup_signal_handler_callback();
 
-        utrade::pandora::io_service_pool engine_pool(3);
+        utrade::pandora::io_service_pool engine_pool(4);
 
         utrade::pandora::ThreadSafeSingleton<ServerEngine>::DoubleCheckInstance(engine_pool);
 

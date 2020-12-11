@@ -206,30 +206,30 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
 
     if (kline_data.size() == 0) return result;
 
-    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*kline_data[0]);
-    result.push_back(cur_data); 
+    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
+    // result.push_back(cur_data); 
 
-    double low = MAX_DOUBLE;
-    double high = MIN_DOUBLE;
+    // double low = MAX_DOUBLE;
+    // double high = MIN_DOUBLE;
 
-    kline_data.erase(kline_data.begin());
+    // kline_data.erase(kline_data.begin());
 
-    for (KlineData* atom : kline_data)
-    {
-        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
-        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+    // for (KlineData* atom : kline_data)
+    // {
+    //     low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+    //     high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
 
-        if (atom->index - (*result.rbegin())->tick_ >= frequency)
-        {            
-            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
-            cur_data->low_ = low;
-            cur_data->high_ = high;
-            result.push_back(cur_data); 
+    //     if (atom->index - (*result.rbegin())->tick_ >= frequency)
+    //     {            
+    //         AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+    //         cur_data->low_ = low;
+    //         cur_data->high_ = high;
+    //         result.push_back(cur_data); 
 
-            low = MAX_DOUBLE;
-            high = MIN_DOUBLE;
-        }
-    }
+    //         low = MAX_DOUBLE;
+    //         high = MIN_DOUBLE;
+    //     }
+    // }
 
     return result;
 }
@@ -298,7 +298,7 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
     return package;        
 }
 
-string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type=KLINE_UPDATE)
+string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
 {
     try
     {

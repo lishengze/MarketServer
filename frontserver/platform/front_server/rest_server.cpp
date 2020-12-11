@@ -5,6 +5,7 @@
 #include "../config/config.h"
 #include "../front_server_declare.h"
 #include "../util/tools.h"
+#include "../log/log.h"
 
 string RestServer::VERSION1 = "v1";
 string RestServer::VERSION2 = "v2";
@@ -14,7 +15,7 @@ string RestServer::KLINE_REQUEST_STARTTIME = "start_time";
 string RestServer::KLINE_REQUEST_ENDTIME = "end_time";
 string RestServer::KLINE_REQUEST_FREQUENCY = "frequency";
 
-RestServer::RestServer()
+RestServer::RestServer(utrade::pandora::io_service_pool& pool):ThreadBasePool(pool)
 {
     server_port_ = CONFIG->get_rest_port();
 }
@@ -26,6 +27,12 @@ RestServer::~RestServer()
         listen_thread_->join();
     }
 }
+
+void httpResponseOnAborted()
+{
+    cout << "\n****** httpResponseOnAborted *****" << endl;
+}
+
 
 void RestServer::launch()
 {
@@ -43,8 +50,17 @@ string get_rsp_msg()
 
 void RestServer::listen()
 {
-    uWS::App().get("/*", [this](HttpResponse * response, HttpRequest * request){
+    uWS::App().get("/*", [this](HttpResponse * response, HttpRequest * request) {
+        cout << "*** Get ***" << endl;
+
+        response->onAborted(httpResponseOnAborted);
+
+        cout << "AbortEnd!" << endl;
+
+        // get_io_service().post(std::bind(&RestServer::process_get, this, response, request));
+
         process_get(response, request);
+
     }).post("/*", [this](HttpResponse * response, HttpRequest * request){
         process_post(response, request);
     }).del("/*", [this](HttpResponse * response, HttpRequest * request){
@@ -57,22 +73,58 @@ void RestServer::listen()
         }
     }).run();
 
+
+    // uWS::App().get("/*", &RestServer::process_get){
+    //     process_get(response, request);
+    // }).post("/*", [this](HttpResponse * response, HttpRequest * request){
+    //     process_post(response, request);
+    // }).del("/*", [this](HttpResponse * response, HttpRequest * request){
+    //     process_del(response, request);
+    // }).put("/*", [this](HttpResponse * response, HttpRequest * request){
+    //     process_put(response, request);
+    // }).listen(server_port_, [this](auto* token){
+    //     if (token) {
+    //         std::cout << "Rest Listening on port " << server_port_ << std::endl;
+    //     }
+    // }).run();
+
      cout << "RestServer Listen End!" << endl;
 }
 
 void RestServer::release()
 {
+    
+}
 
+void RestServer::test_response_multithread(HttpResponse * rsp)
+{
+    std::thread test_thread = std::thread(&RestServer::test_response_multithread_run, this, rsp);
+
+    // test_response_multithread_run(rsp);
+}
+
+void RestServer::test_response_multithread_run(HttpResponse * rsp)
+{
+    cout << "RestServer::test_response_multithread_run" << endl;
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    rsp->end(get_rsp_msg());
 }
 
 void RestServer::process_get(HttpResponse* response, HttpRequest* request)
 {
+    cout << "RestServer::process_get " << endl;
+
     try
     {
-        // cout << "getUrl: " << request->getUrl() << "; \n"
-        //     << "getMethod: " << request->getMethod() << "; \n"
-        //     << "getQuery: " << request->getQuery() << "; \n"
-        //     << "getParameter: " << request->getParameter(1) << endl;
+        // response->end(get_rsp_msg());
+        // response->tryEnd(get_rsp_msg());
+        // test_response_multithread(response);
+        // return;
+
+        cout << "getUrl: " << request->getUrl() << "; \n"
+            << "getMethod: " << request->getMethod() << "; \n"
+            << "getQuery: " << request->getQuery() << "; \n"
+            << "getParameter: " << request->getParameter(1) << endl;
 
         string url = string(request->getUrl().data(), request->getUrl().size());
 
@@ -93,7 +145,8 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
 
         if (first_vec.size() != 3)
         {
-            response->end("Request ");
+            error_msg = "Url can only has tow / ";
+            send_err_msg(response, error_msg);
             return;
         }
         else
@@ -102,13 +155,15 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
             {
                 if (first_vec[1] == RestServer::KLINE_REQUEST)
                 {
-                    process_v1_request_kline(first_vec[2], error_msg, response, request);             
+                    if (!process_v1_request_kline(first_vec[2], error_msg, response, request))             
+                    {
+                        send_err_msg(response, error_msg);
+                        return;
+                    }
                 }
             }
         }
-        
-        response->writeStatus(uWS::HTTP_200_OK);
-        response->end("This is RestServer!");
+        return;
     }
     catch(const std::exception& e)
     {
@@ -118,6 +173,7 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
 
 bool RestServer::process_v1_request_kline(string& query_param, string& error_msg, HttpResponse * res, HttpRequest * req)
 {
+    cout << "RestServer::process_v1_request_kline " << endl;
     bool result = false;
     if (query_param.find(RestServer::KLINE_REQUEST_SYMBOL) == std::string::npos)
     {
@@ -168,7 +224,14 @@ bool RestServer::process_v1_request_kline(string& query_param, string& error_msg
         }
         else
         {
-            front_server_->request_kline_data(symbol, start_time, end_time, frequency);
+            if (!front_server_->request_kline_data(symbol, start_time, end_time, frequency, res, req))
+            {
+                error_msg += "Server Internel Error, Please Try Again!";
+            }
+            else
+            {
+                result = true;
+            }            
         }   
     }       
     return result;
@@ -192,4 +255,21 @@ void RestServer::process_put(HttpResponse * response, HttpRequest *request)
 void RestServer::set_front_server(FrontServer* front_server)
 {
     front_server_ = front_server;
+}
+
+void RestServer::send_err_msg(HttpResponse * response, string msg)
+{
+    try
+    {
+        LOG_INFO(string("send err msg: ") + msg);
+        nlohmann::json json_data;     
+        json_data["err_msg"] = msg;
+        response->end(json_data.dump());
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E]  RestServer::send_err_m...sg: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
 }

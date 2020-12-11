@@ -4,6 +4,7 @@
 #include "hub_struct.h"
 #include "../data_structure/data_struct.h"
 #include "../front_server_declare.h"
+#include <random>
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src);
 
@@ -41,3 +42,28 @@ inline type_tick trans_string_to_type_tick(string time_str)
     type_tick result = std::stoul(time_str);
     return result;
 }
+
+inline type_tick mod_secs(type_tick ori_time, int frequency_secs)
+{
+    ori_time = ori_time - ori_time % frequency_secs;
+    return ori_time;
+}
+
+inline double get_random_double(double max, double min)
+{
+    std::random_device rd;  // 将用于为随机数引擎获得种子
+    std::mt19937 gen(rd()); // 以播种标准 mersenne_twister_engine
+    std::uniform_real_distribution<> dis(min, max);
+
+    return dis(gen);
+}
+
+inline int get_random_double(int max, int min)
+{
+    std::random_device rd;  // 将用于为随机数引擎获得种子
+    std::mt19937 gen(rd()); // 以播种标准 mersenne_twister_engine
+    std::uniform_int_distribution<> dis(min, max);
+    return dis(gen);
+}
+
+
