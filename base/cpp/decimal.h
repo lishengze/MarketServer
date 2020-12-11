@@ -66,8 +66,7 @@ struct SDecimal {
     
     static SDecimal parse_by_raw(uint64 base, uint64 prec) {
         SDecimal ret;
-        ret.data_.real_.value_ = base;
-        ret.data_.real_.prec_ = prec;
+        ret.from(base, prec);
         return ret;
     }
 
@@ -88,6 +87,11 @@ struct SDecimal {
 
     bool is_zero() const {
         return data_.real_.value_ == 0;
+    }
+    
+    void from_raw(uint64 base, uint64 prec) {
+        data_.real_.value_ = base;
+        data_.real_.prec_ = prec;
     }
 
     void from(double v, int precise = -1, bool ceiling = false) {

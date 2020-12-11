@@ -15,6 +15,7 @@
 #include <google/protobuf/empty.pb.h>
 #include "stream_engine.grpc.pb.h"
 #include "hub_struct.h"
+#include "updater_quote.h"
 #include "base/cpp/quote.h"
 
 using grpc::Channel;
@@ -25,13 +26,14 @@ using grpc::ClientWriter;
 using grpc::Status;
 using quote::service::v1::StreamEngine;
 using quote::service::v1::GetKlinesRequest;
-using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::MultiGetKlinesResponse;
+using SEKlineData = quote::service::v1::GetKlinesResponse;
+using SEKline = quote::service::v1::Kline;
 
 
 class IKlineUpdater {
 public:
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
+    virtual void on_kline(const SEKlineData& quote) = 0;
 };
 
 
@@ -91,13 +93,8 @@ private:
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
             for( int i = 0 ; i < resp.data_size() ; i ++ )
             {
-                const GetKlinesResponse& one_resp = resp.data(i);
-                if( one_resp.num() == 0 )
-                    continue;
-                vector<KlineData> klines;
-                klines.resize(one_resp.num());
-                memcpy(&*klines.begin(), one_resp.data().c_str(), sizeof(KlineData)*one_resp.num());
-                callback->on_kline(one_resp.exchange(), one_resp.symbol(), one_resp.resolution(), klines);
+                const SEKlineData& quote = resp.data(i);
+                callback->on_kline(quote);
             }
         }
         Status status = reader->Finish();

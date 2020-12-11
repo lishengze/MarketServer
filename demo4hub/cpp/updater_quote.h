@@ -25,8 +25,12 @@ using quote::service::v1::RiskController;
 using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
 using SEData = quote::service::v1::MarketStreamDataWithDecimal;
 using SEDepth = quote::service::v1::DepthWithDecimal;
-using SEDecimal = quote::service::v1::Decimal;
+using quote::service::v1::Decimal;
 
+inline void Decimal_to_SDecimal(SDecimal& dst, const Decimal& src)
+{
+    dst.from_raw(src.base(), src.prec());
+}
 
 class IQuoteUpdater {
 public:

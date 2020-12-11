@@ -26,7 +26,7 @@ public:
     virtual void on_snap(const SEData& quote);
 
     // IKlineUpdater
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
+    virtual void on_kline(const SEKlineData& quote);
 private:
     // 回调接口
     HubCallback* callback_;

@@ -44,14 +44,14 @@ void HubEntity::on_snap(const SEData& quote)
     quote_depth.tick = quote.time();
     for( int i = 0 ; i < quote.asks_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = quote.asks(i);
-        quote_depth.asks[i].price = SDecimal::parse_by_raw(depth.price().base(), depth.price().prec());
-        quote_depth.asks[i].volume = SDecimal::parse_by_raw(depth.volume().base(), depth.volume().prec());
+        Decimal_to_SDecimal(quote_depth.asks[i].price, depth.price());
+        Decimal_to_SDecimal(quote_depth.asks[i].volume, depth.volume());
         quote_depth.ask_length = i+1;
     }
     for( int i = 0 ; i < quote.bids_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = quote.bids(i);
-        quote_depth.bids[i].price = SDecimal::parse_by_raw(depth.price().base(), depth.price().prec());
-        quote_depth.bids[i].volume = SDecimal::parse_by_raw(depth.volume().base(), depth.volume().prec());
+        Decimal_to_SDecimal(quote_depth.asks[i].price, depth.price());
+        Decimal_to_SDecimal(quote_depth.asks[i].volume, depth.volume());
         quote_depth.bid_length = i+1;
     }
     quote_depth.symbol = quote.symbol();
@@ -59,7 +59,19 @@ void HubEntity::on_snap(const SEData& quote)
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
 }
 
-void HubEntity::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
+void HubEntity::on_kline(const SEKlineData& quote)
 {
-    callback_->on_kline(exchange.c_str(), symbol.c_str(), resolution, klines);
+    vector<KlineData> klines;
+    for( int i = 0 ; i < quote.klines_size() ; i ++ ) {
+        const SEKline& kline = quote.klines(i);
+        KlineData _kline;
+        _kline.index = kline.index();
+        Decimal_to_SDecimal(_kline.px_open, kline.open());
+        Decimal_to_SDecimal(_kline.px_high, kline.high());
+        Decimal_to_SDecimal(_kline.px_low, kline.low());
+        Decimal_to_SDecimal(_kline.px_close, kline.close());
+        Decimal_to_SDecimal(_kline.volume, kline.volume());
+        klines.push_back(_kline);
+    }
+    callback_->on_kline(quote.exchange().c_str(), quote.symbol().c_str(), quote.resolution(), klines);
 }
