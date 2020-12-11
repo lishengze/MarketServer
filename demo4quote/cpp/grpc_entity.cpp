@@ -289,7 +289,7 @@ bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
 {
     size_t limit_size = 10000, current_size = 0; // 单次最多发送这个数量
 
-    for( auto iter = cache_min1_.begin() ; iter != cache_min1_.end() ; iter++ ) 
+    for( auto iter = cache_min1_.begin() ; iter != cache_min1_.end() ; ) 
     {
         const TExchange& exchange = iter->first;
         for( auto iter2 = iter->second.begin() ; iter2 != iter->second.end() ; ) {
@@ -328,7 +328,7 @@ bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
             return true;
     }
 
-    for( auto iter = cache_min60_.begin() ; iter != cache_min60_.end() ; iter++ ) 
+    for( auto iter = cache_min60_.begin() ; iter != cache_min60_.end() ; ) 
     {
         const TExchange& exchange = iter->first;
         for( auto iter2 = iter->second.begin() ; iter2 != iter->second.end() ; ) {
