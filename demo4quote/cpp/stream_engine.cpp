@@ -22,8 +22,8 @@ StreamEngine::StreamEngine(){
     kline_hubber_.set_db_interface(&kline_db_);
     
     // init grpc server
+    server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
-    server_endpoint_.set_cacher(&kline_hubber_);
 }
 
 StreamEngine::~StreamEngine(){
