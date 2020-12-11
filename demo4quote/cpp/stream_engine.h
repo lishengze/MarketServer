@@ -21,7 +21,7 @@ public:
     void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 
     // from INacosCallback
     void on_symbol_channged(const NacosString& symbols);
@@ -46,9 +46,11 @@ private:
     // nacos client
     NacosClient nacos_client_;
 
-    // 聚合K线
+    // 聚合K线，K线缓存
     // 缓存短期K线，计算聚合结果
     KlineMixer kline_mixer_;
+
+    KlineHubber kline_hubber_;
 
     // 数据库功能实现
     // 入数据库接口

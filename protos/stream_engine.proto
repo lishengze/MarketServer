@@ -24,7 +24,7 @@ service StreamEngine {
     rpc GetKlines(GetKlinesRequest) returns (GetKlinesResponse){}
 
     // 订阅K线数据
-    rpc GetLast(GetKlinesRequest) returns (stream GetKlinesResponse){}
+    rpc GetLast(GetKlinesRequest) returns (stream MultiGetKlinesResponse){}
 }
 
 message SubscribeQuoteReq {
@@ -79,5 +79,9 @@ message GetKlinesResponse {
     int32 end_time = 5;
     int32 total_num = 6;
     int32 num = 7;
-    bytes data = 8;
+    repeated Kline klines = 8;
+}
+
+message MultiGetKlinesResponse {
+    repeated GetKlinesResponse data = 1;
 }

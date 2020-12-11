@@ -7,39 +7,27 @@
 const char* config_file = "config.json";
 
 void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
-    vassign(dst.symbol, MAX_SYMBOLNAME_LENGTH, src.symbol());
+    dst.symbol = src.symbol();
     //vassign(dst.seq_no, src.msg_seq());
     // 卖盘
-    for( int i = 0 ; i < src.asks_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+    for( int i = 0 ; i < src.asks_size() ; ++i ) {
         const SEDepth& src_depth = src.asks(i);
-        SInnerDepth& dst_depth = dst.asks[i];
-        dst_depth.price.from(src_depth.price());
-        int count = 0;
+        SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
+        SInnerDepth depth;
         for( auto v : src_depth.data() ) {
-            vassign(dst_depth.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
-            vassign(dst_depth.exchanges[count].volume, v.second);
-            count++;
-            if( count >= MAX_EXCHANGE_LENGTH )          
-                break;
+            depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
         }
-        dst_depth.exchange_length = count;
-        dst.ask_length = i+1; 
+        dst.asks[price] = depth;
     }
     // 买盘
-    for( int i = 0 ; i < src.bids_size() && i < MAX_DEPTH_LENGTH ; ++i ) {
+    for( int i = 0 ; i < src.bids_size() ; ++i ) {
         const SEDepth& src_depth = src.bids(i);
-        SInnerDepth& dst_depth = dst.bids[i];
-        dst_depth.price.from(src_depth.price());
-        int count = 0;
+        SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
+        SInnerDepth depth;
         for( auto v : src_depth.data() ) {
-            vassign(dst_depth.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
-            vassign(dst_depth.exchanges[count].volume, v.second);
-            count++;
-            if( count >= MAX_EXCHANGE_LENGTH )
-                break;
+            depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
         }
-        dst_depth.exchange_length = count;
-        dst.bid_length = i+1; 
+        dst.bids[price] = depth;
     }
 }
 

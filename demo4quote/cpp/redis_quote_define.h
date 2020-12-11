@@ -3,31 +3,6 @@
 #include "base/cpp/decimal.h"
 #include "base/cpp/quote.h"
 
-template<class T,class S>
-inline void vassign(T &r, S v)
-{
-	r = v;
-}
-
-template<class T>
-inline void vassign(T &r, const T v)
-{
-	r = v;
-}
-
-inline void vassign(char * r, unsigned int len, const char *v)
-{
-    unsigned int l = std::min(len-1, (unsigned int)strlen(v));
-	strncpy(r, v, l);
-    r[l] = '\0';
-}
-
-inline void vassign(char * r, unsigned int len, const std::string &v)
-{
-    unsigned int l = std::min(len-1, (unsigned int)v.length());
-    strncpy(r, v.c_str(), l);
-    r[l] = '\0';
-}
 struct SDepthQuote {
     type_uint32 raw_length;
     string exchange;
@@ -59,6 +34,7 @@ using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
 #define KLINE_1MIN_HEAD "KLINEx|"
+#define KLINE_60MIN_HEAD "SLOW_KLINEx|"
 
 inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;
@@ -109,5 +85,5 @@ public:
     virtual void on_nodata_exchange(const TExchange& exchange){};
 
     // K线接口
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
 };

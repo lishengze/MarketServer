@@ -17,14 +17,18 @@ public:
     } 
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline) { 
-        cout << "on_kline " << exchange << " " << symbol << " " << kline.index << " " << kline.px_open.get_str_value() << " " << endl;
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
+        for( int i = 0 ; i < klines.size() ; i ++ )
+        {
+            cout << "on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
+        }
         return 0; 
     }
 };
 
-int main(){
-
+int main()
+{
+    /*
     char value[1024];
     sprintf(value, "%f", 0.165);
     cout << value << endl;
@@ -36,7 +40,7 @@ int main(){
     //decimal<4, floor_round_policy> v = fromString<decimal<4, floor_round_policy>>("0.606");
     //v *= 1.05;
     cout << sizeof(v) << "\t" << v.getDecimalPoints() << "\t" << v.getUnbiased() << "\t" << v.getAsInteger() << "\t" << toString(v) << endl;
-
+    */
     Client client;
     HubInterface::set_callback(&client);
     HubInterface::start();

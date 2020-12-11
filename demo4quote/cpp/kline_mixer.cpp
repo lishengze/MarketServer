@@ -132,20 +132,86 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
     return true;
 }
 
+//////////////////////////////////////////////////////////////////
+KlineCache::KlineCache()
+{
+
+}
+
+KlineCache::~KlineCache()
+{
+
+}
+
+void KlineCache::_shorten(vector<KlineData>& klines)
+{
+    if( klines.size() > limit_ * 2 ) {
+        klines.erase(klines.begin(), klines.end() - limit_);
+    }
+}
+
+void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
+    cache = data_;
+}
+
+void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
+    vector<KlineData>& dst = data_[exchange][symbol];
+
+    if( klines.size() <= 10 )  // 为什么是10？
+    {
+        // 直接插入
+        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ )
+        {
+            const KlineData& kline = *iter;
+            bool inserted = false;
+            for( auto iter2 = dst.begin() ; iter2 != dst.end() ; iter2++ )
+            {
+                if( kline.index < iter2->index ) {
+                    dst.insert(iter2, kline);
+                    inserted = true;
+                    break;
+                } else if( kline.index == iter2->index ) {
+                   *iter2 = kline; 
+                   inserted = true;
+                   break;
+                }
+            }
+            if( !inserted ) {
+                dst.push_back(kline);
+            }
+        }
+    }
+    else
+    {
+        // 转为map处理
+        map<type_tick, KlineData> tmp;
+        for( auto iter = dst.begin() ; iter != dst.end() ; iter++ ){
+            tmp[iter->index] = *iter;
+        }
+        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ ){
+            tmp[iter->index] = *iter;
+        }
+        dst.clear();
+        for( const auto& v : tmp ) {
+            dst.push_back(v.second);
+        }
+    }
+
+    _shorten(dst);
+}
 
 //////////////////////////////////////////////////////////////////
 KlineMixer::KlineMixer()
 {
-
 }
 
 KlineMixer::~KlineMixer()
 {
 
-}
-
-void KlineMixer::start()
-{
 }
 
 void KlineMixer::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
@@ -156,22 +222,92 @@ void KlineMixer::set_symbol(const TSymbol& symbol, const unordered_set<TExchange
 
 void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
 {
-    if( resolution == 60 ) {
-        vector<KlineData> output;
-        min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
-        for( const auto& v : callbacks_) {
-            v->on_kline(symbol, 60, output);
+    switch( resolution ) 
+    {
+        case 60:
+        {
+            vector<KlineData> output;
+            min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
+            if( kline1min_firsttime_[symbol][exchange] == true ){
+                engine_interface_->on_kline("", symbol, resolution, output, false);
+            } else {
+                engine_interface_->on_kline("", symbol, resolution, output, true);
+                kline1min_firsttime_[symbol][exchange] = true;
+            }
+            break;
         }
-    } else if( resolution == 3600 ) {
-        vector<KlineData> output;
-        min60_kline_calculator_.add_kline(exchange, symbol, kline, output);
-        for( const auto& v : callbacks_) {
-            v->on_kline(symbol, 3600, output);
+        case 3600:
+        {
+            vector<KlineData> output;
+            min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
+            if( kline60min_firsttime_[symbol][exchange] == true ){
+                engine_interface_->on_kline("", symbol, resolution, output, false);
+            } else {
+                engine_interface_->on_kline("", symbol, resolution, output, true);
+                kline60min_firsttime_[symbol][exchange] = true;
+            }
+            break;
+        }
+        default:
+        {
+            _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
+            break;
         }
     }
 }
 
-bool KlineMixer::get_kline(const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
+//////////////////////////////////////////////////////////////////
+KlineHubber::KlineHubber()
 {
-    return db_interface_->get_kline(symbol, resolution, start_time, end_time, klines);
+    min1_cache_.set_limit(KLINE_CACHE_MIN1);
+    min60_cache_.set_limit(KLINE_CACHE_MIN60);
+}
+
+KlineHubber::~KlineHubber()
+{
+
+}
+
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
+{
+    // 写入cache
+    // 写入db 缓存区
+    // 写入计算模块
+    db_interface_->on_kline(exchange, symbol, resolution, kline, is_init);
+    switch( resolution ) 
+    {
+        case 60:
+        {
+            min1_cache_.update_kline(exchange, symbol, kline);
+            break;
+        }
+        case 3600:
+        {
+            min60_cache_.update_kline(exchange, symbol, kline);
+            break;
+        }
+        default:
+        {
+            _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
+            break;
+        }
+    }
+
+    if( !is_init && kline.size() > 0 )
+    {
+        for( const auto& v : callbacks_) {
+            v->on_kline(exchange, symbol, resolution, kline);
+        }
+    }
+}
+
+bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
+{
+    return db_interface_->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+}
+
+void KlineHubber::fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60)
+{
+    min1_cache_.fill_klines(cache_min1);
+    min1_cache_.fill_klines(cache_min60);
 }

@@ -64,9 +64,9 @@ struct SDecimal {
         return ret;
     }
     
-    static SDecimal parse_by_raw(uint64 v) {
+    static SDecimal parse_by_raw(uint64 base, uint64 prec) {
         SDecimal ret;
-        ret.data_.value_ = v;
+        ret.from(base, prec);
         return ret;
     }
 
@@ -88,6 +88,11 @@ struct SDecimal {
     bool is_zero() const {
         return data_.real_.value_ == 0;
     }
+    
+    void from_raw(uint64 base, uint64 prec) {
+        data_.real_.value_ = base;
+        data_.real_.prec_ = prec;
+    }
 
     void from(double v, int precise = -1, bool ceiling = false) {
         if( precise == -1 ) {
@@ -98,6 +103,21 @@ struct SDecimal {
         data_.real_.prec_ = precise;
         data_.real_.value_ = d_round(v * CALC_BASE(precise));
         if( ceiling && get_value() < v )
+            data_.real_.value_ += 1;
+    }
+
+    void scale(int precise, bool ceiling = false) 
+    {
+        if( precise < 0 )
+            return;
+        if( data_.real_.prec_ < precise )
+            return;
+
+        uint64 v = CALC_BASE(data_.real_.prec_ - precise);
+        uint64 remain = data_.real_.prec_ % v;
+        data_.real_.prec_ = precise;
+        data_.real_.value_ /= v;
+        if( ceiling && remain > 0 )
             data_.real_.value_ += 1;
     }
 
@@ -125,7 +145,7 @@ struct SDecimal {
     }
 
     void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( data_.real_.prec_ == -1 || data.data_.real_.prec_ <= data_.real_.prec_ ) {
+        if( precise == -1 || data.data_.real_.prec_ <= precise ) {
             data_.real_.value_ = data.data_.real_.value_;
             data_.real_.prec_ = data.data_.real_.prec_;
             return;
@@ -231,16 +251,26 @@ struct SDecimal {
         return *this;
     }
 
-    SDecimal operator / (const double &d) const {;
+    const SDecimal operator / (const double &d) const {
         SDecimal ret = *this;
         ret.data_.real_.value_ /= d;
         return ret;
     }
 
-    SDecimal operator * (const double &d) const {
+    SDecimal & operator/=(const double &rhs) {
+        data_.real_.value_ /= rhs;
+        return *this;
+    }
+
+    const SDecimal operator * (const double &d) const {
         SDecimal ret = *this;
         ret.data_.real_.value_ *= d;
         return ret;
+    }
+
+    SDecimal & operator*=(const double &rhs) {
+        data_.real_.value_ *= rhs;
+        return *this;
     }
 };
 #pragma pack()

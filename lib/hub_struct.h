@@ -8,10 +8,9 @@
 struct SDepthLevelData
 {
     SDecimal price;
-    double volume;
+    SDecimal volume;
 
     SDepthLevelData() {
-        volume = 0;
     }
 };
 
@@ -36,6 +35,8 @@ struct SDepthData
 
 struct KlineData
 {
+    string symbol;
+    string exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;
@@ -57,5 +58,5 @@ public:
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline) { return 0; }
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { return 0; }
 };

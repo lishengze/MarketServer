@@ -14,8 +14,7 @@ void redisquote_to_quote_depth(const njson& data, map<SDecimal, SDecimal>& depth
     }
 }
 
-bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
-    njson snap_json = njson::parse(data); 
+bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, bool isSnap) {
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
@@ -30,8 +29,16 @@ bool redisquote_to_quote(const string& data, SDepthQuote& quote, bool isSnap) {
     redisquote_to_quote_depth(snap_json[askDepth], quote.asks);
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
     redisquote_to_quote_depth(snap_json[bidDepth], quote.bids);
+    return true;
+}
 
-    quote.raw_length = data.length();
+bool redisquote_to_kline(const njson& data, KlineData& kline) {
+    kline.index = int(data[0].get<double>());
+    kline.px_open.from(data[1].get<double>());
+    kline.px_high.from(data[2].get<double>());
+    kline.px_low.from(data[3].get<double>());
+    kline.px_close.from(data[4].get<double>());
+    kline.volume.from(data[5].get<double>());
     return true;
 }
 
@@ -66,18 +73,24 @@ void RedisQuote::start(const RedisParams& params, UTLogPtr logger) {
 
 bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data) 
 {    
-    if( data.length() == 0 )
+    njson snap_json;
+    try
     {
-        _log_and_print("%s-%s size=0.", exchange.c_str(), symbol.c_str());
-        return true;
+        snap_json = njson::parse(data);
     }
+    catch(nlohmann::detail::exception& e)
+    {
+        _log_and_print("parse json fail %s", e.what());
+        return false;
+    } 
 
     SDepthQuote quote;
-    if( !redisquote_to_quote(data, quote, true))
+    if( !redisquote_to_quote(snap_json, quote, true))
     {
         _log_and_print("%s-%s redisquote_to_quote failed. msg=%s", exchange.c_str(), symbol.c_str(), data.c_str());
         return false;
     }
+    quote.raw_length = data.length();
 
     // 更新meta信息
     list<SDepthQuote> wait_to_send;
@@ -96,70 +109,137 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
 void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 {
+    njson snap_json;
+
     // 设置最近数据时间
     last_time_ = get_miliseconds();
-    //cout << channel << endl;
-    
-    //_log_and_print("%s update json size %lu", channel.c_str(), msg.length());
-    //std::cout << "update json size:" << msg.length() << std::endl;
+
     if (channel.find(DEPTH_UPDATE_HEAD) != string::npos)
     {
-        // DEPTH_UPDATE_HEAD频道不存在空包
-        if( msg.length() == 0 ) 
+        // 解析json
+        try
         {
-            _log_and_print("channel=%s msg length = 0.", channel.c_str());
-            return;
+            snap_json = njson::parse(msg);
         }
+        catch(nlohmann::detail::exception& e)
+        {
+            _log_and_print("parse json fail %s", e.what());
+            return;
+        } 
 
         // redis结构到内部结构的转换
         SDepthQuote quote;
-        if( !redisquote_to_quote(msg, quote, false)) 
+        if( !redisquote_to_quote(snap_json, quote, false)) 
         {
             _log_and_print("channel=%s redisquote_to_quote failed. msg=%s", channel.c_str(), msg.c_str());
             return;
         }
+        quote.raw_length = msg.length();
 
         // 更新meta信息
         if( !_update_meta_by_update(quote.exchange, quote.symbol, quote) ) {
             return;
         }
 
-        // 回调
-        //engine_interface_->on_update(quote.exchange, quote.symbol, quote);
+        // 数据更新需要通过频率控制，所以调用ctrl_update
         _ctrl_update(quote.exchange, quote.symbol, quote) ;
     }
     else if(channel.find(KLINE_1MIN_HEAD) != string::npos)
     {
-        // decode exchange and symbol
+        // 
         int pos = channel.find(KLINE_1MIN_HEAD);
         int pos2 = channel.find(".");
         string symbol = channel.substr(pos+strlen(KLINE_1MIN_HEAD), pos2-pos-strlen(KLINE_1MIN_HEAD));
         string exchange = channel.substr(pos2+1);
+        
+        // 解析json
+        try
+        {
+            snap_json = njson::parse(msg);
+        }
+        catch(nlohmann::detail::exception& e)
+        {
+            _log_and_print("parse json fail %s", e.what());
+            return;
+        } 
 
-        njson snap_json = njson::parse(msg); 
-
-        for (auto iter = snap_json.rbegin(); iter != snap_json.rend(); ++iter) {
-            // 取最后一根
-            const njson& data = *iter;
-            KlineData kline;
-            kline.index = int(data[0].get<float>());
-            kline.px_open.from(data[1].get<double>());
-            kline.px_high.from(data[2].get<double>());
-            kline.px_low.from(data[3].get<double>());
-            kline.px_close.from(data[4].get<double>());
-            kline.volume.from(data[5].get<double>());
-            _log_and_print("get kline %s index=%lu open=%s high=%s low=%s close=%s volume=%s", channel.c_str(), 
-                kline.index,
-                kline.px_open.get_str_value().c_str(),
-                kline.px_high.get_str_value().c_str(),
-                kline.px_low.get_str_value().c_str(),
-                kline.px_close.get_str_value().c_str(),
-                kline.volume.get_str_value().c_str()
-                );
+        // 后续更新只取最近一根
+        if( kline1min_firsttime_[symbol][exchange] == true )
+        {
             vector<KlineData> datas;
-            datas.push_back(kline);
-            engine_interface_->on_kline(exchange, symbol, 60, datas);
-            break;
+            KlineData kline;
+            for (auto iter = snap_json.rbegin(); iter != snap_json.rend(); ++iter) {
+                redisquote_to_kline(*iter, kline);
+                _log_and_print("get kline %s index=%lu open=%s high=%s low=%s close=%s volume=%s", channel.c_str(), 
+                    kline.index,
+                    kline.px_open.get_str_value().c_str(),
+                    kline.px_high.get_str_value().c_str(),
+                    kline.px_low.get_str_value().c_str(),
+                    kline.px_close.get_str_value().c_str(),
+                    kline.volume.get_str_value().c_str()
+                    );
+                datas.push_back(kline);
+                break;
+            }
+            engine_interface_->on_kline(exchange, symbol, 60, datas, false);
+        }
+        // 首次更新取所有数据
+        else 
+        {
+            vector<KlineData> datas;
+            KlineData kline;
+            for (auto iter = snap_json.begin(); iter != snap_json.end(); ++iter) {
+                redisquote_to_kline(*iter, kline);
+                datas.push_back(kline);
+            }
+            _log_and_print("get kline %s firsttime, update %lu records.", channel.c_str(), datas.size());
+            engine_interface_->on_kline(exchange, symbol, 60, datas, true);
+            kline1min_firsttime_[symbol][exchange] = true;
+        }
+    }
+    else if( channel.find(KLINE_60MIN_HEAD) != string::npos )
+    {
+        // 
+        int pos = channel.find(KLINE_60MIN_HEAD);
+        int pos2 = channel.find(".");
+        string symbol = channel.substr(pos+strlen(KLINE_60MIN_HEAD), pos2-pos-strlen(KLINE_60MIN_HEAD));
+        string exchange = channel.substr(pos2+1);
+        
+        // 解析json
+        try
+        {
+            snap_json = njson::parse(msg);
+        }
+        catch(nlohmann::detail::exception& e)
+        {
+            _log_and_print("parse json fail %s", e.what());
+            return;
+        } 
+
+        // 后续更新只取最近一根
+        if( kline60min_firsttime_[symbol][exchange] == true )
+        {
+            vector<KlineData> datas;
+            KlineData kline;
+            for (auto iter = snap_json.rbegin(); iter != snap_json.rend(); ++iter) {
+                redisquote_to_kline(*iter, kline);
+                datas.push_back(kline);
+                break;
+            }
+            engine_interface_->on_kline(exchange, symbol, 3600, datas, false);
+        }
+        // 首次更新取所有数据
+        else 
+        {
+            vector<KlineData> datas;
+            KlineData kline;
+            for (auto iter = snap_json.begin(); iter != snap_json.end(); ++iter) {
+                redisquote_to_kline(*iter, kline);
+                datas.push_back(kline);
+            }
+            _log_and_print("get kline60 %s firsttime, update %lu records.", channel.c_str(), datas.size());
+            engine_interface_->on_kline(exchange, symbol, 3600, datas, true);
+            kline60min_firsttime_[symbol][exchange] = true;
         }
     }
     else

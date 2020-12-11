@@ -2,38 +2,81 @@
 
 #include "basic.h"
 
-#define CALC_BASE(x) (int(pow(10, (x))))
+#define CALC_BASE(x) (uint64(pow(10, (x))))
 
 template<typename T>
 inline T labs( const T & x ){return x<0?-x:x;}
  
 template<typename T>
-inline int sgn( const T & x ){return x<0?-1:(x?1:0);}
+inline int64 sgn( const T & x ){return x<0?-1:(x?1:0);}
 
-inline int d_round( const double & x ){return (int)(sgn(x)*(labs(x)+0.50001));}
+inline int64 d_round( const double & x ){return (int64)(sgn(x)*(labs(x)+0.50001));}
+
+inline int64 str_to_int64(const char* s) {
+#ifdef WIN32
+    return _atoi64(s);
+#else
+    char *endptr = NULL;
+    return strtoll(s, &endptr, 10);
+#endif
+}
 
 #pragma pack(1)
 struct SDecimal {
-    unsigned long value;
-    unsigned short base;
+    union{
+        struct{
+            mutable uint64 tag_:1;
+            mutable uint64 value_:55;
+            mutable uint64 prec_:8;
+        }real_;
+        mutable uint64 value_;
+    }data_;
 
     SDecimal() {
-        value = 0;
-        base = 0;
+        data_.value_ = 0;
     }
 
-    SDecimal(double v, double bias = 0.00001) {
-        from(v, bias);
+    SDecimal(double v) {
+        from(v);
     }
 
-    SDecimal(const string& s) {
-        from(s);
+    SDecimal(const string& v) {
+        from(v);
+    }
+
+    explicit SDecimal(double v, int precise = -1, bool ceiling = false) {
+        from(v, precise, ceiling);
+    }
+
+    explicit SDecimal(const string& s, int precise = -1, bool ceiling = false) {
+        from(s, precise, ceiling);
+    }
+
+    static SDecimal parse(const string& s, int precise = -1, bool ceiling = false) {
+        SDecimal ret;
+        ret.from(s, precise, ceiling);
+        return ret;
+    }
+
+    static SDecimal parse(double v, int precise = -1, bool ceiling = false) {
+        SDecimal ret;
+        ret.from(v, precise, ceiling);
+        return ret;
+    }
+    
+    static SDecimal parse_by_raw(uint64 base, uint64 prec) {
+        SDecimal ret;
+        ret.from(base, prec);
+        return ret;
+    }
+
+    uint64 get_raw() const {
+        return data_.value_;
     }
 
     static SDecimal max_decimal() {
         SDecimal ret;
-        ret.value = ULLONG_MAX;
-        ret.base = 0;
+        ret.data_.value_ = ULLONG_MAX;
         return ret;
     }
 
@@ -42,47 +85,69 @@ struct SDecimal {
         return ret;
     }
 
-    void from(double v, double bias = 0.0000001) {
-        base = 0;
-        value = 0;
-        if( v == 0 ) {
+    bool is_zero() const {
+        return data_.real_.value_ == 0;
+    }
+    
+    void from_raw(uint64 base, uint64 prec) {
+        data_.real_.value_ = base;
+        data_.real_.prec_ = prec;
+    }
+
+    void from(double v, int precise = -1, bool ceiling = false) {
+        if( precise == -1 ) {
+            char value[1024];
+            sprintf(value, "%f", v);
+            return from(value, precise, ceiling);
+        }
+        data_.real_.prec_ = precise;
+        data_.real_.value_ = d_round(v * CALC_BASE(precise));
+        if( ceiling && get_value() < v )
+            data_.real_.value_ += 1;
+    }
+
+    void scale(int precise, bool ceiling = false) 
+    {
+        if( precise < 0 )
             return;
-        }
-            
-        int limit = 100;
-        while( base <= limit && abs(get_value() - v)/v > bias ) {
-            base += 1;
-            value = v * CALC_BASE(base);
-        }
+        if( data_.real_.prec_ < precise )
+            return;
+
+        uint64 v = CALC_BASE(data_.real_.prec_ - precise);
+        uint64 remain = data_.real_.prec_ % v;
+        data_.real_.prec_ = precise;
+        data_.real_.value_ /= v;
+        if( ceiling && remain > 0 )
+            data_.real_.value_ += 1;
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
         // 没有小数
         if( pos == string::npos ) {
-            base = 0;
-            value = atoi(data.c_str());
+            data_.real_.prec_ = 0;
+            data_.real_.value_ = str_to_int64(data.c_str());
             return;
         }
 
-        base = data.length() - pos - 1;
-        if( precise >= 0 && precise < base ) { // 精度调整
-            base = precise;
-            string newData = data.substr(0, pos + 1 + precise);
-            float origin = atof(data.c_str());
-            float cutted = atof(newData.c_str());
-            value = d_round(cutted * CALC_BASE(base));
-            if( ceiling && origin > cutted )
-                value += 1;
-        } else {
-            value = d_round(atof(data.c_str()) * CALC_BASE(base));
+        int point = data.length() - pos - 1;
+        data_.real_.prec_ = precise == -1 ? point : precise;
+        if( precise >= 0 && data_.real_.prec_ < point ) { // 精度调整
+            string newData = data.substr(0, pos) + data.substr(pos+1, precise);
+            data_.real_.value_ = str_to_int64(newData.c_str());
+            // todo       
+            if( ceiling )
+                data_.real_.value_ += 1;
+        } else { // 不需要精度调整
+            string newData = data.substr(0, pos) + data.substr(pos+1, data.length()- pos - 1);
+            data_.real_.value_ = str_to_int64(newData.c_str());
         }
     }
 
     void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( precise == -1 || data.base <= precise ) {
-            value = data.value;
-            base = data.base;
+        if( precise == -1 || data.data_.real_.prec_ <= precise ) {
+            data_.real_.value_ = data.data_.real_.value_;
+            data_.real_.prec_ = data.data_.real_.prec_;
             return;
         }
 
@@ -90,90 +155,122 @@ struct SDecimal {
     }
 
     double get_value() const {
-        return value * 1.0 / CALC_BASE(base);
+        return data_.real_.value_ * 1.0 / CALC_BASE(data_.real_.prec_);
     }
 
     string get_str_value() const {
+        if( data_.real_.value_ == 0 )
+            return "0";
+
         char precise[25];
-        sprintf(precise, "%d", base+1);
+        sprintf(precise, "%d", data_.real_.prec_+1);
 
         char holder[1024];
-        string fmt = "%0" + string(precise) + "lld";
-        sprintf(holder, fmt.c_str(), value);
+        string fmt = "%0" + string(precise) + "lu";
+        sprintf(holder, fmt.c_str(), data_.real_.value_);
         string ret = holder;
-        ret.insert(ret.begin() + ret.length() - base, '.');
+        ret.insert(ret.begin() + ret.length() - data_.real_.prec_, '.');
         return ret;
     }
 
     bool operator <(const SDecimal& d) const {
-        if( base > d.base ) {
-            return value < d.value * CALC_BASE(base-d.base);
+        if( data_.real_.prec_ > d.data_.real_.prec_ ) {
+            return data_.real_.value_ < d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
         } else {
-            return value * CALC_BASE(d.base-base) < d.value;
+            return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) < d.data_.real_.value_;
         }
     }
     bool operator >(const SDecimal& d) const {
-        if( base > d.base ) {
-            return value > d.value * CALC_BASE(base-d.base);
+        if( data_.real_.prec_ > d.data_.real_.prec_ ) {
+            return data_.real_.value_ > d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
         } else {
-            return value * CALC_BASE(d.base-base) > d.value;
+            return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) > d.data_.real_.value_;
         }
     }
     bool operator ==(const SDecimal& d) const {
-        if( base > d.base ) {
-            return value == d.value * CALC_BASE(base-d.base);
+        if( data_.real_.prec_ > d.data_.real_.prec_ ) {
+            return data_.real_.value_ == d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
         } else {
-            return value * CALC_BASE(d.base-base) == d.value;
+            return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) == d.data_.real_.value_;
         }
     }
     bool operator <=(const SDecimal& d) const {
-        if( base > d.base ) {
-            return value <= d.value * CALC_BASE(base-d.base);
+        if( data_.real_.prec_ > d.data_.real_.prec_ ) {
+            return data_.real_.value_ <= d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
         } else {
-            return value * CALC_BASE(d.base-base) <= d.value;
+            return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) <= d.data_.real_.value_;
         }
     }
     bool operator >=(const SDecimal& d) const {
-        if( base > d.base ) {
-            return value >= d.value * CALC_BASE(base-d.base);
+        if( data_.real_.prec_ > d.data_.real_.prec_ ) {
+            return data_.real_.value_ >= d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
         } else {
-            return value * CALC_BASE(d.base-base) >= d.value;
+            return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) >= d.data_.real_.value_;
         }
     }
 
-    SDecimal operator + (const SDecimal &d) const {
-        SDecimal ret;
-        if( base > d.base ) {
-            ret.base = base;
-            ret.value = value + d.value * CALC_BASE(base-d.base);
+    const SDecimal operator + (const SDecimal &rhs) const {
+        SDecimal ret = *this;
+        if( ret.data_.real_.prec_ > rhs.data_.real_.prec_ ) {
+            ret.data_.real_.value_ = ret.data_.real_.value_ + rhs.data_.real_.value_ * CALC_BASE(ret.data_.real_.prec_ - rhs.data_.real_.prec_);
         } else {
-            ret.base = d.base;
-            ret.value = value * CALC_BASE(d.base-base) + d.value;
+            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
+            ret.data_.real_.value_ = ret.data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - ret.data_.real_.prec_) + rhs.data_.real_.value_;
         }
         return ret;
     }
-    SDecimal operator - (const SDecimal &d) const {
-        SDecimal ret;
-        if( base > d.base ) {
-            ret.base = base;
-            ret.value = value - d.value * CALC_BASE(base-d.base);
+
+    SDecimal & operator+=(const SDecimal &rhs) {
+        if( data_.real_.prec_ > rhs.data_.real_.prec_ ) {
+            data_.real_.value_ = data_.real_.value_ + rhs.data_.real_.value_ * CALC_BASE(data_.real_.prec_ - rhs.data_.real_.prec_);
         } else {
-            ret.base = d.base;
-            ret.value = value * CALC_BASE(d.base-base) - d.value;
+            data_.real_.prec_ = rhs.data_.real_.prec_;
+            data_.real_.value_ = data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - data_.real_.prec_) + rhs.data_.real_.value_;
+        }
+        return *this;
+    }
+
+    const SDecimal operator-(const SDecimal &rhs) const {
+        SDecimal ret = *this;
+        if( ret.data_.real_.prec_ > rhs.data_.real_.prec_ ) {
+            ret.data_.real_.value_ = ret.data_.real_.value_ - rhs.data_.real_.value_ * CALC_BASE(ret.data_.real_.prec_ - rhs.data_.real_.prec_);
+        } else {
+            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
+            ret.data_.real_.value_ = ret.data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - ret.data_.real_.prec_) - rhs.data_.real_.value_;
         }
         return ret;
     }
-    SDecimal operator / (const double &d) const {
-        SDecimal ret;
-        ret.base = base;
-        ret.value = value / d;
+
+    SDecimal & operator-=(const SDecimal &rhs) {
+        if( data_.real_.prec_ > rhs.data_.real_.prec_ ) {
+            data_.real_.value_ = data_.real_.value_ - rhs.data_.real_.value_ * CALC_BASE(data_.real_.prec_-rhs.data_.real_.prec_);
+        } else {
+            data_.real_.prec_ = rhs.data_.real_.prec_;
+            data_.real_.value_ = data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_-data_.real_.prec_) - rhs.data_.real_.value_;
+        }
+        return *this;
+    }
+
+    const SDecimal operator / (const double &d) const {
+        SDecimal ret = *this;
+        ret.data_.real_.value_ /= d;
         return ret;
     }
-    SDecimal operator * (const double &d) const {
-        SDecimal ret;
-        ret.base = base;
-        ret.value = value * d;
+
+    SDecimal & operator/=(const double &rhs) {
+        data_.real_.value_ /= rhs;
+        return *this;
+    }
+
+    const SDecimal operator * (const double &d) const {
+        SDecimal ret = *this;
+        ret.data_.real_.value_ *= d;
         return ret;
+    }
+
+    SDecimal & operator*=(const double &rhs) {
+        data_.real_.value_ *= rhs;
+        return *this;
     }
 };
 #pragma pack()

@@ -13,49 +13,41 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
     return true;
 }
 
-void _filter_depth_by_watermark(const SInnerDepth* src_depths, const uint32& src_depth_length, const SDecimal& watermark, SInnerDepth* dst_depths, uint32& dst_depth_length, bool is_ask)
+void _filter_depth_by_watermark(const map<SDecimal, SInnerDepth>& src_depths, const SDecimal& watermark, map<SDecimal, SInnerDepth>& dst_depths, bool is_ask)
 {
     bool patched = false;
-    unordered_map<TExchange, double> volumes;   // 被watermark滤掉的单量自动归到买卖一
+    unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
 
-    dst_depth_length = 0;
-    for( uint32 i = 0 ; i < src_depth_length ; ++i )
+    for( const auto& v : src_depths )
     {
-        const SInnerDepth& depth = src_depths[i];
-        if( is_ask ? (depth.price <= watermark) : (depth.price >= watermark) ) {
+        const SDecimal& price = v.first;
+        if( is_ask ? (price <= watermark) : (price >= watermark) ) {
             // 过滤价位
-            for( uint32 j = 0 ; j < depth.exchange_length ; ++j ) {
-                volumes[depth.exchanges[j].name] += depth.exchanges[j].volume;
+            for( const auto& v2 : v.second.exchanges ){
+                volumes[v2.first] += v2.second;
             }
         } else {
             // 保留价位
-            dst_depths[dst_depth_length] = depth;
+            dst_depths[v.first] = v.second;
             if( !patched ) {
                 patched = true;
                 
                 SInnerDepth fake;
-                uint32 count = 0;
-                for( auto &v : volumes ) {
-                    vassign(fake.exchanges[count].name, MAX_EXCHANGENAME_LENGTH, v.first);
-                    fake.exchanges[count].volume = v.second;
-                    count++;
-                    if( count >= MAX_EXCHANGE_LENGTH )
-                        break;
+                for( const auto &v : volumes ) {
+                    fake.exchanges[v.first] = v.second;
                 }
-                fake.exchange_length = count;
 
-                dst_depths[dst_depth_length].mix_exchanges(fake, 0);
+                dst_depths[v.first].mix_exchanges(fake, 0);
             }
-            dst_depth_length ++;
         }
     }
 }
 
 void _filter_by_watermark(const SInnerQuote& src, const SDecimal& watermark, SInnerQuote& dst)
 {
-    strcpy(dst.symbol, src.symbol);
-    _filter_depth_by_watermark(src.asks, src.ask_length, watermark, dst.asks, dst.ask_length, true);
-    _filter_depth_by_watermark(src.bids, src.bid_length, watermark, dst.bids, dst.bid_length, false);
+    dst.symbol = src.symbol;
+    _filter_depth_by_watermark(src.asks, watermark, dst.asks, true);
+    _filter_depth_by_watermark(src.bids, watermark, dst.bids, false);
 }
 
 WatermarkComputerWorker::WatermarkComputerWorker() 
@@ -77,21 +69,19 @@ void WatermarkComputerWorker::set_snap(const SInnerQuote& quote)
 {
     // 提取各交易所的买卖一
     unordered_map<TExchange, SDecimal> first_ask, first_bid;
-    for( uint32 i = 0 ; i < quote.ask_length ; ++i ) {
-        const SInnerDepth& depth = quote.asks[i];
-        for( uint32 j = 0 ; j < depth.exchange_length ; ++j ) {
-            const TExchange& exchange = depth.exchanges[j].name;
+    for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
+        for( const auto& v : iter->second.exchanges ) {
+            const TExchange& exchange = v.first;
             if( first_ask.find(exchange) == first_ask.end() ) {
-                first_ask[exchange] = depth.price;
+                first_ask[exchange] = iter->first;
             }
         }
     }
-    for( uint32 i = 0 ; i < quote.bid_length ; ++i ) {
-        const SInnerDepth& depth = quote.bids[i];
-        for( uint32 j = 0 ; j < depth.exchange_length ; ++j ) {
-            const TExchange& exchange = depth.exchanges[j].name;
+    for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
+        for( const auto& v : iter->second.exchanges ) {
+            const TExchange& exchange = v.first;
             if( first_bid.find(exchange) == first_bid.end() ) {
-                first_bid[exchange] = depth.price;
+                first_bid[exchange] = iter->first;
             }
         }
     }
@@ -113,7 +103,7 @@ bool WatermarkComputerWorker::get_watermark(const string& symbol, SDecimal& wate
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };    
     auto iter = watermark_.find(symbol);
-    if( iter == watermark_.end() || iter->second->watermark.value == 0 ) {
+    if( iter == watermark_.end() || iter->second->watermark.is_zero() ) {
         return false;
     }
     watermark = iter->second->watermark;
@@ -147,7 +137,7 @@ void WatermarkComputerWorker::_calc_watermark() {
    
 SInnerQuote* WatermarkComputerWorker::process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out)
 {
-    vassign(out->symbol, MAX_SYMBOLNAME_LENGTH, src->symbol);
+    vassign(out->symbol, src->symbol);
     vassign(out->time, src->time);
     vassign(out->time_arrive, src->time_arrive);
     vassign(out->seq_no, src->seq_no);
@@ -156,7 +146,7 @@ SInnerQuote* WatermarkComputerWorker::process(SInnerQuote* src, PipelineContent&
     get_watermark(src->symbol, watermark);
     _filter_by_watermark(*src, watermark, *out);
     if( ctx.is_sample_ ) {
-        _log_and_print("worker(watermark)-%s: %s %u/%u", src->symbol, watermark.get_str_value().c_str(), out->ask_length, out->bid_length);
+        _log_and_print("worker(watermark)-%s: %s %lu/%lu", src->symbol.c_str(), watermark.get_str_value().c_str(), out->asks.size(), out->bids.size());
     }
     return out;
 }
@@ -205,44 +195,46 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
     ctx.params.cache_account.get_hedge_amounts(buy_currency, ctx.params.cache_config.HedgePercent / buy_count, buy_total_amounts);
 
     if( ctx.is_sample_ ) {
-        _log_and_print("worker(account)-%s: sell %s %d", src->symbol, sell_currency.c_str(), sell_count);
+        _log_and_print("worker(account)-%s: sell %s %d", src->symbol.c_str(), sell_currency.c_str(), sell_count);
         for( const auto& v : sell_total_amounts ) {
-            _log_and_print("worker(account)-%s: sell %s %.03f", src->symbol, v.first.c_str(), v.second);
+            _log_and_print("worker(account)-%s: sell %s %.03f", src->symbol.c_str(), v.first.c_str(), v.second);
         }
-        _log_and_print("worker(account)-%s: buy %s %d", src->symbol, buy_currency.c_str(), buy_count);
+        _log_and_print("worker(account)-%s: buy %s %d", src->symbol.c_str(), buy_currency.c_str(), buy_count);
         for( const auto& v : buy_total_amounts ) {
-            _log_and_print("worker(account)-%s: buy  %s %.03f", src->symbol, v.first.c_str(), v.second);
+            _log_and_print("worker(account)-%s: buy  %s %.03f", src->symbol.c_str(), v.first.c_str(), v.second);
         }
     }
 
     // 逐档从总余额中扣除资金消耗
-    for( uint32 i = 0 ; i < src->ask_length ; ++i ) {
-        SInnerDepth& depth = src->asks[i];
+    for( auto iter = src->asks.begin() ; iter != src->asks.end() ; iter++ ) 
+    {
+        SInnerDepth& depth = iter->second;
         depth.total_volume = 0;
-        for( uint32 j = 0 ; j < depth.exchange_length ; ++j ) {
-            string exchange = depth.exchanges[j].name;
+        for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
+            const TExchange& exchange = iter2->first;
+            const SDecimal& need_amount = iter2->second;
             double remain_amount = sell_total_amounts[exchange];
-            double need_amount = depth.exchanges[j].volume; // 计算需要消耗的资金量
-            if( remain_amount < need_amount ) {
-                depth.exchanges[j].volume = 0;
+            if( remain_amount < need_amount.get_value() ) {
+                iter2->second = 0;
             } else {
-                sell_total_amounts[exchange] -= need_amount;
-                depth.total_volume += depth.exchanges[j].volume;
+                sell_total_amounts[exchange] -= need_amount.get_value();
+                depth.total_volume += need_amount;
             }
         }
     }
-    for( uint32 i = 0 ; i < src->bid_length ; ++i ) {
-        SInnerDepth& depth = src->bids[i];
+    for( auto iter = src->bids.rbegin() ; iter != src->bids.rend() ; iter++ ) 
+    {
+        SInnerDepth& depth = iter->second;
         depth.total_volume = 0;
-        for( uint32 j = 0 ; j < depth.exchange_length ; ++j ) {
-            string exchange = depth.exchanges[j].name;
-            double remain_amount = buy_total_amounts[exchange];
-            double need_amount = depth.price.get_value() * depth.exchanges[j].volume; // 计算需要消耗的资金量
-            if( remain_amount < need_amount ) {
-                depth.exchanges[j].volume = 0;
+        for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
+            const TExchange& exchange = iter2->first;
+            const SDecimal& need_amount = iter2->second * iter->first.get_value();
+            double remain_amount = sell_total_amounts[exchange];
+            if( remain_amount < need_amount.get_value() ) {
+                iter2->second = 0;
             } else {
-                buy_total_amounts[exchange] -= need_amount;
-                depth.total_volume += depth.exchanges[j].volume;
+                sell_total_amounts[exchange] -= need_amount.get_value();
+                depth.total_volume += need_amount;
             }
         }
     }
@@ -251,6 +243,7 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
 
 SInnerQuote* OrderBookWorker::process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out)
 {
+    /*
     auto orderBookIter = ctx.params.cache_order.find(src->symbol);
     if( orderBookIter != ctx.params.cache_order.end() ) 
     {
@@ -280,11 +273,11 @@ SInnerQuote* OrderBookWorker::process(SInnerQuote* src, PipelineContent& ctx, SI
                 }
             }
         }
-    }
+    }*/
     return src;
 };
 
-void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd) 
+void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd, bool check_total_volume) 
 {
     msd->set_symbol(quote.symbol);
     msd->set_is_snap(true);
@@ -294,40 +287,31 @@ void innerquote_to_msd(const SInnerQuote& quote, MarketStreamData* msd)
     //sprintf(sequence, "%lld", quote.seq_no);
     //msd->set_msg_seq(sequence);
     // 卖盘
-    int count = 0;
-    for( uint32 i = 0 ; i < quote.ask_length && count < CONFIG->grpc_publish_depth_ ; ++i ) {
-        const SInnerDepth& srcDepth = quote.asks[i];
-        if( srcDepth.total_volume <= 0 )
+    for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++) {
+        if( check_total_volume && iter->second.total_volume.is_zero() )
             continue;
-        count++;
         Depth* depth = msd->add_asks();        
-        depth->set_price(srcDepth.price.get_str_value());
-        depth->set_volume(srcDepth.total_volume);
-        for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
-            if( srcDepth.exchanges[j].volume <= 0 )
+        depth->set_price(iter->first.get_str_value());
+        for( const auto& v : iter->second.exchanges ) {
+            if( v.second.is_zero() )
                 continue;
-            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
+             (*depth->mutable_data())[v.first] = v.second.get_value();
         }
     }
-    // 买盘
-    count = 0;
-    for( uint32 i = 0 ; i < quote.bid_length && count < CONFIG->grpc_publish_depth_ ; ++i ) {
-        const SInnerDepth& srcDepth = quote.bids[i];
-        if( srcDepth.total_volume <= 0 )
+    for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++) {
+        if( check_total_volume && iter->second.total_volume.is_zero() )
             continue;
-        count++;
         Depth* depth = msd->add_bids();        
-        depth->set_price(srcDepth.price.get_str_value());
-        depth->set_volume(srcDepth.total_volume);
-        for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
-            if( srcDepth.exchanges[j].volume <= 0 )
+        depth->set_price(iter->first.get_str_value());
+        for( const auto& v : iter->second.exchanges ) {
+            if( v.second.is_zero() )
                 continue;
-            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
+             (*depth->mutable_data())[v.first] = v.second.get_value();
         }
     }
 }
 
-void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd) 
+void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDecimal* msd, bool check_total_volume) 
 {
     msd->set_symbol(quote.symbol);
     msd->set_is_snap(true);
@@ -337,32 +321,22 @@ void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd)
     //sprintf(sequence, "%lld", quote.seq_no);
     //msd->set_msg_seq(sequence);
     // 卖盘
-    int count = 0;
-    for( uint32 i = 0 ; i < quote.ask_length ; ++i ) {
-        const SInnerDepth& srcDepth = quote.asks[i];
-        count++;
-        Depth* depth = msd->add_asks();        
-        depth->set_price(srcDepth.price.get_str_value());
-        for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
-            if( srcDepth.exchanges[j].volume <= 0 )
-                continue;
-            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
-        }
+    for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++) {
+        if( check_total_volume && iter->second.total_volume.is_zero() )
+            continue;
+        DepthWithDecimal* depth = msd->add_asks();
+        set_decimal(depth->mutable_price(), iter->first);
+        set_decimal(depth->mutable_volume(), iter->second.total_volume);
     }
-    // 买盘
-    count = 0;
-    for( uint32 i = 0 ; i < quote.bid_length ; ++i ) {
-        const SInnerDepth& srcDepth = quote.bids[i];
-        count++;
-        Depth* depth = msd->add_bids();        
-        depth->set_price(srcDepth.price.get_str_value());
-        for( uint32 j = 0 ; j < srcDepth.exchange_length ; ++j ) {
-            if( srcDepth.exchanges[j].volume <= 0 )
-                continue;
-            (*depth->mutable_data())[srcDepth.exchanges[j].name] = srcDepth.exchanges[j].volume;
-        }
+    for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++) {
+        if( check_total_volume && iter->second.total_volume.is_zero() )
+            continue;
+        DepthWithDecimal* depth = msd->add_bids();
+        set_decimal(depth->mutable_price(), iter->first);
+        set_decimal(depth->mutable_volume(), iter->second.total_volume);
     }
 }
+
 /////////////////////////////////////////////////////////////////////////////////
 DataCenter::DataCenter() {
     pipeline_.add_worker(&watermark_worker_);
@@ -374,29 +348,18 @@ DataCenter::~DataCenter() {
 
 }
 
-void _calc_depth_bias(const SInnerDepth* depths, const unsigned int& depth_length, double price_bias, double volume_bias, bool is_ask, SInnerDepth* dst, unsigned int& dst_length) 
+void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double price_bias, double volume_bias, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
 {
-    int count = 0;
-    SDecimal lastPrice = is_ask ? SDecimal::min_decimal() : SDecimal::max_decimal();
-    for( uint32 i = 0 ; i < depth_length ; ++i )
+    for( const auto& v: depths )
     {
-        const SInnerDepth& level = depths[i];
-        
-        SDecimal scaledPrice;
+        SDecimal scaledPrice = v.first;
         if( is_ask ) {
-            scaledPrice.from(level.price * ( 1 + price_bias * 1.0 / 100), -1, true); 
+            scaledPrice *= ( 1 + price_bias * 1.0 / 100); 
         } else {
-            scaledPrice.from(level.price * ( 1 - price_bias * 1.0 / 100), -1, false); 
+            scaledPrice *= ( 1 - price_bias * 1.0 / 100); 
         }
-
-        if( is_ask ? (scaledPrice > lastPrice ) : (scaledPrice < lastPrice) ){
-            count++;
-            dst[count-1].price = scaledPrice;
-            lastPrice = scaledPrice;
-        }
-        dst[count-1].mix_exchanges(level, volume_bias);
+        dst[scaledPrice].mix_exchanges(v.second, volume_bias);
     }
-    dst_length = count;
 }
 
 void DataCenter::_add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& params)
@@ -407,9 +370,13 @@ void DataCenter::_add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& pa
     params = params_;
 
     // 计算价位和成交量偏移
-    strcpy(dst.symbol, src.symbol);
-    _calc_depth_bias(src.asks, src.ask_length, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, true, dst.asks, dst.ask_length);
-    _calc_depth_bias(src.bids, src.bid_length, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, false, dst.bids, dst.bid_length);
+    dst.symbol = src.symbol;
+
+    vector<pair<SDecimal, SInnerDepth>> depths;
+    src.get_asks(depths);
+    _calc_depth_bias(depths, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, true, dst.asks);
+    src.get_bids(depths);
+    _calc_depth_bias(depths, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, false, dst.bids);
     
     // 加入快照
     datas_[src.symbol] = dst;
@@ -419,7 +386,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     //std::cout << "publish for broker(raw) " << quote.symbol << " " << quote.ask_length << "/"<< quote.bid_length << std::endl;
-    innerquote_to_msd2(quote, ptrData.get());
+    innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     PUBLISHER->publish4Hedge(quote.symbol, ptrData, NULL);
 
@@ -506,15 +473,16 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
             return;
     }
 
-    std::cout << "publish(raw) " << quote.symbol << " " << newQuote.ask_length << "/"<< newQuote.bid_length << std::endl;
+    std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    innerquote_to_msd(newQuote, ptrData.get());    
+    innerquote_to_msd2(newQuote, ptrData.get(), true);    
     std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
+    PUBLISHER->publish4Broker(quote.symbol, ptrData, NULL);
 
     // send to clients
-    PUBLISHER->publish4Broker(quote.symbol, ptrData, NULL);
-    // send to clients
-    PUBLISHER->publish4Client(quote.symbol, ptrData, NULL);
+    std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
+    innerquote_to_msd3(newQuote, ptrData2.get(), true);   
+    PUBLISHER->publish4Client(quote.symbol, ptrData2, NULL);
 
     last_datas_[quote.symbol] = newQuote;
 }

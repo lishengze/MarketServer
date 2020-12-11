@@ -17,65 +17,47 @@ using namespace std;
 
 
 // 内部行情结构
-struct SExchangeData {
-    char name[MAX_EXCHANGENAME_LENGTH];
-    double volume;
-
-    SExchangeData() {
-        strcpy(name, "");
-        volume = 0;
-    }
-};
-
 struct SInnerDepth {
-    SDecimal price;
-    double total_volume; // 总挂单量，用于下发行情
-    SExchangeData exchanges[MAX_EXCHANGE_LENGTH];
-    uint32 exchange_length;
+    SDecimal total_volume; // 总挂单量，用于下发行情
+    map<TExchange, SDecimal> exchanges;
     double amount_cost; // 余额消耗量
 
     SInnerDepth() {
-        total_volume = 0;
-        exchange_length = 0;
     }
 
     void mix_exchanges(const SInnerDepth& src, double bias) {
-        for( uint32 i = 0 ; i < src.exchange_length ; ++i ) {
-            double biasedVolume = src.exchanges[i].volume * ( 100 + bias ) / 100.0;
-            bool found = false;
-            for( unsigned int j = 0 ; j < exchange_length ; ++j ) {
-                if( string(exchanges[j].name) == string(src.exchanges[i].name) ) {
-                    exchanges[j].volume += biasedVolume;
-                    found = true;
-                    break;
-                }
-            }
-            if( !found ) {
-                vassign(exchanges[exchange_length].name, MAX_EXCHANGENAME_LENGTH, src.exchanges[i].name);
-                exchanges[exchange_length].volume = biasedVolume;
-                exchange_length ++;
-            }
+        for( const auto& v : src.exchanges ) {
+            exchanges[v.first] += v.second * ((100 + bias ) / 100.0);
         }
     }
 };
 
 struct SInnerQuote {
-    char symbol[MAX_SYMBOLNAME_LENGTH];
-    long long time;
-    long long time_arrive;
-    long long seq_no;
-    SInnerDepth asks[MAX_DEPTH_LENGTH];
-    uint32 ask_length;
-    SInnerDepth bids[MAX_DEPTH_LENGTH];
-    uint32 bid_length;
+    string symbol;
+    type_tick time;
+    type_tick time_arrive;
+    type_seqno seq_no;
+    map<SDecimal, SInnerDepth> asks;
+    map<SDecimal, SInnerDepth> bids;
 
     SInnerQuote() {
-        strcpy(symbol, "");
         time = 0;
         time_arrive = 0;
         seq_no = 0;
-        ask_length = 0;
-        bid_length = 0;
+    }
+
+    void get_asks(vector<pair<SDecimal, SInnerDepth>>& depths) const {
+        depths.clear();
+        for( auto iter = asks.begin() ; iter != asks.end() ; iter ++ ) {
+            depths.push_back(make_pair(iter->first, iter->second));
+        }
+    }
+
+    void get_bids(vector<pair<SDecimal, SInnerDepth>>& depths) const {
+        depths.clear();
+        for( auto iter = asks.rbegin() ; iter != asks.rend() ; iter ++ ) {
+            depths.push_back(make_pair(iter->first, iter->second));
+        }
     }
 };
 
