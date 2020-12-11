@@ -287,7 +287,7 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if( !is_init )
+    if( !is_init && kline.size() > 0 )
     {
         for( const auto& v : callbacks_) {
             v->on_kline(exchange, symbol, resolution, kline);

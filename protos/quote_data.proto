@@ -68,3 +68,12 @@ message Depth {
     // 聚合行情各交易所挂单量
     map<string, double> data = 3 [(gogoproto.customname) = "Data", (gogoproto.jsontag) = "data"];
 }
+
+message Kline {
+    int64 index = 1;
+    Decimal open = 2;
+    Decimal high = 3;
+    Decimal low = 4;
+    Decimal close = 5;
+    Decimal volume = 6;
+}

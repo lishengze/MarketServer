@@ -23,6 +23,7 @@ using quote::service::v1::SubscribeMixQuoteReq;
 using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::GetKlinesRequest;
 using quote::service::v1::MultiGetKlinesResponse;
+using quote::service::v1::Kline;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {

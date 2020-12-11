@@ -102,6 +102,21 @@ struct SDecimal {
             data_.real_.value_ += 1;
     }
 
+    void scale(int precise, bool ceiling = false) 
+    {
+        if( precise < 0 )
+            return;
+        if( data_.real_.prec_ < precise )
+            return;
+
+        uint64 v = CALC_BASE(data_.real_.prec_ - precise);
+        uint64 remain = data_.real_.prec_ % v;
+        data_.real_.prec_ = precise;
+        data_.real_.value_ /= v;
+        if( ceiling && remain > 0 )
+            data_.real_.value_ += 1;
+    }
+
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
         // 没有小数
@@ -126,7 +141,7 @@ struct SDecimal {
     }
 
     void from(const SDecimal& data, int precise = -1, bool ceiling = false) {
-        if( data_.real_.prec_ == -1 || data.data_.real_.prec_ <= data_.real_.prec_ ) {
+        if( precise == -1 || data.data_.real_.prec_ <= precise ) {
             data_.real_.value_ = data.data_.real_.value_;
             data_.real_.prec_ = data.data_.real_.prec_;
             return;

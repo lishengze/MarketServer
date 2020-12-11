@@ -79,7 +79,7 @@ message GetKlinesResponse {
     int32 end_time = 5;
     int32 total_num = 6;
     int32 num = 7;
-    bytes data = 8;
+    repeated Kline klines = 8;
 }
 
 message MultiGetKlinesResponse {

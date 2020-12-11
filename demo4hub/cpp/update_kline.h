@@ -26,11 +26,12 @@ using grpc::Status;
 using quote::service::v1::StreamEngine;
 using quote::service::v1::GetKlinesRequest;
 using quote::service::v1::GetKlinesResponse;
+using quote::service::v1::MultiGetKlinesResponse;
 
 
 class IKlineUpdater {
 public:
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const KlineData& kline) = 0;
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
 };
 
 
@@ -59,10 +60,10 @@ private:
         std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
 
         GetKlinesRequest req;
-        GetKlinesResponse resp;
+        MultiGetKlinesResponse resp;
         ClientContext context;
 
-        std::unique_ptr<ClientReader<GetKlinesResponse> > reader(stub->GetLast(&context, req));
+        std::unique_ptr<ClientReader<MultiGetKlinesResponse> > reader(stub->GetLast(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
                 std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
@@ -88,25 +89,15 @@ private:
         while (reader->Read(&resp)) {
             // split and convert
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
-            const char* ptr = resp.data().c_str();
-            size_t length = resp.data().length();
-            if( length != sizeof(WrapperKlineData) * resp.num() ) {
-                std::cout << "size not match(single=" << sizeof(WrapperKlineData) << ", total=" << resp.data().length() << "). reconnect service..." << endl;
-                return;
-            }
-            const WrapperKlineData* data = (const WrapperKlineData*)ptr;
-            for( int i = 0 ; i < resp.num() ; i ++ ) {
-                const WrapperKlineData& tmp = data[i];
-                KlineData kline;
-                kline.index = tmp.index;
-                kline.px_open = tmp.px_open;
-                kline.px_high = tmp.px_high;
-                kline.px_low = tmp.px_low;
-                kline.px_close = tmp.px_close;
-                kline.volume = tmp.volume;
-                kline.exchange = tmp.exchange;
-                kline.symbol = tmp.symbol;
-                callback->on_kline(tmp.exchange, tmp.symbol, tmp.resolution, kline);
+            for( int i = 0 ; i < resp.data_size() ; i ++ )
+            {
+                const GetKlinesResponse& one_resp = resp.data(i);
+                if( one_resp.num() == 0 )
+                    continue;
+                vector<KlineData> klines;
+                klines.resize(one_resp.num());
+                memcpy(&*klines.begin(), one_resp.data().c_str(), sizeof(KlineData)*one_resp.num());
+                callback->on_kline(one_resp.exchange(), one_resp.symbol(), one_resp.resolution(), klines);
             }
         }
         Status status = reader->Finish();

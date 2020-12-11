@@ -58,5 +58,5 @@ public:
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline) { return 0; }
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { return 0; }
 };

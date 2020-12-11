@@ -17,8 +17,11 @@ public:
     } 
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline) { 
-        cout << "on_kline " << exchange << " " << symbol << " " << kline.index << " " << kline.px_open.get_str_value() << " " << endl;
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
+        for( int i = 0 ; i < klines.size() ; i ++ )
+        {
+            cout << "on_kline " << exchange << " " << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
+        }
         return 0; 
     }
 };

@@ -59,7 +59,7 @@ void HubEntity::on_snap(const SEData& quote)
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
 }
 
-void HubEntity::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const KlineData& kline)
+void HubEntity::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
-    callback_->on_kline(exchange.c_str(), symbol.c_str(), resolution, kline);
+    callback_->on_kline(exchange.c_str(), symbol.c_str(), resolution, klines);
 }

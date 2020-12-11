@@ -29,6 +29,16 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     }
 };
 
+void kline_to_pbkline(const KlineData& src, Kline* dst)
+{
+    dst->set_index(src.index);
+    set_decimal(dst->mutable_open(), src.px_open);
+    set_decimal(dst->mutable_high(), src.px_high);
+    set_decimal(dst->mutable_low(), src.px_low);
+    set_decimal(dst->mutable_close(), src.px_close);
+    set_decimal(dst->mutable_volume(), src.volume);
+}
+
 GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(&ctx_)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
@@ -254,7 +264,10 @@ bool GetKlinesEntity::process()
     reply.set_resolution(request_.resolution());
     reply.set_total_num(klines.size());
     reply.set_num(klines.size());
-    reply.set_data(&*klines.begin(), klines.size() * sizeof(KlineData));
+    for( size_t i = 0 ; i < klines.size() ; i ++ ) 
+    {
+        kline_to_pbkline(klines[i], reply.add_klines());
+    }
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);
     return true;
@@ -286,7 +299,10 @@ bool GetLastEntity::process()
         resp->set_symbol(v.symbol);
         resp->set_resolution(v.resolution);
         resp->set_num(v.klines.size());
-        resp->set_data(&*v.klines.begin(), sizeof(KlineData) * v.klines.size());
+        for( size_t i = 0 ; i < v.klines.size() ; i ++ ) 
+        {
+            kline_to_pbkline(v.klines[i], resp->add_klines());
+        }
     }
     datas_.clear();
 
