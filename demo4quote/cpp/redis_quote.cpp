@@ -33,7 +33,7 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, bool isSnap
 }
 
 bool redisquote_to_kline(const njson& data, KlineData& kline) {
-    kline.index = int(data[0].get<float>());
+    kline.index = int(data[0].get<double>());
     kline.px_open.from(data[1].get<double>());
     kline.px_high.from(data[2].get<double>());
     kline.px_low.from(data[3].get<double>());
