@@ -1,6 +1,7 @@
 #pragma once
 
 #include "redis_quote_define.h"
+#include "kline_database.h"
 
 class IMixerKlinePusher
 {
@@ -8,13 +9,12 @@ public:
     virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
 };
 
-class IDataProvider
+class IDataCacher
 {
 public:
     virtual bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines) = 0;
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init) = 0;
+    virtual void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60) = 0;
 };
-
 
 #define INVALID_INDEX ((type_tick)(-1))
 class MixCalculator
@@ -79,6 +79,8 @@ public:
     void set_limit(size_t limit) { limit_ = limit; }
 
     void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines);
+
+    void fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache);
 private:
     size_t limit_;
 
@@ -110,7 +112,7 @@ private:
     unordered_map<TSymbol, unordered_map<TExchange, bool>> kline60min_firsttime_;
 };
 
-class KlineHubber
+class KlineHubber : public IDataCacher
 {
 public:
     KlineHubber();
@@ -122,8 +124,9 @@ public:
 
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 
-    // IDataProvider
+    // IDataCacher
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
+    void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60);
 
 private:
     set<IMixerKlinePusher*> callbacks_;

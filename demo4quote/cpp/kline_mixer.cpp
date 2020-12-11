@@ -150,6 +150,12 @@ void KlineCache::_shorten(vector<KlineData>& klines)
     }
 }
 
+void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
+    cache = data_;
+}
+
 void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
@@ -298,4 +304,10 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
 bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
     return db_interface_->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+}
+
+void KlineHubber::fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60)
+{
+    min1_cache_.fill_klines(cache_min1);
+    min1_cache_.fill_klines(cache_min60);
 }

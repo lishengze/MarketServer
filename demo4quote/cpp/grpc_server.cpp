@@ -42,11 +42,11 @@ void ServerEndpoint::init(const string& grpc_addr)
     callers_[call_id] = caller_getparams_;
     call_id++;
 
-    caller_getklines_ = new GrpcCall<GetKlinesEntity>(call_id, &service_, cq_.get(), provider_);
+    caller_getklines_ = new GrpcCall<GetKlinesEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_getklines_;
     call_id++;
 
-    caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), provider_);
+    caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_getlast_;
     call_id++;
 }

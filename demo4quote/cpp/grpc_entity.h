@@ -173,14 +173,14 @@ private:
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:
-    GetKlinesEntity(void* service, IDataProvider* provider);
+    GetKlinesEntity(void* service, IDataCacher* cacher);
 
     void register_call();
 
     bool process();
 
     GetKlinesEntity* spawn() {
-        return new GetKlinesEntity(service_, provider_);
+        return new GetKlinesEntity(service_, cacher_);
     }
 
 private:
@@ -191,7 +191,7 @@ private:
     GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
 
-    IDataProvider* provider_;
+    IDataCacher* cacher_;
 };
 
 struct WrapperKlineData: KlineData
@@ -206,7 +206,7 @@ struct WrapperKlineData: KlineData
 class GetLastEntity : public BaseGrpcEntity
 {
 public:
-    GetLastEntity(void* service, IDataProvider* provider);
+    GetLastEntity(void* service, IDataCacher* cacher);
 
     void register_call();
 
@@ -218,9 +218,12 @@ public:
     }
 
     GetLastEntity* spawn() {
-        return new GetLastEntity(service_, provider_);
+        return new GetLastEntity(service_, cacher_);
     }
+
 private:
+    bool _fill_data(MultiGetKlinesResponse& reply);
+
     GrpcStreamEngineService::AsyncService* service_;
 
     ServerContext ctx_;
@@ -232,5 +235,11 @@ private:
     mutable std::mutex            mutex_datas_;
     list<WrapperKlineData> datas_;
     
-    IDataProvider* provider_;
+    IDataCacher* cacher_;
+    
+    // 首次发送的缓存
+    bool _snap_sended() const { return snap_cached_ && cache_min1_.size() == 0 && cache_min60_.size() == 0; }
+    bool snap_cached_;
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1_;
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60_;
 };

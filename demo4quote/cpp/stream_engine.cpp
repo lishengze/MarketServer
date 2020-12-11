@@ -9,9 +9,21 @@ StreamEngine::StreamEngine(){
     // init configuration
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
+
+    // 
+    quote_source_.set_engine(this);
+    quote_replay_.set_engine(this);
+
+    // 启动聚合K线计算线程
+    kline_mixer_.set_engine(this);
+
+    // 
+    kline_hubber_.register_callback(&server_endpoint_);
+    kline_hubber_.set_db_interface(&kline_db_);
     
     // init grpc server
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
+    server_endpoint_.set_cacher(&kline_hubber_);
 }
 
 StreamEngine::~StreamEngine(){
@@ -23,7 +35,6 @@ void StreamEngine::start()
 
     if( !CONFIG->replay_mode_ ) {
         // 启动redis
-        quote_source_.set_engine(this);
         RedisParams params;
         params.host = CONFIG->quote_redis_host_;
         params.port = CONFIG->quote_redis_port_;
@@ -35,21 +46,14 @@ void StreamEngine::start()
 
         // 启动db线程
         kline_db_.start();
-
-        // 启动聚合K线计算线程
-        kline_mixer_.set_engine(this);
         
-        // 
-        kline_hubber_.register_callback(&server_endpoint_);
-        kline_hubber_.set_db_interface(&kline_db_);
     } else {
-        quote_replay_.set_engine(this);
+        // 
         quote_replay_.start(CONFIG->replay_ratio_);
     }
 
     // start grpc server
     server_endpoint_.start();
-    //PUBLISHER->run_in_thread();
 
     // 连接配置服务器
     nacos_client_.start(CONFIG->nacos_addr_, this);    

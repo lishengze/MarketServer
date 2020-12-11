@@ -29,7 +29,7 @@ public:
         thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
 
-    void set_provider(IDataProvider* provider) { provider_ = provider; }
+    void set_cacher(IDataCacher* cacher) { cacher_ = cacher; }
     // IMixerKlinePusher
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
     // IMixerKlinePusher
@@ -38,7 +38,7 @@ public:
 private:
     void _handle_rpcs();
 
-    IDataProvider* provider_ = nullptr;
+    IDataCacher* cacher_ = nullptr;
     
     // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;
