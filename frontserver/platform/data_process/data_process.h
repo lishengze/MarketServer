@@ -39,6 +39,9 @@ public:
 
     void init_test_kline_data();
 
+    std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency);
+
+
 private:
     std::map<std::string, EnhancedDepthData*>                       depth_data_;
     std::map<std::string, std::map<type_tick, KlineData*>>          kline_data_;

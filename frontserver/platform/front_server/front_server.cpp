@@ -77,7 +77,9 @@ void FrontServer::handle_response_message(PackagePtr package)
 
         case UT_FID_EnhancedDepthData:
             process_enhanceddata_package(package);            
-            break;
+            break;                
+        case UT_FID_RspKLineData:
+            response_kline_data_package(package);
         default:        
             cout << "Unknow Package" << endl;
             break;
@@ -216,10 +218,10 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         {
             string response_data = RspKlinDataToJsonStr(*p_rsp_kline_data);
             cout << "response_data: " << response_data << endl;
-            // if (p_rsp_kline_data->http_response_)
-            // {
-            //     p_rsp_kline_data->http_response_->end(response_data);
-            // }
+            if (p_rsp_kline_data->http_response_)
+            {
+                p_rsp_kline_data->http_response_->end(response_data);
+            }
         }
         else
         {

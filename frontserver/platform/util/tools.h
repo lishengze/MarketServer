@@ -35,7 +35,7 @@ string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type=MARKET
 
 string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type=KLINE_UPDATE);
 
-std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency);
+// std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency);
 
 inline type_tick trans_string_to_type_tick(string time_str)
 {

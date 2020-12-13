@@ -147,7 +147,8 @@ void DataProcess::request_kline_package(PackagePtr package)
             }
             else
             {
-                deliver_request(package);
+                cout << "Error!" << endl;
+                // deliver_request(package);
             }            
         }
         else
@@ -240,9 +241,57 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
                     ++iter;
                 }
 
-                cout << "src_kline_data data numb: " << src_kline_data.size() << endl;
+                cout << "src_kline_data data numb: " << src_kline_data.size() << endl;                
 
-                std::vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
+                std::vector<AtomKlineDataPtr> target_kline_data;
+
+                // std::vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
+
+                cout << "DataProcess::compute_target_kline_data" << endl;
+
+                std::vector<AtomKlineDataPtr> result;
+
+                if (src_kline_data.size() == 0) return nullptr;
+
+                AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(src_kline_data[0]));
+                cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+                // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
+
+                cout << "make over" << endl;
+
+                result.push_back(cur_data); 
+
+                double low = MAX_DOUBLE;
+                double high = MIN_DOUBLE;
+
+                src_kline_data.erase(src_kline_data.begin());
+
+                cout << "kline_data.size: " << src_kline_data.size() << endl;
+
+                for (KlineData* atom : src_kline_data)
+                {
+                    cout << "atom.tick " << atom->index << endl;
+                    low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+                    high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+
+                    if (atom->index - (*result.rbegin())->tick_ >= pReqKlineData->frequency_)
+                    {            
+                        AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+                        cur_data->low_ = low;
+                        cur_data->high_ = high;
+                        result.push_back(cur_data); 
+
+                        low = MAX_DOUBLE;
+                        high = MIN_DOUBLE;
+                    }
+                }
+
+                target_kline_data = result;
+
+                for (AtomKlineDataPtr atom_data:target_kline_data)
+                {
+                    cout << atom_data->tick_ << endl;
+                }
 
                 cout << "compute_target_kline_data done " << endl;
 
@@ -266,6 +315,54 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
         stream_obj << "[E] DataProcess::get_kline_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }
+}
+
+std::vector<AtomKlineDataPtr>& DataProcess::compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
+{
+    cout << "DataProcess::compute_target_kline_data" << endl;
+
+    std::vector<AtomKlineDataPtr> result;
+
+    cout << "kline_data.size: " << kline_data.size() << endl;
+
+    if (kline_data.size() == 0) return result;
+
+    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
+    cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
+
+    cout << "make over" << endl;
+
+    result.push_back(cur_data); 
+
+    double low = MAX_DOUBLE;
+    double high = MIN_DOUBLE;
+
+    kline_data.erase(kline_data.begin());
+
+    cout << "kline_data.size: " << kline_data.size() << endl;
+
+    for (KlineData* atom : kline_data)
+    {
+        cout << "atom.tick " << atom->index << endl;
+        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+
+        if (atom->index - (*result.rbegin())->tick_ >= frequency)
+        {            
+            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+            cur_data->low_ = low;
+            cur_data->high_ = high;
+            result.push_back(cur_data); 
+
+            low = MAX_DOUBLE;
+            high = MIN_DOUBLE;
+        }
+    }
+
+    cout << "compute over" << endl;
+
+    return result;
 }
 
 // Creaet Last Hour Test Data For BTC_USDT
@@ -301,4 +398,6 @@ void DataProcess::init_test_kline_data()
 
         kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};   
     }
+
+    cout << "init end!" << endl;
 }

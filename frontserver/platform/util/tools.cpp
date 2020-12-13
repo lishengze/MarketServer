@@ -204,32 +204,44 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
 {
     std::vector<AtomKlineDataPtr> result;
 
+    cout << "kline_data.size: " << kline_data.size() << endl;
+
     if (kline_data.size() == 0) return result;
 
-    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
-    // result.push_back(cur_data); 
+    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
+    cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
 
-    // double low = MAX_DOUBLE;
-    // double high = MIN_DOUBLE;
+    cout << "make over" << endl;
 
-    // kline_data.erase(kline_data.begin());
+    result.push_back(cur_data); 
 
-    // for (KlineData* atom : kline_data)
-    // {
-    //     low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
-    //     high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+    double low = MAX_DOUBLE;
+    double high = MIN_DOUBLE;
 
-    //     if (atom->index - (*result.rbegin())->tick_ >= frequency)
-    //     {            
-    //         AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
-    //         cur_data->low_ = low;
-    //         cur_data->high_ = high;
-    //         result.push_back(cur_data); 
+    kline_data.erase(kline_data.begin());
 
-    //         low = MAX_DOUBLE;
-    //         high = MIN_DOUBLE;
-    //     }
-    // }
+    cout << "kline_data.size: " << kline_data.size() << endl;
+
+    for (KlineData* atom : kline_data)
+    {
+        cout << "atom.tick " << atom->index << endl;
+        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+
+        if (atom->index - (*result.rbegin())->tick_ >= frequency)
+        {            
+            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+            cur_data->low_ = low;
+            cur_data->high_ = high;
+            result.push_back(cur_data); 
+
+            low = MAX_DOUBLE;
+            high = MIN_DOUBLE;
+        }
+    }
+
+    cout << "compute over" << endl;
 
     return result;
 }
