@@ -12,12 +12,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/base/cpp/decimal.h" beforeDir="false" afterPath="$PROJECT_DIR$/base/cpp/decimal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo4hub/cpp/hub_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4hub/cpp/hub_struct.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/include/hub_entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/hub_entity.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/include/hub_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/hub_struct.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/include/update_kline.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/update_kline.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/include/updater_quote.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/updater_quote.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/config/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/config/config.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/util/tools.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/util/tools.h" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,10 +39,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="137">
-              <caret line="323" selection-start-line="323" selection-end-line="323" />
+            <state relative-caret-position="339">
+              <caret line="379" column="28" lean-forward="true" selection-start-line="379" selection-start-column="28" selection-end-line="379" selection-end-column="28" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
+                <element signature="e#5017#8294#0" />
+                <element signature="e#8296#9767#0" />
               </folding>
             </state>
           </provider>
@@ -130,7 +136,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds" extendedState="7">
     <option name="x" value="255" />
     <option name="y" value="140" />
     <option name="width" value="1400" />
@@ -226,12 +232,12 @@
       <updated>1607584283541</updated>
       <workItem from="1607584285154" duration="3142000" />
       <workItem from="1607689828354" duration="3035000" />
-      <workItem from="1607830377574" duration="244000" />
+      <workItem from="1607830377574" duration="1355000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="6421000" />
+    <option name="totallyTimeSpent" value="7532000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -243,7 +249,8 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
+    <frame x="0" y="27" width="1920" height="1053" extended-state="7" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18060021" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -280,13 +287,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>275</line>
+          <line>321</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>355</line>
+          <line>401</line>
           <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
+          <line>104</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -423,10 +435,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="137">
-          <caret line="323" selection-start-line="323" selection-end-line="323" />
+        <state relative-caret-position="339">
+          <caret line="379" column="28" lean-forward="true" selection-start-line="379" selection-start-column="28" selection-end-line="379" selection-end-column="28" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
+            <element signature="e#5017#8294#0" />
+            <element signature="e#8296#9767#0" />
           </folding>
         </state>
       </provider>

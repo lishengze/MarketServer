@@ -123,7 +123,7 @@ void DataReceive::handle_response_message(PackagePtr package)
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
-    return 0;
+    return 1;
 }
 
 // K线数据（推送）
@@ -141,17 +141,18 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    // cout << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+
+    return;
+    
+    for (int i =0; i < 10; ++i)
+    {
+        cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
+    }
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
-
-    // SDepthData* pDepthData = GET_NON_CONST_FIELD(package, SDepthData);
-    
-    // string json_str = SDepthDataToJsonStr(*pDepthData);
-
-    // cout << "json_str: " << json_str << endl;
 
     deliver_response(package);
 }

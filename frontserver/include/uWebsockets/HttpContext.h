@@ -364,7 +364,7 @@ public:
 
     /* Register an HTTP route handler acording to URL pattern */
     void onHttp(std::string method, std::string pattern, fu2::unique_function<void(HttpResponse<SSL> *, HttpRequest *)> &&handler, bool upgrade = false) {
-        cout << "On Http :" << endl;
+        // cout << "On Http :" << endl;
         HttpContextData<SSL> *httpContextData = getSocketContextData();
 
         /* Todo: This is ugly, fix */
@@ -380,9 +380,7 @@ public:
             auto user = r->getUserData();
             user.httpRequest->setYield(false);
             user.httpRequest->setParameters(r->getParameters());
-
             
-
             /* Middleware? Automatically respond to expectations */
             std::string_view expect = user.httpRequest->getHeader("expect");
             if (expect.length() && expect == "100-continue") {

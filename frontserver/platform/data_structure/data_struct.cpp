@@ -8,19 +8,26 @@ EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data):type_{"market
 
 void EnhancedDepthData::init(const SDepthData* depth_data)
 {
+    // cout << "EnhancedDepthData::init 0" << endl;
     std::lock_guard<std::mutex> lg(mutex_);
 
     memcpy(&depth_data_, depth_data, sizeof(SDepthData));
 
-    for (int i = 0; i < depth_data_.ask_length; ++i)
+    // cout << "EnhancedDepthData::init 1" << endl;
+
+    for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
-        ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume : depth_data_.asks[i].volume + ask_accumulated_volume_[i-1];
+        ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume.get_value() : depth_data_.asks[i].volume.get_value() + ask_accumulated_volume_[i-1];
     }
 
-    for (int i = 0; i < depth_data_.bid_length; ++i)
+    // cout << "EnhancedDepthData::init 2" << endl;
+
+    for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
-        bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
+        bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume.get_value() + bid_accumulated_volume_[i-1];
     }
+
+    // cout << "EnhancedDepthData::init 3" << endl;
 }
 
 void EnhancedDepthData::set_json_str()
@@ -38,7 +45,7 @@ void EnhancedDepthData::set_json_str()
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = depth_data_.asks[i].price.get_value();
-        depth_level_atom[1] = depth_data_.asks[i].volume;
+        depth_level_atom[1] = depth_data_.asks[i].volume.get_value();
         depth_level_atom[2] = ask_accumulated_volume_[i];
         asks_json[i] = depth_level_atom;
     }
@@ -49,7 +56,7 @@ void EnhancedDepthData::set_json_str()
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = depth_data_.bids[i].price.get_value();
-        depth_level_atom[1] = depth_data_.bids[i].volume;
+        depth_level_atom[1] = depth_data_.bids[i].volume.get_value();
         depth_level_atom[2] = bid_accumulated_volume_[i];
         bids_json[i] = depth_level_atom;
     }

@@ -12,7 +12,7 @@ class Client : public HubCallback
 public:   
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { 
-        cout << "on_depth " << endl;
+        cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
         return 0;
     } 
 

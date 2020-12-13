@@ -107,7 +107,7 @@ struct AtomKlineData
         
     AtomKlineData(KlineData& kline_data)
     {
-        cout << "Reference AtomKlineData " << endl;
+        // cout << "Reference AtomKlineData " << endl;
         open_ = kline_data.px_open.get_value();
         high_ = kline_data.px_high.get_value();
         low_ = kline_data.px_low.get_value();
@@ -117,7 +117,7 @@ struct AtomKlineData
     }
 
     AtomKlineData() {
-        cout << "default AtomKlineData " << endl;
+        // cout << "default AtomKlineData " << endl;
     }
 
     double open_;

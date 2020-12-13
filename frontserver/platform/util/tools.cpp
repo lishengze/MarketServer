@@ -62,7 +62,7 @@ string SDepthDataToJsonStr(const SDepthData& depth)
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = depth.asks[i].price.get_value();
-        depth_level_atom[1] = depth.asks[i].volume;
+        depth_level_atom[1] = depth.asks[i].volume.get_value();
         asks[i] = depth_level_atom;
     }
     json_data["asks"] = asks;
@@ -72,7 +72,7 @@ string SDepthDataToJsonStr(const SDepthData& depth)
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = depth.bids[i].price.get_value();
-        depth_level_atom[1] = depth.bids[i].volume;
+        depth_level_atom[1] = depth.bids[i].volume.get_value();
         bids[i] = depth_level_atom;
     }
     json_data["bids"] = bids;
@@ -173,22 +173,22 @@ string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
     json_data["bid_length"] = en_data.depth_data_.bid_length;   
 
     nlohmann::json asks_json;
-    for (int i = 0; i < en_data.depth_data_.ask_length; ++i)
+    for (int i = 0; i < en_data.depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = en_data.depth_data_.asks[i].price.get_value();
-        depth_level_atom[1] = en_data.depth_data_.asks[i].volume;
+        depth_level_atom[1] = en_data.depth_data_.asks[i].volume.get_value();
         depth_level_atom[2] = en_data.ask_accumulated_volume_[i];
         asks_json[i] = depth_level_atom;
     }
     json_data["asks"] = asks_json;
 
     nlohmann::json bids_json;
-    for (int i = 0; i < en_data.depth_data_.bid_length; ++i)
+    for (int i = 0; i < en_data.depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = en_data.depth_data_.bids[i].price.get_value();
-        depth_level_atom[1] = en_data.depth_data_.bids[i].volume;
+        depth_level_atom[1] = en_data.depth_data_.bids[i].volume.get_value();
         depth_level_atom[2] = en_data.bid_accumulated_volume_[i];
         bids_json[i] = depth_level_atom;
     }

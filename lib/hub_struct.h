@@ -1,6 +1,8 @@
 #pragma once
 
 #include "decimal.h"
+#include <string>
+using std::string;
 
 #define DEPCH_LEVEL_COUNT 100
 
@@ -14,6 +16,7 @@ struct SDepthLevelData
     }
 };
 
+const long UT_FID_SDepthData = 0x10000;
 struct SDepthData
 {
     string symbol;
@@ -31,10 +34,17 @@ struct SDepthData
         ask_length = 0;
         bid_length = 0;
     }
+    static const long Fid = UT_FID_SDepthData;
 };
 
+const long UT_FID_KlineData = 0x10001;
 struct KlineData
 {
+    KlineData(string symbol_str, type_tick time, double open, double high, 
+                double low, double close, double volume_str):
+                symbol{symbol_str}, index{time}, px_open{open}, px_close{close}, 
+                px_high{high}, px_low{low}, volume{volume_str} {}
+                    
     string symbol;
     string exchange;
     type_tick index;
@@ -47,6 +57,7 @@ struct KlineData
     KlineData(){
         index = 0;
     }
+    static const long Fid = UT_FID_KlineData;    
 };
 
 #pragma pack()

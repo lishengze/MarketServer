@@ -36,9 +36,9 @@ struct SDecimal {
         data_.value_ = 0;
     }
 
-    SDecimal(double v) {
-        from(v);
-    }
+    // SDecimal(double v) {
+    //     from(v);
+    // }
 
     SDecimal(const string& v) {
         from(v);

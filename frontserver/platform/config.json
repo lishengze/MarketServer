@@ -1,7 +1,8 @@
 {
     "hub": 
     {
-        "addr": "36.255.220.139:9111"
+        "risk_controller_addr": "36.255.220.139:9111",
+        "stream_enginne_addr": "36.255.220.139:9110"
     },
     "ws_server":
     {

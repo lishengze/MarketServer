@@ -59,7 +59,7 @@ void FrontServer::request_all_symbol()
 
 void FrontServer::handle_response_message(PackagePtr package)
 {
-    cout << "FrontServer::handle_response_message" << endl;
+    // cout << "FrontServer::handle_response_message" << endl;
 
     switch (package->Tid())
     {
@@ -88,7 +88,7 @@ void FrontServer::handle_response_message(PackagePtr package)
 
 void FrontServer::response_sdepth_package(PackagePtr package)
 {
-    cout << "FrontServer::response_sdepth_package " << endl;
+    // cout << "FrontServer::response_sdepth_package " << endl;
     
     auto* psdepth = GET_FIELD(package, SDepthData);
 

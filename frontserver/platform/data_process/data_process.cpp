@@ -98,18 +98,29 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
 {
     try
     {
+        // cout << "DataProcess::response_src_sdepth_package 0" << endl;
+
         SDepthData* p_depth_data = GET_NON_CONST_FIELD(package, SDepthData);
 
         if (p_depth_data)
         {
+            // cout << "DataProcess::response_src_sdepth_package 1" << endl;
+
             PackagePtr package_new = GetNewEnhancedDepthDataPackage(*p_depth_data, package->PackageID());
 
+            // cout << "DataProcess::response_src_sdepth_package 2" << endl;
+
             EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(package_new, EnhancedDepthData);
+
+
+            // cout << "DataProcess::response_src_sdepth_package 3" << endl;
 
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
                 response_new_symbol(en_depth_data->depth_data_.symbol);
             }
+
+            // cout << "DataProcess::response_src_sdepth_package 4" << endl;
 
             depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data;
 
@@ -124,8 +135,13 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
 
 void DataProcess::response_new_symbol(string symbol)
 {
+    // cout << "DataProcess::response_new_symbol 0" << endl;
     std::set<string> symbols{symbol};
+
+    // cout << "DataProcess::response_new_symbol 1" << endl;
     PackagePtr package_new = GetNewSymbolDataPackage(symbols, ID_MANAGER->get_id());
+
+    // cout << "DataProcess::response_new_symbol 2" << endl;
     package_new->prepare_response(UT_FID_SymbolData, package_new->PackageID());
     deliver_response(package_new);
 }
@@ -241,12 +257,12 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
                     ++iter;
                 }
 
-                cout << "src_kline_data data numb: " << src_kline_data.size() << endl;                
+                cout << "src_kline_data data numb: " << src_kline_data.size() << endl;     
 
-                std::vector<AtomKlineDataPtr> target_kline_data;
-
-                // std::vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
-
+                std::vector<AtomKlineDataPtr> target_kline_data;           
+                
+                // target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
+                
                 cout << "DataProcess::compute_target_kline_data" << endl;
 
                 std::vector<AtomKlineDataPtr> result;
@@ -255,9 +271,6 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
                 AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(src_kline_data[0]));
                 cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
-                // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
-
-                cout << "make over" << endl;
 
                 result.push_back(cur_data); 
 
@@ -270,7 +283,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
                 for (KlineData* atom : src_kline_data)
                 {
-                    cout << "atom.tick " << atom->index << endl;
+                    // cout << "atom.tick " << atom->index << endl;
                     low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
                     high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
 
@@ -317,53 +330,53 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
     }
 }
 
-std::vector<AtomKlineDataPtr>& DataProcess::compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
-{
-    cout << "DataProcess::compute_target_kline_data" << endl;
+// std::vector<AtomKlineDataPtr>& DataProcess::compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
+// {
+//     cout << "DataProcess::compute_target_kline_data" << endl;
 
-    std::vector<AtomKlineDataPtr> result;
+//     std::vector<AtomKlineDataPtr> result;
 
-    cout << "kline_data.size: " << kline_data.size() << endl;
+//     cout << "kline_data.size: " << kline_data.size() << endl;
 
-    if (kline_data.size() == 0) return result;
+//     if (kline_data.size() == 0) return result;
 
-    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
-    cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
-    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
+//     AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
+//     cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+//     // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
 
-    cout << "make over" << endl;
+//     cout << "make over" << endl;
 
-    result.push_back(cur_data); 
+//     result.push_back(cur_data); 
 
-    double low = MAX_DOUBLE;
-    double high = MIN_DOUBLE;
+//     double low = MAX_DOUBLE;
+//     double high = MIN_DOUBLE;
 
-    kline_data.erase(kline_data.begin());
+//     kline_data.erase(kline_data.begin());
 
-    cout << "kline_data.size: " << kline_data.size() << endl;
+//     cout << "kline_data.size: " << kline_data.size() << endl;
 
-    for (KlineData* atom : kline_data)
-    {
-        cout << "atom.tick " << atom->index << endl;
-        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
-        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+//     for (KlineData* atom : kline_data)
+//     {
+//         cout << "atom.tick " << atom->index << endl;
+//         low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
+//         high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
 
-        if (atom->index - (*result.rbegin())->tick_ >= frequency)
-        {            
-            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
-            cur_data->low_ = low;
-            cur_data->high_ = high;
-            result.push_back(cur_data); 
+//         if (atom->index - (*result.rbegin())->tick_ >= frequency)
+//         {            
+//             AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
+//             cur_data->low_ = low;
+//             cur_data->high_ = high;
+//             result.push_back(cur_data); 
 
-            low = MAX_DOUBLE;
-            high = MIN_DOUBLE;
-        }
-    }
+//             low = MAX_DOUBLE;
+//             high = MIN_DOUBLE;
+//         }
+//     }
 
-    cout << "compute over" << endl;
+//     cout << "compute over" << endl;
 
-    return result;
-}
+//     return result;
+// }
 
 // Creaet Last Hour Test Data For BTC_USDT
 void DataProcess::init_test_kline_data()

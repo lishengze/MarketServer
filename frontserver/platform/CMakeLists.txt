@@ -27,7 +27,8 @@ AUX_SOURCE_DIRECTORY(./log LOG_SRC)
 
 ###############################################################################################
 INCLUDE_DIRECTORIES(".")
-INCLUDE_DIRECTORIES("../include")
+INCLUDE_DIRECTORIES("../../lib")
+
 INCLUDE_DIRECTORIES("../include/uWebsockets")
 # for include package.h and channel.h
 INCLUDE_DIRECTORIES("../../component/pandora/package")
@@ -61,7 +62,9 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/asio_httpclient")
 
 LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
 
-LINK_DIRECTORIES("../lib")
+# LINK_DIRECTORIES("../lib")
+
+LINK_DIRECTORIES("../../lib")
 
 ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC} ${DATA_STRUCTURE_SRC} ${DATA_PROCESS_SRC} 
                ${DATA_RECEIVE_SRC} ${FRONT_SERVER_SRC} 

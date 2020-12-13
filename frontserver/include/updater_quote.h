@@ -22,10 +22,15 @@ using grpc::ClientReaderWriter;
 using grpc::ClientWriter;
 using grpc::Status;
 using quote::service::v1::RiskController;
-using SEMultiData = quote::service::v1::MultiMarketStreamData;
-using SEData = quote::service::v1::MarketStreamData;
-using SEDepth = quote::service::v1::Depth;
+using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
+using SEData = quote::service::v1::MarketStreamDataWithDecimal;
+using SEDepth = quote::service::v1::DepthWithDecimal;
+using quote::service::v1::Decimal;
 
+inline void Decimal_to_SDecimal(SDecimal& dst, const Decimal& src)
+{
+    dst.from_raw(src.base(), src.prec());
+}
 
 class IQuoteUpdater {
 public:
@@ -80,7 +85,7 @@ private:
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
             for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
                 const SEData& quote = multiQuote.quotes(i);
-                // std::cout << "update symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
+                std::cout << "update symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
                 callback->on_snap(quote);
             }
         }

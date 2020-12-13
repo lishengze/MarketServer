@@ -141,6 +141,7 @@ void WBServer::release()
 
 void WBServer::broadcast(string msg)
 {
+    cout << "broadcast: " << msg << endl;
     for (auto iter:wss_con_map_)
     {
         iter.first->send(msg, uWS::OpCode::TEXT);
@@ -229,7 +230,10 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
     // cout << "WBServer::broadcast_enhanced_data " << endl;
 
     string update_symbol = en_depth_data.depth_data_.symbol;
+
     string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
+
+    cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
 
     for (auto iter:wss_con_map_)
     {

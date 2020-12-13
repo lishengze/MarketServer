@@ -18,9 +18,9 @@ void Config::load_config(string file_name)
             string contents((istreambuf_iterator<char>(in_config)), istreambuf_iterator<char>());
             nlohmann::json js = nlohmann::json::parse(contents);
             
-            if (!js["hub"].is_null() && !js["hub"]["addr"].is_null())
+            if (!js["hub"].is_null() && !js["hub"]["risk_controller_addr"].is_null())
             {
-                hub_address_ = js["hub"]["addr"].get<string>();
+                hub_address_ = js["hub"]["risk_controller_addr"].get<string>();
             }
             else
             {

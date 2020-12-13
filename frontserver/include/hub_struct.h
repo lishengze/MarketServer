@@ -10,10 +10,9 @@ using std::string;
 struct SDepthLevelData
 {
     SDecimal price;
-    double volume;
+    SDecimal volume;
 
     SDepthLevelData() {
-        volume = 0;
     }
 };
 
@@ -45,7 +44,7 @@ struct KlineData
                 double low, double close, double volume_str):
                 symbol{symbol_str}, index{time}, px_open{open}, px_close{close}, 
                 px_high{high}, px_low{low}, volume{volume_str} {}
-
+                    
     string symbol;
     string exchange;
     type_tick index;
@@ -58,9 +57,8 @@ struct KlineData
     KlineData(){
         index = 0;
     }
-    static const long Fid = UT_FID_KlineData;
+    static const long Fid = UT_FID_KlineData;    
 };
-
 
 #pragma pack()
 
@@ -71,5 +69,5 @@ public:
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline) { return 0; }
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { return 0; }
 };

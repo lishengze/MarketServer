@@ -83,10 +83,10 @@ def test_http_client():
     # uri = "http://127.0.0.1"
     conn = http.client.HTTPConnection(uri)
     symbol = "BTC_USDT"
-    frequency = 60
+    frequency = 60 * 5
     end_time = int(time.time())
     end_time = end_time - end_time % frequency
-    start_time = end_time - 60 * 5
+    start_time = end_time - 60 * 30
     query_str = ("v1/kline_request/symbol=%s&start_time=%d&end_time=%d&frequency=%d" \
                 % (symbol, start_time, end_time, frequency))
 
