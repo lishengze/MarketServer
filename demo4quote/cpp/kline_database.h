@@ -52,8 +52,10 @@ private:
     };
     SQLite::Database db_;
     Table table_;
-    SQLite::Statement stmtSelectDataByExchangeSymbolIndex;
-    SQLite::Statement stmtReplaceDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin1SelectDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin1ReplaceDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin60SelectDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin60ReplaceDataByExchangeSymbolIndex;
     bool _init_db();
 
     bool _write_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index, const vector<KlineData>& klines);

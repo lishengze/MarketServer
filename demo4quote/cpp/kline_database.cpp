@@ -76,26 +76,28 @@ KlineDatabase::Table::Table(SQLite::Database& db)
 {
     createTableKlineMin1(db);
     createTableKlineMin60(db);
+    cout << "table init finish." << endl;
 }
 
 void KlineDatabase::Table::createTableKlineMin1(SQLite::Database& db) {
     try
     {
         if (db.tableExists(KLINE_MIN1_TABLENAME)) {
+            cout << KLINE_MIN1_TABLENAME << " exist" << endl;
             return; 
         }
 
         db.exec("CREATE TABLE " KLINE_MIN1_TABLENAME "(\
                 Exchange TEXT, \
                 Symbol TEXT, \
-                Index INTEGER, \
+                TimeIndex INTEGER, \
                 Data TEXT, \
                 Ratio INTEGER, \
                 CreateTime TEXT, \
-                ModifyTime TEXT, \
+                ModifyTime TEXT \
             );");
 
-        db.exec("CREATE INDEX " KLINE_MIN1_TABLENAME "_kline_index ON " KLINE_MIN1_TABLENAME "(Exchange, Symbol, Index);");
+        db.exec("CREATE INDEX " KLINE_MIN1_TABLENAME "_kline_index ON " KLINE_MIN1_TABLENAME "(Exchange, Symbol, TimeIndex);");
     }
     catch(const std::exception& e)
     {
@@ -107,20 +109,21 @@ void KlineDatabase::Table::createTableKlineMin60(SQLite::Database& db) {
     try
     {
         if (db.tableExists(KLINE_MIN60_TABLENAME)) {
+            cout << KLINE_MIN60_TABLENAME << " exist" << endl;
             return; 
         }
 
         db.exec("CREATE TABLE " KLINE_MIN60_TABLENAME "(\
                 Exchange TEXT, \
                 Symbol TEXT, \
-                Index INTEGER, \
+                TimeIndex INTEGER, \
                 Data TEXT, \
                 Ratio INTEGER, \
                 CreateTime TEXT, \
-                ModifyTime TEXT, \
+                ModifyTime TEXT \
             );");
 
-        db.exec("CREATE INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, Index);");
+        db.exec("CREATE INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, TimeIndex);");
     }
     catch(const std::exception& e)
     {
@@ -131,8 +134,10 @@ void KlineDatabase::Table::createTableKlineMin60(SQLite::Database& db) {
 KlineDatabase::KlineDatabase()
 : db_(db_name, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE)
 , table_(db_)
-, stmtSelectDataByExchangeSymbolIndex(db_, "SELECT * FROM ? WHERE Exchange = ? and Symbol = ? and Index = ?;")
-, stmtReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO ? VALUES (?,?,?,?,?,?,?);")
+, stmtMin1SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
+, stmtMin1ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN1_TABLENAME " VALUES (?,?,?,?,?,?,?);")
+, stmtMin60SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN60_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
+, stmtMin60ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN60_TABLENAME " VALUES (?,?,?,?,?,?,?);")
 {
 
 }
@@ -299,35 +304,47 @@ bool KlineDatabase::_init_db()
 
 bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index, const vector<KlineData>& klines)
 {
-    string table_name;
-    switch( resolution ) {
-        case 60:{
-            table_name = KLINE_MIN1_TABLENAME;
-            break;
-        }
-        case 3600:{
-            table_name = KLINE_MIN60_TABLENAME;
-            break;
-        }
-        default:{
-            _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
-            return false;
-        }
-    }
-
     string data = encode_klines(klines);
+
     try
     {
-        stmtReplaceDataByExchangeSymbolIndex.reset();
-        SQLite::bind(stmtReplaceDataByExchangeSymbolIndex,
-            table_name,
-            exchange,
-            symbol,
-            index,
-            data,
-            0
-        );
-        stmtReplaceDataByExchangeSymbolIndex.exec();
+        switch( resolution )
+        {
+            case 60:
+            {
+                stmtMin1ReplaceDataByExchangeSymbolIndex.reset();
+                SQLite::bind(stmtMin1ReplaceDataByExchangeSymbolIndex,
+                    exchange,
+                    symbol,
+                    index,
+                    data,
+                    0,
+                    "",                    //CreateTime
+                    ""                    //ModifyTime
+                );
+                stmtMin1ReplaceDataByExchangeSymbolIndex.exec();
+                break;
+            }
+            case 3600:
+            {
+                stmtMin60ReplaceDataByExchangeSymbolIndex.reset();
+                SQLite::bind(stmtMin60ReplaceDataByExchangeSymbolIndex,
+                    exchange,
+                    symbol,
+                    index,
+                    data,
+                    0,
+                    "",                    //CreateTime
+                    ""                    //ModifyTime
+                );
+                stmtMin60ReplaceDataByExchangeSymbolIndex.exec();
+                break;
+            }
+            default:{
+                _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
+                return false;
+            }
+        }
         return true;
     }
     catch(const std::exception& e)
@@ -340,42 +357,54 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
 
 bool KlineDatabase::_read_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index, vector<KlineData>& klines)
 {
-    string table_name;
-    switch( resolution ) {
-        case 60:{
-            table_name = KLINE_MIN1_TABLENAME;
-            break;
-        }
-        case 3600:{
-            table_name = KLINE_MIN60_TABLENAME;
-            break;
-        }
-        default:{
-            _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
-            return false;
-        }
-    }
-    
+    string data;
     try
     {
-        stmtSelectDataByExchangeSymbolIndex.reset();
-        SQLite::bind(stmtSelectDataByExchangeSymbolIndex,
-            table_name,
-            exchange,
-            symbol,
-            index
-        );
-        if (!stmtSelectDataByExchangeSymbolIndex.executeStep()) 
+        switch( resolution ) 
         {
-            _log_and_print("[sqlite] [stmtSelectDataByExchangeSymbolIndex] executeStep fail");
-            return false;
+            case 60:
+            {
+                stmtMin1SelectDataByExchangeSymbolIndex.reset();
+                SQLite::bind(stmtMin1SelectDataByExchangeSymbolIndex,
+                    exchange,
+                    symbol,
+                    index
+                );
+                if (!stmtMin1SelectDataByExchangeSymbolIndex.executeStep()) 
+                {
+                    _log_and_print("[sqlite] [stmtMin1SelectDataByExchangeSymbolIndex] executeStep fail");
+                    return false;
+                }
+                data = stmtMin1SelectDataByExchangeSymbolIndex.getColumn("Data").getString();
+                break;
+            }
+            case 3600:
+            {
+                stmtMin60SelectDataByExchangeSymbolIndex.reset();
+                SQLite::bind(stmtMin60SelectDataByExchangeSymbolIndex,
+                    exchange,
+                    symbol,
+                    index
+                );
+                if (!stmtMin60SelectDataByExchangeSymbolIndex.executeStep()) 
+                {
+                    _log_and_print("[sqlite] [stmtMin60SelectDataByExchangeSymbolIndex] executeStep fail");
+                    return false;
+                }
+                data = stmtMin60SelectDataByExchangeSymbolIndex.getColumn("Data").getString();
+                break;
+            }
+            default:{
+                _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
+                return false;
+            }
         }
-        string data = stmtSelectDataByExchangeSymbolIndex.getColumn("Data").getString();
-        return decode_json_klines(data, klines);
     }
     catch(const std::exception& e)
     {
         _log_and_print("[sqlite] [stmtSelectDataByExchangeSymbolIndex] exception: %s", e.what());
         return false;
     }
+    
+    return decode_json_klines(data, klines);
 }

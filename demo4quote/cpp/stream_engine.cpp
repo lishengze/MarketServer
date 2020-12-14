@@ -1,14 +1,7 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-// config file relative path
-const char* config_file = "config.json";
-
 StreamEngine::StreamEngine(){
-    
-    // init configuration
-    utrade::pandora::Singleton<Config>::Instance();
-    CONFIG->parse_config(config_file);
 
     // 
     quote_source_.set_engine(this);
