@@ -35,13 +35,13 @@ public:
 
     void handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth);
 
-    void handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline);
+    void handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines);
 
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth);
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline);
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines);
 
     void request_kline_package(PackagePtr package);
 

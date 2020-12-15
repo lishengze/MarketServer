@@ -23,7 +23,10 @@ class Config
         int get_rest_port() { return rest_port_;}
 
     private:
-        string  hub_address_;
-        int     ws_port_;   
-        int     rest_port_; 
+        string                  hub_address_;
+        int                     ws_port_;   
+        int                     rest_port_; 
+        std::vector<int>        frequency_list_;
+        int                     frequency_numb_{100};
+
 };

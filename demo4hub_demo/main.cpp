@@ -11,13 +11,21 @@ class Client : public HubCallback
 {
 public:   
     // 深度数据（推送）
-    virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { 
+    virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
+    { 
         cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
+
+        for (int i =0; i < 10; ++i)
+        {
+            cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
+        }
+
         return 0;
     } 
 
     // K线数据（推送）
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
+        cout << "klines.size: " << klines.size() << endl;
         for( int i = 0 ; i < klines.size() ; i ++ )
         {
             cout << "Test Client on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;

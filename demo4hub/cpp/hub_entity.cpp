@@ -59,10 +59,10 @@ void HubEntity::on_snap(const SEData& quote)
 
     //cout << "HubEntity::on_snap " << quote_depth.symbol << " " << quote_depth.ask_length << " " << quote_depth.bid_length << endl;
 
-    //for (int i =0; i < 10; ++i)
-    //{
-    //    cout << quote_depth.asks[i].price.get_value() << ", " << quote_depth.bids[i].price.get_value() << endl;
-    //}
+    // for (int i =0; i < 10; ++i)
+    // {
+    //     cout << quote_depth.asks[i].price.get_value() << ", " << quote_depth.bids[i].price.get_value() << endl;
+    // }
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
 }
 
