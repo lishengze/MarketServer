@@ -53,6 +53,7 @@ pipeline {
             steps {
                 // compile
                 sh label: '', script: '''
+                    git rm --cached test/brokersystem
                     git submodule init
                     git submodule update
                     mkdir -p demo4quote/cpp/cmake/build
