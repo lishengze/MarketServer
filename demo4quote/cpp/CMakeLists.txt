@@ -36,7 +36,7 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
 add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS})
-target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
+target_link_libraries(demo4quote ${Boost_LIBRARIES})
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
 target_link_libraries(demo4quote protobuf protoc protobuf-lite)
