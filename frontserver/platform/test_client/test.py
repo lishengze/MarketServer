@@ -46,23 +46,49 @@ def sub_btc_usdt(ws, sub_symbol):
     print("sub_info_str: %s" % (sub_info_str))
     ws.send(sub_info_str)    
 
-def on_open(ws):
-    print("Connected")
+def get_sub_depth_str():
     sub_info = {
         "type":"sub_symbol",
         "symbol":["XRP_USDT"]
     }
     sub_info_str = json.dumps(sub_info)
     print("sub_info_str: %s" % (sub_info_str))
-    ws.send(sub_info_str)
+    return sub_info_str
 
-    _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
+def get_sub_kline_str():
+    print("get_sub_kline_str")
+    frequency = 60 * 5
+    end_time = int(time.time())
+    end_time = end_time - end_time % frequency - frequency
+    start_time = end_time - 60 * 30
+
+    sub_info = {
+        "type":"kline_update",
+        "symbol":"BTC_USDT",
+        "start_time":str(start_time),
+        "end_time":str(end_time),
+        "frequency":"60"
+    }
+    sub_info_str = json.dumps(sub_info)
+    print("sub_info_str: %s" % (sub_info_str))
+    return sub_info_str
+
+def on_open(ws):
+    print("Connected")
+
+    # send_str = get_sub_depth_str()
+
+    send_str = get_sub_kline_str()
+
+    ws.send(send_str)
+
+    # _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
 
 
 def test_websocket():
     # websocket.enableTrace(True)
-    ip = "ws://36.255.220.139"
-    # ip = "ws://127.0.0.1"
+    # ip = "ws://36.255.220.139"
+    ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
@@ -105,7 +131,7 @@ def test_urllib():
 
     
 if __name__ == "__main__":
-    # test_websocket()
+    test_websocket()
 
-    test_http_restful()
+    # test_http_restful()
 

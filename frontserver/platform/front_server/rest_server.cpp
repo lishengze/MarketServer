@@ -224,7 +224,7 @@ bool RestServer::process_v1_request_kline(string& query_param, string& error_msg
         }
         else
         {
-            if (!front_server_->request_kline_data(symbol, start_time, end_time, frequency, res, req))
+            if (!front_server_->request_kline_data(symbol, start_time, end_time, frequency, res, req, nullptr))
             {
                 error_msg += "Server Internel Error, Please Try Again!";
             }

@@ -30,7 +30,7 @@ public:
     void request_all_symbol();
 
     bool request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
-                             HttpResponse* http_res, HttpRequest* http_req);
+                             HttpResponse* http_res, HttpRequest* http_req, WebsocketClass* ws);
 
     void process_rtn_depth_package(PackagePtr package);
 

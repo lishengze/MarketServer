@@ -137,13 +137,14 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
 {
+    
     if (depth.symbol.length() == 0 || depth.symbol == "") 
     {
         LOG_INFO("DataReceive::handle_depth_data symbol is null!");
         return;
     }
 
-    // cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
     
     // for (int i =0; i < 10; ++i)
     // {
@@ -159,6 +160,8 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
+    return;
+
     cout << "klines.size: " << klines.size() << endl;
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
@@ -171,13 +174,11 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
 
         LOG_INFO(stream_obj.str());
 
-        // PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
+        PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
-        // package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
+        package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
 
-        // deliver_response(package);
-
-        // cout << "on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
+        deliver_response(package);
     }
 
     // return ; 

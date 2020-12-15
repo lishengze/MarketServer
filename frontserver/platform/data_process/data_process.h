@@ -37,6 +37,8 @@ public:
 
     PackagePtr get_kline_package(PackagePtr package);
 
+    void store_kline_data(int frequency, KlineData* pkline_data);
+
     void init_test_kline_data();
 
     inline std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
@@ -89,9 +91,14 @@ public:
 
 
 private:
-    std::map<std::string, EnhancedDepthData*>                       depth_data_;
-    std::map<std::string, std::map<type_tick, KlineData*>>          kline_data_;
+    std::map<std::string, EnhancedDepthData*>                                depth_data_;
+    std::map<std::string, std::map<int, std::map<type_tick, KlineData*>>>    kline_data_;
+    std::map<std::string, std::map<int, KlineData*>>                         cur_kline_data_;
 
     bool                                                            test_kline_data_{true};
+
+    std::vector<int>                                                frequency_list_;
+    int                                                             frequency_numb_{100};   
+    int                                                             frequency_base_;           
 };
 

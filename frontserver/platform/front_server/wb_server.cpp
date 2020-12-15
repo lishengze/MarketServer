@@ -156,7 +156,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 
         if (js["type"].is_null())
         {
-            ws->send(get_error_send_rsp_string(), uWS::OpCode::TEXT);
+            ws->send(get_error_send_rsp_string("Lost type Item!"), uWS::OpCode::TEXT);
         }
         else
         {
@@ -165,16 +165,109 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
                 process_sub_info(ori_msg, ws);
             }
 
-            if (js["type"].get<string>() == "heartbeat")
+            if (js["type"].get<string>() == HEARTBEAT)
             {
                 process_heartbeat(ws);
             }
+
+            if (js["type"].get<string>() == KLINE_UPDATE)
+            {
+                process_kline_data(ori_msg, ws);
+            }            
         }
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }        
+}
+
+void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
+{
+    try
+    {
+        cout << "ori_msg: " << ori_msg << endl;
+        nlohmann::json js = nlohmann::json::parse(ori_msg);
+        int error_id = 0;
+        string err_msg ="";
+        string symbol;
+        type_tick start_time;
+        type_tick end_time;
+        type_tick frequency;
+
+        if (js["symbol"].is_null())
+        {
+            err_msg += "Lost Symbol Item \n";
+            error_id = -1;
+        }
+        else
+        {
+            symbol = js["symbol"].get<string>();
+        }
+        
+
+        if (js["start_time"].is_null())
+        {
+            err_msg += "Lost start_time Item \n";
+            error_id = -1;
+        }
+        else
+        {
+            start_time = std::stoul(js["start_time"].get<string>());
+        }
+        
+
+        if (js["end_time"].is_null())
+        {
+            err_msg += "Lost end_time Item \n";
+            error_id = -1;
+        }
+        else
+        {
+            end_time = std::stoul(js["end_time"].get<string>());
+        }
+        
+
+        if (js["frequency"].is_null())
+        {
+            err_msg += "Lost frequency Item \n";
+            error_id = -1;
+        }        
+        else
+        {
+            frequency = std::stoi(js["frequency"].get<string>());
+            error_id = -1;
+        }
+                        
+
+        cout<< "symbol: " << symbol << " \n" 
+            << "start_time: " << start_time << " \n"
+            << "end_time: " << end_time << " \n"
+            << "frequency: " << frequency << " \n"
+            << endl;
+
+        if (error_id != 0)
+        {
+            if (!front_server_->request_kline_data(symbol, start_time, end_time, frequency, nullptr, nullptr, ws))
+            {
+                err_msg += "Server Internel Error, Please Try Again!";
+                ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
+            }            
+        }
+        else
+        {
+            ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
+        }
+
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+
+        stream_msg << "WBServer::process_kline_data " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }
+    
 }
 
 void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
@@ -304,12 +397,12 @@ void WBServer::check_heartbeat()
     }
 }
 
-string WBServer::get_error_send_rsp_string()
+string WBServer::get_error_send_rsp_string(string err_msg)
 {
     nlohmann::json json_obj;
     json_obj["type"] = "error";
     json_obj["error_id"] = LOST_TYPE_ITEM;
-    json_obj["error_msg"] = "Send Message lost type item!";
+    json_obj["error_msg"] = err_msg;
     return json_obj.dump();
 }
 

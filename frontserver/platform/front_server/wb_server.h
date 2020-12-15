@@ -67,6 +67,8 @@ class WBServer
     
     void process_sub_info(string ori_msg, WebsocketClass * ws);
 
+    void process_kline_data(string ori_msg, WebsocketClass* ws);
+
     void process_heartbeat(WebsocketClass* ws);
 
     void clean_client(WebsocketClass * ws);
@@ -77,7 +79,7 @@ class WBServer
 
     void check_heartbeat();
 
-    string get_error_send_rsp_string();
+    string get_error_send_rsp_string(string err_msg);
 
     string get_heartbeat_str();
 

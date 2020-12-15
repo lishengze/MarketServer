@@ -50,6 +50,7 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define SYMBOL_LIST "symbol_list"
 #define SYMBOL_UPDATE "symbol_update"
 #define KLINE_UPDATE "kline_update"
+#define HEARTBEAT "heartbeat"
 
 #define MAX_DOUBLE 10000000000000
 #define MIN_DOUBLE -10000000000000

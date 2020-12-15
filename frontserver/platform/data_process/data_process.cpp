@@ -5,10 +5,15 @@
 #include "../util/tools.h"
 #include "../front_server_declare.h"
 #include "../log/log.h"
+#include "../config/config.h"
 
 DataProcess::DataProcess(utrade::pandora::io_service_pool& pool, IPackageStation* next_station)
     :ThreadBasePool(pool), IPackageStation(next_station)
 {
+    frequency_list_ = CONFIG->get_frequency_list();
+    frequency_numb_ = CONFIG->get_frequency_numb();
+    frequency_base_ = CONFIG->get_frequency_base();
+
     if (test_kline_data_)
     {
         init_test_kline_data();
@@ -186,13 +191,16 @@ void DataProcess::response_src_kline_package(PackagePtr package)
     {
         if (test_kline_data_) return;
 
-        KlineData* p_depth_data = GET_NON_CONST_FIELD(package, KlineData);
+        KlineData* pkline_data = GET_NON_CONST_FIELD(package, KlineData);
 
-        if (p_depth_data)
+
+        if (pkline_data)
         {
-            kline_data_[p_depth_data->symbol][p_depth_data->index] = p_depth_data;
-
-            LOG_DEBUG(string("kline_data push") + p_depth_data->symbol + ", " + utrade::pandora::ToSecondStr(p_depth_data->index * NanoPerSec, "%Y-%m-%dT%H:%M:%S"));
+            for (int cur_frequency: frequency_list_)
+            {
+                store_kline_data(cur_frequency, pkline_data);
+            }
+            LOG_DEBUG(string("kline_data push") + pkline_data->symbol + ", " + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%dT%H:%M:%S"));
         }
         else
         {
@@ -208,6 +216,49 @@ void DataProcess::response_src_kline_package(PackagePtr package)
     }    
 }
 
+void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
+{
+    if (kline_data_.find(pkline_data->symbol) == kline_data_.end() 
+    || kline_data_[pkline_data->symbol].find(frequency) == kline_data_[pkline_data->symbol].end())
+    {
+        kline_data_[pkline_data->symbol][frequency][pkline_data->index] = pkline_data;
+        cur_kline_data_[pkline_data->symbol][frequency] = pkline_data;
+    }
+    else
+    {
+        type_tick cur_time = pkline_data->index;
+        type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->first;
+
+
+        KlineData* last_kline;
+
+        if (cur_kline_data_[pkline_data->symbol].find(frequency) != cur_kline_data_[pkline_data->symbol].end())
+        {
+            last_kline = cur_kline_data_[pkline_data->symbol][frequency];
+
+            last_kline->px_close = pkline_data->px_close;
+            last_kline->px_low = last_kline->px_low > pkline_data->px_low ? pkline_data->px_low: last_kline->px_low;
+            last_kline->px_high = last_kline->px_high < pkline_data->px_high ? pkline_data->px_high: last_kline->px_high;
+        }
+        else
+        {
+            last_kline = pkline_data;
+            cur_kline_data_[pkline_data->symbol][frequency] = last_kline;
+        }
+
+        if ((cur_time - last_update_time) % frequency == 0)
+        {
+            if (kline_data_[pkline_data->symbol][frequency].size() == frequency_numb_)
+            {
+                kline_data_[pkline_data->symbol][frequency].erase(kline_data_[pkline_data->symbol][frequency].begin());
+            }
+            kline_data_[pkline_data->symbol][frequency][pkline_data->index] = last_kline;
+
+            cur_kline_data_[pkline_data->symbol].erase(frequency);
+        }
+    }
+}
+
 PackagePtr DataProcess::get_kline_package(PackagePtr package)
 {
     cout << "DataProcess::get_kline_package  " << endl;
@@ -215,15 +266,25 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
     {    
         ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
 
+        cout << "symbol_: " << pReqKlineData->symbol_ << ", \n"
+             << "frequency_: " << pReqKlineData->frequency_ << ", \n"
+             << "request start_time: " << pReqKlineData->start_time_ << ", \n"
+             << "request end_time: " << pReqKlineData->end_time_ << ", \n"
+             << endl;
+
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
-            std::map<type_tick, KlineData*>& symbol_kline_data = kline_data_[pReqKlineData->symbol_];
+            std::map<type_tick, KlineData*>& symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
+
+            if (kline_data_[pReqKlineData->symbol_].find(pReqKlineData->frequency_) != kline_data_[pReqKlineData->symbol_].end())
+            {
+                cout << "Has frequency_: " << pReqKlineData->frequency_ << endl;
+                symbol_kline_data = kline_data_[pReqKlineData->symbol_][pReqKlineData->frequency_];
+            }
 
             cout << "\n" << pReqKlineData->symbol_ << ", \n"
                  << "kline_data start_time: " << symbol_kline_data.begin()->first << ", \n"
                  << "kline_data end_time: " << symbol_kline_data.rbegin()->first << ", \n"
-                 << "request start_time: " << pReqKlineData->start_time_ << ", \n"
-                 << "request end_time: " << pReqKlineData->end_time_ << ", \n"
                  << endl;
 
             if (symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_)
@@ -332,6 +393,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
     }
 }
 
+/*
 // std::vector<AtomKlineDataPtr>& DataProcess::compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
 // {
 //     cout << "DataProcess::compute_target_kline_data" << endl;
@@ -379,6 +441,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
 //     return result;
 // }
+*/
 
 // Creaet Last Hour Test Data For BTC_USDT
 void DataProcess::init_test_kline_data()
@@ -411,8 +474,13 @@ void DataProcess::init_test_kline_data()
 
         // kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};
 
-        kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};   
+        kline_data_[symbol][frequency_base_][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};   
     }
+
+    cout << "test symbol: " << symbol << ", \n"
+         << "test frequency_base_: " << frequency_base_ << ", \n"
+         << "test start_time: " << kline_data_[symbol][frequency_base_].begin()->first << ", \n"
+         << "test end_time: " << kline_data_[symbol][frequency_base_].rbegin()->first << endl;
 
     cout << "init end!" << endl;
 }

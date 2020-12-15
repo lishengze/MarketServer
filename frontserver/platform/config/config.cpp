@@ -65,6 +65,11 @@ void Config::load_config(string file_name)
                 {
                     frequency_numb_ = js["market_cache"]["frequency_numb"].get<int>();
                 }
+
+                if (js["market_cache"]["frequency_base"].is_number())
+                {
+                    frequency_base_ = js["market_cache"]["frequency_base"].get<int>();
+                }                
             }              
 
             cout << "frequency_list_: " << endl;
@@ -73,6 +78,7 @@ void Config::load_config(string file_name)
                 cout << freq << endl;
             }       
             cout << "frequency_numb_: " << frequency_numb_ << endl;
+            cout << "frequency_base: " << frequency_base_ <<endl;
         }
     
     }
