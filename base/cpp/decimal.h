@@ -36,15 +36,11 @@ struct SDecimal {
         data_.value_ = 0;
     }
 
-    //SDecimal(double v) {
-    //    from(v);
-    //}
-
     SDecimal(const string& v) {
         from(v);
     }
 
-    explicit SDecimal(const double v, int precise = -1, bool ceiling = false) {
+    SDecimal(const double v, int precise = -1, bool ceiling = false) {
         from(v, precise, ceiling);
     }
 
