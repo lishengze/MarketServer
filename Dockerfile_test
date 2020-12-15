@@ -4,4 +4,4 @@ COPY deploy /
 
 WORKDIR /
 
-CMD ["/demo"]
+CMD ["/demo4quote"]
