@@ -60,6 +60,7 @@ pipeline {
                     mkdir -p demo4quote/cpp/cmake/build
                     pushd demo4quote/cpp/cmake/build
                     cmake ../..
+                    make clean
                     make -j
                     cp ../../config.json ./
                     ./demo4quote
