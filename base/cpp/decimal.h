@@ -66,7 +66,7 @@ struct SDecimal {
     
     static SDecimal parse_by_raw(uint64 base, uint64 prec) {
         SDecimal ret;
-        ret.from(base, prec);
+        ret.from_raw(base, prec);
         return ret;
     }
 

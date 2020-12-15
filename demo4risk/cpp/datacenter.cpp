@@ -214,7 +214,6 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
             double remain_amount = sell_total_amounts[exchange];
-            cout << remain_amount << endl;
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = SDecimal::parse("0");
             } else {
@@ -231,12 +230,12 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
             double remain_amount = sell_total_amounts[exchange];
-            cout << remain_amount << endl;
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = SDecimal::parse("0");
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
+                //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
             }
         }
     }
