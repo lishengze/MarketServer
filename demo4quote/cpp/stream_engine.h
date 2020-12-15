@@ -5,9 +5,9 @@
 #include "quote_mixer2.h"
 #include "quote_dumper.h"
 #include "grpc_server.h"
-#include "nacos_client.h"
 #include "kline_mixer.h"
 #include "kline_database.h"
+#include "nacos_client.h"
 
 class StreamEngine : public QuoteSourceInterface, public INacosCallback
 {

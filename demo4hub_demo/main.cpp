@@ -28,7 +28,7 @@ public:
         cout << "klines.size: " << klines.size() << endl;
         for( int i = 0 ; i < klines.size() ; i ++ )
         {
-            cout << "on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
+            cout << "Test Client on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
         }
         return 0; 
     }

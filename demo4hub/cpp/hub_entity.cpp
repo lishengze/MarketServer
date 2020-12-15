@@ -57,7 +57,7 @@ void HubEntity::on_snap(const SEData& quote)
     quote_depth.symbol = quote.symbol();
     quote_depth.exchange = quote.exchange();
 
-    cout << "HubEntity::on_snap " << quote_depth.symbol << " " << quote_depth.ask_length << " " << quote_depth.bid_length << endl;
+    //cout << "HubEntity::on_snap " << quote_depth.symbol << " " << quote_depth.ask_length << " " << quote_depth.bid_length << endl;
 
     // for (int i =0; i < 10; ++i)
     // {

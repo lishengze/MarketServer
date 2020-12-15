@@ -209,13 +209,13 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
     for( auto iter = src->asks.begin() ; iter != src->asks.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        depth.total_volume = 0;
+        depth.total_volume = SDecimal::parse("0");
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
-                iter2->second = 0;
+                iter2->second = SDecimal::parse("0");
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
@@ -225,16 +225,18 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
     for( auto iter = src->bids.rbegin() ; iter != src->bids.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        depth.total_volume = 0;
+        depth.total_volume = SDecimal::parse("0");
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
-                iter2->second = 0;
+                iter2->second = SDecimal::parse("0");
+                cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << need_amount.get_str_value() << endl;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
+                cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
             }
         }
     }

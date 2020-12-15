@@ -6,7 +6,6 @@
 using namespace std;
 using njson = nlohmann::json;
 #include "redis_quote_snap.h"
-#include "nacos_client.h"
 
 struct SymbolMeta
 {    

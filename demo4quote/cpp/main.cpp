@@ -1,5 +1,7 @@
 #include "stream_engine.h"
 
+// config file relative path
+const char* config_file = "config.json";
 
 // exit handler function
 void setup_signal_handler_callback()
@@ -11,10 +13,14 @@ void setup_signal_handler_callback()
     signal(SIGKILL, StreamEngine::signal_handler);
 }
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv) 
+{
     // setup the signal here
     setup_signal_handler_callback();
+    
+    // init configuration
+    utrade::pandora::Singleton<Config>::Instance();
+    CONFIG->parse_config(config_file);
 
     StreamEngine streamEngine;
     streamEngine.start();
