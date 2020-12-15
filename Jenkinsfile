@@ -53,14 +53,14 @@ pipeline {
             steps {
                 // compile
                 sh label: '', script: '''
-                    mkdir -p src/cmake/build
-                    pushd src/cmake/build
+                    mkdir -p demo4quote/cpp/cmake/build
+                    pushd demo4quote/cpp/cmake/build
                     cmake ../..
                     make -j
                     popd
                     mkdir -p deploy
-                    cp src/cmake/build/demo deploy
-                    cp src/config.json deploy
+                    cp demo4quote/cpp/cmake/build/demo4quote deploy
+                    cp demo4quote/cpp/config.json deploy
                 '''
                 
                 sh label: '', script: '''
