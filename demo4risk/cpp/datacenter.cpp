@@ -232,6 +232,7 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = SDecimal::parse("0");
+                cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.need_amount.get_str_value() << endl;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
