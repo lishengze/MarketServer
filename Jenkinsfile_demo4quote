@@ -56,6 +56,7 @@ pipeline {
                     git rm --cached test/brokersystem
                     git submodule init
                     git submodule update
+                    ./gen_protos_dock.sh
                     mkdir -p demo4quote/cpp/cmake/build
                     pushd demo4quote/cpp/cmake/build
                     cmake ../..
