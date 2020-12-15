@@ -191,6 +191,8 @@ void DataProcess::response_src_kline_package(PackagePtr package)
         if (p_depth_data)
         {
             kline_data_[p_depth_data->symbol][p_depth_data->index] = p_depth_data;
+
+            LOG_DEBUG(string("kline_data push") + p_depth_data->symbol + ", " + utrade::pandora::ToSecondStr(p_depth_data->index * NanoPerSec, "%Y-%m-%dT%H:%M:%S"));
         }
         else
         {

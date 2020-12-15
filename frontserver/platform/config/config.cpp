@@ -47,7 +47,32 @@ void Config::load_config(string file_name)
             {
                 string error_msg = file_name + " does not have rest_server.port! \n";
                 LOG_ERROR(error_msg); 
-            }                        
+            }   
+
+            if (!js["market_cache"].is_null())
+            {
+                if (js["market_cache"]["frequency_list"].is_array())
+                {
+                    nlohmann::json frequency_list = js["market_cache"]["frequency_list"];
+                    for (json::iterator it = frequency_list.begin(); it != frequency_list.end(); ++it)
+                    {
+                        json &value = *it;
+                        frequency_list_.push_back(value.get<int>());                        
+                    }
+                }
+
+                if (js["market_cache"]["frequency_numb"].is_number())
+                {
+                    frequency_numb_ = js["market_cache"]["frequency_numb"].get<int>();
+                }
+            }              
+
+            cout << "frequency_list_: " << endl;
+            for (auto freq:frequency_list_)
+            {
+                cout << freq << endl;
+            }       
+            cout << "frequency_numb_: " << frequency_numb_ << endl;
         }
     
     }
@@ -55,18 +80,4 @@ void Config::load_config(string file_name)
     {
         std::cerr << "Config::load_config: " << e.what() << '\n';
     }
-
-
-
-    // key_center_info_.Addr = js["KeyCenter"]["Addr"].get<string>();
-    // key_center_info_.Port = js["KeyCenter"]["Port"].get<int>();
-    // key_center_info_.UserName = js["KeyCenter"]["UserName"].get<string>();
-    // key_center_info_.Password = js["KeyCenter"]["Password"].get<string>();
-
-    // debug_client_recv_package = bool(js["debug_client_recv_package"].get<int>());
-    // debug_client_send_package = bool(js["debug_client_send_package"].get<int>());
-    // debug_console_recv_package = bool(js["debug_console_recv_package"].get<int>());
-    // debug_console_send_package = bool(js["debug_console_send_package"].get<int>());
-    // debug_bridge_recv_package = bool(js["debug_bridge_recv_package"].get<int>());
-    // debug_bridge_send_package = bool(js["debug_bridge_send_package"].get<int>());
 }

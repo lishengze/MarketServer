@@ -54,3 +54,7 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define MAX_DOUBLE 10000000000000
 #define MIN_DOUBLE -10000000000000
 
+#define NanoPerSec 1000 * 1000 * 1000
+#define MicroPerSec 1000 * 1000
+#define MillPersec 1000
+

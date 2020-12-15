@@ -127,9 +127,11 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 }
 
 // K线数据（推送）
-int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline)
+int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, kline));
+    // cout << "DataReceive::on_kline " << endl;
+
+    get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
 }
 
@@ -141,14 +143,12 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
-
-    return;
+    // cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
     
-    for (int i =0; i < 10; ++i)
-    {
-        cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
-    }
+    // for (int i =0; i < 10; ++i)
+    // {
+    //     cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
+    // }
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -157,25 +157,29 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     deliver_response(package);
 }
 
-void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const KlineData& kline)
+void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    if (kline.symbol.length() == 0 || kline.symbol == "") 
+    cout << "klines.size: " << klines.size() << endl;
+    for( int i = 0 ; i < klines.size() ; i ++ )
     {
-        LOG_INFO("DataReceive::handle_kline_data symbol is null!");
-        return;
+        const KlineData& kline = klines[i];
+
+        std::stringstream stream_obj;
+        stream_obj << "symbol: " << symbol << ", exchange: " << exchange << ", \n"
+                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
+
+        LOG_INFO(stream_obj.str());
+
+        // PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
+
+        // package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
+
+        // deliver_response(package);
+
+        // cout << "on_kline " << exchange << "-" << symbol << " " << klines[i].index << " " << klines[i].px_open.get_str_value() << " " << endl;
     }
 
-    std::stringstream stream_obj;
-    stream_obj << "symbol: " << symbol << ", exchange: " << exchange << ", \n"
-                << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-
-    LOG_INFO(stream_obj.str());
-
-    PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
-
-    package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
-
-    deliver_response(package);
+    // return ; 
 }
 

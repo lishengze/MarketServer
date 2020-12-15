@@ -233,7 +233,7 @@ void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
 
     string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
 
-    cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
+    // cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
 
     for (auto iter:wss_con_map_)
     {

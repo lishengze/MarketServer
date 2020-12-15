@@ -11,5 +11,10 @@
     "rest_server":
     {
         "port": 9115
+    },
+    "market_cache":
+    {
+        "frequency_list": [60, 300, 600, 900, 1800],
+        "frequency_numb": 1000
     }
 }

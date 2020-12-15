@@ -346,7 +346,8 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
             symbol_meta.seq_no = quote.sequence_no;
             return true;
         } else {
-            _log_and_print("%s-%s sequence skip from %lu to %lu. stop and request snap again ...", exchange.c_str(), symbol.c_str(), symbol_meta.seq_no, quote.sequence_no);
+            _log_and_print("%s-%s sequence skip from %lu to %lu. stop and request snap again ...", 
+                            exchange.c_str(), symbol.c_str(), symbol_meta.seq_no, quote.sequence_no);
             // 序号不连续
             redis_snap_requester_.add_symbol(exchange, symbol);
             symbol_meta.caches.clear();
