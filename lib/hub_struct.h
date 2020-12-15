@@ -42,8 +42,8 @@ struct KlineData
 {
     KlineData(string symbol_str, type_tick time, double open, double high, 
                 double low, double close, double volume_str):
-                symbol{symbol_str}, index{time}, px_open{open}, px_close{close}, 
-                px_high{high}, px_low{low}, volume{volume_str} {}
+                symbol{symbol_str}, index{time}, px_open{open}, px_high{high}, px_low{low},
+                px_close{close}, volume{volume_str} {}
                     
     string symbol;
     string exchange;
