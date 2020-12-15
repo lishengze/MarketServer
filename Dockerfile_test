@@ -1,0 +1,7 @@
+FROM broker_2020_12_2:latest
+
+COPY deploy /
+
+WORKDIR /
+
+CMD ["/demo"]
