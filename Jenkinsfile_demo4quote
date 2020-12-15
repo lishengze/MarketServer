@@ -61,6 +61,8 @@ pipeline {
                     pushd demo4quote/cpp/cmake/build
                     cmake ../..
                     make -j
+                    cp ../../config.json ./
+                    ./demo4quote
                     popd
                     mkdir -p deploy
                     cp demo4quote/cpp/cmake/build/demo4quote deploy
