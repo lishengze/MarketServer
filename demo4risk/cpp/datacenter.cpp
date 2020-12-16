@@ -262,7 +262,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 iter2->second = 0;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
-                depth.total_volume += need_amount;
+                depth.total_volume += iter2->second;
             }
         }
     }
@@ -288,7 +288,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << need_amount.get_str_value() << endl;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
-                depth.total_volume += need_amount;
+                depth.total_volume += iter2->second;
                 //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
             }
         }
