@@ -196,11 +196,12 @@ void DataProcess::response_src_kline_package(PackagePtr package)
 
         if (pkline_data)
         {
+            LOG_DEBUG(string("kline_data push") + pkline_data->symbol + ", " + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
+
             for (int cur_frequency: frequency_list_)
             {
                 store_kline_data(cur_frequency, pkline_data);
             }
-            LOG_DEBUG(string("kline_data push") + pkline_data->symbol + ", " + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%dT%H:%M:%S"));
         }
         else
         {
@@ -218,45 +219,56 @@ void DataProcess::response_src_kline_package(PackagePtr package)
 
 void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
 {
-    if (kline_data_.find(pkline_data->symbol) == kline_data_.end() 
-    || kline_data_[pkline_data->symbol].find(frequency) == kline_data_[pkline_data->symbol].end())
+    try
     {
-        kline_data_[pkline_data->symbol][frequency][pkline_data->index] = pkline_data;
-        cur_kline_data_[pkline_data->symbol][frequency] = pkline_data;
-    }
-    else
-    {
-        type_tick cur_time = pkline_data->index;
-        type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->first;
+        cout << "store: " << frequency << ", " << pkline_data->symbol << endl;
 
-
-        KlineData* last_kline;
-
-        if (cur_kline_data_[pkline_data->symbol].find(frequency) != cur_kline_data_[pkline_data->symbol].end())
+        if (kline_data_.find(pkline_data->symbol) == kline_data_.end() 
+        || kline_data_[pkline_data->symbol].find(frequency) == kline_data_[pkline_data->symbol].end())
         {
-            last_kline = cur_kline_data_[pkline_data->symbol][frequency];
-
-            last_kline->px_close = pkline_data->px_close;
-            last_kline->px_low = last_kline->px_low > pkline_data->px_low ? pkline_data->px_low: last_kline->px_low;
-            last_kline->px_high = last_kline->px_high < pkline_data->px_high ? pkline_data->px_high: last_kline->px_high;
+            kline_data_[pkline_data->symbol][frequency][pkline_data->index] = pkline_data;
+            cur_kline_data_[pkline_data->symbol][frequency] = pkline_data;
         }
         else
         {
-            last_kline = pkline_data;
-            cur_kline_data_[pkline_data->symbol][frequency] = last_kline;
-        }
+            type_tick cur_time = pkline_data->index;
+            type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->first;
 
-        if ((cur_time - last_update_time) % frequency == 0)
-        {
-            if (kline_data_[pkline_data->symbol][frequency].size() == frequency_numb_)
+
+            KlineData* last_kline;
+
+            if (cur_kline_data_[pkline_data->symbol].find(frequency) != cur_kline_data_[pkline_data->symbol].end())
             {
-                kline_data_[pkline_data->symbol][frequency].erase(kline_data_[pkline_data->symbol][frequency].begin());
-            }
-            kline_data_[pkline_data->symbol][frequency][pkline_data->index] = last_kline;
+                last_kline = cur_kline_data_[pkline_data->symbol][frequency];
 
-            cur_kline_data_[pkline_data->symbol].erase(frequency);
+                last_kline->px_close = pkline_data->px_close;
+                last_kline->px_low = last_kline->px_low > pkline_data->px_low ? pkline_data->px_low: last_kline->px_low;
+                last_kline->px_high = last_kline->px_high < pkline_data->px_high ? pkline_data->px_high: last_kline->px_high;
+            }
+            else
+            {
+                last_kline = pkline_data;
+                cur_kline_data_[pkline_data->symbol][frequency] = last_kline;
+            }
+
+            if ((cur_time - last_update_time) % frequency == 0)
+            {
+                if (kline_data_[pkline_data->symbol][frequency].size() == frequency_numb_)
+                {
+                    kline_data_[pkline_data->symbol][frequency].erase(kline_data_[pkline_data->symbol][frequency].begin());
+                }
+                kline_data_[pkline_data->symbol][frequency][pkline_data->index] = last_kline;
+
+                cur_kline_data_[pkline_data->symbol].erase(frequency);
+            }
         }
     }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+
 }
 
 PackagePtr DataProcess::get_kline_package(PackagePtr package)

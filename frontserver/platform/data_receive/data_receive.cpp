@@ -144,13 +144,8 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    // cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
     
-    // for (int i =0; i < 10; ++i)
-    // {
-    //     cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
-    // }
-
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
@@ -160,7 +155,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    return;
+    return ; 
 
     cout << "klines.size: " << klines.size() << endl;
     for( int i = 0 ; i < klines.size() ; i ++ )
@@ -181,6 +176,6 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         deliver_response(package);
     }
 
-    // return ; 
+   
 }
 

@@ -95,7 +95,7 @@ private:
     std::map<std::string, std::map<int, std::map<type_tick, KlineData*>>>    kline_data_;
     std::map<std::string, std::map<int, KlineData*>>                         cur_kline_data_;
 
-    bool                                                            test_kline_data_{true};
+    bool                                                            test_kline_data_{false};
 
     std::vector<int>                                                frequency_list_;
     int                                                             frequency_numb_{100};   
