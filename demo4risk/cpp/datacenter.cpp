@@ -13,41 +13,84 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
     return true;
 }
 
-void _filter_depth_by_watermark(const map<SDecimal, SInnerDepth>& src_depths, const SDecimal& watermark, map<SDecimal, SInnerDepth>& dst_depths, bool is_ask)
+void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SDecimal& watermark, bool is_ask)
 {
-    bool patched = false;
-    unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
-
-    for( const auto& v : src_depths )
+    if( is_ask )
     {
-        const SDecimal& price = v.first;
-        if( is_ask ? (price <= watermark) : (price >= watermark) ) {
-            // 过滤价位
-            for( const auto& v2 : v.second.exchanges ){
-                volumes[v2.first] += v2.second;
-            }
-        } else {
-            // 保留价位
-            dst_depths[v.first] = v.second;
-            if( !patched ) {
-                patched = true;
-                
-                SInnerDepth fake;
-                for( const auto &v : volumes ) {
-                    fake.exchanges[v.first] = v.second;
-                }
+        bool patched = false;
+        unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
 
-                dst_depths[v.first].mix_exchanges(fake, 0);
+        for( auto v = src_depths.begin() ; v != src_depths.end() ; )
+        {
+            const SDecimal& price = v->first;
+            SInnerDepth& depth = v->second;
+            if( is_ask ? (price <= watermark) : (price >= watermark) ) {
+                // 过滤价位
+                for( const auto& v2 : depth.exchanges ){
+                    volumes[v2.first] += v2.second;
+                }
+                src_depths.erase(v++);
+                //cout << "delete depth " << price.get_str_value() << endl;
+            } else {
+                // 保留价位
+                if( !patched ) {
+                    patched = true;
+                    
+                    SInnerDepth fake;
+                    for( const auto &v : volumes ) {
+                        fake.exchanges[v.first] = v.second;
+                    }
+
+                    depth.mix_exchanges(fake, 0);
+                } else {
+                    break;
+                }
+                cout << "accumulate to depth " << price.get_str_value() << endl;
+                v++;
+            }
+        }
+    }
+    else 
+    {
+        bool patched = false;
+        unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
+
+        for( auto v = src_depths.rbegin() ; v != src_depths.rend() ; )
+        {
+            const SDecimal& price = v->first;
+            SInnerDepth& depth = v->second;
+            if( is_ask ? (price <= watermark) : (price >= watermark) ) {
+                // 过滤价位
+                for( const auto& v2 : depth.exchanges ){
+                    volumes[v2.first] += v2.second;
+                }
+                v = decltype(v)(src_depths.erase( std::next(v).base() ));
+                //cout << "delete depth " << price.get_str_value() << endl;
+            } else {
+                // 保留价位
+                if( !patched ) {
+                    patched = true;
+                    
+                    SInnerDepth fake;
+                    for( const auto &v : volumes ) {
+                        fake.exchanges[v.first] = v.second;
+                    }
+
+                    depth.mix_exchanges(fake, 0);
+                } else {
+                    break;
+                }
+                cout << "accumulate to depth " << price.get_str_value() << endl;
+                v++;
             }
         }
     }
 }
 
-void _filter_by_watermark(const SInnerQuote& src, const SDecimal& watermark, SInnerQuote& dst)
+void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark)
 {
-    dst.symbol = src.symbol;
-    _filter_depth_by_watermark(src.asks, watermark, dst.asks, true);
-    _filter_depth_by_watermark(src.bids, watermark, dst.bids, false);
+    _filter_depth_by_watermark(src.asks, watermark, true);
+    _filter_depth_by_watermark(src.bids, watermark, false);
 }
 
 WatermarkComputerWorker::WatermarkComputerWorker() 
@@ -123,9 +166,16 @@ void WatermarkComputerWorker::_calc_watermark() {
                 for( auto &v : obj->bids ) { bids.push_back(v.second); }
                 // 排序
                 sort(asks.begin(), asks.end());
+                for( const auto& v : asks ) {
+                    cout << "ask " << v.get_str_value() << endl;
+                }
                 sort(bids.begin(), bids.end());
+                for( const auto& v : bids ) {
+                    cout << "bid " << v.get_str_value() << endl;
+                }
                 if( asks.size() > 0 && bids.size() > 0 ) {
                     iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
+                    cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
                 }
             }
         }
@@ -135,20 +185,14 @@ void WatermarkComputerWorker::_calc_watermark() {
     }
 };
    
-SInnerQuote* WatermarkComputerWorker::process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out)
+SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    vassign(out->symbol, src->symbol);
-    vassign(out->time, src->time);
-    vassign(out->time_arrive, src->time_arrive);
-    vassign(out->seq_no, src->seq_no);
-
     SDecimal watermark;
-    get_watermark(src->symbol, watermark);
-    _filter_by_watermark(*src, watermark, *out);
-    if( ctx.is_sample_ ) {
-        _log_and_print("worker(watermark)-%s: %s %lu/%lu", src->symbol.c_str(), watermark.get_str_value().c_str(), out->asks.size(), out->bids.size());
-    }
-    return out;
+    get_watermark(src.symbol, watermark);
+    _filter_by_watermark(src, watermark);
+    _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
+    
+    return src;
 }
 
 void AccountAjdustWorker::set_snap(const SInnerQuote& quote) 
@@ -181,12 +225,12 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
     return true;
 }
 
-SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out)
+SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     // 获取币种出现次数
     string sell_currency, buy_currency;
     int sell_count, buy_count;
-    if( !get_currency(*src, sell_currency, sell_count, buy_currency, buy_count) )
+    if( !get_currency(src, sell_currency, sell_count, buy_currency, buy_count) )
         return src;
 
     // 动态调整每个品种的资金分配量
@@ -195,56 +239,75 @@ SInnerQuote* AccountAjdustWorker::process(SInnerQuote* src, PipelineContent& ctx
     ctx.params.cache_account.get_hedge_amounts(buy_currency, ctx.params.cache_config.HedgePercent / buy_count, buy_total_amounts);
 
     if( ctx.is_sample_ ) {
-        _log_and_print("worker(account)-%s: sell %s %d", src->symbol.c_str(), sell_currency.c_str(), sell_count);
+        _log_and_print("worker(account)-%s: sell %s %d", src.symbol.c_str(), sell_currency.c_str(), sell_count);
         for( const auto& v : sell_total_amounts ) {
-            _log_and_print("worker(account)-%s: sell %s %.03f", src->symbol.c_str(), v.first.c_str(), v.second);
+            _log_and_print("worker(account)-%s: sell %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
         }
-        _log_and_print("worker(account)-%s: buy %s %d", src->symbol.c_str(), buy_currency.c_str(), buy_count);
+        _log_and_print("worker(account)-%s: buy %s %d", src.symbol.c_str(), buy_currency.c_str(), buy_count);
         for( const auto& v : buy_total_amounts ) {
-            _log_and_print("worker(account)-%s: buy  %s %.03f", src->symbol.c_str(), v.first.c_str(), v.second);
+            _log_and_print("worker(account)-%s: buy  %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
         }
     }
 
     // 逐档从总余额中扣除资金消耗
-    for( auto iter = src->asks.begin() ; iter != src->asks.end() ; iter++ ) 
+    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        depth.total_volume = SDecimal::parse("0");
+        depth.total_volume = 0;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
-                iter2->second = SDecimal::parse("0");
+                iter2->second = 0;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
             }
         }
     }
-    for( auto iter = src->bids.rbegin() ; iter != src->bids.rend() ; iter++ ) 
+    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; ) 
     {
         SInnerDepth& depth = iter->second;
-        depth.total_volume = SDecimal::parse("0");
+        if( depth.total_volume.is_zero() ) {
+            src.asks.erase(iter++);
+        } else {
+            iter++;
+        }
+    }
+    for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
+    {
+        SInnerDepth& depth = iter->second;
+        depth.total_volume = 0;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
-                iter2->second = SDecimal::parse("0");
-                cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << need_amount.get_str_value() << endl;
+                iter2->second = 0;
+                //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << need_amount.get_str_value() << endl;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += need_amount;
-                cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
+                //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
             }
+        }
+    }
+    for( auto iter = src.bids.begin() ; iter != src.bids.end() ; ) 
+    {
+        SInnerDepth& depth = iter->second;
+        if( depth.total_volume.is_zero() ) {
+            src.bids.erase(iter++);
+        } else {
+            iter++;
         }
     }
     return src;
 }
 
-SInnerQuote* OrderBookWorker::process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out)
+SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    return src;
     /*
     auto orderBookIter = ctx.params.cache_order.find(src->symbol);
     if( orderBookIter != ctx.params.cache_order.end() ) 
@@ -339,11 +402,38 @@ void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDecimal* m
     }
 }
 
+DefaultWorker::DefaultWorker() {}
+DefaultWorker::~DefaultWorker() {}
+
+SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
+{
+    for( auto& v : src.asks ) {
+        v.second.total_volume = 0;
+        for( const auto& v2 : v.second.exchanges ) {
+            v.second.total_volume += v2.second;
+        }
+    }
+    for( auto& v : src.bids ) {
+        v.second.total_volume = 0;
+        for( const auto& v2 : v.second.exchanges ) {
+            v.second.total_volume += v2.second;
+        }
+    }
+    return src;
+}
+
+QuotePipeline::QuotePipeline(){
+    add_worker(&default_worker_);
+}
+
+QuotePipeline::~QuotePipeline(){
+
+}
 /////////////////////////////////////////////////////////////////////////////////
 DataCenter::DataCenter() {
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&account_worker_);
-    pipeline_.add_worker(&orderbook_worker_);
+    //pipeline_.add_worker(&orderbook_worker_);
 }
 
 DataCenter::~DataCenter() {
