@@ -316,6 +316,7 @@ string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
     {
         string result;
         nlohmann::json json_data;        
+        json_data["type"] = type;
         json_data["symbol"] = rsp_kline_data.symbol_;
         json_data["start_time"] = rsp_kline_data.start_time_;
         json_data["end_time"] = rsp_kline_data.end_time_;
