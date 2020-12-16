@@ -155,7 +155,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    return ; 
+    return; 
 
     cout << "klines.size: " << klines.size() << endl;
     for( int i = 0 ; i < klines.size() ; i ++ )
@@ -167,6 +167,12 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
 
+        if (kline.symbol.length() == 0 || kline.symbol == "") 
+        {
+            LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
+            break;
+        }        
+
         LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
@@ -174,8 +180,6 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
 
         deliver_response(package);
-    }
-
-   
+    }   
 }
 

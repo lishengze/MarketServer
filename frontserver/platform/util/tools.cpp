@@ -125,14 +125,20 @@ PackagePtr GetNewSymbolDataPackage(std::set<string> symbols, int package_id)
     return package;       
 }
 
-string SymbolsToJsonStr(SymbolData& symbol_data, string type)
+string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
 {
-    std::set<std::string>& symbols = symbol_data.get_symbols();
-
     nlohmann::json json_data;
     nlohmann::json symbol_json;
 
+    string specified_first_symbol = "BTC_USDT";
+
+    if (symbols.find(specified_first_symbol) != symbols.end())
+    {
+        symbols.erase(specified_first_symbol);
+    }
+
     int i = 0;
+    symbol_json[i++] = specified_first_symbol;
     for (string symbol:symbols)
     {
         symbol_json[i++] = symbol;
@@ -144,21 +150,23 @@ string SymbolsToJsonStr(SymbolData& symbol_data, string type)
     return json_data.dump();
 }
 
-string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
+string SymbolsToJsonStr(SymbolData& symbol_data, string type)
 {
-    nlohmann::json json_data;
-    nlohmann::json symbol_json;
+    std::set<std::string>& symbols = symbol_data.get_symbols();
 
-    int i = 0;
-    for (string symbol:symbols)
-    {
-        symbol_json[i++] = symbol;
-    }
-    json_data["symbol"] = symbol_json;    
+    // nlohmann::json json_data;
+    // nlohmann::json symbol_json;
 
-    json_data["type"] = type;
+    // int i = 0;
+    // for (string symbol:symbols)
+    // {
+    //     symbol_json[i++] = symbol;
+    // }
+    // json_data["symbol"] = symbol_json;    
 
-    return json_data.dump();
+    // json_data["type"] = type;
+
+    return SymbolsToJsonStr(symbols, type);
 }
 
 string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
