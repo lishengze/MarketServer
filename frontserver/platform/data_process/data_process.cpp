@@ -14,6 +14,8 @@ DataProcess::DataProcess(utrade::pandora::io_service_pool& pool, IPackageStation
     frequency_numb_ = CONFIG->get_frequency_numb();
     frequency_base_ = CONFIG->get_frequency_base();
 
+    cout << "frequency_numb_: " << frequency_numb_ << endl;
+
     if (test_kline_data_)
     {
         init_test_kline_data();
