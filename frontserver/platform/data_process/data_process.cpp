@@ -127,6 +127,8 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
 
             // cout << "DataProcess::response_src_sdepth_package 4" << endl;
 
+            depth_data_.erase(en_depth_data->depth_data_.symbol);
+
             depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data;
 
             deliver_response(package_new);
@@ -196,11 +198,37 @@ void DataProcess::response_src_kline_package(PackagePtr package)
 
         if (pkline_data)
         {
-            LOG_DEBUG(string("kline_data push") + pkline_data->symbol + ", " + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
 
             for (int cur_frequency: frequency_list_)
             {
                 store_kline_data(cur_frequency, pkline_data);
+            }
+
+            LOG_DEBUG(string("kline_data push ") + pkline_data->symbol + ", "  
+                        + std::to_string(frequency_base_) + ":" + std::to_string(kline_data_[pkline_data->symbol][frequency_base_].size()) + ", "
+                        + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
+
+            if (kline_data_[pkline_data->symbol][frequency_base_].size() == 60*2)
+            {
+                std::map<int, std::map<type_tick, KlineData*>>& cur_kline_data = kline_data_[pkline_data->symbol];
+
+                for (auto iter: cur_kline_data)
+                {
+                    std::map<type_tick, KlineData*>& cur_fre_data = iter.second;
+
+                    cout << "Frequency: " << iter.first << endl;
+
+                    for (auto atom_iter:cur_fre_data)
+                    {
+                        KlineData& kline = *(atom_iter.second);
+                        string cur_time = utrade::pandora::ToSecondStr(kline.index * NanoPerSec, "%Y-%m-%d %H:%M:%S");
+
+                        cout << cur_time << ", " << kline.symbol << ", "
+                            << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+                            << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;
+                        
+                    }
+                }
             }
         }
         else
@@ -221,7 +249,7 @@ void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
 {
     try
     {
-        cout << "store: " << frequency << ", " << pkline_data->symbol << endl;
+        // cout << "store: " << frequency << ", " << pkline_data->symbol << endl;
 
         if (kline_data_.find(pkline_data->symbol) == kline_data_.end() 
         || kline_data_[pkline_data->symbol].find(frequency) == kline_data_[pkline_data->symbol].end())

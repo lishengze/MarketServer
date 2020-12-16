@@ -45,6 +45,10 @@ public:
 
     void request_kline_package(PackagePtr package);
 
+    void test_kline_data();
+
+    void test_rsp_package();
+
     void test_main();
 
     std::shared_ptr<std::thread>  test_thread_{nullptr};

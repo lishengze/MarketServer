@@ -46,7 +46,53 @@ void DataReceive::init_grpc_interface()
 
 void DataReceive::test_main()
 {
-    long response_id = 0;
+    // test_rsp_package();
+
+    test_kline_data();
+}
+
+void DataReceive::test_kline_data()
+{
+    string symbol = "BTC_USDT";
+    int frequency_secs = 60;
+    type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
+    end_time_secs = mod_secs(end_time_secs, frequency_secs);
+
+    int test_time_numb = 60 * 2;
+
+    double test_max = 100;
+    double test_min = 10;
+    std::random_device rd;  
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(test_min, test_max);    
+    std::uniform_real_distribution<> offset(1,10);
+
+    for (int i = 0; i < test_time_numb; ++i)
+    {
+        type_tick cur_time = end_time_secs - i * frequency_secs;
+
+        double open = dis(gen);
+        double close = dis(gen);
+        double high = std::max(open, close) + offset(gen);
+        double low = std::min(open, close) - offset(gen);
+        double volume = dis(gen) * 5;
+
+        KlineData kline_data(symbol, cur_time, open, high, low, close, volume);
+
+        std::vector<KlineData> vec_kline{kline_data};
+
+        handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);
+
+        // boost::shared_ptr<KlineData> cur_kline_data = boost::make_shared<KlineData>(symbol, cur_time, open, high, low, close,volume);
+
+        // kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
+void DataReceive::test_rsp_package()
+{
     while(true)
     {
         cout << "Send Message " << endl;
@@ -54,12 +100,12 @@ void DataReceive::test_main()
         PackagePtr package_new = PACKAGE_MANAGER->AllocateRtnDepth();
 
         auto p_rtn_depth = GET_NON_CONST_FIELD(package_new, CUTRtnDepthField);
-        package_new->prepare_response(UT_FID_RtnDepth, ++response_id);
+        package_new->prepare_response(UT_FID_RtnDepth, ID_MANAGER->get_id());
 
         assign(p_rtn_depth->ExchangeID, "HUOBI");
         assign(p_rtn_depth->LocalTime, utrade::pandora::NanoTimeStr());
 
-        deliver_response(package_new);
+        deliver_response(package_new);  
 
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     }
@@ -129,8 +175,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    // cout << "DataReceive::on_kline " << endl;
-
+    return -1;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
 }
@@ -155,9 +200,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
 void DataReceive::handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    return; 
-
-    cout << "klines.size: " << klines.size() << endl;
+    // cout << "klines.size: " << klines.size() << endl;
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
         const KlineData& kline = klines[i];
@@ -173,7 +216,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
             break;
         }        
 
-        LOG_INFO(stream_obj.str());
+        // LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
