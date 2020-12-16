@@ -264,6 +264,7 @@ void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
             type_tick cur_time = pkline_data->index;
             type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->first;
 
+            cout << "cur_time: " << cur_time << ", last_time: " << last_update_time << endl;
 
             KlineData* last_kline;
 
@@ -287,7 +288,7 @@ void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
                 {
                     kline_data_[pkline_data->symbol][frequency].erase(kline_data_[pkline_data->symbol][frequency].begin());
                 }
-                kline_data_[pkline_data->symbol][frequency][pkline_data->index] = last_kline;
+                kline_data_[pkline_data->symbol][frequency][cur_time] = last_kline;
 
                 cur_kline_data_[pkline_data->symbol].erase(frequency);
             }

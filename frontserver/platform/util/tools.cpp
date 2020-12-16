@@ -141,7 +141,7 @@ string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
     symbol_json[i++] = specified_first_symbol;
     for (string symbol:symbols)
     {
-        if (symbol.length()==0 ||symbol == "") break;
+        if (symbol.length()==0 ||symbol == "") continue;
         
         symbol_json[i++] = symbol;
     }
