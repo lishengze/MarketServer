@@ -303,7 +303,24 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
 
 bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
-    return db_interface_->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+    switch( resolution )
+    {
+        case 60:
+        {
+            db_interface_->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+            break;
+        }
+        case 3600:
+        {
+            db_interface_->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
+            break;
+        }
+        default:
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void KlineHubber::fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60)
