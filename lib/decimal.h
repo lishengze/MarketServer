@@ -36,15 +36,11 @@ struct SDecimal {
         data_.value_ = 0;
     }
 
-    //SDecimal(double v) {
-    //    from(v);
-    //}
-
     SDecimal(const string& v) {
         from(v);
     }
 
-    explicit SDecimal(const double v, int precise = -1, bool ceiling = false) {
+    SDecimal(const double v, int precise = -1, bool ceiling = false) {
         from(v, precise, ceiling);
     }
 
@@ -66,7 +62,7 @@ struct SDecimal {
     
     static SDecimal parse_by_raw(uint64 base, uint64 prec) {
         SDecimal ret;
-        ret.from(base, prec);
+        ret.from_raw(base, prec);
         return ret;
     }
 
@@ -214,8 +210,8 @@ struct SDecimal {
         if( ret.data_.real_.prec_ > rhs.data_.real_.prec_ ) {
             ret.data_.real_.value_ = ret.data_.real_.value_ + rhs.data_.real_.value_ * CALC_BASE(ret.data_.real_.prec_ - rhs.data_.real_.prec_);
         } else {
-            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
             ret.data_.real_.value_ = ret.data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - ret.data_.real_.prec_) + rhs.data_.real_.value_;
+            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
         }
         return ret;
     }
@@ -224,8 +220,8 @@ struct SDecimal {
         if( data_.real_.prec_ > rhs.data_.real_.prec_ ) {
             data_.real_.value_ = data_.real_.value_ + rhs.data_.real_.value_ * CALC_BASE(data_.real_.prec_ - rhs.data_.real_.prec_);
         } else {
-            data_.real_.prec_ = rhs.data_.real_.prec_;
             data_.real_.value_ = data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - data_.real_.prec_) + rhs.data_.real_.value_;
+            data_.real_.prec_ = rhs.data_.real_.prec_;
         }
         return *this;
     }
@@ -235,8 +231,8 @@ struct SDecimal {
         if( ret.data_.real_.prec_ > rhs.data_.real_.prec_ ) {
             ret.data_.real_.value_ = ret.data_.real_.value_ - rhs.data_.real_.value_ * CALC_BASE(ret.data_.real_.prec_ - rhs.data_.real_.prec_);
         } else {
-            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
             ret.data_.real_.value_ = ret.data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_ - ret.data_.real_.prec_) - rhs.data_.real_.value_;
+            ret.data_.real_.prec_ = rhs.data_.real_.prec_;
         }
         return ret;
     }
@@ -245,8 +241,8 @@ struct SDecimal {
         if( data_.real_.prec_ > rhs.data_.real_.prec_ ) {
             data_.real_.value_ = data_.real_.value_ - rhs.data_.real_.value_ * CALC_BASE(data_.real_.prec_-rhs.data_.real_.prec_);
         } else {
-            data_.real_.prec_ = rhs.data_.real_.prec_;
             data_.real_.value_ = data_.real_.value_ * CALC_BASE(rhs.data_.real_.prec_-data_.real_.prec_) - rhs.data_.real_.value_;
+            data_.real_.prec_ = rhs.data_.real_.prec_;
         }
         return *this;
     }
