@@ -2,6 +2,8 @@
 
 #include "decimal.h"
 #include <string>
+#include <boost/shared_ptr.hpp>
+
 using std::string;
 
 #define DEPCH_LEVEL_COUNT 100
@@ -91,6 +93,7 @@ struct KlineData
     }
     static const long Fid = UT_FID_KlineData;    
 };
+
 using KlineDataPtr = boost::shared_ptr<KlineData>;
 
 #pragma pack()
