@@ -54,10 +54,13 @@ private:
     Table table_;
     SQLite::Statement stmtMin1SelectDataByExchangeSymbolIndex;
     SQLite::Statement stmtMin1ReplaceDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin1SelectDataByExchangeSymbolIndexRange;
     SQLite::Statement stmtMin60SelectDataByExchangeSymbolIndex;
     SQLite::Statement stmtMin60ReplaceDataByExchangeSymbolIndex;
+    SQLite::Statement stmtMin60SelectDataByExchangeSymbolIndexRange;
     bool _init_db();
 
     bool _write_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index, const vector<KlineData>& klines);
     bool _read_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index, vector<KlineData>& klines);
+    bool _read_range_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index_begin, int index_end, vector<KlineData>& klines);
 };

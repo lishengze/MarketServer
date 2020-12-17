@@ -34,6 +34,7 @@ int HubEntity::stop()
 
 int HubEntity::get_kline(const char* exchange, const char* symbol, type_resolution resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
+    RequestKline(CONFIG->stream_engine_addr_, exchange, symbol, resolution, start_time, end_time, klines);
     return 0;
 }
 

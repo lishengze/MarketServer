@@ -29,6 +29,10 @@ struct SInnerDepth {
         for( const auto& v : src.exchanges ) {
             exchanges[v.first] += v.second * ((100 + bias ) / 100.0);
         }
+        total_volume = 0;
+        for( const auto& v : exchanges ) {
+            total_volume += v.second;
+        }
     }
 };
 
@@ -55,7 +59,7 @@ struct SInnerQuote {
 
     void get_bids(vector<pair<SDecimal, SInnerDepth>>& depths) const {
         depths.clear();
-        for( auto iter = asks.rbegin() ; iter != asks.rend() ; iter ++ ) {
+        for( auto iter = bids.rbegin() ; iter != bids.rend() ; iter ++ ) {
             depths.push_back(make_pair(iter->first, iter->second));
         }
     }
@@ -89,25 +93,35 @@ public:
         this->next_ = w;
     }
 
-    SInnerQuote* run(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out) {
-        SInnerQuote* tmp = this->process(src, ctx, out);
+    SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
         if( next_ ) {
-            return next_->run(tmp, ctx, out);
+            SInnerQuote& tmp = this->process(src, ctx);
+            return next_->run(tmp, ctx);
         } else {
-            return tmp;
+            return this->process(src, ctx);
         }
     }
 
-    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out) = 0;
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx) = 0;
 private:
     Worker *next_ = nullptr;
+};
+
+class DefaultWorker : public Worker
+{
+public:
+    DefaultWorker();
+    ~DefaultWorker();
+
+private:
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
 
 class QuotePipeline
 {
 public:
-    QuotePipeline(){}
-    virtual ~QuotePipeline(){}
+    QuotePipeline();
+    virtual ~QuotePipeline();
 
     void add_worker(Worker* w) {
         if( head_ == nullptr ) {
@@ -130,15 +144,15 @@ public:
             ctx.is_sample_ = false;
         }
 
-        if( !head_ )
-            return;
-
+        assert( head_ != NULL );
+        
         SInnerQuote tmp = quote;
-        SInnerQuote* ret = head_->run(&tmp, ctx, &newQuote);
-        newQuote = *ret;
+        newQuote = head_->run(tmp, ctx);
     }
 private:
     Worker *head_ = nullptr, *tail_ = nullptr;
+
+    DefaultWorker default_worker_;
 };
 
 // worker： 处理买卖一价位交叉问题
@@ -148,6 +162,7 @@ struct SymbolWatermark
     unordered_map<TExchange, SDecimal> asks;
     unordered_map<TExchange, SDecimal> bids;
 };
+
 class WatermarkComputerWorker : public Worker
 {
 public:
@@ -164,7 +179,7 @@ private:
     std::thread* thread_loop_ = nullptr;
     void _calc_watermark();
 
-    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
 
 // worker：处理对冲账户资金量风控
@@ -179,7 +194,7 @@ private:
     mutable std::mutex mutex_snaps_;
     unordered_map<TSymbol, int> currency_count_;
     unordered_set<TSymbol> symbols_;
-    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 
     bool get_currency(const SInnerQuote& quote, string& sell_currency, int& sell_count, string& buy_currency, int& buy_count) const;
 };
@@ -191,7 +206,7 @@ public:
     OrderBookWorker(){}
     ~OrderBookWorker(){}
 private:
-    virtual SInnerQuote* process(SInnerQuote* src, PipelineContent& ctx, SInnerQuote* out);
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
 
 class DataCenter {

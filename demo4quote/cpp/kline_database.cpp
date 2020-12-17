@@ -3,6 +3,17 @@
 
 string db_name = "klines.dat";
 
+int timet_to_index(type_tick t, int resolution)
+{
+    struct tm *newtime = localtime( (const long int*)&t );
+    if( resolution == 60 )
+        return newtime->tm_year * 10000 + newtime->tm_mon * 100 + newtime->tm_mday;
+    else if( resolution == 3600 )
+        return newtime->tm_year * 100 + newtime->tm_mon;
+    else
+        return 0;
+}
+
 void _mix_klines(vector<KlineData>& dst, const vector<KlineData>& src)
 {
     map<type_tick, KlineData> tmp;
@@ -136,8 +147,10 @@ KlineDatabase::KlineDatabase()
 , table_(db_)
 , stmtMin1SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
 , stmtMin1ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN1_TABLENAME " VALUES (?,?,?,?,?,?,?);")
+, stmtMin1SelectDataByExchangeSymbolIndexRange(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and (TimeIndex between ? and ?) order by TimeIndex DESC limit 30;")
 , stmtMin60SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN60_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
 , stmtMin60ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN60_TABLENAME " VALUES (?,?,?,?,?,?,?);")
+, stmtMin60SelectDataByExchangeSymbolIndexRange(db_, "SELECT * FROM " KLINE_MIN60_TABLENAME " WHERE Exchange = ? and Symbol = ? and (TimeIndex between ? and ?) order by TimeIndex DESC limit 30;")
 {
 
 }
@@ -203,7 +216,10 @@ void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, i
 
 bool KlineDatabase::get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
-    return true;
+    klines.clear();
+    int begin_index = timet_to_index(start_time, resolution);
+    int end_index = timet_to_index(end_time, resolution);
+    return _read_range_klines(exchange, symbol, resolution, begin_index, end_index, klines);
 }
 
 void KlineDatabase::_loop()
@@ -229,16 +245,6 @@ void KlineDatabase::_loop()
     }
 }
 
-int timet_to_index(type_tick t, int resolution)
-{
-    struct tm *newtime = localtime( (const long int*)&t );
-    if( resolution == 60 )
-        return newtime->tm_year * 10000 + newtime->tm_mon * 100 + newtime->tm_mday;
-    else if( resolution == 3600 )
-        return newtime->tm_year * 100 + newtime->tm_mon;
-    else
-        return 0;
-}
 void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
     int last_index = 0;
@@ -352,6 +358,65 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
         _log_and_print("[sqlite] [stmtReplaceDataByExchangeSymbolIndex] exception: %s", e.what());
         return false;
     }
+    return true;
+}
+
+bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index_begin, int index_end, vector<KlineData>& klines)
+{    
+    klines.clear();
+
+    string data;
+    vector<KlineData> _klines;
+    try
+    {
+        switch( resolution ) 
+        {
+            case 60:
+            {
+                stmtMin1SelectDataByExchangeSymbolIndexRange.reset();
+                SQLite::bind(stmtMin1SelectDataByExchangeSymbolIndexRange,
+                    exchange,
+                    symbol,
+                    index_begin,
+                    index_end
+                );
+                cout << stmtMin1SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
+                while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
+                    data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
+                    decode_json_klines(data, _klines);
+                    klines.insert(klines.begin(), _klines.begin(), _klines.end());
+                }
+                break;
+            }
+            case 3600:
+            {
+                stmtMin60SelectDataByExchangeSymbolIndexRange.reset();
+                SQLite::bind(stmtMin60SelectDataByExchangeSymbolIndexRange,
+                    exchange,
+                    symbol,
+                    index_begin,
+                    index_end
+                );
+                cout << stmtMin60SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
+                while(stmtMin60SelectDataByExchangeSymbolIndexRange.executeStep()) {
+                    data = stmtMin60SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
+                    decode_json_klines(data, _klines);
+                    klines.insert(klines.begin(), _klines.begin(), _klines.end());
+                }
+                break;
+            }
+            default:{
+                _log_and_print("%s-%s unknown resolution %d", exchange.c_str(), symbol.c_str(), resolution);
+                return false;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        _log_and_print("[sqlite] [stmtSelectDataByExchangeSymbolIndex] exception: %s", e.what());
+        return false;
+    }
+    
     return true;
 }
 
