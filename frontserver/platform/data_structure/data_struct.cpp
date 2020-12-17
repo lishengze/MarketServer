@@ -6,12 +6,49 @@ EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data):type_{"market
     init(depth_data);
 }
 
+EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
+{
+    cout << "EnhancedDepthData::EnhancedDepthData " << endl;
+
+    // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
+    // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
+    // memcpy(bid_accumulated_volume_, other.bid_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
+
+    depth_data_ = other.depth_data_;
+    for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+    {
+        ask_accumulated_volume_[i] = other.ask_accumulated_volume_[i];
+        bid_accumulated_volume_[i] = other.bid_accumulated_volume_[i];
+    }
+    type_ = other.type_;
+}
+
+EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
+{
+    cout << "EnhancedDepthData::Operator = " << endl;
+
+    // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
+    // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
+    // memcpy(bid_accumulated_volume_, other.bid_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
+
+    depth_data_ = other.depth_data_;
+    for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+    {
+        ask_accumulated_volume_[i] = other.ask_accumulated_volume_[i];
+        bid_accumulated_volume_[i] = other.bid_accumulated_volume_[i];
+    }
+    type_ = other.type_;
+}
+
 void EnhancedDepthData::init(const SDepthData* depth_data)
 {
-    // cout << "EnhancedDepthData::init 0" << endl;
+    cout << "EnhancedDepthData::init SDepthData" << endl;
+
     std::lock_guard<std::mutex> lg(mutex_);
 
-    memcpy(&depth_data_, depth_data, sizeof(SDepthData));
+    // memcpy(&depth_data_, depth_data, sizeof(SDepthData));
+
+    depth_data_ = *depth_data;
 
     // cout << "EnhancedDepthData::init 1" << endl;
 

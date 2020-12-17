@@ -21,6 +21,38 @@ struct SDepthLevelData
 const long UT_FID_SDepthData = 0x10000;
 struct SDepthData
 {
+    SDepthData(const SDepthData& other)
+    {
+        symbol = other.symbol;
+        exchange = other.exchange;
+        tick = other.tick;
+        seqno = other.seqno;
+        ask_length = other.ask_length;
+        bid_length = other.bid_length;
+
+        for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+        {
+            asks[i] = other.asks[i];
+            bids[i] = other.bids[i];
+        }
+    }
+
+    SDepthData & operator =(const SDepthData& other) {
+        symbol = other.symbol;
+        exchange = other.exchange;
+        tick = other.tick;
+        seqno = other.seqno;
+        ask_length = other.ask_length;
+        bid_length = other.bid_length;
+
+        for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+        {
+            asks[i] = other.asks[i];
+            bids[i] = other.bids[i];
+        }
+        return *this;
+    }
+    
     string symbol;
     string exchange;
     type_tick tick;

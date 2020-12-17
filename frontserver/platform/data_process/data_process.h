@@ -92,7 +92,7 @@ public:
 
 
 private:
-    std::map<symbol_type, EnhancedDepthData*>                                  depth_data_;
+    std::map<symbol_type, EnhancedDepthDataPtr>                                   depth_data_;
     std::map<symbol_type, std::map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
     std::map<symbol_type, std::map<int, KlineDataPtr>>                         cur_kline_data_;
 

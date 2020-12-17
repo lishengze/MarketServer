@@ -320,21 +320,21 @@ void WBServer::process_heartbeat(WebsocketClass* ws)
     }    
 }
 
-void WBServer::broadcast_enhanced_data(EnhancedDepthData& en_depth_data)
+void WBServer::broadcast_enhanced_data(string symbol, string data_str)
 {
     // cout << "WBServer::broadcast_enhanced_data " << endl;
 
-    string update_symbol = en_depth_data.depth_data_.symbol;
+    // string update_symbol = en_depth_data.depth_data_.symbol;
 
-    string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
+    // string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
 
     // cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
 
     for (auto iter:wss_con_map_)
     {
-        if (iter.second.sub_symbol_set.find(update_symbol) != iter.second.sub_symbol_set.end())
+        if (iter.second.sub_symbol_set.find(symbol) != iter.second.sub_symbol_set.end())
         {
-            iter.first->send(send_str, uWS::OpCode::TEXT);
+            iter.first->send(data_str, uWS::OpCode::TEXT);
         }
     }
 }

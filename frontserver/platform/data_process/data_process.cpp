@@ -119,8 +119,9 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
 
             EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(package_new, EnhancedDepthData);
 
+            EnhancedDepthDataPtr cur_enhanced_data = boost::make_shared<EnhancedDepthData>(*en_depth_data);
 
-            // cout << "DataProcess::response_src_sdepth_package 3" << endl;
+            depth_data_[en_depth_data->depth_data_.symbol] = cur_enhanced_data;
 
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
@@ -128,10 +129,6 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
             }
 
             // cout << "DataProcess::response_src_sdepth_package 4" << endl;
-
-            depth_data_.erase(en_depth_data->depth_data_.symbol);
-
-            depth_data_[en_depth_data->depth_data_.symbol] = en_depth_data;
 
             deliver_response(package_new);
         }
@@ -211,7 +208,7 @@ void DataProcess::response_src_kline_package(PackagePtr package)
             //             + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
             // cout << endl;
 
-            if (kline_data_[pkline_data->symbol][frequency_base_].size() == 60*2)
+            if (kline_data_[pkline_data->symbol][frequency_base_].size() == 60)
             {
 
                 std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[pkline_data->symbol];
@@ -376,12 +373,12 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
                  << "kline_data end_time: " << symbol_kline_data.rbegin()->first << ", \n"
                  << endl;
 
-            if (symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_)
+            if (symbol_kline_data.begin()->first > pReqKlineData->end_time_)
             {
                 LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_");
                 return nullptr;
             }
-            else if (symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_)
+            else if (symbol_kline_data.begin()->first > pReqKlineData->start_time_)
             {
                 LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
                 pReqKlineData->append_end_time_ = symbol_kline_data.begin()->first;
@@ -393,15 +390,21 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
                 std::vector< KlineDataPtr> src_kline_data;
 
-                std::map<type_tick, KlineDataPtr>::iterator  iter = symbol_kline_data.find(pReqKlineData->start_time_);
+                std::map<type_tick, KlineDataPtr>::iterator  iter = symbol_kline_data.begin();
 
-                if (iter == symbol_kline_data.end())
+                while(iter->first <= pReqKlineData->start_time_ && (++iter != symbol_kline_data.end() && iter->first > pReqKlineData->start_time_))
                 {
-                    LOG_ERROR("Kline Data Error");
-                    return nullptr;
+                    break;
                 }
 
-                int test_numb = 10;
+                if (iter == symbol_kline_data.end()) 
+                {
+                    LOG_ERROR("Kline Data Error");
+                    return nullptr;                    
+                }                
+
+                cout << "Real Start Time: " << iter->first << endl;
+
                 while (iter->first <= pReqKlineData->end_time_ && iter != symbol_kline_data.end())
                 {
                     src_kline_data.emplace_back(iter->second);                    

@@ -36,6 +36,10 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
         EnhancedDepthData():type_{"market_data"} {}
         EnhancedDepthData(const SDepthData* depth_data);
 
+        EnhancedDepthData(const EnhancedDepthData& other);
+
+        EnhancedDepthData & operator=(const EnhancedDepthData& other);
+
         void init(const SDepthData* depth_data);
 
         virtual ~EnhancedDepthData() {}
@@ -67,6 +71,7 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
         
 
 };
+FORWARD_DECLARE_PTR(EnhancedDepthData);
 
 const long UT_FID_SymbolData = 0x10003;
 class SymbolData

@@ -57,9 +57,9 @@ def get_sub_depth_str():
 
 def get_sub_kline_str():
     print("get_sub_kline_str")
-    frequency = 60 * 5
+    frequency = 60*5
     end_time = int(time.time())
-    end_time = end_time - end_time % frequency - frequency*2
+    end_time = end_time - end_time % frequency - frequency
     start_time = end_time - 60 * 30
 
     sub_info = {
@@ -67,7 +67,7 @@ def get_sub_kline_str():
         "symbol":"BTC_USDT",
         "start_time":str(start_time),
         "end_time":str(end_time),
-        "frequency":"60"
+        "frequency":str(frequency)
     }
     sub_info_str = json.dumps(sub_info)
     print("sub_info_str: %s" % (sub_info_str))
@@ -87,8 +87,8 @@ def on_open(ws):
 
 def test_websocket():
     # websocket.enableTrace(True)
-    ip = "ws://36.255.220.139"
-    # ip = "ws://127.0.0.1"
+    # ip = "ws://36.255.220.139"
+    ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

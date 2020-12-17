@@ -137,11 +137,22 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
 void FrontServer::process_enhanceddata_package(PackagePtr package)
 {
-    // cout << "FrontServer::process_enhanceddata_package " << endl;
-    
-    auto enhanced_data = GET_NON_CONST_FIELD(package, EnhancedDepthData);
+    try
+    {        
+        auto enhanced_data = GET_NON_CONST_FIELD(package, EnhancedDepthData);
 
-    wb_server_->broadcast_enhanced_data(*enhanced_data);
+        string update_symbol = enhanced_data->depth_data_.symbol;
+
+        string send_str = EnhancedDepthDataToJsonStr(*enhanced_data, MARKET_DATA_UPDATE);    
+
+        wb_server_->broadcast_enhanced_data(update_symbol, send_str);
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::process_enhanceddata_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
 }
 
 string FrontServer::get_symbols_str()
