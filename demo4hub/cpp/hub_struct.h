@@ -91,7 +91,6 @@ struct KlineData
 
     bool        clear_{false};
 };
-using KlineDataPtr = boost::shared_ptr<KlineData>;
 
 #pragma pack()
 
