@@ -86,7 +86,7 @@ void WBServer::on_open(WebsocketClass * ws)
 // 处理各种请求
 void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode code)
 {
-    cout << "Req Msg: " << msg << endl;
+    cout << utrade::pandora::NanoTimeStr() << " Req Msg: " << msg << endl;
     string trans_msg(msg.data(), msg.size());
 
     cout << "trans_msg: " << trans_msg << endl;
@@ -185,7 +185,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 {
     return;
-    
+
     try
     {
         cout << "ori_msg: " << ori_msg << endl;
