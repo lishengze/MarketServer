@@ -2,6 +2,7 @@
 #include "../front_server_declare.h"
 #include "pandora/util/json.hpp"
 #include "../log/log.h"
+#include "pandora/util/time_util.h"
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src)
 {
@@ -355,4 +356,9 @@ string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
         LOG_ERROR(stream_obj.str());
     }
     
+}
+
+string get_sec_time_str(unsigned long time)
+{
+    return utrade::pandora::ToSecondStr(time * NanoPerSec, "%Y-%m-%d %H:%M:%S");
 }

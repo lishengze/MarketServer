@@ -44,7 +44,37 @@ struct KlineData
                 double low, double close, double volume_str):
                 symbol{symbol_str}, index{time}, px_open{open}, px_high{high}, px_low{low},
                 px_close{close}, volume{volume_str} {}
-                    
+
+    KlineData(const KlineData& other)
+    {
+        symbol = other.symbol;
+        exchange = other.exchange;
+        index = other.index;
+        px_open = other.px_open;
+        px_close = other.px_close;
+        px_high = other.px_high;
+        px_low = other.px_low;
+        volume = other.volume;
+    }
+
+    void reset(const KlineData& other)
+    {
+        symbol = other.symbol;
+        exchange = other.exchange;
+        index = other.index;
+        px_open = other.px_open;
+        px_close = other.px_close;
+        px_high = other.px_high;
+        px_low = other.px_low;
+        volume = other.volume;   
+
+        clear_ = false;     
+    }
+
+    void clear() { clear_ = true;}
+
+    bool is_clear() {return clear_;}   
+
     string symbol;
     string exchange;
     type_tick index;
@@ -54,11 +84,14 @@ struct KlineData
     SDecimal px_close;
     SDecimal volume;
 
+    bool        clear_{false};
+    
     KlineData(){
         index = 0;
     }
     static const long Fid = UT_FID_KlineData;    
 };
+using KlineDataPtr = boost::shared_ptr<KlineData>;
 
 #pragma pack()
 

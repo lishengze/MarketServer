@@ -206,24 +206,26 @@ void DataProcess::response_src_kline_package(PackagePtr package)
                 store_kline_data(cur_frequency, pkline_data);
             }
 
-            LOG_DEBUG(string("kline_data push ") + pkline_data->symbol + ", "  
-                        + std::to_string(frequency_base_) + ":" + std::to_string(kline_data_[pkline_data->symbol][frequency_base_].size()) + ", "
-                        + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
+            // LOG_DEBUG(string("kline_data push ") + pkline_data->symbol + ", "  
+            //             + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[pkline_data->symbol][frequency_list_[0]].size()) + ", "
+            //             + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
+            // cout << endl;
 
             if (kline_data_[pkline_data->symbol][frequency_base_].size() == 60*2)
             {
-                std::map<int, std::map<type_tick, KlineData*>>& cur_kline_data = kline_data_[pkline_data->symbol];
+
+                std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[pkline_data->symbol];
 
                 for (auto iter: cur_kline_data)
                 {
-                    std::map<type_tick, KlineData*>& cur_fre_data = iter.second;
+                    std::map<type_tick, KlineDataPtr>& cur_fre_data = iter.second;
 
-                    cout << "Frequency: " << iter.first << endl;
+                    cout << "Frequency: " << iter.first << ", data_numb: " << cur_fre_data.size() << endl;
 
                     for (auto atom_iter:cur_fre_data)
                     {
                         KlineData& kline = *(atom_iter.second);
-                        string cur_time = utrade::pandora::ToSecondStr(kline.index * NanoPerSec, "%Y-%m-%d %H:%M:%S");
+                        string cur_time = get_sec_time_str(kline.index);
 
                         cout << cur_time << ", " << kline.symbol << ", "
                             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
@@ -251,55 +253,99 @@ void DataProcess::store_kline_data(int frequency, KlineData* pkline_data)
 {
     try
     {
-        // cout << "store: " << frequency << ", " << pkline_data->symbol << endl;
-
         if (kline_data_.find(pkline_data->symbol) == kline_data_.end() 
         || kline_data_[pkline_data->symbol].find(frequency) == kline_data_[pkline_data->symbol].end())
         {
-            kline_data_[pkline_data->symbol][frequency][pkline_data->index] = pkline_data;
-            cur_kline_data_[pkline_data->symbol][frequency] = pkline_data;
+            KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*pkline_data);
+            kline_data_[pkline_data->symbol][frequency][pkline_data->index] = cur_kline_data;
+
+            KlineDataPtr last_kline_data = boost::make_shared<KlineData>(*pkline_data);
+            cur_kline_data_[pkline_data->symbol][frequency] = last_kline_data;
+
+            // cout << "set new last_kline: "<< get_sec_time_str(pkline_data->index) << " "
+            //      << ", cur_time: " << " "  << get_sec_time_str(pkline_data->index) << endl;
+
+            // cout << "last info: time: " << get_sec_time_str(last_kline_data->index)
+            //         <<  " open: " << last_kline_data->px_open.get_value() 
+            //         << " high: " << last_kline_data->px_high.get_value() 
+            //         << " low: " << last_kline_data->px_low.get_value()  
+            //         << " close: " << last_kline_data->px_close.get_value() << "\n" << endl;                  
+
+            KlineDataPtr last_kline = cur_kline_data_[pkline_data->symbol][frequency];
+              
         }
         else
         {
             type_tick cur_time = pkline_data->index;
-            type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->first;
+            type_tick last_update_time = kline_data_[pkline_data->symbol][frequency].rbegin()->second->index;
 
-            cout << "cur_time: " << cur_time << ", last_time: " << last_update_time << endl;
+            // cout << "cur_time: " << get_sec_time_str(cur_time) << ", last_time: " << get_sec_time_str(last_update_time) << endl;
 
-            KlineData* last_kline;
+            KlineDataPtr last_kline = cur_kline_data_[pkline_data->symbol][frequency];
 
-            if (cur_kline_data_[pkline_data->symbol].find(frequency) != cur_kline_data_[pkline_data->symbol].end())
+            if (last_kline->is_clear())
+            {                
+                last_kline->reset(*pkline_data);
+
+                // cout << "Set New: "<< get_sec_time_str(last_kline->index) 
+                //      << " open: " << last_kline->px_open.get_value() 
+                //      << " high: " << last_kline->px_high.get_value() 
+                //      << " low: " << last_kline->px_low.get_value()  
+                //      << " close: " << last_kline->px_close.get_value() << endl; 
+            }
+            else
             {
-                last_kline = cur_kline_data_[pkline_data->symbol][frequency];
+                // cout << "Com old: " << get_sec_time_str(last_kline->index)
+                //      << " open: " << last_kline->px_open.get_value() 
+                //      << " high: " << last_kline->px_high.get_value() 
+                //      << " low: " << last_kline->px_low.get_value()  
+                //      << " close: " << last_kline->px_close.get_value() << endl; 
+
+                // cout << "cur inf: " << get_sec_time_str(pkline_data->index)
+                //      << " open: " << pkline_data->px_open.get_value() 
+                //      << " high: " << pkline_data->px_high.get_value() 
+                //      << " low: " << pkline_data->px_low.get_value()  
+                //      << " close: " << pkline_data->px_close.get_value() << endl;  
 
                 last_kline->px_close = pkline_data->px_close;
                 last_kline->px_low = last_kline->px_low > pkline_data->px_low ? pkline_data->px_low: last_kline->px_low;
                 last_kline->px_high = last_kline->px_high < pkline_data->px_high ? pkline_data->px_high: last_kline->px_high;
-            }
-            else
-            {
-                last_kline = pkline_data;
-                cur_kline_data_[pkline_data->symbol][frequency] = last_kline;
+                last_kline->index = pkline_data->index;
+                last_kline->symbol = pkline_data->symbol;                
             }
 
             if ((cur_time - last_update_time) % frequency == 0)
             {
+                // cout << "Add data: " << "cur_time: " << get_sec_time_str(cur_time) 
+                //      << ", last_update_time: " << get_sec_time_str(last_update_time) << endl;
+
                 if (kline_data_[pkline_data->symbol][frequency].size() == frequency_numb_)
                 {
                     kline_data_[pkline_data->symbol][frequency].erase(kline_data_[pkline_data->symbol][frequency].begin());
                 }
-                kline_data_[pkline_data->symbol][frequency][cur_time] = last_kline;
 
-                cur_kline_data_[pkline_data->symbol].erase(frequency);
+                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+
+                kline_data_[pkline_data->symbol][frequency][cur_time] = cur_kline_data;
+
+                // cout << "Add inf: " << get_sec_time_str(last_kline->index)
+                //         << " open: " << last_kline->px_open.get_value() 
+                //         << " high: " << last_kline->px_high.get_value() 
+                //         << " low: " << last_kline->px_low.get_value()  
+                //         << " close: " << last_kline->px_close.get_value() << "\n"
+                //         << endl;      
+
+                last_kline->clear();                                   
             }
         }
+
+        // cout << "Lastest Time: " << get_sec_time_str(kline_data_[pkline_data->symbol][frequency].begin()->first) << " " 
+        //      <<get_sec_time_str(kline_data_[pkline_data->symbol][frequency].begin()->second->index) << endl;
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
-    
-
 }
 
 PackagePtr DataProcess::get_kline_package(PackagePtr package)
@@ -317,7 +363,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
-            std::map<type_tick, KlineData*>& symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
+            std::map<type_tick, KlineDataPtr>& symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
 
             if (kline_data_[pReqKlineData->symbol_].find(pReqKlineData->frequency_) != kline_data_[pReqKlineData->symbol_].end())
             {
@@ -345,9 +391,9 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
             {
                 cout << " Compute!  " << endl;
 
-                std::vector< KlineData*> src_kline_data;
+                std::vector< KlineDataPtr> src_kline_data;
 
-                std::map<type_tick, KlineData*>::iterator  iter = symbol_kline_data.find(pReqKlineData->start_time_);
+                std::map<type_tick, KlineDataPtr>::iterator  iter = symbol_kline_data.find(pReqKlineData->start_time_);
 
                 if (iter == symbol_kline_data.end())
                 {
@@ -387,7 +433,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
 
                 cout << "kline_data.size: " << src_kline_data.size() << endl;
 
-                for (KlineData* atom : src_kline_data)
+                for (KlineDataPtr atom : src_kline_data)
                 {
                     // cout << "atom.tick " << atom->index << endl;
                     low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
@@ -517,7 +563,7 @@ void DataProcess::init_test_kline_data()
 
         // kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};
 
-        kline_data_[symbol][frequency_base_][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};   
+        kline_data_[symbol][frequency_base_][cur_time] = boost::make_shared<KlineData>(symbol, cur_time, open, high, low, close, volume);
     }
 
     cout << "test symbol: " << symbol << ", \n"

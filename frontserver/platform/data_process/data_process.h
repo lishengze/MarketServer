@@ -13,6 +13,7 @@
 class DataProcess:public utrade::pandora::ThreadBasePool, public IPackageStation
 {
 public:
+
     DataProcess(utrade::pandora::io_service_pool& pool, IPackageStation* next_station=nullptr);
     virtual ~DataProcess();
 
@@ -91,9 +92,9 @@ public:
 
 
 private:
-    std::map<std::string, EnhancedDepthData*>                                depth_data_;
-    std::map<std::string, std::map<int, std::map<type_tick, KlineData*>>>    kline_data_;
-    std::map<std::string, std::map<int, KlineData*>>                         cur_kline_data_;
+    std::map<symbol_type, EnhancedDepthData*>                                  depth_data_;
+    std::map<symbol_type, std::map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
+    std::map<symbol_type, std::map<int, KlineDataPtr>>                         cur_kline_data_;
 
     bool                                                            test_kline_data_{false};
 

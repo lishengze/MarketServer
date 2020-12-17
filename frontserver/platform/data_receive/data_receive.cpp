@@ -69,7 +69,7 @@ void DataReceive::test_kline_data()
 
     for (int i = 0; i < test_time_numb; ++i)
     {
-        type_tick cur_time = end_time_secs - i * frequency_secs;
+        type_tick cur_time = end_time_secs - (test_time_numb-i) * frequency_secs;
 
         double open = dis(gen);
         double close = dis(gen);
@@ -77,9 +77,9 @@ void DataReceive::test_kline_data()
         double low = std::min(open, close) - offset(gen);
         double volume = dis(gen) * 5;
 
-        KlineData kline_data(symbol, cur_time, open, high, low, close, volume);
+        KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
 
-        std::vector<KlineData> vec_kline{kline_data};
+        std::vector<KlineData> vec_kline{*kline_data};
 
         handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);
 

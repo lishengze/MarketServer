@@ -66,4 +66,6 @@ inline int get_random_double(int max, int min)
     return dis(gen);
 }
 
+string get_sec_time_str(unsigned long time);
+
 

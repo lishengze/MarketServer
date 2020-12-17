@@ -5,6 +5,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+using symbol_type = std::string;
+using frequency_type = unsigned int;
+
 enum class COMM_TYPE {
     HTTP = 0,
     HTTPS,
@@ -120,6 +123,7 @@ struct AtomKlineData
         // cout << "default AtomKlineData " << endl;
     }
 
+    string symbol;
     double open_;
     double high_;
     double low_;
