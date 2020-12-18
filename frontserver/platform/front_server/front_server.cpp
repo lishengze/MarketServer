@@ -35,7 +35,9 @@ void FrontServer::release()
 
 void FrontServer::request_message(PackagePtr package)
 {
-    get_io_service().post(std::bind(&FrontServer::handle_request_message, this, package));
+    // get_io_service().post(std::bind(&FrontServer::handle_request_message, this, package));
+
+    handle_request_message(package);
 }
 
 void FrontServer::response_message(PackagePtr package)
@@ -172,7 +174,7 @@ bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
 {
     try
     {
-        cout << "FrontServer::request_kline_data " << endl;
+        cout << "FrontServer::request_kline_data 0" << endl;
         
 
         PackagePtr package = PackagePtr{new Package{}};
@@ -183,7 +185,7 @@ bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
 
         CREATE_FIELD(package, ReqKLineData);
 
-        
+        cout << "FrontServer::request_kline_data 1" << endl;
 
         ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
 
@@ -208,6 +210,7 @@ bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
             p_req_kline_data->end_time_ = end_time_secs;
             p_req_kline_data->frequency_ = frequency;
 
+            cout << "FrontServer::request_kline_data 2" << endl;
             deliver_request(package);
         }
         else
