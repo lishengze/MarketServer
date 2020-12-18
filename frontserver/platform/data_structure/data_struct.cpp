@@ -42,7 +42,7 @@ EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
 
 void EnhancedDepthData::init(const SDepthData* depth_data)
 {
-    cout << "EnhancedDepthData::init SDepthData" << endl;
+    // cout << "EnhancedDepthData::init SDepthData" << endl;
 
     std::lock_guard<std::mutex> lg(mutex_);
 

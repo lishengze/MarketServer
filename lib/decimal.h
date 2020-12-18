@@ -32,6 +32,7 @@ struct SDecimal {
         mutable uint64 value_;
     }data_;
 
+
     SDecimal() {
         data_.value_ = 0;
     }
@@ -268,5 +269,12 @@ struct SDecimal {
         data_.real_.value_ *= rhs;
         return *this;
     }
+
+    SDecimal & operator = (const SDecimal &rhs) {
+        data_.real_.value_ = rhs.data_.real_.value_;
+        data_.real_.prec_ = rhs.data_.real_.prec_;
+        return *this;
+    }
+    
 };
 #pragma pack()

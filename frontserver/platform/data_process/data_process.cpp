@@ -113,15 +113,15 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
         {
             // cout << "DataProcess::response_src_sdepth_package 1" << endl;
 
-            PackagePtr package_new = GetNewEnhancedDepthDataPackage(*p_depth_data, package->PackageID());
+            PackagePtr enhanced_data_package = GetNewEnhancedDepthDataPackage(*p_depth_data, package->PackageID());
 
             // cout << "DataProcess::response_src_sdepth_package 2" << endl;
 
-            EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(package_new, EnhancedDepthData);
+            EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(enhanced_data_package, EnhancedDepthData);
 
-            EnhancedDepthDataPtr cur_enhanced_data = boost::make_shared<EnhancedDepthData>(*en_depth_data);
+            // EnhancedDepthDataPtr cur_enhanced_data = boost::make_shared<EnhancedDepthData>(*en_depth_data);
 
-            depth_data_[en_depth_data->depth_data_.symbol] = cur_enhanced_data;
+            depth_data_[en_depth_data->depth_data_.symbol] = enhanced_data_package;
 
             if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
             {                
@@ -130,7 +130,7 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
 
             // cout << "DataProcess::response_src_sdepth_package 4" << endl;
 
-            deliver_response(package_new);
+            deliver_response(enhanced_data_package);
         }
     }
     catch(const std::exception& e)
