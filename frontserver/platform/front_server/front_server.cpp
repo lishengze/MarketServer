@@ -202,16 +202,16 @@ void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
 
         cout << "FrontServer::request_kline_data 1.1" << endl;
 
-        p_req_kline_data->symbol_ = req_kline->symbol_;
-        p_req_kline_data->start_time_ = req_kline->start_time_;
-        p_req_kline_data->end_time_ = req_kline->end_time_;
-        p_req_kline_data->frequency_ = req_kline->frequency_;
-        p_req_kline_data->websocket_ = req_kline->websocket_;
-        p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
-
         if (p_req_kline_data)
         {            
-            p_req_kline_data->reset(*req_kline);
+            p_req_kline_data->symbol_ = req_kline->symbol_;
+            p_req_kline_data->start_time_ = req_kline->start_time_;
+            p_req_kline_data->end_time_ = req_kline->end_time_;
+            p_req_kline_data->frequency_ = req_kline->frequency_;
+            p_req_kline_data->websocket_ = req_kline->websocket_;
+            p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
+
+            // p_req_kline_data->reset(*req_kline);
 
             cout << "FrontServer::request_kline_data 2" << endl;
             deliver_request(package);
