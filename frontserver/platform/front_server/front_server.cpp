@@ -193,7 +193,7 @@ bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
         {            
             p_req_kline_data->http_request_ = http_req;
             p_req_kline_data->http_response_ = http_res;
-            p_req_kline_data->websocket_ = ws;
+            // p_req_kline_data->websocket_ = ws;
 
             if (ws)
             {
