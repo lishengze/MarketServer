@@ -266,7 +266,14 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         cout << "FrontServer::request_kline_data 1.1" << endl;
 
-        p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
+        // p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
+
+        p_req_kline_data->symbol_ = symbol;
+        p_req_kline_data->start_time_ = start_time;
+        p_req_kline_data->end_time_ = end_time;
+        p_req_kline_data->frequency_ = frequency;
+        p_req_kline_data->websocket_ = ws;
+        p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
 
         if (error_id != 0)
         {
