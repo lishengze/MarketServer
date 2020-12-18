@@ -59,6 +59,10 @@ void DataProcess::handle_request_message(PackagePtr package)
             request_symbol_data(package);
             return;    
 
+        // case UT_FID_SymbolData:
+        //     request_depth_data(package);
+        //     return;               
+
         case UT_FID_ReqKLineData:
             request_kline_package(package);
             return;
@@ -66,6 +70,11 @@ void DataProcess::handle_request_message(PackagePtr package)
             break;
     }
     // deliver_request(package);
+}
+
+void DataProcess::request_depth_data(PackagePtr package)
+{
+
 }
 
 void DataProcess::request_symbol_data(PackagePtr package)

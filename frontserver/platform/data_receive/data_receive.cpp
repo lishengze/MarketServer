@@ -184,6 +184,7 @@ void DataReceive::request_kline_package(PackagePtr package)
     }    
 }
 
+
 void DataReceive::handle_response_message(PackagePtr package)
 {
 

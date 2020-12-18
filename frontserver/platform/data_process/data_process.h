@@ -36,6 +36,8 @@ public:
 
     void request_kline_package(PackagePtr package);
 
+    void request_depth_data(PackagePtr package);
+
     PackagePtr get_kline_package(PackagePtr package);
 
     void store_kline_data(int frequency, KlineData* pkline_data);
