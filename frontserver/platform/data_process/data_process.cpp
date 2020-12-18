@@ -127,15 +127,18 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
             // cout << "DataProcess::response_src_sdepth_package 2" << endl;
 
             EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(enhanced_data_package, EnhancedDepthData);
+            
+            string cur_symbol = string(en_depth_data->depth_data_.symbol);
 
-            // EnhancedDepthDataPtr cur_enhanced_data = boost::make_shared<EnhancedDepthData>(*en_depth_data);
+            cout << "cur_symbol: " << cur_symbol << endl;
 
-            depth_data_[en_depth_data->depth_data_.symbol] = enhanced_data_package;
-
-            if (depth_data_.find(en_depth_data->depth_data_.symbol) == depth_data_.end())
+            if (depth_data_.find(cur_symbol) == depth_data_.end())
             {                
-                response_new_symbol(en_depth_data->depth_data_.symbol);
+                cout << "New Symbol: " << cur_symbol << endl;
+                response_new_symbol(cur_symbol);
             }
+
+            depth_data_[cur_symbol] = enhanced_data_package;
 
             // cout << "DataProcess::response_src_sdepth_package 4" << endl;
 
@@ -213,7 +216,7 @@ void DataProcess::response_src_kline_package(PackagePtr package)
             }
 
             string cur_symbol = string(pkline_data->symbol);
-            
+
             // LOG_DEBUG(string("kline_data push ") + cur_symbol + ", "  
             //             + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[cur_symbol][frequency_list_[0]].size()) + ", "
             //             + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));

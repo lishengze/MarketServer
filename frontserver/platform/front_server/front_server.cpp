@@ -122,6 +122,7 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     std::set<std::string>& symbols = p_symbol_data->get_symbols();
 
+
     string updated_symbols_str = SymbolsToJsonStr(*p_symbol_data, SYMBOL_UPDATE);
 
     // cout << "FrontServer::process_symbols_package 2" << endl;
