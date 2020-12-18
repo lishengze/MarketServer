@@ -47,6 +47,8 @@ public:
 
     string get_heartbeat_str();
 
+    void handle_request_kline_data(const ReqKLineData* req_kline);
+
 
 private:
     WBServerPtr         wb_server_;    

@@ -171,11 +171,16 @@ string FrontServer::get_heartbeat_str()
 
 bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
 {
+    get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, &req_kline));
+    return true;
+}
+
+void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
+{
     try
     {
         cout << "FrontServer::request_kline_data 0" << endl;
         
-
         PackagePtr package = PackagePtr{new Package{}};
   
         package->SetPackageID(ID_MANAGER->get_id());
@@ -188,19 +193,21 @@ bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
 
         ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
 
+        cout << "FrontServer::request_kline_data 1.1" << endl;
+
         if (p_req_kline_data)
         {            
-            p_req_kline_data->reset(req_kline);
+            p_req_kline_data->reset(*req_kline);
 
             cout << "FrontServer::request_kline_data 2" << endl;
             deliver_request(package);
         }
         else
         {
-            return false;
+            return ;
             LOG_ERROR("FrontServer::request_kline_data Create ReqKLineData Failed!");
         }        
-        return true;
+        return ;
     }
     catch(const std::exception& e)
     {
@@ -208,7 +215,7 @@ bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
 
-        return false;
+        return;
     }
     
 }
