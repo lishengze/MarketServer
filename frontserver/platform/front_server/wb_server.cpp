@@ -252,36 +252,42 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         // cout << "COMM TYPE: " << req_kline_data.comm_type << endl;
 
-        PackagePtr package = PackagePtr{new Package{}};
+        // PackagePtr package = PackagePtr{new Package{}};
   
-        package->SetPackageID(ID_MANAGER->get_id());
+        // package->SetPackageID(ID_MANAGER->get_id());
 
-        package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+        // package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
 
-        CREATE_FIELD(package, ReqKLineData);
+        // CREATE_FIELD(package, ReqKLineData);
 
-        cout << "FrontServer::request_kline_data 1" << endl;
+        // cout << "FrontServer::request_kline_data 1" << endl;
 
-        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+        // ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
 
-        cout << "FrontServer::request_kline_data 1.1" << endl;
+        // cout << "FrontServer::request_kline_data 1.1" << endl;
 
-        // p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
+        // // p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
 
-        p_req_kline_data->symbol_ = symbol;
-        p_req_kline_data->start_time_ = start_time;
-        p_req_kline_data->end_time_ = end_time;
-        p_req_kline_data->frequency_ = frequency;
-        p_req_kline_data->websocket_ = ws;
-        p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
+        // p_req_kline_data->symbol_ = symbol;
+        // p_req_kline_data->start_time_ = start_time;
+        // p_req_kline_data->end_time_ = end_time;
+        // p_req_kline_data->frequency_ = frequency;
+        // p_req_kline_data->websocket_ = ws;
+        // p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
 
         if (error_id != 0)
         {
-            if (!front_server_->request_kline_data(package))
+            // if (!front_server_->request_kline_data(package))
+            // {
+            //     err_msg += "Server Internel Error, Please Try Again!";
+            //     ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
+            // }    
+
+            if (!front_server_->request_kline_data(req_kline_data))
             {
                 err_msg += "Server Internel Error, Please Try Again!";
                 ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
-            }            
+            }                        
         }
         else
         {

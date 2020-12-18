@@ -49,9 +49,9 @@ public:
 
     string get_heartbeat_str();
 
-    // void handle_request_kline_data(const ReqKLineData* req_kline);
+    void handle_request_kline_data(const ReqKLineData* req_kline);
 
-    void handle_request_kline_data(PackagePtr package);
+    // void handle_request_kline_data(PackagePtr package);
 
 
 private:

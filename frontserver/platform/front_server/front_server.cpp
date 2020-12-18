@@ -171,67 +171,57 @@ string FrontServer::get_heartbeat_str()
 
 bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
 {
-    // get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, &req_kline));
+    get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, &req_kline));
     return true;
 }
 
 
 bool FrontServer::request_kline_data(PackagePtr package)
 {
-    get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, package));
+    // get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, package));
     return true;
 }
 
-// void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
-// {
-//     try
-//     {
-//         cout << "FrontServer::request_kline_data 0" << endl;
-        
-//         PackagePtr package = PackagePtr{new Package{}};
-  
-//         package->SetPackageID(ID_MANAGER->get_id());
-
-//         package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
-
-//         CREATE_FIELD(package, ReqKLineData);
-
-//         cout << "FrontServer::request_kline_data 1" << endl;
-
-//         ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
-
-//         cout << "FrontServer::request_kline_data 1.1" << endl;
-
-//         if (p_req_kline_data)
-//         {            
-//             p_req_kline_data->reset(*req_kline);
-
-//             cout << "FrontServer::request_kline_data 2" << endl;
-//             deliver_request(package);
-//         }
-//         else
-//         {
-//             return ;
-//             LOG_ERROR("FrontServer::request_kline_data Create ReqKLineData Failed!");
-//         }        
-//         return ;
-//     }
-//     catch(const std::exception& e)
-//     {
-//         std::stringstream stream_obj;
-//         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
-//         LOG_ERROR(stream_obj.str());
-
-//         return;
-//     }
-    
-// }
-
-void FrontServer::handle_request_kline_data(PackagePtr package)
+void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
 {
     try
     {
-        deliver_request(package);
+        cout << "FrontServer::request_kline_data 0" << endl;
+        
+        PackagePtr package = PackagePtr{new Package{}};
+  
+        package->SetPackageID(ID_MANAGER->get_id());
+
+        package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
+        CREATE_FIELD(package, ReqKLineData);
+
+        cout << "FrontServer::request_kline_data 1" << endl;
+
+        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+        cout << "FrontServer::request_kline_data 1.1" << endl;
+
+        p_req_kline_data->symbol_ = req_kline->symbol_;
+        p_req_kline_data->start_time_ = req_kline->start_time_;
+        p_req_kline_data->end_time_ = req_kline->end_time_;
+        p_req_kline_data->frequency_ = req_kline->frequency_;
+        p_req_kline_data->websocket_ = req_kline->websocket_;
+        p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
+
+        if (p_req_kline_data)
+        {            
+            p_req_kline_data->reset(*req_kline);
+
+            cout << "FrontServer::request_kline_data 2" << endl;
+            deliver_request(package);
+        }
+        else
+        {
+            return ;
+            LOG_ERROR("FrontServer::request_kline_data Create ReqKLineData Failed!");
+        }        
+        return ;
     }
     catch(const std::exception& e)
     {
@@ -240,8 +230,25 @@ void FrontServer::handle_request_kline_data(PackagePtr package)
         LOG_ERROR(stream_obj.str());
 
         return;
-    }    
+    }
+    
 }
+
+// void FrontServer::handle_request_kline_data(PackagePtr package)
+// {
+//     try
+//     {
+//         deliver_request(package);
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::stringstream stream_obj;
+//         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
+//         LOG_ERROR(stream_obj.str());
+
+//         return;
+//     }    
+// }
 
 void FrontServer::response_kline_data_package(PackagePtr package)
 {
