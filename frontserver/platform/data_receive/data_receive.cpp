@@ -193,8 +193,8 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
-    cout << "on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
-    
+    // cout << "on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+
     // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
@@ -204,7 +204,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
     cout << "klines.size: " << klines.size() << endl;
-    return -1;
+    // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
 }
@@ -235,11 +235,11 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         const KlineData& kline = klines[i];
 
         std::stringstream stream_obj;
-        stream_obj  << get_sec_time_str(kline.index) << "symbol: " << symbol << ", \n"
+        stream_obj  << get_sec_time_str(kline.index) << " symbol: " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
 
-        // LOG_INFO(stream_obj.str());
+        LOG_INFO(stream_obj.str());
 
         if (strlen(symbol) == 0) 
         {

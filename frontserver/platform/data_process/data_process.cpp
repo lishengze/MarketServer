@@ -130,7 +130,7 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
             
             string cur_symbol = string(en_depth_data->depth_data_.symbol);
 
-            cout << "cur_symbol: " << cur_symbol << endl;
+            // cout << "cur_symbol: " << cur_symbol << endl;
 
             if (depth_data_.find(cur_symbol) == depth_data_.end())
             {                
