@@ -28,6 +28,7 @@ AUX_SOURCE_DIRECTORY(./log LOG_SRC)
 ###############################################################################################
 INCLUDE_DIRECTORIES(".")
 INCLUDE_DIRECTORIES("../../lib")
+INCLUDE_DIRECTORIES("../../base/cpp")
 
 INCLUDE_DIRECTORIES("../include/uWebsockets")
 # for include package.h and channel.h

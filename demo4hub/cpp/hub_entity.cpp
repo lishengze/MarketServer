@@ -1,6 +1,7 @@
 #include "hub_config.h"
 #include "hub_entity.h"
 #include "hub_interface.h"
+#include "quark/cxx/assign.h"
 #include <iostream>
 using std::endl;
 
@@ -55,8 +56,9 @@ void HubEntity::on_snap(const SEData& quote)
         Decimal_to_SDecimal(quote_depth.asks[i].volume, depth.volume());
         quote_depth.bid_length = i+1;
     }
-    quote_depth.symbol = quote.symbol();
-    quote_depth.exchange = quote.exchange();
+
+    assign(quote_depth.symbol, quote.symbol());
+    assign(quote_depth.exchange, quote.exchange());
 
     //cout << "HubEntity::on_snap " << quote_depth.symbol << " " << quote_depth.ask_length << " " << quote_depth.bid_length << endl;
 
@@ -74,6 +76,9 @@ void HubEntity::on_kline(const SEKlineData& quote)
         const SEKline& kline = quote.klines(i);
         KlineData _kline;
         _kline.index = kline.index();
+        assign(_kline.symbol, quote.symbol());
+        assign(_kline.exchange, quote.exchange());
+
         Decimal_to_SDecimal(_kline.px_open, kline.open());
         Decimal_to_SDecimal(_kline.px_high, kline.high());
         Decimal_to_SDecimal(_kline.px_low, kline.low());

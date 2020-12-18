@@ -25,6 +25,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include "common_datatype_define.h"
+#include "quark/cxx/assign.h"
+
 #include "util/id.hpp"
 
 #include <iostream>

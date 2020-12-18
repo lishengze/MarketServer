@@ -51,8 +51,8 @@ PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_i
 string SDepthDataToJsonStr(const SDepthData& depth)
 {
     nlohmann::json json_data;
-    json_data["symbol"] = depth.symbol;
-    json_data["exchange"] = depth.exchange;
+    json_data["symbol"] = string(depth.symbol);
+    json_data["exchange"] = string(depth.exchange);
     json_data["tick"] = depth.tick;
     json_data["seqno"] = depth.seqno;
     json_data["ask_length"] = depth.ask_length;
@@ -157,18 +157,6 @@ string SymbolsToJsonStr(SymbolData& symbol_data, string type)
 {
     std::set<std::string>& symbols = symbol_data.get_symbols();
 
-    // nlohmann::json json_data;
-    // nlohmann::json symbol_json;
-
-    // int i = 0;
-    // for (string symbol:symbols)
-    // {
-    //     symbol_json[i++] = symbol;
-    // }
-    // json_data["symbol"] = symbol_json;    
-
-    // json_data["type"] = type;
-
     return SymbolsToJsonStr(symbols, type);
 }
 
@@ -176,8 +164,8 @@ string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
 {
     string result;
     nlohmann::json json_data;
-    json_data["symbol"] = en_data.depth_data_.symbol;
-    json_data["exchange"] = en_data.depth_data_.exchange;
+    json_data["symbol"] = string(en_data.depth_data_.symbol);
+    json_data["exchange"] = string(en_data.depth_data_.exchange);
     json_data["tick"] = en_data.depth_data_.tick;
     json_data["seqno"] = en_data.depth_data_.seqno;
     json_data["ask_length"] = en_data.depth_data_.ask_length;
@@ -270,13 +258,13 @@ PackagePtr GetNewReqKLineDataPackage(string symbol, type_tick start_time, type_t
 
         ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
 
-        p_req_kline_data->http_response_ = response;
-        p_req_kline_data->http_request_ = request;
+        assign(p_req_kline_data->http_response_, response);
+        assign(p_req_kline_data->http_request_, request);
 
-        p_req_kline_data->symbol_ = symbol;
-        p_req_kline_data->start_time_ = start_time;
-        p_req_kline_data->end_time_ = end_time;
-        p_req_kline_data->frequency_ = frequency;
+        assign(p_req_kline_data->symbol_, symbol);
+        assign(p_req_kline_data->start_time_, start_time);
+        assign(p_req_kline_data->end_time_, end_time);
+        assign(p_req_kline_data->frequency_, frequency);
 
         return package;
     }
@@ -299,17 +287,20 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
 
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
-        p_rsp_kline_data->comm_type = pReqKlineData->comm_type;
-        p_rsp_kline_data->http_request_ = pReqKlineData->http_request_;
-        p_rsp_kline_data->http_response_ = pReqKlineData->http_response_;
-        p_rsp_kline_data->websocket_ = pReqKlineData->websocket_;
+        assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
+        assign(p_rsp_kline_data->http_request_, pReqKlineData->http_request_);
+        assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
+        assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
 
-        p_rsp_kline_data->symbol_ = pReqKlineData->symbol_;
-        p_rsp_kline_data->start_time_ = pReqKlineData->start_time_;
-        p_rsp_kline_data->end_time_ = pReqKlineData->end_time_;
-        p_rsp_kline_data->frequency_ = pReqKlineData->frequency_;
+        assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
+        assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
+        assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
+        assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
 
-        p_rsp_kline_data->kline_data_vec_ = main_data;
+        for (AtomKlineDataPtr atom_kline:main_data)
+        {
+            p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);
+        }
 
         return package;
     }
@@ -328,7 +319,7 @@ string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
         string result;
         nlohmann::json json_data;        
         json_data["type"] = type;
-        json_data["symbol"] = rsp_kline_data.symbol_;
+        json_data["symbol"] = string(rsp_kline_data.symbol_);
         json_data["start_time"] = rsp_kline_data.start_time_;
         json_data["end_time"] = rsp_kline_data.end_time_;
         json_data["frequency"] = rsp_kline_data.frequency_;

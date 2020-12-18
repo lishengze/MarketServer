@@ -3,6 +3,8 @@
 #include "decimal.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include "common_datatype_define.h"
+#include "quark/cxx/assign.h"
 
 using std::string;
 
@@ -23,13 +25,13 @@ struct SDepthData
 {
     SDepthData(const SDepthData& other)
     {
-        symbol = other.symbol;
-        exchange = other.exchange;
-        tick = other.tick;
-        seqno = other.seqno;
-        ask_length = other.ask_length;
-        bid_length = other.bid_length;
-
+        assign(symbol, other.symbol);
+        assign(exchange, other.exchange);
+        assign(tick, other.tick);
+        assign(seqno, other.seqno);
+        assign(ask_length, other.ask_length);
+        assign(bid_length, other.bid_length);
+    
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
             asks[i] = other.asks[i];
@@ -37,14 +39,16 @@ struct SDepthData
         }
     }
 
-    SDepthData & operator =(const SDepthData& other) {
+    SDepthData & operator =(const SDepthData& other) 
+    {
         // cout << "SDepthData & operator = " << endl;
-        symbol = other.symbol;
-        exchange = other.exchange;
-        tick = other.tick;
-        seqno = other.seqno;
-        ask_length = other.ask_length;
-        bid_length = other.bid_length;
+
+        assign(symbol, other.symbol);
+        assign(exchange, other.exchange);
+        assign(tick, other.tick);
+        assign(seqno, other.seqno);
+        assign(ask_length, other.ask_length);
+        assign(bid_length, other.bid_length);
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -54,8 +58,8 @@ struct SDepthData
         return *this;
     }
     
-    string symbol;
-    string exchange;
+    symbol_type symbol;
+    symbol_type exchange;
     type_tick tick;
     type_seqno seqno;
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];
@@ -76,32 +80,39 @@ const long UT_FID_KlineData = 0x10001;
 struct KlineData
 {
     KlineData(string symbol_str, type_tick time, double open, double high, 
-                double low, double close, double volume_str):
-                symbol{symbol_str}, index{time}, px_open{open}, px_high{high}, px_low{low},
-                px_close{close}, volume{volume_str} {}
+                double low, double close, double volume_str)
+    {
+        assign(symbol, symbol_str);
+        assign(index, time);
+        assign(px_open, SDecimal(open));
+        assign(px_close, SDecimal(close));
+        assign(px_high, SDecimal(high));
+        assign(px_low, SDecimal(low));
+        assign(volume, SDecimal(volume));        
+    }                
 
     KlineData(const KlineData& other)
     {
-        symbol = other.symbol;
-        exchange = other.exchange;
-        index = other.index;
-        px_open = other.px_open;
-        px_close = other.px_close;
-        px_high = other.px_high;
-        px_low = other.px_low;
-        volume = other.volume;
+        assign(symbol, other.symbol);
+        assign(exchange, other.exchange);
+        assign(index, other.index);
+        assign(px_open, other.px_open);
+        assign(px_close, other.px_close);
+        assign(px_high, other.px_high);
+        assign(px_low, other.px_low);
+        assign(volume, other.volume);
     }
 
     void reset(const KlineData& other)
     {
-        symbol = other.symbol;
-        exchange = other.exchange;
-        index = other.index;
-        px_open = other.px_open;
-        px_close = other.px_close;
-        px_high = other.px_high;
-        px_low = other.px_low;
-        volume = other.volume;   
+        assign(symbol, other.symbol);
+        assign(exchange, other.exchange);
+        assign(index, other.index);
+        assign(px_open, other.px_open);
+        assign(px_close, other.px_close);
+        assign(px_high, other.px_high);
+        assign(px_low, other.px_low);
+        assign(volume, other.volume);
 
         clear_ = false;     
     }
@@ -110,8 +121,8 @@ struct KlineData
 
     bool is_clear() {return clear_;}    
                     
-    string symbol;
-    string exchange;
+    symbol_type symbol;
+    symbol_type exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

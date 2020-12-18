@@ -1,12 +1,12 @@
 #pragma once
-#include "../front_server_declare.h"
-#include "hub_struct.h"
-#include <mutex>
 
+#include <mutex>
 #include <boost/shared_ptr.hpp>
 
-using symbol_type = std::string;
-using frequency_type = unsigned int;
+#include "../front_server_declare.h"
+
+#include "hub_struct.h"
+
 
 enum class COMM_TYPE {
     HTTP = 0,
@@ -14,8 +14,6 @@ enum class COMM_TYPE {
     WEBSOCKET,
     WEBSECKETS,
 };
-
-
 struct Socket
 {
     Socket(HttpResponse* res, HttpRequest* req):comm_type{COMM_TYPE::HTTP}, http_response_{res}, http_request_{req}
@@ -39,7 +37,7 @@ struct Socket
         }
     }
 
-    COMM_TYPE comm_type = COMM_TYPE::HTTP;
+    COMM_TYPE           comm_type = COMM_TYPE::HTTP;
     HttpResponse*       http_response_{nullptr};
     HttpRequest*        http_request_{nullptr};
     WebsocketClass*     websocket_{nullptr};
@@ -49,7 +47,6 @@ const long UT_FID_EnhancedDepthData = 0x10002;
 class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
 {
     public:
-        EnhancedDepthData():type_{"market_data"} {}
         EnhancedDepthData(const SDepthData* depth_data);
 
         EnhancedDepthData(const EnhancedDepthData& other);
@@ -66,11 +63,6 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
             return shared_this;
         }
 
-        void set_json_str();
-        string get_json_str() {
-            set_json_str();
-            return json_str_;
-        }
 
         double ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
         double bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
@@ -79,10 +71,7 @@ class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
 
         static const long Fid = UT_FID_EnhancedDepthData;  
 
-        string                    type_{"market_data"};
-
     private:
-        string                    json_str_;
         std::mutex                mutex_;
         
 
@@ -144,7 +133,7 @@ struct AtomKlineData
         // cout << "default AtomKlineData " << endl;
     }
 
-    string symbol;
+    symbol_type symbol;
     double open_;
     double high_;
     double low_;
@@ -162,18 +151,18 @@ class ReqKLineData:public Socket
                 HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
     Socket(res, nullptr, ws)
     {
-        symbol_ = symbol;
-        start_time_ = start_time;
-        end_time_ = end_time;
-        frequency_ = freq;
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(frequency_, freq);
     }
 
     void reset(const ReqKLineData& other)
     {
-        symbol_ = other.symbol_;
-        start_time_ = other.start_time_;
-        end_time_ = other.end_time_;
-        frequency_ = other.frequency_;
+        assign(symbol_, other.symbol_);
+        assign(start_time_, other.start_time_);
+        assign(end_time_, other.end_time_);
+        assign(frequency_, other.frequency_);
 
         http_response_ = other.http_response_;
         websocket_ = other.websocket_;
@@ -183,10 +172,11 @@ class ReqKLineData:public Socket
     void set (string symbol, type_tick start_time, type_tick end_time, int freq, 
             HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
     {
-        symbol_ = symbol;
-        start_time_ = start_time;
-        end_time_ = end_time;
-        frequency_ = freq;
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(frequency_, freq);
+
         http_response_ = res;
         websocket_ = ws;
 
@@ -204,12 +194,12 @@ class ReqKLineData:public Socket
     }    
 
     public: 
-        string              symbol_;
+        symbol_type         symbol_;
         type_tick           start_time_;
         type_tick           end_time_;
         type_tick           append_end_time_;
 
-        int                 frequency_;
+        frequency_type      frequency_;
 
         static const long Fid = UT_FID_ReqKLineData;
 };
@@ -218,10 +208,10 @@ const long UT_FID_RspKLineData = 0x10005;
 class RspKLineData:public Socket
 {
     public: 
-        string                              symbol_;
+        symbol_type                         symbol_;
         type_tick                           start_time_;
         type_tick                           end_time_;
-        int                                 frequency_;
+        frequency_type                      frequency_;
         std::vector<AtomKlineDataPtr>       kline_data_vec_;
 
         static const long Fid = UT_FID_RspKLineData;

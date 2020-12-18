@@ -194,6 +194,7 @@ void DataReceive::handle_response_message(PackagePtr package)
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
     cout << "on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    
     // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
@@ -211,7 +212,7 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
 {
     
-    if (depth.symbol.length() == 0 || depth.symbol == "") 
+    if (strlen(symbol) == 0) 
     {
         LOG_INFO("DataReceive::handle_depth_data symbol is null!");
         return;
@@ -240,13 +241,11 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
 
         // LOG_INFO(stream_obj.str());
 
-        if (kline.symbol.length() == 0 || kline.symbol == "") 
+        if (strlen(symbol) == 0) 
         {
             LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
             break;
         }        
-
-
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
