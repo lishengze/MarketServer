@@ -248,9 +248,14 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
             << "frequency: " << frequency << " \n"
             << endl;
 
+        ReqKLineData req_kline_data(symbol, start_time, end_time, frequency, nullptr, ws);
+
+        // cout << "COMM TYPE: " << req_kline_data.comm_type << endl;
+        
+
         if (error_id != 0)
         {
-            if (!front_server_->request_kline_data(symbol, start_time, end_time, frequency, nullptr, nullptr, ws))
+            if (!front_server_->request_kline_data(req_kline_data))
             {
                 err_msg += "Server Internel Error, Please Try Again!";
                 ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);

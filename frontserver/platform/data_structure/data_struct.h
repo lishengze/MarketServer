@@ -23,6 +23,22 @@ struct Socket
 
     Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
 
+    Socket(HttpResponse* res=nullptr, HttpRequest* req=nullptr, WebsocketClass* ws=nullptr):
+    http_response_{res}, http_request_{req}, websocket_{ws}
+    {
+        if (websocket_)
+        {
+            cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+            comm_type = COMM_TYPE::WEBSOCKET;
+        }
+
+        if (http_response_)
+        {
+            cout << "IS COMM_TYPE::HTTP" << endl;
+            comm_type = COMM_TYPE::HTTP;
+        }
+    }
+
     COMM_TYPE comm_type = COMM_TYPE::HTTP;
     HttpResponse*       http_response_{nullptr};
     HttpRequest*        http_request_{nullptr};
@@ -141,6 +157,29 @@ FORWARD_DECLARE_PTR(AtomKlineData);
 const long UT_FID_ReqKLineData = 0x10004;
 class ReqKLineData:public Socket
 {
+    public:
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int freq, 
+                HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
+    Socket(res, nullptr, ws)
+    {
+        symbol_ = symbol;
+        start_time_ = start_time;
+        end_time_ = end_time;
+        frequency_ = freq;
+    }
+
+    void reset(const ReqKLineData& other)
+    {
+        symbol_ = other.symbol_;
+        start_time_ = other.start_time_;
+        end_time_ = other.end_time_;
+        frequency_ = other.frequency_;
+
+        http_response_ = other.http_response_;
+        websocket_ = other.websocket_;
+        comm_type = other.comm_type;
+    }
+
     public: 
         string              symbol_;
         type_tick           start_time_;

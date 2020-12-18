@@ -35,9 +35,9 @@ void FrontServer::release()
 
 void FrontServer::request_message(PackagePtr package)
 {
-    // get_io_service().post(std::bind(&FrontServer::handle_request_message, this, package));
+    get_io_service().post(std::bind(&FrontServer::handle_request_message, this, package));
 
-    handle_request_message(package);
+    // handle_request_message(package);
 }
 
 void FrontServer::response_message(PackagePtr package)
@@ -169,8 +169,7 @@ string FrontServer::get_heartbeat_str()
     return json_obj.dump();
 }
 
-bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, type_tick end_time_secs, int frequency,
-                                     HttpResponse* http_res, HttpRequest* http_req, WebsocketClass* ws)
+bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
 {
     try
     {
@@ -191,24 +190,7 @@ bool FrontServer::request_kline_data(string symbol, type_tick start_time_secs, t
 
         if (p_req_kline_data)
         {            
-            p_req_kline_data->http_request_ = http_req;
-            p_req_kline_data->http_response_ = http_res;
-            // p_req_kline_data->websocket_ = ws;
-
-            if (ws)
-            {
-                p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
-            }
-
-            if (http_res)
-            {
-                p_req_kline_data->comm_type = COMM_TYPE::HTTP;
-            }
-            
-            p_req_kline_data->symbol_ = symbol;
-            p_req_kline_data->start_time_ = start_time_secs;
-            p_req_kline_data->end_time_ = end_time_secs;
-            p_req_kline_data->frequency_ = frequency;
+            p_req_kline_data->reset(req_kline);
 
             cout << "FrontServer::request_kline_data 2" << endl;
             deliver_request(package);
