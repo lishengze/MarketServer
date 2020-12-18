@@ -180,6 +180,29 @@ class ReqKLineData:public Socket
         comm_type = other.comm_type;
     }
 
+    void set (string symbol, type_tick start_time, type_tick end_time, int freq, 
+            HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
+    {
+        symbol_ = symbol;
+        start_time_ = start_time;
+        end_time_ = end_time;
+        frequency_ = freq;
+        http_response_ = res;
+        websocket_ = ws;
+
+        if (websocket_)
+        {
+            cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+            comm_type = COMM_TYPE::WEBSOCKET;
+        }
+
+        if (http_response_)
+        {
+            cout << "IS COMM_TYPE::HTTP" << endl;
+            comm_type = COMM_TYPE::HTTP;
+        }
+    }    
+
     public: 
         string              symbol_;
         type_tick           start_time_;

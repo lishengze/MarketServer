@@ -251,11 +251,26 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         ReqKLineData req_kline_data(symbol, start_time, end_time, frequency, nullptr, ws);
 
         // cout << "COMM TYPE: " << req_kline_data.comm_type << endl;
-        
+
+        PackagePtr package = PackagePtr{new Package{}};
+  
+        package->SetPackageID(ID_MANAGER->get_id());
+
+        package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
+        CREATE_FIELD(package, ReqKLineData);
+
+        cout << "FrontServer::request_kline_data 1" << endl;
+
+        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+        cout << "FrontServer::request_kline_data 1.1" << endl;
+
+        p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
 
         if (error_id != 0)
         {
-            if (!front_server_->request_kline_data(req_kline_data))
+            if (!front_server_->request_kline_data(package))
             {
                 err_msg += "Server Internel Error, Please Try Again!";
                 ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
