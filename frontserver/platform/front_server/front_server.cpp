@@ -204,7 +204,7 @@ void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
 
         if (p_req_kline_data)
         {            
-            cout << "p_req_kline_data: " << sizeof (p_req_kline_data) << endl;
+            cout << "p_req_kline_data: " << sizeof (*p_req_kline_data) << endl;
 
             p_req_kline_data->symbol_ = req_kline->symbol_;
             p_req_kline_data->start_time_ = req_kline->start_time_;
