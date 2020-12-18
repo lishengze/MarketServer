@@ -38,19 +38,19 @@ struct SDepthData
     }
 
     SDepthData & operator =(const SDepthData& other) {
-        cout << "SDepthData & operator = " << endl;
+        // cout << "SDepthData & operator = " << endl;
         symbol = other.symbol;
-        // exchange = other.exchange;
-        // tick = other.tick;
-        // seqno = other.seqno;
-        // ask_length = other.ask_length;
-        // bid_length = other.bid_length;
+        exchange = other.exchange;
+        tick = other.tick;
+        seqno = other.seqno;
+        ask_length = other.ask_length;
+        bid_length = other.bid_length;
 
-        // for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
-        // {
-        //     asks[i] = other.asks[i];
-        //     bids[i] = other.bids[i];
-        // }
+        for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+        {
+            asks[i] = other.asks[i];
+            bids[i] = other.bids[i];
+        }
         return *this;
     }
     

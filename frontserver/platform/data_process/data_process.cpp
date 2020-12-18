@@ -208,7 +208,7 @@ void DataProcess::response_src_kline_package(PackagePtr package)
             //             + utrade::pandora::ToSecondStr(pkline_data->index * NanoPerSec, "%Y-%m-%d %H:%M:%S"));
             // cout << endl;
 
-            if (kline_data_[pkline_data->symbol][frequency_base_].size() == 60)
+            if (kline_data_[pkline_data->symbol][frequency_base_].size() % 60 == 0)
             {
 
                 std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[pkline_data->symbol];
@@ -408,7 +408,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
                 while (iter->first <= pReqKlineData->end_time_ && iter != symbol_kline_data.end())
                 {
                     src_kline_data.emplace_back(iter->second);                    
-                    cout << iter->first << endl;                    
+                    // cout << iter->first << endl;                    
                     ++iter;
                 }
 

@@ -184,7 +184,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 
 void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 {
-    return;
+    // return;  
 
     try
     {

@@ -8,7 +8,7 @@ EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data):type_{"market
 
 EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
 {
-    cout << "EnhancedDepthData::EnhancedDepthData " << endl;
+    // cout << "EnhancedDepthData::EnhancedDepthData " << endl;
 
     // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
     // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
@@ -25,7 +25,7 @@ EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
 
 EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
 {
-    cout << "EnhancedDepthData::Operator = " << endl;
+    // cout << "EnhancedDepthData::Operator = " << endl;
 
     // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
     // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
@@ -42,13 +42,13 @@ EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
 
 void EnhancedDepthData::init(const SDepthData* depth_data)
 {
-    cout << "EnhancedDepthData::init SDepthData" << endl;
+    // cout << "EnhancedDepthData::init SDepthData" << endl;
 
     std::lock_guard<std::mutex> lg(mutex_);
 
-    // memcpy(&depth_data_, depth_data, sizeof(SDepthData));
+    memcpy(&depth_data_, depth_data, sizeof(SDepthData));
 
-    depth_data_ = *depth_data;
+    // depth_data_ = *depth_data;
 
     // cout << "EnhancedDepthData::init 1" << endl;
 

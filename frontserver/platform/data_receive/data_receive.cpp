@@ -89,6 +89,30 @@ void DataReceive::test_kline_data()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
+    while (true)
+    {
+        type_tick cur_time = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
+        end_time_secs = mod_secs(end_time_secs, frequency_secs);
+
+        double open = dis(gen);
+        double close = dis(gen);
+        double high = std::max(open, close) + offset(gen);
+        double low = std::min(open, close) - offset(gen);
+        double volume = dis(gen) * 5;
+
+        KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
+
+        std::vector<KlineData> vec_kline{*kline_data};
+
+        handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);        
+
+        cout << get_sec_time_str(cur_time) << "symbol: " << symbol << ", \n"
+            << "open: " << open << ", high: " << high << ", "
+            << "low: " << low << ", close: " << volume << endl;
+
+        std::this_thread::sleep_for(std::chrono::seconds(60));
+    }
 }
 
 void DataReceive::test_rsp_package()
@@ -212,7 +236,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         stream_obj  << get_sec_time_str(kline.index) << "symbol: " << symbol << ", \n"
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-        LOG_INFO(stream_obj.str());
+
+        // LOG_INFO(stream_obj.str());
 
         if (kline.symbol.length() == 0 || kline.symbol == "") 
         {
