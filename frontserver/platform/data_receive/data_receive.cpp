@@ -58,7 +58,7 @@ void DataReceive::test_kline_data()
     type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
     end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    int test_time_numb = 60 * 2;
+    int test_time_numb = 60 * 5;
 
     double test_max = 100;
     double test_min = 10;
@@ -194,7 +194,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 {
     // cout << "on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
 
-    return -1;
+    // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
 }
