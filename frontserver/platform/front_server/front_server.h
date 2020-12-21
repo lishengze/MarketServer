@@ -31,8 +31,6 @@ public:
 
     bool request_kline_data(const ReqKLineData& req_kline);
 
-    bool request_kline_data(PackagePtr package);
-
     void process_rtn_depth_package(PackagePtr package);
 
     void response_sdepth_package(PackagePtr package);

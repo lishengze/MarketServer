@@ -176,13 +176,6 @@ bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
     return true;
 }
 
-
-bool FrontServer::request_kline_data(PackagePtr package)
-{
-    // get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, package));
-    return true;
-}
-
 void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
 {
     try

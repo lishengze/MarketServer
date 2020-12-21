@@ -353,3 +353,12 @@ string get_sec_time_str(unsigned long time)
 {
     return utrade::pandora::ToSecondStr(time * NanoPerSec, "%Y-%m-%d %H:%M:%S");
 }
+
+void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src)
+{
+    for (KlineData atom: src)
+    {
+        KlineDataPtr atom_ptr = boost::make_shared<KlineData>(atom);
+        des.emplace_back(atom_ptr);
+    }
+}

@@ -377,6 +377,7 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
             std::map<type_tick, KlineDataPtr> symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
+            std::vector<KlineData> append_result;
 
             if (kline_data_[pReqKlineData->symbol_].find(pReqKlineData->frequency_) != kline_data_[pReqKlineData->symbol_].end())
             {
@@ -397,15 +398,15 @@ PackagePtr DataProcess::get_kline_package(PackagePtr package)
             else if (symbol_kline_data.begin()->first > pReqKlineData->start_time_)
             {
                 LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
-                pReqKlineData->append_end_time_ = symbol_kline_data.begin()->first;
-
-                std::vector<KlineData> append_result;
-                HubInterface::get_kline("", pReqKlineData->symbol_, 1, pReqKlineData->start_time_, symbol_kline_data.rbegin()->first, append_result);
-
-                // complete_kline_data(symbol_kline_data, append_result, pReqKlineData->frequency_);
+                
+                HubInterface::get_kline("", pReqKlineData->symbol_, 1, pReqKlineData->start_time_, symbol_kline_data.begin()->first, append_result);
             }
 
-            std::vector<KlineDataPtr> src_kline_data = get_src_kline_data(symbol_kline_data, pReqKlineData->start_time_, pReqKlineData->end_time_);
+            std::vector<KlineDataPtr> src_kline_data;
+
+            append_kline_to_klinePtr(src_kline_data, append_result);
+
+            get_src_kline_data(src_kline_data, symbol_kline_data, pReqKlineData->start_time_, pReqKlineData->end_time_);
 
             std::vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
@@ -442,10 +443,8 @@ void DataProcess::complete_kline_data(std::vector<KlineData>& ori_symbol_kline_d
 
 }
 
-std::vector<KlineDataPtr> DataProcess::get_src_kline_data(std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time)
+void DataProcess::get_src_kline_data(std::vector<KlineDataPtr>& src_kline_data, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time)
 {
-    std::vector<KlineDataPtr> src_kline_data;
-
     std::map<type_tick, KlineDataPtr>::iterator  iter = symbol_kline_data.begin();
 
     while(iter->first <= start_time && (++iter != symbol_kline_data.end() && iter->first > start_time))
@@ -469,8 +468,6 @@ std::vector<KlineDataPtr> DataProcess::get_src_kline_data(std::map<type_tick, Kl
 
         cout << "src_kline_data data numb: " << src_kline_data.size() << endl;   
     }
-      
-    return src_kline_data;
 }
 
 std::vector<AtomKlineDataPtr> DataProcess::compute_target_kline_data(std::vector<KlineDataPtr>& src_kline_data, int frequency)
@@ -486,21 +483,32 @@ std::vector<AtomKlineDataPtr> DataProcess::compute_target_kline_data(std::vector
 
     double low = MAX_DOUBLE;
     double high = MIN_DOUBLE;
-
-    src_kline_data.erase(src_kline_data.begin());
+    double open;
 
     cout << "kline_data.size: " << src_kline_data.size() << endl;
 
+    src_kline_data.erase(src_kline_data.begin());
+
+    bool is_first = true;
     for (KlineDataPtr atom : src_kline_data)
     {
         low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
         high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
 
+        if (is_first)
+        {
+            open = atom->px_open.get_value();
+            is_first = false;
+        }
+        
         if (atom->index - (*result.rbegin())->tick_ >= frequency)
         {            
             AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
             cur_data->low_ = low;
             cur_data->high_ = high;
+            cur_data->open_ = open;
+
+            is_first = true;
             result.push_back(cur_data); 
 
             low = MAX_DOUBLE;

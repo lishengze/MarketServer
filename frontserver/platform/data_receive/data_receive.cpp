@@ -58,7 +58,7 @@ void DataReceive::test_kline_data()
     type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
     end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    int test_time_numb = 60 * 5;
+    int test_time_numb = 60 * 2;
 
     double test_max = 100;
     double test_min = 10;
@@ -236,16 +236,18 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         std::stringstream stream_obj;
         stream_obj  << get_sec_time_str(kline.index) << " symbol: " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-
-        LOG_INFO(stream_obj.str());
-
+                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
+        
         if (strlen(symbol) == 0) 
         {
             LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
             break;
         }        
-
+        else
+        {
+            LOG_INFO(stream_obj.str());
+        }
+        
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
         package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
