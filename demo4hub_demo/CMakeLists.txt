@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES("../")
 INCLUDE_DIRECTORIES("../lib")
 INCLUDE_DIRECTORIES("../base/cpp")
 
-INCLUDE_DIRECTORIES("../../component/")
+INCLUDE_DIRECTORIES("../component/")
 
 LINK_DIRECTORIES("../lib")
 # for search lib quark
