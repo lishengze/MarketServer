@@ -402,6 +402,7 @@ void WBServer::heartbeat_run()
 
 void WBServer::check_heartbeat()
 {
+
     std::set<WebsocketClass *> dead_ws_set;
     for (auto iter:wss_con_map_)
     {
@@ -418,7 +419,6 @@ void WBServer::check_heartbeat()
     }
 
     string heartbeat_str = get_heartbeat_str();
-    // cout << "heartbeat_str: " << heartbeat_str << endl;
 
     for (auto& iter:wss_con_map_)
     {

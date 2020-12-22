@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <set>
+#include <mutex>
 
 #include "../front_server_declare.h"
 #include "../data_structure/data_struct.h"
@@ -108,6 +109,8 @@ class WBServer
         boost::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
 
         int                                     heartbeat_seconds_{5};    
+
+        std::mutex                              heartbeat_mutex_;
 
         std::atomic_ullong                      socket_id_{0};
 };

@@ -3,14 +3,15 @@
 #include "pandora/package/package_station.h"
 #include "pandora/util/singleton.hpp"
 #include "pandora/util/thread_basepool.h"
-#include "../front_server_declare.h"
 
-#include <boost/shared_ptr.hpp>
+#include "../front_server_declare.h"
 #include "../data_structure/data_struct.h"
+#include "kline_process.h"
+#include "depth_process.h"
 
 // 用于处理数据: 为 front-server 提供全量或增量的更新;
 // 设置缓冲;
-class DataProcess:public utrade::pandora::ThreadBasePool, public IPackageStation
+class DataProcess:public utrade::pandora::ThreadBasePool, public IPackageStation, public boost::enable_shared_from_this<DataProcess>
 {
 public:
 
@@ -23,44 +24,27 @@ public:
     virtual void request_message(PackagePtr package) override;
     virtual void response_message(PackagePtr package) override;
 
+    boost::shared_ptr<DataProcess> get_shared_ptr() { return shared_from_this();}
+
     void handle_request_message(PackagePtr package);
+
     void handle_response_message(PackagePtr package);
-
-    void response_src_sdepth_package(PackagePtr package);
-
-    void response_src_kline_package(PackagePtr package);
-
-    void response_new_symbol(string symbol);
-
-    void request_symbol_data(PackagePtr package);
 
     void request_kline_package(PackagePtr package);
 
-    void request_depth_data(PackagePtr package);
+    void request_depth_package(PackagePtr package);
 
-    PackagePtr get_kline_package(PackagePtr package);
+    void request_symbol_package(PackagePtr package);
 
-    void store_kline_data(int frequency, KlineData* pkline_data);
+    void response_src_sdepth_package(PackagePtr package);    
 
-    void init_test_kline_data();
-
-    void complete_kline_data(std::vector<KlineData>& ori_symbol_kline_data, std::vector<KlineData>& append_result, frequency_type frequency);
-
-    void get_src_kline_data(std::vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time);
-
-    std::vector<AtomKlineDataPtr> compute_target_kline_data(std::vector<KlineDataPtr>& kline_data, int frequency);
-
-    using EnhancedDepthDataPackagePtr = PackagePtr; 
+    void response_src_kline_package(PackagePtr package);
 
 private:
-    std::map<string, EnhancedDepthDataPackagePtr>                         depth_data_;
-    std::map<string, std::map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
-    std::map<string, std::map<int, KlineDataPtr>>                         cur_kline_data_;
-
-    bool                                                            test_kline_data_{false};
-
-    std::vector<int>                                                frequency_list_;
-    int                                                             frequency_numb_{100};   
-    int                                                             frequency_base_;           
+    KlineProcessPtr         kline_process_{nullptr};
+    DepthProcesPtr          depth_process_{nullptr};
+             
 };
+
+FORWARD_DECLARE_PTR(DataProcess);
 

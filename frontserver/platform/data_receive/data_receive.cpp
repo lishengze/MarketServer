@@ -90,29 +90,29 @@ void DataReceive::test_kline_data()
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    // while (true)
-    // {
-    //     type_tick cur_time = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
-    //     end_time_secs = mod_secs(end_time_secs, frequency_secs);
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(60));
 
-    //     double open = dis(gen);
-    //     double close = dis(gen);
-    //     double high = std::max(open, close) + offset(gen);
-    //     double low = std::min(open, close) - offset(gen);
-    //     double volume = dis(gen) * 5;
+        type_tick cur_time = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
+        end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    //     KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
+        double open = dis(gen);
+        double close = dis(gen);
+        double high = std::max(open, close) + offset(gen);
+        double low = std::min(open, close) - offset(gen);
+        double volume = dis(gen) * 5;
 
-    //     std::vector<KlineData> vec_kline{*kline_data};
+        KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
 
-    //     handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);        
+        std::vector<KlineData> vec_kline{*kline_data};
 
-    //     cout << get_sec_time_str(cur_time) << "symbol: " << symbol << ", \n"
-    //         << "open: " << open << ", high: " << high << ", "
-    //         << "low: " << low << ", close: " << volume << endl;
+        handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);        
 
-    //     std::this_thread::sleep_for(std::chrono::seconds(60));
-    // }
+        cout << "Update: " <<  get_sec_time_str(cur_time) << "symbol: " << symbol << ", \n"
+            << "open: " << open << ", high: " << high << ", "
+            << "low: " << low << ", close: " << volume << endl;        
+    }
 }
 
 void DataReceive::test_rsp_package()
@@ -192,8 +192,7 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
-    // cout << "on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
-
+    cout << utrade::pandora::NanoTimeStr() << " on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
     // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
@@ -202,7 +201,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    cout << "klines.size: " << klines.size() << endl;
+    cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << endl;
     return -1;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
@@ -245,7 +244,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* symbol, ty
         }        
         else
         {
-            LOG_INFO(stream_obj.str());
+            // LOG_INFO(stream_obj.str());
         }
         
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());

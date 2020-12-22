@@ -113,6 +113,12 @@ class SymbolData
         
 };
 
+const long UT_FID_ReqDepthData = 0x10004;
+class ReqDepthData:public Socket
+{
+
+};
+
 struct AtomKlineData
 {
     AtomKlineData(double open, double high, double low, double close, double volume):
@@ -143,7 +149,7 @@ struct AtomKlineData
 };
 FORWARD_DECLARE_PTR(AtomKlineData);
 
-const long UT_FID_ReqKLineData = 0x10004;
+const long UT_FID_ReqKLineData = 0x10005;
 class ReqKLineData:public Socket
 {
     public:
@@ -203,8 +209,9 @@ class ReqKLineData:public Socket
 
         static const long Fid = UT_FID_ReqKLineData;
 };
+FORWARD_DECLARE_PTR(ReqKLineData);
 
-const long UT_FID_RspKLineData = 0x10005;
+const long UT_FID_RspKLineData = 0x10006;
 class RspKLineData:public Socket
 {
     public: 
@@ -216,3 +223,4 @@ class RspKLineData:public Socket
 
         static const long Fid = UT_FID_RspKLineData;
 };
+FORWARD_DECLARE_PTR(RspKLineData);

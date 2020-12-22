@@ -57,7 +57,7 @@ def get_sub_depth_str():
 
 def get_sub_kline_str():
     print("get_sub_kline_str")
-    frequency = 60*5
+    frequency = 60*2
     end_time = int(time.time())
     end_time = end_time - end_time % frequency - frequency
     start_time = end_time - 60 * 30
@@ -76,9 +76,9 @@ def get_sub_kline_str():
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
     ws.send(send_str)
 

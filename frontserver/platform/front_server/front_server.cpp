@@ -230,22 +230,6 @@ void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
     
 }
 
-// void FrontServer::handle_request_kline_data(PackagePtr package)
-// {
-//     try
-//     {
-//         deliver_request(package);
-//     }
-//     catch(const std::exception& e)
-//     {
-//         std::stringstream stream_obj;
-//         stream_obj << "[E] FrontServer::request_kline_data: " << e.what() << "\n";
-//         LOG_ERROR(stream_obj.str());
-
-//         return;
-//     }    
-// }
-
 void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
@@ -258,7 +242,17 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         {
             string kline_data_str = RspKlinDataToJsonStr(*p_rsp_kline_data);
 
-            cout << "kline_data_str: " << kline_data_str << endl;
+            // cout << "kline_data_str: " << kline_data_str << endl;
+
+            cout << "Frequency: " << p_rsp_kline_data->frequency_ << ", data_size: " << p_rsp_kline_data->kline_data_vec_.size() << endl;
+            for (AtomKlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
+            {
+                cout << get_sec_time_str(atom_kline->tick_) << ", "
+                     << "open: " << atom_kline->open_ << ", "
+                     << "close: " << atom_kline->close_ << ", "
+                     << "high: " << atom_kline->high_ << ", "
+                     << "low: " << atom_kline->low_ << endl;
+            }
 
             if ((p_rsp_kline_data->comm_type == COMM_TYPE::HTTP || p_rsp_kline_data->comm_type == COMM_TYPE::HTTPS) 
             && p_rsp_kline_data->http_response_)

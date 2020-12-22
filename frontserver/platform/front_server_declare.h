@@ -1,6 +1,5 @@
 #pragma once
 
-#include "envdeclare.h"
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -13,7 +12,9 @@
 #include <string.h>
 #include <random>
 #include <algorithm>
+#include <mutex>
 
+#include "pandora/envdeclare.h"
 #include "pandora/util/json.hpp"
 #include "pandora/util/thread_basepool.h"
 #include "quark/cxx/assign.h"
@@ -24,6 +25,7 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "common_datatype_define.h"
 #include "quark/cxx/assign.h"
