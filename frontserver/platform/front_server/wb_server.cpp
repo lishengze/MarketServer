@@ -314,12 +314,14 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
         if (!js["symbol"].is_null())
         {
             nlohmann::json symbol_list = js["symbol"];
-            wss_con_map_[ws].sub_symbol_set.clear();
+            WebsocketClassThreadSafe thread_safe_ws{ws};
+
+            wss_con_map_[thread_safe_ws].sub_symbol_set.clear();
 
             for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
             {
                 string cur_symbol = *it;
-                wss_con_map_[ws].sub_symbol_set.insert(cur_symbol);
+                wss_con_map_[thread_safe_ws].sub_symbol_set.insert(cur_symbol);
             }
         }
     }
@@ -336,13 +338,13 @@ void WBServer::process_heartbeat(WebsocketClass* ws)
 {
     try
     {
-        if (wss_con_map_.find(ws) == wss_con_map_.end())
+        for (auto& iter:wss_con_map_)
         {
-            LOG_ERROR("WBServer::process_heartbeat Receive UnKnown Heartbeat");
-        }
-        else
-        {
-            wss_con_map_[ws].is_alive = true;
+            if (iter.first.ws_ == ws)
+            {
+                iter.second.is_alive = true;
+                break;
+            }
         }
     }
     catch(const std::exception& e)
@@ -363,20 +365,17 @@ void WBServer::broadcast_enhanced_data(string symbol, string data_str)
 
     // cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
 
-    for (auto iter:wss_con_map_)
+    for (auto& iter:wss_con_map_)
     {
         if (iter.second.sub_symbol_set.find(symbol) != iter.second.sub_symbol_set.end())
         {
-            iter.first->send(data_str, uWS::OpCode::TEXT);
+            iter.first.send(data_str);
         }
     }
 }
 
-void WBServer::clean_client(WebsocketClass * ws)
+void WBServer::clean_client(WebsocketClassThreadSafe * ws)
 {
-    PerSocketData* cur_socket_data = (PerSocketData*)ws->getUserData();
-    cout << "clean ws: " << cur_socket_data->socket_id << endl;
-
     if (wss_con_map_.find(ws) != wss_con_map_.end())
     {
         wss_con_map_.erase(ws);
@@ -403,7 +402,7 @@ void WBServer::heartbeat_run()
 void WBServer::check_heartbeat()
 {
 
-    std::set<WebsocketClass *> dead_ws_set;
+    std::set<WebsocketClassThreadSafe *> dead_ws_set;
     for (auto iter:wss_con_map_)
     {
         if (!iter.second.is_alive)
@@ -412,7 +411,7 @@ void WBServer::check_heartbeat()
         }        
     }
 
-    for (WebsocketClass * ws:dead_ws_set)
+    for (WebsocketClassThreadSafe * ws:dead_ws_set)
     {
         clean_client(ws);
         ws->end();

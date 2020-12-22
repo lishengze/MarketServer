@@ -72,7 +72,7 @@ class WBServer
 
     void process_heartbeat(WebsocketClass* ws);
 
-    void clean_client(WebsocketClass * ws);
+    void clean_client(WebsocketClassThreadSafe * ws);
 
     void heartbeat_run();
 
@@ -100,7 +100,7 @@ class WBServer
 
         int                                     server_port_{9002};
 
-        std::map<WebsocketClass *, WSData>      wss_con_map_;
+        std::map<WebsocketClassThreadSafe, WSData> wss_con_map_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
 

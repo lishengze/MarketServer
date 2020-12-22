@@ -47,8 +47,8 @@ using nlohmann::json;
 using std::pair;
 using boost::weak_ptr;
 
-using HttpResponse = uWS::HttpResponse<false> ;
-using HttpRequest = uWS::HttpRequest;
+using HttpResponseAtom = uWS::HttpResponse<false> ;
+using HttpRequestAtom = uWS::HttpRequest;
 using WebsocketClass = uWS::WebSocket<false, true>;
 
 #define MARKET_DATA_UPDATE "market_data_update"

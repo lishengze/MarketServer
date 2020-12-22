@@ -14,14 +14,58 @@ enum class COMM_TYPE {
     WEBSOCKET,
     WEBSECKETS,
 };
+
+class HttpRequest
+{
+    public:
+
+
+    HttpRequestAtom*    http_request_{nullptr};
+    std::mutex          mutex_;
+};
+
+class HttpResponse
+{
+    public:
+
+
+    HttpResponseAtom*    http_response_{nullptr};
+    std::mutex          mutex_;
+};
+
+class WebsocketClassThreadSafe
+{
+    public:
+
+    WebsocketClassThreadSafe(WebsocketClass* ws)
+    {
+        ws_ = ws;
+    }
+
+    void send(string msg)
+    {
+        std::lock_guard<std::mutex> lk(mutex);
+        ws_->send(msg, uWS::OpCode::TEXT);
+    }
+
+    void end()
+    {
+        std::lock_guard<std::mutex> lk(mutex);
+        ws_->end();
+    }
+
+    WebsocketClass*    ws_{nullptr};
+    std::mutex             mutex_;
+};
+
 struct Socket
 {
     Socket(HttpResponse* res, HttpRequest* req):comm_type{COMM_TYPE::HTTP}, http_response_{res}, http_request_{req}
     {}
 
-    Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
+    Socket(WebsocketClassThreadSafe* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
 
-    Socket(HttpResponse* res=nullptr, HttpRequest* req=nullptr, WebsocketClass* ws=nullptr):
+    Socket(HttpResponse* res=nullptr, HttpRequest* req=nullptr, WebsocketClassThreadSafe* ws=nullptr):
     http_response_{res}, http_request_{req}, websocket_{ws}
     {
         if (websocket_)
@@ -40,8 +84,10 @@ struct Socket
     COMM_TYPE           comm_type = COMM_TYPE::HTTP;
     HttpResponse*       http_response_{nullptr};
     HttpRequest*        http_request_{nullptr};
-    WebsocketClass*     websocket_{nullptr};
+    WebsocketClassThreadSafe*     websocket_{nullptr};
 };
+
+
 
 const long UT_FID_EnhancedDepthData = 0x10002;
 class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
@@ -154,7 +200,7 @@ class ReqKLineData:public Socket
 {
     public:
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int freq, 
-                HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
+                HttpResponse* res=nullptr, WebsocketClassThreadSafe* ws=nullptr):
     Socket(res, nullptr, ws)
     {
         assign(symbol_, symbol);
@@ -176,7 +222,7 @@ class ReqKLineData:public Socket
     }
 
     void set (string symbol, type_tick start_time, type_tick end_time, int freq, 
-            HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
+            HttpResponse* res=nullptr, WebsocketClassThreadSafe* ws=nullptr)
     {
         assign(symbol_, symbol);
         assign(start_time_, start_time);
