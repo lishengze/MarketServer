@@ -86,10 +86,10 @@ void WBServer::on_open(WebsocketClass * ws)
 // 处理各种请求
 void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode code)
 {
-    cout << utrade::pandora::NanoTimeStr() << " Req Msg: " << msg << endl;
+    // cout << utrade::pandora::NanoTimeStr() << " Req Msg: " << msg << endl;
     string trans_msg(msg.data(), msg.size());
 
-    cout << "trans_msg: " << trans_msg << endl;
+    // cout << "trans_msg: " << trans_msg << endl;
 
     process_on_message(trans_msg, ws);
 }
@@ -420,6 +420,8 @@ void WBServer::check_heartbeat()
 
     string heartbeat_str = get_heartbeat_str();
 
+    cout << heartbeat_str << endl;
+
     for (auto& iter:wss_con_map_)
     {
         iter.second.is_alive = false;
@@ -428,7 +430,7 @@ void WBServer::check_heartbeat()
 
     for (auto iter:wss_con_map_)
     {
-        cout << "iter.second: " << iter.second.is_alive << endl;
+        // cout << "iter.second: " << iter.second.is_alive << endl;
     }
 }
 
