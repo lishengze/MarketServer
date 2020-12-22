@@ -52,11 +52,17 @@ class MonitorUtrade(object):
             result_list = result_str.split("\n")
             self.get_opu_pid(result_list, True)            
         except Exception as e:
+            print("Exception output_program_info")
             print(e)
 
     def send_dingding_msg(self, msg):
-        msg = 'Msg Tokyo' + msg
-        self.dingding.send_text(msg, False)
+        try:
+            msg = 'msg ' + msg
+            self.dingding.send_text(msg, False)        
+        except Exception as e:            
+            print("Exception send_dingding_msg")
+            print(e)
+
         
     def get_opu_pid(self, ori_str_list, out=True):
         result = 0
@@ -78,6 +84,7 @@ class MonitorUtrade(object):
                         # self.log_info(str(trans_list)+"\n")
                         # self.log_info(str(result)+"\n")
         except Exception as e:
+            print("Exception get_opu_pid")
             print(e)
 
         return result
@@ -91,6 +98,7 @@ class MonitorUtrade(object):
             result_list = result_str.split("\n")
             result = self.get_opu_pid(result_list)      
         except Exception as e:
+            print("Exception get_status_manually")
             print(e)
    
         return result
@@ -110,6 +118,7 @@ class MonitorUtrade(object):
                         self._program_pid[program_name].append(proc.pid)
                         result = 1      
         except Exception as e:
+            print("Exception get_status")
             print(e)              
 
         return result
@@ -125,6 +134,7 @@ class MonitorUtrade(object):
                 cpu_info += get_process_cpu_usage(process)
             msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s \n" % (program, str(mem_info), str(cpu_info)))
         except Exception as e:
+            print("Exception get_usage_info")
             print(e)
 
         return msg
@@ -135,6 +145,7 @@ class MonitorUtrade(object):
             cmd_str = "df -h"
             result_str = get_datetime_str() + "\n" + subprocess.getoutput(cmd_str) + "\n"
         except Exception as e:
+            print("Exception get_disk_info")
             print(e)
 
         return result_str
@@ -147,6 +158,7 @@ class MonitorUtrade(object):
             self.log_info(str(self._program_curr_status))
             self.log_info(str(self._program_pid)+"\n")            
         except Exception as e:
+            print("Exception set_curr_status")
             print(e)
 
     def record_usage_info(self):        
@@ -172,6 +184,7 @@ class MonitorUtrade(object):
             self.log_info(record_msg)     
                     
         except Exception as e:
+            print("Exception record_usage_info")
             print(e)
 
 
@@ -192,6 +205,7 @@ class MonitorUtrade(object):
 
                 self._program_last_status[program] = self._program_curr_status[program]
         except Exception as e:
+            print("Exception check_program_status")
             print(e)
          
     def timer_func(self):
@@ -202,6 +216,7 @@ class MonitorUtrade(object):
 
             self.set_timer()
         except Exception as e:
+            print("Exception timer_func")
             print(e)
 
     def set_timer(self):
@@ -211,6 +226,7 @@ class MonitorUtrade(object):
             # timer = threading.Timer(self._check_secs, self.print_data)
             timer.start()
         except Exception as e:
+            print("Exception set_timer")
             print(e)
 
     def print_data(self):
@@ -224,7 +240,8 @@ def start_monitor():
         monitor_obj = MonitorUtrade()
         monitor_obj.launch()
     except Exception as e:
-            print(e)
+        print("Exception start_monitor")
+        print(e)
 
 
 if __name__ == "__main__":    
