@@ -189,7 +189,7 @@ void KlineProcess::store_kline_data(int frequency, KlineData* pkline_data)
                 assign(last_kline->symbol, cur_symbol);
             }
 
-            if ((cur_time - last_update_time) % frequency == 0)
+            if (cur_time - last_update_time >= frequency)
             {
                 // cout << "Add data: " << "cur_time: " << get_sec_time_str(cur_time) 
                 //      << ", last_update_time: " << get_sec_time_str(last_update_time) << endl;
@@ -240,7 +240,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
             std::lock_guard<std::mutex> lk(kline_data_mutex_);
-            
+
             std::map<type_tick, KlineDataPtr> symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
             vector<KlineData> append_result;
 
