@@ -384,8 +384,8 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                 SQLite::bind(stmtMin1SelectDataByExchangeSymbolIndexRange,
                     exchange,
                     symbol,
-                    0,//index_begin,
-                    99999999//.index_end
+                    index_begin,
+                    index_end
                 );
                 while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
                     int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("TimeIndex").getInt();
