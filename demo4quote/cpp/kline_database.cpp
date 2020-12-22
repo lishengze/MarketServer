@@ -247,14 +247,19 @@ void KlineDatabase::_loop()
 
 void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
+    int cur_index = 0;
     int last_index = 0;
     vector<KlineData> tmp;
     for( size_t i = 0 ; i < klines.size() ; i ++ ) {
-        int index = timet_to_index(klines[i].index, resolution);
-        if( index == 0 )
+
+        // 1分钟按日压缩存储，60分钟按月压缩存储
+        cur_index = timet_to_index(klines[i].index, resolution);
+        if( cur_index == 0 )
             continue;
-        if( index != last_index && last_index != 0) {
-            last_index = index;
+
+
+        if( cur_index != last_index && last_index != 0) {
+            last_index = cur_index;
             tmp.clear();
             // 更新
             vector<KlineData> last_klines;
@@ -265,12 +270,13 @@ void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol
             tmp.push_back(klines[i]);
         }
     }
+    
     // 收尾
     if( tmp.size() > 0 ) {
         vector<KlineData> last_klines;
-        _read_klines(exchange, symbol, resolution, last_index, last_klines);
+        _read_klines(exchange, symbol, resolution, cur_index, last_klines);
         _mix_klines(last_klines, tmp);
-        _write_klines(exchange, symbol, resolution, last_index, last_klines);
+        _write_klines(exchange, symbol, resolution, cur_index, last_klines);
     }
 }
 
