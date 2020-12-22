@@ -52,5 +52,6 @@ public:
     void test_main();
 
     std::shared_ptr<std::thread>  test_thread_{nullptr};
+    
     bool                          is_test_{true};
 };
