@@ -76,9 +76,9 @@ def get_sub_kline_str():
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
     ws.send(send_str)
 

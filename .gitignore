@@ -7,6 +7,8 @@ demo4risk/cpp/cmake/*
 */__pycache_
 
 lib/
+__pycache__/
+.vscode/
 
 *.so
 
