@@ -379,14 +379,14 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     exchange,
                     symbol,
                     0,//index_begin,
-                    99999999,//.index_end
+                    99999999//.index_end
                 );
                 while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
                     int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Index").getInt();
                     data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
                     klines.insert(klines.begin(), _klines.begin(), _klines.end());
-                    _log_and_print("get index=%d size=%ul", idx, _klines.size());
+                    _log_and_print("get index=%d size=%lu", idx, _klines.size());
                 }
                 break;
             }
