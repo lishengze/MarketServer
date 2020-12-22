@@ -378,14 +378,15 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                 SQLite::bind(stmtMin1SelectDataByExchangeSymbolIndexRange,
                     exchange,
                     symbol,
-                    index_begin,
-                    index_end
+                    0,//index_begin,
+                    99999999,//.index_end
                 );
-                cout << stmtMin1SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
                 while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
+                    int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Index").getInt();
                     data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
                     klines.insert(klines.begin(), _klines.begin(), _klines.end());
+                    _log_and_print("get index=%d size=%ul", idex, _klines.size());
                 }
                 break;
             }
@@ -398,7 +399,6 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     index_begin,
                     index_end
                 );
-                cout << stmtMin60SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
                 while(stmtMin60SelectDataByExchangeSymbolIndexRange.executeStep()) {
                     data = stmtMin60SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
