@@ -386,7 +386,7 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
                     klines.insert(klines.begin(), _klines.begin(), _klines.end());
-                    _log_and_print("get index=%d size=%ul", idex, _klines.size());
+                    _log_and_print("get index=%d size=%ul", idx, _klines.size());
                 }
                 break;
             }
