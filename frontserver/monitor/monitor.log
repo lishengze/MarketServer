@@ -138,3 +138,120 @@
 2020-12-22 19:33:38 [All] cpu usage: 25.641025641025635 
 2020-12-22 19:33:38 [All] mem usage: 30.00759844128283 
 
+{'front_server': 1}
+{'front_server': [222457]}
+
+2020-12-22 19:33:49 front_server mem_usage: 0.16360432001268438, cpu_usage:   0.0 
+2020-12-22 19:33:49 [All] cpu usage: 61.111111111111114 
+2020-12-22 19:33:49 [All] mem usage: 29.888779797659485 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:33:59 [All] cpu usage: 12.195121951219505 
+2020-12-22 19:33:59 [All] mem usage: 29.877217482513217 
+
+2020-12-22 19:33:59  Warining: front_server crashed! 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:34:10 [All] cpu usage: 10.256410256410263 
+2020-12-22 19:34:10 [All] mem usage: 29.913538763637252 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:34:20 [All] cpu usage: 15.384615384615387 
+2020-12-22 19:34:20 [All] mem usage: 30.00786676505205 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:34:30 [All] cpu usage: 15.0 
+2020-12-22 19:34:30 [All] mem usage: 29.943176343600783 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:34:40 [All] cpu usage: 12.820512820512818 
+2020-12-22 19:34:40 [All] mem usage: 29.948957501173915 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:34:50 [All] cpu usage: 21.951219512195124 
+2020-12-22 19:34:50 [All] mem usage: 29.93507784438441 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:01 [All] cpu usage: 14.63414634146342 
+2020-12-22 19:35:01 [All] mem usage: 29.93341911562925 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:11 [All] cpu usage: 7.89473684210526 
+2020-12-22 19:35:11 [All] mem usage: 29.939517383111458 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:21 [All] cpu usage: 10.256410256410263 
+2020-12-22 19:35:21 [All] mem usage: 29.93971252767089 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:31 [All] cpu usage: 15.384615384615387 
+2020-12-22 19:35:31 [All] mem usage: 29.941224898006478 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:41 [All] cpu usage: 12.820512820512818 
+2020-12-22 19:35:41 [All] mem usage: 29.933443508699177 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:35:51 [All] cpu usage: 12.5 
+2020-12-22 19:35:51 [All] mem usage: 29.936834145419287 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:01 [All] cpu usage: 18.181818181818187 
+2020-12-22 19:36:01 [All] mem usage: 29.934809520615193 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:11 [All] cpu usage: 12.5 
+2020-12-22 19:36:11 [All] mem usage: 29.945664436733523 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:21 [All] cpu usage: 12.5 
+2020-12-22 19:36:21 [All] mem usage: 29.94412767332801 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:32 [All] cpu usage: 19.512195121951223 
+2020-12-22 19:36:32 [All] mem usage: 29.95176270421573 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:42 [All] cpu usage: 15.0 
+2020-12-22 19:36:42 [All] mem usage: 29.94405449411822 
+
+{'front_server': 0}
+{'front_server': []}
+
+2020-12-22 19:36:52 [All] cpu usage: 18.604651162790702 
+2020-12-22 19:36:52 [All] mem usage: 29.951713918075875 
+

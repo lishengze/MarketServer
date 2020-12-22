@@ -21,3 +21,4 @@ protos/cpp/*
 protos/python/*
 *.pb.*
 *.so
+*.log

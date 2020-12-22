@@ -23,7 +23,7 @@ class MonitorUtrade(object):
             self._program_curr_status[process_name] = -1
             self._program_pid[process_name] = []
             
-        self.dingding = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=6ef3cd0991cd008f14fc958b4636e917320dc8d57813228dae68ff7832a7a28a")
+        self.dingding = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
         self._check_secs = 10
         self._log_file = "monitor.log"
         self._logger = open(self._log_file, 'w')
