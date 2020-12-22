@@ -108,7 +108,7 @@ void KlineDatabase::Table::createTableKlineMin1(SQLite::Database& db) {
                 ModifyTime TEXT \
             );");
 
-        db.exec("CREATE INDEX " KLINE_MIN1_TABLENAME "_kline_index ON " KLINE_MIN1_TABLENAME "(Exchange, Symbol, TimeIndex);");
+        db.exec("CREATE unique INDEX " KLINE_MIN1_TABLENAME "_kline_index ON " KLINE_MIN1_TABLENAME "(Exchange, Symbol, TimeIndex);");
     }
     catch(const std::exception& e)
     {
@@ -134,7 +134,7 @@ void KlineDatabase::Table::createTableKlineMin60(SQLite::Database& db) {
                 ModifyTime TEXT \
             );");
 
-        db.exec("CREATE INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, TimeIndex);");
+        db.exec("CREATE unique INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, TimeIndex);");
     }
     catch(const std::exception& e)
     {
@@ -247,14 +247,19 @@ void KlineDatabase::_loop()
 
 void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
 {
+    int cur_index = 0;
     int last_index = 0;
     vector<KlineData> tmp;
     for( size_t i = 0 ; i < klines.size() ; i ++ ) {
-        int index = timet_to_index(klines[i].index, resolution);
-        if( index == 0 )
+
+        // 1分钟按日压缩存储，60分钟按月压缩存储
+        cur_index = timet_to_index(klines[i].index, resolution);
+        if( cur_index == 0 )
             continue;
-        if( index != last_index ) {
-            last_index = index;
+
+
+        if( cur_index != last_index && last_index != 0) {
+            last_index = cur_index;
             tmp.clear();
             // 更新
             vector<KlineData> last_klines;
@@ -265,12 +270,13 @@ void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol
             tmp.push_back(klines[i]);
         }
     }
+    
     // 收尾
     if( tmp.size() > 0 ) {
         vector<KlineData> last_klines;
-        _read_klines(exchange, symbol, resolution, last_index, last_klines);
+        _read_klines(exchange, symbol, resolution, cur_index, last_klines);
         _mix_klines(last_klines, tmp);
-        _write_klines(exchange, symbol, resolution, last_index, last_klines);
+        _write_klines(exchange, symbol, resolution, cur_index, last_klines);
     }
 }
 
@@ -363,6 +369,7 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
 
 bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index_begin, int index_end, vector<KlineData>& klines)
 {    
+    _log_and_print("exchange=%s symbol=%s resolution=%d begin=%d end=%d", exchange.c_str(), symbol.c_str(), resolution, index_begin, index_end);
     klines.clear();
 
     string data;
@@ -380,11 +387,12 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     index_begin,
                     index_end
                 );
-                cout << stmtMin1SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
                 while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
+                    int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("TimeIndex").getInt();
                     data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
                     klines.insert(klines.begin(), _klines.begin(), _klines.end());
+                    _log_and_print("get index=%d size=%lu", idx, _klines.size());
                 }
                 break;
             }
@@ -397,7 +405,6 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     index_begin,
                     index_end
                 );
-                cout << stmtMin60SelectDataByExchangeSymbolIndexRange.getQuery() << endl;
                 while(stmtMin60SelectDataByExchangeSymbolIndexRange.executeStep()) {
                     data = stmtMin60SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
