@@ -134,7 +134,7 @@ void KlineDatabase::Table::createTableKlineMin60(SQLite::Database& db) {
                 ModifyTime TEXT \
             );");
 
-        db.exec("CREATE INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, TimeIndex);");
+        db.exec("CREATE unique INDEX " KLINE_MIN60_TABLENAME "_kline_index ON " KLINE_MIN60_TABLENAME "(Exchange, Symbol, TimeIndex);");
     }
     catch(const std::exception& e)
     {
