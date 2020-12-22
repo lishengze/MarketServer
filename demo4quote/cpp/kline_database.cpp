@@ -253,7 +253,7 @@ void KlineDatabase::_write_to_db_single(const TExchange& exchange, const TSymbol
         int index = timet_to_index(klines[i].index, resolution);
         if( index == 0 )
             continue;
-        if( index != last_index ) {
+        if( index != last_index && last_index != 0) {
             last_index = index;
             tmp.clear();
             // 更新
