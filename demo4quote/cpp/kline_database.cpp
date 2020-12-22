@@ -363,6 +363,7 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
 
 bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index_begin, int index_end, vector<KlineData>& klines)
 {    
+    _log_and_print("exchange=%s symbol=%s resolution=%d begin=%d end=%d", exchange.c_str(), symbol.c_str(), resolution, index_begin, index_end);
     klines.clear();
 
     string data;
