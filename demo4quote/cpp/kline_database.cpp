@@ -382,7 +382,7 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                     99999999//.index_end
                 );
                 while(stmtMin1SelectDataByExchangeSymbolIndexRange.executeStep()) {
-                    int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Index").getInt();
+                    int idx = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("TimeIndex").getInt();
                     data = stmtMin1SelectDataByExchangeSymbolIndexRange.getColumn("Data").getString();
                     decode_json_klines(data, _klines);
                     klines.insert(klines.begin(), _klines.begin(), _klines.end());
