@@ -24,11 +24,6 @@ using std::vector;
 
 class FrontServer;
 
-struct PerSocketData {
-    /* Fill with user data */
-    long socket_id{0};
-};
-
 class WBServer
 {       
     public:
@@ -72,7 +67,7 @@ class WBServer
 
     void process_heartbeat(WebsocketClass* ws);
 
-    void clean_client(WebsocketClassThreadSafe * ws);
+    void clean_client(WebsocketClassThreadSafePtr ws);
 
     void heartbeat_run();
 
@@ -84,13 +79,6 @@ class WBServer
 
     string get_heartbeat_str();
 
-    struct WSData
-    {
-        bool              is_alive{false};
-        std::set<string>  sub_symbol_set;
-        std::string       id;
-    };
-
     private:
         us_socket_context_options_t             socket_options_;
 
@@ -100,7 +88,8 @@ class WBServer
 
         int                                     server_port_{9002};
 
-        std::map<WebsocketClassThreadSafe, WSData> wss_con_map_;
+        std::set<WebsocketClassThreadSafePtr, 
+              LessWebsocketClassThreadSafePtr>  wss_con_set_;
 
         boost::shared_ptr<std::thread>          listen_thread_;
 

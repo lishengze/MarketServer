@@ -26,6 +26,8 @@ void DepthProces::request_depth_package(PackagePtr package)
 void DepthProces::request_symbol_package(PackagePtr package)
 {
     std::set<string> symbols;
+
+    std::lock_guard<std::mutex> lk(depth_data_mutex_);
     for (auto iter:depth_data_)
     {
         symbols.emplace(iter.first);
@@ -52,7 +54,7 @@ void DepthProces::response_src_sdepth_package(PackagePtr package)
             if (en_depth_data)
             {
                 std::lock_guard<std::mutex> lk(depth_data_mutex_);
-                
+
                 string cur_symbol = string(en_depth_data->depth_data_.symbol);
 
                 if (depth_data_.find(cur_symbol) == depth_data_.end())

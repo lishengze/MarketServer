@@ -20,9 +20,6 @@ PackagePtr GetNewKlineDataPackage(const KlineData& depth, int package_id);
 
 PackagePtr GetNewSymbolDataPackage(std::set<string> symbol, int package_id);
 
-PackagePtr GetNewReqKLineDataPackage(string symbol, type_tick start_time, type_tick end_time,  int frequency, int package_id,
-                                     HttpResponse * response, HttpRequest *request);
-
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id);
 
 string SDepthDataToJsonStr(const SDepthData& depth);

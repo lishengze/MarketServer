@@ -109,9 +109,9 @@ void DataReceive::test_kline_data()
 
         handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);        
 
-        cout << "Update: " <<  get_sec_time_str(cur_time) << "symbol: " << symbol << ", \n"
+        cout << "Update: " <<  get_sec_time_str(cur_time) << " " << symbol << ", "
             << "open: " << open << ", high: " << high << ", "
-            << "low: " << low << ", close: " << volume << endl;        
+            << "low: " << low << ", close: " << volume << "\n" << endl;        
     }
 }
 
@@ -192,7 +192,7 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
-    cout << utrade::pandora::NanoTimeStr() << " on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    cout << utrade::pandora::NanoTimeStr() << " on_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n" << endl;
     // return -1;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
@@ -201,7 +201,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {
-    cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << endl;
+    cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << "\n" << endl;
     return -1;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;

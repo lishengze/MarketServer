@@ -9,11 +9,7 @@ EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data)
 EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
 {
     cout << "EnhancedDepthData::EnhancedDepthData " << endl;
-
-    // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
-    // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
-    // memcpy(bid_accumulated_volume_, other.bid_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
-
+    
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
     {
@@ -25,10 +21,6 @@ EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
 EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
 {
     cout << "EnhancedDepthData::Operator = " << endl;
-
-    // memcpy(&depth_data_, &other.depth_data_, sizeof(SDepthData));
-    // memcpy(ask_accumulated_volume_, other.ask_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
-    // memcpy(bid_accumulated_volume_, other.bid_accumulated_volume_, sizeof(double) * DEPCH_LEVEL_COUNT);
 
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
@@ -63,10 +55,4 @@ void EnhancedDepthData::init(const SDepthData* depth_data)
     }
 
     // cout << "EnhancedDepthData::init 3" << endl;
-}
-
-string SymbolData::get_json_str()
-{
-    // set_json_str();
-    return json_str_;
 }

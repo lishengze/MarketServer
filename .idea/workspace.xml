@@ -12,16 +12,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/base/cpp/decimal.h" beforeDir="false" afterPath="$PROJECT_DIR$/base/cpp/decimal.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4hub/cpp/hub_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4hub/cpp/hub_struct.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/include/hub_entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/hub_entity.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/include/hub_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/hub_struct.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/include/update_kline.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/update_kline.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/include/updater_quote.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/include/updater_quote.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/config/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/config/config.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/monitor/monitor.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/monitor/monitor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server_declare.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server_declare.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/test_client/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/test_client/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/util/tools.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/util/tools.h" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,85 +36,71 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="339">
-              <caret line="379" column="28" lean-forward="true" selection-start-line="379" selection-start-column="28" selection-end-line="379" selection-end-column="28" />
-              <folding>
-                <element signature="e#0#25#0" expanded="true" />
-                <element signature="e#5017#8294#0" />
-                <element signature="e#8296#9767#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/c++/9/bits/stl_algobase.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="221" selection-start-line="221" selection-end-line="221" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/c++/9/bits/random.tcc">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
-              <caret line="324" selection-start-line="324" selection-end-line="324" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/pandora/util/time_util.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="169">
-              <caret line="153" selection-start-line="153" selection-end-line="153" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/make_shared_object.hpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4590">
-              <caret line="255" selection-start-line="255" selection-end-line="255" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="702">
-              <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/frontserver/platform/util/tools.cpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3924">
-              <caret line="218" column="28" selection-start-line="218" selection-start-column="28" selection-end-line="218" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/c++/9/ext/new_allocator.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="79" selection-start-line="79" selection-end-line="79" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.46385157">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="463">
+                  <caret line="98" column="29" selection-start-line="98" selection-start-column="29" selection-end-line="98" selection-end-column="29" />
+                  <folding>
+                    <element signature="e#0#25#0" expanded="true" />
+                    <element signature="e#5017#8294#0" />
+                    <element signature="e#8296#9767#0" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="540">
+                  <caret line="91" column="60" selection-start-line="91" selection-start-column="48" selection-end-line="91" selection-end-column="60" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="324">
+                  <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-35">
+                  <caret line="292" column="29" selection-start-line="292" selection-start-column="29" selection-end-line="292" selection-end-column="29" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="594">
+                  <caret line="190" column="44" lean-forward="true" selection-start-line="190" selection-start-column="44" selection-end-line="190" selection-end-column="44" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>set_alive</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -123,6 +110,8 @@
       <list>
         <option value="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" />
+        <option value="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" />
+        <option value="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" />
       </list>
     </option>
   </component>
@@ -136,7 +125,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
     <option name="x" value="255" />
     <option name="y" value="140" />
     <option name="width" value="1400" />
@@ -148,7 +137,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -172,7 +160,14 @@
               <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
               <item name="frontserver" type="462c0819:PsiDirectoryNode" />
               <item name="platform" type="462c0819:PsiDirectoryNode" />
-              <item name="data_process" type="462c0819:PsiDirectoryNode" />
+              <item name="data_receive" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
+              <item name="frontserver" type="462c0819:PsiDirectoryNode" />
+              <item name="platform" type="462c0819:PsiDirectoryNode" />
+              <item name="data_structure" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
@@ -181,17 +176,11 @@
               <item name="platform" type="462c0819:PsiDirectoryNode" />
               <item name="front_server" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
-              <item name="frontserver" type="462c0819:PsiDirectoryNode" />
-              <item name="platform" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -200,6 +189,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="MTConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -233,11 +223,13 @@
       <workItem from="1607584285154" duration="3142000" />
       <workItem from="1607689828354" duration="3035000" />
       <workItem from="1607830377574" duration="1355000" />
+      <workItem from="1608704708239" duration="258000" />
+      <workItem from="1608705033637" duration="2327000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="7532000" />
+    <option name="totallyTimeSpent" value="10117000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -249,11 +241,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1920" height="1053" extended-state="7" />
+    <frame x="0" y="-37" width="1920" height="1117" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18060021" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.16237941" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.24973205" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -264,7 +256,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32963374" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
       <window_info anchor="bottom" id="Messages" order="8" weight="0.32963374" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32962587" />
       <window_info anchor="bottom" id="Terminal" order="10" weight="0.32929516" />
       <window_info anchor="bottom" id="Version Control" order="11" />
       <window_info anchor="bottom" id="CMake" order="12" weight="0.32963374" />
@@ -282,22 +274,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>225</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>321</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>401</line>
-          <option name="timeStamp" value="20" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>104</line>
+          <line>107</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
@@ -318,13 +295,6 @@
           <folding>
             <element signature="e#0#37#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3384">
-          <caret line="188" column="12" selection-start-line="188" selection-start-column="12" selection-end-line="188" selection-end-column="12" />
         </state>
       </provider>
     </entry>
@@ -384,64 +354,92 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/make_shared_object.hpp">
+    <entry file="file:///usr/include/c++/9/bits/stl_algobase.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4590">
-          <caret line="255" selection-start-line="255" selection-end-line="255" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/util/tools.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3924">
-          <caret line="218" column="28" selection-start-line="218" selection-start-column="28" selection-end-line="218" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/9/ext/new_allocator.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="79" selection-start-line="79" selection-end-line="79" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/component/pandora/util/time_util.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="153" selection-start-line="153" selection-end-line="153" />
+        <state>
+          <caret line="221" selection-start-line="221" selection-end-line="221" />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/include/c++/9/bits/random.tcc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
+        <state>
           <caret line="324" selection-start-line="324" selection-end-line="324" />
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/c++/9/bits/stl_algobase.h">
+    <entry file="file://$PROJECT_DIR$/component/pandora/util/time_util.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="221" selection-start-line="221" selection-end-line="221" />
+        <state>
+          <caret line="153" selection-start-line="153" selection-end-line="153" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="36" column="9" selection-start-line="36" selection-start-column="9" selection-end-line="36" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/util/tools.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="217" column="28" selection-start-line="217" selection-start-column="28" selection-end-line="217" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/ext/new_allocator.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="79" selection-start-line="79" selection-end-line="79" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="379" column="28" lean-forward="true" selection-start-line="379" selection-start-column="28" selection-end-line="379" selection-end-column="28" />
+        <state relative-caret-position="463">
+          <caret line="98" column="29" selection-start-line="98" selection-start-column="29" selection-end-line="98" selection-end-column="29" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
             <element signature="e#5017#8294#0" />
             <element signature="e#8296#9767#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/make_shared_object.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="255" selection-start-line="255" selection-end-line="255" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="91" column="60" selection-start-line="91" selection-start-column="48" selection-end-line="91" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-35">
+          <caret line="292" column="29" selection-start-line="292" selection-start-column="29" selection-end-line="292" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="152" lean-forward="true" selection-start-line="152" selection-end-line="152" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="190" column="44" lean-forward="true" selection-start-line="190" selection-start-column="44" selection-end-line="190" selection-end-column="44" />
         </state>
       </provider>
     </entry>

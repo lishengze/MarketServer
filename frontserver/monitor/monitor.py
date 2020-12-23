@@ -7,7 +7,7 @@ import psutil
 from util import *
 
 def get_process():
-    return ["front_server"]
+    return ["front_server", "demo4risk", "demo4quote"]
 
 class MonitorUtrade(object):
     def __init__(self):

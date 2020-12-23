@@ -15,22 +15,40 @@ enum class COMM_TYPE {
     WEBSECKETS,
 };
 
-class HttpRequest
+class HttpRequestThreadSafe
 {
     public:
 
+    HttpRequest*    http_request_{nullptr};
+    std::mutex      mutex_;
+};
+FORWARD_DECLARE_PTR(HttpRequestThreadSafe);
 
-    HttpRequestAtom*    http_request_{nullptr};
-    std::mutex          mutex_;
+class HttpResponseThreadSafe
+{
+    public:
+
+    HttpResponseThreadSafe(HttpResponse* res)
+    {
+        http_response_ = res;
+    }
+
+    void end(const string& info)
+    {
+        std::lock_guard<std::mutex> lk(mutex);
+        http_response_->end(info);
+    }
+
+    HttpResponse*    http_response_{nullptr};
+    std::mutex       mutex_;
 };
 
-class HttpResponse
+FORWARD_DECLARE_PTR(HttpResponseThreadSafe);
+
+struct WSData
 {
-    public:
-
-
-    HttpResponseAtom*    http_response_{nullptr};
-    std::mutex          mutex_;
+    bool              is_alive{false};
+    std::set<string>  sub_symbol_set;
 };
 
 class WebsocketClassThreadSafe
@@ -42,7 +60,7 @@ class WebsocketClassThreadSafe
         ws_ = ws;
     }
 
-    void send(string msg)
+    void send(const string& msg)
     {
         std::lock_guard<std::mutex> lk(mutex);
         ws_->send(msg, uWS::OpCode::TEXT);
@@ -54,40 +72,133 @@ class WebsocketClassThreadSafe
         ws_->end();
     }
 
-    WebsocketClass*    ws_{nullptr};
-    std::mutex             mutex_;
+    bool operator < (const WebsocketClassThreadSafe& other)
+    {
+        return ws_ < other.ws_;
+    }
+
+    bool operator == (const WebsocketClassThreadSafe& other)
+    {
+        return ws_ == other.ws_;
+    }    
+
+    bool is_alive() {
+        std::lock_guard<std::mutex> lk(mutex_);
+        return user_data_.is_alive;
+    }
+
+    void set_alive(bool value)
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        user_data_.is_alive = value;
+    }
+
+    void clear_sub_symbol_list()
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        user_data_.sub_symbol_set.clear();
+    }
+
+    void add_sub_symbol(std::string symbol)
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        user_data_.sub_symbol_set.emplace(symbol);
+    }
+
+    bool is_symbol_subed(std::string symbol)
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+
+        if (user_data_.sub_symbol_set.find(symbol) != user_data_.sub_symbol_set.end())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    WebsocketClass* get_ws() { return ws_;}
+
+
+    private:
+        WSData                 user_data_;
+        WebsocketClass*        ws_{nullptr};
+        std::mutex             mutex_;
+};
+
+FORWARD_DECLARE_PTR(WebsocketClassThreadSafe);
+
+class LessWebsocketClassThreadSafePtr
+{
+public:
+    bool operator() (const WebsocketClassThreadSafePtr& a, const WebsocketClassThreadSafePtr& b) const
+    {
+        return a->get_ws() < b->get_ws();
+    }
 };
 
 struct Socket
 {
-    Socket(HttpResponse* res, HttpRequest* req):comm_type{COMM_TYPE::HTTP}, http_response_{res}, http_request_{req}
-    {}
-
-    Socket(WebsocketClassThreadSafe* ws):comm_type{COMM_TYPE::WEBSOCKET}, websocket_{ws}{}
-
-    Socket(HttpResponse* res=nullptr, HttpRequest* req=nullptr, WebsocketClassThreadSafe* ws=nullptr):
-    http_response_{res}, http_request_{req}, websocket_{ws}
+    Socket(HttpResponse* res):comm_type{COMM_TYPE::HTTP}
     {
-        if (websocket_)
+        http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
+    }
+
+    Socket(HttpResponseThreadSafePtr res):comm_type{COMM_TYPE::HTTP}
+    {
+        http_response_ = res;
+    }    
+
+    Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}
+    {
+        websocket_ = boost::make_shared<WebsocketClassThreadSafe>(ws);
+    }
+
+    Socket(WebsocketClassThreadSafePtr ws):comm_type{COMM_TYPE::WEBSOCKET}
+    {
+        websocket_ = ws;
+    }    
+
+    Socket(HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
+    {
+        if (ws)
         {
             cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+            websocket_ = boost::make_shared<WebsocketClassThreadSafe>(ws);
             comm_type = COMM_TYPE::WEBSOCKET;
         }
 
-        if (http_response_)
+        if (res)
         {
             cout << "IS COMM_TYPE::HTTP" << endl;
+            http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
             comm_type = COMM_TYPE::HTTP;
         }
     }
 
-    COMM_TYPE           comm_type = COMM_TYPE::HTTP;
-    HttpResponse*       http_response_{nullptr};
-    HttpRequest*        http_request_{nullptr};
-    WebsocketClassThreadSafe*     websocket_{nullptr};
+    Socket(HttpResponseThreadSafePtr res=nullptr, WebsocketClassThreadSafePtr ws=nullptr)
+    {
+        if (ws)
+        {
+            cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+            websocket_ = ws;
+            comm_type = COMM_TYPE::WEBSOCKET;
+        }
+
+        if (res)
+        {
+            cout << "IS COMM_TYPE::HTTP" << endl;
+            http_response_ = res;
+            comm_type = COMM_TYPE::HTTP;
+        }
+    }    
+
+    COMM_TYPE                       comm_type = COMM_TYPE::HTTP;
+    HttpResponseThreadSafePtr       http_response_{nullptr};
+    WebsocketClassThreadSafePtr     websocket_{nullptr};
 };
-
-
 
 const long UT_FID_EnhancedDepthData = 0x10002;
 class EnhancedDepthData:public boost::enable_shared_from_this<EnhancedDepthData>
@@ -128,7 +239,6 @@ const long UT_FID_SymbolData = 0x10003;
 class SymbolData
 {
     public:
-        SymbolData():type_{"symbol_update"} {}
         void add_symbol(string symbol)
         {
             symbols_.emplace(symbol);
@@ -143,26 +253,30 @@ class SymbolData
 
         std::set<std::string>& get_symbols() { return symbols_;}
 
-        void set_type(string type_str) { type_ = type_str;}
-
         static const long Fid = UT_FID_SymbolData; 
-
-        void set_json_str();
-        string get_json_str();
-
-        string                    type_;
-
     private:
         std::mutex                mutex_;
         std::set<std::string>     symbols_;
-        string                    json_str_;
-        
 };
 
 const long UT_FID_ReqDepthData = 0x10004;
 class ReqDepthData:public Socket
 {
+    public:
+    ReqDepthData(string symbol, HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
+    Socket(res, ws)
+    {
+        assign(symbol_, symbol);
+    }
 
+    ReqDepthData(const ReqDepthData& other):Socket(other.http_response_, other.websocket_)
+    {
+        assign(symbol_, other.symbol_);
+    }
+
+    symbol_type symbol_;
+
+    static const long Fid = UT_FID_ReqDepthData;
 };
 
 struct AtomKlineData
@@ -200,8 +314,8 @@ class ReqKLineData:public Socket
 {
     public:
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int freq, 
-                HttpResponse* res=nullptr, WebsocketClassThreadSafe* ws=nullptr):
-    Socket(res, nullptr, ws)
+                HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
+    Socket(res, ws)
     {
         assign(symbol_, symbol);
         assign(start_time_, start_time);
@@ -220,31 +334,7 @@ class ReqKLineData:public Socket
         websocket_ = other.websocket_;
         comm_type = other.comm_type;
     }
-
-    void set (string symbol, type_tick start_time, type_tick end_time, int freq, 
-            HttpResponse* res=nullptr, WebsocketClassThreadSafe* ws=nullptr)
-    {
-        assign(symbol_, symbol);
-        assign(start_time_, start_time);
-        assign(end_time_, end_time);
-        assign(frequency_, freq);
-
-        http_response_ = res;
-        websocket_ = ws;
-
-        if (websocket_)
-        {
-            cout << "IS COMM_TYPE::WEBSOCKET" << endl;
-            comm_type = COMM_TYPE::WEBSOCKET;
-        }
-
-        if (http_response_)
-        {
-            cout << "IS COMM_TYPE::HTTP" << endl;
-            comm_type = COMM_TYPE::HTTP;
-        }
-    }    
-
+  
     public: 
         symbol_type         symbol_;
         type_tick           start_time_;

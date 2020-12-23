@@ -170,10 +170,14 @@ string FrontServer::get_heartbeat_str()
     return json_obj.dump();
 }
 
-bool FrontServer::request_kline_data(const ReqKLineData& req_kline)
+void FrontServer::request_kline_data(const ReqKLineData& req_kline)
 {
     get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, &req_kline));
-    return true;
+}
+
+void FrontServer::request_depth_data(const ReqDepthData& req_depth)
+{
+    get_io_service().post(std::bind(&FrontServer::handle_request_depth_data, this, &req_depth));
 }
 
 void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
@@ -277,6 +281,47 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         std::stringstream stream_obj;
         stream_obj << "[E] FrontServer::response_kline_data_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
+    }
+    
+}
+
+void FrontServer::handle_request_depth_data(const ReqDepthData* req_depth)
+{
+    try
+    {
+        PackagePtr package = PackagePtr{new Package{}};
+  
+        package->SetPackageID(ID_MANAGER->get_id());
+
+        package->prepare_request(UT_FID_ReqDepthData, package->PackageID());
+
+        CREATE_FIELD(package, ReqDepthData);
+
+
+        ReqDepthData* p_req_depth_data = GET_NON_CONST_FIELD(package, ReqDepthData);
+
+        if (p_req_depth_data)
+        {            
+            assign(p_req_depth_data->symbol_, req_depth->symbol_);
+
+            assign(p_req_depth_data->websocket_, req_depth->websocket_);
+            assign(p_req_depth_data->comm_type, req_depth->comm_type);
+            assign(p_req_depth_data->http_response_, req_depth->http_response_);
+
+            deliver_request(package);
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::request_depth_data Create ReqDepthData Failed!");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::handle_request_depth_data: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+
+        return;
     }
     
 }

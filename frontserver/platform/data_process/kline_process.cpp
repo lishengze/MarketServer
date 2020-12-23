@@ -80,7 +80,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
 
             LOG_DEBUG(string("kline_data push ") + cur_symbol + ", "  
                         + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[cur_symbol][frequency_list_[0]].size()) + ", "
-                        + get_sec_time_str(pkline_data->index));
+                        + get_sec_time_str(pkline_data->index) + "\n");
 
             if (kline_data_[cur_symbol][frequency_base_].size() == 120)
             {
@@ -100,8 +100,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
 
                         cout << cur_time << ", " << kline.symbol << ", "
                             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                            << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;
-                        
+                            << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;                        
                     }
                 }
             }

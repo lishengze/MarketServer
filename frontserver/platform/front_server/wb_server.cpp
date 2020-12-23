@@ -71,10 +71,11 @@ void WBServer::init_websocket_server()
 
 void WBServer::on_open(WebsocketClass * ws)
 {
-    wss_con_map_[ws].is_alive = true;
+    WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws);
 
-    PerSocketData* cur_ws_data =(PerSocketData*)ws->getUserData();
-    cur_ws_data->socket_id = socket_id_++;
+    ws_safe->set_alive(true);
+
+    wss_con_set_.insert(ws_safe);
 
     string symbols_str = front_server_->get_symbols_str();
 
@@ -108,14 +109,15 @@ void WBServer::on_close(WebsocketClass * ws)
 {
     cout << "one connection closed " << endl;
 
-    clean_client(ws);
+    WebsocketClassThreadSafePtr thread_safe_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
+    clean_client(thread_safe_ws);
 }
 
 void WBServer::listen()
 {
     cout << "WServer Start Listen: " << server_port_ << endl;
 
-    uWS::App().ws<PerSocketData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
+    uWS::App().ws<WSData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
         if (token) {
             std::cout << "WS Listening on port " << server_port_ << std::endl;
         }
@@ -142,9 +144,9 @@ void WBServer::release()
 void WBServer::broadcast(string msg)
 {
     cout << "broadcast: " << msg << endl;
-    for (auto iter:wss_con_map_)
+    for (auto iter:wss_con_set_)
     {
-        iter.first->send(msg, uWS::OpCode::TEXT);
+        iter->send(msg);
     }
 }
 
@@ -250,44 +252,9 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         ReqKLineData req_kline_data(symbol, start_time, end_time, frequency, nullptr, ws);
 
-        // cout << "COMM TYPE: " << req_kline_data.comm_type << endl;
-
-        // PackagePtr package = PackagePtr{new Package{}};
-  
-        // package->SetPackageID(ID_MANAGER->get_id());
-
-        // package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
-
-        // CREATE_FIELD(package, ReqKLineData);
-
-        // cout << "FrontServer::request_kline_data 1" << endl;
-
-        // ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
-
-        // cout << "FrontServer::request_kline_data 1.1" << endl;
-
-        // // p_req_kline_data->set(symbol, start_time, end_time, frequency, nullptr, ws);
-
-        // p_req_kline_data->symbol_ = symbol;
-        // p_req_kline_data->start_time_ = start_time;
-        // p_req_kline_data->end_time_ = end_time;
-        // p_req_kline_data->frequency_ = frequency;
-        // p_req_kline_data->websocket_ = ws;
-        // p_req_kline_data->comm_type = COMM_TYPE::WEBSOCKET;
-
         if (error_id != 0)
         {
-            // if (!front_server_->request_kline_data(package))
-            // {
-            //     err_msg += "Server Internel Error, Please Try Again!";
-            //     ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
-            // }    
-
-            if (!front_server_->request_kline_data(req_kline_data))
-            {
-                err_msg += "Server Internel Error, Please Try Again!";
-                ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
-            }                        
+            front_server_->request_kline_data(req_kline_data);                     
         }
         else
         {
@@ -314,14 +281,21 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
         if (!js["symbol"].is_null())
         {
             nlohmann::json symbol_list = js["symbol"];
-            WebsocketClassThreadSafe thread_safe_ws{ws};
 
-            wss_con_map_[thread_safe_ws].sub_symbol_set.clear();
+            WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
 
-            for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
+            auto iter = wss_con_set_.find(tmp_ws);
+
+            if (iter != wss_con_set_.end())
             {
-                string cur_symbol = *it;
-                wss_con_map_[thread_safe_ws].sub_symbol_set.insert(cur_symbol);
+                (*iter)->clear_sub_symbol_list();
+
+                for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
+                {
+                    string cur_symbol = *it;
+                    
+                    (*iter)->add_sub_symbol(cur_symbol);                    
+                }                
             }
         }
     }
@@ -338,14 +312,14 @@ void WBServer::process_heartbeat(WebsocketClass* ws)
 {
     try
     {
-        for (auto& iter:wss_con_map_)
+        WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
+
+        auto iter = wss_con_set_.find(tmp_ws);
+
+        if (iter != wss_con_set_.end())
         {
-            if (iter.first.ws_ == ws)
-            {
-                iter.second.is_alive = true;
-                break;
-            }
-        }
+            (*iter)->set_alive(true);
+        }        
     }
     catch(const std::exception& e)
     {
@@ -357,31 +331,21 @@ void WBServer::process_heartbeat(WebsocketClass* ws)
 
 void WBServer::broadcast_enhanced_data(string symbol, string data_str)
 {
-    // cout << "WBServer::broadcast_enhanced_data " << endl;
-
-    // string update_symbol = en_depth_data.depth_data_.symbol;
-
-    // string send_str = EnhancedDepthDataToJsonStr(en_depth_data, MARKET_DATA_UPDATE);    
-
-    // cout << "WBServer::broadcast_enhanced_data  send_str: " << send_str << endl;
-
-    for (auto& iter:wss_con_map_)
-    {
-        if (iter.second.sub_symbol_set.find(symbol) != iter.second.sub_symbol_set.end())
+    for (auto& iter:wss_con_set_)
+    {        
+        if (iter->is_symbol_subed((symbol)))
         {
-            iter.first.send(data_str);
-        }
+            iter->send(data_str);
+        }        
     }
 }
 
-void WBServer::clean_client(WebsocketClassThreadSafe * ws)
+void WBServer::clean_client(WebsocketClassThreadSafePtr ws)
 {
-    if (wss_con_map_.find(ws) != wss_con_map_.end())
+    if (wss_con_set_.find(ws) != wss_con_set_.end())
     {
-        wss_con_map_.erase(ws);
-    }    
-
-    std::set<std::string>   empty_symbol_set;
+        wss_con_set_.erase(ws);
+    }
 }
 
 void WBServer::start_heartbeat()
@@ -401,17 +365,17 @@ void WBServer::heartbeat_run()
 
 void WBServer::check_heartbeat()
 {
+    std::set<WebsocketClassThreadSafePtr, LessWebsocketClassThreadSafePtr> dead_ws_set;
 
-    std::set<WebsocketClassThreadSafe *> dead_ws_set;
-    for (auto iter:wss_con_map_)
-    {
-        if (!iter.second.is_alive)
+    for (auto ws:wss_con_set_)
+    {        
+        if (!ws->is_alive())
         {
-            dead_ws_set.emplace(iter.first);            
+            dead_ws_set.emplace(ws);            
         }        
     }
 
-    for (WebsocketClassThreadSafe * ws:dead_ws_set)
+    for (auto ws:dead_ws_set)
     {
         clean_client(ws);
         ws->end();
@@ -421,15 +385,10 @@ void WBServer::check_heartbeat()
 
     cout << heartbeat_str << endl;
 
-    for (auto& iter:wss_con_map_)
+    for (auto ws:wss_con_set_)
     {
-        iter.second.is_alive = false;
-        iter.first->send(heartbeat_str, uWS::OpCode::TEXT);
-    }
-
-    for (auto iter:wss_con_map_)
-    {
-        // cout << "iter.second: " << iter.second.is_alive << endl;
+        ws->set_alive(false);
+        ws->send(heartbeat_str);
     }
 }
 

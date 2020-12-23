@@ -131,15 +131,16 @@ string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
     nlohmann::json json_data;
     nlohmann::json symbol_json;
 
+    int i = 0;
+
     string specified_first_symbol = "BTC_USDT";
 
     if (symbols.find(specified_first_symbol) != symbols.end())
     {
         symbols.erase(specified_first_symbol);
+        symbol_json[i++] = specified_first_symbol;
     }
-
-    int i = 0;
-    symbol_json[i++] = specified_first_symbol;
+    
     for (string symbol:symbols)
     {
         if (symbol.length()==0 ||symbol == "") continue;
@@ -245,37 +246,6 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
     return result;
 }
 
-PackagePtr GetNewReqKLineDataPackage(string symbol, type_tick start_time, type_tick end_time,  int frequency, int package_id, 
-                                    HttpResponse * response, HttpRequest *request)
-{
-    PackagePtr package{nullptr};
-    try
-    {    
-        package = PackagePtr{new Package{}};
-        package->SetPackageID(package_id);
-
-        CREATE_FIELD(package, ReqKLineData);
-
-        ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
-
-        assign(p_req_kline_data->http_response_, response);
-        assign(p_req_kline_data->http_request_, request);
-
-        assign(p_req_kline_data->symbol_, symbol);
-        assign(p_req_kline_data->start_time_, start_time);
-        assign(p_req_kline_data->end_time_, end_time);
-        assign(p_req_kline_data->frequency_, frequency);
-
-        return package;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "GetNewSymbolDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;   
-}
-
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id)
 {
     PackagePtr package = PackagePtr{new Package{}};
@@ -288,7 +258,6 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
         assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
-        assign(p_rsp_kline_data->http_request_, pReqKlineData->http_request_);
         assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
         assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
 
