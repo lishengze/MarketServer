@@ -10,8 +10,8 @@ int timet_to_index(type_tick t, int resolution)
 {
     struct tm *newtime = localtime( (const long int*)&t );
     if( resolution == 60 ) {
-        return t;
-        //return newtime->tm_year * 10000 + newtime->tm_mon * 100 + newtime->tm_mday;
+        //return t;
+        return newtime->tm_year * 10000 + newtime->tm_mon * 100 + newtime->tm_mday;
     } else if( resolution == 3600 ) {
         return newtime->tm_year * 100 + newtime->tm_mon;
     } else {
