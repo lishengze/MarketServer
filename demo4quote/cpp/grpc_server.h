@@ -14,7 +14,7 @@
 
 //#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
 
-class ServerEndpoint : public IMixerKlinePusher, public IMixerQuotePusher
+class ServerEndpoint : public IKlinePusher, public IMixerQuotePusher
 {
 public:
     ServerEndpoint(){}
@@ -30,11 +30,14 @@ public:
     }
 
     void set_cacher(IDataCacher* cacher) { cacher_ = cacher; }
-    // IMixerKlinePusher
+
+    // IKlinePusher
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
-    // IMixerKlinePusher
+
+    // IKlinePusher
     void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
     void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
+    
 private:
     void _handle_rpcs();
 

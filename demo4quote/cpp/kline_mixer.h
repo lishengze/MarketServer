@@ -3,16 +3,22 @@
 #include "redis_quote_define.h"
 #include "kline_database.h"
 
-class IMixerKlinePusher
+// K线往下游推送接口
+class IKlinePusher
 {
 public:
     virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines) = 0;
 };
 
+/*
+缓存接口
+*/
 class IDataCacher
 {
 public:
+    // 请求缓存中的K线
     virtual bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines) = 0;
+    // （首次连接）提取已在缓存中的数据
     virtual void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60) = 0;
 };
 
@@ -55,8 +61,6 @@ public:
         }
     };
 
-
-
     MixCalculator();
     ~MixCalculator();
 
@@ -69,7 +73,6 @@ private:
 
 #define KLINE_CACHE_MIN1 1440
 #define KLINE_CACHE_MIN60 240
-
 class KlineCache
 {
 public:
@@ -90,6 +93,31 @@ private:
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_;
 };
 
+class KlineHubber : public IDataCacher
+{
+public:
+    KlineHubber();
+    ~KlineHubber();
+
+    void register_callback(IKlinePusher* callback) { callbacks_.insert(callback); }
+
+    void set_db_interface(IDataProvider* db_interfacce) { db_interface_ = db_interfacce; }
+
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
+
+    // IDataCacher
+    bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
+    void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60);
+
+private:
+    set<IKlinePusher*> callbacks_;
+    IDataProvider* db_interface_;
+
+    KlineCache min1_cache_;
+    KlineCache min60_cache_;
+};
+
+// 计算聚合K线
 class KlineMixer
 {
 public:
@@ -110,28 +138,4 @@ private:
 
     unordered_map<TSymbol, unordered_map<TExchange, bool>> kline1min_firsttime_;
     unordered_map<TSymbol, unordered_map<TExchange, bool>> kline60min_firsttime_;
-};
-
-class KlineHubber : public IDataCacher
-{
-public:
-    KlineHubber();
-    ~KlineHubber();
-
-    void register_callback(IMixerKlinePusher* callback) { callbacks_.insert(callback); }
-
-    void set_db_interface(IDataProvider* db_interfacce) { db_interface_ = db_interfacce; }
-
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
-
-    // IDataCacher
-    bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
-    void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60);
-
-private:
-    set<IMixerKlinePusher*> callbacks_;
-    IDataProvider* db_interface_;
-
-    KlineCache min1_cache_;
-    KlineCache min60_cache_;
 };
