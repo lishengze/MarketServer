@@ -250,8 +250,10 @@ void _mix_klines(vector<KlineData>& dst, const vector<KlineData>& src)
 
 void KlineDatabase::_write_to_db(const unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache, int resolution)
 {
-    for( const auto& exchange: cache ) {
-        for( const auto& symbol: v.second ) {
+    for( const auto& v: cache ) {
+        for( const auto& v2: v.second ) {
+            const TExchange& exchange = v.first;
+            const TSymbol& symbol = v2.first;
             const vector<KlineData>& klines = v2.second;
             
             int cur_index = 0;
