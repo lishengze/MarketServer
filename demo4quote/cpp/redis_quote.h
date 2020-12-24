@@ -135,7 +135,7 @@ private:
     bool _check_update_clocks(const TExchange& exchange, const TSymbol& symbol, float frequency);
     bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
-    // 订阅的交易币种换粗
+    // 订阅的交易币种缓存
     unordered_map<TSymbol, unordered_set<TExchange>> symbols_;
 
     // K线源头首次获取的tag

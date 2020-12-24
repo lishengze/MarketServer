@@ -112,15 +112,15 @@ struct SymbolFee
     {
         if( fee_type == 2 ) {
             if( is_ask ) {
-                dst = src + maker_fee;
+                dst = src.add(maker_fee, true);
             } else {
-                dst = src - taker_fee;
+                dst = src.add(taker_fee, false);
             }
         } else if( fee_type == 1 ) {
             if( is_ask ) {
-                dst = src * (100 + maker_fee) / 100.0;
+                dst = src.multiple((100 + maker_fee) / 100.0, true);
             } else {
-                dst = src * (100 - taker_fee) / 100.0;
+                dst = src.multiple((100 - taker_fee) / 100.0, false);
             }
         } else {
             dst = src;

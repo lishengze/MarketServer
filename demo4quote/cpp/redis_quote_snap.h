@@ -34,8 +34,6 @@ private:
 
     void _get_snap(const TExchange& exchange, const TSymbol& symbol);
 
-    void on_timer(const TExchange& exchange, const TSymbol& symbol, int seconds);
-
 private:
     // redis api对象
     RedisParams                params_;
