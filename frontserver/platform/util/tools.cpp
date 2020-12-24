@@ -126,7 +126,7 @@ PackagePtr GetNewSymbolDataPackage(std::set<string> symbols, int package_id)
     return package;       
 }
 
-string SymbolsToJsonStr(std::set<std::string>& symbols, string type)
+string SymbolsToJsonStr(std::set<std::string> symbols, string type)
 {
     nlohmann::json json_data;
     nlohmann::json symbol_json;

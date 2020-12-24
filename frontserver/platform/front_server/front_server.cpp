@@ -133,6 +133,13 @@ void FrontServer::process_symbols_package(PackagePtr package)
 
     symbols_.merge(p_symbol_data->get_symbols());
 
+    cout << "\nCurrent FrontServer Symbol: " << endl;
+
+    for (auto symbol: symbols_)
+    {
+        cout << symbol << endl;
+    }
+
     // cout << "FrontServer::process_symbols_package 4" << endl;
 
     wb_server_->broadcast(updated_symbols_str);

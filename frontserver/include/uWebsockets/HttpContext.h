@@ -376,7 +376,7 @@ public:
         }
 
         httpContextData->router.add(methods, pattern, [handler = std::move(handler)](auto *r) mutable {
-            cout << "Add Hander" << endl;
+            // cout << "Add Hander" << endl;
             auto user = r->getUserData();
             user.httpRequest->setYield(false);
             user.httpRequest->setParameters(r->getParameters());
@@ -387,7 +387,7 @@ public:
                 user.httpResponse->writeContinue();
             }
 
-            cout << "Process Handler!" << endl;
+            // cout << "Process Handler!" << endl;
             handler(user.httpResponse, user.httpRequest);
 
             /* If any handler yielded, the router will keep looking for a suitable handler. */

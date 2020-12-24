@@ -153,7 +153,7 @@ private:
     /* Executes as many handlers it can */
     bool executeHandlers(Node *parent, int urlSegment, USERDATA &userData) {
 
-        std::cout << "[HttpRouter] executeHandlers " << endl;
+        // std::cout << "[HttpRouter] executeHandlers " << endl;
 
         auto [segment, isStop] = getUrlSegment(urlSegment);
 
