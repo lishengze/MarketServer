@@ -36,6 +36,11 @@ void QuoteMixer2::_publish_quote(const TSymbol& symbol, std::shared_ptr<MarketSt
     }
 }
 
+void QuoteMixer2::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
+{
+
+}
+
 void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
     // 更新单个品种 & 手续费率和精度处理

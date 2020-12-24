@@ -71,22 +71,24 @@ struct SMixQuote {
     }
 };
 
-struct SNacosConfigFee
+struct SNacosConfigByExchange
 {
     int fee_type;
     float fee_maker;
     float fee_taker;
+    int precise;    // 最小价格单位
+    int vprecise;   // 最小挂单量单位
 };
 
 struct SNacosConfig
 {
-    int precise;    // 最小价格单位
-    int vprecise;   // 最小挂单量单位
-    type_uint32 depth;
-    float frequency;
-    type_uint32 mix_depth;
-    float mix_frequecy;
-    map<TExchange, SNacosConfigFee> exchanges;    
+    type_uint32 depth; // 【原始】深度
+    float frequency;    // 【原始】更新频率
+    int precise;    // 【聚合】最小价格单位
+    int vprecise;   // 【聚合】最小挂单量单位
+    type_uint32 mix_depth;  // 【聚合】深度
+    float mix_frequecy; // 【聚合】更新频率
+    map<TExchange, SNacosConfigByExchange> exchanges;    
 
     unordered_set<TExchange> get_exchanges() const {
         unordered_set<TExchange> ret;

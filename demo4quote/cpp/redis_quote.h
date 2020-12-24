@@ -61,6 +61,11 @@ struct ExchangeMeta
 class RedisQuote : public utrade::pandora::CRedisSpi
 {
 public:
+    struct ExchangeConfig
+    {
+        int precise; // 交易所原始价格精度
+        int vprecise; // 交易所原始成交量精度
+    };
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
@@ -68,19 +73,22 @@ public:
     ~RedisQuote();
 
     // 动态修改配置
-    void set_frequency(const TSymbol& symbol, float frequency);
-    void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+    void set_config(const TSymbol& symbol, float frequency, const unordered_map<TExchange, ExchangeConfig)& exchanges);
 
-    // init
+    // 初始化
     void start(const RedisParams& params, UTLogPtr logger);
     void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
+
+    // 订阅
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
         redis_api_->SubscribeTopic("UPDATEx|" + symbol + "." + exchange);
         redis_api_->SubscribeTopic("KLINEx|" + symbol + "." + exchange);
+        redis_api_->SubscribeTopic("TRADEx|" + symbol + "." + exchange);
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
         redis_api_->UnSubscribeTopic("UPDATEx|" + symbol + "." + exchange);
         redis_api_->UnSubscribeTopic("KLINEx|" + symbol + "." + exchange);
+        redis_api_->UnSubscribeTopic("TRADEx|" + symbol + "." + exchange);
     }
     
     // callback from RedisSnapRequester
@@ -136,7 +144,21 @@ private:
     bool _ctrl_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
     // 订阅的交易币种缓存
-    unordered_map<TSymbol, unordered_set<TExchange>> symbols_;
+    mutable std::mutex mutex_symbol_;   
+    unordered_map<TSymbol, unordered_map<TExchange, ExchangeConfig>> symbols_;
+
+    bool get_symbol_config(const TExchange& exchange, const TSymbol& symbol, ExchangeConfig& config) const {
+        std::unique_lock<std::mutex> inner_lock{ mutex_symbol_ };
+        auto v = symbols_.find(symbol);
+        if( v == symbols_.end() )
+            return false;
+        const unordered_map<TExchange, ExchangeConfig>& configs = v.second;        
+        auto v2 = configs.find(exchange);
+        if( v2 == configs.end() )
+            return false;
+        config = v2.second;
+        return true;
+    }
 
     // K线源头首次获取的tag
     unordered_map<TSymbol, unordered_map<TExchange, bool>> kline1min_firsttime_;

@@ -25,11 +25,29 @@ service StreamEngine {
 
     // 订阅K线数据
     rpc GetLast(GetKlinesRequest) returns (stream MultiGetKlinesResponse){}
+
+    // 订阅交易信息
+    rpc SubscribeTrade(SubscribeTradeReq) returns (stream MultiTradeWithDecimal);
+    
+    // 查询最近数据
+    rpc GetLatestTrades(GetLatestTradesReq) returns (GetLatestTradesResp);
 }
 
 message SubscribeQuoteReq {
   string exchange = 1;
   string symbol = 2;
+}
+
+message SubscribeTradeReq {
+  string exchange = 1;
+  string symbol = 2;
+}
+
+message GetLatestTradesReq{    
+}
+
+message GetLatestTradesResp{
+    map<string, TradeWithDecimal> trades = 1;
 }
 
 message SubscribeMixQuoteReq {

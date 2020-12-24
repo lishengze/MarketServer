@@ -79,6 +79,11 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange)
     quote_mixer2_.clear_exchange(exchange);
 }
 
+void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
+{
+    quote_mixer2_.on_trade(exchange, symbol, trade);
+}
+
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
 {
     for( const auto& v : kline ) {        
@@ -105,8 +110,8 @@ void StreamEngine::signal_handler(int signum)
     exit(0);
 } 
 
-map<TExchange, SymbolFee> to_fees(const map<TExchange, SNacosConfigFee>& exchanges) {    
-    map<TExchange, SymbolFee> fees;
+unordered_map<TExchange, SymbolFee> to_fees(const map<TExchange, SNacosConfigByExchange>& exchanges) {    
+    unordered_map<TExchange, SymbolFee> fees;
     for( const auto& v : exchanges ) {
         SymbolFee tmp;
         tmp.fee_type = v.second.fee_type;
@@ -117,14 +122,15 @@ map<TExchange, SymbolFee> to_fees(const map<TExchange, SNacosConfigFee>& exchang
     return fees;
 }
 
-bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolFee>& m2) {
+template<typename T>
+bool map_equal(const map<TExchange, T>& m1, const map<TExchange, T>& m2) {
     for( const auto& v : m1 ) {
         auto iter = m2.find(v.first);
         if( iter == m2.end() )
             return false;
-        const SymbolFee& f1 = v.second;
-        const SymbolFee& f2 = iter->second;
-        if( memcmp(&f1, &f2, sizeof(SymbolFee)) != 0 )
+        const T& f1 = v.second;
+        const T& f2 = iter->second;
+        if( memcmp(&f1, &f2, sizeof(T)) != 0 )
             return false;
     }
     for( const auto& v : m2 ) {
@@ -132,6 +138,16 @@ bool map_equal(const map<TExchange, SymbolFee>& m1, const map<TExchange, SymbolF
             return false;
     }
     return true;
+}
+
+unordered_map<TExchange, RedisQuote::ExchangeConfig> NacosToRedisConfig(const map<TExchange, SNacosConfigByExchange>& configs)
+{
+    unordered_map<TExchange, RedisQuote::ExchangeConfig> ret;
+    for( const auto& v : config.exchanges ) {
+        ret[v.first].precise = v.second.precise;
+        ret[v.first].vprecise = v.second.vprecise;
+    }
+    return ret;
 }
 
 void StreamEngine::on_symbol_channged(const NacosString& configInfo)
@@ -167,7 +183,9 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
         {
             const TExchange& exchange = iter2.key();
             const njson& exchange_cfgs = iter2.value();
-            SNacosConfigFee exchange_cfg;
+            SNacosConfigByExchange exchange_cfg;
+            exchange_cfg.precise = exchange_cfgs["precise"].get<int>();
+            exchange_cfg.precise = exchange_cfgs["vprecise"].get<int>();
             exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
             exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
             exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
@@ -188,21 +206,19 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
             quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fees(config.exchanges));
             quote_mixer2_.set_publish_params(symbol, config.mix_frequecy);
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
-            quote_source_.set_frequency(symbol, config.frequency);
-            quote_source_.set_symbol(symbol, config.get_exchanges());
+            quote_source_.set_config(symbol, config.frequency, NacosToRedisConfig(config.exchanges));
         }
         // 已有的品种
         else 
         { 
             const SNacosConfig& last_config = symbols_[symbol];
             // 行情原始频率变更
-            if( last_config.frequency != config.frequency ) {
-                quote_source_.set_frequency(symbol, config.frequency);
+            if( last_config.frequency != config.frequency || !map_equal(NacosToRedisConfig(config.last_config), NacosToRedisConfig(config.exchanges))) {
+                quote_source_.set_config(symbol, config.frequency, NacosToRedisConfig(config.exchanges);
             }
             // 交易所数量变更
             if( last_config.get_exchanges() != config.get_exchanges() ) {
                 kline_mixer_.set_symbol(symbol, config.get_exchanges());
-                quote_source_.set_symbol(symbol, config.get_exchanges());
             }
             // 精度，各交易所手续费 
             if( last_config.precise != config.precise || !map_equal(to_fees(last_config.exchanges), to_fees(config.exchanges)) || last_config.mix_depth != config.mix_depth) {

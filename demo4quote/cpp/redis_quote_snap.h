@@ -27,7 +27,7 @@ public:
 
     void start();
 
-    void add_symbol(const TExchange& exchange, const TSymbol& symbol);
+    void request_symbol(const TExchange& exchange, const TSymbol& symbol);
 
 private:
     void _thread_loop();

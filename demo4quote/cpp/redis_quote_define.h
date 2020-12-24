@@ -68,6 +68,17 @@ struct KlineData
         volume = 0;
     }
 };
+
+struct Trade
+{
+    type_tick time;
+    SDecimal price;
+    SDecimal volume;
+
+    Trade() {
+        time = 0;
+    }
+}
 #pragma pack()
 
 struct RedisParams {
@@ -86,4 +97,7 @@ public:
 
     // K线接口
     virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
+
+    // 交易接口
+    virtual void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade) = 0;
 };

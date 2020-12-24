@@ -20,6 +20,8 @@ public:
 
     void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
+    void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
+
     void clear_exchange(const TExchange& exchange);
 
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }

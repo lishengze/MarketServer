@@ -19,7 +19,7 @@ void RedisSnapRequester::start(){
     thread_loop_ = new std::thread(&RedisSnapRequester::_thread_loop, this);
 }
 
-void RedisSnapRequester::add_symbol(const TExchange& exchange, const TSymbol& symbol) 
+void RedisSnapRequester::request_symbol(const TExchange& exchange, const TSymbol& symbol) 
 {    
     string combinedSymbol = make_symbolkey(exchange, symbol);
     std::unique_lock<std::mutex> inner_lock{ mutex_symbols_ };

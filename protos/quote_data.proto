@@ -77,3 +77,13 @@ message Kline {
     Decimal close = 5;
     Decimal volume = 6;
 }
+
+message MultiTradeWithDecimal {
+    repeated TradeWithDecimal trades = 1;
+}
+
+message TradeWithDecimal {
+    int64 time = 1;
+    Decimal price = 2;
+    Decimal volume = 3;
+}

@@ -1,20 +1,20 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
 
-void redisquote_to_quote_depth(const njson& data, map<SDecimal, SDecimal>& depths)
+void redisquote_to_quote_depth(const njson& data, const RedisQuote::ExchangeConfig& config, map<SDecimal, SDecimal>& depths)
 {
     for (auto iter = data.begin() ; iter != data.end() ; ++iter )
     {
         const string& price = iter.key();
         const double& volume = iter.value();
-        SDecimal dPrice = SDecimal::parse(price);
-        SDecimal dVolume = SDecimal::parse(volume);
+        SDecimal dPrice = SDecimal::parse(price, config.precise);
+        SDecimal dVolume = SDecimal::parse(volume, config.vprevise);
         depths[dPrice] = dVolume;
         //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
 }
 
-bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, bool isSnap) {
+bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const RedisQuote::ExchangeConfig& config, bool isSnap) {
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
@@ -26,9 +26,9 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, bool isSnap
     //vassign(quote.time_arrive, timeArrive); // 暂时不处理
     
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
-    redisquote_to_quote_depth(snap_json[askDepth], quote.asks);
+    redisquote_to_quote_depth(snap_json[askDepth], config, quote.asks);
     string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
-    redisquote_to_quote_depth(snap_json[bidDepth], quote.bids);
+    redisquote_to_quote_depth(snap_json[bidDepth], config, quote.bids);
     return true;
 }
 
@@ -84,8 +84,13 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         return false;
     } 
 
+    ExchangeConfig config;
+    if( !get_symbol_config(exchange, symbol, config) ) {            
+        _log_and_print("symbol not exist. exchange=%s symbol=%s", exchange.c_str(), symbol.c_str());
+        return;
+    }
     SDepthQuote quote;
-    if( !redisquote_to_quote(snap_json, quote, true))
+    if( !redisquote_to_quote(snap_json, quote, config, true))
     {
         _log_and_print("%s-%s redisquote_to_quote failed. msg=%s", exchange.c_str(), symbol.c_str(), data.c_str());
         return false;
@@ -116,6 +121,12 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
     if (channel.find(DEPTH_UPDATE_HEAD) != string::npos)
     {
+        // 
+        int pos = channel.find(DEPTH_UPDATE_HEAD);
+        int pos2 = channel.find(".");
+        string symbol = channel.substr(pos+strlen(DEPTH_UPDATE_HEAD), pos2-pos-strlen(DEPTH_UPDATE_HEAD));
+        string exchange = channel.substr(pos2+1);
+
         // 解析json
         try
         {
@@ -128,8 +139,13 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         } 
 
         // redis结构到内部结构的转换
+        ExchangeConfig config;
+        if( !get_symbol_config(exchange, symbol, config) ) {            
+            _log_and_print("channel=%s symbol not exist. exchange=%s symbol=%s", channel.c_str(), exchange.c_str(), symbol.c_str());
+            return;
+        }
         SDepthQuote quote;
-        if( !redisquote_to_quote(snap_json, quote, false)) 
+        if( !redisquote_to_quote(snap_json, quote, config, false)) 
         {
             _log_and_print("channel=%s redisquote_to_quote failed. msg=%s", channel.c_str(), msg.c_str());
             return;
@@ -294,7 +310,7 @@ bool RedisQuote::_update_meta_by_snap(const TExchange& exchange, const TSymbol& 
             {
                 // snap < head 
                 _log_and_print("%s-%s snap too late. request snap again.", exchange.c_str(), symbol.c_str());
-                redis_snap_requester_.add_symbol(exchange, symbol);
+                redis_snap_requester_.request_symbol(exchange, symbol);
                 return false;
             } 
             else if( quote.sequence_no <= symbol_meta.caches.back().sequence_no ) 
@@ -349,7 +365,7 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
             _log_and_print("%s-%s sequence skip from %lu to %lu. stop and request snap again ...", 
                             exchange.c_str(), symbol.c_str(), symbol_meta.seq_no, quote.sequence_no);
             // 序号不连续
-            redis_snap_requester_.add_symbol(exchange, symbol);
+            redis_snap_requester_.request_symbol(exchange, symbol);
             symbol_meta.caches.clear();
             symbol_meta.caches.push_back(quote);
             symbol_meta.seq_no = 0;
@@ -369,7 +385,7 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
             auto last_seqno = symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.back().sequence_no;
             if( last_seqno == 0 || (last_seqno+1) == quote.sequence_no ) {
                 // 连续
-                redis_snap_requester_.add_symbol(exchange, symbol);
+                redis_snap_requester_.request_symbol(exchange, symbol);
                 symbol_meta.caches.push_back(quote);
                 return false;
             } else {
@@ -399,7 +415,7 @@ bool RedisQuote::_update_meta_by_update(const TExchange& exchange, const TSymbol
             } else {
                 _log_and_print("%s-%s snap too late. request snap again.", exchange.c_str(), symbol.c_str());
                 // 大于snap+1
-                redis_snap_requester_.add_symbol(exchange, symbol);
+                redis_snap_requester_.request_symbol(exchange, symbol);
                 symbol_meta.caches.clear();
                 symbol_meta.caches.push_back(quote);
                 return false;
@@ -556,7 +572,7 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     tmp.arrive_time = update.arrive_time;
     tmp.asks.swap(update.asks);
     tmp.bids.swap(update.bids);
-    engine_interface_->on_update(exchange, symbol, tmp);
+        engine_interface_->on_update(exchange, symbol, tmp);
     return true;
 }
 
@@ -574,37 +590,40 @@ bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& 
     return true;
 }
 
-void RedisQuote::set_frequency(const TSymbol& symbol, float frequency)
+void RedisQuote::set_config(const TSymbol& symbol, float frequency, const unordered_map<TExchange, ExchangeConfig)& exchanges);
 {
-    _log_and_print("%s frequency=%.03f", symbol.c_str(), frequency);
-
-    std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
-    frequecy_[symbol] = frequency;
-}
-
-void RedisQuote::set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
-{
+    // 打印输入信息
     string desc = "";
     for( const auto& v : exchanges ) {
-        desc += v + ",";
+        desc += v.first + ",";
     }
-    _log_and_print("%s exchanges=%s", symbol.c_str(), desc.c_str());
+    _log_and_print("%s frequency=%.05f, exchanges=%s", symbol.c_str(), frequency, desc.c_str());
 
-    // 删除老的
-    const auto& iter = symbols_.find(symbol);
-    if( iter != symbols_.end() )
+    // 设置交易所配置
     {
-        for( const auto& v : iter->second ) {
-            unsubscribe(v, symbol);
+        std::unique_lock<std::mutex> inner_lock{ mutex_symbol_ };
+        // 删除老的
+        const auto& iter = symbols_.find(symbol);
+        if( iter != symbols_.end() )
+        {
+            for( const auto& v : iter->second ) {
+                unsubscribe(v.first, symbol);
+            }
         }
-    }
 
-    // 添加新的    
-    for( const auto& v : exchanges )
+        // 添加新的    
+        for( const auto& v : exchanges )
+        {
+            subscribe(v.first, symbol);
+        }
+
+        // 赋值
+        symbols_[symbol] = exchanges;
+    }
+    
+    // 设置原始行情频率配置
     {
-        subscribe(v, symbol);
+        std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
+        frequecy_[symbol] = frequency;
     }
-
-    // 赋值
-    symbols_[symbol] = exchanges;
 }
