@@ -117,6 +117,24 @@ struct SDecimal {
             data_.real_.value_ += 1;
     }
 
+    void multiple(double factor, bool ceiling = false)
+    {
+        double tmp = (double)data_.real_.value_ * factor;
+        data_.real_.value_ = tmp;
+        if( ceiling && tmp > data_.real_.value_) {
+            data_.real_.value_ += 1;
+        }
+    }
+
+    void add(double factor, bool ceiling = false)
+    {
+        double tmp = (double)data_.real_.value_ + factor;
+        data_.real_.value_ = tmp;
+        if( ceiling && tmp > data_.real_.value_ ) {
+            data_.real_.value_ += 1;
+        }
+    }
+
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
         // 没有小数
