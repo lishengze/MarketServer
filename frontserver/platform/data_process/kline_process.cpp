@@ -43,7 +43,7 @@ void KlineProcess::request_kline_package(PackagePtr package)
             else
             {
                 cout << "Error!" << endl;
-                process_engine_->deliver_request(package);
+                // process_engine_->deliver_request(package);
             }            
         }
         else
@@ -78,32 +78,39 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
 
             // if (kline_data_[cur_symbol][frequency_list_[0]].size() > 60) return;            
 
-            LOG_DEBUG(string("kline_data push ") + cur_symbol + ", "  
-                        + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[cur_symbol][frequency_list_[0]].size()) + ", "
-                        + get_sec_time_str(pkline_data->index) + "\n");
+            // LOG_DEBUG(string("kline_data push ") + cur_symbol + ", "  
+            //             + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[cur_symbol][frequency_list_[0]].size()) + ", "
+            //             + get_sec_time_str(pkline_data->index) + "\n");
 
-            if (kline_data_[cur_symbol][frequency_base_].size() == 120)
+            for (auto fre:frequency_list_)
             {
-
-                std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[cur_symbol];
-
-                for (auto iter: cur_kline_data)
-                {
-                    std::map<type_tick, KlineDataPtr>& cur_fre_data = iter.second;
-
-                    cout << "Frequency: " << iter.first << ", data_numb: " << cur_fre_data.size() << endl;
-
-                    for (auto atom_iter:cur_fre_data)
-                    {
-                        KlineData& kline = *(atom_iter.second);
-                        string cur_time = get_sec_time_str(kline.index);
-
-                        cout << cur_time << ", " << kline.symbol << ", "
-                            << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                            << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;                        
-                    }
-                }
+                LOG_DEBUG(string("Push ") + cur_symbol + ", "  
+                            + std::to_string(fre) + ":" + std::to_string(kline_data_[cur_symbol][fre].size()) + ", "
+                            + get_sec_time_str(pkline_data->index) + "\n");                
             }
+
+            // if (kline_data_[cur_symbol][frequency_base_].size() == 120)
+            // {
+
+            //     std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[cur_symbol];
+
+            //     for (auto iter: cur_kline_data)
+            //     {
+            //         std::map<type_tick, KlineDataPtr>& cur_fre_data = iter.second;
+
+            //         cout << "Frequency: " << iter.first << ", data_numb: " << cur_fre_data.size() << endl;
+
+            //         for (auto atom_iter:cur_fre_data)
+            //         {
+            //             KlineData& kline = *(atom_iter.second);
+            //             string cur_time = get_sec_time_str(kline.index);
+
+            //             cout << cur_time << ", " << kline.symbol << ", "
+            //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+            //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;                        
+            //         }
+            //     }
+            // }
         }
         else
         {
@@ -286,6 +293,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
         }
         else
         {
+            LOG_ERROR(string("Symbol: ") + string(pReqKlineData->symbol_) + string(" does not exit!"));
             return nullptr;
         }    
     }

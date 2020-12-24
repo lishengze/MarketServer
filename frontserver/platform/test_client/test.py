@@ -76,11 +76,11 @@ def get_sub_kline_str():
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
-    ws.send(send_str)
+    # ws.send(send_str)
 
     # _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
 

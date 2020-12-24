@@ -26,7 +26,7 @@ string SDepthDataToJsonStr(const SDepthData& depth);
 
 string SymbolsToJsonStr(SymbolData& symbol_data, string type=SYMBOL_UPDATE);
 
-string SymbolsToJsonStr(std::set<std::string>& symbols, string type=SYMBOL_LIST);
+string SymbolsToJsonStr(std::set<std::string> symbols, string type=SYMBOL_LIST);
 
 string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type=MARKET_DATA_UPDATE);
 
