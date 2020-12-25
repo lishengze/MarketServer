@@ -7,8 +7,8 @@ void redisquote_to_quote_depth(const njson& data, const RedisQuote::ExchangeConf
     {
         const string& price = iter.key();
         const double& volume = iter.value();
-        SDecimal dPrice = SDecimal::parse(price, config.precise);
-        SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
+        SDecimal dPrice = SDecimal::parse(price, -1);
+        SDecimal dVolume = SDecimal::parse(volume, -1);
         depths[dPrice] = dVolume;
         //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
