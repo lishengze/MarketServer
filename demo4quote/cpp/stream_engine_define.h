@@ -88,7 +88,7 @@ struct SNacosConfig
     int vprecise;   // 【聚合】最小挂单量单位
     type_uint32 mix_depth;  // 【聚合】深度
     float mix_frequecy; // 【聚合】更新频率
-    map<TExchange, SNacosConfigByExchange> exchanges;    
+    unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
 
     unordered_set<TExchange> get_exchanges() const {
         unordered_set<TExchange> ret;

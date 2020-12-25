@@ -343,7 +343,7 @@ void QuoteMixer2::set_publish_params(const TSymbol& symbol, float frequency)
     publish_params_[symbol].frequency = frequency;
 }
 
-void QuoteMixer2::set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const map<TExchange, SymbolFee>& fees)
+void QuoteMixer2::set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const unordered_map<TExchange, SymbolFee>& fees)
 {
     _log_and_print("%s precise=%d mix_depth=%u", symbol.c_str(), precise, depth);
     

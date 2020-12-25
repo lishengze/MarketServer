@@ -27,7 +27,7 @@ public:
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 
     void set_publish_params(const TSymbol& symbol, float frequency);
-    void set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const map<TExchange, SymbolFee>& fees);
+    void set_compute_params(const TSymbol& symbol, int precise, type_uint32 depth, const unordered_map<TExchange, SymbolFee>& fees);
 private:
     set<IMixerQuotePusher*> callbacks_;
 
@@ -35,7 +35,7 @@ private:
     struct _compute_param{
         type_uint32 depth;
         int precise;
-        map<TExchange, SymbolFee> fees;
+        unordered_map<TExchange, SymbolFee> fees;
     };
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, _compute_param> _compute_params_; 

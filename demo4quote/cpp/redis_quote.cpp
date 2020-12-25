@@ -8,7 +8,7 @@ void redisquote_to_quote_depth(const njson& data, const RedisQuote::ExchangeConf
         const string& price = iter.key();
         const double& volume = iter.value();
         SDecimal dPrice = SDecimal::parse(price, config.precise);
-        SDecimal dVolume = SDecimal::parse(volume, config.vprevise);
+        SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
         depths[dPrice] = dVolume;
         //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
@@ -85,9 +85,9 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     } 
 
     ExchangeConfig config;
-    if( !get_symbol_config(exchange, symbol, config) ) {            
+    if( !_get_symbol_config(exchange, symbol, config) ) {            
         _log_and_print("symbol not exist. exchange=%s symbol=%s", exchange.c_str(), symbol.c_str());
-        return;
+        return false;
     }
     SDepthQuote quote;
     if( !redisquote_to_quote(snap_json, quote, config, true))
@@ -103,7 +103,6 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         // 执行发送
         engine_interface_->on_snap(exchange, symbol, quote);
         for( const auto& v: wait_to_send ) {
-            //engine_interface_->on_update(exchange, symbol, v);
             _ctrl_update(exchange, symbol, v);
         }
         return true;
@@ -140,7 +139,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
         // redis结构到内部结构的转换
         ExchangeConfig config;
-        if( !get_symbol_config(exchange, symbol, config) ) {            
+        if( !_get_symbol_config(exchange, symbol, config) ) {            
             _log_and_print("channel=%s symbol not exist. exchange=%s symbol=%s", channel.c_str(), exchange.c_str(), symbol.c_str());
             return;
         }
@@ -590,9 +589,9 @@ bool RedisQuote::_check_update_clocks(const TExchange& exchange, const TSymbol& 
     return true;
 }
 
-void RedisQuote::set_config(const TSymbol& symbol, float frequency, const unordered_map<TExchange, ExchangeConfig)& exchanges);
+void RedisQuote::set_config(const TSymbol& symbol, float frequency, const ExchangeConfigs& exchanges)
 {
-    // 打印输入信息
+    // 打印入参
     string desc = "";
     for( const auto& v : exchanges ) {
         desc += v.first + ",";
@@ -626,4 +625,18 @@ void RedisQuote::set_config(const TSymbol& symbol, float frequency, const unorde
         std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
         frequecy_[symbol] = frequency;
     }
+}
+
+bool RedisQuote::_get_symbol_config(const TExchange& exchange, const TSymbol& symbol, ExchangeConfig& config) const 
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_symbol_ };
+    auto v = symbols_.find(symbol);
+    if( v == symbols_.end() )
+        return false;
+    const ExchangeConfigs& configs = v->second;        
+    auto v2 = configs.find(exchange);
+    if( v2 == configs.end() )
+        return false;
+    config = v2->second;
+    return true;
 }

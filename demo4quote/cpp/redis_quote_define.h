@@ -78,7 +78,7 @@ struct Trade
     Trade() {
         time = 0;
     }
-}
+};
 #pragma pack()
 
 struct RedisParams {

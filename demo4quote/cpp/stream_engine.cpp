@@ -110,7 +110,8 @@ void StreamEngine::signal_handler(int signum)
     exit(0);
 } 
 
-unordered_map<TExchange, SymbolFee> to_fees(const map<TExchange, SNacosConfigByExchange>& exchanges) {    
+unordered_map<TExchange, SymbolFee> to_fee_config(const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
+{    
     unordered_map<TExchange, SymbolFee> fees;
     for( const auto& v : exchanges ) {
         SymbolFee tmp;
@@ -123,7 +124,7 @@ unordered_map<TExchange, SymbolFee> to_fees(const map<TExchange, SNacosConfigByE
 }
 
 template<typename T>
-bool map_equal(const map<TExchange, T>& m1, const map<TExchange, T>& m2) {
+bool map_equal(const unordered_map<TExchange, T>& m1, const unordered_map<TExchange, T>& m2) {
     for( const auto& v : m1 ) {
         auto iter = m2.find(v.first);
         if( iter == m2.end() )
@@ -140,20 +141,20 @@ bool map_equal(const map<TExchange, T>& m1, const map<TExchange, T>& m2) {
     return true;
 }
 
-unordered_map<TExchange, RedisQuote::ExchangeConfig> NacosToRedisConfig(const map<TExchange, SNacosConfigByExchange>& configs)
+unordered_map<TExchange, RedisQuote::ExchangeConfig> to_redis_config(const unordered_map<TExchange, SNacosConfigByExchange>& configs)
 {
     unordered_map<TExchange, RedisQuote::ExchangeConfig> ret;
-    for( const auto& v : config.exchanges ) {
+    for( const auto& v : configs ) {
         ret[v.first].precise = v.second.precise;
         ret[v.first].vprecise = v.second.vprecise;
     }
     return ret;
 }
 
-void StreamEngine::on_symbol_channged(const NacosString& configInfo)
+void StreamEngine::on_config_channged(const NacosString& configInfo)
 {
-    njson js;
-    
+    // json 解析
+    njson js;    
     try
     {
         js = njson::parse(configInfo);
@@ -162,8 +163,10 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
     {
         _log_and_print("parse json fail %s", e.what());
         return;
-    }
+    }    
+    _log_and_print("parse config from nacos finish");
 
+    // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     for (auto iter = js.begin() ; iter != js.end() ; ++iter )
     {
@@ -194,37 +197,39 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
         symbols[symbol] = cfg;
     }
     
-    // quote_source_ 涉及交易所+交易币种，原始行情更新频率
+    // quote_source_ 涉及交易所+交易币种+原始行情精度，原始行情更新频率
     // quote_mixer2_ 涉及交易币种的精度，深度，频率，各交易所手续费
+    
     for( const auto& v : symbols )
     {
         const TSymbol& symbol = v.first;
         const SNacosConfig& config = v.second;
+
         // 新增品种
         if( symbols_.find(symbol) == symbols_.end() ) 
         {
-            quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fees(config.exchanges));
+            quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fee_config(config.exchanges));
             quote_mixer2_.set_publish_params(symbol, config.mix_frequecy);
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
-            quote_source_.set_config(symbol, config.frequency, NacosToRedisConfig(config.exchanges));
+            quote_source_.set_config(symbol, config.frequency, to_redis_config(config.exchanges));
         }
         // 已有的品种
         else 
         { 
             const SNacosConfig& last_config = symbols_[symbol];
-            // 行情原始频率变更
-            if( last_config.frequency != config.frequency || !map_equal(NacosToRedisConfig(config.last_config), NacosToRedisConfig(config.exchanges))) {
-                quote_source_.set_config(symbol, config.frequency, NacosToRedisConfig(config.exchanges);
+            // 源头配置变更
+            if( last_config.frequency != config.frequency || !map_equal(to_redis_config(last_config.exchanges), to_redis_config(config.exchanges))) {
+                quote_source_.set_config(symbol, config.frequency, to_redis_config(config.exchanges));
             }
             // 交易所数量变更
             if( last_config.get_exchanges() != config.get_exchanges() ) {
                 kline_mixer_.set_symbol(symbol, config.get_exchanges());
             }
             // 精度，各交易所手续费 
-            if( last_config.precise != config.precise || !map_equal(to_fees(last_config.exchanges), to_fees(config.exchanges)) || last_config.mix_depth != config.mix_depth) {
-                quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fees(config.exchanges));
+            if( last_config.precise != config.precise || !map_equal(to_fee_config(last_config.exchanges), to_fee_config(config.exchanges)) || last_config.mix_depth != config.mix_depth) {
+                quote_mixer2_.set_compute_params(symbol, config.precise, config.mix_depth, to_fee_config(config.exchanges));
             }
-            // 频率和深度
+            // 频率
             if( last_config.mix_frequecy != config.mix_frequecy ) {
                 quote_mixer2_.set_publish_params(symbol, config.mix_frequecy);
             }
@@ -235,7 +240,7 @@ void StreamEngine::on_symbol_channged(const NacosString& configInfo)
     // 删除品种
     for( const auto& v : symbols_ ) {
         if( symbols.find(v.first) == symbols.end() ) {
-            quote_source_.set_symbol(v.first, unordered_set<TExchange>());
+            quote_source_.set_config(v.first, 0, unordered_map<TExchange, RedisQuote::ExchangeConfig>());
         }
     }
 

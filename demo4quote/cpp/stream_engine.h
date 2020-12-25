@@ -18,14 +18,14 @@ public:
     void start();
 
     // from QuoteSourceInterface
-    void on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote);
-    void on_update(const string& exchange, const string& symbol, const SDepthQuote& quote);
+    void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
+    void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
     void on_nodata_exchange(const TSymbol& symbol);
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
 
     // from INacosCallback
-    void on_symbol_channged(const NacosString& symbols);
+    void on_config_channged(const NacosString& symbols);
 
     // signal handler function
     static volatile int signal_sys;

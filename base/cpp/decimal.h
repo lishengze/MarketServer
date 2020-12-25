@@ -117,24 +117,26 @@ struct SDecimal {
             data_.real_.value_ += 1;
     }
 
-    SDecimal & multiple(double factor, bool ceiling = false)
+    const SDecimal multiple(double factor, bool ceiling = false) const
     {
-        double tmp = (double)data_.real_.value_ * factor;
-        data_.real_.value_ = tmp;
-        if( ceiling && tmp > data_.real_.value_) {
-            data_.real_.value_ += 1;
+        SDecimal ret = *this;
+        double tmp = (double)ret.data_.real_.value_ * factor;
+        ret.data_.real_.value_ = tmp;
+        if( ceiling && tmp > ret.data_.real_.value_) {
+            ret.data_.real_.value_ += 1;
         }
-        return *this;
+        return ret;
     }
 
-    SDecimal & add(double factor, bool ceiling = false)
+    const SDecimal add(double factor, bool ceiling = false) const
     {
-        double tmp = (double)data_.real_.value_ + factor;
-        data_.real_.value_ = tmp;
-        if( ceiling && tmp > data_.real_.value_ ) {
-            data_.real_.value_ += 1;
+        SDecimal ret = *this;
+        double tmp = (double)ret.data_.real_.value_ + factor;
+        ret.data_.real_.value_ = tmp;
+        if( ceiling && tmp > ret.data_.real_.value_ ) {
+            ret.data_.real_.value_ += 1;
         }
-        return *this;
+        return ret;
     }
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
