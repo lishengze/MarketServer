@@ -30,7 +30,7 @@ struct SDepthQuote {
 };
 
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
-#define TICK_HEAD "TRADEx|"
+#define TRADE_HEAD "TRADEx|"
 #define DEPTH_UPDATE_HEAD "UPDATEx|"
 #define GET_DEPTH_HEAD "DEPTHx|"
 #define KLINE_1MIN_HEAD "KLINEx|"

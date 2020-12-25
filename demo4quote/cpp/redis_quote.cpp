@@ -32,13 +32,22 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const Redis
     return true;
 }
 
-bool redisquote_to_kline(const njson& data, KlineData& kline) {
+bool redisquote_to_kline(const njson& data, KlineData& kline) 
+{
     kline.index = int(data[0].get<double>());
     kline.px_open.from(data[1].get<double>());
     kline.px_high.from(data[2].get<double>());
     kline.px_low.from(data[3].get<double>());
     kline.px_close.from(data[4].get<double>());
     kline.volume.from(data[5].get<double>());
+    return true;
+}
+
+bool redisquote_to_trade(const njson& data, Trade& trade) 
+{
+    //trade.time = int(data[0].get<double>());
+    trade.price.from(data["LastPx"].get<double>());
+    trade.volume.from(data["Qty"].get<double>());
     return true;
 }
 
@@ -158,6 +167,30 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
         // 数据更新需要通过频率控制，所以调用ctrl_update
         _ctrl_update(quote.exchange, quote.symbol, quote) ;
+    }
+    else if(channel.find(TRADE_HEAD) != string::npos )
+    {
+        //cout << msg << endl;
+        // 
+        int pos = channel.find(TRADE_HEAD);
+        int pos2 = channel.find(".");
+        string symbol = channel.substr(pos+strlen(TRADE_HEAD), pos2-pos-strlen(TRADE_HEAD));
+        string exchange = channel.substr(pos2+1);
+
+        // 解析json
+        try
+        {
+            snap_json = njson::parse(msg);
+        }
+        catch(nlohmann::detail::exception& e)
+        {
+            _log_and_print("parse json fail %s", e.what());
+            return;
+        } 
+
+        Trade trade;
+        redisquote_to_trade(snap_json, trade);
+        engine_interface_->on_trade(exchange, symbol, trade);
     }
     else if(channel.find(KLINE_1MIN_HEAD) != string::npos)
     {
@@ -571,7 +604,7 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     tmp.arrive_time = update.arrive_time;
     tmp.asks.swap(update.asks);
     tmp.bids.swap(update.bids);
-        engine_interface_->on_update(exchange, symbol, tmp);
+    engine_interface_->on_update(exchange, symbol, tmp);
     return true;
 }
 
