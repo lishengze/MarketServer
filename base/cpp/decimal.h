@@ -104,17 +104,21 @@ struct SDecimal {
 
     void scale(int precise, bool ceiling = false) 
     {
-        if( precise < 0 )
-            return;
-        if( data_.real_.prec_ < precise )
+        if( precise < 0 || data_.real_.prec_ == precise )
             return;
 
-        uint64 v = CALC_BASE(data_.real_.prec_ - precise);
-        uint64 remain = data_.real_.prec_ % v;
-        data_.real_.prec_ = precise;
-        data_.real_.value_ /= v;
-        if( ceiling && remain > 0 )
-            data_.real_.value_ += 1;
+        if( precise > data_.real_.prec_ ) { // 放大
+            uint64 v = CALC_BASE(precise - data_.real_.prec_);
+            data_.real_.value_ *= v;
+            data_.real_.prec_ = precise;
+        } else { // 缩小
+            uint64 v = CALC_BASE(data_.real_.prec_ - precise);
+            uint64 remain = data_.real_.prec_ % v;
+            data_.real_.prec_ = precise;
+            data_.real_.value_ /= v;
+            if( ceiling && remain > 0 )
+                data_.real_.value_ += 1;
+        }
     }
 
     const SDecimal multiple(double factor, bool ceiling = false) const
@@ -141,24 +145,19 @@ struct SDecimal {
 
     void from(const string& data, int precise = -1, bool ceiling = false) {
         std::string::size_type pos = data.find(".");
-        // 没有小数
-        if( pos == string::npos ) {
+        if( pos == string::npos ) { // 没有小数
             data_.real_.prec_ = 0;
             data_.real_.value_ = str_to_int64(data.c_str());
-            return;
-        }
-
-        int point = data.length() - pos - 1;
-        data_.real_.prec_ = precise == -1 ? point : precise;
-        if( precise >= 0 && data_.real_.prec_ < point ) { // 精度调整
-            string newData = data.substr(0, pos) + data.substr(pos+1, precise);
-            data_.real_.value_ = str_to_int64(newData.c_str());
-            // todo       
-            if( ceiling )
-                data_.real_.value_ += 1;
-        } else { // 不需要精度调整
+        } else { // 有小数
+            int point = data.length() - pos - 1;
+            data_.real_.prec_ = point;
             string newData = data.substr(0, pos) + data.substr(pos+1, data.length()- pos - 1);
             data_.real_.value_ = str_to_int64(newData.c_str());
+        }
+
+        // 缩放
+        if( precise != -1 ) {
+            scale(precise, ceiling);
         }
     }
 
