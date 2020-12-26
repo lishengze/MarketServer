@@ -145,7 +145,8 @@ private:
     type_tick last_statistic_time_; // 上一次计算统计信息时间
     void _looping_print_statistics();
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
-    void _looping_checknodata();
+    void _looping_check_nodata();
+    void _looping_force_to_update();
 
 
     // 行情源头下发速度控制    

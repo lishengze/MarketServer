@@ -427,41 +427,8 @@ void RedisQuote::_looping()
         type_tick now = get_miliseconds();
 
         // 强制刷出没有后续更新的品种
-        /*
-        vector<SDepthQuote> forced_to_update;
-        if( false ) {
-            std::unique_lock<std::mutex> inner_lock{ mutex_clocks_ };
-            for( auto& v : last_clocks_ )
-            {
-                const TSymbol& symbol = v.first;
-                for( auto& u : v.second )
-                {                    
-                    const TExchange& exchange = u.first;
-                    float frequency = frequecy_[symbol];
-                    if( frequency != 0 && (now - u.second) < (1000/frequency) ) {
-                        continue;
-                    }
-                    u.second = now;
-                    
-                    SDepthQuote& quote = updates_[symbol][exchange];
-                    SDepthQuote tmp;
-                    tmp.exchange = exchange;
-                    tmp.symbol = symbol;
-                    tmp.arrive_time = quote.arrive_time;
-                    tmp.asks.swap(quote.asks);
-                    tmp.bids.swap(quote.bids);
-                    if( tmp.asks.size() == 0 && tmp.bids.size() == 0 ) {
-                        continue;
-                    }
-                    forced_to_update.push_back(tmp);
-                }
-            }
-        }
-        for( const auto& v : forced_to_update ) {            
-            engine_interface_->on_update(v.exchange, v.symbol, v);
-        }
-        */
-
+        _looping_force_to_update();
+        
         // 检查心跳
         if( now > last_time_ && (now - last_time_) > 10 * 1000 ) {
             _log_and_print("heartbeat expired. [now=%ld, last=%ld]", now, last_time_);
@@ -471,7 +438,7 @@ void RedisQuote::_looping()
         // 检查异常没有数据的交易所
         if( (now - last_nodata_time_) > 30*1000 ) 
         {
-            _looping_checknodata();
+            _looping_check_nodata();
             last_nodata_time_ = now;
         }
 
@@ -482,6 +449,51 @@ void RedisQuote::_looping()
             last_statistic_time_ = now;
         }
     }
+}
+
+void RedisQuote::_looping_force_to_update()
+{
+    type_tick now = get_miliseconds();
+    SExchangeConfig config;
+    vector<SDepthQuote> forced_to_update;
+
+    {
+        std::unique_lock<std::mutex> l{ mutex_clocks_ };
+        for( auto& v : frequency_metas_ )
+        {
+            const TSymbol& symbol = v.first;
+            _SFrequencyMeta& meta = v.second;
+            for( auto& u : meta.updates )
+            {                    
+                const TExchange& exchange = u.first;
+                SDepthQuote& cache = u.second;
+                if( cache.asks.size() == 0 && cache.bids.size() == 0 )
+                    continue;
+                if( !_get_config(exchange, symbol, config) )
+                    continue;
+                    
+                if( config.frequency != 0 && (now - meta.last_clocks[exchange]) < (1000/config.frequency) ) {
+                    continue;
+                }
+                meta.last_clocks[exchange] = now;
+                
+                SDepthQuote tmp;
+                tmp.exchange = exchange;
+                tmp.symbol = symbol;
+                tmp.arrive_time = cache.arrive_time;
+                tmp.asks.swap(cache.asks);
+                tmp.bids.swap(cache.bids);
+                forced_to_update.push_back(tmp);
+                _log_and_print("force to flush %s.%s updates.", exchange.c_str(), symbol.c_str());
+            }
+        }
+    }
+
+    for( const auto& v : forced_to_update ) 
+    { 
+        engine_interface_->on_update(v.exchange, v.symbol, v);
+    }
+
 }
 
 void RedisQuote::_loopng_check_heartbeat()
@@ -497,7 +509,7 @@ void RedisQuote::_loopng_check_heartbeat()
 
 }
 
-void RedisQuote::_looping_checknodata()
+void RedisQuote::_looping_check_nodata()
 {
     unordered_set<TExchange> nodata_exchanges;
     {
