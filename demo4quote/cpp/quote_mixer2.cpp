@@ -219,7 +219,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
             quotes_[symbol] = ptr;
         }
 
-        _inner_process(exchange, symbol, quote, ptr);
+        _inner_process(exchange, symbol, output, ptr);
 
         if( !_check_update_clocks(symbol, config.frequency) ) {
             return;
