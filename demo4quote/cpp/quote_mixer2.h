@@ -34,8 +34,6 @@ public:
 
     void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
-    void clear_exchange(const TExchange& exchange);
-
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 private:
     set<IMixerQuotePusher*> callbacks_;

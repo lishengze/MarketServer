@@ -109,7 +109,7 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
                 break;
             }
             KlineData tmp = c->klines.front();
-            if( tmp.volume < VOLUME_PRECISE )
+            if( tmp.volume.is_zero() )
                 continue;
             datas.push_back(tmp);
         }

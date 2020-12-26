@@ -140,11 +140,13 @@ private:
     //std::mutex mutex_checker_;
     type_tick last_time_; // 上一次从redis收到行情的时间
     std::thread* checker_loop_ = nullptr;
-    void _check();
-
-    // 统计信息
+    void _looping();
+    void _loopng_check_heartbeat();
     type_tick last_statistic_time_; // 上一次计算统计信息时间
+    void _looping_print_statistics();
     type_tick last_nodata_time_; // 上一次检查交易所数据的时间
+    void _looping_checknodata();
+
 
     // 行情源头下发速度控制    
     struct _SFrequencyMeta

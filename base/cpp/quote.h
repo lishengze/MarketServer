@@ -6,9 +6,6 @@
 #define TExchange string
 #define TExchangeSymbol string
 
-#define PRICE_PRECISE 0.000000001
-#define VOLUME_PRECISE 0.000000001
-
 template<class T,class S>
 inline void vassign(T &r, S v)
 {
