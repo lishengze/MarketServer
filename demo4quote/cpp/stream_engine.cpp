@@ -122,11 +122,12 @@ QuoteCacher::SSymbolConfig to_cacher_config(const unordered_map<TExchange, SNaco
     return config;
 }
 
-QuoteMixer2::SSymbolConfig to_mixer_config(type_uint32 depth, type_uint32 precise, float frequency, const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
+QuoteMixer2::SSymbolConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
 {    
     QuoteMixer2::SSymbolConfig config;
     config.depth = depth;
     config.precise = precise;
+    config.vprecise = vprecise;
     config.frequency = frequency;
     for( const auto& v : exchanges ) 
     {
@@ -207,7 +208,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         // 新增品种
         if( symbols_.find(symbol) == symbols_.end() ) 
         {
-            quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.frequecy, config.exchanges));
+            quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
             quote_cacher_.set_config(symbol, to_cacher_config(config.exchanges));
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
             quote_source_.set_config(symbol, to_redis_config(config.exchanges));
@@ -229,9 +230,9 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
                 quote_cacher_.set_config(symbol, to_cacher_config(config.exchanges));
             }
             // mixer配置变更
-            if( to_mixer_config(config.depth, config.precise, config.frequecy, config.exchanges) != 
-                to_mixer_config(last_config.depth, last_config.precise, last_config.frequecy, last_config.exchanges) ) {
-                quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.frequecy, config.exchanges));
+            if( to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges) != 
+                to_mixer_config(last_config.depth, last_config.precise, last_config.vprecise, last_config.frequecy, last_config.exchanges) ) {
+                quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
             }
         }
     }

@@ -206,6 +206,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     output.symbol = symbol;
     output.arrive_time = quote.arrive_time;
     output.sequence_no = quote.sequence_no;
+    cout << exchange << " " << config.precise << " " << config.vprecise << endl;
     process_depths(quote.asks, output.asks, config.precise, config.fees[exchange], true);
     process_depths(quote.bids, output.bids, config.precise, config.fees[exchange], false);
 

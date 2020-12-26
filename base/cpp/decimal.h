@@ -113,7 +113,7 @@ struct SDecimal {
             data_.real_.prec_ = precise;
         } else { // 缩小
             uint64 v = CALC_BASE(data_.real_.prec_ - precise);
-            uint64 remain = data_.real_.prec_ % v;
+            uint64 remain = data_.real_.value_ % v;
             data_.real_.prec_ = precise;
             data_.real_.value_ /= v;
             if( ceiling && remain > 0 )

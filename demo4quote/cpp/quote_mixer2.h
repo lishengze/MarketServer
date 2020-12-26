@@ -18,11 +18,12 @@ public:
     {
         type_uint32 depth;
         type_uint32 precise;
+        type_uint32 vprecise;
         float frequency;
         unordered_map<TExchange, SymbolFee> fees;
 
         bool operator==(const SSymbolConfig &rhs) const {
-            return depth == rhs.depth && precise == rhs.precise && frequency == rhs.frequency&& fees == rhs.fees;
+            return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
         }
         bool operator!=(const SSymbolConfig &rhs) const {
             return !(*this == rhs);
