@@ -12,8 +12,6 @@
 #include "quote_mixer2.h"
 #include "grpc_entity.h"
 
-//#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
-
 class ServerEndpoint : public IKlinePusher, public IMixerQuotePusher
 {
 public:
@@ -34,10 +32,11 @@ public:
     // IKlinePusher
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
 
-    // IKlinePusher
+    // IMixerQuotePusher
     void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
     void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
-    
+    void publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade);
+
 private:
     void _handle_rpcs();
 
@@ -57,5 +56,6 @@ private:
     GrpcCall<GetParamsEntity>* caller_getparams_;
     GrpcCall<GetKlinesEntity>* caller_getklines_;
     GrpcCall<GetLastEntity>* caller_getlast_;
+    GrpcCall<SubscribeTradeEntity>* caller_subscribe_trade_;
     unordered_map<int, CommonGrpcCall*> callers_;
 };

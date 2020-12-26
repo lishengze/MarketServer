@@ -83,7 +83,14 @@ message MultiTradeWithDecimal {
 }
 
 message TradeWithDecimal {
-    int64 time = 1;
-    Decimal price = 2;
-    Decimal volume = 3;
+    // 交易所
+    string exchange = 1;
+    // 代码
+    string symbol = 2;
+    // 成交时间
+    int64 time = 3;
+    // 价格
+    Decimal price = 4;
+    // 成交量
+    Decimal volume = 5;
 }

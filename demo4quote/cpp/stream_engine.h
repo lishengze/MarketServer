@@ -41,6 +41,8 @@ private:
     // redis quote upstream
     RedisQuote quote_source_;
 
+    QuoteCacher quote_cacher_;
+    
     // mix quotation
     QuoteMixer2 quote_mixer2_;
 

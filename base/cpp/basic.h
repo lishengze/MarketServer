@@ -47,3 +47,17 @@ inline type_tick get_miliseconds() {
 	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
     return duration_in_ms.count();
 }
+
+template <typename T>
+std::string ToString(const T& t)
+{
+    std::ostringstream oss;
+    oss.imbue(std::locale::classic());
+    oss << t;
+    return oss.str();
+}
+
+inline type_tick parse_nano(const string& timestr)
+{
+    return 0;
+}

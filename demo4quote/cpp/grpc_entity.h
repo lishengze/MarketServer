@@ -24,6 +24,9 @@ using quote::service::v1::GetKlinesResponse;
 using quote::service::v1::GetKlinesRequest;
 using quote::service::v1::MultiGetKlinesResponse;
 using quote::service::v1::Kline;
+using quote::service::v1::SubscribeTradeReq;
+using quote::service::v1::TradeWithDecimal;
+using quote::service::v1::MultiTradeWithDecimal;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -242,4 +245,32 @@ private:
     bool snap_cached_;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1_;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60_;
+};
+
+//////////////////////////////////////////////////
+class SubscribeTradeEntity : public BaseGrpcEntity
+{
+public:
+    SubscribeTradeEntity(void* service);
+
+    void register_call();
+
+    bool process();
+
+    void add_data(std::shared_ptr<TradeWithDecimal> data);
+
+    SubscribeTradeEntity* spawn() {
+        return new SubscribeTradeEntity(service_);
+    }
+private:
+    GrpcStreamEngineService::AsyncService* service_;
+
+    ServerContext ctx_;
+
+    SubscribeTradeReq request_;
+    ServerAsyncWriter<MultiTradeWithDecimal> responder_;
+
+    // 
+    mutable std::mutex                 mutex_datas_;
+    vector<std::shared_ptr<void>> datas_;
 };

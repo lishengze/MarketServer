@@ -76,18 +76,19 @@ struct SNacosConfigByExchange
     int fee_type;
     float fee_maker;
     float fee_taker;
-    int precise;    // 最小价格单位
-    int vprecise;   // 最小挂单量单位
+    type_uint32 depth;
+    type_uint32 precise;    // 最小价格单位
+    type_uint32 vprecise;   // 最小挂单量单位
+    float frequency;
 };
 
 struct SNacosConfig
 {
     type_uint32 depth; // 【原始】深度
     float frequency;    // 【原始】更新频率
-    int precise;    // 【聚合】最小价格单位
-    int vprecise;   // 【聚合】最小挂单量单位
-    type_uint32 mix_depth;  // 【聚合】深度
-    float mix_frequecy; // 【聚合】更新频率
+    type_uint32 precise;    // 【聚合】最小价格单位
+    type_uint32 vprecise;   // 【聚合】最小挂单量单位
+    float frequecy; // 【聚合】更新频率
     unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
 
     unordered_set<TExchange> get_exchanges() const {
@@ -108,6 +109,10 @@ struct SymbolFee
     SymbolFee() {
         fee_type = 0;
         maker_fee = taker_fee = 0.2;
+    }
+
+    bool operator==(const SymbolFee &rhs) const {
+        return fee_type == rhs.fee_type && maker_fee == rhs.maker_fee && taker_fee == rhs.taker_fee;
     }
 
     void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const

@@ -412,3 +412,46 @@ bool GetLastEntity::process()
     responder_.Write(reply, this);      
     return true;
 }
+
+//////////////////////////////////////////////////
+SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(&ctx_)
+{
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
+}
+
+void SubscribeTradeEntity::register_call()
+{
+    std::cout << "register SubscribeTradeEntity" << std::endl;
+    service_->RequestSubscribeTrade(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool SubscribeTradeEntity::process()
+{    
+    MultiTradeWithDecimal reply;
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+
+        for( size_t i = 0 ; i < datas_.size() ; ++i ) {            
+            TradeWithDecimal* quote = reply.add_trades();
+            //trade_to_trade((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+        }
+        datas_.clear();
+    }
+    if( reply.trades_size() > 0 ) {
+        responder_.Write(reply, this);      
+        return true;
+    } else {
+        return false;
+    } 
+}
+
+void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data) 
+{   
+    if( string(request_.symbol()) != string(data->symbol()) || string(request_.exchange()) != string(data->exchange()) ) {
+        //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+        return;
+    }
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    datas_.push_back(data);
+}

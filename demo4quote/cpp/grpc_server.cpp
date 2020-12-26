@@ -49,6 +49,10 @@ void ServerEndpoint::init(const string& grpc_addr)
     caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_getlast_;
     call_id++;
+
+    caller_subscribe_trade_ = new GrpcCall<SubscribeTradeEntity>(call_id, &service_, cq_.get());
+    callers_[call_id] = caller_subscribe_trade_;
+    call_id++;
 }
 
 void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
@@ -66,6 +70,11 @@ void ServerEndpoint::publish_mix(const TSymbol& symbol, std::shared_ptr<MarketSt
     data.snap = snap;
     data.update = update;
     caller_subscribe_mix_->add_data(data);
+};
+
+void ServerEndpoint::publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade)
+{
+    caller_subscribe_trade_->add_data(trade);
 };
 
 void ServerEndpoint::_handle_rpcs() 

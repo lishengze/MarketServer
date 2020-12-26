@@ -30,11 +30,11 @@ struct SDepthQuote {
 };
 
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
-#define TRADE_HEAD "TRADEx|"
-#define DEPTH_UPDATE_HEAD "UPDATEx|"
-#define GET_DEPTH_HEAD "DEPTHx|"
-#define KLINE_1MIN_HEAD "KLINEx|"
-#define KLINE_60MIN_HEAD "SLOW_KLINEx|"
+#define TRADE_HEAD "TRADEx"
+#define DEPTH_UPDATE_HEAD "UPDATEx"
+#define GET_DEPTH_HEAD "DEPTHx"
+#define KLINE_1MIN_HEAD "KLINEx"
+#define KLINE_60MIN_HEAD "SLOW_KLINEx"
 
 inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;
