@@ -37,7 +37,7 @@ public:
     virtual void on_kline(const SEKlineData& quote) = 0;
 };
 
-inline void RequestKline(const string& addr, const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start, type_tick end, vector<KlineData>& klines)
+inline void RequestKline(const string& addr, const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start, type_tick end, vector<SEKline>& klines)
 {
     klines.clear();
 
@@ -57,14 +57,7 @@ inline void RequestKline(const string& addr, const TExchange& exchange, const TS
 
     for( int i = 0 ; i < resp.klines_size() ; i ++ ) {
         const SEKline& kline = resp.klines(i);
-        KlineData _kline;
-        _kline.index = kline.index();
-        Decimal_to_SDecimal(_kline.px_open, kline.open());
-        Decimal_to_SDecimal(_kline.px_high, kline.high());
-        Decimal_to_SDecimal(_kline.px_low, kline.low());
-        Decimal_to_SDecimal(_kline.px_close, kline.close());
-        Decimal_to_SDecimal(_kline.volume, kline.volume());
-        klines.push_back(_kline);
+        klines.push_back(kline);
     }
 }
 

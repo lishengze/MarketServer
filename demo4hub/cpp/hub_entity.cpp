@@ -8,6 +8,25 @@ using std::endl;
 // config file relative path
 const char* config_file = "config.json";
 
+void SETradeToTrade(const SETrade& src, Trade& dst)
+{    
+    assign(dst.symbol, src.symbol());
+    assign(dst.exchange, src.exchange());
+    dst.time = src.time();
+    Decimal_to_SDecimal(dst.price, src.price());
+    Decimal_to_SDecimal(dst.volume, src.volume());
+}
+
+void SEKlineToKline(const SEKline& src, KlineData& dst)
+{    
+    dst.index = src.index();
+    Decimal_to_SDecimal(dst.px_open, src.open());
+    Decimal_to_SDecimal(dst.px_high, src.high());
+    Decimal_to_SDecimal(dst.px_low, src.low());
+    Decimal_to_SDecimal(dst.px_close, src.close());
+    Decimal_to_SDecimal(dst.volume, src.volume());
+}
+
 HubEntity::HubEntity()
 {
     // init configuration
@@ -36,7 +55,30 @@ int HubEntity::stop()
 
 int HubEntity::get_kline(const char* exchange, const char* symbol, type_resolution resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
-    RequestKline(CONFIG->stream_engine_addr_, exchange, symbol, resolution, start_time, end_time, klines);
+    vector<SEKline> raw;
+    RequestKline(CONFIG->stream_engine_addr_, exchange, symbol, resolution, start_time, end_time, raw);
+    klines.clear();
+    klines.reserve(raw.size());
+    for( const auto& v : raw ) {
+        KlineData tmp;
+        SEKlineToKline(v, tmp);
+        klines.push_back(tmp);
+    }
+    return 0;
+    return 0;
+}
+
+int HubEntity::get_lasttrades(vector<Trade>& trades)
+{
+    vector<SETrade> raw;
+    RequestLastTrades(CONFIG->stream_engine_addr_, raw);
+    trades.clear();
+    trades.reserve(raw.size());
+    for( const auto& v : raw ) {
+        Trade tmp;
+        SETradeToTrade(v, tmp);
+        trades.push_back(tmp);
+    }
     return 0;
 }
 
@@ -73,9 +115,7 @@ void HubEntity::on_snap(const SEData& quote)
 void HubEntity::on_trade(const SETrade& trade)
 {
     Trade _trade;
-    _trade.time = trade.time();
-    Decimal_to_SDecimal(_trade.price, trade.price());
-    Decimal_to_SDecimal(_trade.volume, trade.volume());
+    SETradeToTrade(trade, _trade);
     callback_->on_trade(trade.exchange().c_str(), trade.symbol().c_str(), _trade);
 }
 
@@ -88,12 +128,7 @@ void HubEntity::on_kline(const SEKlineData& quote)
         _kline.index = kline.index();
         assign(_kline.symbol, quote.symbol());
         assign(_kline.exchange, quote.exchange());
-
-        Decimal_to_SDecimal(_kline.px_open, kline.open());
-        Decimal_to_SDecimal(_kline.px_high, kline.high());
-        Decimal_to_SDecimal(_kline.px_low, kline.low());
-        Decimal_to_SDecimal(_kline.px_close, kline.close());
-        Decimal_to_SDecimal(_kline.volume, kline.volume());
+        SEKlineToKline(kline, _kline);
         klines.push_back(_kline);
     }
     callback_->on_kline(quote.exchange().c_str(), quote.symbol().c_str(), quote.resolution(), klines);

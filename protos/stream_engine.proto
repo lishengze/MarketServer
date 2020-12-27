@@ -47,7 +47,7 @@ message GetLatestTradesReq{
 }
 
 message GetLatestTradesResp{
-    map<string, TradeWithDecimal> trades = 1;
+    repeated TradeWithDecimal trades = 1;
 }
 
 message SubscribeMixQuoteReq {

@@ -11,4 +11,7 @@ public:
 
     // K线数据（请求）
     static int get_kline(const char* exchange, const char* symbol, type_resolution resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
+
+    // 最近交易（请求）
+    static int get_lasttrades(vector<Trade>& trades);
 };

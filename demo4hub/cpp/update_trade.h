@@ -37,37 +37,24 @@ public:
     virtual void on_trade(const SETrade& quote) = 0;
 };
 
-/*
-inline void RequestLastTrades(const string& addr, const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start, type_tick end, vector<KlineData>& klines)
+inline void RequestLastTrades(const string& addr, vector<SETrade>& trades)
 {
-    klines.clear();
+    trades.clear();
 
     auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
     std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
     
-    GetKlinesRequest req;
-    req.set_exchange(exchange);
-    req.set_symbol(symbol);
-    req.set_resolution(resolution);
-    req.set_start_time(start);
-    req.set_end_time(end);
-    GetKlinesResponse resp;
+    GetLatestTradesReq req;
+    GetLatestTradesResp resp;
     ClientContext context;
 
-    stub->GetKlines(&context, req, &resp);
+    stub->GetLatestTrades(&context, req, &resp);
 
-    for( int i = 0 ; i < resp.klines_size() ; i ++ ) {
-        const SEKline& kline = resp.klines(i);
-        KlineData _kline;
-        _kline.index = kline.index();
-        Decimal_to_SDecimal(_kline.px_open, kline.open());
-        Decimal_to_SDecimal(_kline.px_high, kline.high());
-        Decimal_to_SDecimal(_kline.px_low, kline.low());
-        Decimal_to_SDecimal(_kline.px_close, kline.close());
-        Decimal_to_SDecimal(_kline.volume, kline.volume());
-        klines.push_back(_kline);
+    for( int i = 0 ; i < resp.trades_size() ; i ++ ) {
+        const SETrade& trade = resp.trades(i);
+        trades.push_back(trade);
     }
-}*/
+}
 
 class TradeUpdater 
 {

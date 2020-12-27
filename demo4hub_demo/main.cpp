@@ -65,6 +65,15 @@ void test_get_kline()
     }
 }
 
+void test_get_lasttrades()
+{
+    vector<Trade> trades;
+
+    HubInterface::get_lasttrades(trades);
+
+    cout << "Test get_lasttrades, Size:  " << trades.size() << endl;
+}
+
 int main()
 {
     Client client;
@@ -72,6 +81,7 @@ int main()
     HubInterface::start();
 
     test_get_kline();
+    test_get_lasttrades();
 
     while(true){
         std::this_thread::sleep_for(std::chrono::seconds(1));

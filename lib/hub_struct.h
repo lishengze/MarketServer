@@ -143,6 +143,8 @@ using KlineDataPtr = boost::shared_ptr<KlineData>;
 
 struct Trade
 {
+    symbol_type symbol;
+    symbol_type exchange;
     type_tick time;
     SDecimal price;
     SDecimal volume;

@@ -22,7 +22,8 @@ public:
     int set_callback(HubCallback* callback) { callback_ = callback; return 0; }
 
     int get_kline(const char* exchange, const char* symbol, type_resolution resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
-
+    int get_lasttrades(vector<Trade>& trades);
+    
     // IQuoteUpdater
     virtual void on_snap(const SEData& quote);
 

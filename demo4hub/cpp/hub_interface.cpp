@@ -32,3 +32,11 @@ int HubInterface::get_kline(const char* exchange, const char* symbol, type_resol
 
     return HUB->get_kline(exchange, symbol, resolution, start_time, end_time, klines);
 }
+
+// 最近成交（请求）
+int HubInterface::get_lasttrades(vector<Trade>& trades)
+{
+    cout << "HubInterface get_lasttrades " << endl;
+
+    return HUB->get_lasttrades(trades);
+}
