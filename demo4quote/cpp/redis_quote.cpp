@@ -475,6 +475,7 @@ void RedisQuote::_looping_force_to_update()
                 if( config.frequency != 0 && (now - meta.last_clocks[exchange]) < (1000/config.frequency) ) {
                     continue;
                 }
+                cout << now << " " << meta.last_clocks[exchange] << endl;
                 meta.last_clocks[exchange] = now;
                 
                 SDepthQuote tmp;
