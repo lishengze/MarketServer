@@ -83,7 +83,7 @@ bool redisquote_to_kline(const njson& data, KlineData& kline, const RedisQuote::
 
 bool redisquote_to_trade(const njson& data, Trade& trade, const RedisQuote::SExchangeConfig& config) 
 {
-    trade.time = parse_nano(data["Time"].get<string>());
+    trade.time = parse_nano(data["Time"].get<string>());  // 2020-12-27 12:48:41.578000
     trade.price.from(data["LastPx"].get<double>(), config.precise);
     trade.volume.from(data["Qty"].get<double>(), config.vprecise);
     return true;

@@ -14,6 +14,7 @@
 #include <chrono>
 #include <algorithm>
 #include <sstream>
+#include <sys/time.h>
 using namespace std;
 
 #ifdef WIN32
@@ -52,6 +53,18 @@ std::string ToString(const T& t)
 }
 
 inline type_tick parse_nano(const string& timestr)
-{
-    return 0;
+{ // 2020-12-27 12:48:41.578000
+    std::string base, remain;
+    std::size_t pos = timestr.find(".");
+    if( pos == std::string::npos ) {
+        base = timestr;
+    } else {
+        base = timestr.substr(0, pos);
+        remain = timestr.substr(pos+1);
+    }
+    //cout << base << " " << remain << endl;
+    
+    struct tm _tm = {0};
+    strptime(base.c_str(), "%Y-%m-%d %H:%M:%S", &_tm);
+    return mktime(&_tm) * 1000000000 + atoi(remain.c_str());
 }

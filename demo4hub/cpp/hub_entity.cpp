@@ -25,6 +25,7 @@ int HubEntity::start()
     cout << "HubEntity::start "<< endl;
     quote_updater_.start(CONFIG->risk_controller_addr_, this);
     kline_updater_.start(CONFIG->stream_engine_addr_, this);
+    trade_updater_.start(CONFIG->stream_engine_addr_, this);
     return 0;
 }
 
@@ -67,6 +68,15 @@ void HubEntity::on_snap(const SEData& quote)
     //     cout << quote_depth.asks[i].price.get_value() << ", " << quote_depth.bids[i].price.get_value() << endl;
     // }
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
+}
+
+void HubEntity::on_trade(const SETrade& trade)
+{
+    Trade _trade;
+    _trade.time = trade.time();
+    Decimal_to_SDecimal(_trade.price, trade.price());
+    Decimal_to_SDecimal(_trade.volume, trade.volume());
+    callback_->on_trade(trade.exchange().c_str(), trade.symbol().c_str(), _trade);
 }
 
 void HubEntity::on_kline(const SEKlineData& quote)

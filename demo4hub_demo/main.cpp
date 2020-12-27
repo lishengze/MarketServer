@@ -1,5 +1,6 @@
 #include "hub_interface.h"
 #include "base/cpp/pl_decimal.h"
+#include "base/cpp/tinyformat.h"
 #include "pandora/util/time_util.h"
 #include <thread>
 
@@ -14,6 +15,7 @@ public:
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
+        tfm::printfln("[depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
         // return -1;
         // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
 
@@ -34,6 +36,12 @@ public:
             cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
         }
         return 0; 
+    }
+
+    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
+    {
+        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        return 0;
     }
 };
 
@@ -59,19 +67,6 @@ void test_get_kline()
 
 int main()
 {
-    /*
-    char value[1024];
-    sprintf(value, "%f", 0.165);
-    cout << value << endl;
-    SDecimal pp = SDecimal::parse(value);
-    cout << pp.get_str_value() << endl;
-
-    decimal<4> v1 = fromString<decimal<4>>("0.6068");
-    decimal<3, ceiling_round_policy> v = fromString<decimal<3, ceiling_round_policy>>(toString(v1));
-    //decimal<4, floor_round_policy> v = fromString<decimal<4, floor_round_policy>>("0.606");
-    //v *= 1.05;
-    cout << sizeof(v) << "\t" << v.getDecimalPoints() << "\t" << v.getUnbiased() << "\t" << v.getAsInteger() << "\t" << toString(v) << endl;
-    */
     Client client;
     HubInterface::set_callback(&client);
     HubInterface::start();

@@ -21,6 +21,9 @@ void QuoteCacher::on_trade(const TExchange& exchange, const TSymbol& symbol, con
     std::shared_ptr<TradeWithDecimal> pub_trade = std::make_shared<TradeWithDecimal>();
     pub_trade->set_exchange(exchange);
     pub_trade->set_symbol(symbol);
+    pub_trade->set_time(trade.time);
+    set_decimal(pub_trade->mutable_price(), trade.price);
+    set_decimal(pub_trade->mutable_volume(), trade.volume);
     //pub_trade->set_time(trade);
     
     for( const auto& v : callbacks_) 

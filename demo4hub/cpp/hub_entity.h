@@ -5,10 +5,11 @@
 
 #include "updater_quote.h"
 #include "update_kline.h"
+#include "update_trade.h"
 
 #define HUB utrade::pandora::ThreadSafeSingleton<HubEntity>::DoubleCheckInstance()
 
-class HubEntity final : public IQuoteUpdater, public IKlineUpdater
+class HubEntity final : public IQuoteUpdater, public IKlineUpdater, public ITradeUpdater
 {
 public:
     HubEntity();
@@ -27,6 +28,9 @@ public:
 
     // IKlineUpdater
     virtual void on_kline(const SEKlineData& quote);
+
+    // ITradeUpdater
+    virtual void on_trade(const SETrade& trade);
 private:
     // 回调接口
     HubCallback* callback_;
@@ -36,4 +40,8 @@ private:
 
     // K线接入
     KlineUpdater kline_updater_;
+    
+    // 成交接入
+    TradeUpdater trade_updater_;
 };
+
