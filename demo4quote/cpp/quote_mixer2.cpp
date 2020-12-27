@@ -16,19 +16,44 @@ void update_depth_diff(const map<SDecimal, SDecimal>& update, map<SDecimal, SDec
     }
 }
 
+void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Trade& src, TradeWithDecimal* dst)
+{
+    dst->set_exchange(exchange);
+    dst->set_symbol(symbol);
+    dst->set_time(src.time);
+    set_decimal(dst->mutable_price(), src.price);
+    set_decimal(dst->mutable_volume(), src.volume);
+}
+
+bool QuoteCacher::get_latetrades(vector<TradeWithDecimal>& trades)
+{
+    std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    for( const auto& s : trades_ ) {
+        for( const auto & e : s.second ) {
+            const TSymbol& symbol = s.first;
+            const TExchange& exchange = e.first;
+            const Trade& trade = e.second;
+            TradeWithDecimal tmp;
+            trade_to_pbtrade(exchange, symbol, trade, &tmp);
+            trades.push_back(tmp);
+        }
+    }
+    return true;
+}
+
 void QuoteCacher::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
 {
     std::shared_ptr<TradeWithDecimal> pub_trade = std::make_shared<TradeWithDecimal>();
-    pub_trade->set_exchange(exchange);
-    pub_trade->set_symbol(symbol);
-    pub_trade->set_time(trade.time);
-    set_decimal(pub_trade->mutable_price(), trade.price);
-    set_decimal(pub_trade->mutable_volume(), trade.volume);
-    //pub_trade->set_time(trade);
+    trade_to_pbtrade(exchange, symbol, trade, pub_trade.get());
     
     for( const auto& v : callbacks_) 
     {
         v->publish_trade(exchange, symbol, pub_trade);
+    }
+
+    {
+        std::unique_lock<std::mutex> l{ mutex_quotes_ };
+        trades_[symbol][exchange] = trade;
     }
 }
 

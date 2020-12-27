@@ -27,6 +27,8 @@ using quote::service::v1::Kline;
 using quote::service::v1::SubscribeTradeReq;
 using quote::service::v1::TradeWithDecimal;
 using quote::service::v1::MultiTradeWithDecimal;
+using quote::service::v1::GetLatestTradesReq;
+using quote::service::v1::GetLatestTradesResp;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -176,7 +178,7 @@ private:
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:
-    GetKlinesEntity(void* service, IDataCacher* cacher);
+    GetKlinesEntity(void* service, IKlineCacher* cacher);
 
     void register_call();
 
@@ -194,7 +196,7 @@ private:
     GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
 
-    IDataCacher* cacher_;
+    IKlineCacher* cacher_;
 };
 
 struct WrapperKlineData: KlineData
@@ -209,7 +211,7 @@ struct WrapperKlineData: KlineData
 class GetLastEntity : public BaseGrpcEntity
 {
 public:
-    GetLastEntity(void* service, IDataCacher* cacher);
+    GetLastEntity(void* service, IKlineCacher* cacher);
 
     void register_call();
 
@@ -238,7 +240,7 @@ private:
     mutable std::mutex            mutex_datas_;
     list<WrapperKlineData> datas_;
     
-    IDataCacher* cacher_;
+    IKlineCacher* cacher_;
     
     // 首次发送的缓存
     bool _snap_sended() const { return snap_cached_ && cache_min1_.size() == 0 && cache_min60_.size() == 0; }
@@ -273,4 +275,33 @@ private:
     // 
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
+};
+
+//////////////////////////////////////////////////////////////
+class IQuoteCacher;
+class GetLastTradesEntity : public BaseGrpcEntity
+{
+public:
+    GetLastTradesEntity(void* service, IQuoteCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    GetLastTradesEntity* spawn() {
+        return new GetLastTradesEntity(service_, cacher_);
+    }
+
+private:
+    bool _fill_data(MultiGetKlinesResponse& reply);
+
+    GrpcStreamEngineService::AsyncService* service_;
+
+    ServerContext ctx_;
+
+    GetLatestTradesReq request_;
+    GetLatestTradesResp reply_;
+    ServerAsyncResponseWriter<GetLatestTradesResp> responder_;
+    
+    IQuoteCacher* cacher_;    
 };

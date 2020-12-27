@@ -27,7 +27,8 @@ public:
         thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
 
-    void set_cacher(IDataCacher* cacher) { cacher_ = cacher; }
+    void set_cacher(IKlineCacher* cacher) { cacher_ = cacher; }
+    void set_quote_cacher(IQuoteCacher* cacher) { quote_cacher_ = cacher; }
 
     // IKlinePusher
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
@@ -40,7 +41,8 @@ public:
 private:
     void _handle_rpcs();
 
-    IDataCacher* cacher_ = nullptr;
+    IKlineCacher* cacher_ = nullptr;
+    IQuoteCacher* quote_cacher_ = nullptr;
     
     // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;
@@ -57,5 +59,6 @@ private:
     GrpcCall<GetKlinesEntity>* caller_getklines_;
     GrpcCall<GetLastEntity>* caller_getlast_;
     GrpcCall<SubscribeTradeEntity>* caller_subscribe_trade_;
+    GrpcCall<GetLastTradesEntity>* caller_getlast_trades_;
     unordered_map<int, CommonGrpcCall*> callers_;
 };

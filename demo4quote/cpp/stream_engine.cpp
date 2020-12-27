@@ -17,6 +17,7 @@ StreamEngine::StreamEngine(){
     
     // init grpc server
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
+    server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
 }
 

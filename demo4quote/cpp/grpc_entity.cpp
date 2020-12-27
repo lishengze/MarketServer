@@ -1,5 +1,6 @@
 #include "stream_engine_config.h"
 #include "grpc_entity.h"
+#include "quote_mixer2.h"
 
 void trade_to_trade(const TradeWithDecimal* src, TradeWithDecimal* dst) {
     dst->set_exchange(src->exchange());
@@ -251,7 +252,7 @@ bool GetParamsEntity::process(){
 }
 
 //////////////////////////////////////////////////
-GetKlinesEntity::GetKlinesEntity(void* service, IDataCacher* cacher):responder_(&ctx_)
+GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher):responder_(&ctx_)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -283,7 +284,7 @@ bool GetKlinesEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastEntity::GetLastEntity(void* service, IDataCacher* cacher):responder_(&ctx_)
+GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(&ctx_)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -457,4 +458,31 @@ void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data)
 {   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(data);
+}
+
+//////////////////////////////////////////////////
+GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(&ctx_)
+{
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
+    cacher_ = cacher;
+}
+
+void GetLastTradesEntity::register_call(){
+    std::cout << "register GetLastTradesEntity" << std::endl;
+    service_->RequestGetLatestTrades(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool GetLastTradesEntity::process()
+{
+    vector<TradeWithDecimal> trades;
+    cacher_->get_latetrades(trades);
+
+    GetLatestTradesResp reply;
+    for( size_t i = 0 ; i < trades.size() ; i ++ ) 
+    {
+        trade_to_trade(&trades[i], reply.add_trades());
+    }
+    status_ = FINISH;
+    responder_.Finish(reply, Status::OK, this);
+    return true;
 }

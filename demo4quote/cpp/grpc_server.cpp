@@ -53,6 +53,10 @@ void ServerEndpoint::init(const string& grpc_addr)
     caller_subscribe_trade_ = new GrpcCall<SubscribeTradeEntity>(call_id, &service_, cq_.get());
     callers_[call_id] = caller_subscribe_trade_;
     call_id++;
+
+    caller_getlast_trades_ = new GrpcCall<GetLastTradesEntity>(call_id, &service_, cq_.get(), quote_cacher_);
+    callers_[call_id] = caller_getlast_trades_;
+    call_id++;
 }
 
 void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)

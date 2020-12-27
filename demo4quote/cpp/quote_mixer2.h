@@ -56,7 +56,17 @@ private:
     unordered_map<TSymbol, SSymbolConfig> configs_; 
 };
 
-class QuoteCacher
+/*
+缓存接口
+*/
+class IQuoteCacher
+{
+public:
+    // 请求缓存中的K线
+    virtual bool get_latetrades(vector<TradeWithDecimal>& trades) = 0;
+};
+
+class QuoteCacher : public IQuoteCacher
 {
 public:
     struct SSymbolConfig
@@ -85,6 +95,8 @@ public:
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 
     void clear_exchange(const TExchange& exchange);
+
+    bool get_latetrades(vector<TradeWithDecimal>& trades);
 private:
     set<IMixerQuotePusher*> callbacks_;
 
@@ -95,4 +107,5 @@ private:
 
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> singles_;
+    unordered_map<TSymbol, unordered_map<TExchange, Trade>> trades_;
 };

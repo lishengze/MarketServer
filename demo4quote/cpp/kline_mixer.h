@@ -13,7 +13,7 @@ public:
 /*
 缓存接口
 */
-class IDataCacher
+class IKlineCacher
 {
 public:
     // 请求缓存中的K线
@@ -93,7 +93,7 @@ private:
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_;
 };
 
-class KlineHubber : public IDataCacher
+class KlineHubber : public IKlineCacher
 {
 public:
     KlineHubber();
