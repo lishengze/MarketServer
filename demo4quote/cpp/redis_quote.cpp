@@ -427,7 +427,7 @@ void RedisQuote::_looping()
         type_tick now = get_miliseconds();
 
         // 强制刷出没有后续更新的品种
-        _looping_force_to_update();
+        //_looping_force_to_update();
         
         // 检查心跳
         if( now > last_time_ && (now - last_time_) > 10 * 1000 ) {
