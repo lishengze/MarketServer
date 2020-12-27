@@ -152,7 +152,7 @@ RedisQuote::SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosC
 }
 
 void StreamEngine::on_config_channged(const NacosString& configInfo)
-{
+{    
     // json 解析
     njson js;    
     try

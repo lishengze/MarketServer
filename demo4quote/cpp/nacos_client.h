@@ -1,15 +1,14 @@
 #pragma once
 
-#include "stream_engine_define.h"
+#include <iostream>
+#include <thread>
+
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
 #include "listen/Listener.h"
 #include "PropertyKeyConst.h"
 #include "DebugAssertion.h"
 #include "Debug.h"
-
-#include "base/cpp/quote.h"
-#include "stream_engine_config.h"
 
 using namespace std;
 using namespace nacos;
@@ -27,32 +26,11 @@ private:
     ConfigService* server_;
     INacosCallback* callback_;
 public:
-    NacosListener(ConfigService* server, string group, string dataid, INacosCallback* callback) 
-    {
-        group_ = group;
-        dataid_ = dataid;
-        server_ = server;
-        callback_ = callback;
+    NacosListener(ConfigService* server, string group, string dataid, INacosCallback* callback);
 
-        NacosString ss = "";
-        try {
-            ss = server_->getConfig(dataid_, group_, 1000);
-        }
-        catch (NacosException &e) {
-            cout <<
-                "Request failed with curl code:" << e.errorcode() << endl <<
-                "Reason:" << e.what() << endl;
-            return;
-        }
-        receiveConfigInfo(ss);
-    }
+    void on_get_config(const NacosString &configInfo) const;
 
-    void receiveConfigInfo(const NacosString &configInfo) {
-        if( group_ == "quotation" && dataid_ == "symbols" ) {
-            _log_and_print("quotation:symbols changed. %s", configInfo.c_str());
-            callback_->on_config_channged(configInfo);
-        }
-    }
+    void receiveConfigInfo(const NacosString &configInfo);
 };
 
 class NacosClient
@@ -61,11 +39,7 @@ public:
     NacosClient(){}
     ~NacosClient(){}
 
-    void start(const string& addr, INacosCallback* callback) 
-    {
-        _log_and_print("connect nacos addr %s.", addr.c_str());
-        _run_thread_ = new std::thread(&NacosClient::_run, this, addr, callback);
-    }
+    void start(const string& addr, INacosCallback* callback);
 
 private:
     std::thread* _run_thread_ = nullptr;

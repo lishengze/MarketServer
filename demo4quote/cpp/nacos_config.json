@@ -9,7 +9,7 @@
             "BINANCE":{
                 "precise":2,
                 "vprecise":6,
-                "frequency":1,
+                "frequency":0.1,
                 "depth":200,
                 "fee_type":0,
                 "fee_maker":0,
@@ -18,7 +18,7 @@
             "HUOBI":{
                 "precise":2,
                 "vprecise":6,
-                "frequency":1,
+                "frequency":0.1,
                 "depth":200,
                 "fee_type":0,
                 "fee_maker":0,
@@ -27,9 +27,36 @@
             "OKEX":{
                 "precise":1,
                 "vprecise":6,
-                "frequency":1,
+                "frequency":0.1,
                 "depth":200,
                 "fee_type":0,
+                "fee_maker":0,
+                "fee_taker":0
+            }
+        }
+    },
+    "XRP_USDT":{
+        "enable":1,
+        "precise":6,
+        "vprecise":6,
+        "depth":200,
+        "frequency":0,
+        "exchanges":{
+            "HUOBI":{
+                "precise":6,
+                "vprecise":6,
+                "frequency":0.1,
+                "depth":200,
+                "fee_type":1,
+                "fee_maker":0,
+                "fee_taker":0
+            },
+            "OKEX":{
+                "precise":6,
+                "vprecise":6,
+                "frequency":0.1,
+                "depth":200,
+                "fee_type":1,
                 "fee_maker":0,
                 "fee_taker":0
             }
@@ -38,14 +65,14 @@
     "IRIS_USDT":{
         "enable":1,
         "precise":6,
-        "vprecise":2,
+        "vprecise":6,
         "depth":200,
         "frequency":0,
         "exchanges":{
             "HUOBI":{
                 "precise":6,
-                "vprecise":2,
-                "frequency":1,
+                "vprecise":6,
+                "frequency":0.1,
                 "depth":200,
                 "fee_type":1,
                 "fee_maker":0,

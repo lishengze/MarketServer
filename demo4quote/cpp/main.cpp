@@ -1,3 +1,4 @@
+#include "stream_engine_config.h"
 #include "stream_engine.h"
 
 // config file relative path
