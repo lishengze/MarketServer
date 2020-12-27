@@ -47,13 +47,11 @@ public:
         }
         
         string get() const {
-            char content[1024];
             if( pkg_count > 0 ) {
-                sprintf(content, "%d\t\t%d\t\t%d", pkg_count, pkg_size, int(pkg_size/pkg_count));
+                return tfm::format("%d\t\t%d\t\t%d", pkg_count, pkg_size, int(pkg_size/pkg_count));
             } else {
-                sprintf(content, "%d\t\t%d\t\t-", pkg_count, pkg_size);
+                return tfm::format("%d\t\t%d\t\t-", pkg_count, pkg_size);
             }
-            return content;
         }
 
         void accumlate(const ExchangeMeta& stat) {
@@ -89,16 +87,16 @@ public:
 
     // 订阅
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
-        redis_api_->SubscribeTopic(string(DEPTH_UPDATE_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->SubscribeTopic(string(TRADE_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->SubscribeTopic(string(KLINE_1MIN_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->SubscribeTopic(string(KLINE_60MIN_HEAD) + "|" + symbol + "." + exchange);
+        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
+        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
+        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
+        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
-        redis_api_->UnSubscribeTopic(string(DEPTH_UPDATE_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->UnSubscribeTopic(string(TRADE_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->UnSubscribeTopic(string(KLINE_1MIN_HEAD) + "|" + symbol + "." + exchange);
-        redis_api_->UnSubscribeTopic(string(KLINE_60MIN_HEAD) + "|" + symbol + "." + exchange);
+        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
+        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
+        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
+        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
     
     // callback from RedisSnapRequester

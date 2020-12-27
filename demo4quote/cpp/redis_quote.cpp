@@ -130,20 +130,20 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
     if( !decode_channelmsg(msg, body) )
     {
-        _log_and_print("decode json fail %s. [exchange=%s, symbol=%s]", msg.c_str(), exchange.c_str(), symbol.c_str());
+        _log_and_print("decode json fail %s. [exchange=%s, symbol=%s]", msg, exchange, symbol);
         return false;
     }
     
     if( !_get_config(exchange, symbol, config) ) 
     {
-        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange.c_str(), symbol.c_str());
+        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
         return false;
     }
 
     SDepthQuote quote;
     if( !redisquote_to_quote(body, quote, config, true))
     {
-        _log_and_print("redisquote_to_quote failed. [exchange=%s, symbol=%s, msg=%s]", exchange.c_str(), symbol.c_str(), msg.c_str());
+        _log_and_print("redisquote_to_quote failed. [exchange=%s, symbol=%s, msg=%s]", exchange, symbol, msg);
         return false;
     }
     quote.raw_length = msg.length();
@@ -179,7 +179,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
     {
-        _log_and_print("decode channel name fail. [channel=%s]", channel.c_str());
+        _log_and_print("decode channel name fail. [channel=%s]", channel);
         return;
     }
     // 仅处理指定的频道
@@ -188,19 +188,19 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         channel_type != KLINE_1MIN_HEAD &&
         channel_type != KLINE_60MIN_HEAD )
     {
-        _log_and_print("unknown message type.[channel=%s]", channel.c_str());
+        _log_and_print("unknown message type.[channel=%s]", channel);
         return;
     }
 
     if( !decode_channelmsg(msg, body) )
     {
-        _log_and_print("decode json fail %s.[channel=%s]", msg.c_str(), channel.c_str());
+        _log_and_print("decode json fail %s.[channel=%s]", msg, channel);
         return;
     }
     
     if( !_get_config(exchange, symbol, config) ) 
     {
-        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange.c_str(), symbol.c_str());
+        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
         return;
     }
     
@@ -209,7 +209,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         SDepthQuote quote;
         if( !redisquote_to_quote(body, quote, config, false) ) 
         {
-            _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel.c_str(), msg.c_str());
+            _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
             return;
         }
         quote.raw_length = msg.length();
@@ -246,7 +246,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         Trade trade;
         if( !redisquote_to_trade(body, trade, config) )
         {
-            _log_and_print("redisquote_to_trade failed. [channel=%s, msg=%s]", channel.c_str(), msg.c_str());
+            _log_and_print("redisquote_to_trade failed. [channel=%s, msg=%s]", channel, msg);
             return;
         }
         engine_interface_->on_trade(exchange, symbol, trade);
@@ -259,13 +259,13 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         {
             KlineData kline;
             redisquote_to_kline(*iter, kline, config);
-            _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), 
+            _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
                 kline.index,
-                kline.px_open.get_str_value().c_str(),
-                kline.px_high.get_str_value().c_str(),
-                kline.px_low.get_str_value().c_str(),
-                kline.px_close.get_str_value().c_str(),
-                kline.volume.get_str_value().c_str()
+                kline.px_open.get_str_value(),
+                kline.px_high.get_str_value(),
+                kline.px_low.get_str_value(),
+                kline.px_close.get_str_value(),
+                kline.volume.get_str_value()
                 );
             klines.push_back(kline);
             if( is_first_time )
@@ -322,7 +322,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
 
     if( symbol_meta.publishing )
     {
-        _log_and_print("%s.%s recv snap during publishing. SKIP.", exchange.c_str(), symbol.c_str());
+        _log_and_print("%s.%s recv snap during publishing. SKIP.", exchange, symbol);
         return SYNC_SKIP;
     }
 
@@ -331,7 +331,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     // 以下尚未启动推送
     type_seqno left = symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.front().sequence_no;
     type_seqno right =  symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.back().sequence_no;
-    _log_and_print("%s.%s recv snap %lu, updates from %lu to %lu.", exchange.c_str(), symbol.c_str(), quote.sequence_no, 
+    _log_and_print("%s.%s recv snap %lu, updates from %lu to %lu.", exchange, symbol, quote.sequence_no, 
         symbol_meta.caches.front().sequence_no,
         symbol_meta.caches.back().sequence_no
     );
@@ -341,12 +341,12 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
         symbol_meta.caches.clear();
         symbol_meta.seq_no = quote.sequence_no;
         symbol_meta.publishing = true;
-        _log_and_print("%s.%s start without updates.", exchange.c_str(), symbol.c_str());
+        _log_and_print("%s.%s start without updates.", exchange, symbol);
         return SYNC_STARTING;
     }
     else if( quote.sequence_no < (left - 1) ) 
     {
-        _log_and_print("%s.%s request snap again.", exchange.c_str(), symbol.c_str());
+        _log_and_print("%s.%s request snap again.", exchange, symbol);
         return SYNC_SNAPAGAIN;
     }
     else // left <= quote.sequence_no <= right
@@ -363,7 +363,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
         symbol_meta.caches.clear();
         symbol_meta.seq_no = right;
         symbol_meta.publishing = true;
-        _log_and_print("%s.%s start with %lu updates.", exchange.c_str(), symbol.c_str(), updates_queue.size());
+        _log_and_print("%s.%s start with %lu updates.", exchange, symbol, updates_queue.size());
         return SYNC_STARTING;
     }
 
@@ -387,7 +387,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     if( quote.sequence_no != (symbol_meta.seq_no + 1) ) 
     {
         _log_and_print("%s.%s sequence skip from %lu to %lu. refresh snap again.", 
-                        exchange.c_str(), symbol.c_str(), symbol_meta.seq_no, quote.sequence_no);
+                        exchange, symbol, symbol_meta.seq_no, quote.sequence_no);
         redis_snap_requester_.request_symbol(exchange, symbol);
         symbol_meta.caches.clear();
         symbol_meta.caches.push_back(quote);
@@ -485,7 +485,7 @@ void RedisQuote::_looping_force_to_update()
                 tmp.asks.swap(cache.asks);
                 tmp.bids.swap(cache.bids);
                 forced_to_update.push_back(tmp);
-                _log_and_print("force to flush %s.%s updates.", exchange.c_str(), symbol.c_str());
+                _log_and_print("force to flush %s.%s updates.", exchange, symbol);
             }
         }
     }
@@ -518,7 +518,7 @@ void RedisQuote::_looping_check_nodata()
         for( const auto& v : metas_ ) {
             if( v.second.pkg_count == 0 ) {
                 nodata_exchanges.insert(v.first);
-                _log_and_print("exchange %s no data", v.first.c_str());
+                _log_and_print("exchange %s no data", v.first);
             }
         }
 
@@ -544,14 +544,14 @@ void RedisQuote::_looping_print_statistics()
         }
     }
 
-    _println_("-------------");
+    tfm::printfln("-------------");
     ExchangeMeta total;
     for( const auto& v : statistics ) {
-        _println_("%s\t\t%s", v.first.c_str(), v.second.get().c_str());
+        tfm::printfln("%s\t\t%s", v.first, v.second.get());
         total.accumlate(v.second);
     }
-    _println_("total\t\t%s", total.get().c_str());
-    _println_("-------------");
+    tfm::printfln("total\t\t%s", total.get());
+    tfm::printfln("-------------");
 
 }
 
@@ -604,7 +604,7 @@ void RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
     for( const auto& v : config ) {
         desc += v.first + ":" + ToString(v.second.precise) + ":" + ToString(v.second.vprecise);
     }
-    _log_and_print("%s exchanges=%s", symbol.c_str(), desc.c_str());
+    _log_and_print("%s exchanges=%s", symbol, desc);
 
     // 设置交易所配置
     {

@@ -10,6 +10,7 @@ using njson = nlohmann::json;
 #include <fstream>
 #include <set>
 using namespace std;
+#include "base/cpp/tinyformat.h"
 
 #define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
 
@@ -79,8 +80,19 @@ public:
     UTLogPtr logger_;
 };
 
-#define _log_and_print(...)                                             \
-    do {                                                                \
-        UT_LOG_INFO_FMT(CONFIG->logger_, __VA_ARGS__);                  \
-        _println_(__VA_ARGS__);                                         \
+
+#define _log_and_print(fmt, ...)                                     \
+    do {                                                             \
+        std::string log_msg;                                         \
+        try {                                                        \
+            log_msg = tfm::format(fmt, ##__VA_ARGS__);               \
+        } catch (tinyformat::format_error& fmterr) {                 \
+            /* Original format string will have newline so don't add one here */ \
+            log_msg = "Error \"" + std::string(fmterr.what()) + "\" while formatting log message: " + fmt; \
+        }                                                            \
+        std::string new_fmt = "%s:%d - " + string(fmt);              \
+                                                                     \
+        tfm::printfln("%s:%d - %s", __func__, __LINE__, log_msg);    \
+                                                                     \
+        UT_LOG_INFO_FMT(CONFIG->logger_, "%s:%d - %s", __func__, __LINE__, log_msg.c_str());\
     } while(0)                                                          

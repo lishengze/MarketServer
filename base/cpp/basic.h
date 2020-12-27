@@ -13,14 +13,8 @@
 #include <cstring>
 #include <chrono>
 #include <algorithm>
+#include <sstream>
 using namespace std;
-
-#define _println_(...)                                             \
-    do {                                                           \
-        char content[1024];                                        \
-        sprintf(content, __VA_ARGS__);                             \
-        std::cout << fixed << content << std::endl;                         \
-    } while(0)
 
 #ifdef WIN32
 using uint32 = unsigned int;

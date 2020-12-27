@@ -2,6 +2,7 @@
 
 #include "base/cpp/decimal.h"
 #include "base/cpp/quote.h"
+#include "base/cpp/tinyformat.h"
 
 struct SDepthQuote {
     type_uint32 raw_length;
@@ -21,10 +22,12 @@ struct SDepthQuote {
 
     void print() const {
         for( const auto&v : asks ) {
-            cout << "asks\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+            tfm::printf("[ask] %s:%s", v.first.get_str_value(), v.second.get_str_value());
+            //cout << "asks\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
         }
         for( const auto&v : bids ) {
-            cout << "bids\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
+            tfm::printf("[bid] %s:%s", v.first.get_str_value(), v.second.get_str_value());
+            //cout << "bids\t" << v.first.get_str_value() << "\t" << v.second.get_str_value() << "\t" << v.second.data_.real_.value_ << endl;
         }
     }
 };

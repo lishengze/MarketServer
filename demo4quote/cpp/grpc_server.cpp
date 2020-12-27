@@ -105,14 +105,15 @@ void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, 
     tmp.klines = klines;
     caller_getlast_->add_data(tmp);
 
-    for( const auto& v : klines ) {
+    for( const auto& v : klines ) 
+    {
         
-        _log_and_print("publish %s-%s resolution=%d index=%lu open=%s high=%s low=%s close=%s", exchange.c_str(), symbol.c_str(), resolution,
+        _log_and_print("publish %s.%s resolution=%d index=%lu open=%s high=%s low=%s close=%s", exchange, symbol, resolution,
             v.index,
-            v.px_open.get_str_value().c_str(),
-            v.px_high.get_str_value().c_str(),
-            v.px_low.get_str_value().c_str(),
-            v.px_close.get_str_value().c_str()
+            v.px_open.get_str_value(),
+            v.px_high.get_str_value(),
+            v.px_low.get_str_value(),
+            v.px_close.get_str_value()
             );
     }
 }

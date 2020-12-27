@@ -13,14 +13,8 @@
 #include <cstring>
 #include <chrono>
 #include <algorithm>
+#include <sstream>
 using namespace std;
-
-#define _println_(...)                                             \
-    do {                                                           \
-        char content[1024];                                        \
-        sprintf(content, __VA_ARGS__);                             \
-        std::cout << fixed << content << std::endl;                         \
-    } while(0)
 
 #ifdef WIN32
 using uint32 = unsigned int;
@@ -46,4 +40,18 @@ inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();
 	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
     return duration_in_ms.count();
+}
+
+template <typename T>
+std::string ToString(const T& t)
+{
+    std::ostringstream oss;
+    oss.imbue(std::locale::classic());
+    oss << t;
+    return oss.str();
+}
+
+inline type_tick parse_nano(const string& timestr)
+{
+    return 0;
 }

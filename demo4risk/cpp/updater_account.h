@@ -152,16 +152,16 @@ private:
     {
         while( 1 ) 
         {
-            _println_("-------------------");
+            tfm::printfln("-------------------");
             std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
             for( const auto& v : account_.hedge_accounts_ )
             {
                 for( const auto& v2 : v.second.currencies ) 
                 {
-                    _println_("%s-%s: %.03f", v.first.c_str(), v2.first.c_str(), v2.second.amount);
+                    tfm::printfln("%s-%s: %.03f", v.first, v2.first, v2.second.amount);
                 }
             }
-            _println_("-------------------");
+            tfm::printfln("-------------------");
 
             // 休眠
             std::this_thread::sleep_for(std::chrono::seconds(10));
