@@ -1,6 +1,14 @@
 #include "stream_engine_config.h"
 #include "grpc_entity.h"
 
+void trade_to_trade(const TradeWithDecimal* src, TradeWithDecimal* dst) {
+    dst->set_exchange(src->exchange());
+    dst->set_symbol(src->symbol());
+    dst->set_time(src->time());
+    set_decimal(dst->mutable_price(), src->price());
+    set_decimal(dst->mutable_volume(), src->volume());
+}
+
 void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWithDecimal* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
@@ -433,7 +441,7 @@ bool SubscribeTradeEntity::process()
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {            
             TradeWithDecimal* quote = reply.add_trades();
-            //trade_to_trade((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+            trade_to_trade((TradeWithDecimal*)datas_[i].get(), quote);
         }
         datas_.clear();
     }
@@ -447,11 +455,6 @@ bool SubscribeTradeEntity::process()
 
 void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data) 
 {   
-    if( string(request_.symbol()) != string(data->symbol()) || string(request_.exchange()) != string(data->exchange()) ) {
-        //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
-        return;
-    }
-
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(data);
 }
