@@ -170,34 +170,42 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;
-    for (auto iter = js.begin() ; iter != js.end() ; ++iter )
+    try
     {
-        const TSymbol& symbol = iter.key();
-        const njson& symbol_cfgs = iter.value();
-        int enable = symbol_cfgs["enable"].get<int>();
-        if( enable < 1 )
-            continue;
-        SNacosConfig cfg;
-        cfg.precise = symbol_cfgs["precise"].get<int>();
-        cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
-        cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
-        cfg.frequecy = symbol_cfgs["frequency"].get<float>();
-        for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
+        for (auto iter = js.begin() ; iter != js.end() ; ++iter )
         {
-            const TExchange& exchange = iter2.key();
-            const njson& exchange_cfgs = iter2.value();
-            SNacosConfigByExchange exchange_cfg;
-            exchange_cfg.precise = exchange_cfgs["precise"].get<int>();
-            exchange_cfg.vprecise = exchange_cfgs["vprecise"].get<int>();
-            exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
-            exchange_cfg.frequency = exchange_cfgs["frequency"].get<float>();
-            exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
-            exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
-            exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
-            cfg.exchanges[exchange] = exchange_cfg;
-        } 
-        symbols[symbol] = cfg;
+            const TSymbol& symbol = iter.key();
+            const njson& symbol_cfgs = iter.value();
+            int enable = symbol_cfgs["enable"].get<int>();
+            if( enable < 1 )
+                continue;
+            SNacosConfig cfg;
+            cfg.precise = symbol_cfgs["precise"].get<int>();
+            cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
+            cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
+            cfg.frequecy = symbol_cfgs["frequency"].get<float>();
+            for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
+            {
+                const TExchange& exchange = iter2.key();
+                const njson& exchange_cfgs = iter2.value();
+                SNacosConfigByExchange exchange_cfg;
+                exchange_cfg.precise = exchange_cfgs["precise"].get<int>();
+                exchange_cfg.vprecise = exchange_cfgs["vprecise"].get<int>();
+                exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
+                exchange_cfg.frequency = exchange_cfgs["frequency"].get<float>();
+                exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
+                exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
+                exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
+                cfg.exchanges[exchange] = exchange_cfg;
+            } 
+            symbols[symbol] = cfg;
+        }
     }
+    catch(nlohmann::detail::exception& e)
+    {
+        _log_and_print("decode config fail %s", e.what());
+        return;
+    }    
     
     // quote_source_ 涉及交易所+交易币种+原始行情精度，原始行情更新频率
     // quote_mixer2_ 涉及交易币种的精度，深度，频率，各交易所手续费

@@ -117,7 +117,7 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
 }
 
 /////////////////////////////////////////////////////////////////////
-void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>& dst, int precise, const SymbolFee& fee, bool is_ask)
+void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>& dst, int precise, int vprecise, const SymbolFee& fee, bool is_ask)
 {
     if( is_ask ) {
         SDecimal lastPrice = SDecimal::min_decimal();
@@ -156,7 +156,14 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
             }
         }
     }
+
+    // 缩放成交量
+    for( auto& v : dst ) 
+    {
+        v.second.scale(vprecise, false);
+    }
 }
+
 bool QuoteMixer2::_check_update_clocks(const TSymbol& symbol, float frequency) {
     if( frequency == 0 )
         return true;
@@ -185,8 +192,8 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     output.symbol = symbol;
     output.arrive_time = quote.arrive_time;
     output.sequence_no = quote.sequence_no;
-    process_depths(quote.asks, output.asks, config.precise, config.fees[exchange], true);
-    process_depths(quote.bids, output.bids, config.precise, config.fees[exchange], false);
+    process_depths(quote.asks, output.asks, config.precise, config.vprecise, config.fees[exchange], true);
+    process_depths(quote.bids, output.bids, config.precise, config.vprecise, config.fees[exchange], false);
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap;
     {
