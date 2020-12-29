@@ -600,11 +600,10 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
 void RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 {
     // 打印入参
-    string desc = "";
-    for( const auto& v : config ) {
-        desc += v.first + ":" + ToString(v.second.precise) + ":" + ToString(v.second.vprecise);
+    for( const auto& v : config ) 
+    {
+        _log_and_print("[%s.%s] precise=%s vprecise=%s frequency=%s", v.first, symbol, ToString(v.second.precise), ToString(v.second.vprecise), ToString(v.second.frequency));
     }
-    _log_and_print("%s exchanges=%s", symbol, desc);
 
     // 设置交易所配置
     {
