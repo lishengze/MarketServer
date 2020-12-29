@@ -135,7 +135,7 @@ struct SDecimal {
     const SDecimal add(double factor, bool ceiling = false) const
     {
         SDecimal ret = *this;
-        double tmp = (double)ret.data_.real_.value_ + factor;
+        double tmp = (double)ret.data_.real_.value_ + factor * CALC_BASE(ret.data_.real_.prec_);
         ret.data_.real_.value_ = tmp;
         if( ceiling && tmp > ret.data_.real_.value_ ) {
             ret.data_.real_.value_ += 1;
