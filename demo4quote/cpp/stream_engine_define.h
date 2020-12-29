@@ -121,7 +121,7 @@ struct SymbolFee
             if( is_ask ) {
                 dst = src.add(maker_fee, true);
             } else {
-                dst = src.add(taker_fee, false);
+                dst = src.add(taker_fee * (-1), false);
             }
         } else if( fee_type == 1 ) {
             if( is_ask ) {
