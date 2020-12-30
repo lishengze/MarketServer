@@ -383,7 +383,7 @@ void WBServer::check_heartbeat()
 
     string heartbeat_str = get_heartbeat_str();
 
-    cout << heartbeat_str << endl;
+    // cout << heartbeat_str << endl;
 
     for (auto ws:wss_con_set_)
     {

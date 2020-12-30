@@ -101,7 +101,7 @@ private:
         }
         while (reader->Read(&resp)) {
             // split and convert
-            std::cout << "get " << resp.trades_size() << " items" << std::endl;
+            // std::cout << "get " << resp.trades_size() << " items" << std::endl;
             for( int i = 0 ; i < resp.trades_size() ; i ++ )
             {
                 const SETrade& trade = resp.trades(i);
