@@ -28,21 +28,34 @@ public:
     } 
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
-        // return -1;
-        // cout << "Test Client on_kline: " << klines.size() << endl;
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
+    { 
         for( int i = 0 ; i < klines.size() ; i ++ )
         {
-            cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
+            tfm::printfln("[kline] %s.%s index=%s open=%s", exchange, symbol, utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].px_open.get_str_value());
+                
+            // 检查K线是否有倒着走            
+            if( resolution == 60 ) 
+            {
+                type_tick last_index = kline1_cache[exchange][symbol];
+                type_tick new_index = klines[i].index;
+                if( new_index < last_index ) {
+                    tfm::printfln("[kline] fatal error.");
+                }
+                kline1_cache[exchange][symbol] = new_index;
+            }
         }
         return 0; 
     }
 
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
-        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        //tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
+
+private:
+    unordered_map<string, unordered_map<string, type_tick>> kline1_cache;
 };
 
 void test_get_kline()
