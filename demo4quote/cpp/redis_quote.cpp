@@ -268,7 +268,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 kline.volume.get_str_value()
                 );
             klines.push_back(kline);
-            if( is_first_time )
+            if( !is_first_time )
                 break;
         }
 
@@ -294,7 +294,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 kline.volume.get_str_value().c_str()
                 );
             klines.push_back(kline);
-            if( is_first_time )
+            if( !is_first_time )
                 break;
         }
 
