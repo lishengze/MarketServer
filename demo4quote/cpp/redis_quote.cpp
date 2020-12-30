@@ -253,12 +253,35 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
     }
     else if( channel_type == KLINE_1MIN_HEAD )
     {
+        if( body.size() == 0 )
+            return;
+
         bool is_first_time = !kline1min_firsttime_[symbol][exchange];
-        vector<KlineData> klines;
-        for (auto iter = body.rbegin(); iter != body.rend(); ++iter) 
+        if( is_first_time )
         {
+            vector<KlineData> klines;
+            for (auto iter = body.begin(); iter != body.end(); ++iter) 
+            {
+                KlineData kline;
+                redisquote_to_kline(*iter, kline, config);
+                _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
+                    kline.index,
+                    kline.px_open.get_str_value(),
+                    kline.px_high.get_str_value(),
+                    kline.px_low.get_str_value(),
+                    kline.px_close.get_str_value(),
+                    kline.volume.get_str_value()
+                    );
+                klines.push_back(kline);
+            }
+            engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
+            kline1min_firsttime_[symbol][exchange] = true;
+        }
+        else
+        {
+            vector<KlineData> klines;
             KlineData kline;
-            redisquote_to_kline(*iter, kline, config);
+            redisquote_to_kline(body.back(), kline, config);
             _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
                 kline.index,
                 kline.px_open.get_str_value(),
@@ -268,40 +291,52 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 kline.volume.get_str_value()
                 );
             klines.push_back(kline);
-            if( !is_first_time )
-                break;
+
+            engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
         }
-
-        engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
-
-        if( is_first_time )
-            kline1min_firsttime_[symbol][exchange] = true;
     }
     else if( channel.find(KLINE_60MIN_HEAD) != string::npos )
     {
+        if( body.size() == 0 )
+            return;
+
         bool is_first_time = !kline60min_firsttime_[symbol][exchange];
-        vector<KlineData> klines;
-        for (auto iter = body.rbegin(); iter != body.rend(); ++iter) 
+        if( is_first_time )
         {
+            vector<KlineData> klines;
+            for (auto iter = body.begin(); iter != body.end(); ++iter) 
+            {
+                KlineData kline;
+                redisquote_to_kline(*iter, kline, config);
+                _log_and_print("[%s.%s] get kline60 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
+                    kline.index,
+                    kline.px_open.get_str_value(),
+                    kline.px_high.get_str_value(),
+                    kline.px_low.get_str_value(),
+                    kline.px_close.get_str_value(),
+                    kline.volume.get_str_value()
+                    );
+                klines.push_back(kline);
+            }
+            engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
+            kline60min_firsttime_[symbol][exchange] = true;
+        }
+        else
+        {
+            vector<KlineData> klines;
             KlineData kline;
-            redisquote_to_kline(*iter, kline, config);
-            _log_and_print("[%s.%s] get kline60 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), 
+            redisquote_to_kline(body.back(), kline, config);
+            _log_and_print("[%s.%s] get kline60 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
                 kline.index,
-                kline.px_open.get_str_value().c_str(),
-                kline.px_high.get_str_value().c_str(),
-                kline.px_low.get_str_value().c_str(),
-                kline.px_close.get_str_value().c_str(),
-                kline.volume.get_str_value().c_str()
+                kline.px_open.get_str_value(),
+                kline.px_high.get_str_value(),
+                kline.px_low.get_str_value(),
+                kline.px_close.get_str_value(),
+                kline.volume.get_str_value()
                 );
             klines.push_back(kline);
-            if( !is_first_time )
-                break;
+            engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
         }
-
-        engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
-        
-        if( is_first_time )
-            kline60min_firsttime_[symbol][exchange] = true;
     }
 };
 
