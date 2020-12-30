@@ -15,7 +15,7 @@
 #include <google/protobuf/empty.pb.h>
 #include "stream_engine.grpc.pb.h"
 #include "hub_struct.h"
-#include "updater_quote.h"
+#include "update_quote.h"
 #include "base/cpp/quote.h"
 
 using grpc::Channel;
@@ -92,29 +92,29 @@ private:
         std::unique_ptr<ClientReader<MultiGetKlinesResponse> > reader(stub->GetLast(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
+                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_IDLE" << endl;
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "status is GRPC_CHANNEL_CONNECTING" << endl;
+                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_CONNECTING" << endl;
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                std::cout << "status is GRPC_CHANNEL_READY" << endl;
+                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_READY" << endl;
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_SHUTDOWN" << endl;
                 break;
             }
         }
         while (reader->Read(&resp)) {
             // split and convert
-            std::cout << "get " << resp.data_size() << " items" << std::endl;
+            //std::cout << "get " << resp.data_size() << " items" << std::endl;
             for( int i = 0 ; i < resp.data_size() ; i ++ )
             {
                 const SEKlineData& quote = resp.data(i);

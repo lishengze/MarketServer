@@ -3,13 +3,13 @@
 #include "hub_struct.h"
 #include "pandora/util/thread_safe_singleton.hpp"
 
-#include "updater_quote.h"
+#include "update_quote.h"
 #include "update_kline.h"
-#include "update_trade.h"
+#include "update_stream_engine.h"
 
 #define HUB utrade::pandora::ThreadSafeSingleton<HubEntity>::DoubleCheckInstance()
 
-class HubEntity final : public IQuoteUpdater, public IKlineUpdater, public ITradeUpdater
+class HubEntity final : public IQuoteUpdater, public IKlineUpdater, public IStreamEngineUpdater
 {
 public:
     HubEntity();
@@ -30,8 +30,9 @@ public:
     // IKlineUpdater
     virtual void on_kline(const SEKlineData& quote);
 
-    // ITradeUpdater
+    // IStreamEngineUpdater
     virtual void on_trade(const SETrade& trade);
+    virtual void on_raw_depth(const SEData& quote);
 private:
     // 回调接口
     HubCallback* callback_;
@@ -44,5 +45,8 @@ private:
     
     // 成交接入
     TradeUpdater trade_updater_;
+
+    // 原始行情接入
+    DepthUpdater depth_updater_;
 };
 

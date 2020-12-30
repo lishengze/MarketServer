@@ -8,7 +8,7 @@
 
 using std::string;
 
-#define DEPCH_LEVEL_COUNT 100
+#define DEPCH_LEVEL_COUNT 200
 
 #pragma pack(1)
 struct SDepthLevelData
@@ -159,12 +159,15 @@ struct Trade
 class HubCallback
 {
 public:
-    // 深度数据（推送）
+    // 原始深度数据推送
+    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
+
+    // 风控后深度数据
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
 
-    // 成交（推送）
+    // 成交
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) { return 0; }
 
-    // K线数据（推送）
+    // K线数据
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { return 0; }
 };

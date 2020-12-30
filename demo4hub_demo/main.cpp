@@ -13,6 +13,21 @@ class Client : public HubCallback
 {
 public:   
     // 深度数据（推送）
+    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
+    { 
+        tfm::printfln("[raw_depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
+        // return -1;
+        // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
+
+        for (int i =0; i < 10; ++i)
+        {
+            // cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
+        }
+
+        return 0;
+    } 
+
+    // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
         tfm::printfln("[depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
@@ -42,6 +57,7 @@ public:
                 if( new_index < last_index ) {
                     tfm::printfln("[kline] fatal error.");
                 }
+                assert( new_index >= last_index );
                 kline1_cache[exchange][symbol] = new_index;
             }
         }
@@ -50,7 +66,7 @@ public:
 
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
-        //tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 

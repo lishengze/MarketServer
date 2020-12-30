@@ -314,6 +314,7 @@ bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
             resp->set_num(klines.size());
             for( size_t i = 0 ; i < klines.size() ; i ++ ) 
             {
+                cout << klines[i].index << endl;
                 kline_to_pbkline(klines[i], resp->add_klines());
             }
 

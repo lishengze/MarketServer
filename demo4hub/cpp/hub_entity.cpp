@@ -45,6 +45,7 @@ int HubEntity::start()
     quote_updater_.start(CONFIG->risk_controller_addr_, this);
     kline_updater_.start(CONFIG->stream_engine_addr_, this);
     trade_updater_.start(CONFIG->stream_engine_addr_, this);
+    depth_updater_.start(CONFIG->stream_engine_addr_, this);
     return 0;
 }
 
@@ -82,34 +83,39 @@ int HubEntity::get_lasttrades(vector<Trade>& trades)
     return 0;
 }
 
+void SEData_to_SDepthData(const SEData& src, SDepthData& dst)
+{
+    dst.seqno = src.seq_no();
+    dst.tick = src.time();
+    for( int i = 0 ; i < src.asks_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
+        const SEDepth& depth = src.asks(i);
+        Decimal_to_SDecimal(dst.asks[i].price, depth.price());
+        Decimal_to_SDecimal(dst.asks[i].volume, depth.volume());
+        dst.ask_length = i+1;
+    }
+    for( int i = 0 ; i < src.bids_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
+        const SEDepth& depth = src.bids(i);
+        Decimal_to_SDecimal(dst.asks[i].price, depth.price());
+        Decimal_to_SDecimal(dst.asks[i].volume, depth.volume());
+        dst.bid_length = i+1;
+    }
+
+    assign(dst.symbol, src.symbol());
+    assign(dst.exchange, src.exchange());
+}
+
 void HubEntity::on_snap(const SEData& quote)
 {
     SDepthData quote_depth;
-    quote_depth.seqno = quote.seq_no();
-    quote_depth.tick = quote.time();
-    for( int i = 0 ; i < quote.asks_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
-        const SEDepth& depth = quote.asks(i);
-        Decimal_to_SDecimal(quote_depth.asks[i].price, depth.price());
-        Decimal_to_SDecimal(quote_depth.asks[i].volume, depth.volume());
-        quote_depth.ask_length = i+1;
-    }
-    for( int i = 0 ; i < quote.bids_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
-        const SEDepth& depth = quote.bids(i);
-        Decimal_to_SDecimal(quote_depth.asks[i].price, depth.price());
-        Decimal_to_SDecimal(quote_depth.asks[i].volume, depth.volume());
-        quote_depth.bid_length = i+1;
-    }
-
-    assign(quote_depth.symbol, quote.symbol());
-    assign(quote_depth.exchange, quote.exchange());
-
-    //cout << "HubEntity::on_snap " << quote_depth.symbol << " " << quote_depth.ask_length << " " << quote_depth.bid_length << endl;
-
-    // for (int i =0; i < 10; ++i)
-    // {
-    //     cout << quote_depth.asks[i].price.get_value() << ", " << quote_depth.bids[i].price.get_value() << endl;
-    // }
+    SEData_to_SDepthData(quote, quote_depth);
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
+}
+
+void HubEntity::on_raw_depth(const SEData& quote)
+{
+    SDepthData quote_depth;
+    SEData_to_SDepthData(quote, quote_depth);
+    callback_->on_raw_depth("", quote.symbol().c_str(), quote_depth);
 }
 
 void HubEntity::on_trade(const SETrade& trade)
