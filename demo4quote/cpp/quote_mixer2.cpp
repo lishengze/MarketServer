@@ -65,6 +65,7 @@ void QuoteCacher::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
+    _log_and_print("%s.%s on_snap", exchange, symbol);
     SSymbolConfig config;
     {
         std::unique_lock<std::mutex> l{ mutex_config_ };

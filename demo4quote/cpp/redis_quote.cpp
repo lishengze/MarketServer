@@ -53,6 +53,9 @@ void redisquote_to_quote_depth(const njson& data, const RedisQuote::SExchangeCon
 }
 
 bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const RedisQuote::SExchangeConfig& config, bool isSnap) {
+    quote.asks.clear();
+    quote.bids.clear();
+    
     string symbol = snap_json["Symbol"].get<std::string>();
     string exchange = snap_json["Exchange"].get<std::string>();
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
@@ -231,6 +234,8 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         }
         else 
         {
+            assert( result == SYNC_OK );
+
             // 频率控制
             SDepthQuote tmp;
             if( !_ctrl_update(exchange, symbol, quote, config, tmp) ) 

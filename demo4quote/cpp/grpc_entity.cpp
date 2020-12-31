@@ -173,6 +173,7 @@ void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
         datas_.push_back(data.update);
     } else {
         snap_sended_ = true;
+        _log_and_print("%s.%s publish snap", pdata->exchange(), pdata->symbol());
         datas_.push_back(data.snap);
     }
 }
