@@ -60,23 +60,23 @@ private:
         std::unique_ptr<ClientReader<SEMultiData> > reader(stub->ServeMarketStream4Client(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
+                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_IDLE" << endl;
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "status is GRPC_CHANNEL_CONNECTING" << endl;
+                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_CONNECTING" << endl;
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                std::cout << "status is GRPC_CHANNEL_READY" << endl;
+                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_READY" << endl;
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_SHUTDOWN" << endl;
                 break;
             }
         }
