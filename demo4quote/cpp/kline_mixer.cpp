@@ -197,6 +197,7 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         }
         dst.clear();
         for( const auto& v : tmp ) {
+            tfm::printfln("%s.%s %d", exchange, symbol, v.second.index);
             dst.push_back(v.second);
         }
     }

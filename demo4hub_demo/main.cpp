@@ -28,20 +28,39 @@ public:
     } 
 
     // K线数据（推送）
-    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
-        // return -1;
-        // cout << "Test Client on_kline: " << klines.size() << endl;
-        // for( int i = 0 ; i < klines.size() ; i ++ )
-        for (const KlineData& kline:klines)
+    // virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
+    //     // return -1;
+    //     // cout << "Test Client on_kline: " << klines.size() << endl;
+    //     // for( int i = 0 ; i < klines.size() ; i ++ )
+    //     for (const KlineData& kline:klines)
+    //     {
+    //         // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
+
+    //         // const KlineData& kline = klines[i];
+    //         cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
+    //             << kline.symbol << ", "
+    //             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+    //             << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";    
+
+    //     }
+    // }
+
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
+    { 
+        for( int i = 0 ; i < klines.size() ; i ++ )
         {
-            // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
-
-            // const KlineData& kline = klines[i];
-            cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
-                << kline.symbol << ", "
-                << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";    
-
+            tfm::printfln("[kline] %s.%s index=%s open=%s", exchange, symbol, utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].px_open.get_str_value());
+                
+            // 检查K线是否有倒着走            
+            if( resolution == 60 ) 
+            {
+                type_tick last_index = kline1_cache[exchange][symbol];
+                type_tick new_index = klines[i].index;
+                if( new_index < last_index ) {
+                    tfm::printfln("[kline] fatal error.");
+                }
+                kline1_cache[exchange][symbol] = new_index;
+            }
         }
         return 0; 
     }
@@ -51,6 +70,9 @@ public:
         // tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
+
+private:
+    unordered_map<string, unordered_map<string, type_tick>> kline1_cache;
 };
 
 void test_get_kline()

@@ -82,12 +82,12 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
             //             + std::to_string(frequency_list_[0]) + ":" + std::to_string(kline_data_[cur_symbol][frequency_list_[0]].size()) + ", "
             //             + get_sec_time_str(pkline_data->index) + "\n");
 
-            for (auto fre:frequency_list_)
-            {
-                LOG_DEBUG(string("Push ") + cur_symbol + ", "  
-                            + std::to_string(fre) + ":" + std::to_string(kline_data_[cur_symbol][fre].size()) + ", "
-                            + get_sec_time_str(pkline_data->index));                
-            }
+            // for (auto fre:frequency_list_)
+            // {
+            //     LOG_DEBUG(string("Push ") + cur_symbol + ", "  
+            //                 + std::to_string(fre) + ":" + std::to_string(kline_data_[cur_symbol][fre].size()) + ", "
+            //                 + get_sec_time_str(pkline_data->index));                
+            // }
 
             if (kline_data_[cur_symbol][300].size() == 100)
             {
@@ -163,11 +163,11 @@ void KlineProcess::store_kline_data(int frequency, KlineData* pkline_data)
             if (cur_time < last_update_time)
             {
                 std::stringstream stream_obj;
-                stream_obj  << "[Kine] Time Seq is Error , current time is " << get_sec_time_str(cur_time)
+                stream_obj  << "[Kine] Time Seq is Error , "<< cur_symbol << " current time is " << get_sec_time_str(cur_time)
                             << ", last update time is " << get_sec_time_str(last_update_time);
 
                 LOG_ERROR(stream_obj.str());
-                
+
                 return;
             }
 

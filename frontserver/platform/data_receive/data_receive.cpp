@@ -191,22 +191,24 @@ void DataReceive::handle_response_message(PackagePtr package)
 
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
-{
-    cout <<"[Depth] " << utrade::pandora::NanoTimeStr() << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n" << endl;
-    // return -1;
+{    
+    if (is_test_)
+    {
+        return -1;
+    }
+    // cout <<"[Depth] " << utrade::pandora::NanoTimeStr() << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n" << endl;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
 }
 
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
-{
-    cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << "\n" << endl;
+{    
     if (is_test_)
     {
         return -1;
     }
-    
+    // cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << "\n" << endl;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
 }
@@ -234,9 +236,13 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     if (strlen(c_symbol) == 0) 
     {
         LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
+        return;
     }        
-
     
+    if (strlen(exchange) != 0)
+    {
+        return;
+    }
 
     string symbol = string(c_symbol);
     if (symbol != "BTC_USDT")
@@ -257,13 +263,13 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             kline_symbol_data_count_[symbol]++;
         }
         
-        if (kline_symbol_data_count_[symbol] > 120*5)
-        {
-            return;
-        }
+        // if (kline_symbol_data_count_[symbol] > 120*5)
+        // {
+        //     return;
+        // }
 
         std::stringstream stream_obj;
-        stream_obj  << "[Kine] " << get_sec_time_str(kline.index) << " symbol: " << symbol << ", "
+        stream_obj  << "[Kine] " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         
