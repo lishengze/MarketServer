@@ -155,6 +155,9 @@ void FrontServer::process_enhanceddata_package(PackagePtr package)
 
         string send_str = EnhancedDepthDataToJsonStr(*enhanced_data, MARKET_DATA_UPDATE);    
 
+        // LOG_INFO(update_symbol);
+        // LOG_INFO(send_str);
+
         wb_server_->broadcast_enhanced_data(update_symbol, send_str);
     }
     catch(const std::exception& e)

@@ -92,6 +92,8 @@ void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode
 
     // cout << "trans_msg: " << trans_msg << endl;
 
+    // LOG_INFO(trans_msg);
+
     process_on_message(trans_msg, ws);
 }
 
@@ -383,7 +385,7 @@ void WBServer::check_heartbeat()
 
     string heartbeat_str = get_heartbeat_str();
 
-    cout << heartbeat_str << endl;
+    // cout << heartbeat_str << endl;
 
     for (auto ws:wss_con_set_)
     {
