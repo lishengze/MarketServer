@@ -114,11 +114,7 @@ private:
         }
         while (reader->Read(&resp)) {
             // split and convert
-<<<<<<< HEAD
             // std::cout << "get " << resp.data_size() << " items" << std::endl;
-=======
-            //std::cout << "get " << resp.data_size() << " items" << std::endl;
->>>>>>> e8007f667f89ef2b36b44136ca0e0cfeefe1f52d
             for( int i = 0 ; i < resp.data_size() ; i ++ )
             {
                 const SEKlineData& quote = resp.data(i);
