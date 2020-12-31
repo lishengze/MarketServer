@@ -81,7 +81,7 @@ void DataReceive::test_kline_data()
 
         std::vector<KlineData> vec_kline{*kline_data};
 
-        handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);
+        handle_kline_data("", symbol.c_str(), -1, vec_kline);
 
         // boost::shared_ptr<KlineData> cur_kline_data = boost::make_shared<KlineData>(symbol, cur_time, open, high, low, close,volume);
 
@@ -107,7 +107,7 @@ void DataReceive::test_kline_data()
 
         std::vector<KlineData> vec_kline{*kline_data};
 
-        handle_kline_data("HUOBI", symbol.c_str(), -1, vec_kline);        
+        handle_kline_data("", symbol.c_str(), -1, vec_kline);        
 
         cout << "Update: " <<  get_sec_time_str(cur_time) << " " << symbol << ", "
             << "open: " << open << ", high: " << high << ", "
@@ -192,10 +192,10 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {    
-    if (is_test_)
-    {
-        return -1;
-    }
+    // if (is_test_)
+    // {
+    //     return -1;
+    // }
     // cout <<"[Depth] " << utrade::pandora::NanoTimeStr() << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n" << endl;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
@@ -222,6 +222,12 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
+    std::stringstream stream_obj;
+    stream_obj  << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    
+    // LOG_INFO(stream_obj.str());
+
+
     // cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
@@ -238,7 +244,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
         return;
     }        
-    
+
     if (strlen(exchange) != 0)
     {
         return;
@@ -269,7 +275,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         // }
 
         std::stringstream stream_obj;
-        stream_obj  << "[Kine] " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
+        stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         

@@ -164,7 +164,7 @@ void KlineProcess::store_kline_data(int frequency, KlineData* pkline_data)
             {
                 std::stringstream stream_obj;
                 stream_obj  << "[Kine] Time Seq is Error , "<< cur_symbol << " current time is " << get_sec_time_str(cur_time)
-                            << ", last update time is " << get_sec_time_str(last_update_time);
+                            << ", last update time is " << get_sec_time_str(last_update_time) << "\n";
 
                 LOG_ERROR(stream_obj.str());
 

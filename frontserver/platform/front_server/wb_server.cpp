@@ -92,6 +92,8 @@ void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode
 
     // cout << "trans_msg: " << trans_msg << endl;
 
+    // LOG_INFO(trans_msg);
+
     process_on_message(trans_msg, ws);
 }
 

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include "pandora/util/thread_safe_singleton.hpp"
 
 using std::string;
@@ -18,8 +19,30 @@ using std::endl;
 class Log
 {
     public:
+        Log()
+        {
+            log_file_.open(file_name_, ios_base::ate | ios_base::out);
+        }
+
         void log(string msg, string flag)
         {
             cout << flag << ": " << msg << endl;
+
+            if (!log_file_.is_open())
+            {
+                log_file_.open(file_name_, ios_base::ate | ios_base::out | ios_base::app);
+            }
+
+            log_file_ << flag << ": " << msg << "\n";
+            log_file_.close();
         }
+
+        ~Log()
+        {
+
+        }
+
+    private:
+        string              file_name_{"server.log"};
+        std::ofstream       log_file_;
 };
