@@ -62,7 +62,7 @@ void StreamEngine::on_snap(const string& exchange, const string& symbol, const S
     }
     
     if( CONFIG->publish_data_ ) {
-        quote_mixer2_.on_snap(exchange, symbol, quote);
+        quote_cacher_.on_snap(exchange, symbol, quote);
     }
 };
 
