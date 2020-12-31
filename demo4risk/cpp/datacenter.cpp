@@ -30,7 +30,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
                     volumes[v2.first] += v2.second;
                 }
                 src_depths.erase(v++);
-                //cout << "delete depth " << price.get_str_value() << endl;
+                cout << "delete ask depth " << price.get_str_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -65,7 +65,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                //cout << "delete depth " << price.get_str_value() << endl;
+                cout << "delete bid depth " << price.get_str_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
