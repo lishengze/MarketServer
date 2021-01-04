@@ -63,6 +63,7 @@ class WebsocketClassThreadSafe
     void send(const string& msg)
     {
         std::lock_guard<std::mutex> lk(mutex);
+        cout << "ws send: " << msg << endl;
         ws_->send(msg, uWS::OpCode::TEXT);
     }
 

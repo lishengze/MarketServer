@@ -92,7 +92,6 @@ def on_open(ws):
 
     # _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
 
-
 def test_websocket():
     # websocket.enableTrace(True)
     ip = "ws://36.255.220.139"
