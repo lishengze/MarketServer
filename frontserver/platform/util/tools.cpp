@@ -265,6 +265,7 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
         assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
         assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
         assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
+        assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
         assign(p_rsp_kline_data->data_count_, main_data.size());
 
         for (AtomKlineDataPtr atom_kline:main_data)

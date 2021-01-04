@@ -69,6 +69,8 @@ class WBServer
 
     void clean_client(WebsocketClassThreadSafePtr ws);
 
+    void send_data(ID_TYPE id, string msg);
+
     void heartbeat_run();
 
     void start_heartbeat();
@@ -91,6 +93,9 @@ class WBServer
         std::set<WebsocketClassThreadSafePtr, 
               LessWebsocketClassThreadSafePtr>  wss_con_set_;
 
+        std::mutex                              wss_map_mutex_;
+        std::map<int, WebsocketClassThreadSafePtr> wss_map_;
+ 
         boost::shared_ptr<std::thread>          listen_thread_;
 
         FrontServer*                            front_server_{nullptr};

@@ -213,23 +213,23 @@ void FrontServer::handle_request_kline_data(const ReqKLineData* req_kline)
         if (p_req_kline_data)
         {   
  
-            assign(p_req_kline_data->symbol_, req_kline->symbol_);
+            // assign(p_req_kline_data->symbol_, req_kline->symbol_);
             
-            assign(p_req_kline_data->start_time_, req_kline->start_time_);
+            // assign(p_req_kline_data->start_time_, req_kline->start_time_);
             
-            assign(p_req_kline_data->end_time_, req_kline->end_time_);
+            // assign(p_req_kline_data->end_time_, req_kline->end_time_);
             
-            assign(p_req_kline_data->frequency_, req_kline->frequency_);
+            // assign(p_req_kline_data->frequency_, req_kline->frequency_);
 
-            assign(p_req_kline_data->data_count_, req_kline->data_count_);
+            // assign(p_req_kline_data->data_count_, req_kline->data_count_);
             
-            assign(p_req_kline_data->websocket_, req_kline->websocket_);
+            // assign(p_req_kline_data->websocket_, req_kline->websocket_);
             
-            assign(p_req_kline_data->comm_type, req_kline->comm_type);
+            // assign(p_req_kline_data->comm_type, req_kline->comm_type);
 
-            assign(p_req_kline_data->http_response_, req_kline->http_response_); 
+            // assign(p_req_kline_data->http_response_, req_kline->http_response_); 
    
-            // p_req_kline_data->reset(*req_kline);
+            p_req_kline_data->reset(*req_kline);
 
             deliver_request(package);
         }
@@ -286,6 +286,12 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             {
                 cout << "WEBSOCKET  Send Data!" << endl;
                 p_rsp_kline_data->websocket_->send(kline_data_str);
+            }
+
+            if (p_rsp_kline_data->ws_id_ != -1)
+            {
+                cout << "p_rsp_kline_data->ws_id_: " << p_rsp_kline_data->ws_id_ << endl;
+                wb_server_->send_data(p_rsp_kline_data->ws_id_, kline_data_str);
             }
         }
         else

@@ -2,10 +2,12 @@
 
 #include <atomic>
 
+using ID_TYPE = long long;
+
 class ID
 {
     public:
-        long long get_id() {return id_++;}
+        ID_TYPE get_id() {return id_++;}
 
     private:
         std::atomic_ullong      id_{0};

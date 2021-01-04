@@ -14,7 +14,7 @@
 
 #include "../front_server_declare.h"
 #include "../ErrorDefine.hpp"
-
+#include "../util/id.hpp"
 
 using namespace std::placeholders;
 
@@ -247,18 +247,27 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         LOG_INFO(info_obj.str());
 
-        ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, nullptr, ws);
-
-        if (error_id == 0)
         {
-            front_server_->request_kline_data(req_kline_data);                     
-        }
-        else
-        {
-            LOG_ERROR(err_msg);
-            ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
-        }
+            std::lock_guard<std::mutex> lk(wss_map_mutex_);
+            WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
+            ID_TYPE id = ID_MANAGER->get_id();
 
+            wss_map_[id] = tmp_ws;
+
+            cout << "wss_id: " << id << endl;
+
+            ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, id, nullptr, nullptr);  
+
+            if (error_id == 0)
+            {
+                front_server_->request_kline_data(req_kline_data);                     
+            }
+            else
+            {
+                LOG_ERROR(err_msg);
+                ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
+            }
+        }
     }
     catch(const std::exception& e)
     {
@@ -335,6 +344,15 @@ void WBServer::broadcast_enhanced_data(string symbol, string data_str)
         {
             iter->send(data_str);
         }        
+    }
+}
+
+void WBServer::send_data(ID_TYPE id, string msg)
+{
+    if (wss_map_.find(id) != wss_map_.end())
+    {
+        cout << "wss_id: " << id << ", send: " << msg;
+        wss_map_[id]->send(msg);
     }
 }
 

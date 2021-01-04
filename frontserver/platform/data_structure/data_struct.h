@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "../front_server_declare.h"
+#include "../util/id.hpp"
 
 #include "hub_struct.h"
 
@@ -63,7 +64,7 @@ class WebsocketClassThreadSafe
     void send(const string& msg)
     {
         std::lock_guard<std::mutex> lk(mutex);
-        cout << "ws send: " << msg << endl;
+        // cout << "ws send: " << msg << endl;
         ws_->send(msg, uWS::OpCode::TEXT);
     }
 
@@ -314,7 +315,7 @@ const long UT_FID_ReqKLineData = 0x10005;
 class ReqKLineData:public Socket
 {
     public:
-    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, ID_TYPE ws_id,
                 HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
     Socket(res, ws)
     {
@@ -323,6 +324,7 @@ class ReqKLineData:public Socket
         assign(end_time_, end_time);
         assign(data_count_, data_count);
         assign(frequency_, freq);
+        assign(ws_id_, ws_id);
     }
 
     void reset(const ReqKLineData& other)
@@ -332,6 +334,7 @@ class ReqKLineData:public Socket
         assign(end_time_, other.end_time_);
         assign(frequency_, other.frequency_);
         assign(data_count_, other.data_count_);
+        assign(ws_id_, other.ws_id_);
 
         http_response_ = other.http_response_;
         websocket_ = other.websocket_;
@@ -344,6 +347,8 @@ class ReqKLineData:public Socket
         type_tick           end_time_{0};
         type_tick           append_end_time_{0};
         int                 data_count_{-1};
+
+        ID_TYPE             ws_id_{-1};
 
         frequency_type      frequency_;
 
@@ -359,6 +364,7 @@ class RspKLineData:public Socket
         type_tick                           start_time_;
         type_tick                           end_time_;
         frequency_type                      frequency_;
+        ID_TYPE                             ws_id_{-1};
         int                                 data_count_;
         std::vector<AtomKlineDataPtr>       kline_data_vec_;
 
