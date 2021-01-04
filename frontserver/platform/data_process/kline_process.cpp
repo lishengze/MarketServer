@@ -248,11 +248,13 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
         ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
 
-        cout << "symbol_: " << pReqKlineData->symbol_ << ", \n"
+        stringstream s_obj;
+        s_obj << "symbol_: " << pReqKlineData->symbol_ << ", \n"
              << "frequency_: " << pReqKlineData->frequency_ << ", \n"
              << "request start_time: " << pReqKlineData->start_time_ << ", \n"
              << "request end_time: " << pReqKlineData->end_time_ << ", \n"
-             << endl;
+             << "request data_count: " << pReqKlineData->data_count_ << ", \n";
+        LOG_DEBUG(s_obj.str());
 
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {
@@ -260,43 +262,57 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
             std::map<type_tick, KlineDataPtr> symbol_kline_data = kline_data_[pReqKlineData->symbol_][frequency_base_];
             vector<KlineData> append_result;
-
+            vector<KlineDataPtr> src_kline_data;
+            bool is_need_aggregation{true};
+            
             if (kline_data_[pReqKlineData->symbol_].find(pReqKlineData->frequency_) != kline_data_[pReqKlineData->symbol_].end())
             {
                 cout << "Has frequency_: " << pReqKlineData->frequency_ << endl;
                 symbol_kline_data = kline_data_[pReqKlineData->symbol_][pReqKlineData->frequency_];
+                is_need_aggregation = false;
             }
 
-            cout << "\n" << pReqKlineData->symbol_ << ", \n"
-                 << "kline_data start_time: " << symbol_kline_data.begin()->first << ", \n"
-                 << "kline_data end_time: " << symbol_kline_data.rbegin()->first << ", \n"
-                 << endl;
+            s_obj.clear();
+            s_obj << "\n" << pReqKlineData->symbol_ << ", \n"
+                 << "kline_data start_time: " << get_sec_time_str(symbol_kline_data.begin()->first) << ", \n"
+                 << "kline_data end_time: " << get_sec_time_str(symbol_kline_data.rbegin()->first) << ", \n"
+                 << "kline_data data_size: " << symbol_kline_data.size() << "\n";
+            // LOG_DEBUG(s_obj.str());
 
-            if (symbol_kline_data.begin()->first > pReqKlineData->end_time_)
+            if (pReqKlineData->data_count_ == -1)
             {
-                LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_");
-                return nullptr;
+                if (symbol_kline_data.begin()->first > pReqKlineData->end_time_)
+                {
+                    LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->end_time_");
+                    return nullptr;
+                }
+                else if (symbol_kline_data.begin()->first > pReqKlineData->start_time_)
+                {
+                    LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
+                    
+                    HubInterface::get_kline("", pReqKlineData->symbol_, 1, pReqKlineData->start_time_, symbol_kline_data.begin()->first, append_result);
+                }
+
+                append_kline_to_klinePtr(src_kline_data, append_result);
+                get_src_kline_data(src_kline_data, symbol_kline_data, pReqKlineData->start_time_, pReqKlineData->end_time_);
             }
-            else if (symbol_kline_data.begin()->first > pReqKlineData->start_time_)
+            else
             {
-                LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
-                
-                HubInterface::get_kline("", pReqKlineData->symbol_, 1, pReqKlineData->start_time_, symbol_kline_data.begin()->first, append_result);
-            }
+                // cout << "src_kline_data.size: " << src_kline_data.size() << endl;
+                int data_count = pReqKlineData->data_count_;
+                if (is_need_aggregation)
+                {
+                    data_count *= (pReqKlineData->frequency_ / frequency_base_);
+                }
+                cout << "src data_cout: " << data_count << endl;
+                get_src_kline_data(src_kline_data, symbol_kline_data, data_count);
+            }            
 
-            vector<KlineDataPtr> src_kline_data;
-
-            append_kline_to_klinePtr(src_kline_data, append_result);
-
-            get_src_kline_data(src_kline_data, symbol_kline_data, pReqKlineData->start_time_, pReqKlineData->end_time_);
+            cout << "src_kline_data.size: " << src_kline_data.size() << endl;
 
             vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
-            cout << "compute_target_kline_data done " << endl;
-
             PackagePtr rsp_package = GetNewRspKLineDataPackage(pReqKlineData, target_kline_data, ID_MANAGER->get_id());
-
-            cout << "GetNewRspKLineDataPackage done " << endl;
 
             rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
 
@@ -348,14 +364,32 @@ void KlineProcess::get_src_kline_data(vector<KlineDataPtr>& src_kline_data, std:
     }
 }
 
+void KlineProcess::get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, int data_count)
+{
+    // result.resize(data_count);
+    std::map<type_tick, KlineDataPtr>::iterator iter = symbol_kline_data.begin();
+
+    while (data_count < symbol_kline_data.size())
+    {
+        iter++;
+        data_count++;
+    }
+
+    while (iter != symbol_kline_data.end())
+    {
+        result.emplace_back(iter->second);       
+        ++iter;
+    }
+}
+
 vector<AtomKlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
 {
     vector<AtomKlineDataPtr> result;
 
-    cout << " Compute!  " << endl;
+    cout << "compute_target_kline_data" << endl;
 
     AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(src_kline_data[0]));
-    cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+    // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
 
     result.push_back(cur_data); 
 
@@ -363,7 +397,7 @@ vector<AtomKlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDat
     double high = MIN_DOUBLE;
     double open;
 
-    cout << "kline_data.size: " << src_kline_data.size() << endl;
+    // cout << "kline_data.size: " << src_kline_data.size() << endl;
 
     src_kline_data.erase(src_kline_data.begin());
 

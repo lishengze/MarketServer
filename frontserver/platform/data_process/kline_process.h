@@ -31,6 +31,8 @@ public:
 
     void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time);
 
+    void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, int data_count);
+
     vector<AtomKlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
 
     void init_test_kline_data();

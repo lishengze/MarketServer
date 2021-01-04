@@ -197,9 +197,10 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         int error_id = 0;
         string err_msg ="";
         string symbol;
-        type_tick start_time;
-        type_tick end_time;
+        type_tick start_time = 0;
+        type_tick end_time = 0;
         type_tick frequency;
+        int data_count = -1;
 
         if (js["symbol"].is_null())
         {
@@ -212,27 +213,20 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         }
         
 
-        if (js["start_time"].is_null())
-        {
-            err_msg += "Lost start_time Item \n";
-            error_id = -1;
-        }
-        else
+        if (!js["start_time"].is_null() && !js["end_time"].is_null())
         {
             start_time = std::stoul(js["start_time"].get<string>());
+            end_time = std::stoul(js["end_time"].get<string>());
         }
-        
-
-        if (js["end_time"].is_null())
+        else if (!js["data_count"].is_null())
         {
-            err_msg += "Lost end_time Item \n";
-            error_id = -1;
+            data_count = std::stoul(js["data_count"].get<string>());
         }
         else
         {
-            end_time = std::stoul(js["end_time"].get<string>());
+            err_msg += "K line data needs start_end time or data_count! \n";
+            error_id = -1;
         }
-        
 
         if (js["frequency"].is_null())
         {
@@ -242,24 +236,26 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         else
         {
             frequency = std::stoi(js["frequency"].get<string>());
-            error_id = -1;
         }
-                        
 
-        cout<< "symbol: " << symbol << " \n" 
-            << "start_time: " << start_time << " \n"
-            << "end_time: " << end_time << " \n"
-            << "frequency: " << frequency << " \n"
-            << endl;
+        stringstream info_obj;
+        info_obj<< "symbol: " << symbol << " \n" 
+                << "start_time: " << start_time << " \n"
+                << "end_time: " << end_time << " \n"
+                << "frequency: " << frequency << " \n"
+                << "data_count: " << data_count << "\n";
 
-        ReqKLineData req_kline_data(symbol, start_time, end_time, frequency, nullptr, ws);
+        LOG_INFO(info_obj.str());
 
-        if (error_id != 0)
+        ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, nullptr, ws);
+
+        if (error_id == 0)
         {
             front_server_->request_kline_data(req_kline_data);                     
         }
         else
         {
+            LOG_ERROR(err_msg);
             ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
         }
 

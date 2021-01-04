@@ -58,6 +58,7 @@
         "symbol":"symbolName",  
         "start_time":start_time,    // 必须是秒级的UTC时间戳   
         "end_time":end_time,        // 必须是秒级的UTC时间戳  
+        "data_count": data_count,   // 请求的数据数目，这个选项和起止时间只需填写一个
         "frequency":"60"            // 数据频率，以秒为单位，现在必须是60的整数倍.
     }
 
@@ -67,7 +68,9 @@
         "symbol":"symbolName",    
         "start_time":"",    // 回复数据的开始时间，秒级的UTC时间戳   
         "end_time":0,       // 回复数据的结束时间，秒级的UTC时间戳   
+        "data_count":0,     // 回复的数据数目
         "frequency":0,      // 请求的时间频率  
         "type":"kline_update"     // type 类型   
+
 
     }    

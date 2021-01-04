@@ -192,11 +192,6 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {    
-    // if (is_test_)
-    // {
-    //     return -1;
-    // }
-    // cout <<"[Depth] " << utrade::pandora::NanoTimeStr() << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n" << endl;
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
 }
@@ -208,7 +203,6 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
     {
         return -1;
     }
-    // cout << utrade::pandora::NanoTimeStr() << " on_kline " << symbol << " size: " << klines.size() << "\n" << endl;
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
 }
@@ -218,17 +212,20 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     
     if (strlen(symbol) == 0) 
     {
-        LOG_INFO("DataReceive::handle_depth_data symbol is null!");
+        LOG_ERROR("DataReceive::handle_depth_data symbol is null! \n");
+        return;
+    }
+
+    if (strlen(exchange) != 0)
+    {
+        // 只处理聚合数据;
         return;
     }
 
     std::stringstream stream_obj;
-    stream_obj  << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    stream_obj  << "[Depth] handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     
-    // LOG_INFO(stream_obj.str());
-
-
-    // cout << "handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << endl;
+    LOG_INFO(stream_obj.str());
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -251,10 +248,6 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     }
 
     string symbol = string(c_symbol);
-    if (symbol != "BTC_USDT")
-    {   
-        return;
-    }
     
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
@@ -269,11 +262,6 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             kline_symbol_data_count_[symbol]++;
         }
         
-        // if (kline_symbol_data_count_[symbol] > 120*5)
-        // {
-        //     return;
-        // }
-
         std::stringstream stream_obj;
         stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "

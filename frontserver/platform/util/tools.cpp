@@ -265,6 +265,7 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
         assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
         assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
         assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
+        assign(p_rsp_kline_data->data_count_, main_data.size());
 
         for (AtomKlineDataPtr atom_kline:main_data)
         {
@@ -292,6 +293,7 @@ string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
         json_data["start_time"] = rsp_kline_data.start_time_;
         json_data["end_time"] = rsp_kline_data.end_time_;
         json_data["frequency"] = rsp_kline_data.frequency_;
+        json_data["data_count"] = rsp_kline_data.data_count_;
 
         int i = 0;
         nlohmann::json detail_data;

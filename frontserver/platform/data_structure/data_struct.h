@@ -313,13 +313,14 @@ const long UT_FID_ReqKLineData = 0x10005;
 class ReqKLineData:public Socket
 {
     public:
-    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int freq, 
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
                 HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
     Socket(res, ws)
     {
         assign(symbol_, symbol);
         assign(start_time_, start_time);
         assign(end_time_, end_time);
+        assign(data_count_, data_count);
         assign(frequency_, freq);
     }
 
@@ -329,6 +330,7 @@ class ReqKLineData:public Socket
         assign(start_time_, other.start_time_);
         assign(end_time_, other.end_time_);
         assign(frequency_, other.frequency_);
+        assign(data_count_, other.data_count_);
 
         http_response_ = other.http_response_;
         websocket_ = other.websocket_;
@@ -337,9 +339,10 @@ class ReqKLineData:public Socket
   
     public: 
         symbol_type         symbol_;
-        type_tick           start_time_;
-        type_tick           end_time_;
-        type_tick           append_end_time_;
+        type_tick           start_time_{0};
+        type_tick           end_time_{0};
+        type_tick           append_end_time_{0};
+        int                 data_count_{-1};
 
         frequency_type      frequency_;
 
@@ -355,6 +358,7 @@ class RspKLineData:public Socket
         type_tick                           start_time_;
         type_tick                           end_time_;
         frequency_type                      frequency_;
+        int                                 data_count_;
         std::vector<AtomKlineDataPtr>       kline_data_vec_;
 
         static const long Fid = UT_FID_RspKLineData;
