@@ -266,6 +266,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             if ((p_rsp_kline_data->comm_type == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->comm_type == COMM_TYPE::WEBSECKETS) 
             && p_rsp_kline_data->websocket_)
             {
+                cout << "WEBSOCKET  Send Data!" << endl;
                 p_rsp_kline_data->websocket_->send(kline_data_str);
             }
         }
