@@ -24,6 +24,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
+            cout << price.get_str_value() << " " << watermark.get_str_value() << endl;
             if( is_ask ? (price <= watermark) : (price >= watermark) ) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
@@ -59,6 +60,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
+            cout << price.get_str_value() << " " << watermark.get_str_value() << endl;
             if( is_ask ? (price <= watermark) : (price >= watermark) ) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
