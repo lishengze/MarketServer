@@ -92,8 +92,8 @@ def on_open(ws):
 
 def test_websocket():
     # websocket.enableTrace(True)
-    # ip = "ws://36.255.220.139"
-    ip = "ws://127.0.0.1"
+    ip = "ws://36.255.220.139"
+    # ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
