@@ -2,6 +2,7 @@
 #include "../config/config.h"
 #include "../log/log.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../util/id.hpp"
 
 #include "kline_process.h"

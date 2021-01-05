@@ -13,7 +13,7 @@
 #include <mutex>
 
 #include "../front_server_declare.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 #include <thread>
 #include <atomic>
 
@@ -94,9 +94,6 @@ class WBServer
 
         std::set<WebsocketClassThreadSafePtr, 
               LessWebsocketClassThreadSafePtr>  wss_con_set_;
-
-        std::mutex                              wss_map_mutex_;
-        std::map<int, WebsocketClassThreadSafePtr> wss_map_;
  
         boost::shared_ptr<std::thread>          listen_thread_;
 

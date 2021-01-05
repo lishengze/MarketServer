@@ -13,7 +13,7 @@ using std::endl;
 #define LOG utrade::pandora::ThreadSafeSingleton<Log>::DoubleCheckInstance()
 
 #define LOG_ERROR(msg) LOG->log(msg, "Error")
-#define LOG_INFO(msg) LOG->log(msg, "Info")
+#define LOG_INFO(msg) LOG->log(msg, "Info ")
 #define LOG_DEBUG(msg) LOG->log(msg, "Debug")
 
 class Log

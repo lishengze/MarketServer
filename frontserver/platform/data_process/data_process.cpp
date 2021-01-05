@@ -1,8 +1,9 @@
 #include "data_process.h"
 #include "hub_interface.h"
 #include "pandora/util/time_util.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../front_server_declare.h"
 #include "../log/log.h"
 #include "../config/config.h"
@@ -63,16 +64,19 @@ void DataProcess::handle_request_message(PackagePtr package)
 
     switch (package->Tid())
     {
-        case UT_FID_SymbolData:
+        case UT_FID_RspSymbolListData:
             request_symbol_package(package);
             return;    
 
-        case UT_FID_ReqDepthData:
+        case UT_FID_ReqRiskCtrledDepthData:
             request_depth_package(package);
             return;               
 
         case UT_FID_ReqKLineData:
             request_kline_package(package);
+
+        case UT_FID_ReqEnquiry:
+            request_enquiry_package(package);
             return;
         default:
             break;
@@ -97,6 +101,11 @@ void DataProcess::handle_response_message(PackagePtr package)
     }    
 
     deliver_response(package);
+}
+
+void DataProcess::request_enquiry_package(PackagePtr package)
+{
+    
 }
 
 void DataProcess::request_kline_package(PackagePtr package)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../front_server_declare.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 using std::map;
 using std::vector;
 

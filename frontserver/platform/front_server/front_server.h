@@ -7,7 +7,7 @@
 #include "../front_server_declare.h"
 #include "wb_server.h"
 #include "rest_server.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 
 
 // 用于处理数据: 为 front-server 提供全量或增量的更新;
@@ -31,13 +31,15 @@ public:
 
     void request_kline_data(const ReqKLineData& req_kline);
 
-    void request_depth_data(const ReqDepthData& req_depth);
+    void request_depth_data(const ReqRiskCtrledDepthData& req_depth);
 
     void process_rtn_depth_package(PackagePtr package);
 
     void response_sdepth_package(PackagePtr package);
 
     void response_kline_data_package(PackagePtr package);
+
+    void response_enquiry_data_package(PackagePtr package);
 
     void process_symbols_package(PackagePtr package);
 
@@ -51,7 +53,7 @@ public:
 
     void handle_request_kline_data(const ReqKLineData* req_kline);
 
-    void handle_request_depth_data(const ReqDepthData* req_depth);
+    void handle_request_depth_data(const ReqRiskCtrledDepthData* req_depth);
 
     // void handle_request_kline_data(PackagePtr package);
 

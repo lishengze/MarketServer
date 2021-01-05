@@ -3,6 +3,7 @@
 #include "pandora/util/json.hpp"
 #include "../log/log.h"
 #include "pandora/util/time_util.h"
+#include "id.hpp"
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src)
 {
@@ -15,37 +16,9 @@ void copy_klinedata(KlineData* des, const KlineData* src)
     memcpy(des, src, sizeof (KlineData));
 }
 
-void copy_enhanced_data(EnhancedDepthData* des, const EnhancedDepthData* src)
+void copy_enhanced_data(RspRiskCtrledDepthData* des, const RspRiskCtrledDepthData* src)
 {
-    memcpy(des, src, sizeof(EnhancedDepthData));
-}
-
-PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
-{
-    PackagePtr package =PackagePtr{new Package{}};
-
-    package->SetPackageID(package_id);
-
-    CREATE_FIELD(package, SDepthData);
-
-    SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
-
-    copy_sdepthdata(pSDepthData, &depth);
-
-    return package;
-}
-
-PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_id)
-{
-    PackagePtr package =PackagePtr{new Package{}};
-    package->SetPackageID(package_id);
-    CREATE_FIELD(package, KlineData);
-
-    KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
-
-    copy_klinedata(pklineData, &ori_kline_data);
-
-    return package;
+    memcpy(des, src, sizeof(RspRiskCtrledDepthData));
 }
 
 string SDepthDataToJsonStr(const SDepthData& depth)
@@ -81,51 +54,6 @@ string SDepthDataToJsonStr(const SDepthData& depth)
     return json_data.dump(); 
 }
 
-PackagePtr GetNewEnhancedDepthDataPackage(const SDepthData& depth, int package_id)
-{
-    PackagePtr package =PackagePtr{new Package{}};
-
-    try
-    {        
-        package->SetPackageID(package_id);
-
-        CREATE_FIELD(package, EnhancedDepthData);
-
-        EnhancedDepthData* p_enhanced_depth_data = GET_NON_CONST_FIELD(package, EnhancedDepthData);
-
-        p_enhanced_depth_data->init(&depth);
-
-        package->prepare_response(UT_FID_EnhancedDepthData, package->PackageID());        
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-    return package;    
-}
-
-PackagePtr GetNewSymbolDataPackage(std::set<string> symbols, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
-    try
-    {    
-        package->SetPackageID(package_id);
-
-        CREATE_FIELD(package, SymbolData);
-
-        SymbolData* p_symbol_data = GET_NON_CONST_FIELD(package, SymbolData);
-
-        p_symbol_data->set_symbols(symbols);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "GetNewSymbolDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;       
-}
-
 string SymbolsToJsonStr(std::set<std::string> symbols, string type)
 {
     nlohmann::json json_data;
@@ -154,14 +82,14 @@ string SymbolsToJsonStr(std::set<std::string> symbols, string type)
     return json_data.dump();
 }
 
-string SymbolsToJsonStr(SymbolData& symbol_data, string type)
+string SymbolsToJsonStr(RspSymbolListData& symbol_data, string type)
 {
     std::set<std::string>& symbols = symbol_data.get_symbols();
 
     return SymbolsToJsonStr(symbols, type);
 }
 
-string EnhancedDepthDataToJsonStr(EnhancedDepthData& en_data, string type)
+string RspRiskCtrledDepthDataToJsonStr(RspRiskCtrledDepthData& en_data, string type)
 {
     string result;
     nlohmann::json json_data;
@@ -244,43 +172,6 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
     cout << "compute over" << endl;
 
     return result;
-}
-
-PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
-    try
-    {    
-        package->SetPackageID(package_id);
-
-        CREATE_FIELD(package, RspKLineData);
-
-        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
-
-        assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
-        assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
-        assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
-
-        assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
-        assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
-        assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
-        assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
-        assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
-        assign(p_rsp_kline_data->data_count_, main_data.size());
-
-        for (AtomKlineDataPtr atom_kline:main_data)
-        {
-            p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);
-        }
-
-        return package;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "GetNewSymbolDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;        
 }
 
 string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)

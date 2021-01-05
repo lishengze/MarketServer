@@ -5,7 +5,11 @@
 #include "../config/config.h"
 #include "../front_server_declare.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../log/log.h"
+
+string RestServer::PARMA_SPLIT_CHAR = "/";
+string RestServer::QUERY_SPLIT_CHAR = "&";
 
 string RestServer::VERSION1 = "v1";
 string RestServer::VERSION2 = "v2";
@@ -14,6 +18,11 @@ string RestServer::KLINE_REQUEST_SYMBOL = "symbol";
 string RestServer::KLINE_REQUEST_STARTTIME = "start_time";
 string RestServer::KLINE_REQUEST_ENDTIME = "end_time";
 string RestServer::KLINE_REQUEST_FREQUENCY = "frequency";
+
+string RestServer::ENQUIRY_REQUEST = "enquiry";
+string RestServer::ENQUIRY_REQUEST_SYMBOL = "symbol";
+string RestServer::ENQUIRY_REQUEST_VOLUME = "volume";
+string RestServer::ENQUIRY_REQUEST_AMOUNT = "amount";
 
 RestServer::RestServer(utrade::pandora::io_service_pool& pool):ThreadBasePool(pool)
 {
@@ -57,9 +66,9 @@ void RestServer::listen()
 
         cout << "AbortEnd!" << endl;
 
-        // get_io_service().post(std::bind(&RestServer::process_get, this, response, request));
+        get_io_service().post(std::bind(&RestServer::process_get, this, response, request));
 
-        process_get(response, request);
+        // process_get(response, request);
 
     }).post("/*", [this](HttpResponse * response, HttpRequest * request){
         process_post(response, request);
@@ -130,20 +139,19 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
 
         cout << "url: " << url << endl;
 
-        string first_split_char = "/";
-        std::vector<std::string> first_vec;
-        boost::split(first_vec, url, boost::is_any_of(first_split_char));
+        std::vector<std::string> param_vec;
+        boost::split(param_vec, url, boost::is_any_of(PARMA_SPLIT_CHAR));
 
         string error_msg="";
 
-        cout << "first_vec.size: " << first_vec.size() << endl;
-        for (string data:first_vec)
+        cout << "param_vec.size: " << param_vec.size() << endl;
+        for (string data:param_vec)
         {
             cout << data << " \n";
         }
         cout << endl;
 
-        if (first_vec.size() != 3)
+        if (param_vec.size() != 3)
         {
             error_msg = "Url can only has tow / ";
             send_err_msg(response, error_msg);
@@ -151,16 +159,26 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
         }
         else
         {
-            if (first_vec[0] == RestServer::VERSION1)
+            if (param_vec[0] == RestServer::VERSION1)
             {
-                if (first_vec[1] == RestServer::KLINE_REQUEST)
+                if (param_vec[1] == RestServer::KLINE_REQUEST)
                 {
-                    if (!process_v1_request_kline(first_vec[2], error_msg, response, request))             
+                    if (!process_v1_request_kline(param_vec[2], error_msg, response, request))             
                     {
                         send_err_msg(response, error_msg);
                         return;
                     }
                 }
+                else if (param_vec[1] == RestServer::ENQUIRY_REQUEST)
+                {
+                    // if (!)
+                }
+                else
+                {
+                    error_msg = string("Unknown Request ") + param_vec[1];
+                    send_err_msg(response, error_msg);  
+                    return;
+                }                                
             }
         }
         return;
@@ -169,6 +187,54 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
     {
         std::cerr << e.what() << '\n';
     }
+}
+
+bool RestServer::process_v1_request_enquiry(string& query_param, string& error_msg, HttpResponse * res)
+{
+    cout << "RestServer::process_v1_request_enquiry " << endl;
+    bool result = false;
+    if (query_param.find(RestServer::ENQUIRY_REQUEST_SYMBOL) == std::string::npos)
+    {
+        error_msg += "Query Parmas Lost Param: " + RestServer::ENQUIRY_REQUEST_SYMBOL;
+    }    
+    else if (query_param.find(RestServer::ENQUIRY_REQUEST_VOLUME) == std::string::npos && 
+             query_param.find(RestServer::ENQUIRY_REQUEST_AMOUNT) == std::string::npos )
+    {
+        error_msg += "Query Parmas Need Para: " + RestServer::ENQUIRY_REQUEST_VOLUME 
+                   + " or " + RestServer::ENQUIRY_REQUEST_AMOUNT;
+    }
+    else
+    {
+        std::vector<std::string> query_vec;
+        boost::split(query_vec, query_param, boost::is_any_of(QUERY_SPLIT_CHAR)); 
+
+        for (string param:query_vec)
+        {
+            cout << param << "\n";
+        }          
+        cout << endl;          
+
+        string symbol = query_vec[0].substr(query_vec[0].find("=")+1);
+        double volume = -1;
+        double amount = -1;
+        if (query_param.find(RestServer::ENQUIRY_REQUEST_VOLUME) != std::string::npos)
+        {
+            volume = std::stod(query_vec[1].substr(query_vec[1].find("=")+1));
+        }
+
+        if (query_param.find(RestServer::ENQUIRY_REQUEST_AMOUNT) == std::string::npos)
+        {
+            amount = std::stod(query_vec[1].substr(query_vec[1].find("=")+1));
+        }       
+
+
+        HttpResponseThreadSafePtr res_ptr = boost::make_shared<HttpResponseThreadSafe>(res);
+
+        PackagePtr package = GetReqEnquiryPackage(symbol, volume, amount, res_ptr);
+
+        front_server_->deliver_request(package);
+    }
+    return result;
 }
 
 bool RestServer::process_v1_request_kline(string& query_param, string& error_msg, HttpResponse * res, HttpRequest * req)
@@ -193,9 +259,8 @@ bool RestServer::process_v1_request_kline(string& query_param, string& error_msg
     }
     else
     {
-        string query_split_char = "&";
         std::vector<std::string> param_vec;
-        boost::split(param_vec, query_param, boost::is_any_of(query_split_char));      
+        boost::split(param_vec, query_param, boost::is_any_of(QUERY_SPLIT_CHAR));      
 
         for (string param:param_vec)
         {

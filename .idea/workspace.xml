@@ -51,7 +51,7 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="378">
                   <caret line="155" column="70" lean-forward="true" selection-start-line="155" selection-start-column="70" selection-end-line="155" selection-end-column="70" />
@@ -99,7 +99,7 @@
         <option value="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" />
-        <option value="$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h" />
+        <option value="$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h" />
       </list>
     </option>
   </component>
@@ -423,7 +423,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/data_struct.h">
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="378">
           <caret line="155" column="70" lean-forward="true" selection-start-line="155" selection-start-column="70" selection-end-line="155" selection-end-column="70" />

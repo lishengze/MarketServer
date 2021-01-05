@@ -1,14 +1,14 @@
-#include "data_struct.h"
+#include "comm_data.h"
 
 
-EnhancedDepthData::EnhancedDepthData(const SDepthData* depth_data)
+RspRiskCtrledDepthData::RspRiskCtrledDepthData(const SDepthData* depth_data)
 {
     init(depth_data);
 }
 
-EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
+RspRiskCtrledDepthData::RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other)
 {
-    cout << "EnhancedDepthData::EnhancedDepthData " << endl;
+    cout << "RspRiskCtrledDepthData::RspRiskCtrledDepthData " << endl;
     
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
@@ -18,9 +18,9 @@ EnhancedDepthData::EnhancedDepthData(const EnhancedDepthData& other)
     }
 }
 
-EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
+RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDepthData& other)
 {
-    cout << "EnhancedDepthData::Operator = " << endl;
+    cout << "RspRiskCtrledDepthData::Operator = " << endl;
 
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
@@ -30,9 +30,9 @@ EnhancedDepthData & EnhancedDepthData::operator=(const EnhancedDepthData& other)
     }
 }
 
-void EnhancedDepthData::init(const SDepthData* depth_data)
+void RspRiskCtrledDepthData::init(const SDepthData* depth_data)
 {
-    // cout << "EnhancedDepthData::init SDepthData" << endl;
+    // cout << "RspRiskCtrledDepthData::init SDepthData" << endl;
 
     std::lock_guard<std::mutex> lg(mutex_);
 
@@ -40,19 +40,31 @@ void EnhancedDepthData::init(const SDepthData* depth_data)
 
     // depth_data_ = *depth_data;
 
-    // cout << "EnhancedDepthData::init 1" << endl;
+    // cout << "RspRiskCtrledDepthData::init 1" << endl;
 
     for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume.get_value() : depth_data_.asks[i].volume.get_value() + ask_accumulated_volume_[i-1];
     }
 
-    // cout << "EnhancedDepthData::init 2" << endl;
+    // cout << "RspRiskCtrledDepthData::init 2" << endl;
 
     for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume.get_value() + bid_accumulated_volume_[i-1];
     }
 
-    // cout << "EnhancedDepthData::init 3" << endl;
+    // cout << "RspRiskCtrledDepthData::init 3" << endl;
+}
+
+string   RspEnquiry::rsp_json_type_ = "enquiry";
+
+string RspEnquiry::get_json_str()
+{
+    string result;
+
+    nlohmann::json json_data;
+    json_data["price"] = std::to_string(price_);
+    json_data["symbol"] = string(symbol_);
+    json_data["type"] = rsp_json_type_;    
 }

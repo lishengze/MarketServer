@@ -2,7 +2,7 @@
 
 #include <mutex>
 #include "../front_server_declare.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 
 using std::map;
 using std::vector;
@@ -24,14 +24,16 @@ public:
 
     void request_symbol_package(PackagePtr package);
 
+    void request_enquiry_package(PackagePtr package);
+
     void response_src_sdepth_package(PackagePtr package);
     
     void response_new_symbol(string symbol);
 
-    using EnhancedDepthDataPackagePtr = PackagePtr; 
+    using RspRiskCtrledDepthDataPackagePtr = PackagePtr; 
 
 private:
-    map<string, EnhancedDepthDataPackagePtr>    depth_data_;
+    map<string, RspRiskCtrledDepthDataPackagePtr>    depth_data_;
     std::mutex                                  depth_data_mutex_;
 
     DataProcessPtr                              process_engine_;    

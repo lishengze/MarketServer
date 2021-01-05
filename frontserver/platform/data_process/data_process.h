@@ -5,7 +5,7 @@
 #include "pandora/util/thread_basepool.h"
 
 #include "../front_server_declare.h"
-#include "../data_structure/data_struct.h"
+#include "../data_structure/comm_data.h"
 #include "kline_process.h"
 #include "depth_process.h"
 
@@ -35,6 +35,8 @@ public:
     void request_depth_package(PackagePtr package);
 
     void request_symbol_package(PackagePtr package);
+
+    void request_enquiry_package(PackagePtr package);
 
     void response_src_sdepth_package(PackagePtr package);    
 

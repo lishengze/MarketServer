@@ -2,6 +2,7 @@
 #include "../config/config.h"
 #include "../log/log.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../util/id.hpp"
 
 #include "depth_process.h"
@@ -33,8 +34,8 @@ void DepthProces::request_symbol_package(PackagePtr package)
         symbols.emplace(iter.first);
     }
 
-    PackagePtr package_new = GetNewSymbolDataPackage(symbols, 0);
-    package_new->prepare_response(UT_FID_SymbolData, package_new->PackageID());
+    PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, 0);
+    package_new->prepare_response(UT_FID_RspSymbolListData, package_new->PackageID());
     process_engine_->deliver_response(package_new);
 }
 
@@ -47,9 +48,9 @@ void DepthProces::response_src_sdepth_package(PackagePtr package)
 
         if (p_depth_data)
         {
-            PackagePtr enhanced_data_package = GetNewEnhancedDepthDataPackage(*p_depth_data, package->PackageID());
+            PackagePtr enhanced_data_package = GetNewRspRiskCtrledDepthDataPackage(*p_depth_data, package->PackageID());
 
-            EnhancedDepthData* en_depth_data = GET_NON_CONST_FIELD(enhanced_data_package, EnhancedDepthData);
+            RspRiskCtrledDepthData* en_depth_data = GET_NON_CONST_FIELD(enhanced_data_package, RspRiskCtrledDepthData);
             
             if (en_depth_data)
             {
@@ -59,7 +60,6 @@ void DepthProces::response_src_sdepth_package(PackagePtr package)
 
                 if (depth_data_.find(cur_symbol) == depth_data_.end())
                 {                
-                    cout << "New Symbol: " << cur_symbol << endl;
                     response_new_symbol(cur_symbol);
                 }
 
@@ -83,9 +83,14 @@ void DepthProces::response_new_symbol(string symbol)
     std::set<string> symbols{symbol};
 
     // cout << "DepthProces::response_new_symbol 1" << endl;
-    PackagePtr package_new = GetNewSymbolDataPackage(symbols, ID_MANAGER->get_id());
+    PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, ID_MANAGER->get_id());
 
     // cout << "DepthProces::response_new_symbol 2" << endl;
-    package_new->prepare_response(UT_FID_SymbolData, package_new->PackageID());
+    package_new->prepare_response(UT_FID_RspSymbolListData, package_new->PackageID());
     process_engine_->deliver_response(package_new);
+}
+
+void DepthProces::request_enquiry_package(PackagePtr package)
+{
+
 }

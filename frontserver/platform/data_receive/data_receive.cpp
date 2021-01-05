@@ -4,6 +4,7 @@
 #include "pandora/util/time_util.h"
 #include "pandora/package/package.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../log/log.h"
 
 #include <chrono>
@@ -58,7 +59,7 @@ void DataReceive::test_kline_data()
     type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
     end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    int test_time_numb = 60 * 24;
+    int test_time_numb = 60 * 2;
 
     double test_max = 100;
     double test_min = 10;
@@ -215,6 +216,34 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
     }
     get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
     return 1;
+}
+
+// 原始深度数据推送
+int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
+{
+    get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
+    return 1;
+}
+
+void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
+{
+    
+    if (strlen(symbol) == 0) 
+    {
+        LOG_ERROR("DataReceive::handle_raw_depth symbol is null! \n");
+        return;
+    }
+
+    if (strlen(exchange) != 0)
+    {
+        // 只处理聚合数据;
+        return;
+    }
+
+    std::stringstream stream_obj;
+    stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    LOG_DEBUG(stream_obj.str());
+
 }
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)

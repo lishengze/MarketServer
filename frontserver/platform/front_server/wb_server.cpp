@@ -9,6 +9,7 @@
 #include "front_server.h"
 
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../config/config.h"
 #include "../log/log.h"
 
@@ -243,15 +244,7 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         LOG_INFO(info_obj.str());
 
         {
-            std::lock_guard<std::mutex> lk(wss_map_mutex_);
-
             WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
-
-            ID_TYPE id = ID_MANAGER->get_id();
-
-            wss_map_[id] = tmp_ws;
-
-            cout << "wss_id: " << id << endl;
 
             ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, -1, tmp_ws);  
 
@@ -346,11 +339,7 @@ void WBServer::broadcast_enhanced_data(string symbol, string data_str)
 
 void WBServer::send_data(ID_TYPE id, string msg)
 {
-    if (wss_map_.find(id) != wss_map_.end())
-    {
-        cout << "wss_id: " << id << ", send: " << msg;
-        wss_map_[id]->send(msg);
-    }
+
 }
 
 void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)

@@ -3,6 +3,7 @@
 #include "pandora/util/json.hpp"
 #include "hub_struct.h"
 #include "../util/tools.h"
+#include "../util/package_manage.h"
 #include "../front_server_declare.h"
 #include "../log/log.h"
 
@@ -55,7 +56,7 @@ void FrontServer::handle_request_message(PackagePtr package)
 void FrontServer::request_all_symbol()
 {
     PackagePtr package = PackagePtr{new Package{}};
-    package->prepare_request(UT_FID_SymbolData, ID_MANAGER->get_id());
+    package->prepare_request(UT_FID_RspSymbolListData, ID_MANAGER->get_id());
     deliver_request(package);
 }
 
@@ -73,15 +74,19 @@ void FrontServer::handle_response_message(PackagePtr package)
             response_sdepth_package(package);
             break;
 
-        case UT_FID_SymbolData:
+        case UT_FID_RspSymbolListData:
             process_symbols_package(package);            
             break;
 
-        case UT_FID_EnhancedDepthData:
+        case UT_FID_RspRiskCtrledDepthData:
             process_enhanceddata_package(package);            
             break;                
         case UT_FID_RspKLineData:
             response_kline_data_package(package);
+
+        case UT_FID_RspEnquiry:
+            response_enquiry_data_package(package);
+
         default:        
             cout << "Unknow Package" << endl;
             break;
@@ -116,7 +121,7 @@ void FrontServer::process_symbols_package(PackagePtr package)
 {
     // cout << "FrontServer::process_symbols_package 0" << endl;
 
-    SymbolData* p_symbol_data = GET_NON_CONST_FIELD(package, SymbolData);
+    RspSymbolListData* p_symbol_data = GET_NON_CONST_FIELD(package, RspSymbolListData);
 
     // cout << "FrontServer::process_symbols_package 1" << endl;
 
@@ -126,8 +131,6 @@ void FrontServer::process_symbols_package(PackagePtr package)
     string updated_symbols_str = SymbolsToJsonStr(*p_symbol_data, SYMBOL_UPDATE);
 
     // cout << "FrontServer::process_symbols_package 2" << endl;
-
-    cout << "updated_symbols_str: " << updated_symbols_str << endl;
 
     // cout << "FrontServer::process_symbols_package 3" << endl;
 
@@ -149,11 +152,11 @@ void FrontServer::process_enhanceddata_package(PackagePtr package)
 {
     try
     {        
-        auto enhanced_data = GET_NON_CONST_FIELD(package, EnhancedDepthData);
+        auto enhanced_data = GET_NON_CONST_FIELD(package, RspRiskCtrledDepthData);
 
         string update_symbol = enhanced_data->depth_data_.symbol;
 
-        string send_str = EnhancedDepthDataToJsonStr(*enhanced_data, MARKET_DATA_UPDATE);    
+        string send_str = RspRiskCtrledDepthDataToJsonStr(*enhanced_data, MARKET_DATA_UPDATE);    
 
         // LOG_INFO(update_symbol);
         // LOG_INFO(send_str);
@@ -185,7 +188,7 @@ void FrontServer::request_kline_data(const ReqKLineData& req_kline)
     get_io_service().post(std::bind(&FrontServer::handle_request_kline_data, this, &req_kline));
 }
 
-void FrontServer::request_depth_data(const ReqDepthData& req_depth)
+void FrontServer::request_depth_data(const ReqRiskCtrledDepthData& req_depth)
 {
     get_io_service().post(std::bind(&FrontServer::handle_request_depth_data, this, &req_depth));
 }
@@ -285,17 +288,9 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             if ((p_rsp_kline_data->comm_type == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->comm_type == COMM_TYPE::WEBSECKETS) 
             && p_rsp_kline_data->websocket_)
             {
-                cout << "WEBSOCKET  Send Data!" << endl;
-                // p_rsp_kline_data->websocket_->send(kline_data_str);
-
                 wb_server_->send_data(p_rsp_kline_data->websocket_, kline_data_str);
             }
 
-            if (p_rsp_kline_data->ws_id_ != -1)
-            {
-                cout << "p_rsp_kline_data->ws_id_: " << p_rsp_kline_data->ws_id_ << endl;
-                wb_server_->send_data(p_rsp_kline_data->ws_id_, kline_data_str);
-            }
         }
         else
         {
@@ -312,7 +307,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
     
 }
 
-void FrontServer::handle_request_depth_data(const ReqDepthData* req_depth)
+void FrontServer::handle_request_depth_data(const ReqRiskCtrledDepthData* req_depth)
 {
     try
     {
@@ -320,12 +315,12 @@ void FrontServer::handle_request_depth_data(const ReqDepthData* req_depth)
   
         package->SetPackageID(ID_MANAGER->get_id());
 
-        package->prepare_request(UT_FID_ReqDepthData, package->PackageID());
+        package->prepare_request(UT_FID_ReqRiskCtrledDepthData, package->PackageID());
 
-        CREATE_FIELD(package, ReqDepthData);
+        CREATE_FIELD(package, ReqRiskCtrledDepthData);
 
 
-        ReqDepthData* p_req_depth_data = GET_NON_CONST_FIELD(package, ReqDepthData);
+        ReqRiskCtrledDepthData* p_req_depth_data = GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
 
         if (p_req_depth_data)
         {            
@@ -339,7 +334,7 @@ void FrontServer::handle_request_depth_data(const ReqDepthData* req_depth)
         }
         else
         {
-            LOG_ERROR("FrontServer::request_depth_data Create ReqDepthData Failed!");
+            LOG_ERROR("FrontServer::request_depth_data Create ReqRiskCtrledDepthData Failed!");
         }
     }
     catch(const std::exception& e)
@@ -351,4 +346,44 @@ void FrontServer::handle_request_depth_data(const ReqDepthData* req_depth)
         return;
     }
     
+}
+
+void FrontServer::response_enquiry_data_package(PackagePtr package)
+{
+    try
+    {
+        cout << "FrontServer::response_enquiry_data_package " << endl;
+
+        RspEnquiry* p_rsp_enquiry = GET_NON_CONST_FIELD(package, RspEnquiry);
+
+        if (p_rsp_enquiry)
+        {
+            string json_str = p_rsp_enquiry->get_json_str();
+
+            LOG_DEBUG(json_str);
+
+            if ((p_rsp_enquiry->comm_type == COMM_TYPE::HTTP || p_rsp_enquiry->comm_type == COMM_TYPE::HTTPS) 
+            && p_rsp_enquiry->http_response_)
+            {
+                p_rsp_enquiry->http_response_->end(json_str);
+            }
+
+            if ((p_rsp_enquiry->comm_type == COMM_TYPE::WEBSOCKET || p_rsp_enquiry->comm_type == COMM_TYPE::WEBSECKETS) 
+            && p_rsp_enquiry->websocket_)
+            {
+                wb_server_->send_data(p_rsp_enquiry->websocket_, json_str);
+            }
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+        }
+        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_kline_data_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
 }

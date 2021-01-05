@@ -34,6 +34,8 @@ class RestServer:public utrade::pandora::ThreadBasePool
 
         bool process_v1_request_kline(string& query_param, string& err_msg, HttpResponse *, HttpRequest *);
 
+        bool process_v1_request_enquiry(string& query_param, string& err_msg, HttpResponse * res);
+
         void send_err_msg(HttpResponse *, string msg);
 
         void test_response_multithread_run(HttpResponse * rsp);
@@ -51,6 +53,10 @@ class RestServer:public utrade::pandora::ThreadBasePool
 
         FrontServer*                            front_server_;
 
+
+        static string                           PARMA_SPLIT_CHAR;
+        static string                           QUERY_SPLIT_CHAR;
+
         static string                           VERSION1;
         static string                           VERSION2;
         static string                           KLINE_REQUEST;
@@ -58,6 +64,11 @@ class RestServer:public utrade::pandora::ThreadBasePool
         static string                           KLINE_REQUEST_STARTTIME;
         static string                           KLINE_REQUEST_ENDTIME;
         static string                           KLINE_REQUEST_FREQUENCY;
+
+        static string                           ENQUIRY_REQUEST;
+        static string                           ENQUIRY_REQUEST_SYMBOL;
+        static string                           ENQUIRY_REQUEST_VOLUME;
+        static string                           ENQUIRY_REQUEST_AMOUNT;
 
         std::thread                             process_thread_;
 
