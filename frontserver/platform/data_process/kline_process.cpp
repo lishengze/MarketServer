@@ -89,28 +89,28 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
             //                 + get_sec_time_str(pkline_data->index));                
             // }
 
-            if (kline_data_[cur_symbol][300].size() == 100)
-            {
+            // if (kline_data_[cur_symbol][300].size() == 100)
+            // {
 
-                std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[cur_symbol];
+            //     std::map<int, std::map<type_tick, KlineDataPtr>>& cur_kline_data = kline_data_[cur_symbol];
 
-                for (auto iter: cur_kline_data)
-                {
-                    std::map<type_tick, KlineDataPtr>& cur_fre_data = iter.second;
+            //     for (auto iter: cur_kline_data)
+            //     {
+            //         std::map<type_tick, KlineDataPtr>& cur_fre_data = iter.second;
 
-                    cout << "Frequency: " << iter.first << ", data_numb: " << cur_fre_data.size() << endl;
+            //         cout << "Frequency: " << iter.first << ", data_numb: " << cur_fre_data.size() << endl;
 
-                    for (auto atom_iter:cur_fre_data)
-                    {
-                        KlineData& kline = *(atom_iter.second);
-                        string cur_time = get_sec_time_str(kline.index);
+            //         for (auto atom_iter:cur_fre_data)
+            //         {
+            //             KlineData& kline = *(atom_iter.second);
+            //             string cur_time = get_sec_time_str(kline.index);
 
-                        cout << cur_time << ", " << kline.symbol << ", "
-                            << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                            << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;                        
-                    }
-                }
-            }
+            //             cout << cur_time << ", " << kline.symbol << ", "
+            //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+            //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << endl;                        
+            //         }
+            //     }
+            // }
         }
         else
         {
