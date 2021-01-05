@@ -52,9 +52,9 @@ void DataProcess::request_message(PackagePtr package)
 
 void DataProcess::response_message(PackagePtr package)
 {
-    handle_response_message(package);
+    // handle_response_message(package);
 
-    // get_io_service().post(std::bind(&DataProcess::handle_response_message, this, package));
+    get_io_service().post(std::bind(&DataProcess::handle_response_message, this, package));
 }
 
 void DataProcess::handle_request_message(PackagePtr package)
