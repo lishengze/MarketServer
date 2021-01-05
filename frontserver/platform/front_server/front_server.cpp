@@ -269,6 +269,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             for (AtomKlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
             {
                 cout << get_sec_time_str(atom_kline->tick_) << ", "
+                     << p_rsp_kline_data->symbol_ << ", "
                      << "open: " << atom_kline->open_ << ", "
                      << "close: " << atom_kline->close_ << ", "
                      << "high: " << atom_kline->high_ << ", "
