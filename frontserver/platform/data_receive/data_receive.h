@@ -53,7 +53,8 @@ public:
 
     std::shared_ptr<std::thread>  test_thread_{nullptr};
     
-    bool                          is_test_{true};
+    bool                          is_test_kline{false};
+    bool                          is_test_depth{false};    
 
     map<string, int>              kline_symbol_data_count_;
 };

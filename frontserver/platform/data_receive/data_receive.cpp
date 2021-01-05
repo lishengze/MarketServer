@@ -32,7 +32,7 @@ void DataReceive::launch()
 
     init_grpc_interface();
 
-    if (is_test_)
+    if (is_test_kline || is_test_depth)
     {
         test_thread_ = std::make_shared<std::thread>(&DataReceive::test_main, this);
     }    
@@ -192,6 +192,10 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {    
+    if (is_test_depth)
+    {
+        return -1;
+    }    
     get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
     return 1;
 }
@@ -199,7 +203,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
 {    
-    if (is_test_)
+    if (is_test_kline)
     {
         return -1;
     }

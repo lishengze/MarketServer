@@ -29,11 +29,9 @@ def on_error(ws, error):
     print("Error")
     print(error)
 
-
 def on_close(ws):
     print("Server Closed")
     print("### closed ###")
-
 
 def sub_btc_usdt(ws, sub_symbol):
     time.sleep(15)
