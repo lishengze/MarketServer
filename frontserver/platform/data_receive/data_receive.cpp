@@ -257,13 +257,23 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     {
         const KlineData& kline = klines[i];
 
-        if (kline_symbol_data_count_.find(symbol)== kline_symbol_data_count_.end())
+        // 过滤掉逆序的时间;
+        if (kline_symbol_last_time_.find(symbol)== kline_symbol_last_time_.end())
         {
-            kline_symbol_data_count_[symbol] == 0;
+            kline_symbol_last_time_[symbol] == kline.index;
+        }
+        else if (kline_symbol_last_time_[symbol] >= kline.index)
+        {
+            std::stringstream stream_obj;
+            stream_obj  << "[Kine] Time Seq is Error , "<< symbol << " current time is " << get_sec_time_str(kline.index)
+                        << ", last update time is " << get_sec_time_str(kline_symbol_last_time_[symbol]) << "\n";
+
+            LOG_ERROR(stream_obj.str());
+            continue;
         }
         else
         {
-            kline_symbol_data_count_[symbol]++;
+           kline_symbol_last_time_[symbol] = kline.index;
         }
         
         std::stringstream stream_obj;

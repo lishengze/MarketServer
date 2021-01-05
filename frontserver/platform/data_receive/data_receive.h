@@ -57,4 +57,5 @@ public:
     bool                          is_test_depth{false};    
 
     map<string, int>              kline_symbol_data_count_;
+    map<string, type_tick>        kline_symbol_last_time_;
 };
