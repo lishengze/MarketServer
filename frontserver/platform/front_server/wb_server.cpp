@@ -79,7 +79,7 @@ void WBServer::on_open(WebsocketClass * ws)
 
     string symbols_str = front_server_->get_symbols_str();
 
-    cout << "all symbols str: " << symbols_str << endl;
+    // cout << "all symbols str: " << symbols_str << endl;
 
     ws->send(symbols_str, uWS::OpCode::TEXT);
 }
@@ -87,12 +87,7 @@ void WBServer::on_open(WebsocketClass * ws)
 // 处理各种请求
 void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode code)
 {
-    // cout << utrade::pandora::NanoTimeStr() << " Req Msg: " << msg << endl;
     string trans_msg(msg.data(), msg.size());
-
-    // cout << "trans_msg: " << trans_msg << endl;
-
-    // LOG_INFO(trans_msg);
 
     process_on_message(trans_msg, ws);
 }
@@ -145,7 +140,7 @@ void WBServer::release()
 
 void WBServer::broadcast(string msg)
 {
-    cout << "broadcast: " << msg << endl;
+    // cout << "broadcast: " << msg << endl;
     for (auto iter:wss_con_set_)
     {
         iter->send(msg);
@@ -249,14 +244,16 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         {
             std::lock_guard<std::mutex> lk(wss_map_mutex_);
+
             WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
+
             ID_TYPE id = ID_MANAGER->get_id();
 
             wss_map_[id] = tmp_ws;
 
             cout << "wss_id: " << id << endl;
 
-            ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, id, nullptr, nullptr);  
+            ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, -1, tmp_ws);  
 
             if (error_id == 0)
             {
@@ -354,6 +351,17 @@ void WBServer::send_data(ID_TYPE id, string msg)
         cout << "wss_id: " << id << ", send: " << msg;
         wss_map_[id]->send(msg);
     }
+}
+
+void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
+{
+    auto iter = wss_con_set_.find(ws);
+
+    if (iter != wss_con_set_.end())
+    {
+        cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
+        (*iter)->send(msg);          
+    }    
 }
 
 void WBServer::clean_client(WebsocketClassThreadSafePtr ws)

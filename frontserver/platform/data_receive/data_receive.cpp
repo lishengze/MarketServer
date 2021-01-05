@@ -58,7 +58,7 @@ void DataReceive::test_kline_data()
     type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
     end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    int test_time_numb = 60 * 24;
+    int test_time_numb = 60 * 2;
 
     double test_max = 100;
     double test_min = 10;

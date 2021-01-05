@@ -327,6 +327,18 @@ class ReqKLineData:public Socket
         assign(ws_id_, ws_id);
     }
 
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, ID_TYPE ws_id,
+                 WebsocketClassThreadSafePtr ws):
+    Socket(ws)
+    {
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(data_count_, data_count);
+        assign(frequency_, freq);
+        assign(ws_id_, ws_id);
+    }    
+
     void reset(const ReqKLineData& other)
     {
         assign(symbol_, other.symbol_);

@@ -286,7 +286,9 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             && p_rsp_kline_data->websocket_)
             {
                 cout << "WEBSOCKET  Send Data!" << endl;
-                p_rsp_kline_data->websocket_->send(kline_data_str);
+                // p_rsp_kline_data->websocket_->send(kline_data_str);
+
+                wb_server_->send_data(p_rsp_kline_data->websocket_, kline_data_str);
             }
 
             if (p_rsp_kline_data->ws_id_ != -1)
