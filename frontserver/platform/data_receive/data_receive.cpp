@@ -53,12 +53,12 @@ void DataReceive::test_main()
 
 void DataReceive::test_kline_data()
 {
-    string symbol = "BTC_USDT";
+    std::vector<string> symbol_list{"BTC_USDT", "XRP_USDT"};
     int frequency_secs = 60;
     type_tick end_time_secs = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
     end_time_secs = mod_secs(end_time_secs, frequency_secs);
 
-    int test_time_numb = 60 * 2;
+    int test_time_numb = 60 * 24;
 
     double test_max = 100;
     double test_min = 10;
@@ -77,15 +77,15 @@ void DataReceive::test_kline_data()
         double low = std::min(open, close) - offset(gen);
         double volume = dis(gen) * 5;
 
-        KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
+        for (auto symbol:symbol_list)
+        {
+            KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
 
-        std::vector<KlineData> vec_kline{*kline_data};
+            std::vector<KlineData> vec_kline{*kline_data};
 
-        handle_kline_data("", symbol.c_str(), -1, vec_kline);
+            handle_kline_data("", symbol.c_str(), -1, vec_kline);
 
-        // boost::shared_ptr<KlineData> cur_kline_data = boost::make_shared<KlineData>(symbol, cur_time, open, high, low, close,volume);
-
-        // kline_data_[symbol][cur_time] = new KlineData{symbol, cur_time, open, high, low, close, volume};
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
@@ -103,15 +103,21 @@ void DataReceive::test_kline_data()
         double low = std::min(open, close) - offset(gen);
         double volume = dis(gen) * 5;
 
-        KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
+        for (auto symbol:symbol_list)
+        {
 
-        std::vector<KlineData> vec_kline{*kline_data};
+            KlineData* kline_data = new KlineData(symbol, cur_time, open, high, low, close, volume);
 
-        handle_kline_data("", symbol.c_str(), -1, vec_kline);        
+            std::vector<KlineData> vec_kline{*kline_data};
 
-        cout << "Update: " <<  get_sec_time_str(cur_time) << " " << symbol << ", "
-            << "open: " << open << ", high: " << high << ", "
-            << "low: " << low << ", close: " << volume << "\n" << endl;        
+            handle_kline_data("", symbol.c_str(), -1, vec_kline);   
+
+            cout << "Update: " <<  get_sec_time_str(cur_time) << " " << symbol << ", "
+                << "open: " << open << ", high: " << high << ", "
+                << "low: " << low << ", close: " << volume << "\n" << endl;               
+        }    
+
+     
     }
 }
 
