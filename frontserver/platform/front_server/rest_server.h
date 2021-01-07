@@ -67,6 +67,7 @@ class RestServer:public utrade::pandora::ThreadBasePool
 
         static string                           ENQUIRY_REQUEST;
         static string                           ENQUIRY_REQUEST_SYMBOL;
+        static string                           ENQUIRY_REQUEST_TYPE;
         static string                           ENQUIRY_REQUEST_VOLUME;
         static string                           ENQUIRY_REQUEST_AMOUNT;
 

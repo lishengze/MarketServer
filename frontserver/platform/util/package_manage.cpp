@@ -74,7 +74,7 @@ PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, int package_
     return package;       
 }
 
-PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, HttpResponseThreadSafePtr res)
+PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, HttpResponseThreadSafePtr res)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
@@ -87,7 +87,7 @@ PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, Htt
 
         ReqEnquiry* p_req_enquiry = GET_NON_CONST_FIELD(package, ReqEnquiry);
 
-        p_req_enquiry->set(symbol, volume, amount, res);        
+        p_req_enquiry->set(symbol, volume, amount, type, res);        
     }
     catch(const std::exception& e)
     {
@@ -158,3 +158,30 @@ PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadS
     
     return package;      
 }
+
+PackagePtr GetRspErrMsgPackage(string err_msg, int err_id, 
+                                HttpResponseThreadSafePtr res, 
+                                WebsocketClassThreadSafePtr ws)
+{
+    PackagePtr package = PackagePtr{new Package{}};
+    try
+    {    
+        ID_TYPE id = ID_MANAGER->get_id();
+        package->SetPackageID(id);
+        package->prepare_response(UT_FID_RspErrorMsg, id);
+
+        CREATE_FIELD(package, RspEnquiry);
+
+        RspErrorMsg* p_rsp_err = GET_NON_CONST_FIELD(package, RspErrorMsg);
+
+        p_rsp_err->set(err_msg, err_id, res, ws);
+    
+        return package;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+    }
+    
+    return package;
+}                                

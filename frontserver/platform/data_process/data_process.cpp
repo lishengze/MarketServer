@@ -105,7 +105,7 @@ void DataProcess::handle_response_message(PackagePtr package)
 
 void DataProcess::request_enquiry_package(PackagePtr package)
 {
-    
+    depth_process_->request_enquiry_package(package);
 }
 
 void DataProcess::request_kline_package(PackagePtr package)

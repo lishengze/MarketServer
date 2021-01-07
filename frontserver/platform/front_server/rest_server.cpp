@@ -21,6 +21,7 @@ string RestServer::KLINE_REQUEST_FREQUENCY = "frequency";
 
 string RestServer::ENQUIRY_REQUEST = "enquiry";
 string RestServer::ENQUIRY_REQUEST_SYMBOL = "symbol";
+string RestServer::ENQUIRY_REQUEST_TYPE = "type";
 string RestServer::ENQUIRY_REQUEST_VOLUME = "volume";
 string RestServer::ENQUIRY_REQUEST_AMOUNT = "amount";
 
@@ -66,9 +67,9 @@ void RestServer::listen()
 
         cout << "AbortEnd!" << endl;
 
-        get_io_service().post(std::bind(&RestServer::process_get, this, response, request));
+        // get_io_service().post(std::bind(&RestServer::process_get, this, response, request));
 
-        // process_get(response, request);
+        process_get(response, request);
 
     }).post("/*", [this](HttpResponse * response, HttpRequest * request){
         process_post(response, request);
@@ -171,7 +172,11 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
                 }
                 else if (param_vec[1] == RestServer::ENQUIRY_REQUEST)
                 {
-                    // if (!)
+                    if (!process_v1_request_enquiry(param_vec[2], error_msg, response))
+                    {
+                        send_err_msg(response, error_msg);
+                        return;
+                    }
                 }
                 else
                 {
@@ -197,6 +202,10 @@ bool RestServer::process_v1_request_enquiry(string& query_param, string& error_m
     {
         error_msg += "Query Parmas Lost Param: " + RestServer::ENQUIRY_REQUEST_SYMBOL;
     }    
+    else if (query_param.find(RestServer::ENQUIRY_REQUEST_SYMBOL) == std::string::npos)
+    {
+        error_msg += "Query Parmas Lost Param: " + RestServer::ENQUIRY_REQUEST_TYPE;
+    }
     else if (query_param.find(RestServer::ENQUIRY_REQUEST_VOLUME) == std::string::npos && 
              query_param.find(RestServer::ENQUIRY_REQUEST_AMOUNT) == std::string::npos )
     {
@@ -215,24 +224,29 @@ bool RestServer::process_v1_request_enquiry(string& query_param, string& error_m
         cout << endl;          
 
         string symbol = query_vec[0].substr(query_vec[0].find("=")+1);
+        int    type = std::stoi(query_vec[1].substr(query_vec[1].find("=")+1));
         double volume = -1;
         double amount = -1;
+
         if (query_param.find(RestServer::ENQUIRY_REQUEST_VOLUME) != std::string::npos)
         {
-            volume = std::stod(query_vec[1].substr(query_vec[1].find("=")+1));
+            volume = std::stod(query_vec[2].substr(query_vec[2].find("=")+1));
         }
 
-        if (query_param.find(RestServer::ENQUIRY_REQUEST_AMOUNT) == std::string::npos)
+        if (query_param.find(RestServer::ENQUIRY_REQUEST_AMOUNT) != std::string::npos)
         {
-            amount = std::stod(query_vec[1].substr(query_vec[1].find("=")+1));
+            amount = std::stod(query_vec[2].substr(query_vec[2].find("=")+1));
         }       
 
+        cout << "symbol: " << symbol << ", type: " << type << ", volume: " << volume << ", amount: " << amount << endl;
 
         HttpResponseThreadSafePtr res_ptr = boost::make_shared<HttpResponseThreadSafe>(res);
 
-        PackagePtr package = GetReqEnquiryPackage(symbol, volume, amount, res_ptr);
-
+        PackagePtr package = GetReqEnquiryPackage(symbol, volume, amount, type, res_ptr);
+        
         front_server_->deliver_request(package);
+
+        result = true;
     }
     return result;
 }

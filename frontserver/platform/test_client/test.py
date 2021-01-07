@@ -92,8 +92,8 @@ def on_open(ws):
 
 def test_websocket():
     # websocket.enableTrace(True)
-    # ip = "ws://36.255.220.139"
-    ip = "ws://127.0.0.1"
+    ip = "ws://36.255.220.139"
+    # ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
@@ -109,10 +109,7 @@ def test_http_restful():
     # test_urllib()
     test_http_client()
 
-def test_http_client():
-    uri = "127.0.0.1:9115"
-    # uri = "http://127.0.0.1"
-    conn = http.client.HTTPConnection(uri)
+def get_http_kline_str():
     symbol = "BTC_USDT"
     frequency = 60 * 5
     end_time = int(time.time())
@@ -120,14 +117,29 @@ def test_http_client():
     start_time = end_time - 60 * 30
     query_str = ("v1/kline_request/symbol=%s&start_time=%d&end_time=%d&frequency=%d" \
                 % (symbol, start_time, end_time, frequency))
+    return query_str  
+
+def get_http_enquiry_str():
+    symbol = "BTC_USDT"
+    volume = 10
+    direction_type = 0
+    query_str = ("v1/enquiry/symbol=%s&type=%d&volume=%d" \
+                % (symbol, direction_type, volume))
+    return query_str      
+
+def test_http_client():
+    uri = "127.0.0.1:9115"
+    # uri = "http://127.0.0.1"
+    conn = http.client.HTTPConnection(uri)
+    # query_str = get_http_kline_str()
+    query_str = get_http_enquiry_str()
 
     print("query_str: %s" % (query_str))
 
     conn.request("GET", query_str)
     res =conn.getresponse()
     print(res.read().decode("utf-8"))
-    # print(r1.text)  
-
+    
 def test_urllib():
     uri = "http://127.0.0.1:9115"
     response = urllib.request.urlopen(uri)

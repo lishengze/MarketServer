@@ -31,6 +31,7 @@ struct SDepthData
         assign(seqno, other.seqno);
         assign(ask_length, other.ask_length);
         assign(bid_length, other.bid_length);
+        assign(is_raw, other.is_raw);
     
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -49,6 +50,7 @@ struct SDepthData
         assign(seqno, other.seqno);
         assign(ask_length, other.ask_length);
         assign(bid_length, other.bid_length);
+        assign(is_raw, other.is_raw);
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -66,6 +68,8 @@ struct SDepthData
     type_length ask_length;
     SDepthLevelData bids[DEPCH_LEVEL_COUNT];
     type_length bid_length;
+
+    bool is_raw{false};
     
     SDepthData() {
         tick = 0;
@@ -75,6 +79,7 @@ struct SDepthData
     }
     static const long Fid = UT_FID_SDepthData;
 };
+using SDepthDataPtr = boost::shared_ptr<SDepthData>;
 
 const long UT_FID_KlineData = 0x10001;
 struct KlineData

@@ -41,6 +41,8 @@ public:
 
     void response_enquiry_data_package(PackagePtr package);
 
+    void response_errmsg_package(PackagePtr package);
+
     void process_symbols_package(PackagePtr package);
 
     void process_enhanceddata_package(PackagePtr package);

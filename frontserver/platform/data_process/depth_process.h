@@ -30,13 +30,19 @@ public:
     
     void response_new_symbol(string symbol);
 
+    double compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount);
+
     using RspRiskCtrledDepthDataPackagePtr = PackagePtr; 
+
 
 private:
     map<string, RspRiskCtrledDepthDataPackagePtr>    depth_data_;
-    std::mutex                                  depth_data_mutex_;
+    map<string, SDepthDataPtr>                       raw_depth_data_;
 
-    DataProcessPtr                              process_engine_;    
+    std::mutex                                       raw_depth_data_mutex_;
+    std::mutex                                       depth_data_mutex_;
+
+    DataProcessPtr                                   process_engine_;    
 };
 
 FORWARD_DECLARE_PTR(DepthProces);

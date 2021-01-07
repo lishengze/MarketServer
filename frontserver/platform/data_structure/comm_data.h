@@ -8,6 +8,8 @@
 #include "base_data.h"
 #include "hub_struct.h"
 
+
+
 const long UT_FID_RspSymbolListData = 0x10002;
 class RspSymbolListData
 {
@@ -89,7 +91,7 @@ const long UT_FID_ReqEnquiry = 0x10005;
 class ReqEnquiry:public Socket
 {
     public:
-        ReqEnquiry(string symbol, double volumn, double amount, 
+        ReqEnquiry(string symbol, double volumn, double amount, int type,
                     HttpResponseThreadSafePtr res=nullptr, WebsocketClassThreadSafePtr ws=nullptr):
         Socket(res, ws)
         {
@@ -109,12 +111,13 @@ class ReqEnquiry:public Socket
             comm_type      = other.comm_type;               
         }
 
-        void set(string symbol, double volumn, double amount, 
+        void set(string symbol, double volumn, double amount, int type,
                  HttpResponseThreadSafePtr res=nullptr, WebsocketClassThreadSafePtr ws=nullptr)
         {
             assign(symbol_, symbol);
             assign(volume_, volumn);
-            assign(amount_, amount);       
+            assign(amount_, amount); 
+            assign(type_, type);
 
             if (res != nullptr)
             {
@@ -129,8 +132,8 @@ class ReqEnquiry:public Socket
         }        
     static const long Fid = UT_FID_ReqEnquiry;
 
-    private:
         symbol_type symbol_;
+        int         type_{-1};
         double      volume_{-1};
         double      amount_{-1};
 
@@ -169,14 +172,13 @@ class RspEnquiry:public Socket
 
         string get_json_str();
 
+    static string   json_type_; 
+
     static const long Fid = UT_FID_RspEnquiry;
     
     private:
         double          price_;
-        symbol_type     symbol_;
-        static string   rsp_json_type_;
-
-    
+        symbol_type     symbol_;  
 };
 FORWARD_DECLARE_PTR(RspEnquiry);
 
@@ -252,3 +254,46 @@ class RspKLineData:public Socket
         static const long Fid = UT_FID_RspKLineData;
 };
 FORWARD_DECLARE_PTR(RspKLineData);
+
+const long UT_FID_RspErrorMsg = 0x10009;
+class RspErrorMsg:public Socket
+{
+    public:
+        RspErrorMsg(string err_msg, int err_id, 
+                    HttpResponseThreadSafePtr res=nullptr, 
+                    WebsocketClassThreadSafePtr ws=nullptr):
+        Socket(res, ws)
+        {
+            assign(err_msg_, err_msg);
+            assign(err_id_, err_id);
+        }
+
+        void set(string err_msg, int err_id,  
+                 HttpResponseThreadSafePtr res=nullptr, 
+                 WebsocketClassThreadSafePtr ws=nullptr)
+        {
+            assign(err_msg_, err_msg);
+            assign(err_id_, err_id);
+
+            if (res != nullptr)
+            {
+                http_response_ = res;
+                comm_type = COMM_TYPE::HTTP;
+            }
+            else if (ws != nullptr)
+            {
+                websocket_ = ws;
+                comm_type = COMM_TYPE::WEBSOCKET;
+            }                         
+        }
+
+        string get_json_str();
+
+    static const long Fid = UT_FID_RspErrorMsg;
+    
+    private:
+        int             err_id_;
+        string          err_msg_;
+        static string   json_type_;  
+};
+FORWARD_DECLARE_PTR(RspErrorMsg);

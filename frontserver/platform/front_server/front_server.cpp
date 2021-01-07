@@ -83,10 +83,15 @@ void FrontServer::handle_response_message(PackagePtr package)
             break;                
         case UT_FID_RspKLineData:
             response_kline_data_package(package);
+            break;
 
         case UT_FID_RspEnquiry:
             response_enquiry_data_package(package);
+            break;
 
+        case UT_FID_RspErrorMsg:
+            response_errmsg_package(package);
+            break;
         default:        
             cout << "Unknow Package" << endl;
             break;
@@ -360,6 +365,8 @@ void FrontServer::response_enquiry_data_package(PackagePtr package)
         {
             string json_str = p_rsp_enquiry->get_json_str();
 
+            // string json_str = "test";
+
             LOG_DEBUG(json_str);
 
             if ((p_rsp_enquiry->comm_type == COMM_TYPE::HTTP || p_rsp_enquiry->comm_type == COMM_TYPE::HTTPS) 
@@ -376,14 +383,52 @@ void FrontServer::response_enquiry_data_package(PackagePtr package)
         }
         else
         {
-            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+            LOG_ERROR("FrontServer::response_enquiry_data_package RspKLineData is NULL!");
         }
         
     }
     catch(const std::exception& e)
     {
         std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_kline_data_package: " << e.what() << "\n";
+        stream_obj << "[E] FrontServer::response_enquiry_data_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }
+}
+
+void FrontServer::response_errmsg_package(PackagePtr package)
+{
+    try
+    {
+        cout << "FrontServer::response_enquiry_data_package " << endl;
+
+        RspErrorMsg* p_rsp_enquiry = GET_NON_CONST_FIELD(package, RspErrorMsg);
+
+        if (p_rsp_enquiry)
+        {
+            string json_str = p_rsp_enquiry->get_json_str();
+
+            LOG_DEBUG(json_str);
+
+            if (p_rsp_enquiry->http_response_)
+            {
+                p_rsp_enquiry->http_response_->end(json_str);
+            }
+
+            if (p_rsp_enquiry->websocket_)
+            {
+                wb_server_->send_data(p_rsp_enquiry->websocket_, json_str);
+            }
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::response_errmsg_package RspKLineData is NULL!");
+        }
+        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_errmsg_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
 }

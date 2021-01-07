@@ -264,6 +264,18 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     std::stringstream stream_obj;
     stream_obj  << "[Depth] handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     
+    cout << "Ask: length: " << depth.ask_length << endl;
+    for ( int i = 0; i < depth.ask_length; ++i)
+    {
+        cout << depth.asks[i].price.get_value() << endl;
+    }
+
+    cout << "\nBid, length: " << depth.bid_length << endl;
+    for ( int i = 0; i < depth.bid_length; ++i)
+    {
+        cout << depth.bids[i].price.get_value() << endl;
+    }    
+
     LOG_INFO(stream_obj.str());
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
