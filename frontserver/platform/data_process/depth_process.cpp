@@ -117,15 +117,38 @@ void DepthProces::request_enquiry_package(PackagePtr package)
                  << ", volume: " << p_req_enquiry->volume_ 
                  << ", amount: " << p_req_enquiry->amount_ << endl;
 
-            SDepthDataPtr depth_data = raw_depth_data_[string(p_req_enquiry->symbol_ )];
-
-            price = compute_enquiry_price(depth_data, p_req_enquiry->type_, p_req_enquiry->volume_, p_req_enquiry->amount_);
-
-            if (price != -1)
+            std::lock_guard<std::mutex> lk(raw_depth_data_mutex_);
+            if (raw_depth_data_.find(symbol) != raw_depth_data_.end())
             {
-                PackagePtr  rsp_package = GetRspEnquiryPackage(p_req_enquiry->symbol_, price, p_req_enquiry->http_response_);
-                process_engine_->deliver_response(rsp_package);
+                SDepthDataPtr depth_data = raw_depth_data_[symbol];
+
+                cout << "Ask: length: " << depth_data->ask_length << endl;
+                for ( int i = 0; i < depth_data->ask_length; ++i)
+                {
+                    cout << depth_data->asks[i].price.get_value() << ", " << depth_data->asks[i].volume.get_value() << endl;
+                }
+
+                cout << "\nBid, length: " << depth_data->bid_length << endl;
+                for ( int i = 0; i < depth_data->bid_length; ++i)
+                {
+                    cout << depth_data->bids[i].price.get_value() << ", " << depth_data->bids[i].volume.get_value() << endl;
+                }    
+
+
+                price = compute_enquiry_price(depth_data, p_req_enquiry->type_, p_req_enquiry->volume_, p_req_enquiry->amount_);
+
+                if (price != -1)
+                {
+                    PackagePtr  rsp_package = GetRspEnquiryPackage(symbol, price, p_req_enquiry->http_response_);
+                    process_engine_->deliver_response(rsp_package);
+                }
             }
+            else
+            {
+                LOG_ERROR(string("\nRaw Depth data does not have symbol: ") + symbol );
+            }
+            
+
         }
         else
         {
@@ -145,11 +168,11 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
     double price = -1;
     if (type == 0)
     {
-
         if (volume != -1)
         {
             double sum_amount = 0;
-            for (int i = depth_data->ask_length; i >= 0; --i)
+            int i;
+            for (i = depth_data->ask_length; i >= 0; --i)
             {
                 if (volume - depth_data->asks[i].volume.get_value() >= 0)
                 {
@@ -164,8 +187,6 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
             }
             if (i < 0)
             {
-
-                return price;
             }
             else
             {
@@ -175,11 +196,12 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
         else if (amount != -1)
         {
             double sum_volume = 0;
-            for (int i = depth_data->ask_length; i >= 0; --i)
+            int i;
+            for (i = depth_data->ask_length; i >= 0; --i)
             {
-                if (amout - depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value() >= 0)
+                if (amount - depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value() >= 0)
                 {
-                    amout -= depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();
+                    amount -= depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();
                     sum_volume += depth_data->asks[i].volume.get_value();
                 }
                 else
@@ -206,7 +228,8 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
         if (volume != -1)
         {
             double sum_amount = 0;
-            for (int i = 0; i < depth_data->bid_length; ++i)
+            int i;
+            for (i = 0; i < depth_data->bid_length; ++i)
             {
                 if (volume - depth_data->bids[i].volume.get_value() >= 0)
                 {
@@ -231,11 +254,12 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
         else if (amount != -1)
         {
             double sum_volume = 0;
-            for (int i = 0; i < depth_data->bid_length; ++i)
+            int i;
+            for (i = 0; i < depth_data->bid_length; ++i)
             {
-                if (amout - depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value() >= 0)
+                if (amount - depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value() >= 0)
                 {
-                    amout -= depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value();
+                    amount -= depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value();
                     sum_volume += depth_data->bids[i].volume.get_value();
                 }
                 else

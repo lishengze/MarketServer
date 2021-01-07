@@ -121,7 +121,7 @@ def get_http_kline_str():
 
 def get_http_enquiry_str():
     symbol = "BTC_USDT"
-    volume = 10
+    volume = 2
     direction_type = 0
     query_str = ("v1/enquiry/symbol=%s&type=%d&volume=%d" \
                 % (symbol, direction_type, volume))
@@ -148,7 +148,7 @@ def test_urllib():
 
     
 if __name__ == "__main__":
-    test_websocket()
+    # test_websocket()
 
-    # test_http_restful()
+    test_http_restful()
 
