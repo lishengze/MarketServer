@@ -55,6 +55,7 @@ class RestServer:public utrade::pandora::ThreadBasePool
 
 
         static string                           PARMA_SPLIT_CHAR;
+        static string                           QUERY_START_CHAR;
         static string                           QUERY_SPLIT_CHAR;
 
         static string                           VERSION1;

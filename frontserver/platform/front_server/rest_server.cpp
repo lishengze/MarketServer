@@ -9,6 +9,7 @@
 #include "../log/log.h"
 
 string RestServer::PARMA_SPLIT_CHAR = "/";
+string RestServer::QUERY_START_CHAR = "?";
 string RestServer::QUERY_SPLIT_CHAR = "&";
 
 string RestServer::VERSION1 = "v1";
@@ -132,9 +133,13 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
         // return;
 
         cout << "getUrl: " << request->getUrl() << "; \n"
-            << "getMethod: " << request->getMethod() << "; \n"
-            << "getQuery: " << request->getQuery() << "; \n"
-            << "getParameter: " << request->getParameter(1) << endl;
+             << "getMethod: " << request->getMethod() << "; \n"
+             << "getQuery: " << request->getQuery() << "; \n"
+             << "getParameter: " << request->getParameter(1) << endl;
+
+        std::string_view query_string_view = request->getQuery();
+
+        std::string query_string(query_string_view.data(), query_string_view.size());
 
         string url = string(request->getUrl().data(), request->getUrl().size());
 
@@ -152,9 +157,9 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
         }
         cout << endl;
 
-        if (param_vec.size() != 3)
+        if (param_vec.size() != 2)
         {
-            error_msg = "Url can only has tow / ";
+            error_msg = "Url Needs QueryVersion/QueryType";
             send_err_msg(response, error_msg);
             return;
         }
@@ -162,17 +167,19 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
         {
             if (param_vec[0] == RestServer::VERSION1)
             {
-                if (param_vec[1] == RestServer::KLINE_REQUEST)
+                string query_type = param_vec[1];
+
+                if (query_type == RestServer::KLINE_REQUEST)
                 {
-                    if (!process_v1_request_kline(param_vec[2], error_msg, response, request))             
+                    if (!process_v1_request_kline(query_string, error_msg, response, request))             
                     {
                         send_err_msg(response, error_msg);
                         return;
                     }
                 }
-                else if (param_vec[1] == RestServer::ENQUIRY_REQUEST)
+                else if (query_type == RestServer::ENQUIRY_REQUEST)
                 {
-                    if (!process_v1_request_enquiry(param_vec[2], error_msg, response))
+                    if (!process_v1_request_enquiry(query_string, error_msg, response))
                     {
                         send_err_msg(response, error_msg);
                         return;
@@ -183,8 +190,9 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
                     error_msg = string("Unknown Request ") + param_vec[1];
                     send_err_msg(response, error_msg);  
                     return;
-                }                                
+                }        
             }
+
         }
         return;
     }
@@ -341,8 +349,16 @@ void RestServer::send_err_msg(HttpResponse * response, string msg)
     try
     {
         LOG_INFO(string("send err msg: ") + msg);
-        nlohmann::json json_data;     
-        json_data["err_msg"] = msg;
+
+        nlohmann::json json_data;
+        nlohmann::json data_list;
+        nlohmann::json data;
+        data_list[0] = data;
+
+        json_data["code"] = 1;
+        json_data["msg"] = msg;   
+        json_data["data"] = data_list;   
+
         response->end(json_data.dump());
     }
     catch(const std::exception& e)
