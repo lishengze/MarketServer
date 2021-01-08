@@ -72,6 +72,7 @@ void WBServer::init_websocket_server()
 
 void WBServer::on_open(WebsocketClass * ws)
 {
+    cout << "\nWBServer::on_open ws: " << ws << endl;
     store_ws(ws);
 
     string symbols_str = front_server_->get_symbols_str();
@@ -137,6 +138,8 @@ void WBServer::release()
 
 void WBServer::store_ws(WebsocketClass * ws)
 {
+    std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
+
     WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws);
 
     auto iter = wss_con_set_.find(ws_safe);
@@ -174,6 +177,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         else
         {
             store_ws(ws);
+            cout << "\nWBServer::process_on_message: ws: " << ws << endl;
 
             if (js["type"].get<string>() == "sub_symbol")
             {
@@ -359,6 +363,7 @@ void WBServer::send_data(ID_TYPE id, string msg)
 
 void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 {
+
     auto iter = wss_con_set_.find(ws);
 
     
@@ -383,6 +388,8 @@ void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 
 void WBServer::clean_client(WebsocketClassThreadSafePtr ws)
 {
+    std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
+
     if (wss_con_set_.find(ws) != wss_con_set_.end())
     {
         wss_con_set_.erase(ws);

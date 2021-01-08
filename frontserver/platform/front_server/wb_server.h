@@ -96,6 +96,7 @@ class WBServer
 
         std::set<WebsocketClassThreadSafePtr, 
               LessWebsocketClassThreadSafePtr>  wss_con_set_;
+        std::mutex                              wss_con_set_mutex_;
  
         boost::shared_ptr<std::thread>          listen_thread_;
 
