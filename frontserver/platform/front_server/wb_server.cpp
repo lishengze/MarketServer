@@ -174,7 +174,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         else
         {
             store_ws(ws);
-            
+
             if (js["type"].get<string>() == "sub_symbol")
             {
                 process_sub_info(ori_msg, ws);
@@ -361,11 +361,24 @@ void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 {
     auto iter = wss_con_set_.find(ws);
 
+    
+    cout << "Stored WS: " << wss_con_set_.size() << endl;
+    for (auto ws:wss_con_set_)
+    {
+        cout << ws->get_ws() << endl;
+    }
+    cout << "currrent ws: " << ws->get_ws() << endl;
+
     if (iter != wss_con_set_.end())
     {
         cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
         (*iter)->send(msg);          
     }    
+    else
+    {
+        LOG_ERROR("WBServer::send_data can't find ws");
+    }
+    
 }
 
 void WBServer::clean_client(WebsocketClassThreadSafePtr ws)
