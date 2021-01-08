@@ -119,6 +119,8 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
         assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
         assign(p_rsp_kline_data->data_count_, main_data.size());
 
+        cout << "GetNewRspKLineDataPackage: " << p_rsp_kline_data->websocket_->get_ws() << ", " << pReqKlineData->websocket_->get_ws() << endl;
+
         for (AtomKlineDataPtr atom_kline:main_data)
         {
             p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);

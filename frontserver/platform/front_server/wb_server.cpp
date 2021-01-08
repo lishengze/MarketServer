@@ -265,11 +265,24 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
         {
             WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
 
-            ReqKLineData req_kline_data(symbol, start_time, end_time, data_count, frequency, -1, tmp_ws);  
-
             if (error_id == 0)
             {
-                front_server_->request_kline_data(req_kline_data);                     
+                PackagePtr package = PackagePtr{new Package{}};
+        
+                package->SetPackageID(ID_MANAGER->get_id());
+
+                package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
+                CREATE_FIELD(package, ReqKLineData);
+
+                ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+                if (p_req_kline_data)
+                {
+                    p_req_kline_data->set(symbol, start_time, end_time, data_count, frequency, tmp_ws);  
+
+                    front_server_->deliver_request(package);
+                }                   
             }
             else
             {

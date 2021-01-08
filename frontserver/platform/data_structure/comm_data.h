@@ -210,6 +210,21 @@ class ReqKLineData:public Socket
         assign(ws_id_, ws_id);
     }    
 
+    void set(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
+             WebsocketClassThreadSafePtr ws)
+    {
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(data_count_, data_count);
+        assign(frequency_, freq);
+
+        websocket_ = ws;
+        comm_type = COMM_TYPE::WEBSOCKET;    
+
+        cout << "ReqKLineData::set ws" << ws->get_ws() <<endl;       
+    }
+
     void reset(const ReqKLineData& other)
     {
         assign(symbol_, other.symbol_);
