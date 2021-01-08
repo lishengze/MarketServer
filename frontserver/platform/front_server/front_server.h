@@ -29,8 +29,6 @@ public:
 
     void request_all_symbol();
 
-    void request_kline_data(const ReqKLineData& req_kline);
-
     void request_depth_data(const ReqRiskCtrledDepthData& req_depth);
 
     void process_rtn_depth_package(PackagePtr package);
@@ -53,12 +51,7 @@ public:
 
     string get_heartbeat_str();
 
-    void handle_request_kline_data(const ReqKLineData* req_kline);
-
     void handle_request_depth_data(const ReqRiskCtrledDepthData* req_depth);
-
-    // void handle_request_kline_data(PackagePtr package);
-
 
 private:
     WBServerPtr         wb_server_;    
