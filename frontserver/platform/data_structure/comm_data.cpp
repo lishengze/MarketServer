@@ -64,21 +64,32 @@ string RspEnquiry::get_json_str()
     string result;
 
     nlohmann::json json_data;
-    json_data["price"] = std::to_string(price_);
-    json_data["symbol"] = string(symbol_);
-    json_data["type"] = string(json_type_);   
+    nlohmann::json data_list;
+    nlohmann::json data;
+
+    data["price"] = std::to_string(price_);
+    data["symbol"] = string(symbol_);
+    data["type"] = string(json_type_); 
+    data_list[0] = data; 
+
+    json_data["code"] = 0;
+    json_data["msg"] = "";   
+    json_data["data"] = data_list;    
+
     return json_data.dump(); 
 }
 
 string RspErrorMsg::json_type_="error";
 string RspErrorMsg::get_json_str()
 {
-    string result;
-
     nlohmann::json json_data;
-    json_data["error_msg"] = err_msg_;
-    json_data["error_id"] = std::to_string(err_id_);
-    json_data["type"] = string(json_type_);    
+    nlohmann::json data_list;
+    nlohmann::json data;
+    data_list[0] = data;
+
+    json_data["code"] = err_id_;
+    json_data["msg"] = err_msg_;   
+    json_data["data"] = data_list;   
 
     return json_data.dump();
 }

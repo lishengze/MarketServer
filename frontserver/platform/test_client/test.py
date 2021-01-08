@@ -128,9 +128,8 @@ def get_http_enquiry_str():
     return query_str      
 
 def test_http_client():
-    # uri = "127.0.0.1:9115"
-    uri = "36.255.220.139:9115"
-    # uri = "http://127.0.0.1"
+    uri = "127.0.0.1:9115"
+    # uri = "36.255.220.139:9115"
     conn = http.client.HTTPConnection(uri)
     # query_str = get_http_kline_str()
     query_str = get_http_enquiry_str()
@@ -148,6 +147,6 @@ def test_urllib():
     print("Http Response: \n%s" % (html))    
 
 if __name__ == "__main__":
-    test_websocket()
-    # test_http_restful()
+    # test_websocket()
+    test_http_restful()
 
