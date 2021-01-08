@@ -72,11 +72,7 @@ void WBServer::init_websocket_server()
 
 void WBServer::on_open(WebsocketClass * ws)
 {
-    WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws);
-
-    ws_safe->set_alive(true);
-
-    wss_con_set_.insert(ws_safe);
+    store_ws(ws);
 
     string symbols_str = front_server_->get_symbols_str();
 
@@ -139,6 +135,23 @@ void WBServer::release()
 
 }
 
+void WBServer::store_ws(WebsocketClass * ws)
+{
+    WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws);
+
+    auto iter = wss_con_set_.find(ws_safe);
+    if ( iter != wss_con_set_.end())
+    {
+        (*iter)->set_alive(true);
+    }
+    else
+    {
+        ws_safe->set_alive(true);
+
+        wss_con_set_.insert(ws_safe);
+    }
+}
+
 void WBServer::broadcast(string msg)
 {
     // cout << "broadcast: " << msg << endl;
@@ -160,6 +173,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         }
         else
         {
+            store_ws(ws);
+            
             if (js["type"].get<string>() == "sub_symbol")
             {
                 process_sub_info(ori_msg, ws);

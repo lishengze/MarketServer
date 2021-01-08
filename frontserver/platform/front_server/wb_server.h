@@ -57,6 +57,8 @@ class WBServer
 
     void broadcast(string msg);
 
+    void store_ws(WebsocketClass * ws);
+
     void broadcast_enhanced_data(string symbol, string data_str);
     
     void process_on_message(string ori_msg, WebsocketClass * ws);
