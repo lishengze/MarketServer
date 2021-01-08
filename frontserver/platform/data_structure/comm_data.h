@@ -293,7 +293,7 @@ class RspErrorMsg:public Socket
     
     private:
         int             err_id_;
-        string          err_msg_;
+        error_msg_type  err_msg_;
         static string   json_type_;  
 };
 FORWARD_DECLARE_PTR(RspErrorMsg);

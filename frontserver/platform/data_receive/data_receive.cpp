@@ -269,7 +269,7 @@ int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SD
 {
     if (is_test_enquiry)
     {
-        return true;
+        return 1;
     }
     get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
     return 1;
@@ -293,17 +293,17 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
     stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     LOG_DEBUG(stream_obj.str());
 
-    // cout << "Ask: length: " << depth.ask_length << endl;
-    // for ( int i = 0; i < depth.ask_length; ++i)
-    // {
-    //     cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
-    // }
+    cout << "Ask: length: " << depth.ask_length << endl;
+    for ( int i = 0; i < depth.ask_length; ++i)
+    {
+        cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
+    }
 
-    // cout << "\nBid, length: " << depth.bid_length << endl;
-    // for ( int i = 0; i < depth.bid_length; ++i)
-    // {
-    //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
-    // }    
+    cout << "\nBid, length: " << depth.bid_length << endl;
+    for ( int i = 0; i < depth.bid_length; ++i)
+    {
+        cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
+    }    
 
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
@@ -398,7 +398,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         
-        // LOG_INFO(stream_obj.str());
+        LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
