@@ -74,6 +74,7 @@ void DataProcess::handle_request_message(PackagePtr package)
 
         case UT_FID_ReqKLineData:
             request_kline_package(package);
+            return;
 
         case UT_FID_ReqEnquiry:
             request_enquiry_package(package);
