@@ -93,7 +93,7 @@ void FrontServer::handle_response_message(PackagePtr package)
             response_errmsg_package(package);
             break;
         default:        
-            cout << "Unknow Package" << endl;
+            cout << "FrontServer::handle_response_message Unknow Package" << endl;
             break;
     }    
 }

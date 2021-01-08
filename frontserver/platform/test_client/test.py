@@ -82,9 +82,9 @@ def get_sub_kline_str():
 def on_open(ws):
     print("Connected")
 
-    send_str = get_sub_depth_str()
+    # send_str = get_sub_depth_str()
 
-    # send_str = get_sub_kline_str()
+    send_str = get_sub_kline_str()
 
     ws.send(send_str)
 
@@ -92,8 +92,8 @@ def on_open(ws):
 
 def test_websocket():
     # websocket.enableTrace(True)
-    # ip = "ws://36.255.220.139"
-    ip = "ws://127.0.0.1"
+    ip = "ws://36.255.220.139"
+    # ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
@@ -148,6 +148,6 @@ def test_urllib():
     print("Http Response: \n%s" % (html))    
 
 if __name__ == "__main__":
-    # test_websocket()
-    test_http_restful()
+    test_websocket()
+    # test_http_restful()
 
