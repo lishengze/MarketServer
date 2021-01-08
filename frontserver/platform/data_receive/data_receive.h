@@ -55,14 +55,18 @@ public:
 
     void test_kline_data();
 
+    void test_enquiry();
+
     void test_rsp_package();
 
     void test_main();
 
-    std::shared_ptr<std::thread>  test_thread_{nullptr};
+    std::shared_ptr<std::thread>  test_kline_thread_{nullptr};
+    std::shared_ptr<std::thread>  test_enquiry_thread_{nullptr};
     
     bool                          is_test_kline{true};
     bool                          is_test_depth{false};    
+    bool                          is_test_enquiry{true};
 
     map<string, int>              kline_symbol_data_count_;
     map<string, type_tick>        kline_symbol_last_time_;

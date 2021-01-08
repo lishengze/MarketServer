@@ -18,11 +18,19 @@ DataReceive::DataReceive(utrade::pandora::io_service_pool& pool, IPackageStation
 
 DataReceive::~DataReceive()
 {
-    if (!test_thread_)
+    if (!test_kline_thread_)
     {
-        if (test_thread_->joinable())
+        if (test_kline_thread_->joinable())
         {
-            test_thread_->join();
+            test_kline_thread_->join();
+        }
+    }
+
+    if (!test_enquiry_thread_)
+    {
+        if (test_enquiry_thread_->joinable())
+        {
+            test_enquiry_thread_->join();
         }
     }
 }
@@ -33,10 +41,7 @@ void DataReceive::launch()
 
     init_grpc_interface();
 
-    if (is_test_kline || is_test_depth)
-    {
-        test_thread_ = std::make_shared<std::thread>(&DataReceive::test_main, this);
-    }    
+    test_main();    
 }
 
 void DataReceive::init_grpc_interface()
@@ -49,7 +54,16 @@ void DataReceive::test_main()
 {
     // test_rsp_package();
 
-    test_kline_data();
+    if (is_test_enquiry)
+    {
+        test_enquiry_thread_ = std::make_shared<std::thread>(&DataReceive::test_enquiry, this);
+    }
+
+    if (is_test_kline)
+    {
+        test_kline_thread_ = std::make_shared<std::thread>(&DataReceive::test_kline_data, this);
+    }
+    
 }
 
 void DataReceive::test_kline_data()
@@ -116,9 +130,7 @@ void DataReceive::test_kline_data()
             cout << "Update: " <<  get_sec_time_str(cur_time) << " " << symbol << ", "
                 << "open: " << open << ", high: " << high << ", "
                 << "low: " << low << ", close: " << volume << "\n" << endl;               
-        }    
-
-     
+        }         
     }
 }
 
@@ -139,6 +151,40 @@ void DataReceive::test_rsp_package()
         deliver_response(package_new);  
 
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+    }
+}
+
+void DataReceive::test_enquiry()
+{
+    std::vector<string> symbol_list{"BTC_USDT", "XRP_USDT"};
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        SDepthData test_raw_depth;
+
+        test_raw_depth.tick = utrade::pandora::NanoTime() / (1000 * 1000 * 1000);
+        test_raw_depth.ask_length = 50;
+        test_raw_depth.bid_length = 50;
+
+        test_raw_depth.is_raw = true;
+        for (int i = 0; i < test_raw_depth.ask_length; ++i)
+        {
+            test_raw_depth.asks[i].price = 2000 - i * 10;
+            test_raw_depth.asks[i].volume = 5;
+        }
+        for (int i = 0; i < test_raw_depth.bid_length; ++i)
+        {
+            test_raw_depth.bids[i].price = 1000 - i * 10;
+            test_raw_depth.bids[i].volume = 5;
+        }        
+
+        for (auto symbol:symbol_list)
+        {
+            assign(test_raw_depth.symbol, symbol);
+            handle_raw_depth("", symbol.c_str(), test_raw_depth);              
+        }         
     }
 }
 
@@ -221,13 +267,16 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 // 原始深度数据推送
 int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
+    if (is_test_enquiry)
+    {
+        return true;
+    }
     get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
     return 1;
 }
 
 void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
-{
-    
+{    
     if (strlen(symbol) == 0) 
     {
         LOG_ERROR("DataReceive::handle_raw_depth symbol is null! \n");
@@ -239,18 +288,22 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
         // 只处理聚合数据;
         return;
     }
-    
-    cout << "Ask: length: " << depth.ask_length << endl;
-    for ( int i = 0; i < depth.ask_length; ++i)
-    {
-        cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
-    }
 
-    cout << "\nBid, length: " << depth.bid_length << endl;
-    for ( int i = 0; i < depth.bid_length; ++i)
-    {
-        cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
-    }    
+    std::stringstream stream_obj;
+    stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    LOG_DEBUG(stream_obj.str());
+
+    // cout << "Ask: length: " << depth.ask_length << endl;
+    // for ( int i = 0; i < depth.ask_length; ++i)
+    // {
+    //     cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
+    // }
+
+    // cout << "\nBid, length: " << depth.bid_length << endl;
+    // for ( int i = 0; i < depth.bid_length; ++i)
+    // {
+    //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
+    // }    
 
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
@@ -261,11 +314,6 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
     package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
 
     deliver_response(package);
-
-    std::stringstream stream_obj;
-    stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    LOG_DEBUG(stream_obj.str());
-
 }
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
@@ -350,7 +398,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         
-        LOG_INFO(stream_obj.str());
+        // LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 

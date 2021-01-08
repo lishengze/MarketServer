@@ -30,7 +30,7 @@ public:
     
     void response_new_symbol(string symbol);
 
-    double compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount);
+    double compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount, string& errr_msg, int& err_id);
 
     using RspRiskCtrledDepthDataPackagePtr = PackagePtr; 
 

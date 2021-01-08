@@ -120,6 +120,8 @@ void DepthProces::request_enquiry_package(PackagePtr package)
             std::lock_guard<std::mutex> lk(raw_depth_data_mutex_);
             if (raw_depth_data_.find(symbol) != raw_depth_data_.end())
             {
+                string err_msg;
+                int err_id;
                 SDepthDataPtr depth_data = raw_depth_data_[symbol];
 
                 cout << "Ask: length: " << depth_data->ask_length << endl;
@@ -134,13 +136,18 @@ void DepthProces::request_enquiry_package(PackagePtr package)
                     cout << depth_data->bids[i].price.get_value() << ", " << depth_data->bids[i].volume.get_value() << endl;
                 }    
 
-
-                price = compute_enquiry_price(depth_data, p_req_enquiry->type_, p_req_enquiry->volume_, p_req_enquiry->amount_);
+                price = compute_enquiry_price(depth_data, p_req_enquiry->type_, p_req_enquiry->volume_, p_req_enquiry->amount_, err_msg, err_id);
 
                 if (price != -1)
                 {
                     PackagePtr  rsp_package = GetRspEnquiryPackage(symbol, price, p_req_enquiry->http_response_);
                     process_engine_->deliver_response(rsp_package);
+                }
+                else
+                {
+                    LOG_ERROR(err_msg);
+                    PackagePtr err_package = GetRspErrMsgPackage(err_msg, err_id, p_req_enquiry->http_response_);
+                    process_engine_->deliver_response(err_package);
                 }
             }
             else
@@ -163,61 +170,74 @@ void DepthProces::request_enquiry_package(PackagePtr package)
     }    
 }
 
-double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount)
+double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount, string& errr_msg, int& err_id)
 {
     double price = -1;
+    double origin_volume = volume;
+    double origin_amount = amount;
     if (type == 0)
     {
         if (volume != -1)
         {
             double sum_amount = 0;
             int i;
-            for (i = depth_data->ask_length; i >= 0; --i)
+            for (i = depth_data->ask_length-1; i >= 0 && volume > 0; --i)
             {
                 if (volume - depth_data->asks[i].volume.get_value() >= 0)
                 {
-                    sum_amount += depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();
-                    volume -= depth_data->asks[i].volume.get_value();
+                    sum_amount += depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();                    
                 }
                 else
                 {
                     sum_amount += volume * depth_data->asks[i].price.get_value();
-                    break;
-                }                
+                }               
+
+                volume -= depth_data->asks[i].volume.get_value(); 
             }
             if (i < 0)
             {
+                double cur_sum_volume = origin_volume - volume;
+                errr_msg = string("Depth Can't afford Enquiry Order! Volume: ") 
+                         + std::to_string(origin_volume) + " is too big!"
+                         + "Current Sum Volume is: " + std::to_string(cur_sum_volume);
+                
+                err_id = 1;
             }
             else
             {
-                price = sum_amount / volume;
+                price = sum_amount / origin_volume;
             }            
         }
         else if (amount != -1)
         {
             double sum_volume = 0;
             int i;
-            for (i = depth_data->ask_length; i >= 0; --i)
+            for (i = depth_data->ask_length-1; i >= 0 && amount > 0; --i)
             {
                 if (amount - depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value() >= 0)
-                {
-                    amount -= depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();
+                {                    
                     sum_volume += depth_data->asks[i].volume.get_value();
                 }
                 else
                 {
                     sum_volume += amount / depth_data->asks[i].price.get_value();
-                    break;
-                }                
+                }         
+
+                amount -= depth_data->asks[i].volume.get_value() * depth_data->asks[i].price.get_value();       
             }
 
             if (i < 0)
             {
+                double cur_sum_amount = origin_amount - amount;
+                errr_msg = string("Depth Can't afford Enquiry Order! Amout: ") 
+                         + std::to_string(cur_sum_amount) + " is too big!"
+                         + "Current Sum Amount is: " + std::to_string(cur_sum_amount);
+                err_id = 1;                
                 return price;
             }
             else
             {
-                price = amount / sum_volume;
+                price = origin_amount / sum_volume;
             }                        
         }
     }
@@ -229,52 +249,61 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
         {
             double sum_amount = 0;
             int i;
-            for (i = 0; i < depth_data->bid_length; ++i)
+            for (i = 0; i < depth_data->bid_length && volume > 0; ++i)
             {
                 if (volume - depth_data->bids[i].volume.get_value() >= 0)
                 {
                     sum_amount += depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value();
-                    volume -= depth_data->bids[i].volume.get_value();
+                    
                 }
                 else
                 {
                     sum_amount += volume * depth_data->bids[i].price.get_value();
-                    break;
-                }                
+                }             
+                volume -= depth_data->bids[i].volume.get_value();   
             }
             if (i ==  depth_data->bid_length)
             {
+                double cur_sum_volume = origin_volume - volume;
+                errr_msg = string("Depth Can't afford Enquiry Order! Volume: ") 
+                         + std::to_string(origin_volume) + " is too big!"
+                         + "Current Sum Volume is: " + std::to_string(cur_sum_volume);
+                err_id = 1;                
                 return price;
             }
             else
             {
-                price = sum_amount / volume;
+                price = sum_amount / origin_volume;
             }                            
         }
         else if (amount != -1)
         {
             double sum_volume = 0;
             int i;
-            for (i = 0; i < depth_data->bid_length; ++i)
+            for (i = 0; i < depth_data->bid_length && amount > 0; ++i)
             {
                 if (amount - depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value() >= 0)
-                {
-                    amount -= depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value();
+                {                    
                     sum_volume += depth_data->bids[i].volume.get_value();
                 }
                 else
                 {
                     sum_volume += amount / depth_data->bids[i].price.get_value();
-                    break;
                 }                
+                amount -= depth_data->bids[i].volume.get_value() * depth_data->bids[i].price.get_value();
             }
             if (i ==  depth_data->bid_length)
             {
+                double cur_sum_amount = origin_amount - amount;
+                errr_msg = string("Depth Can't afford Enquiry Order! Amout: ") 
+                         + std::to_string(cur_sum_amount) + " is too big!"
+                         + "Current Sum Amount is: " + std::to_string(cur_sum_amount);
+                err_id = 1;                
                 return price;
             }
             else
             {
-                price = amount / sum_volume;
+                price = origin_amount / sum_volume;
             }            
         }        
     }

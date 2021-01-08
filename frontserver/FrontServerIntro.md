@@ -58,7 +58,7 @@
         "symbol":"symbolName",  
         "start_time":start_time,    // 必须是秒级的UTC时间戳   
         "end_time":end_time,        // 必须是秒级的UTC时间戳  
-        "data_count": data_count,   // 请求的数据数目，这个选项和起止时间只需填写一个
+        "data_count": data_count,   // 请求的数据数目，这个选项和起止时间只需填写一个  
         "frequency":"60"            // 数据频率，以秒为单位，现在必须是60的整数倍.
     }
 
@@ -68,9 +68,32 @@
         "symbol":"symbolName",    
         "start_time":"",    // 回复数据的开始时间，秒级的UTC时间戳   
         "end_time":0,       // 回复数据的结束时间，秒级的UTC时间戳   
-        "data_count":0,     // 回复的数据数目
+        "data_count":0,     // 回复的数据数目  
         "frequency":0,      // 请求的时间频率  
         "type":"kline_update"     // type 类型   
 
 
     }    
+
+4. 询价接口  
+    通过 http 请求获取数据
+    1) 请求参数: 
+       symbol: 请求的合约名称  
+       type: 0,1 // 0 买; 1 卖;  
+       volume:   // 询价的交易量;   
+       amount:   // 询价的交易额;   
+       volume, amount 写一个即可;   
+    2) 请求格式:  
+       v1/enquiry/symbol=value&type=value&volume=value;
+    3) 回报为 json 字符串:  
+    {
+        "price":"995.000000",  // 价格  
+        "symbol":"BTC_USDT",   // 合约  
+        "type":"enquiry"       // 类型  
+    }  
+    4) 错误回报 json 字符串:  
+    {
+        "error_msg":"",  // 错误信息  
+        "error_id":"",   // 错误id  
+        "type":"error"       // 类型  
+    }   

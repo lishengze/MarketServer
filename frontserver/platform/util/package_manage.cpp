@@ -170,7 +170,7 @@ PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,
         package->SetPackageID(id);
         package->prepare_response(UT_FID_RspErrorMsg, id);
 
-        CREATE_FIELD(package, RspEnquiry);
+        CREATE_FIELD(package, RspErrorMsg);
 
         RspErrorMsg* p_rsp_err = GET_NON_CONST_FIELD(package, RspErrorMsg);
 

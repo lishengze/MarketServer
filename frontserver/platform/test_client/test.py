@@ -82,9 +82,9 @@ def get_sub_kline_str():
 def on_open(ws):
     print("Connected")
 
-    send_str = get_sub_depth_str()
+    # send_str = get_sub_depth_str()
 
-    # send_str = get_sub_kline_str()
+    send_str = get_sub_kline_str()
 
     ws.send(send_str)
 
@@ -121,8 +121,8 @@ def get_http_kline_str():
 
 def get_http_enquiry_str():
     symbol = "BTC_USDT"
-    volume = 2
-    direction_type = 0
+    volume = 100000000000
+    direction_type = 1
     query_str = ("v1/enquiry/symbol=%s&type=%d&volume=%d" \
                 % (symbol, direction_type, volume))
     return query_str      
@@ -146,9 +146,7 @@ def test_urllib():
     html = response.read()
     print("Http Response: \n%s" % (html))    
 
-    
 if __name__ == "__main__":
-    # test_websocket()
-
-    test_http_restful()
+    test_websocket()
+    # test_http_restful()
 
