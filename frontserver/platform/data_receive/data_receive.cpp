@@ -293,17 +293,17 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
     stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     LOG_DEBUG(stream_obj.str());
 
-    cout << "Ask: length: " << depth.ask_length << endl;
-    for ( int i = 0; i < depth.ask_length; ++i)
-    {
-        cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
-    }
+    // cout << "Ask: length: " << depth.ask_length << endl;
+    // for ( int i = 0; i < depth.ask_length; ++i)
+    // {
+    //     cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
+    // }
 
-    cout << "\nBid, length: " << depth.bid_length << endl;
-    for ( int i = 0; i < depth.bid_length; ++i)
-    {
-        cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
-    }    
+    // cout << "\nBid, length: " << depth.bid_length << endl;
+    // for ( int i = 0; i < depth.bid_length; ++i)
+    // {
+    //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
+    // }    
 
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
