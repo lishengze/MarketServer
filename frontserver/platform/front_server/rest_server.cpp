@@ -145,6 +145,12 @@ void RestServer::process_get(HttpResponse* response, HttpRequest* request)
 
         cout << "url: " << url << endl;
 
+        if (url[0] == '/')
+        {
+            url = url.substr(1, url.length()-1);
+            cout << "trans_url: " << url << endl;
+        }        
+
         std::vector<std::string> param_vec;
         boost::split(param_vec, url, boost::is_any_of(PARMA_SPLIT_CHAR));
 

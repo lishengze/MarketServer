@@ -112,10 +112,10 @@ void DepthProces::request_enquiry_package(PackagePtr package)
             double price = -1;
             string symbol = p_req_enquiry->symbol_;
 
-            cout << "symbol: " << p_req_enquiry->symbol_ 
-                 << ", type: " << p_req_enquiry->type_ 
-                 << ", volume: " << p_req_enquiry->volume_ 
-                 << ", amount: " << p_req_enquiry->amount_ << endl;
+            // cout << "symbol: " << p_req_enquiry->symbol_ 
+            //      << ", type: " << p_req_enquiry->type_ 
+            //      << ", volume: " << p_req_enquiry->volume_ 
+            //      << ", amount: " << p_req_enquiry->amount_ << endl;
 
             std::lock_guard<std::mutex> lk(raw_depth_data_mutex_);
             if (raw_depth_data_.find(symbol) != raw_depth_data_.end())
@@ -124,17 +124,17 @@ void DepthProces::request_enquiry_package(PackagePtr package)
                 int err_id;
                 SDepthDataPtr depth_data = raw_depth_data_[symbol];
 
-                cout << "Ask: length: " << depth_data->ask_length << endl;
-                for ( int i = 0; i < depth_data->ask_length; ++i)
-                {
-                    cout << depth_data->asks[i].price.get_value() << ", " << depth_data->asks[i].volume.get_value() << endl;
-                }
+                // cout << "Ask: length: " << depth_data->ask_length << endl;
+                // for ( int i = 0; i < depth_data->ask_length; ++i)
+                // {
+                //     cout << depth_data->asks[i].price.get_value() << ", " << depth_data->asks[i].volume.get_value() << endl;
+                // }
 
-                cout << "\nBid, length: " << depth_data->bid_length << endl;
-                for ( int i = 0; i < depth_data->bid_length; ++i)
-                {
-                    cout << depth_data->bids[i].price.get_value() << ", " << depth_data->bids[i].volume.get_value() << endl;
-                }    
+                // cout << "\nBid, length: " << depth_data->bid_length << endl;
+                // for ( int i = 0; i < depth_data->bid_length; ++i)
+                // {
+                //     cout << depth_data->bids[i].price.get_value() << ", " << depth_data->bids[i].volume.get_value() << endl;
+                // }    
 
                 price = compute_enquiry_price(depth_data, p_req_enquiry->type_, p_req_enquiry->volume_, p_req_enquiry->amount_, err_msg, err_id);
 

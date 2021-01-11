@@ -123,7 +123,7 @@ def get_http_enquiry_str():
     symbol = "BTC_USDT"
     volume = 100000000000
     direction_type = 0
-    query_str = ("v1/enquiry?symbol=%s&type=%d&volume=%d" \
+    query_str = ("/v1/enquiry?symbol=%s&type=%d&volume=%d" \
                 % (symbol, direction_type, volume))
     return query_str      
 
