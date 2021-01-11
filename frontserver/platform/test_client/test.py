@@ -121,15 +121,15 @@ def get_http_kline_str():
 
 def get_http_enquiry_str():
     symbol = "BTC_USDT"
-    volume = 100000000000
+    volume = 10
     direction_type = 0
     query_str = ("/v1/enquiry?symbol=%s&type=%d&volume=%d" \
                 % (symbol, direction_type, volume))
     return query_str      
 
 def test_http_client():
-    uri = "127.0.0.1:9115"
-    # uri = "36.255.220.139:9115"
+    # uri = "127.0.0.1:9115"
+    uri = "36.255.220.139:9115"
     conn = http.client.HTTPConnection(uri)
     # query_str = get_http_kline_str()
     query_str = get_http_enquiry_str()

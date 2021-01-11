@@ -69,12 +69,11 @@ string RspEnquiry::get_json_str()
 
     data["price"] = std::to_string(price_);
     data["symbol"] = string(symbol_);
-    data["type"] = string(json_type_); 
-    data_list[0] = data; 
+    data["type"] = string(json_type_);
 
     json_data["code"] = 0;
     json_data["msg"] = "";   
-    json_data["data"] = data_list;    
+    json_data["data"] = data;    
 
     return json_data.dump(); 
 }
@@ -85,11 +84,10 @@ string RspErrorMsg::get_json_str()
     nlohmann::json json_data;
     nlohmann::json data_list;
     nlohmann::json data;
-    data_list[0] = data;
 
     json_data["code"] = err_id_;
     json_data["msg"] = err_msg_;   
-    json_data["data"] = data_list;   
+    json_data["data"] = data;   
 
     return json_data.dump();
 }
