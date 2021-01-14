@@ -341,7 +341,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     // }
 
     // cout << "\nBid, length: " << depth.bid_length << endl;
-    // for ( int i = 0; i < depth.bid_length; ++i)
+    // for ( int i = 0; i < depth.bid_length && i < 5; ++i)
     // {
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    

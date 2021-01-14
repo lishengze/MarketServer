@@ -66,7 +66,7 @@ public:
     
     bool                          is_test_kline{true};
     bool                          is_test_depth{false};    
-    bool                          is_test_enquiry{true};
+    bool                          is_test_enquiry{false};
 
     map<string, int>              kline_symbol_data_count_;
     map<string, type_tick>        kline_symbol_last_time_;

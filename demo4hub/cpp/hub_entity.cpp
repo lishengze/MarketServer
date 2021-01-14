@@ -95,8 +95,8 @@ void SEData_to_SDepthData(const SEData& src, SDepthData& dst)
     }
     for( int i = 0 ; i < src.bids_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = src.bids(i);
-        Decimal_to_SDecimal(dst.asks[i].price, depth.price());
-        Decimal_to_SDecimal(dst.asks[i].volume, depth.volume());
+        Decimal_to_SDecimal(dst.bids[i].price, depth.price());
+        Decimal_to_SDecimal(dst.bids[i].volume, depth.volume());
         dst.bid_length = i+1;
     }
 
@@ -107,7 +107,13 @@ void SEData_to_SDepthData(const SEData& src, SDepthData& dst)
 void HubEntity::on_snap(const SEData& quote)
 {
     SDepthData quote_depth;
+    // cout << "on_snap: " << quote.symbol() << ", "
+    //      << "ask: " << quote.asks_size() << ", "
+    //      << "bid: " << quote.bids_size() << "\n"
+    //      << endl;
+
     SEData_to_SDepthData(quote, quote_depth);
+
     callback_->on_depth("", quote.symbol().c_str(), quote_depth);
 }
 
