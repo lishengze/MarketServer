@@ -57,6 +57,10 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define KLINE_UPDATE "kline_update"
 #define HEARTBEAT "heartbeat"
 
+#define RSP_ENQUIRY "enquiry"
+#define RSP_ERROR "error"
+
+
 #define MAX_DOUBLE 10000000000000
 #define MIN_DOUBLE -10000000000000
 

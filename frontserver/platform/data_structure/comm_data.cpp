@@ -58,7 +58,6 @@ void RspRiskCtrledDepthData::init(const SDepthData* depth_data)
     // cout << "RspRiskCtrledDepthData::init 3" << endl;
 }
 
-string RspEnquiry::json_type_="enquiry";
 string RspEnquiry::get_json_str()
 {
     string result;
@@ -69,25 +68,22 @@ string RspEnquiry::get_json_str()
 
     data["price"] = std::to_string(price_);
     data["symbol"] = string(symbol_);
-    data["type"] = string(json_type_);
+    data["type"] = string(RSP_ENQUIRY);
 
     json_data["code"] = 0;
-    json_data["msg"] = "";   
+    json_data["msg"] = "";
     json_data["data"] = data;    
 
     return json_data.dump(); 
 }
 
-string RspErrorMsg::json_type_="error";
 string RspErrorMsg::get_json_str()
 {
     nlohmann::json json_data;
-    nlohmann::json data_list;
-    nlohmann::json data;
 
     json_data["code"] = err_id_;
     json_data["msg"] = err_msg_;   
-    json_data["data"] = data;   
+    json_data["type"] = RSP_ERROR;   
 
     return json_data.dump();
 }

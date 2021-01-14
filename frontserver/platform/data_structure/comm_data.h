@@ -171,9 +171,7 @@ class RspEnquiry:public Socket
         }
 
         string get_json_str();
-
-    static string   json_type_; 
-
+        
     static const long Fid = UT_FID_RspEnquiry;
     
     private:
@@ -309,6 +307,5 @@ class RspErrorMsg:public Socket
     private:
         int             err_id_;
         error_msg_type  err_msg_;
-        static string   json_type_;  
 };
 FORWARD_DECLARE_PTR(RspErrorMsg);
