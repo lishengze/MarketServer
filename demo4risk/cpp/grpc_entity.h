@@ -1,5 +1,6 @@
 #pragma once
-#include "grpc_call.h"
+#include "base/cpp/grpc_call.h"
+//#include "grpc_call.h"
 #include "risk_controller.grpc.pb.h"
 #include "base/cpp/decimal.h"
 
@@ -12,7 +13,10 @@ using quote::service::v1::MultiMarketStreamDataWithDecimal;
 using quote::service::v1::MarketStreamDataWithDecimal;
 using quote::service::v1::DepthWithDecimal;
 using quote::service::v1::Decimal;
+using quote::service::v1::QuoteRequest;
+using quote::service::v1::QuoteResponse;
 using GrpcRiskControllerService = quote::service::v1::RiskController;
+using namespace quote::service::v1;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -35,7 +39,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    MarketStream4BrokerEntity* spawn() {
+        return new MarketStream4BrokerEntity(service_);
+    }
+
+    void add_data(std::shared_ptr<void> snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
@@ -59,7 +67,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    MarketStream4HedgeEntity* spawn() {
+        return new MarketStream4HedgeEntity(service_);
+    }
+
+    void add_data(std::shared_ptr<void> snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
@@ -83,7 +95,11 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+    MarketStream4ClientEntity* spawn() {
+        return new MarketStream4ClientEntity(service_);
+    }
+
+    void add_data(std::shared_ptr<void> snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
@@ -96,4 +112,31 @@ private:
     // 
     mutable std::mutex            mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
+};
+
+class IDataCacher;
+class OtcQuoteEntity : public BaseGrpcEntity
+{
+public:
+    OtcQuoteEntity(void* service, IDataCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    OtcQuoteEntity* spawn() {
+        return new OtcQuoteEntity(service_, cacher_);
+    }
+
+    //void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+
+private:
+    GrpcRiskControllerService::AsyncService* service_;
+    ServerContext ctx_;
+
+    QuoteRequest request_;
+    QuoteResponse reply_;
+    ServerAsyncResponseWriter<QuoteResponse> responder_;
+
+    IDataCacher* cacher_;
 };

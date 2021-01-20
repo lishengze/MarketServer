@@ -19,6 +19,8 @@ StreamEngine::StreamEngine(){
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
+    quote_cacher_.register_callback(&server_endpoint_);
+    quote_mixer2_.register_callback(&server_endpoint_);
 }
 
 StreamEngine::~StreamEngine(){
@@ -26,8 +28,6 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() 
 {
-    quote_cacher_.register_callback(&server_endpoint_);
-    quote_mixer2_.register_callback(&server_endpoint_);
 
     if( !CONFIG->replay_mode_ ) {
         // 启动redis

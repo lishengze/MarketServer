@@ -10,12 +10,13 @@
 #include "updater_account.h"
 #include "updater_order.h"
 #include "datacenter.h"
+#include "grpc_server.h"
 
-class RiskController : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
+class RiskControllerServer : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
 {
 public:
-    RiskController();
-    ~RiskController();
+    RiskControllerServer();
+    ~RiskControllerServer();
 
     void start();
 
@@ -43,6 +44,8 @@ private:
     QuoteUpdater quote_updater_;
 
     OrderUpdater order_updater_;
+    
+    ServerEndpoint server_endpoint_;
 
     // 行情数据中心
     DataCenter datacenter_;

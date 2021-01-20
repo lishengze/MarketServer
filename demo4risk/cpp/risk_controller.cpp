@@ -8,6 +8,9 @@ const char* config_file = "config.json";
 
 void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     dst.symbol = src.symbol();
+    dst.precise = src.price_precise();
+    dst.vprecise = src.volume_precise();
+    
     //vassign(dst.seq_no, src.msg_seq());
     // 卖盘
     for( int i = 0 ; i < src.asks_size() ; ++i ) {
@@ -31,29 +34,31 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     }
 }
 
-RiskController::RiskController(){
-    
+RiskControllerServer::RiskControllerServer()
+{
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
     utrade::pandora::Singleton<ServerEndpoint>::Instance();
-    PUBLISHER->init(CONFIG->grpc_publish_addr_);
+    server_endpoint_.set_cacher(&datacenter_); // 必须在init之前
+    server_endpoint_.init(CONFIG->grpc_publish_addr_);
+    datacenter_.register_callback(&server_endpoint_);
 }
 
-RiskController::~RiskController(){
+RiskControllerServer::~RiskControllerServer(){
 }
 
-void RiskController::start() {
+void RiskControllerServer::start() {
     quote_updater_.start(CONFIG->grpc_quote_addr_, this);
     configuration_updater_.start(this);
     account_updater_.start(CONFIG->grpc_account_addr_, this);
 
     // start grpc server
-    PUBLISHER->run_in_thread();
+    server_endpoint_.start();
 }
 
-void RiskController::signal_handler(int signum)
+void RiskControllerServer::signal_handler(int signum)
 {
     //UT_LOG_INFO(GALAXY_LOGGER, "KernelEngine::signal_handler " << signum);
     //signal_sys = signum;
@@ -63,26 +68,26 @@ void RiskController::signal_handler(int signum)
     exit(0);
 }
 
-void RiskController::on_snap(const SEData& quote)
+void RiskControllerServer::on_snap(const SEData& quote)
 {
     // QuoteData to SInnerQuote
     SInnerQuote raw;
     quotedata_to_innerquote(quote, raw);
-    //std::cout << "update symbol " << quote.symbol() << " " << raw.ask_length << "/" << raw.bid_length << std::endl;
+    std::cout << "update symbol " << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
     datacenter_.add_quote(raw);
 }
 
-void RiskController::on_configuration_update(const QuoteConfiguration& config)
+void RiskControllerServer::on_configuration_update(const QuoteConfiguration& config)
 {
     datacenter_.change_configuration(config);
 }
 
-void RiskController::on_account_update(const AccountInfo& account)
+void RiskControllerServer::on_account_update(const AccountInfo& account)
 {
     datacenter_.change_account(account);
 }
 
-void RiskController::on_order_update(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
+void RiskControllerServer::on_order_update(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
 {
     datacenter_.change_orders(symbol, order, asks, bids);
 }

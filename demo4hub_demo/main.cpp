@@ -15,7 +15,8 @@ public:
     // 深度数据（推送）
     virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
-        tfm::printfln("[raw_depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
+        type_tick now = get_miliseconds();
+        tfm::printfln("[raw_depth] %s.%s delay=%u ask_depth=%u bid_depth=%u", exchange, symbol, now-depth.tick, depth.ask_length, depth.bid_length);
         // return -1;
         // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
 
@@ -30,7 +31,7 @@ public:
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
-        tfm::printfln("[depth] %s %s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
+        tfm::printfln("[depth] %s.%s %u ask_depth=%u bid_depth=%u", exchange, symbol, depth.tick, depth.ask_length, depth.bid_length);
         // return -1;
         // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
 

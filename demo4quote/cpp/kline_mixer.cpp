@@ -158,13 +158,31 @@ void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vec
 
 void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines)
 {
+    // 锁住对象
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
     vector<KlineData>& dst = data_[exchange][symbol];
 
-    if( klines.size() <= 10 )  // 为什么是10？
+    // 填补跳空数据
+    vector<KlineData> _klines = klines;
+    if( dst.size() > 0 && _klines.size() > 0 ) {
+        const KlineData& last = dst.back();
+        const KlineData& first = _klines.front();
+        type_tick fix_index = last.index + this->resolution_;
+        while( fix_index < first.index ) {
+            tfm::printfln("%s.%s kline patch index=%u to %u", exchange, symbol, fix_index, first.index);
+            KlineData tmp = last;
+            tmp.index = fix_index;
+            tmp.volume = 0;
+            _klines.insert(_klines.begin(), tmp);
+            fix_index += this->resolution_;
+        }
+    }
+    
+    // 合并到内存
+    if( _klines.size() <= 10 )
     {
-        // 直接插入
-        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ )
+        // 数量少的时候，直接插入。为什么是10？
+        for( auto iter = _klines.begin() ; iter != _klines.end() ; iter++ )
         {
             const KlineData& kline = *iter;
             bool inserted = false;
@@ -192,12 +210,12 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         for( auto iter = dst.begin() ; iter != dst.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
-        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ ){
+        for( auto iter = _klines.begin() ; iter != _klines.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
         dst.clear();
         for( const auto& v : tmp ) {
-            tfm::printfln("%s.%s %d", exchange, symbol, v.second.index);
+            //tfm::printfln("%s.%s %d", exchange, symbol, v.second.index);
             dst.push_back(v.second);
         }
     }
@@ -261,7 +279,9 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
 KlineHubber::KlineHubber()
 {
     min1_cache_.set_limit(KLINE_CACHE_MIN1);
+    min1_cache_.set_resolution(60);
     min60_cache_.set_limit(KLINE_CACHE_MIN60);
+    min60_cache_.set_resolution(3600);
 }
 
 KlineHubber::~KlineHubber()
@@ -327,5 +347,5 @@ bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, in
 void KlineHubber::fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60)
 {
     min1_cache_.fill_klines(cache_min1);
-    min1_cache_.fill_klines(cache_min60);
+    min60_cache_.fill_klines(cache_min60);
 }

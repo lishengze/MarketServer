@@ -15,6 +15,9 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     dst->set_symbol(src->symbol());
     dst->set_seq_no(src->seq_no());
     dst->set_is_snap(src->is_snap());
+    dst->set_time(src->time());
+    dst->set_price_precise(src->price_precise());
+    dst->set_volume_precise(src->volume_precise());
 
     // 卖盘
     for( int i = 0 ; i < src->asks_size() ; ++i ) {
@@ -289,6 +292,7 @@ GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(&ct
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
+    snap_cached_ = false;
 }
 
 void GetLastEntity::register_call(){
@@ -315,7 +319,7 @@ bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
             resp->set_num(klines.size());
             for( size_t i = 0 ; i < klines.size() ; i ++ ) 
             {
-                cout << klines[i].index << endl;
+                //cout << klines[i].index << endl;
                 kline_to_pbkline(klines[i], resp->add_klines());
             }
 
@@ -388,6 +392,7 @@ bool GetLastEntity::process()
     {
         if( !snap_cached_ ){
             cacher_->fill_cache(cache_min1_, cache_min60_);
+            tfm::printfln("kline get last registered, init min1/%u min60/%u", cache_min1_.size(), cache_min60_.size());
             snap_cached_ = true;
         } 
 

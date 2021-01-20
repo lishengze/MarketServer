@@ -1,4 +1,5 @@
 #include "grpc_entity.h"
+#include "datacenter.h"
 
 void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
     dst->set_exchange(src->exchange());
@@ -86,7 +87,7 @@ bool MarketStream4BrokerEntity::process(){
     }
 }
 
-void MarketStream4BrokerEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+void MarketStream4BrokerEntity::add_data(std::shared_ptr<void> snap) {
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(snap);
 }
@@ -122,7 +123,7 @@ bool MarketStream4HedgeEntity::process(){
     }
 }
 
-void MarketStream4HedgeEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+void MarketStream4HedgeEntity::add_data(std::shared_ptr<void> snap) {
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(snap);
 }
@@ -158,9 +159,33 @@ bool MarketStream4ClientEntity::process(){
     }
 }
 
-void MarketStream4ClientEntity::add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update) {
+void MarketStream4ClientEntity::add_data(std::shared_ptr<void> snap) {
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     datas_.push_back(snap);
 }
 
+//////////////////////////////////////////////////
+OtcQuoteEntity::OtcQuoteEntity(void* service, IDataCacher* cacher):responder_(&ctx_)
+{
+    service_ = (GrpcRiskControllerService::AsyncService*)service;
+    cacher_ = cacher;
+}
 
+void OtcQuoteEntity::register_call(){
+    std::cout << "register OtcQuoteEntity" << std::endl;
+    service_->RequestOtcQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool OtcQuoteEntity::process()
+{
+    SDecimal price;
+    QuoteResponse_Result result = cacher_->otc_query("", request_.symbol(), request_.direction(), request_.amount(), request_.turnover(), price);
+
+    QuoteResponse reply;
+    reply.set_symbol(request_.symbol());
+    reply.set_price(price.get_str_value());
+    reply.set_result(result);
+    status_ = FINISH;
+    responder_.Finish(reply, Status::OK, this);
+    return true;
+}

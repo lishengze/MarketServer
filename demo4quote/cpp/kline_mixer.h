@@ -80,12 +80,14 @@ public:
     ~KlineCache();
 
     void set_limit(size_t limit) { limit_ = limit; }
+    void set_resolution(uint32 resolution) { resolution_ = resolution; }
 
     void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines);
 
     void fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache);
 private:
     size_t limit_;
+    uint32 resolution_;
 
     void _shorten(vector<KlineData>& datas);
 

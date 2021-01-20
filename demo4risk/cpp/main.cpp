@@ -4,11 +4,11 @@
 // exit handler function
 void setup_signal_handler_callback()
 {
-    signal(SIGTERM, RiskController::signal_handler);
-    signal(SIGINT, RiskController::signal_handler);
-    signal(SIGHUP, RiskController::signal_handler);
-    signal(SIGQUIT, RiskController::signal_handler);
-    signal(SIGKILL, RiskController::signal_handler);
+    signal(SIGTERM, RiskControllerServer::signal_handler);
+    signal(SIGINT, RiskControllerServer::signal_handler);
+    signal(SIGHUP, RiskControllerServer::signal_handler);
+    signal(SIGQUIT, RiskControllerServer::signal_handler);
+    signal(SIGKILL, RiskControllerServer::signal_handler);
 }
 
 int main(int argc, char** argv) {
@@ -16,8 +16,8 @@ int main(int argc, char** argv) {
     // setup the signal here
     setup_signal_handler_callback();
 
-    RiskController riskController;
-    riskController.start();
+    RiskControllerServer riskControllerServer;
+    riskControllerServer.start();
     
     utrade::pandora::io_service_pool engine_pool(3);
     // start pool

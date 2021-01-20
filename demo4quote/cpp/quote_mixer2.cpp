@@ -220,7 +220,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     output.exchange = exchange;
     output.symbol = symbol;
     output.arrive_time = quote.arrive_time;
+    output.server_time = get_miliseconds();
     output.sequence_no = quote.sequence_no;
+    output.price_precise = config.precise;
+    output.volume_precise = config.vprecise;
     process_depths(quote.asks, output.asks, config.precise, config.vprecise, config.fees[exchange], true);
     process_depths(quote.bids, output.bids, config.precise, config.vprecise, config.fees[exchange], false);
 
@@ -251,6 +254,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
 void QuoteMixer2::_inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr)
 {
+    ptr->server_time = quote.server_time;
+    ptr->price_precise = quote.price_precise;
+    ptr->volume_precise = quote.volume_precise;
+    
     // 1. 清除老的exchange数据
     ptr->asks = _clear_exchange(exchange, ptr->asks);
     ptr->bids = _clear_exchange(exchange, ptr->bids);

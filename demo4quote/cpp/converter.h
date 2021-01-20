@@ -31,7 +31,10 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
     msd->set_seq_no(src->sequence_no);
+    msd->set_time(src->server_time);
     msd->set_is_snap(is_snap);
+    msd->set_price_precise(src->price_precise);
+    msd->set_volume_precise(src->volume_precise);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);
@@ -66,9 +69,11 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     std::shared_ptr<MarketStreamDataWithDecimal> msd = std::make_shared<MarketStreamDataWithDecimal>();
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
-    msd->set_time(src.arrive_time);
+    msd->set_time(src.server_time);
     msd->set_seq_no(src.sequence_no);
     msd->set_is_snap(is_snap);
+    msd->set_price_precise(src.price_precise);
+    msd->set_volume_precise(src.volume_precise);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);

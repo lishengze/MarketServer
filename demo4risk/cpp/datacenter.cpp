@@ -95,6 +95,34 @@ void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark)
     _filter_depth_by_watermark(src.bids, watermark, false);
 }
 
+void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double price_bias, double volume_bias, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
+{
+    for( const auto& v: depths )
+    {
+        SDecimal scaledPrice = v.first;
+        if( is_ask ) {
+            scaledPrice *= ( 1 + price_bias * 1.0 / 100); 
+        } else {
+            scaledPrice *= ( 1 - price_bias * 1.0 / 100); 
+        }
+        dst[scaledPrice].mix_exchanges(v.second, volume_bias);
+    }
+}
+
+SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
+{
+    SInnerQuote tmp = src;
+    vector<pair<SDecimal, SInnerDepth>> depths;
+    src.get_asks(depths);
+    _calc_depth_bias(depths, ctx.params.cache_config.PriceBias, ctx.params.cache_config.VolumeBias, true, tmp.asks);
+    src.get_bids(depths);
+    _calc_depth_bias(depths, ctx.params.cache_config.PriceBias, ctx.params.cache_config.VolumeBias, false, tmp.bids);
+    
+    src = tmp;
+    tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    return src;
+}
+
 WatermarkComputerWorker::WatermarkComputerWorker() 
 {
     thread_loop_ = new std::thread(&WatermarkComputerWorker::_calc_watermark, this);
@@ -168,13 +196,13 @@ void WatermarkComputerWorker::_calc_watermark() {
                 for( auto &v : obj->bids ) { bids.push_back(v.second); }
                 // 排序
                 sort(asks.begin(), asks.end());
-                for( const auto& v : asks ) {
+                //for( const auto& v : asks ) {
                     // cout << "ask " << v.get_str_value() << endl;
-                }
+                //}
                 sort(bids.begin(), bids.end());
-                for( const auto& v : bids ) {
+                //for( const auto& v : bids ) {
                     // cout << "bid " << v.get_str_value() << endl;
-                }
+                //}
                 if( asks.size() > 0 && bids.size() > 0 ) {
                     iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
                     // cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
@@ -189,11 +217,14 @@ void WatermarkComputerWorker::_calc_watermark() {
    
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    set_snap(src);
+    
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _filter_by_watermark(src, watermark);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     
+    tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -240,16 +271,16 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     ctx.params.cache_account.get_hedge_amounts(sell_currency, ctx.params.cache_config.HedgePercent / sell_count, sell_total_amounts);
     ctx.params.cache_account.get_hedge_amounts(buy_currency, ctx.params.cache_config.HedgePercent / buy_count, buy_total_amounts);
 
-    if( ctx.is_sample_ ) {
+    //if( ctx.is_sample_ ) {
         // _log_and_print("worker(account)-%s: sell %s %d", src.symbol.c_str(), sell_currency.c_str(), sell_count);
-        for( const auto& v : sell_total_amounts ) {
+    //    for( const auto& v : sell_total_amounts ) {
             // _log_and_print("worker(account)-%s: sell %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
-        }
+    //    }
         // _log_and_print("worker(account)-%s: buy %s %d", src.symbol.c_str(), buy_currency.c_str(), buy_count);
-        for( const auto& v : buy_total_amounts ) {
+    //    for( const auto& v : buy_total_amounts ) {
             // _log_and_print("worker(account)-%s: buy  %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
-        }
-    }
+    //    }
+    // }
 
     // 逐档从总余额中扣除资金消耗
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
@@ -304,6 +335,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
+    tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -415,18 +447,15 @@ void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDecimal* m
     }
     cout << "msd3, transd:" << quote.symbol << ", ask: " << msd->asks_size() << ", bid: " << msd->bids_size() << endl;
 
-    if (msd->asks_size() != quote.asks.size())
-    {
-        cout << "*** ask 0 volumne count: " << quote.asks.size() - msd->asks_size() << endl;
-    }
-    if (msd->bids_size() != quote.bids.size())
-    {
-        cout << "*** bid 0 volumne count: " << quote.bids.size() - msd->bids_size() << endl;
-    }    
+    //if (msd->asks_size() != quote.asks.size())
+    //{
+    //    cout << "*** ask 0 volumne count: " << quote.asks.size() - msd->asks_size() << endl;
+    //}
+    //if (msd->bids_size() != quote.bids.size())
+    //{
+    //    cout << "*** bid 0 volumne count: " << quote.bids.size() - msd->bids_size() << endl;
+    //}    
 }
-
-DefaultWorker::DefaultWorker() {}
-DefaultWorker::~DefaultWorker() {}
 
 SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
@@ -454,6 +483,7 @@ QuotePipeline::~QuotePipeline(){
 }
 /////////////////////////////////////////////////////////////////////////////////
 DataCenter::DataCenter() {
+    pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&account_worker_);
     //pipeline_.add_worker(&orderbook_worker_);
@@ -463,122 +493,73 @@ DataCenter::~DataCenter() {
 
 }
 
-void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double price_bias, double volume_bias, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
-{
-    for( const auto& v: depths )
-    {
-        SDecimal scaledPrice = v.first;
-        if( is_ask ) {
-            scaledPrice *= ( 1 + price_bias * 1.0 / 100); 
-        } else {
-            scaledPrice *= ( 1 - price_bias * 1.0 / 100); 
-        }
-        dst[scaledPrice].mix_exchanges(v.second, volume_bias);
-    }
-}
-
-void DataCenter::_add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& params)
-{
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-    // 取出参数
-    params = params_;
-
-    // 计算价位和成交量偏移
-    dst.symbol = src.symbol;
-
-    vector<pair<SDecimal, SInnerDepth>> depths;
-    src.get_asks(depths);
-    _calc_depth_bias(depths, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, true, dst.asks);
-    src.get_bids(depths);
-    _calc_depth_bias(depths, params_.cache_config.PriceBias, params_.cache_config.VolumeBias, false, dst.bids);
-    
-    // 加入快照
-    datas_[src.symbol] = dst;
-}
-
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     //std::cout << "publish for broker(raw) " << quote.symbol << " " << quote.ask_length << "/"<< quote.bid_length << std::endl;
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    PUBLISHER->publish4Hedge(quote.symbol, ptrData, NULL);
+    for( const auto& v : callbacks_) 
+    {
+        v->publish4Hedge(quote.symbol, ptrData, NULL);
+    }
 
-    // 更新内存中的行情
-    Params params;
-    SInnerQuote new_quote;
-    _add_quote(quote, new_quote, params);
-
-    // 加入买卖一
-    watermark_worker_.set_snap(new_quote);
-    account_worker_.set_snap(new_quote);
-
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    // 存储原始行情
+    datas_[quote.symbol] = quote;    
     // 发布行情
-    _publish_quote(new_quote, params);
+    _publish_quote(quote);
 };
 
 void DataCenter::change_account(const AccountInfo& info)
 {
-    cout << "change_account" << endl;
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        params_.cache_account = info;
-    }
-
+    tfm::printfln("change_account");
+    
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    params_.cache_account = info;
     _push_to_clients();
 }
 
 void DataCenter::change_configuration(const QuoteConfiguration& config)
 {
-    cout << "change_configuration" << endl;
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        params_.cache_config = config;
-    }
-
+    tfm::printfln("change_configuration");
+    
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    params_.cache_config = config;
     _push_to_clients();
 }
 
 void DataCenter::change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
 {
-    cout << "change_orders" << endl;
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        params_.cache_order[symbol] = make_pair(asks, bids);
-    }
+    tfm::printfln("change_orders");
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    params_.cache_order[symbol] = make_pair(asks, bids);
 
     _push_to_clients(symbol);
 }
 
 void DataCenter::_push_to_clients(const TSymbol& symbol) 
 {
-    Params params;
-    // 获取参数
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        params = params_;
-    }
-
     if( symbol == "" ) 
     {
         for( auto iter = datas_.begin() ; iter != datas_.end() ; ++iter ) 
         {
-            _publish_quote(iter->second, params);
+            _publish_quote(iter->second);
         }
     } else {
         auto iter = datas_.find(symbol);
         if( iter == datas_.end() )
             return;
 
-        _publish_quote(iter->second, params);
+        _publish_quote(iter->second);
     }
 }
 
-void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params) 
+void DataCenter::_publish_quote(const SInnerQuote& quote) 
 {    
     SInnerQuote newQuote;
-    pipeline_.run(quote, params, newQuote);
+    pipeline_.run(quote, params_, newQuote);
 
     // 检查是否发生变化
     auto iter = last_datas_.find(quote.symbol);
@@ -592,15 +573,115 @@ void DataCenter::_publish_quote(const SInnerQuote& quote, const Params& params)
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
     std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    PUBLISHER->publish4Broker(quote.symbol, ptrData, NULL);
+    for( const auto& v : callbacks_) 
+    {
+        v->publish4Broker(quote.symbol, ptrData, NULL);
+    }
 
     // send to clients
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
-    PUBLISHER->publish4Client(quote.symbol, ptrData2, NULL);
+    for( const auto& v : callbacks_) 
+    {
+        v->publish4Client(quote.symbol, ptrData2, NULL);
+    }
 
     last_datas_[quote.symbol] = newQuote;
-
-    cout << endl;
-
 }
+
+QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const OtcParams& params, double volume, SDecimal& price, uint32 precise)
+{
+    SDecimal total_volume = 0, total_amount;
+    if( is_ask ) {
+        for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
+            if( (total_volume + iter->second.total_volume) <= volume ) {
+                total_volume += iter->second.total_volume;
+                total_amount += iter->second.total_volume * iter->first.get_value();
+            } else {
+                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+            }
+        }
+    } else {
+        for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
+            if( (total_volume + iter->second.total_volume) <= volume ) {
+                total_volume += iter->second.total_volume;
+                total_amount += iter->second.total_volume * iter->first.get_value();
+            } else {
+                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+            }
+        }
+    }
+
+    price = total_amount.get_value() / total_volume.get_value();
+    if( is_ask ) {
+        price *= ( 1 + params.percent * 1.0 / 100); 
+    } else {
+        price *= ( 1 - params.percent * 1.0 / 100); 
+    }
+    price.scale(precise, is_ask);
+    return QuoteResponse_Result_OK;
+}
+
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const OtcParams& params, double amount, SDecimal& price, uint32 precise)
+{
+    SDecimal total_volume = 0, total_amount;
+    if( is_ask ) {
+        for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
+            SDecimal amounts = iter->second.total_volume * iter->first.get_value();
+            if( (total_amount + amounts) <= amount ) {
+                total_volume += iter->second.total_volume;
+                total_amount += amounts;
+            } else {
+                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+            }
+        }
+    } else {
+        for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
+            SDecimal amounts = iter->second.total_volume * iter->first.get_value();
+            if( (total_amount + amounts) <= amount ) {
+                total_volume += iter->second.total_volume;
+                total_amount += amounts;
+            } else {
+                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+            }
+        }
+    }
+
+    price = total_amount.get_value() / total_volume.get_value();
+    if( is_ask ) {
+        price *= ( 1 + params.percent * 1.0 / 100); 
+    } else {
+        price *= ( 1 - params.percent * 1.0 / 100); 
+    }
+    price.scale(precise, is_ask);
+    return QuoteResponse_Result_OK;
+}
+
+QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
+{
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    auto iter = last_datas_.find(symbol);
+    if( iter == last_datas_.end() )
+        return QuoteResponse_Result_WRONG_SYMBOL;
+
+    SInnerQuote& quote = iter->second;
+    if( volume == 0 )
+    {
+        if( direction == QuoteRequest_Direction_BUY ) {
+            return _calc_otc_by_volume(quote.asks, true, params_.otc_params, volume, price, quote.precise);
+        } else {
+            return _calc_otc_by_volume(quote.bids, false, params_.otc_params, volume, price, quote.precise);   
+        }
+    } 
+    else
+    {
+        if( direction == QuoteRequest_Direction_BUY ) {
+            return _calc_otc_by_amount(quote.bids, true, params_.otc_params, amount, price, quote.precise);
+        } else { 
+            return _calc_otc_by_amount(quote.bids, false, params_.otc_params, amount, price, quote.precise);
+        }
+    }
+
+    return QuoteResponse_Result_WRONG_DIRECTION;
+}
+

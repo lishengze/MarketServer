@@ -18,6 +18,9 @@ service RiskController {
 
     // 客户端 对冲订单推流
     rpc PutOrderStream(stream MultiOrderStreamData) returns (.google.protobuf.Empty){} 
+
+    // OTC 询价
+    rpc OtcQuote(QuoteRequest) returns (QuoteResponse){}
 }
 
 message MultiOrderStreamData {
@@ -30,4 +33,40 @@ message OrderStreamData {
     double order_amount = 3 [(gogoproto.customname) = "OrderAmount", (gogoproto.jsontag) = "order_amount"];
     double hedged_amount = 4 [(gogoproto.customname) = "HedgedAmount", (gogoproto.jsontag) = "hedged_amount"];
     int64 time = 5 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
+}
+
+message QuoteRequest {
+    
+    enum Direction
+    {
+        BUY = 0;
+        SELL = 1;
+    }
+    // 币对
+    string symbol = 1 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+    // 交易量
+    double amount = 2 [(gogoproto.customname) = "Amount", (gogoproto.jsontag) = "amount"];
+    // 交易额
+    double turnover = 3 [(gogoproto.customname) = "Turnover", (gogoproto.jsontag) = "turnover"];
+    // 交易方向
+    Direction direction = 4 [(gogoproto.customname) = "Direction", (gogoproto.jsontag) = "direction"];
+}
+
+message QuoteResponse {
+
+    enum Result
+    {
+        OK = 0;
+        WRONG_SYMBOL = 1;
+        WRONG_DIRECTION = 2;
+        NOT_ENOUGH_VOLUME = 3;
+        NOT_ENOUGH_AMOUNT = 4;
+    }
+
+    // 币对
+    string symbol = 1 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+    // 价格
+    string price = 2 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
+    // 执行结果
+    Result result = 3 [(gogoproto.customname) = "Result", (gogoproto.jsontag) = "result"];
 }

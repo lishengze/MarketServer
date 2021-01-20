@@ -7,12 +7,11 @@
 #include <string>
 #include <thread>
 
-#include "grpc_entity.h"
 #include "pandora/util/singleton.hpp"
+#include "datacenter.h"
+#include "grpc_entity.h"
 
-#define PUBLISHER utrade::pandora::Singleton<ServerEndpoint>::GetInstance()
-
-class ServerEndpoint final {
+class ServerEndpoint : public IQuotePusher {
 public:
     ~ServerEndpoint() {
         server_->Shutdown();
@@ -21,9 +20,12 @@ public:
 
     void init(const string& grpc_addr);
 
-    void run_in_thread() {
+    void start() 
+    {
         thread_loop_ = new std::thread(&ServerEndpoint::_handle_rpcs, this);
     }
+
+    void set_cacher(IDataCacher* cacher) { cacher_ = cacher; }
 
     // 发布聚合行情（用于撮合）
     // 发布风控处理后的行情
@@ -47,12 +49,16 @@ private:
     std::unique_ptr<Server> server_;
 
     std::thread* thread_loop_ = nullptr;
+    IDataCacher* cacher_ = nullptr;
 
     // 不做价位交叉处理
-    CommonGrpcCall* caller_marketstream4broker_;
+    GrpcCall<MarketStream4BrokerEntity>* caller_marketstream4broker_;
     // 做价位交叉处理
-    CommonGrpcCall* caller_marketstream4hedge_;
+    GrpcCall<MarketStream4HedgeEntity>* caller_marketstream4hedge_;
     // 只需要各档总挂单量
-    CommonGrpcCall* caller_marketstream4client_;
+    GrpcCall<MarketStream4ClientEntity>* caller_marketstream4client_;
+    // otc查询
+    GrpcCall<OtcQuoteEntity>* caller_otcquete_;
+
     unordered_map<int, CommonGrpcCall*> callers_;
 };

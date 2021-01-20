@@ -28,7 +28,7 @@ void Config::parse_config(const std::string& file_name)
 
         // grpc
         risk_controller_addr_ = js["hub"]["risk_controller_addr"].get<string>();
-        stream_engine_addr_ = js["hub"]["stream_enginne_addr"].get<string>();
+        stream_engine_addr_ = js["hub"]["stream_engine_addr"].get<string>();
 
         cout << "risk_controller_addr_: " << risk_controller_addr_ << endl;
         cout << "stream_engine_addr_: " << stream_engine_addr_ << endl;
