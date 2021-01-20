@@ -51,7 +51,7 @@ RiskControllerServer::~RiskControllerServer(){
 
 void RiskControllerServer::start() {
     quote_updater_.start(CONFIG->grpc_quote_addr_, this);
-    configuration_updater_.start(this);
+    configuration_updater_.start(CONFIG->nacos_addr_, this);
     account_updater_.start(CONFIG->grpc_account_addr_, this);
 
     // start grpc server
@@ -77,7 +77,7 @@ void RiskControllerServer::on_snap(const SEData& quote)
     datacenter_.add_quote(raw);
 }
 
-void RiskControllerServer::on_configuration_update(const QuoteConfiguration& config)
+void RiskControllerServer::on_configuration_update(const map<TSymbol, QuoteConfiguration>& config)
 {
     datacenter_.change_configuration(config);
 }

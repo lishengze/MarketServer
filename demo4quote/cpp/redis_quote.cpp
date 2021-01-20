@@ -173,6 +173,10 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     return true;
 };
 
+bool valida_kline(const KlineData& kline) {
+    return !(kline.index < 1000000000 || kline.index > 1900000000);
+}
+
 void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 {
     last_time_ = get_miliseconds();
@@ -280,10 +284,12 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                     kline.px_close.get_str_value(),
                     kline.volume.get_str_value()
                     );
-                if( kline.index < 1000000000 || kline.index > 1900000000) {
-                    _log_and_print("[kline] get abnormal kline %s", iter->dump());
+
+                if( !valida_kline(kline) ) {
+                    _log_and_print("[kline min1] get abnormal kline %s", iter->dump());
                     continue;
                 }
+
                 klines.push_back(kline);
             }
             engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
@@ -302,7 +308,12 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 kline.px_close.get_str_value(),
                 kline.volume.get_str_value()
                 );
-            klines.push_back(kline);
+
+            if( valida_kline(kline) ) {
+                klines.push_back(kline);
+            } else {
+                _log_and_print("[kline min1] get abnormal kline %s", body.back().dump());
+            }
 
             engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
         }
@@ -328,6 +339,12 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                     kline.px_close.get_str_value(),
                     kline.volume.get_str_value()
                     );
+
+                if( !valida_kline(kline) ) {
+                    _log_and_print("[kline min60] get abnormal kline %s", iter->dump());
+                    continue;
+                }
+
                 klines.push_back(kline);
             }
             engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
@@ -346,7 +363,13 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
                 kline.px_close.get_str_value(),
                 kline.volume.get_str_value()
                 );
-            klines.push_back(kline);
+
+            if( valida_kline(kline) ) {
+                klines.push_back(kline);
+            } else {
+                _log_and_print("[kline min60] get abnormal kline %s", body.back().dump());
+            }
+
             engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
         }
     }

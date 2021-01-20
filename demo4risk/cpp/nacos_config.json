@@ -1,0 +1,26 @@
+{
+    "BTC_USDT":{
+        "enable":1,
+        "price_bias":0,
+        "volume_bias":0,
+        "hedge_percent":100
+    },
+    "XRP_USDT":{
+        "enable":1,
+        "price_bias":0,
+        "volume_bias":0,
+        "hedge_percent":100
+    },
+    "IRIS_USDT":{
+        "enable":1,
+        "price_bias":0,
+        "volume_bias":0,
+        "hedge_percent":100
+    },
+    "ABC_USDT":{
+        "enable":1,
+        "price_bias":0,
+        "volume_bias":0,
+        "hedge_percent":100
+    }
+}

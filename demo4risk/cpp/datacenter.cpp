@@ -111,15 +111,26 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double 
 
 SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    SInnerQuote tmp = src;
+    // 获取配置
+    double price_bias = 0;
+    double volume_bias = 0;
+    auto iter = ctx.params.cache_config.find(src.symbol);
+    if( iter != ctx.params.cache_config.end() ) {
+        price_bias = iter->second.PriceBias;
+        volume_bias = iter->second.VolumeBias;
+    }
+
+    // 风控的价格和成交量处理
+    SInnerQuote tmp;
     vector<pair<SDecimal, SInnerDepth>> depths;
     src.get_asks(depths);
-    _calc_depth_bias(depths, ctx.params.cache_config.PriceBias, ctx.params.cache_config.VolumeBias, true, tmp.asks);
+    _calc_depth_bias(depths, price_bias, volume_bias, true, tmp.asks);
+    src.asks.swap(tmp.asks);
     src.get_bids(depths);
-    _calc_depth_bias(depths, ctx.params.cache_config.PriceBias, ctx.params.cache_config.VolumeBias, false, tmp.bids);
-    
-    src = tmp;
+    _calc_depth_bias(depths, price_bias, volume_bias, false, tmp.bids);
+    src.bids.swap(tmp.bids);
     tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+
     return src;
 }
 
@@ -218,7 +229,7 @@ void WatermarkComputerWorker::_calc_watermark() {
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     set_snap(src);
-    
+
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _filter_by_watermark(src, watermark);
@@ -260,6 +271,13 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    // 获取配置
+    double hedge_percent = 0;
+    auto iter = ctx.params.cache_config.find(src.symbol);
+    if( iter != ctx.params.cache_config.end() ) {
+        hedge_percent = iter->second.HedgePercent;
+    }
+
     // 获取币种出现次数
     string sell_currency, buy_currency;
     int sell_count, buy_count;
@@ -268,19 +286,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     // 动态调整每个品种的资金分配量
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
-    ctx.params.cache_account.get_hedge_amounts(sell_currency, ctx.params.cache_config.HedgePercent / sell_count, sell_total_amounts);
-    ctx.params.cache_account.get_hedge_amounts(buy_currency, ctx.params.cache_config.HedgePercent / buy_count, buy_total_amounts);
-
-    //if( ctx.is_sample_ ) {
-        // _log_and_print("worker(account)-%s: sell %s %d", src.symbol.c_str(), sell_currency.c_str(), sell_count);
-    //    for( const auto& v : sell_total_amounts ) {
-            // _log_and_print("worker(account)-%s: sell %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
-    //    }
-        // _log_and_print("worker(account)-%s: buy %s %d", src.symbol.c_str(), buy_currency.c_str(), buy_count);
-    //    for( const auto& v : buy_total_amounts ) {
-            // _log_and_print("worker(account)-%s: buy  %s %.03f", src.symbol.c_str(), v.first.c_str(), v.second);
-    //    }
-    // }
+    ctx.params.cache_account.get_hedge_amounts(sell_currency, hedge_percent / sell_count, sell_total_amounts);
+    ctx.params.cache_account.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
 
     // 逐档从总余额中扣除资金消耗
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
@@ -308,6 +315,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
+    
     for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
@@ -520,7 +528,7 @@ void DataCenter::change_account(const AccountInfo& info)
     _push_to_clients();
 }
 
-void DataCenter::change_configuration(const QuoteConfiguration& config)
+void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
 {
     tfm::printfln("change_configuration");
     
