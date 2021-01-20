@@ -1,5 +1,6 @@
 #include "comm_data.h"
 #include "../front_server_declare.h"
+#include "../log/log.h"
 
 
 RspRiskCtrledDepthData::RspRiskCtrledDepthData(const SDepthData* depth_data)
@@ -56,6 +57,52 @@ void RspRiskCtrledDepthData::init(const SDepthData* depth_data)
     }
 
     // cout << "RspRiskCtrledDepthData::init 3" << endl;
+}
+
+string RspKLineData::get_json_str()
+{
+    try
+    {
+        string result;
+        nlohmann::json json_data;       
+        if (is_update)
+        {
+            json_data["type"] = KLINE_UPDATE;
+        } 
+        else
+        {
+            json_data["type"] = KLINE_RSP;
+        }
+        
+        json_data["symbol"] = string(symbol_);
+        json_data["start_time"] = start_time_;
+        json_data["end_time"] = end_time_;
+        json_data["frequency"] = frequency_;
+        json_data["data_count"] = data_count_;
+
+        int i = 0;
+        nlohmann::json detail_data;
+        for (KlineDataPtr atom_data:kline_data_vec_)
+        {
+            nlohmann::json tmp_json;
+            tmp_json["open"] = atom_data->px_open.get_value();
+            tmp_json["high"] = atom_data->px_high.get_value();
+            tmp_json["low"] = atom_data->px_low.get_value();
+            tmp_json["close"] = atom_data->px_close.get_value();
+            tmp_json["volume"] = atom_data->volume.get_value();
+            tmp_json["tick"] = atom_data->index;
+            detail_data[i++] = tmp_json;
+        }
+        json_data["data"] = detail_data;
+        return json_data.dump();
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] RspKLineData::get_json_str: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    
 }
 
 string RspEnquiry::get_json_str()

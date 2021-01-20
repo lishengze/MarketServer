@@ -38,6 +38,8 @@ void KlineProcess::request_kline_package(PackagePtr package)
 
             if (rsp_package)
             {
+                init_update_kline_data(rsp_package, pReqKlineData);
+
                 cout << "deliver_response " << endl;
                 process_engine_->deliver_response(rsp_package);
             }
@@ -67,6 +69,8 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
         if (test_kline_data_) return;
 
         KlineData* pkline_data = GET_NON_CONST_FIELD(package, KlineData);
+
+        update_kline_data(pkline_data);
 
         if (pkline_data)
         {
@@ -311,12 +315,28 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
             cout << "src_kline_data.size: " << src_kline_data.size() << endl;
 
-            vector<AtomKlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
+            vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
-            PackagePtr rsp_package = GetNewRspKLineDataPackage(pReqKlineData, target_kline_data, ID_MANAGER->get_id());
+            PackagePtr rsp_package;
 
-            rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
+            if (target_kline_data.size() > 0)
+            {
+                rsp_package = GetNewRspKLineDataPackage(pReqKlineData, target_kline_data, ID_MANAGER->get_id());
 
+                rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());                
+            }
+            else
+            {
+                stringstream s_obj;
+                s_obj << "No KLine Data For " << pReqKlineData->symbol_ 
+                      << " fre: " << pReqKlineData->frequency_ 
+                      << " data_count: " << pReqKlineData->data_count_;
+
+                string err_msg = s_obj.str();
+                int err_id = 1;
+                rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->http_response_, pReqKlineData->websocket_);
+            }
+            
             return rsp_package;                       
         }
         else
@@ -383,43 +403,43 @@ void KlineProcess::get_src_kline_data(vector<KlineDataPtr>& result, std::map<typ
     }
 }
 
-vector<AtomKlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
+vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
 {
-    vector<AtomKlineDataPtr> result;
+    vector<KlineDataPtr> result;
 
     cout << "compute_target_kline_data" << endl;
 
-    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(src_kline_data[0]));
+    KlineDataPtr cur_data = src_kline_data[0];
     // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
 
     result.push_back(cur_data); 
 
-    double low = MAX_DOUBLE;
-    double high = MIN_DOUBLE;
-    double open;
+    SDecimal low(MAX_DOUBLE);
+    SDecimal high(MIN_DOUBLE);
+    SDecimal open;
 
     // cout << "kline_data.size: " << src_kline_data.size() << endl;
 
     src_kline_data.erase(src_kline_data.begin());
 
     bool is_first = true;
-    for (KlineDataPtr atom : src_kline_data)
+    for (KlineDataPtr atom:src_kline_data)
     {
-        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
-        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
+        low = low > atom->px_low ? atom->px_low:low;
+        high = high < atom->px_high ? atom->px_high:high;
 
         if (is_first)
         {
-            open = atom->px_open.get_value();
+            open = atom->px_open;
             is_first = false;
         }
         
-        if (atom->index - (*result.rbegin())->tick_ >= frequency)
+        if (atom->index - (*result.rbegin())->index >= frequency)
         {            
-            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
-            cur_data->low_ = low;
-            cur_data->high_ = high;
-            cur_data->open_ = open;
+            KlineDataPtr cur_data = boost::make_shared<KlineData>(*atom);
+            cur_data->px_low = low;
+            cur_data->px_high = high;
+            cur_data->px_open = open;
 
             is_first = true;
             result.push_back(cur_data); 
@@ -470,4 +490,78 @@ void KlineProcess::init_test_kline_data()
          << "test end_time: " << kline_data_[symbol][frequency_base_].rbegin()->first << endl;
 
     cout << "init end!" << endl;
+}
+
+void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineData * pReqKlineData)
+{
+    const RspKLineData* p_rsp_kline_data = GET_FIELD(rsp_package, RspKLineData);
+
+    if (p_rsp_kline_data)
+    {
+        auto iter = p_rsp_kline_data->kline_data_vec_.rbegin();
+
+        KlineDataUpdatePtr kline_update = boost::make_shared<KlineDataUpdate>(*pReqKlineData);
+
+        updated_kline_data_[string(pReqKlineData->symbol_)].emplace_back(kline_update);          
+
+        kline_update->last_update_time_ = (*iter)->index;         
+
+        cout << pReqKlineData->symbol_ << " Last Update Time: " << get_sec_time_str(kline_update->last_update_time_) << endl; 
+    }
+}
+
+void KlineProcess::update_kline_data(const KlineData* kline_data)
+{
+    cout << "KlineProcess::update_kline_data " << endl;
+
+    string symbol = kline_data->symbol;
+
+    if (updated_kline_data_.find(symbol) != updated_kline_data_.end())
+    {
+        vector<KlineDataUpdatePtr>& vec = updated_kline_data_[symbol];
+
+        // cout << "vec.size: " << vec.size() << endl;
+
+        for (auto kline_update:vec)
+        {                        
+            if (!kline_update->kline_data_ )
+            {
+                kline_update->kline_data_ = boost::make_shared<KlineData>(*kline_data);
+            }
+
+            KlineDataPtr last_kline = kline_update->kline_data_;
+
+            if (last_kline->is_clear())
+            {
+                last_kline->reset(*kline_data);
+            }
+            else
+            {
+                last_kline->px_close = kline_data->px_close;
+                last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
+                last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
+                last_kline->index = kline_data->index;
+                assign(last_kline->symbol, kline_data->symbol);                
+            }
+
+            if (kline_data->index - kline_update->last_update_time_ >= kline_update->req_kline_data_.frequency_)
+            {
+                cout << "Current Update Time: " << get_sec_time_str(kline_data->index) << endl;
+                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+                
+                PackagePtr rsp_package = GetNewRspKLineDataPackage(&kline_update->req_kline_data_, cur_kline_data, ID_MANAGER->get_id());
+
+                if (rsp_package)
+                {
+                    rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
+
+                    process_engine_->deliver_response(rsp_package);
+                }
+
+                kline_update->last_update_time_ = kline_data->index;
+
+                last_kline->clear();
+            }
+        }
+    }
 }

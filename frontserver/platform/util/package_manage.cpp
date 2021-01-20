@@ -97,7 +97,7 @@ PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int
     return package;  
 }
 
-PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<AtomKlineDataPtr>& main_data, int package_id)
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& main_data, int package_id)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
@@ -121,10 +121,46 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<A
 
         cout << "GetNewRspKLineDataPackage: " << p_rsp_kline_data->websocket_->get_ws() << ", " << pReqKlineData->websocket_->get_ws() << endl;
 
-        for (AtomKlineDataPtr atom_kline:main_data)
+        for (KlineDataPtr atom_kline:main_data)
         {
             p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);
         }
+
+        return package;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+    }
+    
+    return package;        
+}
+
+
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr& update_kline_data, int package_id)
+{
+    PackagePtr package = PackagePtr{new Package{}};
+    try
+    {    
+        package->SetPackageID(package_id);
+
+        CREATE_FIELD(package, RspKLineData);
+
+        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+
+        p_rsp_kline_data->is_update = true;
+
+        assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
+        assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
+        assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
+
+        assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
+        assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
+        assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
+        assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
+        assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
+
+        p_rsp_kline_data->kline_data_vec_.emplace_back(update_kline_data);
 
         return package;
     }

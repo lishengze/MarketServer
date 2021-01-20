@@ -176,39 +176,39 @@ std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*
 
 string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
 {
-    try
-    {
-        string result;
-        nlohmann::json json_data;        
-        json_data["type"] = type;
-        json_data["symbol"] = string(rsp_kline_data.symbol_);
-        json_data["start_time"] = rsp_kline_data.start_time_;
-        json_data["end_time"] = rsp_kline_data.end_time_;
-        json_data["frequency"] = rsp_kline_data.frequency_;
-        json_data["data_count"] = rsp_kline_data.data_count_;
+    // try
+    // {
+    //     string result;
+    //     nlohmann::json json_data;        
+    //     json_data["type"] = type;
+    //     json_data["symbol"] = string(rsp_kline_data.symbol_);
+    //     json_data["start_time"] = rsp_kline_data.start_time_;
+    //     json_data["end_time"] = rsp_kline_data.end_time_;
+    //     json_data["frequency"] = rsp_kline_data.frequency_;
+    //     json_data["data_count"] = rsp_kline_data.data_count_;
 
-        int i = 0;
-        nlohmann::json detail_data;
-        for (AtomKlineDataPtr atom_data:rsp_kline_data.kline_data_vec_)
-        {
-            nlohmann::json tmp_json;
-            tmp_json["open"] = atom_data->open_;
-            tmp_json["high"] = atom_data->high_;
-            tmp_json["low"] = atom_data->low_;
-            tmp_json["close"] = atom_data->close_;
-            tmp_json["volume"] = atom_data->volume_;
-            tmp_json["tick"] = atom_data->tick_;
-            detail_data[i++] = tmp_json;
-        }
-        json_data["data"] = detail_data;
-        return json_data.dump();
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] RspKlinDataToJsonStr: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }
+    //     int i = 0;
+    //     nlohmann::json detail_data;
+    //     for (AtomKlineDataPtr atom_data:rsp_kline_data.kline_data_vec_)
+    //     {
+    //         nlohmann::json tmp_json;
+    //         tmp_json["open"] = atom_data->open_;
+    //         tmp_json["high"] = atom_data->high_;
+    //         tmp_json["low"] = atom_data->low_;
+    //         tmp_json["close"] = atom_data->close_;
+    //         tmp_json["volume"] = atom_data->volume_;
+    //         tmp_json["tick"] = atom_data->tick_;
+    //         detail_data[i++] = tmp_json;
+    //     }
+    //     json_data["data"] = detail_data;
+    //     return json_data.dump();
+    // }
+    // catch(const std::exception& e)
+    // {
+    //     std::stringstream stream_obj;
+    //     stream_obj << "[E] RspKlinDataToJsonStr: " << e.what() << "\n";
+    //     LOG_ERROR(stream_obj.str());
+    // }
     
 }
 
