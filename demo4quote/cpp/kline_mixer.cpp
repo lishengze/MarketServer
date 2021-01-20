@@ -164,19 +164,22 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
 
     // 填补跳空数据
     vector<KlineData> _klines = klines;
+    /*
     if( dst.size() > 0 && _klines.size() > 0 ) {
         const KlineData& last = dst.back();
         const KlineData& first = _klines.front();
+        vector<KlineData> patch;
         type_tick fix_index = last.index + this->resolution_;
         while( fix_index < first.index ) {
             tfm::printfln("%s.%s kline patch index=%u to %u", exchange, symbol, fix_index, first.index);
             KlineData tmp = last;
             tmp.index = fix_index;
             tmp.volume = 0;
-            _klines.insert(_klines.begin(), tmp);
+            patch.push_back(tmp);
             fix_index += this->resolution_;
         }
-    }
+        _klines.insert(_klines.begin(), patch.begin(), patch.end());
+    }*/
     
     // 合并到内存
     if( _klines.size() <= 10 )
@@ -289,22 +292,22 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
     // 写入cache
     // 写入db 缓存区
     // 写入计算模块
-    db_interface_->on_kline(exchange, symbol, resolution, kline, is_init);
+    db_interface_->on_kline(exchange, symbol, resolution, klines, is_init);
     switch( resolution ) 
     {
         case 60:
         {
-            min1_cache_.update_kline(exchange, symbol, kline);
+            min1_cache_.update_kline(exchange, symbol, klines);
             break;
         }
         case 3600:
         {
-            min60_cache_.update_kline(exchange, symbol, kline);
+            min60_cache_.update_kline(exchange, symbol, klines);
             break;
         }
         default:
@@ -314,10 +317,10 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if( !is_init && kline.size() > 0 )
+    if( !is_init && klines.size() > 0 )
     {
         for( const auto& v : callbacks_) {
-            v->on_kline(exchange, symbol, resolution, kline);
+            v->on_kline(exchange, symbol, resolution, klines);
         }
     }
 }
