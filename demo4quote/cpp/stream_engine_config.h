@@ -70,7 +70,7 @@ public:
         }                                                            \
         std::string new_fmt = "%s:%d - " + string(fmt);              \
                                                                      \
-        tfm::printfln("%s:%d - %s", __func__, __LINE__, log_msg);    \
+        tfm::printfln("%s:%d - %s", __FILE__, __LINE__, log_msg);    \
                                                                      \
-        UT_LOG_INFO_FMT(CONFIG->logger_, "%s:%d - %s", __func__, __LINE__, log_msg.c_str());\
+        UT_LOG_INFO_FMT(CONFIG->logger_, "%s:%d - %s", __FILE__, __LINE__, log_msg.c_str());\
     } while(0)                                                          

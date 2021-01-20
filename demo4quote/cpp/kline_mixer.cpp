@@ -156,15 +156,35 @@ void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vec
     cache = data_;
 }
 
-void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines)
+void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs)
 {
+    // 锁住对象
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
     vector<KlineData>& dst = data_[exchange][symbol];
 
-    if( klines.size() <= 10 )  // 为什么是10？
+    // 填补跳空数据
+    outputs = klines;
+    if( dst.size() > 0 && outputs.size() > 0 ) {
+        const KlineData& last = dst.back();
+        const KlineData& first = klines.front();
+        vector<KlineData> patch;
+        type_tick fix_index = last.index + this->resolution_;
+        while( fix_index < first.index ) {
+            tfm::printfln("%s.%s kline patch index=%u to %u", exchange, symbol, fix_index, first.index);
+            KlineData tmp = last;
+            tmp.index = fix_index;
+            tmp.volume = 0;
+            patch.push_back(tmp);
+            fix_index += this->resolution_;
+        }
+        outputs.insert(outputs.begin(), patch.begin(), patch.end());
+    }
+    
+    // 合并到内存
+    if( outputs.size() <= 10 )
     {
-        // 直接插入
-        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ )
+        // 数量少的时候，直接插入。为什么是10？
+        for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ )
         {
             const KlineData& kline = *iter;
             bool inserted = false;
@@ -192,12 +212,12 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         for( auto iter = dst.begin() ; iter != dst.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
-        for( auto iter = klines.begin() ; iter != klines.end() ; iter++ ){
+        for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
         dst.clear();
         for( const auto& v : tmp ) {
-            tfm::printfln("%s.%s %d", exchange, symbol, v.second.index);
+            //tfm::printfln("%s.%s %d", exchange, symbol, v.second.index);
             dst.push_back(v.second);
         }
     }
@@ -261,7 +281,9 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
 KlineHubber::KlineHubber()
 {
     min1_cache_.set_limit(KLINE_CACHE_MIN1);
+    min1_cache_.set_resolution(60);
     min60_cache_.set_limit(KLINE_CACHE_MIN60);
+    min60_cache_.set_resolution(3600);
 }
 
 KlineHubber::~KlineHubber()
@@ -269,22 +291,19 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs)
 {
     // 写入cache
-    // 写入db 缓存区
-    // 写入计算模块
-    db_interface_->on_kline(exchange, symbol, resolution, kline, is_init);
     switch( resolution ) 
     {
         case 60:
         {
-            min1_cache_.update_kline(exchange, symbol, kline);
+            min1_cache_.update_kline(exchange, symbol, klines, outputs);
             break;
         }
         case 3600:
         {
-            min60_cache_.update_kline(exchange, symbol, kline);
+            min60_cache_.update_kline(exchange, symbol, klines, outputs);
             break;
         }
         default:
@@ -294,10 +313,14 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if( !is_init && kline.size() > 0 )
+    // 写入db缓存区
+    db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
+
+    // 更新回调
+    if( !is_init && outputs.size() > 0 )
     {
         for( const auto& v : callbacks_) {
-            v->on_kline(exchange, symbol, resolution, kline);
+            v->on_kline(exchange, symbol, resolution, outputs);
         }
     }
 }
@@ -327,5 +350,5 @@ bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, in
 void KlineHubber::fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60)
 {
     min1_cache_.fill_klines(cache_min1);
-    min1_cache_.fill_klines(cache_min60);
+    min60_cache_.fill_klines(cache_min60);
 }

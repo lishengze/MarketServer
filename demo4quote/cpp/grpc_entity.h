@@ -30,6 +30,9 @@ using quote::service::v1::MultiTradeWithDecimal;
 using quote::service::v1::GetLatestTradesReq;
 using quote::service::v1::GetLatestTradesResp;
 
+class IQuoteCacher;
+class IMixerCacher;
+
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
     dst->set_base(src.data_.real_.value_);
@@ -76,7 +79,7 @@ private:
 class SubscribeSingleQuoteEntity : public BaseGrpcEntity
 {
 public:
-    SubscribeSingleQuoteEntity(void* service);
+    SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher);
 
     void register_call();
 
@@ -85,7 +88,7 @@ public:
     void add_data(SnapAndUpdate data);
 
     SubscribeSingleQuoteEntity* spawn() {
-        return new SubscribeSingleQuoteEntity(service_);
+        return new SubscribeSingleQuoteEntity(service_, cacher_);
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
@@ -95,18 +98,20 @@ private:
     SubscribeQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
+    IQuoteCacher* cacher_ = nullptr;
+    bool snap_sended_;
+    type_seqno last_seqno;
+
     // 
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
-    bool snap_sended_;
-    type_seqno last_seqno;
 };
 
 //////////////////////////////////////////////////
 class SubscribeMixQuoteEntity : public BaseGrpcEntity
 {
 public:
-    SubscribeMixQuoteEntity(void* service);
+    SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher);
 
     void register_call();
 
@@ -115,7 +120,7 @@ public:
     void add_data(SnapAndUpdate data);
 
     SubscribeMixQuoteEntity* spawn() {
-        return new SubscribeMixQuoteEntity(service_);
+        return new SubscribeMixQuoteEntity(service_, cacher_);
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
@@ -124,11 +129,13 @@ private:
     SubscribeMixQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
+    IMixerCacher* cacher_ = nullptr;
+    bool snap_sended_;
+    type_seqno last_seqno;
+
     // 
     mutable std::mutex                 mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
-    bool snap_sended_;
-    type_seqno last_seqno;
 };
 
 //////////////////////////////////////////////////
@@ -240,8 +247,8 @@ private:
     mutable std::mutex            mutex_datas_;
     list<WrapperKlineData> datas_;
     
-    IKlineCacher* cacher_;
-    
+    IKlineCacher* cacher_ = nullptr;
+     
     // 首次发送的缓存
     bool _snap_sended() const { return snap_cached_ && cache_min1_.size() == 0 && cache_min60_.size() == 0; }
     bool snap_cached_;
@@ -278,7 +285,6 @@ private:
 };
 
 //////////////////////////////////////////////////////////////
-class IQuoteCacher;
 class GetLastTradesEntity : public BaseGrpcEntity
 {
 public:

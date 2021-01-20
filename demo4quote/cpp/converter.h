@@ -6,7 +6,7 @@
 
 using FuncAddDepth2 = std::function<DepthWithDecimal*()>;
 
-inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask)
+inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask, uint32 vprecise)
 {
     unsigned int depth_count = 0;
     const SMixDepthPrice* ptr = depths;
@@ -19,6 +19,7 @@ inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDept
             set_decimal(&tmp, v.second);
             (*depth->mutable_data())[v.first] = tmp;
         }        
+        total_volume.scale(vprecise);
         set_decimal(depth->mutable_volume(), total_volume);
         depth_count += 1;
         ptr = ptr->next;
@@ -31,14 +32,17 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
     msd->set_seq_no(src->sequence_no);
+    msd->set_time(src->server_time);
     msd->set_is_snap(is_snap);
+    msd->set_price_precise(src->price_precise);
+    msd->set_volume_precise(src->volume_precise);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);
-    mixquote_to_pbquote2_depth(src->asks, f1, depth, true);
+    mixquote_to_pbquote2_depth(src->asks, f1, depth, true, src->volume_precise);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamDataWithDecimal::add_bids, msd);
-    mixquote_to_pbquote2_depth(src->bids, f2, depth, false);
+    mixquote_to_pbquote2_depth(src->bids, f2, depth, false, src->volume_precise);
 
     return msd;
 };
@@ -66,9 +70,11 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     std::shared_ptr<MarketStreamDataWithDecimal> msd = std::make_shared<MarketStreamDataWithDecimal>();
     msd->set_exchange(exchange);
     msd->set_symbol(symbol);
-    msd->set_time(src.arrive_time);
+    msd->set_time(src.server_time);
     msd->set_seq_no(src.sequence_no);
     msd->set_is_snap(is_snap);
+    msd->set_price_precise(src.price_precise);
+    msd->set_volume_precise(src.volume_precise);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);

@@ -14,13 +14,14 @@ using namespace std;
 #include "updater_account.h"
 #include "updater_order.h"
 #include "risk_controller_define.h"
+#include "grpc_entity.h"
 
 
 // 内部行情结构
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
     map<TExchange, SDecimal> exchanges;
-    double amount_cost; // 余额消耗量
+    //double amount_cost; // 余额消耗量
 
     SInnerDepth() {
     }
@@ -41,6 +42,8 @@ struct SInnerQuote {
     type_tick time;
     type_tick time_arrive;
     type_seqno seq_no;
+    uint32 precise;
+    uint32 vprecise;
     map<SDecimal, SInnerDepth> asks;
     map<SDecimal, SInnerDepth> bids;
 
@@ -48,6 +51,8 @@ struct SInnerQuote {
         time = 0;
         time_arrive = 0;
         seq_no = 0;
+        precise = 0;
+        vprecise = 0;
     }
 
     void get_asks(vector<pair<SDecimal, SInnerDepth>>& depths) const {
@@ -68,10 +73,15 @@ struct SInnerQuote {
 class CallDataServeMarketStream;
 
 
+struct OtcParams{
+    double percent;
+};
+
 
 struct Params {
+    OtcParams otc_params;
     AccountInfo cache_account;
-    QuoteConfiguration cache_config;
+    map<TSymbol, QuoteConfiguration> cache_config;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
 };
 
@@ -109,10 +119,6 @@ private:
 
 class DefaultWorker : public Worker
 {
-public:
-    DefaultWorker();
-    ~DefaultWorker();
-
 private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
@@ -155,6 +161,13 @@ private:
     DefaultWorker default_worker_;
 };
 
+// worker：处理订单簿风控
+class QuoteBiasWorker : public Worker
+{
+private:
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
+};
+
 // worker： 处理买卖一价位交叉问题
 struct SymbolWatermark
 {
@@ -186,8 +199,6 @@ private:
 class AccountAjdustWorker: public Worker
 {
 public:
-    AccountAjdustWorker(){}
-    ~AccountAjdustWorker(){};
     void set_snap(const SInnerQuote& quote);
 private:
     // cache
@@ -202,14 +213,34 @@ private:
 // worker：处理订单簿风控
 class OrderBookWorker : public Worker
 {
-public:
-    OrderBookWorker(){}
-    ~OrderBookWorker(){}
 private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
 
-class DataCenter {
+/*
+缓存接口
+*/
+class IDataCacher
+{
+public:
+    // 询价查询
+    // 返回0 执行成功 
+    // 返回1 没有找到币对
+    virtual QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price) = 0;
+
+    virtual bool get_snaps(vector<SInnerQuote>& snaps) = 0;
+};
+
+class IQuotePusher
+{
+public:
+    virtual void publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
+    virtual void publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update) = 0;
+    virtual void publish4Client(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update) = 0;
+};
+
+class DataCenter : public IDataCacher 
+{
 public:
     DataCenter();
     ~DataCenter();
@@ -219,26 +250,30 @@ public:
     // 触发重新计算，并下发行情给所有client
     void change_account(const AccountInfo& info);
     // 触发重新计算，并下发行情给所有client
-    void change_configuration(const QuoteConfiguration& config);
+    void change_configuration(const map<TSymbol, QuoteConfiguration>& config);
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
-private:
-    void _add_quote(const SInnerQuote& src, SInnerQuote& dst, Params& params);
+    // 询价查询
+    QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price);
+    // 注册推送接口
+    void register_callback(IQuotePusher* callback) { callbacks_.insert(callback); }
 
-    void _publish_quote(const SInnerQuote& quote, const Params& params);
+    bool get_snaps(vector<SInnerQuote>& snaps);
+private:
+    set<IQuotePusher*> callbacks_;
+
+    void _publish_quote(const SInnerQuote& quote);
 
     void _push_to_clients(const string& symbol = "");
 
-    //void _calc_newquote(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote);
-    
     mutable std::mutex                  mutex_datas_;
     unordered_map<TSymbol, SInnerQuote> datas_;
     unordered_map<TSymbol, SInnerQuote> last_datas_;
-
     Params params_;
 
     // 处理流水线
     QuotePipeline pipeline_;
+    QuoteBiasWorker quotebias_worker_;
     WatermarkComputerWorker watermark_worker_;
     AccountAjdustWorker account_worker_;
     OrderBookWorker orderbook_worker_;

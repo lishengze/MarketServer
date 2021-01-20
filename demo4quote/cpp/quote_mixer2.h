@@ -11,7 +11,13 @@ public:
     virtual void publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade) = 0;
 };
 
-class QuoteMixer2
+class IMixerCacher
+{
+public:
+    virtual bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps) = 0;
+};
+
+class QuoteMixer2 : public IMixerCacher
 {
 public:
     struct SSymbolConfig
@@ -35,6 +41,8 @@ public:
     void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
+
+    bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
 private:
     set<IMixerQuotePusher*> callbacks_;
 
@@ -64,6 +72,7 @@ class IQuoteCacher
 public:
     // 请求缓存中的K线
     virtual bool get_latetrades(vector<TradeWithDecimal>& trades) = 0;
+    virtual bool get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap) = 0;
 };
 
 class QuoteCacher : public IQuoteCacher
@@ -97,6 +106,8 @@ public:
     void clear_exchange(const TExchange& exchange);
 
     bool get_latetrades(vector<TradeWithDecimal>& trades);
+
+    bool get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap);
 private:
     set<IMixerQuotePusher*> callbacks_;
 

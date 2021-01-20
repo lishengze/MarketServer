@@ -26,11 +26,11 @@ void ServerEndpoint::init(const string& grpc_addr)
     callers_[call_id] = caller_demo_;
     call_id++;
 
-    caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get());
+    caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
     callers_[call_id] = caller_subscribe_single_;
     call_id++;
 
-    caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get());
+    caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), mixer_cacher_);
     callers_[call_id] = caller_subscribe_mix_;
     call_id++;
 

@@ -21,32 +21,36 @@ void ServerEndpoint::init(const string& grpc_addr)
     
     int call_id = 0;
 
-    caller_marketstream4broker_ = new GrpcCall<MarketStream4BrokerEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4broker_ = new GrpcCall<MarketStream4BrokerEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4broker_;
     call_id++;
 
-    caller_marketstream4hedge_ = new GrpcCall<MarketStream4HedgeEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4hedge_ = new GrpcCall<MarketStream4HedgeEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4hedge_;
     call_id++;
     
-    caller_marketstream4client_ = new GrpcCall<MarketStream4ClientEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4client_ = new GrpcCall<MarketStream4ClientEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4client_;
+    call_id++;
+
+    caller_otcquete_ = new GrpcCall<OtcQuoteEntity>(call_id, &service_, cq_.get(), cacher_);
+    callers_[call_id] = caller_otcquete_;
     call_id++;
 }
 
 void ServerEndpoint::publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
-    caller_marketstream4hedge_->add_data(snap, update);
+    caller_marketstream4hedge_->add_data(snap);
 }
 
 void ServerEndpoint::publish4Broker(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)
 {
-    caller_marketstream4broker_->add_data(snap, update);
+    caller_marketstream4broker_->add_data(snap);
 }
 
 void ServerEndpoint::publish4Client(const string& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
 {
-    caller_marketstream4client_->add_data(snap, update);
+    caller_marketstream4client_->add_data(snap);
 }
 
 void ServerEndpoint::_handle_rpcs() 

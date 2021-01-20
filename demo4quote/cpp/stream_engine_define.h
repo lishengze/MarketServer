@@ -30,10 +30,15 @@ struct SMixQuote {
     SMixDepthPrice* bids; // 买盘
     SDecimal watermark;
     long long sequence_no;
+    type_tick server_time;
+    uint32 price_precise;
+    uint32 volume_precise;
 
     SMixQuote() {
         asks = NULL;
         bids = NULL;
+        price_precise = 0;
+        volume_precise = 0;
     }
 
     unsigned int ask_length() const {

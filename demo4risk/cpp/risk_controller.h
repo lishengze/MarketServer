@@ -10,12 +10,13 @@
 #include "updater_account.h"
 #include "updater_order.h"
 #include "datacenter.h"
+#include "grpc_server.h"
 
-class RiskController : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
+class RiskControllerServer : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
 {
 public:
-    RiskController();
-    ~RiskController();
+    RiskControllerServer();
+    ~RiskControllerServer();
 
     void start();
 
@@ -27,7 +28,7 @@ public:
     void on_snap(const SEData& quote);
 
     // 配置修改回调
-    void on_configuration_update(const QuoteConfiguration& config);
+    void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config);
 
     // 账户相关回调
     void on_account_update(const AccountInfo& info);
@@ -43,6 +44,8 @@ private:
     QuoteUpdater quote_updater_;
 
     OrderUpdater order_updater_;
+    
+    ServerEndpoint server_endpoint_;
 
     // 行情数据中心
     DataCenter datacenter_;

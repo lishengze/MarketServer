@@ -6,6 +6,9 @@
         "quote_addr": "127.0.0.1:9000",
         "account_addr": "36.255.220.139:9000"
     },
+    "nacos": {
+        "addr": "36.255.220.139:8848"
+    },
     "debug": {
         "sample_symbol": "BTC_USDT",
         "output_to_screen": 0,

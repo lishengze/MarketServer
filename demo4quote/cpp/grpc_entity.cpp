@@ -15,6 +15,9 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     dst->set_symbol(src->symbol());
     dst->set_seq_no(src->seq_no());
     dst->set_is_snap(src->is_snap());
+    dst->set_time(src->time());
+    dst->set_price_precise(src->price_precise());
+    dst->set_volume_precise(src->volume_precise());
 
     // 卖盘
     for( int i = 0 ; i < src->asks_size() ; ++i ) {
@@ -67,11 +70,13 @@ bool GrpcDemoEntity::process(){
 }
 
 //////////////////////////////////////////////////
-SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service):responder_(&ctx_)
+SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
+, snap_sended_(false)
+, last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
-    snap_sended_ = false;
-    last_seqno = 0;
 }
 
 void SubscribeSingleQuoteEntity::register_call(){
@@ -139,21 +144,30 @@ void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 bool SubscribeSingleQuoteEntity::process(){
     
     MultiMarketStreamDataWithDecimal reply;
+
+    if( snap_sended_ )
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {
             MarketStreamDataWithDecimal* quote = reply.add_quotes();
             quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
-            // 检查seq_no
-            //if( last_seqno != 0 && (1+last_seqno) != quote->seq_no() ) {
-            //    cout << "lost !!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-            //}
             last_seqno = quote->seq_no();
             //compare_pb_json2(*quote);
         }
         datas_.clear();
     }
+    else 
+    {
+        std::shared_ptr<MarketStreamDataWithDecimal> snap;
+        if( cacher_->get_lastsnap(request_.exchange(), request_.symbol(), snap) )
+        {            
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamDataWithDecimal*)snap.get(), quote);
+        }
+        snap_sended_ = true;
+    }
+
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -179,10 +193,13 @@ void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
 }
 
 //////////////////////////////////////////////////
-SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service):responder_(&ctx_)
+SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
+, snap_sended_(false)
+, last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
-    snap_sended_ = false;
 }
 
 void SubscribeMixQuoteEntity::register_call(){
@@ -190,9 +207,11 @@ void SubscribeMixQuoteEntity::register_call(){
     service_->RequestSubscribeMixQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool SubscribeMixQuoteEntity::process(){
-    
+bool SubscribeMixQuoteEntity::process()
+{    
     MultiMarketStreamDataWithDecimal reply;
+
+    if( snap_sended_ )
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
@@ -202,6 +221,20 @@ bool SubscribeMixQuoteEntity::process(){
         }
         datas_.clear();
     }
+    else
+    {
+        vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
+        cacher_->get_lastsnaps(snaps);
+        tfm::printfln("get_lastsnaps %u items", snaps.size());
+        
+        for( size_t i = 0 ; i < snaps.size() ; ++i ) {
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            quote_to_quote((MarketStreamDataWithDecimal*)snaps[i].get(), quote);
+        }
+        snap_sended_ = true;
+    }
+
+    // 执行发送
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -289,6 +322,7 @@ GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(&ct
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
+    snap_cached_ = false;
 }
 
 void GetLastEntity::register_call(){
@@ -315,7 +349,7 @@ bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
             resp->set_num(klines.size());
             for( size_t i = 0 ; i < klines.size() ; i ++ ) 
             {
-                cout << klines[i].index << endl;
+                //cout << klines[i].index << endl;
                 kline_to_pbkline(klines[i], resp->add_klines());
             }
 
@@ -388,6 +422,7 @@ bool GetLastEntity::process()
     {
         if( !snap_cached_ ){
             cacher_->fill_cache(cache_min1_, cache_min60_);
+            tfm::printfln("kline get last registered, init min1/%u min60/%u", cache_min1_.size(), cache_min60_.size());
             snap_cached_ = true;
         } 
 

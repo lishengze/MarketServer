@@ -18,7 +18,10 @@ StreamEngine::StreamEngine(){
     // init grpc server
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
+    server_endpoint_.set_mixer_cacher(&quote_mixer2_);
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
+    quote_cacher_.register_callback(&server_endpoint_);
+    quote_mixer2_.register_callback(&server_endpoint_);
 }
 
 StreamEngine::~StreamEngine(){
@@ -26,8 +29,6 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() 
 {
-    quote_cacher_.register_callback(&server_endpoint_);
-    quote_mixer2_.register_callback(&server_endpoint_);
 
     if( !CONFIG->replay_mode_ ) {
         // 启动redis
@@ -87,9 +88,9 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
     quote_cacher_.on_trade(exchange, symbol, trade);
 }
 
-void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
+void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    for( const auto& v : kline ) {        
+    for( const auto& v : klines ) {        
         _log_and_print("get %s-%s kline %d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
             v.index,
             v.px_open.get_str_value().c_str(),
@@ -99,9 +100,12 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
             v.volume.get_str_value().c_str()
         );
     }
+    
+    vector<KlineData> outputs;
+    kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
+
     if( exchange != "" )
-        kline_mixer_.on_kline(exchange, symbol, resolution, kline);
-    kline_hubber_.on_kline(exchange, symbol, resolution, kline, is_init);
+        kline_mixer_.on_kline(exchange, symbol, resolution, outputs);
 }
 
 void StreamEngine::signal_handler(int signum)

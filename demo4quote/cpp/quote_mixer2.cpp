@@ -25,6 +25,23 @@ void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Tr
     set_decimal(dst->mutable_volume(), src.volume);
 }
 
+bool QuoteCacher::get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap)
+{
+    SSymbolConfig config;
+    {
+        std::unique_lock<std::mutex> l{ mutex_config_ };
+        config = configs_[symbol];
+    }
+
+    SDepthQuote quote;
+    {
+        std::unique_lock<std::mutex> l{ mutex_quotes_ };
+        quote = singles_[symbol][exchange];
+    }
+    snap = depth_to_pbquote2(exchange, symbol, quote, config.depths[exchange], true);
+    return true;
+}
+
 bool QuoteCacher::get_latetrades(vector<TradeWithDecimal>& trades)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
@@ -220,7 +237,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     output.exchange = exchange;
     output.symbol = symbol;
     output.arrive_time = quote.arrive_time;
+    output.server_time = get_miliseconds();
     output.sequence_no = quote.sequence_no;
+    output.price_precise = config.precise;
+    output.volume_precise = config.vprecise;
     process_depths(quote.asks, output.asks, config.precise, config.vprecise, config.fees[exchange], true);
     process_depths(quote.bids, output.bids, config.precise, config.vprecise, config.fees[exchange], false);
 
@@ -251,6 +271,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
 void QuoteMixer2::_inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr)
 {
+    ptr->server_time = quote.server_time;
+    ptr->price_precise = quote.price_precise;
+    ptr->volume_precise = quote.volume_precise;
+    
     // 1. 清除老的exchange数据
     ptr->asks = _clear_exchange(exchange, ptr->asks);
     ptr->bids = _clear_exchange(exchange, ptr->bids);
@@ -275,6 +299,18 @@ bool QuoteMixer2::_get_quote(const TSymbol& symbol, SMixQuote*& ptr) const {
     if( iter == quotes_.end() )
         return false;
     ptr = iter->second;
+    return true;
+}
+
+bool QuoteMixer2::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps)
+{    
+    std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    for( const auto & v : quotes_ )
+    {
+        SSymbolConfig config = configs_[v.first];
+        std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = mixquote_to_pbquote2("", v.first, v.second, config.depth, true);
+        snaps.push_back(pub_snap);
+    }
     return true;
 }
 

@@ -45,6 +45,9 @@ public:
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
             grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();
 
+            // nacos
+            nacos_addr_ = js["nacos"]["addr"].get<string>();
+            
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
             dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
@@ -68,6 +71,9 @@ public:
     string grpc_account_addr_;
     string grpc_publish_addr_;
     int grpc_publish_depth_;
+
+    // nacos
+    string nacos_addr_;
 
     // [for debug] sample symbol
     string sample_symbol_;
