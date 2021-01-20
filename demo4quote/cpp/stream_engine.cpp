@@ -18,6 +18,7 @@ StreamEngine::StreamEngine(){
     // init grpc server
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
+    server_endpoint_.set_mixer_cacher(&quote_mixer2_);
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
     quote_cacher_.register_callback(&server_endpoint_);
     quote_mixer2_.register_callback(&server_endpoint_);
@@ -99,9 +100,12 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
             v.volume.get_str_value().c_str()
         );
     }
+    
+    vector<KlineData> outputs;
+    kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
+
     if( exchange != "" )
-        kline_mixer_.on_kline(exchange, symbol, resolution, klines);
-    kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init);
+        kline_mixer_.on_kline(exchange, symbol, resolution, outputs);
 }
 
 void StreamEngine::signal_handler(int signum)

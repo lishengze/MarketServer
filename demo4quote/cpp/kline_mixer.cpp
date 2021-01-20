@@ -156,18 +156,17 @@ void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vec
     cache = data_;
 }
 
-void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines)
+void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs)
 {
     // 锁住对象
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
     vector<KlineData>& dst = data_[exchange][symbol];
 
     // 填补跳空数据
-    vector<KlineData> _klines = klines;
-    /*
-    if( dst.size() > 0 && _klines.size() > 0 ) {
+    outputs = klines;
+    if( dst.size() > 0 && outputs.size() > 0 ) {
         const KlineData& last = dst.back();
-        const KlineData& first = _klines.front();
+        const KlineData& first = klines.front();
         vector<KlineData> patch;
         type_tick fix_index = last.index + this->resolution_;
         while( fix_index < first.index ) {
@@ -178,14 +177,14 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
             patch.push_back(tmp);
             fix_index += this->resolution_;
         }
-        _klines.insert(_klines.begin(), patch.begin(), patch.end());
-    }*/
+        outputs.insert(outputs.begin(), patch.begin(), patch.end());
+    }
     
     // 合并到内存
-    if( _klines.size() <= 10 )
+    if( outputs.size() <= 10 )
     {
         // 数量少的时候，直接插入。为什么是10？
-        for( auto iter = _klines.begin() ; iter != _klines.end() ; iter++ )
+        for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ )
         {
             const KlineData& kline = *iter;
             bool inserted = false;
@@ -213,7 +212,7 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         for( auto iter = dst.begin() ; iter != dst.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
-        for( auto iter = _klines.begin() ; iter != _klines.end() ; iter++ ){
+        for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ ){
             tmp[iter->index] = *iter;
         }
         dst.clear();
@@ -292,22 +291,19 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs)
 {
     // 写入cache
-    // 写入db 缓存区
-    // 写入计算模块
-    db_interface_->on_kline(exchange, symbol, resolution, klines, is_init);
     switch( resolution ) 
     {
         case 60:
         {
-            min1_cache_.update_kline(exchange, symbol, klines);
+            min1_cache_.update_kline(exchange, symbol, klines, outputs);
             break;
         }
         case 3600:
         {
-            min60_cache_.update_kline(exchange, symbol, klines);
+            min60_cache_.update_kline(exchange, symbol, klines, outputs);
             break;
         }
         default:
@@ -317,10 +313,14 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if( !is_init && klines.size() > 0 )
+    // 写入db缓存区
+    db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
+
+    // 更新回调
+    if( !is_init && outputs.size() > 0 )
     {
         for( const auto& v : callbacks_) {
-            v->on_kline(exchange, symbol, resolution, klines);
+            v->on_kline(exchange, symbol, resolution, outputs);
         }
     }
 }

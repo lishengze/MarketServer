@@ -1,10 +1,13 @@
 #include "grpc_entity.h"
 #include "datacenter.h"
+#include "converter.h"
 
 void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
     dst->set_is_snap(src->is_snap());
+    dst->set_price_precise(src->price_precise());
+    dst->set_volume_precise(src->volume_precise());
 
     // 卖盘
     for( int i = 0 ; i < src->asks_size() ; ++i ) {
@@ -32,6 +35,8 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
     dst->set_seq_no(src->seq_no());
+    dst->set_price_precise(src->price_precise());
+    dst->set_volume_precise(src->volume_precise());
     dst->set_is_snap(src->is_snap());
 
     // 卖盘
@@ -57,7 +62,10 @@ void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWith
 };
 
 //////////////////////////////////////////////////
-MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service):responder_(&ctx_)
+MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service, IDataCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
+, snap_sended_(false)
 {
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
@@ -70,6 +78,8 @@ void MarketStream4BrokerEntity::register_call(){
 bool MarketStream4BrokerEntity::process(){
     
     MultiMarketStreamData reply;
+
+    if( snap_sended_ )
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
@@ -79,6 +89,17 @@ bool MarketStream4BrokerEntity::process(){
         }
         datas_.clear();
     }
+    else
+    {
+        vector<SInnerQuote> snaps;
+        cacher_->get_snaps(snaps);
+        for( const auto& v : snaps ) {
+            MarketStreamData* quote = reply.add_quotes();
+            innerquote_to_msd2(v, quote, true);            
+        }
+        snap_sended_ = true;
+    }
+    
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -93,7 +114,10 @@ void MarketStream4BrokerEntity::add_data(std::shared_ptr<void> snap) {
 }
 
 //////////////////////////////////////////////////
-MarketStream4HedgeEntity::MarketStream4HedgeEntity(void* service):responder_(&ctx_)
+MarketStream4HedgeEntity::MarketStream4HedgeEntity(void* service, IDataCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
+, snap_sended_(false)
 {
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
@@ -106,6 +130,8 @@ void MarketStream4HedgeEntity::register_call(){
 bool MarketStream4HedgeEntity::process(){
     
     MultiMarketStreamData reply;
+
+    if( snap_sended_ )
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
@@ -115,6 +141,17 @@ bool MarketStream4HedgeEntity::process(){
         }
         datas_.clear();
     }
+    else
+    {
+        vector<SInnerQuote> snaps;
+        cacher_->get_snaps(snaps);
+        for( const auto& v : snaps ) {
+            MarketStreamData* quote = reply.add_quotes();
+            innerquote_to_msd2(v, quote, true);            
+        }
+        snap_sended_ = true;
+    }
+
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -129,7 +166,10 @@ void MarketStream4HedgeEntity::add_data(std::shared_ptr<void> snap) {
 }
 
 //////////////////////////////////////////////////
-MarketStream4ClientEntity::MarketStream4ClientEntity(void* service):responder_(&ctx_)
+MarketStream4ClientEntity::MarketStream4ClientEntity(void* service, IDataCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
+, snap_sended_(false)
 {
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
@@ -142,6 +182,8 @@ void MarketStream4ClientEntity::register_call(){
 bool MarketStream4ClientEntity::process(){
     
     MultiMarketStreamDataWithDecimal reply;
+
+    if( snap_sended_ )
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
@@ -151,6 +193,17 @@ bool MarketStream4ClientEntity::process(){
         }
         datas_.clear();
     }
+    else
+    {
+        vector<SInnerQuote> snaps;
+        cacher_->get_snaps(snaps);
+        for( const auto& v : snaps ) {
+            MarketStreamDataWithDecimal* quote = reply.add_quotes();
+            innerquote_to_msd3(v, quote, true);            
+        }
+        snap_sended_ = true;
+    }
+
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;

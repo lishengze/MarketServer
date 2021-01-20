@@ -18,6 +18,8 @@ using quote::service::v1::QuoteResponse;
 using GrpcRiskControllerService = quote::service::v1::RiskController;
 using namespace quote::service::v1;
 
+class IDataCacher;
+
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
     dst->set_base(src.data_.real_.value_);
@@ -33,14 +35,14 @@ inline void set_decimal(Decimal* dst, const Decimal& src)
 class MarketStream4BrokerEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4BrokerEntity(void* service);
+    MarketStream4BrokerEntity(void* service, IDataCacher* cacher);
 
     void register_call();
 
     bool process();
 
     MarketStream4BrokerEntity* spawn() {
-        return new MarketStream4BrokerEntity(service_);
+        return new MarketStream4BrokerEntity(service_, cacher_);
     }
 
     void add_data(std::shared_ptr<void> snap);
@@ -52,6 +54,9 @@ private:
 
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
+    
+    IDataCacher* cacher_;
+    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -61,14 +66,14 @@ private:
 class MarketStream4HedgeEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4HedgeEntity(void* service);
+    MarketStream4HedgeEntity(void* service, IDataCacher* cacher);
 
     void register_call();
 
     bool process();
 
     MarketStream4HedgeEntity* spawn() {
-        return new MarketStream4HedgeEntity(service_);
+        return new MarketStream4HedgeEntity(service_, cacher_);
     }
 
     void add_data(std::shared_ptr<void> snap);
@@ -81,6 +86,9 @@ private:
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
 
+    IDataCacher* cacher_;
+    bool snap_sended_;
+
     // 
     mutable std::mutex            mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
@@ -89,14 +97,14 @@ private:
 class MarketStream4ClientEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4ClientEntity(void* service);
+    MarketStream4ClientEntity(void* service, IDataCacher* cacher);
 
     void register_call();
 
     bool process();
 
     MarketStream4ClientEntity* spawn() {
-        return new MarketStream4ClientEntity(service_);
+        return new MarketStream4ClientEntity(service_, cacher_);
     }
 
     void add_data(std::shared_ptr<void> snap);
@@ -109,12 +117,14 @@ private:
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
+    IDataCacher* cacher_;
+    bool snap_sended_;
+
     // 
     mutable std::mutex            mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
 };
 
-class IDataCacher;
 class OtcQuoteEntity : public BaseGrpcEntity
 {
 public:

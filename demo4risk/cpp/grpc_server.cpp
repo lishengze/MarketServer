@@ -21,15 +21,15 @@ void ServerEndpoint::init(const string& grpc_addr)
     
     int call_id = 0;
 
-    caller_marketstream4broker_ = new GrpcCall<MarketStream4BrokerEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4broker_ = new GrpcCall<MarketStream4BrokerEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4broker_;
     call_id++;
 
-    caller_marketstream4hedge_ = new GrpcCall<MarketStream4HedgeEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4hedge_ = new GrpcCall<MarketStream4HedgeEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4hedge_;
     call_id++;
     
-    caller_marketstream4client_ = new GrpcCall<MarketStream4ClientEntity>(call_id, &service_, cq_.get());
+    caller_marketstream4client_ = new GrpcCall<MarketStream4ClientEntity>(call_id, &service_, cq_.get(), cacher_);
     callers_[call_id] = caller_marketstream4client_;
     call_id++;
 

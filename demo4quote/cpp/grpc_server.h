@@ -29,6 +29,7 @@ public:
 
     void set_cacher(IKlineCacher* cacher) { cacher_ = cacher; }
     void set_quote_cacher(IQuoteCacher* cacher) { quote_cacher_ = cacher; }
+    void set_mixer_cacher(IMixerCacher* cacher) { mixer_cacher_ = cacher; }
 
     // IKlinePusher
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
@@ -43,6 +44,7 @@ private:
 
     IKlineCacher* cacher_ = nullptr;
     IQuoteCacher* quote_cacher_ = nullptr;
+    IMixerCacher* mixer_cacher_ = nullptr;
     
     // grpc对象
     std::unique_ptr<ServerCompletionQueue> cq_;

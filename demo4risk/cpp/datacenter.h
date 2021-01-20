@@ -227,6 +227,8 @@ public:
     // 返回0 执行成功 
     // 返回1 没有找到币对
     virtual QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price) = 0;
+
+    virtual bool get_snaps(vector<SInnerQuote>& snaps) = 0;
 };
 
 class IQuotePusher
@@ -255,6 +257,8 @@ public:
     QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price);
     // 注册推送接口
     void register_callback(IQuotePusher* callback) { callbacks_.insert(callback); }
+
+    bool get_snaps(vector<SInnerQuote>& snaps);
 private:
     set<IQuotePusher*> callbacks_;
 

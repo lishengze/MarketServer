@@ -82,7 +82,7 @@ public:
     void set_limit(size_t limit) { limit_ = limit; }
     void set_resolution(uint32 resolution) { resolution_ = resolution; }
 
-    void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines);
+    void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs);
 
     void fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache);
 private:
@@ -105,7 +105,7 @@ public:
 
     void set_db_interface(IDataProvider* db_interfacce) { db_interface_ = db_interfacce; }
 
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init, vector<KlineData>& outputs);
 
     // IDataCacher
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
