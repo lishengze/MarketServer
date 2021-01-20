@@ -15,6 +15,8 @@ using namespace nacos;
 #include <set>
 #include <vector>
 using namespace std;
+#include "pandora/util/json.hpp"
+using njson = nlohmann::json;
 #include "risk_controller_define.h"
 
 struct QuoteConfiguration
@@ -61,8 +63,35 @@ public:
 
     void on_get_config(const NacosString &configInfo) const {        
         if( group_ == "riskcontrol" && dataid_ == "symbols" ) {
-            cout << configInfo << endl;
-            map<TSymbol, QuoteConfiguration> config;
+            tfm::printfln("on_get_config: %s", configInfo);
+
+            // json 解析
+            njson js;    
+            try
+            {
+                js = njson::parse(configInfo);
+            }
+            catch(nlohmann::detail::exception& e)
+            {
+                tfm::printfln("parse json fail %s", e.what());
+                return;
+            }    
+            tfm::printfln("parse config from nacos finish");
+
+            map<TSymbol, QuoteConfiguration> config;            
+            for (auto iter = js.begin() ; iter != js.end() ; ++iter )
+            {
+                const TSymbol& symbol = iter.key();
+                const njson& symbol_cfgs = iter.value();
+                int enable = symbol_cfgs["enable"].get<int>();
+                if( enable < 1 )
+                    continue;
+                QuoteConfiguration cfg;
+                cfg.PriceBias = symbol_cfgs["price_bias"].get<double>();
+                cfg.VolumeBias = symbol_cfgs["volume_bias"].get<double>();
+                cfg.HedgePercent = symbol_cfgs["hedge_percent"].get<double>();
+                config[symbol] = cfg;
+            }
             callback_->on_configuration_update(config);
         }
     }
