@@ -78,19 +78,6 @@ public:
 class QuoteCacher : public IQuoteCacher
 {
 public:
-    struct SSymbolConfig
-    {
-        unordered_map<TExchange, type_uint32> depths;
-
-        bool operator==(const SSymbolConfig &rhs) const {
-            return depths == rhs.depths;
-        }
-        bool operator!=(const SSymbolConfig &rhs) const {
-            return !(*this == rhs);
-        }
-    };
-
-public:
     void set_mixer(QuoteMixer2* mixer) { mixer_ = mixer; }
 
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
@@ -98,8 +85,6 @@ public:
     void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
-    
-    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 
@@ -112,9 +97,6 @@ private:
     set<IMixerQuotePusher*> callbacks_;
 
     QuoteMixer2* mixer_ = nullptr;
-
-    mutable std::mutex mutex_config_;
-    unordered_map<TSymbol, SSymbolConfig> configs_; 
 
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> singles_;

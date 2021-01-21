@@ -27,18 +27,12 @@ void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Tr
 
 bool QuoteCacher::get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap)
 {
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
     SDepthQuote quote;
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         quote = singles_[symbol][exchange];
     }
-    snap = depth_to_pbquote2(exchange, symbol, quote, config.depths[exchange], true);
+    snap = depth_to_pbquote2(exchange, symbol, quote, true);
     return true;
 }
 
@@ -74,27 +68,15 @@ void QuoteCacher::on_trade(const TExchange& exchange, const TSymbol& symbol, con
     }
 }
 
-void QuoteCacher::set_config(const TSymbol& symbol, const SSymbolConfig& config)
-{
-    std::unique_lock<std::mutex> l{ mutex_config_ };
-    configs_[symbol] = config;
-}
-
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
-    _log_and_print("%s.%s on_snap", exchange, symbol);
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
+    _log_and_print("[%s.%s] on_snap", exchange, symbol);
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         singles_[symbol][exchange] = quote;
     }
     
-    std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, config.depths[exchange], true);
+    std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
     for( const auto& v : callbacks_) 
     {
         v->publish_single(exchange, symbol, pub_snap, NULL);
@@ -127,7 +109,7 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
         const SDepthQuote& quote = snap.second;
         for( const auto& v : callbacks_) 
         {
-            std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, 0, true);
+            std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
             v->publish_single(exchange, symbol, pub_snap, NULL);
             mixer_->on_snap(exchange, symbol, quote);
         }
@@ -136,12 +118,6 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
 
 void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& update) 
 {
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
     SDepthQuote snap;
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
@@ -152,8 +128,8 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
     }
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap, pub_diff;
-    pub_snap = depth_to_pbquote2(exchange, symbol, snap, config.depths[exchange], true);
-    pub_diff = depth_to_pbquote2(exchange, symbol, update, config.depths[exchange], false);
+    pub_snap = depth_to_pbquote2(exchange, symbol, snap, true);
+    pub_diff = depth_to_pbquote2(exchange, symbol, update, false);
     for( const auto& v : callbacks_) 
     {
         v->publish_single(exchange, symbol, pub_snap, pub_diff);

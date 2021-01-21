@@ -47,17 +47,16 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
     return msd;
 };
 
-inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDecimal>& depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask)
+inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDecimal>& depths, FuncAddDepth2 func, bool is_ask)
 {
-    type_uint32 count = 0;
     if( is_ask ) {
-        for( auto iter = depths.begin() ; iter != depths.end() && count < depth ; iter ++, count ++) {
+        for( auto iter = depths.begin() ; iter != depths.end() ; iter++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second);
         }
     } else {
-        for( auto iter = depths.rbegin() ; iter != depths.rend() && count < depth ; iter ++, count ++) {
+        for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second);
@@ -65,7 +64,7 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
     }
 }
 
-inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, type_uint32 depth, bool is_snap)
+inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, bool is_snap)
 {
     std::shared_ptr<MarketStreamDataWithDecimal> msd = std::make_shared<MarketStreamDataWithDecimal>();
     msd->set_exchange(exchange);
@@ -78,10 +77,10 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);
-    depth_to_pbquote2_depth(exchange, symbol, src.asks, f1, depth, true);
+    depth_to_pbquote2_depth(exchange, symbol, src.asks, f1, true);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamDataWithDecimal::add_bids, msd);
-    depth_to_pbquote2_depth(exchange, symbol, src.bids, f2, depth, false);
+    depth_to_pbquote2_depth(exchange, symbol, src.bids, f2, false);
 
     return msd;
 };

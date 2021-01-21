@@ -35,7 +35,8 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() 
 {
-    if( !CONFIG->replay_mode_ ) {
+    if( !CONFIG->replay_mode_ ) 
+    {
         quote_source_.start();
 
         // 启动录数据线程
@@ -57,7 +58,6 @@ void StreamEngine::start()
 }
 
 void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
-    //quote.print();
     if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
         quote_dumper_.on_snap(exchange, symbol, quote);
     }
@@ -116,16 +116,6 @@ void StreamEngine::signal_handler(int signum)
     // 退出
     exit(0);
 } 
-
-QuoteCacher::SSymbolConfig to_cacher_config(const unordered_map<TExchange, SNacosConfigByExchange>& exchanges)
-{
-    QuoteCacher::SSymbolConfig config;
-    for( const auto& v : exchanges ) 
-    {
-        config.depths[v.first] = v.second.depth;
-    }
-    return config;
-}
 
 QuoteMixer2::SSymbolConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
 {    
@@ -224,7 +214,6 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         if( symbols_.find(symbol) == symbols_.end() ) 
         {
             quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
-            quote_cacher_.set_config(symbol, to_cacher_config(config.exchanges));
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
             quote_source_.set_config(symbol, to_redis_config(config.exchanges));
         }
@@ -239,10 +228,6 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
             // 交易所数量变更
             if( last_config.get_exchanges() != config.get_exchanges() ) {
                 kline_mixer_.set_symbol(symbol, config.get_exchanges());
-            }
-            // cache配置变更
-            if( to_cacher_config(last_config.exchanges) != to_cacher_config(config.exchanges) ) {
-                quote_cacher_.set_config(symbol, to_cacher_config(config.exchanges));
             }
             // mixer配置变更
             if( to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges) != 
