@@ -613,7 +613,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         return QuoteResponse_Result_WRONG_SYMBOL;
 
     SInnerQuote& quote = iter->second;
-    if( volume == 0 )
+    if( volume > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_volume(quote.asks, true, params_.otc_params, volume, price, quote.precise);
