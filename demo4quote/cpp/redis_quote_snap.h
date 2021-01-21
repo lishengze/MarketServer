@@ -3,10 +3,10 @@
 #include "pandora/messager/ut_log.h"
 #include "pandora/util/json.hpp"
 #include "pandora/redis/redis_api.h"
-using namespace std;
+#include "redis_quote_define.h"
+using njson = nlohmann::json;
 #include <boost/thread/thread.hpp>
 #include <boost/asio.hpp>
-#include "redis_quote_define.h"
 
 class RedisQuote;
 class RedisSnapRequester 
@@ -18,16 +18,11 @@ public:
     RedisSnapRequester();
     ~RedisSnapRequester();
 
-    void init(const RedisParams& params, UTLogPtr logger){
-        params_ = params;
-        logger_ = logger;
-    }
-
-    void set_engine(RedisQuote* ptr) { quote_interface_ = ptr; }
-
+    void init(const RedisParams& params, UTLogPtr logger, RedisQuote* callback);
+    
     void start();
 
-    void request_symbol(const TExchange& exchange, const TSymbol& symbol);
+    void async_request_symbol(const TExchange& exchange, const TSymbol& symbol);
 
 private:
     void _thread_loop();
@@ -36,15 +31,14 @@ private:
 
 private:
     // redis api对象
-    RedisParams                params_;
-    UTLogPtr                   logger_;
-    unordered_map<std::thread::id, RedisApiPtr> redis_sync_apis_;
+    RedisApiPtr                redis_sync_api_ = nullptr;
 
     // 回调对象
     RedisQuote*                quote_interface_ = nullptr;
+    // 请求线程
+    std::thread*               thread_loop_ = nullptr;
 
     // 维护所有品种列表，作为请求全量的基础
-    std::thread*               thread_loop_ = nullptr;// 请求线程
     mutable std::mutex         mutex_symbols_;
     unordered_set<TSymbol>     symbols_;
     
@@ -53,8 +47,7 @@ private:
         TExchange exchange;
         TSymbol symbol;
         type_tick event_time;
-    };
-    mutable std::mutex         mutex_events_;
-    list<EventData>            events_;
-    void _add_event(const TExchange& exchange, const TSymbol& symbol, int seconds);
+    };    
+    moodycamel::ConcurrentQueue<EventData>            events_;
+    void _add_event(const TExchange& exchange, const TSymbol& symbol, int delay_seconds);
 };

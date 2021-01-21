@@ -1,10 +1,16 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 
-StreamEngine::StreamEngine(){
+StreamEngine::StreamEngine()
+{
+    // 启动redis
+    RedisParams params;
+    params.host = CONFIG->quote_redis_host_;
+    params.port = CONFIG->quote_redis_port_;
+    params.password = CONFIG->quote_redis_password_;
+    quote_source_.init(params, CONFIG->logger_, this);
 
     // 
-    quote_source_.set_engine(this);
     quote_replay_.set_engine(this);
     quote_cacher_.set_mixer(&quote_mixer2_);
 
@@ -29,14 +35,8 @@ StreamEngine::~StreamEngine(){
 
 void StreamEngine::start() 
 {
-
     if( !CONFIG->replay_mode_ ) {
-        // 启动redis
-        RedisParams params;
-        params.host = CONFIG->quote_redis_host_;
-        params.port = CONFIG->quote_redis_port_;
-        params.password = CONFIG->quote_redis_password_;
-        quote_source_.start(params, CONFIG->logger_);
+        quote_source_.start();
 
         // 启动录数据线程
         quote_dumper_.start();
