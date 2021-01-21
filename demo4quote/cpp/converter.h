@@ -47,19 +47,19 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
     return msd;
 };
 
-inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDecimal>& depths, FuncAddDepth2 func, bool is_ask)
+inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDepth>& depths, FuncAddDepth2 func, bool is_ask)
 {
     if( is_ask ) {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
-            set_decimal(depth->mutable_volume(), iter->second);
+            set_decimal(depth->mutable_volume(), iter->second.volume);
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
-            set_decimal(depth->mutable_volume(), iter->second);
+            set_decimal(depth->mutable_volume(), iter->second.volume);
         }
     }
 }
@@ -115,5 +115,19 @@ inline void process_precise_mixdepth(SMixDepthPrice* dst, int precise, const SMi
         }
 
         src = src->next;
+    }
+}
+
+inline void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth>& dst)
+{
+    for( const auto& v : update ) {
+        if( v.second.volume.is_zero() ) {
+            auto iter = dst.find(v.first);
+            if( iter != dst.end() ) {
+                dst.erase(iter);
+            }
+        } else {
+            dst[v.first] = v.second;
+        }
     }
 }

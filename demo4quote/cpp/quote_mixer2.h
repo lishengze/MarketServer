@@ -51,9 +51,9 @@ private:
 
     bool _get_quote(const TSymbol& symbol, SMixQuote*& ptr) const;
     void _inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr);
-    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, SDecimal>& newDepths, bool isAsk);
+    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, SDepth>& newDepths, bool isAsk);
     SMixDepthPrice* _clear_exchange(const TExchange& exchange, SMixDepthPrice* depths);
-    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDecimal>>& depths, bool isAsk);
+    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDepth>>& depths, bool isAsk);
 
     // 发布频率控制
     mutable std::mutex mutex_clocks_;

@@ -75,6 +75,11 @@ void MarketStream4BrokerEntity::register_call(){
     service_->RequestServeMarketStream4Broker(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
+void MarketStream4BrokerEntity::on_init()
+{
+    
+}
+
 bool MarketStream4BrokerEntity::process(){
     
     MultiMarketStreamData reply;
@@ -127,6 +132,11 @@ void MarketStream4HedgeEntity::register_call(){
     service_->RequestServeMarketStream4Hedge(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
+void MarketStream4HedgeEntity::on_init()
+{
+    
+}
+
 bool MarketStream4HedgeEntity::process(){
     
     MultiMarketStreamData reply;
@@ -177,6 +187,11 @@ MarketStream4ClientEntity::MarketStream4ClientEntity(void* service, IDataCacher*
 void MarketStream4ClientEntity::register_call(){
     std::cout << "register MarketStream4ClientEntity" << std::endl;
     service_->RequestServeMarketStream4Client(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+void MarketStream4ClientEntity::on_init()
+{
+    
 }
 
 bool MarketStream4ClientEntity::process(){

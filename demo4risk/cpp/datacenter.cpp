@@ -525,7 +525,8 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * iter->first.get_value();
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_volume = volume;
             }
         }
     } else {
@@ -534,10 +535,14 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * iter->first.get_value();
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_volume = volume;
             }
         }
     }
+
+    if( total_volume < volume )
+        return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
@@ -559,7 +564,9 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_amount = amount;
+                break;
             }
         }
     } else {
@@ -569,10 +576,14 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_amount = amount;
+                break;
             }
         }
     }
+    if( total_amount < amount )
+        return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
@@ -595,6 +606,7 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
 
 QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
 {
+    _log_and_print("[otc_query] %s.%s direction=%s volume=%s amount=%s", exchange, symbol, direction, volume, amount);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
     if( iter == last_datas_.end() )

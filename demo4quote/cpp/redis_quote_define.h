@@ -5,31 +5,40 @@
 #include "base/cpp/tinyformat.h"
 #include "base/cpp/concurrentqueue.h"
 
+struct SDepth {
+    SDecimal volume;    // 单量
+    unordered_map<TExchange, SDecimal> volume_by_exchanges; // 聚合行情才有用
+};
+
 struct SDepthQuote {
     type_uint32 raw_length; // 原始包大小（用来比较压缩效率）
-    string exchange;
-    string symbol;
+    string exchange;        // 交易所
+    string symbol;          // 代码
     type_seqno sequence_no; // 序号
     type_tick arrive_time;  // api行情时间
     type_tick server_time;  // 服务器行情时间
     uint32 price_precise;   // 价格精度（来自配置中心）
     uint32 volume_precise;  // 成交量精度（来自配置中心）
-    map<SDecimal, SDecimal> asks; // 买盘
-    map<SDecimal, SDecimal> bids; // 卖盘
+    map<SDecimal, SDepth> asks; // 买盘
+    map<SDecimal, SDepth> bids; // 卖盘
 
     SDepthQuote() {
         raw_length = 0;
         exchange = "";
         symbol = "";
         sequence_no = 0;
+        arrive_time = 0;
+        server_time = 0;
+        price_precise = 0;
+        volume_precise = 0;
     }
 
     void print() const {
         for( const auto&v : asks ) {
-            tfm::printf("[ask] %s:%s", v.first.get_str_value(), v.second.get_str_value());
+            tfm::printf("[ask] %s:%s", v.first.get_str_value(), v.second.volume.get_str_value());
         }
         for( const auto&v : bids ) {
-            tfm::printf("[bid] %s:%s", v.first.get_str_value(), v.second.get_str_value());
+            tfm::printf("[bid] %s:%s", v.first.get_str_value(), v.second.volume.get_str_value());
         }
     }
 };

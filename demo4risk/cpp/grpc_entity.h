@@ -41,6 +41,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     MarketStream4BrokerEntity* spawn() {
         return new MarketStream4BrokerEntity(service_, cacher_);
     }
@@ -72,6 +74,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     MarketStream4HedgeEntity* spawn() {
         return new MarketStream4HedgeEntity(service_, cacher_);
     }
@@ -102,6 +106,8 @@ public:
     void register_call();
 
     bool process();
+
+    void on_init();
 
     MarketStream4ClientEntity* spawn() {
         return new MarketStream4ClientEntity(service_, cacher_);
@@ -137,8 +143,6 @@ public:
     OtcQuoteEntity* spawn() {
         return new OtcQuoteEntity(service_, cacher_);
     }
-
-    //void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;

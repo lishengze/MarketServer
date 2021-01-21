@@ -85,6 +85,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     void add_data(SnapAndUpdate data);
 
     SubscribeSingleQuoteEntity* spawn() {
@@ -99,11 +101,10 @@ private:
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IQuoteCacher* cacher_ = nullptr;
-    bool snap_sended_;
     type_seqno last_seqno;
 
     // 
-    mutable std::mutex                 mutex_datas_;
+    mutable std::mutex            mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
 };
 
@@ -116,6 +117,8 @@ public:
     void register_call();
 
     bool process();
+
+    void on_init();
 
     void add_data(SnapAndUpdate data);
 
@@ -130,7 +133,6 @@ private:
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IMixerCacher* cacher_ = nullptr;
-    bool snap_sended_;
     type_seqno last_seqno;
 
     // 

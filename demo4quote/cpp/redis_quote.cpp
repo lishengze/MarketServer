@@ -1,5 +1,6 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
+#include "converter.h"
 
 // channel_name = [channel_type]|[symbol].[exchange]
 bool decode_channelname(const string& channel_name, string& channel_type, TSymbol& symbol, TExchange& exchange)
@@ -38,7 +39,7 @@ bool decode_channelmsg(const string& msg, njson& body)
     return true;
 }
 
-void redisquote_to_quote_depth(const njson& data, const SExchangeConfig& config, map<SDecimal, SDecimal>& depths)
+void redisquote_to_quote_depth(const njson& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
     for (auto iter = data.begin() ; iter != data.end() ; ++iter )
     {
@@ -47,7 +48,7 @@ void redisquote_to_quote_depth(const njson& data, const SExchangeConfig& config,
         SDecimal dPrice = SDecimal::parse(price, config.precise);        
         SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
         //cout << volume << " " << config.vprecise << " " << dVolume.get_str_value() << endl;
-        depths[dPrice] = dVolume;
+        depths[dPrice].volume = dVolume;
         //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
 }
@@ -228,8 +229,8 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
             fake_update.arrive_time = v.arrive_time;
             fake_update.server_time = v.server_time;
             fake_update.sequence_no = v.sequence_no;
-            for( const auto& depth : v.asks ) { fake_update.asks[depth.first] += depth.second; }
-            for( const auto& depth : v.bids ) { fake_update.bids[depth.first] += depth.second; }
+            update_depth_diff(v.asks, fake_update.asks);
+            update_depth_diff(v.bids, fake_update.bids);
         }
         engine_interface_->on_update(exchange, symbol, fake_update);
     }
