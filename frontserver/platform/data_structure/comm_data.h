@@ -184,6 +184,11 @@ const long UT_FID_ReqKLineData = 0x10007;
 class ReqKLineData:public Socket
 {
     public:
+    ReqKLineData():Socket(nullptr, nullptr)
+    {
+
+    }
+
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, ID_TYPE ws_id,
                 HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
     Socket(res, ws)
@@ -194,6 +199,33 @@ class ReqKLineData:public Socket
         assign(data_count_, data_count);
         assign(frequency_, freq);
         assign(ws_id_, ws_id);
+    }
+
+    ReqKLineData(const ReqKLineData& other):Socket(other.http_response_, other.websocket_)
+    {
+        assign(symbol_, other.symbol_);
+        assign(start_time_, other.start_time_);
+        assign(end_time_, other.end_time_);
+        assign(data_count_, other.data_count_);
+        assign(frequency_, other.frequency_);
+        assign(ws_id_, other.ws_id_);        
+    }
+
+    ReqKLineData& operator=(const ReqKLineData& other)
+    {
+        if (this == &other) return *this;
+
+        assign(symbol_, other.symbol_);
+        assign(start_time_, other.start_time_);
+        assign(end_time_, other.end_time_);
+        assign(frequency_, other.frequency_);
+        assign(data_count_, other.data_count_);
+        assign(ws_id_, other.ws_id_);
+
+        http_response_ = other.http_response_;
+        websocket_ = other.websocket_;
+        comm_type = other.comm_type;
+        return *this;        
     }
 
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, ID_TYPE ws_id,
@@ -262,9 +294,13 @@ class RspKLineData:public Socket
         frequency_type                      frequency_;
         ID_TYPE                             ws_id_{-1};
         int                                 data_count_;
-        std::vector<AtomKlineDataPtr>       kline_data_vec_;
+        std::vector<KlineDataPtr>           kline_data_vec_;
+
+        bool                                is_update{false};
 
         static const long Fid = UT_FID_RspKLineData;
+
+        string get_json_str();
 };
 FORWARD_DECLARE_PTR(RspKLineData);
 

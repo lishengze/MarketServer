@@ -203,19 +203,19 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
         if (p_rsp_kline_data)
         {
-            string kline_data_str = RspKlinDataToJsonStr(*p_rsp_kline_data);
+            string kline_data_str = p_rsp_kline_data->get_json_str();
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 
             cout << "Frequency: " << p_rsp_kline_data->frequency_ << ", data_size: " << p_rsp_kline_data->kline_data_vec_.size() << endl;
-            for (AtomKlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
+            for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
             {
-                cout << get_sec_time_str(atom_kline->tick_) << ", "
+                cout << get_sec_time_str(atom_kline->index) << ", "
                      << p_rsp_kline_data->symbol_ << ", "
-                     << "open: " << atom_kline->open_ << ", "
-                     << "close: " << atom_kline->close_ << ", "
-                     << "high: " << atom_kline->high_ << ", "
-                     << "low: " << atom_kline->low_ << endl;
+                     << "open: " << atom_kline->px_open.get_value() << ", "
+                     << "close: " << atom_kline->px_close.get_value() << ", "
+                     << "high: " << atom_kline->px_high.get_value() << ", "
+                     << "low: " << atom_kline->px_low.get_value() << endl;
             }
 
             if ((p_rsp_kline_data->comm_type == COMM_TYPE::HTTP || p_rsp_kline_data->comm_type == COMM_TYPE::HTTPS) 

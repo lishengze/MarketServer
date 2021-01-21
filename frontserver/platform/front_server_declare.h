@@ -54,6 +54,7 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define MARKET_DATA_UPDATE "market_data_update"
 #define SYMBOL_LIST "symbol_list"
 #define SYMBOL_UPDATE "symbol_update"
+#define KLINE_RSP "kline_rsp"
 #define KLINE_UPDATE "kline_update"
 #define HEARTBEAT "heartbeat"
 

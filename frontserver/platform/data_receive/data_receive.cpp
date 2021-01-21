@@ -244,7 +244,8 @@ void DataReceive::handle_response_message(PackagePtr package)
 
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
-{    
+{   
+    return 1; 
     if (is_test_depth)
     {
         return -1;
@@ -267,6 +268,7 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 // 原始深度数据推送
 int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {
+    return 1;
     if (is_test_enquiry)
     {
         return 1;

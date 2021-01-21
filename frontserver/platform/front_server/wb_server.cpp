@@ -389,7 +389,7 @@ void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 
     if (iter != wss_con_set_.end())
     {
-        cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
+        // cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
         (*iter)->send(msg);          
     }    
     else

@@ -6,6 +6,21 @@ using std::map;
 using std::vector;
 
 class DataProcess;
+
+class KlineDataUpdate
+{
+    public:
+        KlineDataUpdate(const ReqKLineData& req_data)
+        {
+            req_kline_data_ = req_data;
+        }
+
+    ReqKLineData   req_kline_data_;
+    type_tick      last_update_time_;
+    KlineDataPtr   kline_data_{nullptr};
+};
+FORWARD_DECLARE_PTR(KlineDataUpdate);
+
 class KlineProcess
 {
 public:
@@ -33,9 +48,14 @@ public:
 
     void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, int data_count);
 
-    vector<AtomKlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
+    vector<KlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
 
     void init_test_kline_data();
+
+    void init_update_kline_data(PackagePtr rsp_package, ReqKLineData * pReqKlineData);
+
+    void update_kline_data(const KlineData* kline_data);
+
 
 private:
     DataProcessPtr                                              process_engine_;   
@@ -43,6 +63,8 @@ private:
     std::mutex                                                  kline_data_mutex_;
     map<string, map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
+
+    map<string, vector<KlineDataUpdatePtr>>                     updated_kline_data_;
 
     bool                                                        test_kline_data_{false};
 
