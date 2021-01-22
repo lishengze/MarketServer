@@ -100,11 +100,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double 
     for( const auto& v: depths )
     {
         SDecimal scaledPrice = v.first;
-        if( is_ask ) {
-            scaledPrice *= ( 1 + price_bias * 1.0 / 100); 
-        } else {
-            scaledPrice *= ( 1 - price_bias * 1.0 / 100); 
-        }
+        scaledPrice *= ( 1 - price_bias * 1.0 / 100);
         dst[scaledPrice].mix_exchanges(v.second, volume_bias);
     }
 }

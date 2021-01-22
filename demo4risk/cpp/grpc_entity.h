@@ -3,6 +3,7 @@
 //#include "grpc_call.h"
 #include "risk_controller.grpc.pb.h"
 #include "base/cpp/decimal.h"
+#include "base/cpp/concurrentqueue.h"
 
 using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
@@ -20,6 +21,8 @@ using GrpcRiskControllerService = quote::service::v1::RiskController;
 using namespace quote::service::v1;
 
 class IDataCacher;
+using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
+using StreamDataPtr2 = std::shared_ptr<MarketStreamData>;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -48,7 +51,7 @@ public:
         return new MarketStream4BrokerEntity(service_, cacher_);
     }
 
-    void add_data(std::shared_ptr<void> snap);
+    void add_data(StreamDataPtr2 snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
@@ -56,10 +59,7 @@ private:
     ServerAsyncWriter<MultiMarketStreamData> responder_;
     
     IDataCacher* cacher_;
-
-    // 
-    mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<StreamDataPtr2> datas_;
 };
 
 class MarketStream4HedgeEntity : public BaseGrpcEntity
@@ -77,7 +77,7 @@ public:
         return new MarketStream4HedgeEntity(service_, cacher_);
     }
 
-    void add_data(std::shared_ptr<void> snap);
+    void add_data(StreamDataPtr2 snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
@@ -85,10 +85,7 @@ private:
     ServerAsyncWriter<MultiMarketStreamData> responder_;
 
     IDataCacher* cacher_;
-
-    // 
-    mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<StreamDataPtr2> datas_;
 };
 
 class MarketStream4ClientEntity : public BaseGrpcEntity
@@ -106,18 +103,15 @@ public:
         return new MarketStream4ClientEntity(service_, cacher_);
     }
 
-    void add_data(std::shared_ptr<void> snap);
+    void add_data(StreamDataPtr snap);
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
-    IDataCacher* cacher_;
-
-    // 
-    mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    IDataCacher* cacher_ = nullptr;
+    moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
 };
 
 class OtcQuoteEntity : public BaseGrpcEntity
@@ -138,7 +132,7 @@ private:
     QuoteRequest request_;
     ServerAsyncResponseWriter<QuoteResponse> responder_;
 
-    IDataCacher* cacher_;
+    IDataCacher* cacher_ = nullptr;
 };
 
 class GetParamsEntity : public BaseGrpcEntity
@@ -156,9 +150,8 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
     google::protobuf::Empty request_;
     ServerAsyncResponseWriter<GetParamsResponse> responder_;
 
-    IDataCacher* cacher_;
+    IDataCacher* cacher_ = nullptr;
 };
