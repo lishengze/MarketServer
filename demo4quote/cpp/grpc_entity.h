@@ -59,16 +59,11 @@ public:
 
     bool process();
 
-    void add_data(SnapAndUpdate data){}
-
     GrpcDemoEntity* spawn() {
         return new GrpcDemoEntity(service_);
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     DemoReq request_;
     ServerAsyncWriter<DemoResp> responder_;
     
@@ -85,6 +80,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     void add_data(SnapAndUpdate data);
 
     SubscribeSingleQuoteEntity* spawn() {
@@ -92,18 +89,14 @@ public:
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     SubscribeQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IQuoteCacher* cacher_ = nullptr;
-    bool snap_sended_;
     type_seqno last_seqno;
 
     // 
-    mutable std::mutex                 mutex_datas_;
+    mutable std::mutex            mutex_datas_;
     vector<std::shared_ptr<void>> datas_;
 };
 
@@ -117,6 +110,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     void add_data(SnapAndUpdate data);
 
     SubscribeMixQuoteEntity* spawn() {
@@ -124,13 +119,10 @@ public:
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-    ServerContext ctx_;
-
     SubscribeMixQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IMixerCacher* cacher_ = nullptr;
-    bool snap_sended_;
     type_seqno last_seqno;
 
     // 
@@ -153,8 +145,6 @@ public:
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-    ServerContext ctx_;
-
     SetParamsReq request_;
     SetParamsResp reply_;
     ServerAsyncResponseWriter<SetParamsResp> responder_;
@@ -175,8 +165,6 @@ public:
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-    ServerContext ctx_;
-
     GetParamsReq request_;
     GetParamsResp reply_;
     ServerAsyncResponseWriter<GetParamsResp> responder_;
@@ -197,8 +185,6 @@ public:
 
 private:
     GrpcStreamEngineService::AsyncService* service_;
-    ServerContext ctx_;
-
     GetKlinesRequest request_;
     GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
@@ -237,9 +223,6 @@ private:
     bool _fill_data(MultiGetKlinesResponse& reply);
 
     GrpcStreamEngineService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     GetKlinesRequest request_;
     ServerAsyncWriter<MultiGetKlinesResponse> responder_;
 
@@ -273,9 +256,6 @@ public:
     }
 private:
     GrpcStreamEngineService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     SubscribeTradeReq request_;
     ServerAsyncWriter<MultiTradeWithDecimal> responder_;
 
@@ -302,9 +282,6 @@ private:
     bool _fill_data(MultiGetKlinesResponse& reply);
 
     GrpcStreamEngineService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     GetLatestTradesReq request_;
     GetLatestTradesResp reply_;
     ServerAsyncResponseWriter<GetLatestTradesResp> responder_;

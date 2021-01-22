@@ -2,6 +2,14 @@
 #include "grpc_entity.h"
 #include "quote_mixer2.h"
 
+template<class T>
+void copy_protobuf_object(const T* src, T* dst) {
+    string tmp;
+    if( !src->SerializeToString(&tmp) )
+        return;
+    dst->ParseFromString(tmp);
+}
+
 void trade_to_trade(const TradeWithDecimal* src, TradeWithDecimal* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
@@ -51,7 +59,7 @@ void kline_to_pbkline(const KlineData& src, Kline* dst)
     set_decimal(dst->mutable_volume(), src.volume);
 }
 
-GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(&ctx_)
+GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -71,9 +79,8 @@ bool GrpcDemoEntity::process(){
 
 //////////////////////////////////////////////////
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
-: responder_(&ctx_)
+: responder_(get_context())
 , cacher_(cacher)
-, snap_sended_(false)
 , last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
@@ -83,6 +90,16 @@ void SubscribeSingleQuoteEntity::register_call(){
     std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
     service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
+
+void SubscribeSingleQuoteEntity::on_init() 
+{
+    std::shared_ptr<MarketStreamDataWithDecimal> snap;
+    if( cacher_->get_lastsnap(request_.exchange(), request_.symbol(), snap) )
+    {            
+        datas_.push_back(snap);
+    }
+}
+
 /*
 void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 {
@@ -145,28 +162,14 @@ bool SubscribeSingleQuoteEntity::process(){
     
     MultiMarketStreamDataWithDecimal reply;
 
-    if( snap_sended_ )
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-        for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamDataWithDecimal* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
-            last_seqno = quote->seq_no();
-            //compare_pb_json2(*quote);
-        }
-        datas_.clear();
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+        MarketStreamDataWithDecimal* quote = reply.add_quotes();
+        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+        last_seqno = quote->seq_no();
+        //compare_pb_json2(*quote);
     }
-    else 
-    {
-        std::shared_ptr<MarketStreamDataWithDecimal> snap;
-        if( cacher_->get_lastsnap(request_.exchange(), request_.symbol(), snap) )
-        {            
-            MarketStreamDataWithDecimal* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamDataWithDecimal*)snap.get(), quote);
-        }
-        snap_sended_ = true;
-    }
+    datas_.clear();
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -183,20 +186,18 @@ void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
         return;
     }
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    if( snap_sended_ && data.update ) {
+    if( data.update ) {
         datas_.push_back(data.update);
     } else {
-        snap_sended_ = true;
-        _log_and_print("%s.%s publish snap", pdata->exchange(), pdata->symbol());
+        //_log_and_print("%s.%s publish snap", pdata->exchange(), pdata->symbol());
         datas_.push_back(data.snap);
     }
 }
 
 //////////////////////////////////////////////////
 SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher)
-: responder_(&ctx_)
+: responder_(get_context())
 , cacher_(cacher)
-, snap_sended_(false)
 , last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
@@ -207,32 +208,29 @@ void SubscribeMixQuoteEntity::register_call(){
     service_->RequestSubscribeMixQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
+void SubscribeMixQuoteEntity::on_init() 
+{
+    vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
+    cacher_->get_lastsnaps(snaps);
+    tfm::printfln("get_lastsnaps %u items", snaps.size());
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    for( const auto& v : snaps ){
+        datas_.push_back(v);
+    }
+}
+
 bool SubscribeMixQuoteEntity::process()
 {    
     MultiMarketStreamDataWithDecimal reply;
 
-    if( snap_sended_ )
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
-        for( size_t i = 0 ; i < datas_.size() ; ++i ) {
-            MarketStreamDataWithDecimal* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
-        }
-        datas_.clear();
+    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+        MarketStreamDataWithDecimal* quote = reply.add_quotes();
+        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
     }
-    else
-    {
-        vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
-        cacher_->get_lastsnaps(snaps);
-        tfm::printfln("get_lastsnaps %u items", snaps.size());
-        
-        for( size_t i = 0 ; i < snaps.size() ; ++i ) {
-            MarketStreamDataWithDecimal* quote = reply.add_quotes();
-            quote_to_quote((MarketStreamDataWithDecimal*)snaps[i].get(), quote);
-        }
-        snap_sended_ = true;
-    }
+    datas_.clear();
 
     // 执行发送
     if( reply.quotes_size() > 0 ) {
@@ -249,7 +247,7 @@ void SubscribeMixQuoteEntity::add_data(SnapAndUpdate data) {
 }
 
 //////////////////////////////////////////////////
-SetParamsEntity::SetParamsEntity(void* service):responder_(&ctx_)
+SetParamsEntity::SetParamsEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -266,7 +264,7 @@ bool SetParamsEntity::process()
     return true;
 }
 //////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service):responder_(&ctx_)
+GetParamsEntity::GetParamsEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -318,7 +316,7 @@ bool GetKlinesEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(&ctx_)
+GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -460,7 +458,7 @@ bool GetLastEntity::process()
 }
 
 //////////////////////////////////////////////////
-SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(&ctx_)
+SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -479,7 +477,7 @@ bool SubscribeTradeEntity::process()
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {            
             TradeWithDecimal* quote = reply.add_trades();
-            trade_to_trade((TradeWithDecimal*)datas_[i].get(), quote);
+            copy_protobuf_object((TradeWithDecimal*)datas_[i].get(), quote);
         }
         datas_.clear();
     }
@@ -498,7 +496,7 @@ void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data)
 }
 
 //////////////////////////////////////////////////
-GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(&ctx_)
+GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -517,7 +515,7 @@ bool GetLastTradesEntity::process()
     GetLatestTradesResp reply;
     for( size_t i = 0 ; i < trades.size() ; i ++ ) 
     {
-        trade_to_trade(&trades[i], reply.add_trades());
+        copy_protobuf_object(&trades[i], reply.add_trades());
     }
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);

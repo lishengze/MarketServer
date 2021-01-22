@@ -51,9 +51,9 @@ private:
 
     bool _get_quote(const TSymbol& symbol, SMixQuote*& ptr) const;
     void _inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr);
-    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, SDecimal>& newDepths, bool isAsk);
+    SMixDepthPrice* _clear_pricelevel(const TExchange& exchange, SMixDepthPrice* depths, const map<SDecimal, SDepth>& newDepths, bool isAsk);
     SMixDepthPrice* _clear_exchange(const TExchange& exchange, SMixDepthPrice* depths);
-    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDecimal>>& depths, bool isAsk);
+    SMixDepthPrice* _mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDepth>>& depths, bool isAsk);
 
     // 发布频率控制
     mutable std::mutex mutex_clocks_;
@@ -78,19 +78,6 @@ public:
 class QuoteCacher : public IQuoteCacher
 {
 public:
-    struct SSymbolConfig
-    {
-        unordered_map<TExchange, type_uint32> depths;
-
-        bool operator==(const SSymbolConfig &rhs) const {
-            return depths == rhs.depths;
-        }
-        bool operator!=(const SSymbolConfig &rhs) const {
-            return !(*this == rhs);
-        }
-    };
-
-public:
     void set_mixer(QuoteMixer2* mixer) { mixer_ = mixer; }
 
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
@@ -98,8 +85,6 @@ public:
     void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
-    
-    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
     void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 
@@ -112,9 +97,6 @@ private:
     set<IMixerQuotePusher*> callbacks_;
 
     QuoteMixer2* mixer_ = nullptr;
-
-    mutable std::mutex mutex_config_;
-    unordered_map<TSymbol, SSymbolConfig> configs_; 
 
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> singles_;

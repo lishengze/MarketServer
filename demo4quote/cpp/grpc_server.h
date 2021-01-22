@@ -62,5 +62,4 @@ private:
     GrpcCall<GetLastEntity>* caller_getlast_;
     GrpcCall<SubscribeTradeEntity>* caller_subscribe_trade_;
     GrpcCall<GetLastTradesEntity>* caller_getlast_trades_;
-    unordered_map<int, CommonGrpcCall*> callers_;
 };

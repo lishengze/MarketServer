@@ -149,6 +149,15 @@ WatermarkComputerWorker::~WatermarkComputerWorker()
     }
 }
 
+void WatermarkComputerWorker::query(map<TSymbol, SDecimal>& watermarks) const
+{
+    watermarks.clear();
+    std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
+    for( const auto& v : watermark_ ) {
+        watermarks[v.first] = v.second->watermark;
+    }
+}
+
 void WatermarkComputerWorker::set_snap(const SInnerQuote& quote) 
 {
     // 提取各交易所的买卖一
@@ -525,7 +534,8 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * iter->first.get_value();
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_volume = volume;
             }
         }
     } else {
@@ -534,10 +544,14 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * iter->first.get_value();
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_volume = volume;
             }
         }
     }
+
+    if( total_volume < volume )
+        return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
@@ -559,7 +573,9 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_amount = amount;
+                break;
             }
         }
     } else {
@@ -569,10 +585,14 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_amount = amount;
+                break;
             }
         }
     }
+    if( total_amount < amount )
+        return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
@@ -595,13 +615,14 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
 
 QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
 {
+    _log_and_print("[otc_query] %s.%s direction=%s volume=%s amount=%s", exchange, symbol, direction, volume, amount);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
     if( iter == last_datas_.end() )
         return QuoteResponse_Result_WRONG_SYMBOL;
 
     SInnerQuote& quote = iter->second;
-    if( volume == 0 )
+    if( volume > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_volume(quote.asks, true, params_.otc_params, volume, price, quote.precise);
@@ -621,3 +642,16 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     return QuoteResponse_Result_WRONG_DIRECTION;
 }
 
+void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts)
+{
+    watermark_worker_.query(watermarks);
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    for( const auto&v : params_.cache_account.hedge_accounts_ ) {
+        const TExchange& exchange = v.first;
+        for( const auto& v2 : v.second.currencies ) {
+            const TSymbol& symbol = v2.first;
+            accounts[exchange][symbol] = v2.second.amount;
+        }
+    }
+}

@@ -15,6 +15,7 @@ using quote::service::v1::DepthWithDecimal;
 using quote::service::v1::Decimal;
 using quote::service::v1::QuoteRequest;
 using quote::service::v1::QuoteResponse;
+using quote::service::v1::GetParamsResponse;
 using GrpcRiskControllerService = quote::service::v1::RiskController;
 using namespace quote::service::v1;
 
@@ -41,6 +42,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     MarketStream4BrokerEntity* spawn() {
         return new MarketStream4BrokerEntity(service_, cacher_);
     }
@@ -49,14 +52,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
     
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -72,6 +71,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     MarketStream4HedgeEntity* spawn() {
         return new MarketStream4HedgeEntity(service_, cacher_);
     }
@@ -80,14 +81,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
 
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -103,6 +100,8 @@ public:
 
     bool process();
 
+    void on_init();
+
     MarketStream4ClientEntity* spawn() {
         return new MarketStream4ClientEntity(service_, cacher_);
     }
@@ -111,14 +110,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -138,15 +133,32 @@ public:
         return new OtcQuoteEntity(service_, cacher_);
     }
 
-    //void add_data(std::shared_ptr<void> snap, std::shared_ptr<void> update);
+private:
+    GrpcRiskControllerService::AsyncService* service_;
+    QuoteRequest request_;
+    ServerAsyncResponseWriter<QuoteResponse> responder_;
+
+    IDataCacher* cacher_;
+};
+
+class GetParamsEntity : public BaseGrpcEntity
+{
+public:
+    GetParamsEntity(void* service, IDataCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    GetParamsEntity* spawn() {
+        return new GetParamsEntity(service_, cacher_);
+    }
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-    ServerContext ctx_;
 
-    QuoteRequest request_;
-    QuoteResponse reply_;
-    ServerAsyncResponseWriter<QuoteResponse> responder_;
+    google::protobuf::Empty request_;
+    ServerAsyncResponseWriter<GetParamsResponse> responder_;
 
     IDataCacher* cacher_;
 };

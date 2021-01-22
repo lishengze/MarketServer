@@ -2,20 +2,6 @@
 #include "quote_mixer2.h"
 #include "converter.h"
 
-void update_depth_diff(const map<SDecimal, SDecimal>& update, map<SDecimal, SDecimal>& dst)
-{
-    for( const auto& v : update ) {
-        if( v.second.is_zero() ) {
-            auto iter = dst.find(v.first);
-            if( iter != dst.end() ) {
-                dst.erase(iter);
-            }
-        } else {
-            dst[v.first] = v.second;
-        }
-    }
-}
-
 void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Trade& src, TradeWithDecimal* dst)
 {
     dst->set_exchange(exchange);
@@ -27,18 +13,12 @@ void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Tr
 
 bool QuoteCacher::get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap)
 {
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
     SDepthQuote quote;
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         quote = singles_[symbol][exchange];
     }
-    snap = depth_to_pbquote2(exchange, symbol, quote, config.depths[exchange], true);
+    snap = depth_to_pbquote2(exchange, symbol, quote, true);
     return true;
 }
 
@@ -74,27 +54,15 @@ void QuoteCacher::on_trade(const TExchange& exchange, const TSymbol& symbol, con
     }
 }
 
-void QuoteCacher::set_config(const TSymbol& symbol, const SSymbolConfig& config)
-{
-    std::unique_lock<std::mutex> l{ mutex_config_ };
-    configs_[symbol] = config;
-}
-
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
-    _log_and_print("%s.%s on_snap", exchange, symbol);
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
+    _log_and_print("[%s.%s] on_snap", exchange, symbol);
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         singles_[symbol][exchange] = quote;
     }
     
-    std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, config.depths[exchange], true);
+    std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
     for( const auto& v : callbacks_) 
     {
         v->publish_single(exchange, symbol, pub_snap, NULL);
@@ -127,7 +95,7 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
         const SDepthQuote& quote = snap.second;
         for( const auto& v : callbacks_) 
         {
-            std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, 0, true);
+            std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
             v->publish_single(exchange, symbol, pub_snap, NULL);
             mixer_->on_snap(exchange, symbol, quote);
         }
@@ -136,12 +104,6 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
 
 void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& update) 
 {
-    SSymbolConfig config;
-    {
-        std::unique_lock<std::mutex> l{ mutex_config_ };
-        config = configs_[symbol];
-    }
-
     SDepthQuote snap;
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
@@ -152,8 +114,8 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
     }
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap, pub_diff;
-    pub_snap = depth_to_pbquote2(exchange, symbol, snap, config.depths[exchange], true);
-    pub_diff = depth_to_pbquote2(exchange, symbol, update, config.depths[exchange], false);
+    pub_snap = depth_to_pbquote2(exchange, symbol, snap, true);
+    pub_diff = depth_to_pbquote2(exchange, symbol, update, false);
     for( const auto& v : callbacks_) 
     {
         v->publish_single(exchange, symbol, pub_snap, pub_diff);
@@ -163,7 +125,7 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
 }
 
 /////////////////////////////////////////////////////////////////////
-void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>& dst, int precise, int vprecise, const SymbolFee& fee, bool is_ask)
+void process_depths(const map<SDecimal, SDepth>& src, map<SDecimal, SDepth>& dst, int precise, int vprecise, const SymbolFee& fee, bool is_ask)
 {
     if( is_ask ) {
         SDecimal lastPrice = SDecimal::min_decimal();
@@ -181,7 +143,7 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
                 dst[scaledPrice] = iter->second;
                 lastPrice = scaledPrice;
             } else {
-                dst[lastPrice] = dst[lastPrice] + iter->second;
+                dst[lastPrice].volume = dst[lastPrice].volume + iter->second.volume;
             }
         }
     } else {
@@ -198,7 +160,7 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
                 dst[scaledPrice] = iter->second;
                 lastPrice = scaledPrice;
             } else {
-                dst[lastPrice] = dst[lastPrice] + iter->second;
+                dst[lastPrice].volume = dst[lastPrice].volume + iter->second.volume;
             }
         }
     }
@@ -206,7 +168,7 @@ void process_depths(const map<SDecimal, SDecimal>& src, map<SDecimal, SDecimal>&
     // 缩放成交量
     for( auto& v : dst ) 
     {
-        v.second.scale(vprecise, false);
+        v.second.volume.scale(vprecise, false);
     }
 }
 
@@ -280,7 +242,7 @@ void QuoteMixer2::_inner_process(const TExchange& exchange, const TSymbol& symbo
     ptr->bids = _clear_exchange(exchange, ptr->bids);
 
     // 2. 合并价位
-    vector<pair<SDecimal, SDecimal>> depths;
+    vector<pair<SDecimal, SDepth>> depths;
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
         depths.push_back(make_pair(iter->first, iter->second));
     }
@@ -338,7 +300,7 @@ SMixDepthPrice* QuoteMixer2::_clear_exchange(const TExchange& exchange, SMixDept
     return head.next;
 }
 
-SMixDepthPrice* QuoteMixer2::_mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDecimal>>& depths, bool isAsk) { 
+SMixDepthPrice* QuoteMixer2::_mix_exchange(const TExchange& exchange, SMixDepthPrice* mixedDepths, const vector<pair<SDecimal, SDepth>>& depths, bool isAsk) { 
     SMixDepthPrice head;
     head.next = mixedDepths;
     SMixDepthPrice* last = &head;
@@ -348,7 +310,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const TExchange& exchange, SMixDepthP
     auto iter = depths.begin();
     for( tmp = head.next ; iter != depths.end() && tmp != NULL ; ) {
         const SDecimal& price = iter->first;
-        const SDecimal& volume = iter->second;
+        const SDecimal& volume = iter->second.volume;
         if( volume.is_zero() ) {
             iter++;
             continue;
@@ -375,7 +337,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const TExchange& exchange, SMixDepthP
     // 2. 剩余全部加入队尾
     for( ; iter != depths.end() ; iter ++ ) {
         const SDecimal& price = iter->first;
-        const SDecimal& volume = iter->second;
+        const SDecimal& volume = iter->second.volume;
         if( volume.is_zero() ) {
             continue;
         }

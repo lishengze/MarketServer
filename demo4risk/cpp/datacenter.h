@@ -184,6 +184,7 @@ public:
 
     bool get_watermark(const string& symbol, SDecimal& watermark) const;
     void set_snap(const SInnerQuote& quote);
+    void query(map<TSymbol, SDecimal>& watermarks) const;
 
 private:
     // 独立线程计算watermark
@@ -228,6 +229,10 @@ public:
     // 返回1 没有找到币对
     virtual QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price) = 0;
 
+    // 查询内部参数
+    virtual void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts) = 0;
+
+    // 查询快照
     virtual bool get_snaps(vector<SInnerQuote>& snaps) = 0;
 };
 
@@ -259,6 +264,8 @@ public:
     void register_callback(IQuotePusher* callback) { callbacks_.insert(callback); }
 
     bool get_snaps(vector<SInnerQuote>& snaps);
+
+    void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts);
 private:
     set<IQuotePusher*> callbacks_;
 

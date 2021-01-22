@@ -1,5 +1,6 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
+#include "converter.h"
 
 // channel_name = [channel_type]|[symbol].[exchange]
 bool decode_channelname(const string& channel_name, string& channel_type, TSymbol& symbol, TExchange& exchange)
@@ -38,7 +39,7 @@ bool decode_channelmsg(const string& msg, njson& body)
     return true;
 }
 
-void redisquote_to_quote_depth(const njson& data, const RedisQuote::SExchangeConfig& config, map<SDecimal, SDecimal>& depths)
+void redisquote_to_quote_depth(const njson& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
     for (auto iter = data.begin() ; iter != data.end() ; ++iter )
     {
@@ -47,12 +48,12 @@ void redisquote_to_quote_depth(const njson& data, const RedisQuote::SExchangeCon
         SDecimal dPrice = SDecimal::parse(price, config.precise);        
         SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
         //cout << volume << " " << config.vprecise << " " << dVolume.get_str_value() << endl;
-        depths[dPrice] = dVolume;
+        depths[dPrice].volume = dVolume;
         //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
 }
 
-bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const RedisQuote::SExchangeConfig& config, bool isSnap) {
+bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const SExchangeConfig& config, bool isSnap) {
     quote.asks.clear();
     quote.bids.clear();
     
@@ -76,7 +77,7 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const Redis
     return true;
 }
 
-bool redisquote_to_kline(const njson& data, KlineData& kline, const RedisQuote::SExchangeConfig& config) 
+bool redisquote_to_kline(const njson& data, KlineData& kline, const SExchangeConfig& config) 
 {
     kline.index = int(data[0].get<double>());
     kline.px_open.from(data[1].get<double>(), config.precise);
@@ -87,13 +88,71 @@ bool redisquote_to_kline(const njson& data, KlineData& kline, const RedisQuote::
     return true;
 }
 
-bool redisquote_to_trade(const njson& data, Trade& trade, const RedisQuote::SExchangeConfig& config) 
+bool redisquote_to_trade(const njson& data, Trade& trade, const SExchangeConfig& config) 
 {
     trade.time = parse_nano(data["Time"].get<string>());  // 2020-12-27 12:48:41.578000
     trade.price.from(data["LastPx"].get<double>(), config.precise);
     trade.volume.from(data["Qty"].get<double>(), config.vprecise);
     return true;
 }
+
+bool valida_kline(const KlineData& kline) {
+    return !(kline.index < 1000000000 || kline.index > 1900000000);
+}
+
+bool RedisKlineHelper::on_get_message(const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines)
+{
+    bool is_first_time = !first_package_[symbol][exchange];
+    if( is_first_time )
+    {
+        for (auto iter = body.begin(); iter != body.end(); ++iter) 
+        {
+            KlineData kline;
+            redisquote_to_kline(*iter, kline, config);
+            _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
+                kline.index,
+                kline.px_open.get_str_value(),
+                kline.px_high.get_str_value(),
+                kline.px_low.get_str_value(),
+                kline.px_close.get_str_value(),
+                kline.volume.get_str_value()
+                );
+
+            if( !valida_kline(kline) ) {
+                _log_and_print("[kline min1] get abnormal kline %s", iter->dump());
+                continue;
+            }
+
+            klines.push_back(kline);
+        }
+        first_package_[symbol][exchange] = true;
+    }
+    else
+    {
+        KlineData kline;
+        redisquote_to_kline(body.back(), kline, config);
+        _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
+            kline.index,
+            kline.px_open.get_str_value(),
+            kline.px_high.get_str_value(),
+            kline.px_low.get_str_value(),
+            kline.px_close.get_str_value(),
+            kline.volume.get_str_value()
+            );
+
+        if( valida_kline(kline) ) {
+            klines.push_back(kline);
+        } else {
+            _log_and_print("[kline min1] get abnormal kline %s", body.back().dump());
+        }
+    }
+    return is_first_time;
+}
+
+RedisQuote::RedisQuote()
+: kline_min1_(60)
+, kline_min60_(3600)
+{}
 
 RedisQuote::~RedisQuote()
 {
@@ -105,24 +164,25 @@ RedisQuote::~RedisQuote()
     }
 }
 
-void RedisQuote::start(const RedisParams& params, UTLogPtr logger) 
-{
-    // 只能调用一次
-    assert( checker_loop_ == NULL );
+void RedisQuote::init(const RedisParams& params, UTLogPtr logger, QuoteSourceInterface* callback)
+{    
+    engine_interface_ = callback;
 
-    params_ = params;
-    
     // 请求全量
-    redis_snap_requester_.init(params, logger);
-    redis_snap_requester_.set_engine(this);
-    redis_snap_requester_.start();
+    redis_snap_requester_.init(params, logger, this);
 
     // 请求增量
-    redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
+    redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
     redis_api_->RegisterSpi(this);
-    redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
+    redis_api_->RegisterRedis(params.host, params.port, params.password, utrade::pandora::RM_Subscribe);
+}
 
-    // 检查连接状态
+void RedisQuote::start() 
+{
+    redis_snap_requester_.start();
+
+    if( checker_loop_ )
+        return;
     type_tick now = get_miliseconds();
     last_time_ = now;
     checker_loop_ = new std::thread(&RedisQuote::_looping, this);
@@ -160,10 +220,19 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     if( result == SYNC_STARTING )
     {
         engine_interface_->on_snap(exchange, symbol, quote);
+        // 合并更新
+        SDepthQuote fake_update = quote;
+        fake_update.asks.clear();
+        fake_update.bids.clear();
         for( const auto& v: updates_queue ) 
         {
-            engine_interface_->on_update(exchange, symbol, v);
+            fake_update.arrive_time = v.arrive_time;
+            fake_update.server_time = v.server_time;
+            fake_update.sequence_no = v.sequence_no;
+            update_depth_diff(v.asks, fake_update.asks);
+            update_depth_diff(v.bids, fake_update.bids);
         }
+        engine_interface_->on_update(exchange, symbol, fake_update);
     }
     else if( result == SYNC_SNAPAGAIN ) 
     {
@@ -172,10 +241,6 @@ bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
     return true;
 };
-
-bool valida_kline(const KlineData& kline) {
-    return !(kline.index < 1000000000 || kline.index > 1900000000);
-}
 
 void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 {
@@ -237,7 +302,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         } 
         else if( result == SYNC_SNAPAGAIN )
         {
-            redis_snap_requester_.request_symbol(exchange, symbol);
+            redis_snap_requester_.async_request_symbol(exchange, symbol);
         }
         else 
         {
@@ -268,110 +333,18 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         if( body.size() == 0 )
             return;
 
-        bool is_first_time = !kline1min_firsttime_[symbol][exchange];
-        if( is_first_time )
-        {
-            vector<KlineData> klines;
-            for (auto iter = body.begin(); iter != body.end(); ++iter) 
-            {
-                KlineData kline;
-                redisquote_to_kline(*iter, kline, config);
-                _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
-                    kline.index,
-                    kline.px_open.get_str_value(),
-                    kline.px_high.get_str_value(),
-                    kline.px_low.get_str_value(),
-                    kline.px_close.get_str_value(),
-                    kline.volume.get_str_value()
-                    );
-
-                if( !valida_kline(kline) ) {
-                    _log_and_print("[kline min1] get abnormal kline %s", iter->dump());
-                    continue;
-                }
-
-                klines.push_back(kline);
-            }
-            engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
-            kline1min_firsttime_[symbol][exchange] = true;
-        }
-        else
-        {
-            vector<KlineData> klines;
-            KlineData kline;
-            redisquote_to_kline(body.back(), kline, config);
-            _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
-                kline.index,
-                kline.px_open.get_str_value(),
-                kline.px_high.get_str_value(),
-                kline.px_low.get_str_value(),
-                kline.px_close.get_str_value(),
-                kline.volume.get_str_value()
-                );
-
-            if( valida_kline(kline) ) {
-                klines.push_back(kline);
-            } else {
-                _log_and_print("[kline min1] get abnormal kline %s", body.back().dump());
-            }
-
-            engine_interface_->on_kline(exchange, symbol, 60, klines, is_first_time);
-        }
+        vector<KlineData> klines;
+        bool first_package = kline_min1_.on_get_message(body, exchange, symbol, config, klines);
+        engine_interface_->on_kline(exchange, symbol, kline_min1_.resolution_, klines, first_package);
     }
     else if( channel.find(KLINE_60MIN_HEAD) != string::npos )
     {
         if( body.size() == 0 )
             return;
 
-        bool is_first_time = !kline60min_firsttime_[symbol][exchange];
-        if( is_first_time )
-        {
-            vector<KlineData> klines;
-            for (auto iter = body.begin(); iter != body.end(); ++iter) 
-            {
-                KlineData kline;
-                redisquote_to_kline(*iter, kline, config);
-                _log_and_print("[%s.%s] get kline60 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
-                    kline.index,
-                    kline.px_open.get_str_value(),
-                    kline.px_high.get_str_value(),
-                    kline.px_low.get_str_value(),
-                    kline.px_close.get_str_value(),
-                    kline.volume.get_str_value()
-                    );
-
-                if( !valida_kline(kline) ) {
-                    _log_and_print("[kline min60] get abnormal kline %s", iter->dump());
-                    continue;
-                }
-
-                klines.push_back(kline);
-            }
-            engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
-            kline60min_firsttime_[symbol][exchange] = true;
-        }
-        else
-        {
-            vector<KlineData> klines;
-            KlineData kline;
-            redisquote_to_kline(body.back(), kline, config);
-            _log_and_print("[%s.%s] get kline60 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
-                kline.index,
-                kline.px_open.get_str_value(),
-                kline.px_high.get_str_value(),
-                kline.px_low.get_str_value(),
-                kline.px_close.get_str_value(),
-                kline.volume.get_str_value()
-                );
-
-            if( valida_kline(kline) ) {
-                klines.push_back(kline);
-            } else {
-                _log_and_print("[kline min60] get abnormal kline %s", body.back().dump());
-            }
-
-            engine_interface_->on_kline(exchange, symbol, 3600, klines, is_first_time);
-        }
+        vector<KlineData> klines;
+        bool first_package = kline_min60_.on_get_message(body, exchange, symbol, config, klines);
+        engine_interface_->on_kline(exchange, symbol, kline_min60_.resolution_, klines, first_package);
     }
 };
 
@@ -390,6 +363,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     ExchangeMeta& meta = metas_[symbol];
     SymbolMeta& symbol_meta = meta.symbols[exchange];
 
+    // 已经启动推送
     if( symbol_meta.publishing )
     {
         _log_and_print("%s.%s recv snap during publishing. SKIP.", exchange, symbol);
@@ -458,7 +432,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     {
         _log_and_print("%s.%s sequence skip from %lu to %lu. refresh snap again.", 
                         exchange, symbol, symbol_meta.seq_no, quote.sequence_no);
-        redis_snap_requester_.request_symbol(exchange, symbol);
+        redis_snap_requester_.async_request_symbol(exchange, symbol);
         symbol_meta.caches.clear();
         symbol_meta.caches.push_back(quote);
         symbol_meta.publishing = false;
@@ -672,13 +646,12 @@ void RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
     // 打印入参
     for( const auto& v : config ) 
     {
-        _log_and_print("[%s.%s] precise=%s vprecise=%s frequency=%s", v.first, symbol, ToString(v.second.precise), ToString(v.second.vprecise), ToString(v.second.frequency));
+        _log_and_print("[%s.%s] %s", v.first, symbol, v.second.desc());
     }
 
     // 设置交易所配置
     {
         std::unique_lock<std::mutex> l{ mutex_symbol_ };
-        // 删除老的
         const auto& iter = symbols_.find(symbol);
         if( iter != symbols_.end() )
         {

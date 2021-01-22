@@ -1,12 +1,16 @@
 #pragma once
 
-#include "pandora/messager/ut_log.h"
-#include "pandora/redis/redis_api.h"
-#include "pandora/util/json.hpp"
-#include "pandora/util/time_util.h"
-using namespace std;
-using njson = nlohmann::json;
 #include "redis_quote_snap.h"
+
+struct RedisKlineHelper
+{
+    uint32 resolution_;
+    unordered_map<TSymbol, unordered_map<TExchange, bool>> first_package_;
+
+    RedisKlineHelper(uint32 resolution): resolution_(resolution){};
+
+    bool on_get_message(const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines);
+};
 
 class RedisQuote : public utrade::pandora::CRedisSpi
 {
@@ -60,30 +64,21 @@ public:
         }
     };
 
-    struct SExchangeConfig
-    {
-        float frequency; // 原始更新频率
-        int precise; // 交易所原始价格精度
-        int vprecise; // 交易所原始成交量精度
-
-        bool operator==(const SExchangeConfig &rhs) const {
-            return frequency == rhs.frequency && precise == rhs.precise && vprecise == rhs.vprecise;
-        }
-    };
-
     using SSymbolConfig = unordered_map<TExchange, SExchangeConfig>;
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
-    RedisQuote(){};
+    RedisQuote();
     ~RedisQuote();
 
     // 动态修改配置
     void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
     // 初始化
-    void start(const RedisParams& params, UTLogPtr logger);
-    void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
+    void init(const RedisParams& params, UTLogPtr logger, QuoteSourceInterface* callback);
+    
+    // 启动
+    void start();
 
     // 订阅
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
@@ -110,6 +105,7 @@ public:
     virtual void OnMessage(const std::string& channel, const std::string& msg);
 
 private:
+    // redis连接参数
     RedisParams params_;
     // 上一次连接时间
     type_tick last_redis_time_;
@@ -163,6 +159,6 @@ private:
     bool _get_config(const TExchange& exchange, const TSymbol& symbol, SExchangeConfig& config) const;
 
     // K线更新相关
-    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline1min_firsttime_;
-    unordered_map<TSymbol, unordered_map<TExchange, bool>> kline60min_firsttime_;
+    RedisKlineHelper kline_min1_;
+    RedisKlineHelper kline_min60_;
 };
