@@ -62,7 +62,18 @@
         "frequency":"60"            // 数据频率，以秒为单位，现在必须是60的整数倍.
     }
 
-    2) websocket 推送的数据:
+    2) websocket 推送的数据:  
+    a. 初次推送 
+    {  
+        "data":[["open":,"high":,"low":,"close":,"volume":,"tick":,]...]  // 每个数组原子储存 open, high, low, close, volume, tick-时间戳 等信息;
+        "symbol":"symbolName",    
+        "start_time":"",    // 回复数据的开始时间，秒级的UTC时间戳   
+        "end_time":0,       // 回复数据的结束时间，秒级的UTC时间戳   
+        "data_count":0,     // 回复的数据数目  
+        "frequency":0,      // 请求的时间频率  
+        "type":"kline_rsp"     // type 类型   
+    }    
+    b. 实时更新 
     {  
         "data":[["open":,"high":,"low":,"close":,"volume":,"tick":,]...]  // 每个数组原子储存 open, high, low, close, volume, tick-时间戳 等信息;
         "symbol":"symbolName",    
@@ -71,9 +82,7 @@
         "data_count":0,     // 回复的数据数目  
         "frequency":0,      // 请求的时间频率  
         "type":"kline_update"     // type 类型   
-
-
-    }    
+    }        
 
 4. 询价接口  
     通过 http 请求获取数据
@@ -91,7 +100,7 @@
         "symbol":"BTC_USDT",   // 合约  
         "type":"enquiry"       // 类型  
     }  
-    4) 错误回报 json 字符串:  
+    1) 错误回报 json 字符串:  
     {
         "error_msg":"",  // 错误信息  
         "error_id":"",   // 错误id  
