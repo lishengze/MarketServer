@@ -64,7 +64,7 @@ public:
     std::shared_ptr<std::thread>  test_kline_thread_{nullptr};
     std::shared_ptr<std::thread>  test_enquiry_thread_{nullptr};
     
-    bool                          is_test_kline{true};
+    bool                          is_test_kline{false};
     bool                          is_test_depth{false};    
     bool                          is_test_enquiry{false};
 
