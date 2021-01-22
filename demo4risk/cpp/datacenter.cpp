@@ -149,6 +149,15 @@ WatermarkComputerWorker::~WatermarkComputerWorker()
     }
 }
 
+void WatermarkComputerWorker::query(map<TSymbol, SDecimal>& watermarks) const
+{
+    watermarks.clear();
+    std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
+    for( const auto& v : watermark_ ) {
+        watermarks[v.first] = v.second->watermark;
+    }
+}
+
 void WatermarkComputerWorker::set_snap(const SInnerQuote& quote) 
 {
     // 提取各交易所的买卖一
@@ -633,3 +642,16 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     return QuoteResponse_Result_WRONG_DIRECTION;
 }
 
+void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts)
+{
+    watermark_worker_.query(watermarks);
+
+    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    for( const auto&v : params_.cache_account.hedge_accounts_ ) {
+        const TExchange& exchange = v.first;
+        for( const auto& v2 : v.second.currencies ) {
+            const TSymbol& symbol = v2.first;
+            accounts[exchange][symbol] = v2.second.amount;
+        }
+    }
+}

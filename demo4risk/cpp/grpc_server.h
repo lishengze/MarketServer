@@ -59,6 +59,6 @@ private:
     GrpcCall<MarketStream4ClientEntity>* caller_marketstream4client_;
     // otc查询
     GrpcCall<OtcQuoteEntity>* caller_otcquete_;
-
-    unordered_map<int, CommonGrpcCall*> callers_;
+    // 查询内部参数
+    GrpcCall<GetParamsEntity>* caller_getparams_;
 };

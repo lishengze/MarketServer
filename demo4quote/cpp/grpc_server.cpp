@@ -23,40 +23,22 @@ void ServerEndpoint::init(const string& grpc_addr)
     int call_id = 0;
 
     caller_demo_ = new GrpcCall<GrpcDemoEntity>(call_id, &service_, cq_.get());
-    callers_[call_id] = caller_demo_;
-    call_id++;
 
     caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
-    callers_[call_id] = caller_subscribe_single_;
-    call_id++;
 
     caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), mixer_cacher_);
-    callers_[call_id] = caller_subscribe_mix_;
-    call_id++;
 
     caller_setparams_ = new GrpcCall<SetParamsEntity>(call_id, &service_, cq_.get());
-    callers_[call_id] = caller_setparams_;
-    call_id++;
 
     caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get());
-    callers_[call_id] = caller_getparams_;
-    call_id++;
 
     caller_getklines_ = new GrpcCall<GetKlinesEntity>(call_id, &service_, cq_.get(), cacher_);
-    callers_[call_id] = caller_getklines_;
-    call_id++;
 
     caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), cacher_);
-    callers_[call_id] = caller_getlast_;
-    call_id++;
 
     caller_subscribe_trade_ = new GrpcCall<SubscribeTradeEntity>(call_id, &service_, cq_.get());
-    callers_[call_id] = caller_subscribe_trade_;
-    call_id++;
 
     caller_getlast_trades_ = new GrpcCall<GetLastTradesEntity>(call_id, &service_, cq_.get(), quote_cacher_);
-    callers_[call_id] = caller_getlast_trades_;
-    call_id++;
 }
 
 void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
@@ -90,12 +72,10 @@ void ServerEndpoint::_handle_rpcs()
         GPR_ASSERT(cq_->Next(&tag, &ok));
         if( ok ) {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            CommonGrpcCall* caller = callers_[cd->call_id_];
-            caller->process(cd);
+            cd->proceed();
         } else {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            CommonGrpcCall* caller = callers_[cd->call_id_];
-            caller->release(cd);
+            cd->release();
         }
     }
 }

@@ -21,6 +21,9 @@ service RiskController {
 
     // OTC 询价
     rpc OtcQuote(QuoteRequest) returns (QuoteResponse){}
+
+    // 查询状态参数
+    rpc GetParams(.google.protobuf.Empty) returns (GetParamsResponse){}
 }
 
 message MultiOrderStreamData {
@@ -69,4 +72,9 @@ message QuoteResponse {
     string price = 2 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
     // 执行结果
     Result result = 3 [(gogoproto.customname) = "Result", (gogoproto.jsontag) = "result"];
+}
+
+message GetParamsResponse {
+    map<string, Decimal> watermarks = 1;
+    map<string, double> accounts = 2;
 }

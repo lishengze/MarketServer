@@ -15,6 +15,7 @@ using quote::service::v1::DepthWithDecimal;
 using quote::service::v1::Decimal;
 using quote::service::v1::QuoteRequest;
 using quote::service::v1::QuoteResponse;
+using quote::service::v1::GetParamsResponse;
 using GrpcRiskControllerService = quote::service::v1::RiskController;
 using namespace quote::service::v1;
 
@@ -51,14 +52,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
     
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -84,14 +81,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamData> responder_;
 
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -117,14 +110,10 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-
-    ServerContext ctx_;
-
     google::protobuf::Empty request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IDataCacher* cacher_;
-    bool snap_sended_;
 
     // 
     mutable std::mutex            mutex_datas_;
@@ -146,11 +135,30 @@ public:
 
 private:
     GrpcRiskControllerService::AsyncService* service_;
-    ServerContext ctx_;
-
     QuoteRequest request_;
-    QuoteResponse reply_;
     ServerAsyncResponseWriter<QuoteResponse> responder_;
+
+    IDataCacher* cacher_;
+};
+
+class GetParamsEntity : public BaseGrpcEntity
+{
+public:
+    GetParamsEntity(void* service, IDataCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    GetParamsEntity* spawn() {
+        return new GetParamsEntity(service_, cacher_);
+    }
+
+private:
+    GrpcRiskControllerService::AsyncService* service_;
+
+    google::protobuf::Empty request_;
+    ServerAsyncResponseWriter<GetParamsResponse> responder_;
 
     IDataCacher* cacher_;
 };

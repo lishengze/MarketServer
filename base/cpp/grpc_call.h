@@ -30,8 +30,6 @@ class CommonGrpcCall
 public:
     virtual void on_connect(void*) = 0;
     virtual void on_disconnect(void*) = 0;
-    virtual void release(void*) = 0;
-    virtual void process(void*) = 0;
 };
 
 class BaseGrpcEntity
@@ -49,6 +47,8 @@ public:
     ServerCompletionQueue* cq_ = nullptr;
 
     int call_id_;
+
+    ServerContext ctx_;
 public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
@@ -56,6 +56,8 @@ public:
 
     BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1){}
     virtual ~BaseGrpcEntity(){}
+
+    ServerContext* get_context() { return &ctx_; }
 
     void set_callid(int call_id) { call_id_ = call_id; }
     void set_completequeue(ServerCompletionQueue* cq) { cq_ = cq; }
@@ -74,12 +76,12 @@ public:
                 caller_->on_connect(this);
             }
             
-            // process返回true表示有消息发送，返回false表示无消息，需要手动插入一个事件
+            // process返回true表示有消息发送
+            // 返回false表示无消息，需要手动插入一个事件
             if( !process() ) {
                 alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
             }
 
-            //
             if( status_ != FINISH )
                 status_ = PUSH_TO_BACK;
         } else if(status_ == PUSH_TO_BACK) {
@@ -98,21 +100,14 @@ class GrpcCall : public CommonGrpcCall
 {
 public:
     template<class ...Args>
-    GrpcCall(int call_id, void* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
+    GrpcCall(int& call_id, void* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
     {
         ENTITY* ptr = new ENTITY(service, rest...);
         ptr->set_callid(call_id);
         ptr->set_completequeue(cq);
         ptr->set_parent(this);
         ptr->register_call();
-    }
-
-    void release(void* entity) {
-        ((ENTITY*)entity)->release();
-    }
-
-    void process(void* entity) {
-        ((ENTITY*)entity)->proceed();
+        call_id++;
     }
 
     void on_connect(void* entity) {    

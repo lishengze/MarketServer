@@ -2,6 +2,14 @@
 #include "grpc_entity.h"
 #include "quote_mixer2.h"
 
+template<class T>
+void copy_protobuf_object(const T* src, T* dst) {
+    string tmp;
+    if( !src->SerializeToString(&tmp) )
+        return;
+    dst->ParseFromString(tmp);
+}
+
 void trade_to_trade(const TradeWithDecimal* src, TradeWithDecimal* dst) {
     dst->set_exchange(src->exchange());
     dst->set_symbol(src->symbol());
@@ -51,7 +59,7 @@ void kline_to_pbkline(const KlineData& src, Kline* dst)
     set_decimal(dst->mutable_volume(), src.volume);
 }
 
-GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(&ctx_)
+GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -71,7 +79,7 @@ bool GrpcDemoEntity::process(){
 
 //////////////////////////////////////////////////
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
-: responder_(&ctx_)
+: responder_(get_context())
 , cacher_(cacher)
 , last_seqno(0)
 {
@@ -157,7 +165,7 @@ bool SubscribeSingleQuoteEntity::process(){
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     for( size_t i = 0 ; i < datas_.size() ; ++i ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
-        quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
         last_seqno = quote->seq_no();
         //compare_pb_json2(*quote);
     }
@@ -188,7 +196,7 @@ void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
 
 //////////////////////////////////////////////////
 SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher)
-: responder_(&ctx_)
+: responder_(get_context())
 , cacher_(cacher)
 , last_seqno(0)
 {
@@ -220,7 +228,7 @@ bool SubscribeMixQuoteEntity::process()
 
     for( size_t i = 0 ; i < datas_.size() ; ++i ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
-        quote_to_quote((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
     }
     datas_.clear();
 
@@ -239,7 +247,7 @@ void SubscribeMixQuoteEntity::add_data(SnapAndUpdate data) {
 }
 
 //////////////////////////////////////////////////
-SetParamsEntity::SetParamsEntity(void* service):responder_(&ctx_)
+SetParamsEntity::SetParamsEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -256,7 +264,7 @@ bool SetParamsEntity::process()
     return true;
 }
 //////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service):responder_(&ctx_)
+GetParamsEntity::GetParamsEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -308,7 +316,7 @@ bool GetKlinesEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(&ctx_)
+GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -450,7 +458,7 @@ bool GetLastEntity::process()
 }
 
 //////////////////////////////////////////////////
-SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(&ctx_)
+SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -469,7 +477,7 @@ bool SubscribeTradeEntity::process()
 
         for( size_t i = 0 ; i < datas_.size() ; ++i ) {            
             TradeWithDecimal* quote = reply.add_trades();
-            trade_to_trade((TradeWithDecimal*)datas_[i].get(), quote);
+            copy_protobuf_object((TradeWithDecimal*)datas_[i].get(), quote);
         }
         datas_.clear();
     }
@@ -488,7 +496,7 @@ void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data)
 }
 
 //////////////////////////////////////////////////
-GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(&ctx_)
+GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
     cacher_ = cacher;
@@ -507,7 +515,7 @@ bool GetLastTradesEntity::process()
     GetLatestTradesResp reply;
     for( size_t i = 0 ; i < trades.size() ; i ++ ) 
     {
-        trade_to_trade(&trades[i], reply.add_trades());
+        copy_protobuf_object(&trades[i], reply.add_trades());
     }
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);
