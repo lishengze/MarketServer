@@ -41,21 +41,15 @@ void ServerEndpoint::init(const string& grpc_addr)
     caller_getlast_trades_ = new GrpcCall<GetLastTradesEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 }
 
-void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
+void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
 {
-    SnapAndUpdate data;
-    data.snap = snap;
-    data.update = update;
-    caller_subscribe_single_->add_data(data);
+    caller_subscribe_single_->add_data(snap);
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
 
-void ServerEndpoint::publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update)
+void ServerEndpoint::publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
 {
-    SnapAndUpdate data;
-    data.snap = snap;
-    data.update = update;
-    caller_subscribe_mix_->add_data(data);
+    caller_subscribe_mix_->add_data(snap);
 };
 
 void ServerEndpoint::publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade)

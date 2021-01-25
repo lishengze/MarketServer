@@ -65,7 +65,7 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
     for( const auto& v : callbacks_) 
     {
-        v->publish_single(exchange, symbol, pub_snap, NULL);
+        v->publish_single(exchange, symbol, pub_snap);
     }
 
     mixer_->on_snap(exchange, symbol, quote);
@@ -96,7 +96,7 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
         for( const auto& v : callbacks_) 
         {
             std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, true);
-            v->publish_single(exchange, symbol, pub_snap, NULL);
+            v->publish_single(exchange, symbol, pub_snap);
             mixer_->on_snap(exchange, symbol, quote);
         }
     }
@@ -118,7 +118,7 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
     pub_diff = depth_to_pbquote2(exchange, symbol, update, false);
     for( const auto& v : callbacks_) 
     {
-        v->publish_single(exchange, symbol, pub_snap, pub_diff);
+        v->publish_single(exchange, symbol, pub_diff);
     }
 
     mixer_->on_snap(exchange, symbol, snap);
@@ -227,7 +227,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
     {
-        v->publish_mix(symbol, pub_snap, NULL);
+        v->publish_mix(symbol, pub_snap);
     }
 }
 

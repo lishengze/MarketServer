@@ -36,6 +36,7 @@ class IQuoteCacher;
 class IMixerCacher;
 
 using TradePtr = std::shared_ptr<TradeWithDecimal>;
+using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -86,7 +87,7 @@ public:
 
     void on_init();
 
-    void add_data(SnapAndUpdate data);
+    void add_data(StreamDataPtr data);
 
     SubscribeSingleQuoteEntity* spawn() {
         return new SubscribeSingleQuoteEntity(service_, cacher_);
@@ -97,11 +98,11 @@ private:
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IQuoteCacher* cacher_ = nullptr;
-    type_seqno last_seqno;
 
     // 
-    mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
+    //mutable std::mutex            mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };
 
 //////////////////////////////////////////////////
@@ -116,7 +117,7 @@ public:
 
     void on_init();
 
-    void add_data(SnapAndUpdate data);
+    void add_data(StreamDataPtr data);
 
     SubscribeMixQuoteEntity* spawn() {
         return new SubscribeMixQuoteEntity(service_, cacher_);
@@ -127,11 +128,11 @@ private:
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IMixerCacher* cacher_ = nullptr;
-    type_seqno last_seqno;
 
     // 
-    mutable std::mutex                 mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
+    //mutable std::mutex                 mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };
 
 //////////////////////////////////////////////////
@@ -170,7 +171,6 @@ public:
 private:
     GrpcStreamEngineService::AsyncService* service_;
     GetParamsReq request_;
-    GetParamsResp reply_;
     ServerAsyncResponseWriter<GetParamsResp> responder_;
 };
 
@@ -190,7 +190,6 @@ public:
 private:
     GrpcStreamEngineService::AsyncService* service_;
     GetKlinesRequest request_;
-    GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
 
     IKlineCacher* cacher_;

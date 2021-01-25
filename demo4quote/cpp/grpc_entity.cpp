@@ -83,12 +83,12 @@ bool GrpcDemoEntity::process(){
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
-, last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
-void SubscribeSingleQuoteEntity::register_call(){
+void SubscribeSingleQuoteEntity::register_call()
+{
     std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
     service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -98,7 +98,7 @@ void SubscribeSingleQuoteEntity::on_init()
     std::shared_ptr<MarketStreamDataWithDecimal> snap;
     if( cacher_->get_lastsnap(request_.exchange(), request_.symbol(), snap) )
     {            
-        datas_.push_back(snap);
+        datas_.enqueue(snap);
     }
 }
 
@@ -160,18 +160,16 @@ void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
     std::cout << "---------------------" << std::endl;
 }
 */
-bool SubscribeSingleQuoteEntity::process(){
-    
+bool SubscribeSingleQuoteEntity::process()
+{
     MultiMarketStreamDataWithDecimal reply;
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+    StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
-        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
-        last_seqno = quote->seq_no();
-        //compare_pb_json2(*quote);
-    }
-    datas_.clear();
+        copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+    }    
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -181,31 +179,26 @@ bool SubscribeSingleQuoteEntity::process(){
     } 
 }
 
-void SubscribeSingleQuoteEntity::add_data(SnapAndUpdate data) {
-    MarketStreamDataWithDecimal* pdata = (MarketStreamDataWithDecimal*)data.snap.get();    
-    if( string(request_.symbol()) != string(pdata->symbol()) || string(request_.exchange()) != string(pdata->exchange()) ) {
+void SubscribeSingleQuoteEntity::add_data(StreamDataPtr data) 
+{
+    if( string(request_.symbol()) != string(data->symbol()) || string(request_.exchange()) != string(data->exchange()) ) {
         //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
         return;
     }
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    if( data.update ) {
-        datas_.push_back(data.update);
-    } else {
-        //_log_and_print("%s.%s publish snap", pdata->exchange(), pdata->symbol());
-        datas_.push_back(data.snap);
-    }
+
+    datas_.enqueue(data);
 }
 
 //////////////////////////////////////////////////
 SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
-, last_seqno(0)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
-void SubscribeMixQuoteEntity::register_call(){
+void SubscribeMixQuoteEntity::register_call()
+{
     std::cout << "register SubscribeMixQuoteEntity" << std::endl;
     service_->RequestSubscribeMixQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -216,9 +209,8 @@ void SubscribeMixQuoteEntity::on_init()
     cacher_->get_lastsnaps(snaps);
     tfm::printfln("get_lastsnaps %u items", snaps.size());
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     for( const auto& v : snaps ){
-        datas_.push_back(v);
+        datas_.enqueue(v);
     }
 }
 
@@ -226,13 +218,12 @@ bool SubscribeMixQuoteEntity::process()
 {    
     MultiMarketStreamDataWithDecimal reply;
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+    StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
-        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
-    }
-    datas_.clear();
+        copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+    }    
 
     // 执行发送
     if( reply.quotes_size() > 0 ) {
@@ -243,18 +234,20 @@ bool SubscribeMixQuoteEntity::process()
     }
 }
 
-void SubscribeMixQuoteEntity::add_data(SnapAndUpdate data) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(data.snap);
+void SubscribeMixQuoteEntity::add_data(StreamDataPtr data) 
+{
+    datas_.enqueue(data);
 }
 
 //////////////////////////////////////////////////
-SetParamsEntity::SetParamsEntity(void* service):responder_(get_context())
+SetParamsEntity::SetParamsEntity(void* service)
+: responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
-void SetParamsEntity::register_call(){
+void SetParamsEntity::register_call()
+{
     std::cout << "register SetParamsEntity" << std::endl;
     service_->RequestSetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -265,13 +258,17 @@ bool SetParamsEntity::process()
     responder_.Finish(reply_, Status::OK, this);
     return true;
 }
+
+
 //////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service):responder_(get_context())
+GetParamsEntity::GetParamsEntity(void* service)
+: responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
 
-void GetParamsEntity::register_call(){
+void GetParamsEntity::register_call()
+{
     std::cout << "register GetParamsEntity" << std::endl;
     service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -286,13 +283,15 @@ bool GetParamsEntity::process(){
 }
 
 //////////////////////////////////////////////////
-GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher):responder_(&ctx_)
+GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher)
+: responder_(&ctx_)
+, cacher_(cacher)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
-    cacher_ = cacher;
 }
 
-void GetKlinesEntity::register_call(){
+void GetKlinesEntity::register_call()
+{
     std::cout << "register GetKlinesEntity" << std::endl;
     service_->RequestGetKlines(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
