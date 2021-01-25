@@ -67,8 +67,9 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const SExch
     quote.exchange = exchange;
     quote.symbol = symbol;
     vassign(quote.sequence_no, sequence_no);
-    vassign(quote.arrive_time, parse_nano(timeArrive));
-    quote.server_time = get_miliseconds();
+    vassign(quote.origin_time, parse_nano(timeArrive));
+    quote.arrive_time = get_miliseconds();
+    quote.server_time = 0; // 这个时间应该在发送前赋值
     
     string askDepth = isSnap ? "AskDepth" : "AskUpdate";
     redisquote_to_quote_depth(snap_json[askDepth], config, quote.asks);

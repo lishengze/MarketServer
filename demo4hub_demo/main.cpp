@@ -12,34 +12,25 @@ using namespace dec;
 class Client : public HubCallback
 {
 public:   
-    // 深度数据（推送）
+    // 风控前数据（推送）
     virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
         type_tick now = get_miliseconds();
-        tfm::printfln("[raw_depth] %s.%s delay=%u ask_depth=%u bid_depth=%u", exchange, symbol, now-depth.tick, depth.ask_length, depth.bid_length);
-        // return -1;
-        // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
-
-        for (int i =0; i < 10; ++i)
-        {
-            // cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
-        }
-
+        type_tick delay = now-depth.tick1;
+        tfm::printfln("[raw_depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u tick=%u tick1=%u tick2=%u )", 
+            exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1,
+            depth.tick, depth.tick1, depth.tick2);
+        
         return 0;
     } 
 
-    // 深度数据（推送）
+    // 风控后数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
-        tfm::printfln("[depth] %s.%s %u ask_depth=%u bid_depth=%u", exchange, symbol, depth.tick, depth.ask_length, depth.bid_length);
-        // return -1;
-        // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
-
-        for (int i =0; i < 10; ++i)
-        {
-            // cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
-        }
-
+        type_tick now = get_miliseconds();
+        type_tick delay = now-depth.tick1;
+        tfm::printfln("[depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u rc_cost=%u)", 
+            exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1, depth.tick3 - depth.tick2);        
         return 0;
     } 
 

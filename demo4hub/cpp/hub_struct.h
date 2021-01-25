@@ -62,7 +62,10 @@ struct SDepthData
     
     symbol_type symbol;
     symbol_type exchange;
-    type_tick tick;
+    type_tick tick;     // 来自交易所的时间戳
+    type_tick tick1;    // 来自streamengine收到行情的本地时间戳
+    type_tick tick2;    // 来自streamengine发出数据包的时间戳
+    type_tick tick3;    // 来自riskcontrol发出的数据包的时间戳
     type_seqno seqno;
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];
     type_length ask_length;

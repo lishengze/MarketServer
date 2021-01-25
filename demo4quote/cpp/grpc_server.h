@@ -35,8 +35,8 @@ public:
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines);
 
     // IMixerQuotePusher
-    void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
-    void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap, std::shared_ptr<MarketStreamDataWithDecimal> update);
+    void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap);
+    void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap);
     void publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade);
 
 private:
@@ -53,10 +53,8 @@ private:
 
     std::thread* thread_loop_ = nullptr;
 
-    GrpcCall<GrpcDemoEntity>* caller_demo_;
     GrpcCall<SubscribeSingleQuoteEntity>* caller_subscribe_single_;
     GrpcCall<SubscribeMixQuoteEntity>* caller_subscribe_mix_;
-    GrpcCall<SetParamsEntity>* caller_setparams_;
     GrpcCall<GetParamsEntity>* caller_getparams_;
     GrpcCall<GetKlinesEntity>* caller_getklines_;
     GrpcCall<GetLastEntity>* caller_getlast_;

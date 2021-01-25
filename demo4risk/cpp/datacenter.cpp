@@ -108,7 +108,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double 
             else
                 scaledPrice = 0;
         }
-        dst[scaledPrice].mix_exchanges(v.second, volume_bias);
+        dst[scaledPrice].mix_exchanges(v.second, volume_bias * (-1));
     }
 }
 

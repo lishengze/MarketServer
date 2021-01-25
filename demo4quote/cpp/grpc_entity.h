@@ -36,6 +36,7 @@ class IQuoteCacher;
 class IMixerCacher;
 
 using TradePtr = std::shared_ptr<TradeWithDecimal>;
+using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -49,31 +50,6 @@ inline void set_decimal(Decimal* dst, const Decimal& src)
     dst->set_prec(src.prec());
 }
 
-struct SnapAndUpdate{
-    std::shared_ptr<void> snap;
-    std::shared_ptr<void> update;
-};
-
-class GrpcDemoEntity : public BaseGrpcEntity
-{
-public:
-    GrpcDemoEntity(void* service);
-
-    void register_call();
-
-    bool process();
-
-    GrpcDemoEntity* spawn() {
-        return new GrpcDemoEntity(service_);
-    }
-private:
-    GrpcStreamEngineService::AsyncService* service_;
-    DemoReq request_;
-    ServerAsyncWriter<DemoResp> responder_;
-    
-    int times_;
-};
-
 //////////////////////////////////////////////////
 class SubscribeSingleQuoteEntity : public BaseGrpcEntity
 {
@@ -86,22 +62,25 @@ public:
 
     void on_init();
 
-    void add_data(SnapAndUpdate data);
+    void add_data(StreamDataPtr data);
 
     SubscribeSingleQuoteEntity* spawn() {
         return new SubscribeSingleQuoteEntity(service_, cacher_);
     }
 private:
+
+    bool _is_filtered(const TExchange& exchange, const TSymbol& symbol);
+
     GrpcStreamEngineService::AsyncService* service_;
     SubscribeQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IQuoteCacher* cacher_ = nullptr;
-    type_seqno last_seqno;
 
     // 
-    mutable std::mutex            mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
+    //mutable std::mutex            mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };
 
 //////////////////////////////////////////////////
@@ -116,7 +95,7 @@ public:
 
     void on_init();
 
-    void add_data(SnapAndUpdate data);
+    void add_data(StreamDataPtr data);
 
     SubscribeMixQuoteEntity* spawn() {
         return new SubscribeMixQuoteEntity(service_, cacher_);
@@ -127,31 +106,11 @@ private:
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
     IMixerCacher* cacher_ = nullptr;
-    type_seqno last_seqno;
 
     // 
-    mutable std::mutex                 mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
-};
-
-//////////////////////////////////////////////////
-class SetParamsEntity : public BaseGrpcEntity
-{
-public:
-    SetParamsEntity(void* service);
-
-    void register_call();
-
-    bool process();
-
-    SetParamsEntity* spawn() {
-        return new SetParamsEntity(service_);
-    }
-private:
-    GrpcStreamEngineService::AsyncService* service_;
-    SetParamsReq request_;
-    SetParamsResp reply_;
-    ServerAsyncResponseWriter<SetParamsResp> responder_;
+    moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
+    //mutable std::mutex                 mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };
 
 //////////////////////////////////////////////////
@@ -170,10 +129,10 @@ public:
 private:
     GrpcStreamEngineService::AsyncService* service_;
     GetParamsReq request_;
-    GetParamsResp reply_;
     ServerAsyncResponseWriter<GetParamsResp> responder_;
 };
 
+//////////////////////////////////////////////////
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:
@@ -190,7 +149,6 @@ public:
 private:
     GrpcStreamEngineService::AsyncService* service_;
     GetKlinesRequest request_;
-    GetKlinesResponse reply_;
     ServerAsyncResponseWriter<GetKlinesResponse> responder_;
 
     IKlineCacher* cacher_;

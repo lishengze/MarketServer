@@ -12,10 +12,10 @@ service StreamEngine {
     rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
 
     // demo
-    rpc Demo(DemoReq) returns (stream DemoResp);
+    //rpc Demo(DemoReq) returns (stream DemoResp);
 
     // 设置参数
-    rpc SetParams(SetParamsReq) returns (SetParamsResp);
+    //rpc SetParams(SetParamsReq) returns (SetParamsResp);
 
     // 获取参数
     rpc GetParams(GetParamsReq) returns (GetParamsResp);
