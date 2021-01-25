@@ -28,7 +28,8 @@ struct SInnerDepth {
 
     void mix_exchanges(const SInnerDepth& src, double bias) {
         for( const auto& v : src.exchanges ) {
-            exchanges[v.first] += v.second * ((100 + bias ) / 100.0);
+            if( bias > (-100) )
+                exchanges[v.first] += v.second * ((100 + bias ) / 100.0);
         }
         total_volume = 0;
         for( const auto& v : exchanges ) {
