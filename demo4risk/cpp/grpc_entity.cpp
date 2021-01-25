@@ -2,6 +2,8 @@
 #include "datacenter.h"
 #include "converter.h"
 
+#define ONE_ROUND_MESSAGE_NUMBRE 999
+
 template<class T>
 void copy_protobuf_object(const T* src, T* dst) {
     string tmp;
@@ -77,7 +79,8 @@ MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service, IDataCacher*
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
-void MarketStream4BrokerEntity::register_call(){
+void MarketStream4BrokerEntity::register_call()
+{
     std::cout << "register MarketStream4BrokerEntity" << std::endl;
     service_->RequestServeMarketStream4Broker(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -87,22 +90,22 @@ void MarketStream4BrokerEntity::on_init()
     vector<SInnerQuote> snaps;
     cacher_->get_snaps(snaps);
     for( const auto& v : snaps ) {
-        std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
+        StreamDataPtr2 ptrData(new MarketStreamData);
         innerquote_to_msd2(v, ptrData.get(), true);
-        datas_.push_back(ptrData);
-    }
+        datas_.enqueue(ptrData);
+    }    
 }
 
 bool MarketStream4BrokerEntity::process()
 {    
     MultiMarketStreamData reply;
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+    StreamDataPtr2 ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamData* quote = reply.add_quotes();
-        copy_protobuf_object((MarketStreamData*)datas_[i].get(), quote);
+        copy_protobuf_object((MarketStreamData*)ptrs[i].get(), quote);
     }
-    datas_.clear();
     
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -112,9 +115,9 @@ bool MarketStream4BrokerEntity::process()
     }
 }
 
-void MarketStream4BrokerEntity::add_data(std::shared_ptr<void> snap) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
+void MarketStream4BrokerEntity::add_data(StreamDataPtr2 snap) 
+{
+    datas_.enqueue(snap);
 }
 
 //////////////////////////////////////////////////
@@ -135,22 +138,22 @@ void MarketStream4HedgeEntity::on_init()
     vector<SInnerQuote> snaps;
     cacher_->get_snaps(snaps);
     for( const auto& v : snaps ) {
-        std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
+        StreamDataPtr2 ptrData(new MarketStreamData);
         innerquote_to_msd2(v, ptrData.get(), true);
-        datas_.push_back(ptrData);
-    }
+        datas_.enqueue(ptrData);
+    }    
 }
 
 bool MarketStream4HedgeEntity::process()
 {    
     MultiMarketStreamData reply;
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+    StreamDataPtr2 ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamData* quote = reply.add_quotes();
-        copy_protobuf_object((MarketStreamData*)datas_[i].get(), quote);
-    }
-    datas_.clear();
+        copy_protobuf_object((MarketStreamData*)ptrs[i].get(), quote);
+    }    
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -160,9 +163,9 @@ bool MarketStream4HedgeEntity::process()
     }
 }
 
-void MarketStream4HedgeEntity::add_data(std::shared_ptr<void> snap) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
+void MarketStream4HedgeEntity::add_data(StreamDataPtr2 snap) 
+{
+    datas_.enqueue(snap);
 }
 
 //////////////////////////////////////////////////
@@ -173,7 +176,8 @@ MarketStream4ClientEntity::MarketStream4ClientEntity(void* service, IDataCacher*
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
-void MarketStream4ClientEntity::register_call(){
+void MarketStream4ClientEntity::register_call()
+{
     std::cout << "register MarketStream4ClientEntity" << std::endl;
     service_->RequestServeMarketStream4Client(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -183,9 +187,9 @@ void MarketStream4ClientEntity::on_init()
     vector<SInnerQuote> snaps;
     cacher_->get_snaps(snaps);
     for( const auto& v : snaps ) {
-        std::shared_ptr<MarketStreamDataWithDecimal> ptrData(new MarketStreamDataWithDecimal);
+        StreamDataPtr ptrData(new MarketStreamDataWithDecimal);
         innerquote_to_msd3(v, ptrData.get(), true);
-        datas_.push_back(ptrData);
+        datas_.enqueue(ptrData);
     }    
 }
 
@@ -193,13 +197,13 @@ bool MarketStream4ClientEntity::process()
 {
     MultiMarketStreamDataWithDecimal reply;
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( size_t i = 0 ; i < datas_.size() ; ++i ) {
+    StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
-        copy_protobuf_object((MarketStreamDataWithDecimal*)datas_[i].get(), quote);
+        copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
     }
-    datas_.clear();
-
+    
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -208,20 +212,21 @@ bool MarketStream4ClientEntity::process()
     }
 }
 
-void MarketStream4ClientEntity::add_data(std::shared_ptr<void> snap) {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(snap);
+void MarketStream4ClientEntity::add_data(StreamDataPtr snap) 
+{
+    datas_.enqueue(snap);
 }
 
 //////////////////////////////////////////////////
 OtcQuoteEntity::OtcQuoteEntity(void* service, IDataCacher* cacher)
 : responder_(get_context())
+, cacher_(cacher)
 {
     service_ = (GrpcRiskControllerService::AsyncService*)service;
-    cacher_ = cacher;
 }
 
-void OtcQuoteEntity::register_call(){
+void OtcQuoteEntity::register_call()
+{
     std::cout << "register OtcQuoteEntity" << std::endl;
     service_->RequestOtcQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -243,12 +248,13 @@ bool OtcQuoteEntity::process()
 //////////////////////////////////////////////////
 GetParamsEntity::GetParamsEntity(void* service, IDataCacher* cacher)
 : responder_(get_context())
+, cacher_(cacher)
 {
     service_ = (GrpcRiskControllerService::AsyncService*)service;
-    cacher_ = cacher;
 }
 
-void GetParamsEntity::register_call(){
+void GetParamsEntity::register_call()
+{
     std::cout << "register GetParamsEntity" << std::endl;
     service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
