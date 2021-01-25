@@ -113,7 +113,26 @@ private:
     //vector<std::shared_ptr<void>> datas_;
 };
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
+class GetParamsEntity : public BaseGrpcEntity
+{
+public:
+    GetParamsEntity(void* service);
+
+    void register_call();
+
+    bool process();
+
+    GetParamsEntity* spawn() {
+        return new GetParamsEntity(service_);
+    }
+private:
+    GrpcStreamEngineService::AsyncService* service_;
+    GetParamsReq request_;
+    ServerAsyncResponseWriter<GetParamsResp> responder_;
+};
+
+//////////////////////////////////////////////////
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:

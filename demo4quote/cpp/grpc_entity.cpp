@@ -239,6 +239,28 @@ void SubscribeMixQuoteEntity::add_data(StreamDataPtr data)
 }
 
 //////////////////////////////////////////////////
+GetParamsEntity::GetParamsEntity(void* service)
+: responder_(get_context())
+{
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
+}
+
+void GetParamsEntity::register_call()
+{
+    std::cout << "register GetParamsEntity" << std::endl;
+    service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+bool GetParamsEntity::process(){    
+    GetParamsResp reply;
+    reply.set_json_data(CONFIG->get_config());
+    
+    status_ = FINISH;
+    responder_.Finish(reply, Status::OK, this);
+    return true;
+}
+
+//////////////////////////////////////////////////
 GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher)
 : responder_(&ctx_)
 , cacher_(cacher)

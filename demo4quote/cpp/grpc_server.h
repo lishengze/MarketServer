@@ -55,6 +55,7 @@ private:
 
     GrpcCall<SubscribeSingleQuoteEntity>* caller_subscribe_single_;
     GrpcCall<SubscribeMixQuoteEntity>* caller_subscribe_mix_;
+    GrpcCall<GetParamsEntity>* caller_getparams_;
     GrpcCall<GetKlinesEntity>* caller_getklines_;
     GrpcCall<GetLastEntity>* caller_getlast_;
     GrpcCall<SubscribeTradeEntity>* caller_subscribe_trade_;

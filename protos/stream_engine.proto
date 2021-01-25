@@ -18,7 +18,7 @@ service StreamEngine {
     //rpc SetParams(SetParamsReq) returns (SetParamsResp);
 
     // 获取参数
-    //rpc GetParams(GetParamsReq) returns (GetParamsResp);
+    rpc GetParams(GetParamsReq) returns (GetParamsResp);
 
     // 请求K线数据
     rpc GetKlines(GetKlinesRequest) returns (GetKlinesResponse){}

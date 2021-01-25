@@ -216,6 +216,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
             quotes_[symbol] = ptr;
         }
 
+        type_tick begin = get_miliseconds();
         _inner_process(exchange, symbol, output, ptr);
 
         if( !_check_update_clocks(symbol, config.frequency) ) {
@@ -223,6 +224,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         }
 
         pub_snap = mixquote_to_pbquote2("", symbol, ptr, config.depth, true);
+        type_tick end = get_miliseconds();
+        if( (end-begin) > 50 ) {
+            cout << "toolong" << endl;
+        }
     }
     
     std::cout << "publish(snap) " << symbol << " " << pub_snap->asks_size() << "/" << pub_snap->bids_size() << std::endl;
