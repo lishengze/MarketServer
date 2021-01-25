@@ -265,16 +265,16 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 }
 
 // 原始深度数据推送
-int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
-{
-    return 1;
-    if (is_test_enquiry)
-    {
-        return 1;
-    }
-    get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
-    return 1;
-}
+// int DataReceive::on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
+// {
+//     return 1;
+//     if (is_test_enquiry)
+//     {
+//         return 1;
+//     }
+//     get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
+//     return 1;
+// }
 
 void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {    
