@@ -60,28 +60,37 @@ void DataProcess::response_message(PackagePtr package)
 
 void DataProcess::handle_request_message(PackagePtr package)
 {
-    cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
-
-    switch (package->Tid())
+    try
     {
-        case UT_FID_RspSymbolListData:
-            request_symbol_package(package);
-            return;    
+        cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
 
-        case UT_FID_ReqRiskCtrledDepthData:
-            request_depth_package(package);
-            return;               
+        switch (package->Tid())
+        {
+            case UT_FID_RspSymbolListData:
+                request_symbol_package(package);
+                return;    
 
-        case UT_FID_ReqKLineData:
-            request_kline_package(package);
-            return;
+            case UT_FID_ReqRiskCtrledDepthData:
+                request_depth_package(package);
+                return;               
 
-        case UT_FID_ReqEnquiry:
-            request_enquiry_package(package);
-            return;
-        default:
-            break;
+            case UT_FID_ReqKLineData:
+                request_kline_package(package);
+                return;
+
+            case UT_FID_ReqEnquiry:
+                request_enquiry_package(package);
+                return;
+            default:
+                break;
+        }
     }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+
 }
 
 void DataProcess::handle_response_message(PackagePtr package)

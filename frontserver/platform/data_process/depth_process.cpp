@@ -21,7 +21,32 @@ void DepthProces::init_process_engine(DataProcessPtr process_engine)
 
 void DepthProces::request_depth_package(PackagePtr package)
 {
+    try
+    {
+        ReqRiskCtrledDepthData* p_req = GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
 
+        if (p_req)
+        {
+            string symbol = string(p_req->symbol_);
+
+            if (depth_data_.find(symbol) != depth_data_.end())
+            {
+                std::lock_guard<std::mutex> lk(depth_data_mutex_);
+
+                PackagePtr enhanced_data_package = depth_data_[symbol];
+
+                process_engine_->deliver_response(enhanced_data_package);
+            }
+        }
+        else 
+        {
+            /* code */
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 void DepthProces::request_symbol_package(PackagePtr package)

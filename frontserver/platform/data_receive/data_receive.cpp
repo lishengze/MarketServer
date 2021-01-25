@@ -347,7 +347,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    
 
-    LOG_INFO(stream_obj.str());
+    // LOG_INFO(stream_obj.str());
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -398,6 +398,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
            kline_symbol_last_time_[symbol] = kline.index;
         }
         
+        // kline.frequency_ = resolution;
+
         std::stringstream stream_obj;
         stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "

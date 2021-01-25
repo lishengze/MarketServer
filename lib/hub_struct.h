@@ -96,6 +96,11 @@ struct KlineData
         assign(volume, SDecimal(volume));        
     }                
 
+    ~KlineData()
+    {
+        // cout << "~KlineData" << endl;
+    }
+
     KlineData(const KlineData& other)
     {
         assign(symbol, other.symbol);
@@ -126,8 +131,8 @@ struct KlineData
 
     bool is_clear() {return clear_;}    
                     
-    symbol_type symbol;
-    symbol_type exchange;
+    symbol_type symbol{NULL};
+    symbol_type exchange{NULL};
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;
@@ -141,6 +146,7 @@ struct KlineData
     static const long Fid = UT_FID_KlineData;    
 
     bool        clear_{false};
+    int         frequency_{60};
 };
 
 using KlineDataPtr = boost::shared_ptr<KlineData>;

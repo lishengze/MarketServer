@@ -229,7 +229,26 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             {
                 if (!wb_server_->send_data(p_rsp_kline_data->websocket_, kline_data_str))
                 {
+                    cout << "Request Delete KLine Connect" << endl;
                     
+                    PackagePtr package = PackagePtr{new Package{}};
+            
+                    package->SetPackageID(ID_MANAGER->get_id());
+
+                    package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
+                    CREATE_FIELD(package, ReqKLineData);
+
+                    ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+                    if (p_req_kline_data)
+                    {
+                        p_req_kline_data->set(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
+                                              p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, p_rsp_kline_data->websocket_, true);  
+
+                        deliver_request(package);
+                    }    
+
                 }
             }
         }

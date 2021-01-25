@@ -13,6 +13,8 @@
 //     auto data_ptr = boost::make_shared<user_class>(std::forward<Args>(args)...);
 // }
 
+PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, int package_id, WebsocketClassThreadSafePtr ws=nullptr);
+
 PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int package_id);
 
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id);
@@ -24,6 +26,10 @@ PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbol, int package_i
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& main_data, int package_id);
 
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr& update_kline_data, int package_id);
+
+PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
+                                     frequency_type frequency, WebsocketClassThreadSafePtr ws,
+                                     KlineDataPtr& update_kline_data, int package_id);
 
 PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, HttpResponseThreadSafePtr res);
 

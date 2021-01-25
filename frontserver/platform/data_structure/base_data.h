@@ -46,8 +46,8 @@ FORWARD_DECLARE_PTR(HttpResponseThreadSafe);
 
 struct WSData
 {
-    bool              is_alive{false};
-    std::set<string>  sub_symbol_set;
+    bool                   is_alive{false};
+    // std::set<symbol_type>  sub_symbol_set;
 };
 
 class WebsocketClassThreadSafe
@@ -93,31 +93,31 @@ class WebsocketClassThreadSafe
         user_data_.is_alive = value;
     }
 
-    void clear_sub_symbol_list()
-    {
-        std::lock_guard<std::mutex> lk(mutex_);
-        user_data_.sub_symbol_set.clear();
-    }
+    // void clear_sub_symbol_list()
+    // {
+    //     std::lock_guard<std::mutex> lk(mutex_);
+    //     user_data_.sub_symbol_set.clear();
+    // }
 
-    void add_sub_symbol(std::string symbol)
-    {
-        std::lock_guard<std::mutex> lk(mutex_);
-        user_data_.sub_symbol_set.emplace(symbol);
-    }
+    // void add_sub_symbol(std::string symbol)
+    // {
+    //     std::lock_guard<std::mutex> lk(mutex_);
+    //     user_data_.sub_symbol_set.emplace(symbol);
+    // }
 
-    bool is_symbol_subed(std::string symbol)
-    {
-        std::lock_guard<std::mutex> lk(mutex_);
+    // bool is_symbol_subed(std::string symbol)
+    // {
+    //     std::lock_guard<std::mutex> lk(mutex_);
 
-        if (user_data_.sub_symbol_set.find(symbol) != user_data_.sub_symbol_set.end())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    //     if (user_data_.sub_symbol_set.find(symbol) != user_data_.sub_symbol_set.end())
+    //     {
+    //         return true;
+    //     }
+    //     else
+    //     {
+    //         return false;
+    //     }
+    // }
 
     WebsocketClass* get_ws() { return ws_;}
 
@@ -194,6 +194,11 @@ struct Socket
             comm_type = COMM_TYPE::HTTP;
         }
     }    
+
+    virtual ~Socket()
+    {
+        cout << "~Socket() " << endl;
+    }
 
     COMM_TYPE                       comm_type = COMM_TYPE::HTTP;
     HttpResponseThreadSafePtr       http_response_{nullptr};

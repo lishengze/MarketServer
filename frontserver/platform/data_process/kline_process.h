@@ -10,14 +10,37 @@ class DataProcess;
 class KlineDataUpdate
 {
     public:
-        KlineDataUpdate(const ReqKLineData& req_data)
+        KlineDataUpdate(const ReqKLineData& other)
         {
-            req_kline_data_ = req_data;
+            assign(symbol_, other.symbol_);
+            assign(start_time_, other.start_time_);
+            assign(end_time_, other.end_time_);
+            assign(data_count_, other.data_count_);
+            assign(frequency_, other.frequency_); 
+            websocket_ = other.websocket_->get_ws();
+
+            websocket_com_ = boost::make_shared<WebsocketClassThreadSafe>(other.websocket_->get_ws());
+            // websocket_ = other.websocket_;
         }
 
-    ReqKLineData   req_kline_data_;
-    type_tick      last_update_time_;
-    KlineDataPtr   kline_data_{nullptr};
+        ~KlineDataUpdate()
+        {
+            cout << "~KlineDataUpdate() " << endl;
+        }
+
+    // ReqKLineData   req_kline_data_;
+
+    symbol_type                     symbol_{NULL};
+    type_tick                       start_time_{0};
+    type_tick                       end_time_{0};
+    int                             data_count_{-1};
+    frequency_type                  frequency_{0};   
+    WebsocketClass*                 websocket_{nullptr};
+
+    WebsocketClassThreadSafePtr     websocket_com_{nullptr};
+
+    type_tick           last_update_time_;
+    KlineData           kline_data_;
 };
 FORWARD_DECLARE_PTR(KlineDataUpdate);
 
@@ -40,6 +63,8 @@ public:
 
     PackagePtr get_kline_package(PackagePtr package);
 
+    bool delete_kline_request_connect(ReqKLineData* pReqKlineData);
+
     void store_kline_data(int frequency, KlineData* pkline_data);
 
     void complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency);
@@ -56,6 +81,7 @@ public:
 
     void update_kline_data(const KlineData* kline_data);
 
+    void check_websocket_subinfo(ReqKLineData* pReqKlineData);
 
 private:
     DataProcessPtr                                              process_engine_;   
@@ -64,7 +90,11 @@ private:
     map<string, map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
-    map<string, vector<KlineDataUpdatePtr>>                     updated_kline_data_;
+    map<string, vector<KlineDataUpdate>>                        updated_kline_data_;
+    std::map<WebsocketClassThreadSafePtr, string,
+             LessWebsocketClassThreadSafePtr>                   wss_con_map_;  
+
+    std::mutex                                                  updated_kline_data_mutex_;
 
     bool                                                        test_kline_data_{false};
 

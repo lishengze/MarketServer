@@ -49,6 +49,13 @@ class ReqRiskCtrledDepthData:public Socket
         assign(symbol_, other.symbol_);
     }
 
+    void set(string symbol, WebsocketClassThreadSafePtr ws)
+    {
+        assign(symbol_, symbol);
+        assign(websocket_, ws);
+        comm_type = COMM_TYPE::WEBSOCKET;
+    }
+
     symbol_type symbol_;
 
     static const long Fid = UT_FID_ReqRiskCtrledDepthData;
@@ -75,8 +82,8 @@ class RspRiskCtrledDepthData:public boost::enable_shared_from_this<RspRiskCtrled
         }
 
 
-        double ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
-        double bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
+        SDecimal ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
+        SDecimal bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
 
         SDepthData depth_data_;
 
@@ -189,8 +196,13 @@ class ReqKLineData:public Socket
 
     }
 
+    virtual ~ReqKLineData()
+    {
+        cout << "~ReqKLineData() " << endl;
+    }
+
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, ID_TYPE ws_id,
-                HttpResponse* res=nullptr, WebsocketClass* ws=nullptr):
+                HttpResponse* res=nullptr, WebsocketClass* ws=nullptr, bool is_canacel_request=false):
     Socket(res, ws)
     {
         assign(symbol_, symbol);
@@ -199,6 +211,7 @@ class ReqKLineData:public Socket
         assign(data_count_, data_count);
         assign(frequency_, freq);
         assign(ws_id_, ws_id);
+        assign(is_canacel_request_, is_canacel_request);
     }
 
     ReqKLineData(const ReqKLineData& other):Socket(other.http_response_, other.websocket_)
@@ -241,13 +254,14 @@ class ReqKLineData:public Socket
     }    
 
     void set(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
-             WebsocketClassThreadSafePtr ws)
+             WebsocketClassThreadSafePtr ws, bool is_canacel_request=false)
     {
         assign(symbol_, symbol);
         assign(start_time_, start_time);
         assign(end_time_, end_time);
         assign(data_count_, data_count);
         assign(frequency_, freq);
+        assign(is_canacel_request_, is_canacel_request);
 
         websocket_ = ws;
         comm_type = COMM_TYPE::WEBSOCKET;    
@@ -279,6 +293,7 @@ class ReqKLineData:public Socket
         ID_TYPE             ws_id_{-1};
 
         frequency_type      frequency_;
+        bool                is_canacel_request_{false};
 
         static const long Fid = UT_FID_ReqKLineData;
 };

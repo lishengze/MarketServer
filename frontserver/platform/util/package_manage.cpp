@@ -1,31 +1,62 @@
 #include "package_manage.h"
 #include "tools.h"
 
+PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, int package_id, WebsocketClassThreadSafePtr ws)
+{
+    PackagePtr package =PackagePtr{new Package{}};
+    try
+    {        
+        package->SetPackageID(package_id);
+        package->prepare_request(UT_FID_ReqRiskCtrledDepthData, package_id);
+        CREATE_FIELD(package, ReqRiskCtrledDepthData);
+
+        ReqRiskCtrledDepthData* p_req= GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
+
+        p_req->set(symbol, ws);        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
+    }    
+    return package;
+}
+
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
 {
     PackagePtr package =PackagePtr{new Package{}};
+    try
+    {        
+        package->SetPackageID(package_id);
 
-    package->SetPackageID(package_id);
+        CREATE_FIELD(package, SDepthData);
 
-    CREATE_FIELD(package, SDepthData);
+        SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
 
-    SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
-
-    copy_sdepthdata(pSDepthData, &depth);
-
+        copy_sdepthdata(pSDepthData, &depth);        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"GetNewSDepthDataPackage " << e.what() << '\n';
+    }    
     return package;
 }
 
 PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_id)
 {
     PackagePtr package =PackagePtr{new Package{}};
-    package->SetPackageID(package_id);
-    CREATE_FIELD(package, KlineData);
+    try
+    {        
+        package->SetPackageID(package_id);
+        CREATE_FIELD(package, KlineData);
 
-    KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
+        KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
 
-    copy_klinedata(pklineData, &ori_kline_data);
-
+        copy_klinedata(pklineData, &ori_kline_data);        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"GetNewKlineDataPackage " << e.what() << '\n';
+    }    
     return package;
 }
 
@@ -47,7 +78,7 @@ PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int pack
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr <<"GetNewRspRiskCtrledDepthDataPackage " << e.what() << '\n';
     }
     
     return package;    
@@ -171,6 +202,41 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr&
     
     return package;        
 }
+
+PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
+                                     frequency_type frequency, WebsocketClassThreadSafePtr ws,
+                                     KlineDataPtr& update_kline_data, int package_id)
+{
+    PackagePtr package = PackagePtr{new Package{}};
+    try
+    {    
+        package->SetPackageID(package_id);
+
+        CREATE_FIELD(package, RspKLineData);
+
+        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+
+        p_rsp_kline_data->is_update = true;
+
+        assign(p_rsp_kline_data->comm_type, COMM_TYPE::WEBSOCKET);
+        assign(p_rsp_kline_data->websocket_, ws);
+
+        assign(p_rsp_kline_data->symbol_, symbol);
+        assign(p_rsp_kline_data->start_time_, start_time);
+        assign(p_rsp_kline_data->end_time_, end_time);
+        assign(p_rsp_kline_data->frequency_, frequency);
+
+        p_rsp_kline_data->kline_data_vec_.emplace_back(update_kline_data);
+
+        return package;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+    }
+    
+    return package;      
+}                                     
 
 PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadSafePtr res)
 {

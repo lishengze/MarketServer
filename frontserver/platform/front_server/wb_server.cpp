@@ -317,13 +317,17 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
 
             if (iter != wss_con_set_.end())
             {
-                (*iter)->clear_sub_symbol_list();
+                // (*iter)->clear_sub_symbol_list();
 
                 for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
                 {
                     string cur_symbol = *it;
                     
-                    (*iter)->add_sub_symbol(cur_symbol);                    
+                    // (*iter)->add_sub_symbol(cur_symbol);       
+
+                    PackagePtr package = GetReqRiskCtrledDepthDataPackage(cur_symbol, ID_MANAGER->get_id(), tmp_ws);
+
+                    front_server_->deliver_request(package);
                 }                
             }
         }
@@ -360,13 +364,13 @@ void WBServer::process_heartbeat(WebsocketClass* ws)
 
 void WBServer::broadcast_enhanced_data(string symbol, string data_str)
 {
-    for (auto& iter:wss_con_set_)
-    {        
-        if (iter->is_symbol_subed((symbol)))
-        {
-            iter->send(data_str);
-        }        
-    }
+    // for (auto& iter:wss_con_set_)
+    // {        
+    //     if (iter->is_symbol_subed((symbol)))
+    //     {
+    //         iter->send(data_str);
+    //     }        
+    // }
 }
 
 void WBServer::send_data(ID_TYPE id, string msg)

@@ -106,7 +106,7 @@ string RspRiskCtrledDepthDataToJsonStr(RspRiskCtrledDepthData& en_data, string t
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = en_data.depth_data_.asks[i].price.get_value();
         depth_level_atom[1] = en_data.depth_data_.asks[i].volume.get_value();
-        depth_level_atom[2] = en_data.ask_accumulated_volume_[i];
+        depth_level_atom[2] = en_data.ask_accumulated_volume_[i].get_value();
         asks_json[i] = depth_level_atom;
     }
     json_data["asks"] = asks_json;
@@ -117,7 +117,7 @@ string RspRiskCtrledDepthDataToJsonStr(RspRiskCtrledDepthData& en_data, string t
         nlohmann::json depth_level_atom;
         depth_level_atom[0] = en_data.depth_data_.bids[i].price.get_value();
         depth_level_atom[1] = en_data.depth_data_.bids[i].volume.get_value();
-        depth_level_atom[2] = en_data.bid_accumulated_volume_[i];
+        depth_level_atom[2] = en_data.bid_accumulated_volume_[i].get_value();
         bids_json[i] = depth_level_atom;
     }
     json_data["bids"] = bids_json;

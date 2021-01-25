@@ -141,6 +141,7 @@ struct KlineData
     static const long Fid = UT_FID_KlineData;    
 
     bool        clear_{false};
+    int         frequency_{60};
 };
 
 using KlineDataPtr = boost::shared_ptr<KlineData>;
