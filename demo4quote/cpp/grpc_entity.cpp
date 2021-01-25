@@ -2,6 +2,8 @@
 #include "grpc_entity.h"
 #include "quote_mixer2.h"
 
+#define ONE_ROUND_MESSAGE_NUMBRE 999
+
 template<class T>
 void copy_protobuf_object(const T* src, T* dst) {
     string tmp;
@@ -316,130 +318,60 @@ bool GetKlinesEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher):responder_(get_context())
+GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher)
+: responder_(get_context())
+, cacher_(cacher)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
-    cacher_ = cacher;
-    snap_cached_ = false;
 }
 
-void GetLastEntity::register_call(){
+void GetLastEntity::on_init()
+{
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1;
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60;
+    cacher_->fill_cache(cache_min1, cache_min60);
+    tfm::printfln("kline get last registered, init min1/%u min60/%u", cache_min1.size(), cache_min60.size());
+    for( const auto& v : cache_min1 ) {
+        for( const auto& v2 : v.second ) {
+            WrapperKlineData symbol_kline;
+            symbol_kline.exchange = v.first;
+            symbol_kline.symbol = v2.first;
+            symbol_kline.resolution = 60;
+            symbol_kline.klines = v2.second;
+            datas_.enqueue(symbol_kline);
+        }
+    }
+    for( const auto& v : cache_min60 ) {
+        for( const auto& v2 : v.second ) {
+            WrapperKlineData symbol_kline;
+            symbol_kline.exchange = v.first;
+            symbol_kline.symbol = v2.first;
+            symbol_kline.resolution = 3600;
+            symbol_kline.klines = v2.second;
+            datas_.enqueue(symbol_kline);
+        }
+    }
+}
+
+void GetLastEntity::add_data(const WrapperKlineData& data)
+{
+    datas_.enqueue(data);
+}
+
+void GetLastEntity::register_call()
+{
     std::cout << "register GetLastEntity" << std::endl;
     service_->RequestGetLast(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
-bool GetLastEntity::_fill_data(MultiGetKlinesResponse& reply)
-{
-    size_t limit_size = 10000, current_size = 0; // 单次最多发送这个数量
-
-    for( auto iter = cache_min1_.begin() ; iter != cache_min1_.end() ; ) 
-    {
-        const TExchange& exchange = iter->first;
-        for( auto iter2 = iter->second.begin() ; iter2 != iter->second.end() ; ) {
-            const TSymbol& symbol = iter2->first;
-            const vector<KlineData>& klines = iter2->second;
-
-            // 转换
-            GetKlinesResponse* resp = reply.add_data();
-            resp->set_exchange(exchange);
-            resp->set_symbol(symbol);
-            resp->set_resolution(60);
-            resp->set_num(klines.size());
-            for( size_t i = 0 ; i < klines.size() ; i ++ ) 
-            {
-                //cout << klines[i].index << endl;
-                kline_to_pbkline(klines[i], resp->add_klines());
-            }
-
-            // 累计总量
-            current_size += klines.size();
-            iter->second.erase(iter2++);
-
-            // 终止
-            if( current_size >= limit_size )
-                return true;
-        }
-
-        // 删除
-        if( iter->second.size() == 0 ) {
-            cache_min1_.erase(iter++);
-        } else {
-            iter++;
-        }
-
-        // 终止
-        if( current_size >= limit_size )
-            return true;
-    }
-
-    for( auto iter = cache_min60_.begin() ; iter != cache_min60_.end() ; ) 
-    {
-        const TExchange& exchange = iter->first;
-        for( auto iter2 = iter->second.begin() ; iter2 != iter->second.end() ; ) {
-            const TSymbol& symbol = iter2->first;
-            const vector<KlineData>& klines = iter2->second;
-
-            // 转换
-            GetKlinesResponse* resp = reply.add_data();
-            resp->set_exchange(exchange);
-            resp->set_symbol(symbol);
-            resp->set_resolution(3600);
-            resp->set_num(klines.size());
-            for( size_t i = 0 ; i < klines.size() ; i ++ ) 
-            {
-                kline_to_pbkline(klines[i], resp->add_klines());
-            }
-
-            // 累计总量
-            current_size += klines.size();
-            iter->second.erase(iter2++);
-
-            // 终止
-            if( current_size >= limit_size )
-                return true;
-        }
-
-        // 删除
-        if( iter->second.size() == 0 ) {
-            cache_min60_.erase(iter++);
-        } else {
-            iter++;
-        }
-
-        // 终止
-        if( current_size >= limit_size )
-            return true;
-    }
-
-    return current_size > 0;
-}
-
 bool GetLastEntity::process()
 {    
-    if( !_snap_sended() )
-    {
-        if( !snap_cached_ ){
-            cacher_->fill_cache(cache_min1_, cache_min60_);
-            tfm::printfln("kline get last registered, init min1/%u min60/%u", cache_min1_.size(), cache_min60_.size());
-            snap_cached_ = true;
-        } 
-
-        MultiGetKlinesResponse reply;
-        if( _fill_data(reply) ) {
-            responder_.Write(reply, this);      
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    if( datas_.size() == 0 )
-        return false;
-        
     MultiGetKlinesResponse reply;
-    for( const auto& v : datas_ )
-    {
+    
+    WrapperKlineData ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
+        const WrapperKlineData& v = ptrs[i];
         GetKlinesResponse* resp = reply.add_data();
         resp->set_exchange(v.exchange);
         resp->set_symbol(v.symbol);
@@ -450,15 +382,18 @@ bool GetLastEntity::process()
             kline_to_pbkline(v.klines[i], resp->add_klines());
         }
     }
-    datas_.clear();
 
-    inner_lock.unlock();
-    responder_.Write(reply, this);      
-    return true;
+    if( reply.data_size() > 0 ) {
+        responder_.Write(reply, this);      
+        return true;
+    } else {
+        return false;
+    }
 }
 
 //////////////////////////////////////////////////
-SubscribeTradeEntity::SubscribeTradeEntity(void* service):responder_(get_context())
+SubscribeTradeEntity::SubscribeTradeEntity(void* service)
+: responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
 }
@@ -472,15 +407,14 @@ void SubscribeTradeEntity::register_call()
 bool SubscribeTradeEntity::process()
 {    
     MultiTradeWithDecimal reply;
-    {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-        for( size_t i = 0 ; i < datas_.size() ; ++i ) {            
-            TradeWithDecimal* quote = reply.add_trades();
-            copy_protobuf_object((TradeWithDecimal*)datas_[i].get(), quote);
-        }
-        datas_.clear();
+    
+    TradePtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
+        TradeWithDecimal* quote = reply.add_trades();
+        copy_protobuf_object((TradeWithDecimal*)ptrs[i].get(), quote);
     }
+
     if( reply.trades_size() > 0 ) {
         responder_.Write(reply, this);      
         return true;
@@ -489,20 +423,23 @@ bool SubscribeTradeEntity::process()
     } 
 }
 
-void SubscribeTradeEntity::add_data(std::shared_ptr<TradeWithDecimal> data) 
+void SubscribeTradeEntity::add_data(TradePtr data) 
 {   
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    datas_.push_back(data);
+    datas_.enqueue(data);
+    //std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    //datas_.push_back(data);
 }
 
 //////////////////////////////////////////////////
-GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher):responder_(get_context())
+GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher)
+: responder_(get_context())
+, cacher_(cacher)
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
-    cacher_ = cacher;
 }
 
-void GetLastTradesEntity::register_call(){
+void GetLastTradesEntity::register_call()
+{
     std::cout << "register GetLastTradesEntity" << std::endl;
     service_->RequestGetLatestTrades(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
@@ -517,6 +454,7 @@ bool GetLastTradesEntity::process()
     {
         copy_protobuf_object(&trades[i], reply.add_trades());
     }
+
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);
     return true;

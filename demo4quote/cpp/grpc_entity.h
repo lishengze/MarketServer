@@ -1,6 +1,8 @@
 #pragma once
 
 #include "base/cpp/grpc_call.h"
+#include "base/cpp/concurrentqueue.h"
+#include "base/cpp/decimal.h"
 //#include "grpc_call.h"
 #include "stream_engine_define.h"
 #include "stream_engine.grpc.pb.h"
@@ -32,6 +34,8 @@ using quote::service::v1::GetLatestTradesResp;
 
 class IQuoteCacher;
 class IMixerCacher;
+
+using TradePtr = std::shared_ptr<TradeWithDecimal>;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -208,35 +212,35 @@ public:
 
     void register_call();
 
+    void on_init();
+
     bool process();
 
-    void add_data(const WrapperKlineData& data) {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        datas_.push_back(data);
-    }
+    void add_data(const WrapperKlineData& data);
 
     GetLastEntity* spawn() {
         return new GetLastEntity(service_, cacher_);
     }
 
 private:
-    bool _fill_data(MultiGetKlinesResponse& reply);
+    //bool _fill_data(MultiGetKlinesResponse& reply);
 
     GrpcStreamEngineService::AsyncService* service_;
     GetKlinesRequest request_;
     ServerAsyncWriter<MultiGetKlinesResponse> responder_;
-
-    // 
-    mutable std::mutex            mutex_datas_;
-    list<WrapperKlineData> datas_;
     
     IKlineCacher* cacher_ = nullptr;
+
+    // 
+    moodycamel::ConcurrentQueue<WrapperKlineData> datas_;
+    //mutable std::mutex            mutex_datas_;
+    //list<WrapperKlineData> datas_;
      
     // 首次发送的缓存
-    bool _snap_sended() const { return snap_cached_ && cache_min1_.size() == 0 && cache_min60_.size() == 0; }
-    bool snap_cached_;
-    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1_;
-    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60_;
+    //bool _snap_sended() const { return snap_cached_ && cache_min1_.size() == 0 && cache_min60_.size() == 0; }
+    //bool snap_cached_;
+    //unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1_;
+    //unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60_;
 };
 
 //////////////////////////////////////////////////
@@ -249,7 +253,7 @@ public:
 
     bool process();
 
-    void add_data(std::shared_ptr<TradeWithDecimal> data);
+    void add_data(TradePtr data);
 
     SubscribeTradeEntity* spawn() {
         return new SubscribeTradeEntity(service_);
@@ -260,8 +264,9 @@ private:
     ServerAsyncWriter<MultiTradeWithDecimal> responder_;
 
     // 
-    mutable std::mutex                 mutex_datas_;
-    vector<std::shared_ptr<void>> datas_;
+    moodycamel::ConcurrentQueue<TradePtr> datas_;
+    //mutable std::mutex                 mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };
 
 //////////////////////////////////////////////////////////////
@@ -283,7 +288,6 @@ private:
 
     GrpcStreamEngineService::AsyncService* service_;
     GetLatestTradesReq request_;
-    GetLatestTradesResp reply_;
     ServerAsyncResponseWriter<GetLatestTradesResp> responder_;
     
     IQuoteCacher* cacher_;    
