@@ -512,12 +512,12 @@ void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineData *
 
 void KlineProcess::update_kline_data(const KlineData* kline_data)
 {
-    cout << "KlineProcess::update_kline_data " << endl;
-
     string symbol = kline_data->symbol;
 
     if (updated_kline_data_.find(symbol) != updated_kline_data_.end())
     {
+        cout << "KlineProcess::update_kline_data " << symbol << endl;
+
         vector<KlineDataUpdatePtr>& vec = updated_kline_data_[symbol];
 
         // cout << "vec.size: " << vec.size() << endl;
@@ -546,7 +546,7 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
             if (kline_data->index - kline_update->last_update_time_ >= kline_update->req_kline_data_.frequency_)
             {
-                cout << "Current Update Time: " << get_sec_time_str(kline_data->index) << endl;
+                cout << "Kline Update Time: " << get_sec_time_str(kline_data->index) << endl;
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
                 
                 PackagePtr rsp_package = GetNewRspKLineDataPackage(&kline_update->req_kline_data_, cur_kline_data, ID_MANAGER->get_id());

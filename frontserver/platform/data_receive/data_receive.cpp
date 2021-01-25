@@ -386,7 +386,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             stream_obj  << "[Kine] Time Seq is Error , "<< symbol << " current time is " << get_sec_time_str(kline.index)
                         << ", last update time is " << get_sec_time_str(kline_symbol_last_time_[symbol]) << "\n";
 
-            LOG_ERROR(stream_obj.str());
+            // LOG_ERROR(stream_obj.str());
             continue;
         }
         else
@@ -399,7 +399,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         
-        LOG_INFO(stream_obj.str());
+        // LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 

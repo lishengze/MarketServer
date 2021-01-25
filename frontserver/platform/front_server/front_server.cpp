@@ -227,9 +227,11 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             if ((p_rsp_kline_data->comm_type == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->comm_type == COMM_TYPE::WEBSECKETS) 
             && p_rsp_kline_data->websocket_)
             {
-                wb_server_->send_data(p_rsp_kline_data->websocket_, kline_data_str);
+                if (!wb_server_->send_data(p_rsp_kline_data->websocket_, kline_data_str))
+                {
+                    
+                }
             }
-
         }
         else
         {

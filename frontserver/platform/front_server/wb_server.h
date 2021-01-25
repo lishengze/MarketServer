@@ -73,7 +73,7 @@ class WBServer
 
     void send_data(ID_TYPE id, string msg);
 
-    void send_data(WebsocketClassThreadSafePtr ws, string msg);
+    bool send_data(WebsocketClassThreadSafePtr ws, string msg);
 
     void heartbeat_run();
 

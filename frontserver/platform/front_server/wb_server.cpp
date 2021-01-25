@@ -374,7 +374,7 @@ void WBServer::send_data(ID_TYPE id, string msg)
 
 }
 
-void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
+bool WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 {
 
     auto iter = wss_con_set_.find(ws);
@@ -390,13 +390,14 @@ void WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
     if (iter != wss_con_set_.end())
     {
         // cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
-        (*iter)->send(msg);          
+        (*iter)->send(msg);     
+        return true;     
     }    
     else
     {
         LOG_ERROR("WBServer::send_data can't find ws");
-    }
-    
+        return false;
+    }    
 }
 
 void WBServer::clean_client(WebsocketClassThreadSafePtr ws)
