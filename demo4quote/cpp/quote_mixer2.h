@@ -72,7 +72,7 @@ class IQuoteCacher
 public:
     // 请求缓存中的K线
     virtual bool get_latetrades(vector<TradeWithDecimal>& trades) = 0;
-    virtual bool get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap) = 0;
+    virtual bool get_lastsnap(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps) = 0;
 };
 
 class QuoteCacher : public IQuoteCacher
@@ -92,7 +92,7 @@ public:
 
     bool get_latetrades(vector<TradeWithDecimal>& trades);
 
-    bool get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap);
+    bool get_lastsnap(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
 private:
     set<IMixerQuotePusher*> callbacks_;
 

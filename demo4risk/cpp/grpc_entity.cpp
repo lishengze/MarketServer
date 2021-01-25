@@ -196,12 +196,14 @@ void MarketStream4ClientEntity::on_init()
 bool MarketStream4ClientEntity::process()
 {
     MultiMarketStreamDataWithDecimal reply;
+    type_tick now = get_miliseconds();
 
     StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
     for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
         copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+        quote->set_time_produced_by_riskcontrol(now);
     }
     
     if( reply.quotes_size() > 0 ) {

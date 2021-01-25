@@ -50,31 +50,6 @@ inline void set_decimal(Decimal* dst, const Decimal& src)
     dst->set_prec(src.prec());
 }
 
-struct SnapAndUpdate{
-    std::shared_ptr<void> snap;
-    std::shared_ptr<void> update;
-};
-
-class GrpcDemoEntity : public BaseGrpcEntity
-{
-public:
-    GrpcDemoEntity(void* service);
-
-    void register_call();
-
-    bool process();
-
-    GrpcDemoEntity* spawn() {
-        return new GrpcDemoEntity(service_);
-    }
-private:
-    GrpcStreamEngineService::AsyncService* service_;
-    DemoReq request_;
-    ServerAsyncWriter<DemoResp> responder_;
-    
-    int times_;
-};
-
 //////////////////////////////////////////////////
 class SubscribeSingleQuoteEntity : public BaseGrpcEntity
 {
@@ -93,6 +68,9 @@ public:
         return new SubscribeSingleQuoteEntity(service_, cacher_);
     }
 private:
+
+    bool _is_filtered(const TExchange& exchange, const TSymbol& symbol);
+
     GrpcStreamEngineService::AsyncService* service_;
     SubscribeQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
@@ -135,45 +113,7 @@ private:
     //vector<std::shared_ptr<void>> datas_;
 };
 
-//////////////////////////////////////////////////
-class SetParamsEntity : public BaseGrpcEntity
-{
-public:
-    SetParamsEntity(void* service);
-
-    void register_call();
-
-    bool process();
-
-    SetParamsEntity* spawn() {
-        return new SetParamsEntity(service_);
-    }
-private:
-    GrpcStreamEngineService::AsyncService* service_;
-    SetParamsReq request_;
-    SetParamsResp reply_;
-    ServerAsyncResponseWriter<SetParamsResp> responder_;
-};
-
-//////////////////////////////////////////////////
-class GetParamsEntity : public BaseGrpcEntity
-{
-public:
-    GetParamsEntity(void* service);
-
-    void register_call();
-
-    bool process();
-
-    GetParamsEntity* spawn() {
-        return new GetParamsEntity(service_);
-    }
-private:
-    GrpcStreamEngineService::AsyncService* service_;
-    GetParamsReq request_;
-    ServerAsyncResponseWriter<GetParamsResp> responder_;
-};
-
+//////////////////////////////////////////////////////
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:

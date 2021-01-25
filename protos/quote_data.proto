@@ -31,6 +31,12 @@ message MarketStreamDataWithDecimal {
     int32 price_precise = 8;
     // 成交量精度
     int32 volume_precise = 9;
+    // 行情时间（streamengine收到）
+    int64 time_arrive = 10;
+    // 行情时间（从streamengine发出）
+    int64 time_produced_by_streamengine = 11;
+    // 行情时间（从riskcontrol发出）
+    int64 time_produced_by_riskcontrol = 12;
 }
 
 message DepthWithDecimal {

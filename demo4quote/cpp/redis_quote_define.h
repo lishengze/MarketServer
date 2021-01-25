@@ -15,8 +15,9 @@ struct SDepthQuote {
     string exchange;        // 交易所
     string symbol;          // 代码
     type_seqno sequence_no; // 序号
-    type_tick arrive_time;  // api行情时间
-    type_tick server_time;  // 服务器行情时间
+    type_tick origin_time;  // 交易所时间
+    type_tick arrive_time;  // 服务器收到时间
+    type_tick server_time;  // 服务器处理完成时间
     uint32 price_precise;   // 价格精度（来自配置中心）
     uint32 volume_precise;  // 成交量精度（来自配置中心）
     map<SDecimal, SDepth> asks; // 买盘

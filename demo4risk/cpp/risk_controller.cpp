@@ -10,6 +10,10 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     dst.symbol = src.symbol();
     dst.precise = src.price_precise();
     dst.vprecise = src.volume_precise();
+    dst.time_origin = src.time();
+    dst.time_arrive_at_streamengine = src.time_arrive();
+    dst.time_produced_by_streamengine = src.time_produced_by_streamengine();
+    dst.time_arrive = get_miliseconds();
     
     //vassign(dst.seq_no, src.msg_seq());
     // 卖盘

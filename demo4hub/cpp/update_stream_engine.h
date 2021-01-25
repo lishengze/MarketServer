@@ -26,7 +26,7 @@ using grpc::ClientWriter;
 using grpc::Status;
 using quote::service::v1::StreamEngine;
 using quote::service::v1::SubscribeTradeReq;
-using quote::service::v1::SubscribeMixQuoteReq;
+using quote::service::v1::SubscribeQuoteReq;
 using SETrade = quote::service::v1::TradeWithDecimal;
 using quote::service::v1::MultiTradeWithDecimal;
 using quote::service::v1::GetLatestTradesReq;
@@ -58,6 +58,7 @@ inline void RequestLastTrades(const string& addr, vector<SETrade>& trades)
     }
 }
 
+// 从StreamEngine订阅成交数据
 class TradeUpdater 
 {
 public:
@@ -128,7 +129,7 @@ private:
     std::thread*               thread_loop_ = nullptr;
 };
 
-
+// 从StreamEngine订阅行情数据
 class DepthUpdater 
 {
 public:
@@ -143,11 +144,11 @@ private:
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
         std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
 
-        SubscribeMixQuoteReq req;
+        SubscribeQuoteReq req;
         SEMultiData multiQuote;
         ClientContext context;
 
-        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeMixQuote(&context, req));
+        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeQuote(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
                 std::cout << "[DepthUpdater] status is GRPC_CHANNEL_IDLE" << endl;
@@ -181,9 +182,9 @@ private:
         }
         Status status = reader->Finish();
         if (status.ok()) {
-            std::cout << "SubscribeMixQuote rpc succeeded." << std::endl;
+            std::cout << "SubscribeQuote rpc succeeded." << std::endl;
         } else {
-            std::cout << "SubscribeMixQuote rpc failed." << std::endl;
+            std::cout << "SubscribeQuote rpc failed." << std::endl;
         }
     }
 

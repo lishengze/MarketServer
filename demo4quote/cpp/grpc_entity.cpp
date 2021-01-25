@@ -61,24 +61,6 @@ void kline_to_pbkline(const KlineData& src, Kline* dst)
     set_decimal(dst->mutable_volume(), src.volume);
 }
 
-GrpcDemoEntity::GrpcDemoEntity(void* service):responder_(get_context())
-{
-    service_ = (GrpcStreamEngineService::AsyncService*)service;
-}
-
-void GrpcDemoEntity::register_call(){
-    std::cout << "register GrpcDemoEntity" << std::endl;
-    service_->RequestDemo(&ctx_, &request_, &responder_, cq_, cq_, this);
-}
-
-bool GrpcDemoEntity::process(){
-    times_ ++;
-    DemoResp reply;
-    reply.set_resp(times_);
-    responder_.Write(reply, this);      
-    return true;
-}
-
 //////////////////////////////////////////////////
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
@@ -95,10 +77,14 @@ void SubscribeSingleQuoteEntity::register_call()
 
 void SubscribeSingleQuoteEntity::on_init() 
 {
-    std::shared_ptr<MarketStreamDataWithDecimal> snap;
-    if( cacher_->get_lastsnap(request_.exchange(), request_.symbol(), snap) )
+    vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
+    if( cacher_->get_lastsnap(snaps) )
     {            
-        datas_.enqueue(snap);
+        for( const auto& v : snaps ) {
+            if( _is_filtered(v->exchange(), v->symbol()) )
+                continue;
+            datas_.enqueue(v);
+        }
     }
 }
 
@@ -163,12 +149,14 @@ void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 bool SubscribeSingleQuoteEntity::process()
 {
     MultiMarketStreamDataWithDecimal reply;
+    type_tick now = get_miliseconds();
 
     StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
     for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
         copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+        quote->set_time_produced_by_streamengine(now);
     }    
 
     if( reply.quotes_size() > 0 ) {
@@ -179,12 +167,21 @@ bool SubscribeSingleQuoteEntity::process()
     } 
 }
 
+bool SubscribeSingleQuoteEntity::_is_filtered(const TExchange& exchange, const TSymbol& symbol)
+{
+    if( string(request_.exchange()) != "" && string(request_.exchange()) != exchange ) {
+        return true;
+    }
+    if( string(request_.symbol()) != "" && string(request_.symbol()) != symbol ) {
+        return true;
+    }
+    return false;
+}
+
 void SubscribeSingleQuoteEntity::add_data(StreamDataPtr data) 
 {
-    if( string(request_.symbol()) != string(data->symbol()) || string(request_.exchange()) != string(data->exchange()) ) {
-        //cout << "filter:" << request_.symbol() << ":" << string(pdata->symbol()) << "," << string(request_.exchange()) << ":" << exchange << endl;
+    if( _is_filtered(data->exchange(), data->symbol()) )
         return;
-    }
 
     datas_.enqueue(data);
 }
@@ -217,12 +214,14 @@ void SubscribeMixQuoteEntity::on_init()
 bool SubscribeMixQuoteEntity::process()
 {    
     MultiMarketStreamDataWithDecimal reply;
+    type_tick now = get_miliseconds();
 
     StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
     for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
         copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+        quote->set_time_produced_by_streamengine(now);
     }    
 
     // 执行发送
@@ -237,49 +236,6 @@ bool SubscribeMixQuoteEntity::process()
 void SubscribeMixQuoteEntity::add_data(StreamDataPtr data) 
 {
     datas_.enqueue(data);
-}
-
-//////////////////////////////////////////////////
-SetParamsEntity::SetParamsEntity(void* service)
-: responder_(get_context())
-{
-    service_ = (GrpcStreamEngineService::AsyncService*)service;
-}
-
-void SetParamsEntity::register_call()
-{
-    std::cout << "register SetParamsEntity" << std::endl;
-    service_->RequestSetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
-}
-
-bool SetParamsEntity::process()
-{    
-    status_ = FINISH;
-    responder_.Finish(reply_, Status::OK, this);
-    return true;
-}
-
-
-//////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service)
-: responder_(get_context())
-{
-    service_ = (GrpcStreamEngineService::AsyncService*)service;
-}
-
-void GetParamsEntity::register_call()
-{
-    std::cout << "register GetParamsEntity" << std::endl;
-    service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
-}
-
-bool GetParamsEntity::process(){    
-    GetParamsResp reply;
-    reply.set_json_data(CONFIG->get_config());
-    
-    status_ = FINISH;
-    responder_.Finish(reply, Status::OK, this);
-    return true;
 }
 
 //////////////////////////////////////////////////

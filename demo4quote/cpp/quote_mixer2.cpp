@@ -11,14 +11,17 @@ void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Tr
     set_decimal(dst->mutable_volume(), src.volume);
 }
 
-bool QuoteCacher::get_lastsnap(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal>& snap)
+bool QuoteCacher::get_lastsnap(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps)
 {
-    SDepthQuote quote;
-    {
-        std::unique_lock<std::mutex> l{ mutex_quotes_ };
-        quote = singles_[symbol][exchange];
+    std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    for( const auto& v : singles_ ) {
+        const TSymbol& symbol = v.first;
+        for( const auto& v2 : v.second ) {
+            const TExchange& exchange = v2.first;
+            std::shared_ptr<MarketStreamDataWithDecimal> snap = depth_to_pbquote2(exchange, symbol, v2.second, true);
+            snaps.push_back(snap);
+        }
     }
-    snap = depth_to_pbquote2(exchange, symbol, quote, true);
     return true;
 }
 
@@ -198,8 +201,6 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     SDepthQuote output;
     output.exchange = exchange;
     output.symbol = symbol;
-    output.arrive_time = quote.arrive_time;
-    output.server_time = get_miliseconds();
     output.sequence_no = quote.sequence_no;
     output.price_precise = config.precise;
     output.volume_precise = config.vprecise;
@@ -228,12 +229,13 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     for( const auto& v : callbacks_) 
     {
         v->publish_mix(symbol, pub_snap);
+        v->publish_single("", symbol, pub_snap);
     }
 }
 
 void QuoteMixer2::_inner_process(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SMixQuote* ptr)
 {
-    ptr->server_time = quote.server_time;
+    ptr->server_time = get_miliseconds();
     ptr->price_precise = quote.price_precise;
     ptr->volume_precise = quote.volume_precise;
     

@@ -53,11 +53,8 @@ private:
 
     std::thread* thread_loop_ = nullptr;
 
-    GrpcCall<GrpcDemoEntity>* caller_demo_;
     GrpcCall<SubscribeSingleQuoteEntity>* caller_subscribe_single_;
     GrpcCall<SubscribeMixQuoteEntity>* caller_subscribe_mix_;
-    GrpcCall<SetParamsEntity>* caller_setparams_;
-    GrpcCall<GetParamsEntity>* caller_getparams_;
     GrpcCall<GetKlinesEntity>* caller_getklines_;
     GrpcCall<GetLastEntity>* caller_getlast_;
     GrpcCall<SubscribeTradeEntity>* caller_subscribe_trade_;

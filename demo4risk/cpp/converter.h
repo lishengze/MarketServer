@@ -9,7 +9,7 @@ inline void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd, 
     msd->set_is_snap(true);
     msd->set_price_precise(quote.precise);
     msd->set_volume_precise(quote.vprecise);
-    //msd->set_time(quote.time);
+    msd->set_time(quote.time_origin);
     //msd->set_time_arrive(quote.time_arrive);
     //char sequence[256];
     //sprintf(sequence, "%lld", quote.seq_no);
@@ -45,6 +45,9 @@ inline void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDec
     msd->set_is_snap(true);
     msd->set_price_precise(quote.precise);
     msd->set_volume_precise(quote.vprecise);
+    msd->set_time(quote.time_origin);
+    msd->set_time_arrive(quote.time_arrive_at_streamengine);
+    msd->set_time_produced_by_streamengine(quote.time_produced_by_streamengine);
     //msd->set_time(quote.time);
     //msd->set_time_arrive(quote.time_arrive);
     //char sequence[256];

@@ -39,8 +39,10 @@ struct SInnerDepth {
 
 struct SInnerQuote {
     string symbol;
-    type_tick time;
-    type_tick time_arrive;
+    type_tick time_origin;      // 交易所原始时间
+    type_tick time_arrive_at_streamengine;   // se收到的时间
+    type_tick time_produced_by_streamengine;    // se处理完发送的时间
+    type_tick time_arrive;  // rc收到的时间
     type_seqno seq_no;
     uint32 precise;
     uint32 vprecise;
@@ -48,11 +50,10 @@ struct SInnerQuote {
     map<SDecimal, SInnerDepth> bids;
 
     SInnerQuote() {
-        time = 0;
-        time_arrive = 0;
         seq_no = 0;
         precise = 0;
         vprecise = 0;
+        time_origin = time_arrive_at_streamengine = time_produced_by_streamengine = time_arrive = 0;
     }
 
     void get_asks(vector<pair<SDecimal, SInnerDepth>>& depths) const {
