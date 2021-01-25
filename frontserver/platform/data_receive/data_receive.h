@@ -40,7 +40,7 @@ public:
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines);
 
     // 原始深度数据推送
-    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth);
+    // virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth);
 
     // 成交
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) { return 0; }
