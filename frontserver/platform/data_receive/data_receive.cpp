@@ -369,6 +369,10 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         return;
     }
 
+    std::stringstream stream_obj;
+    stream_obj  << "[Kline] handle_kline_data " << c_symbol << " " << klines.size();
+    LOG_DEBUG(stream_obj.str());
+
     string symbol = string(c_symbol);
     
     for( int i = 0 ; i < klines.size() ; i ++ )
