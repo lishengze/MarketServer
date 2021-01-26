@@ -103,36 +103,20 @@ bool valida_kline(const KlineData& kline) {
 
 bool RedisKlineHelper::on_get_message(const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines)
 {
-    bool is_first_time = !first_package_[symbol][exchange];
-    if( is_first_time )
-    {
-        for (auto iter = body.begin(); iter != body.end(); ++iter) 
-        {
-            KlineData kline;
-            redisquote_to_kline(*iter, kline, config);
-            _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
-                kline.index,
-                kline.px_open.get_str_value(),
-                kline.px_high.get_str_value(),
-                kline.px_low.get_str_value(),
-                kline.px_close.get_str_value(),
-                kline.volume.get_str_value()
-                );
-
-            if( !valida_kline(kline) ) {
-                _log_and_print("[kline min1] get abnormal kline %s", iter->dump());
-                continue;
-            }
-
-            klines.push_back(kline);
-        }
-        first_package_[symbol][exchange] = true;
-    }
-    else
+    type_tick last_index = first_package_[symbol][exchange];
+    for (auto iter = body.begin(); iter != body.end(); ++iter) 
     {
         KlineData kline;
-        redisquote_to_kline(body.back(), kline, config);
-        _log_and_print("[%s.%s] get kline1 index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, 
+        redisquote_to_kline(*iter, kline, config);
+        if( !valida_kline(kline) ) {
+            _log_and_print("[kline min%u] get abnormal kline %s", resolution_, iter->dump());
+            continue;
+        }
+        if( kline.index < last_index ) {
+            continue;
+        }
+
+        _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, resolution_,
             kline.index,
             kline.px_open.get_str_value(),
             kline.px_high.get_str_value(),
@@ -140,14 +124,13 @@ bool RedisKlineHelper::on_get_message(const njson& body, const TExchange& exchan
             kline.px_close.get_str_value(),
             kline.volume.get_str_value()
             );
-
-        if( valida_kline(kline) ) {
-            klines.push_back(kline);
-        } else {
-            _log_and_print("[kline min1] get abnormal kline %s", body.back().dump());
-        }
+        klines.push_back(kline);
     }
-    return is_first_time;
+
+    if( klines.size() > 0 )
+        first_package_[symbol][exchange] = klines.back().index;
+
+    return last_index == 0;
 }
 
 RedisQuote::RedisQuote()

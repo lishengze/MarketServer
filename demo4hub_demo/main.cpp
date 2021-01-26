@@ -58,7 +58,8 @@ public:
     { 
         for( int i = 0 ; i < klines.size() ; i ++ )
         {
-            tfm::printfln("[kline] %s.%s index=%s open=%s", exchange, symbol, utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].px_open.get_str_value());
+            tfm::printfln("[kline] %s.%s index=%s open=%s", exchange, symbol, utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), 
+                klines[i].px_open.get_str_value());
                 
             // 检查K线是否有倒着走            
             if( resolution == 60 ) 
