@@ -36,7 +36,7 @@ void KlineProcess::request_kline_package(PackagePtr package)
         {
             if(pReqKlineData -> is_canacel_request_)
             {
-                delete_kline_request_connect(pReqKlineData);
+                delete_kline_request_connect(pReqKlineData->symbol_, pReqKlineData->socket_id_);
             }
             else
             {
@@ -77,13 +77,11 @@ void KlineProcess::request_kline_package(PackagePtr package)
     }
 }
 
-bool KlineProcess::delete_kline_request_connect(ReqKLineData* pReqKlineData)
+bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id)
 {
     try
     {
-        string symbol = pReqKlineData->symbol_;
-        int frequency = pReqKlineData->frequency_;
-
+        cout << "KlineProcess::delete_kline_request_connect " << symbol << " " << socket_id << endl;
         std::lock_guard<std::mutex> lk(updated_kline_data_mutex_);
         if (updated_kline_data_.find(symbol) != updated_kline_data_.end())
         {
@@ -98,16 +96,16 @@ bool KlineProcess::delete_kline_request_connect(ReqKLineData* pReqKlineData)
             int pos = 0;
             for (; pos < kline_updater.size(); ++pos)
             {
-                if (kline_updater[pos].websocket_ == pReqKlineData->websocket_->get_ws())break;
+                if (kline_updater[pos].reqkline_data.socket_id_ == socket_id) break;
             }
 
             if (pos != kline_updater.size())
             {
                 std::stringstream stream_obj;
                 stream_obj << "[Kline Update]: Erase Websocket " 
-                        << kline_updater[pos].symbol_ << " " 
-                        << kline_updater[pos].frequency_ << " "
-                        << kline_updater[pos].websocket_ << "\n";
+                        << kline_updater[pos].reqkline_data.symbol_ << " " 
+                        << kline_updater[pos].reqkline_data.frequency_ << " "
+                        << kline_updater[pos].reqkline_data.socket_id_ << "\n";
                 LOG_DEBUG(stream_obj.str());    
 
                 while (pos < kline_updater.size()-1)
@@ -425,7 +423,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
                 string err_msg = s_obj.str();
                 int err_id = 1;
-                rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->http_response_, pReqKlineData->websocket_);
+                rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->socket_id_, pReqKlineData->socket_type_);
             }
             
             return rsp_package;                       
@@ -615,36 +613,52 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
         for (auto& kline_update:updated_kline_data_[symbol])
         {                        
-            if ( kline_update.kline_data_.symbol == NULL)
+            if (!kline_update.kline_data_)
             {
-                kline_update.kline_data_.reset(*kline_data);
+                kline_update.kline_data_ = boost::make_shared<KlineData>(*kline_data);
             }
 
-            KlineData& last_kline = kline_update.kline_data_;
+            KlineDataPtr& last_kline = kline_update.kline_data_;
 
-            if (last_kline.is_clear())
+            if (last_kline->is_clear())
             {
-                last_kline.reset(*kline_data);
+                last_kline->reset(*kline_data);
+
+                cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
+                <<"close: " << last_kline->px_close.get_value() << " "
+                <<"high: " << last_kline->px_high.get_value() << " "
+                <<"low: " << last_kline->px_low.get_value() << " "                
+                << " ****"<< endl;
             }
             else
             {
-                last_kline.px_close = kline_data->px_close;
-                last_kline.px_low = last_kline.px_low > kline_data->px_low ? kline_data->px_low: last_kline.px_low;
-                last_kline.px_high = last_kline.px_high < kline_data->px_high ? kline_data->px_high: last_kline.px_high;
-                last_kline.index = kline_data->index;
-                assign(last_kline.symbol, kline_data->symbol);                
+                last_kline->px_close = kline_data->px_close;
+                last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
+                last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
+                last_kline->index = kline_data->index;
+                assign(last_kline->symbol, kline_data->symbol);                
             }
 
-            if (kline_data->index - kline_update.last_update_time_ >= kline_update.frequency_)
+            if (kline_data->index - kline_update.last_update_time_ >= kline_update.reqkline_data.frequency_)
             {
-                cout << "Kline Update Time: " << get_sec_time_str(kline_data->index) << endl;
-                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(last_kline);
+                cout << "\n**** Kline Update Time: " << get_sec_time_str(kline_data->index) 
+                <<"open: " << kline_data->px_open.get_value() << " " 
+                <<"close: " << kline_data->px_close.get_value() << " "
+                <<"high: " << kline_data->px_high.get_value() << " "
+                <<"low: " << kline_data->px_low.get_value() << " "                
+                << " ****"<< endl;
 
-                WebsocketClassThreadSafePtr ws = boost::make_shared<WebsocketClassThreadSafe>(kline_update.websocket_);
+                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+
+                cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
+                <<"close: " << last_kline->px_close.get_value() << " "
+                <<"high: " << last_kline->px_high.get_value() << " "
+                <<"low: " << last_kline->px_low.get_value() << " "                
+                << " ****"<< endl;     
+
+                cout << endl;           
                 
-                PackagePtr rsp_package = GetNewRspKLineDataPackage(string(kline_update.symbol_), kline_update.start_time_, kline_update.end_time_, 
-                                                                    kline_update.data_count_,  kline_update.frequency_, ws,
-                                                                    cur_kline_data, ID_MANAGER->get_id());
+                PackagePtr rsp_package = GetNewRspKLineDataPackage(&(kline_update.reqkline_data), cur_kline_data, ID_MANAGER->get_id());
 
                 if (rsp_package)
                 {
@@ -655,7 +669,7 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
                 kline_update.last_update_time_ = kline_data->index;
 
-                last_kline.clear();
+                last_kline->clear();
             }
         }
     }
@@ -663,8 +677,11 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
 void KlineProcess::check_websocket_subinfo(ReqKLineData* pReqKlineData)
 {
-    if (wss_con_map_.find(pReqKlineData->websocket_) != wss_con_map_.end())
+    cout << "KlineProcess::check_websocket_subinfo " << pReqKlineData->symbol_ <<" " << pReqKlineData->socket_id_ << endl;
+    std::lock_guard<std::mutex> lk(wss_con_map_mutex_);
+    if (wss_con_map_.find(pReqKlineData->socket_id_) != wss_con_map_.end())
     {
-        delete_kline_request_connect(pReqKlineData);
+        delete_kline_request_connect(wss_con_map_[pReqKlineData->socket_id_], pReqKlineData->socket_id_);
     }
+    wss_con_map_[pReqKlineData->socket_id_] = pReqKlineData->symbol_;
 }

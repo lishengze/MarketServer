@@ -29,8 +29,6 @@ public:
 
     void request_all_symbol();
 
-    void request_depth_data(const ReqRiskCtrledDepthData& req_depth);
-
     void process_rtn_depth_package(PackagePtr package);
 
     void response_sdepth_package(PackagePtr package);
@@ -41,18 +39,15 @@ public:
 
     void response_errmsg_package(PackagePtr package);
 
-    void process_symbols_package(PackagePtr package);
+    void response_symbol_list_package(PackagePtr package);
 
-    void process_enhanceddata_package(PackagePtr package);
+    void response_depth_data_package(PackagePtr package);
 
     std::set<std::string>& get_symbols() { return symbols_;}
 
     string get_symbols_str();
 
     string get_heartbeat_str();
-
-    void handle_request_depth_data(const ReqRiskCtrledDepthData* req_depth);
-
 private:
     WBServerPtr         wb_server_;    
 

@@ -57,21 +57,26 @@ class WBServer
 
     void broadcast(string msg);
 
-    void store_ws(WebsocketClass * ws);
 
     void broadcast_enhanced_data(string symbol, string data_str);
     
+    void process_on_open(WebsocketClass * ws);
+
     void process_on_message(string ori_msg, WebsocketClass * ws);
     
-    void process_sub_info(string ori_msg, WebsocketClass * ws);
+    void process_depth_req(string ori_msg, ID_TYPE socket_id);
 
-    void process_kline_data(string ori_msg, WebsocketClass* ws);
+    void process_kline_req(string ori_msg, ID_TYPE socket_id);
 
-    void process_heartbeat(WebsocketClass* ws);
+    void process_heartbeat(ID_TYPE socket_id);
 
-    void clean_client(WebsocketClassThreadSafePtr ws);
+    WebsocketClassThreadSafePtr store_ws(WebsocketClass * ws);
 
-    void send_data(ID_TYPE id, string msg);
+    bool check_ws(WebsocketClass * ws);
+
+    void clean_ws(WebsocketClass* ws);
+
+    bool send_data(ID_TYPE socket_id, string msg);
 
     bool send_data(WebsocketClassThreadSafePtr ws, string msg);
 
@@ -94,8 +99,8 @@ class WBServer
 
         int                                     server_port_{9002};
 
-        std::set<WebsocketClassThreadSafePtr, 
-              LessWebsocketClassThreadSafePtr>  wss_con_set_;
+        std::map<ID_TYPE, WebsocketClassThreadSafePtr> wss_con_map_;
+
         std::mutex                              wss_con_set_mutex_;
  
         boost::shared_ptr<std::thread>          listen_thread_;

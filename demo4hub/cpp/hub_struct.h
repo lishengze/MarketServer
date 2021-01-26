@@ -129,8 +129,8 @@ struct KlineData
 
     bool is_clear() {return clear_;}    
                     
-    symbol_type symbol;
-    symbol_type exchange;
+    symbol_type symbol{NULL};
+    symbol_type exchange{NULL};
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

@@ -46,6 +46,7 @@ FORWARD_DECLARE_PTR(HttpResponseThreadSafe);
 
 struct WSData
 {
+    ID_TYPE                id_{0};
     bool                   is_alive{false};
     // std::set<symbol_type>  sub_symbol_set;
 };
@@ -54,7 +55,7 @@ class WebsocketClassThreadSafe
 {
     public:
 
-    WebsocketClassThreadSafe(WebsocketClass* ws)
+    WebsocketClassThreadSafe(WebsocketClass* ws, ID_TYPE id): id_{id}
     {
         ws_ = ws;
     }
@@ -93,6 +94,12 @@ class WebsocketClassThreadSafe
         user_data_.is_alive = value;
     }
 
+    ID_TYPE get_id()
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        return id_;
+    }
+
     // void clear_sub_symbol_list()
     // {
     //     std::lock_guard<std::mutex> lk(mutex_);
@@ -126,6 +133,7 @@ class WebsocketClassThreadSafe
         WSData                 user_data_;
         WebsocketClass*        ws_{nullptr};
         std::mutex             mutex_;
+        ID_TYPE                id_;
 };
 
 FORWARD_DECLARE_PTR(WebsocketClassThreadSafe);
@@ -139,71 +147,84 @@ public:
     }
 };
 
+// struct SocketCom
+// {
+//     SocketCom(HttpResponse* res):socket_type{COMM_TYPE::HTTP}
+//     {
+//         http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
+//     }
+
+//     SocketCom(HttpResponseThreadSafePtr res):socket_type{COMM_TYPE::HTTP}
+//     {
+//         http_response_ = res;
+//     }    
+
+//     SocketCom(WebsocketClass* ws):socket_type{COMM_TYPE::WEBSOCKET}
+//     {
+//         websocket_ = boost::make_shared<WebsocketClassThreadSafe>(wsd);
+//     }
+
+//     SocketCom(WebsocketClassThreadSafePtr ws):socket_type{COMM_TYPE::WEBSOCKET}
+//     {
+//         websocket_ = ws;
+//     }    
+
+//     SocketCom(HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
+//     {
+//         if (ws)
+//         {
+//             // cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+//             websocket_ = boost::make_shared<WebsocketClassThreadSafe>(ws);
+//             socket_type = COMM_TYPE::WEBSOCKET;
+//         }
+
+//         if (res)
+//         {
+//             // cout << "IS COMM_TYPE::HTTP" << endl;
+//             http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
+//             socket_type = COMM_TYPE::HTTP;
+//         }
+//     }
+
+//     SocketCom(HttpResponseThreadSafePtr res=nullptr, WebsocketClassThreadSafePtr ws=nullptr)
+//     {
+//         if (ws)
+//         {
+//             cout << "IS COMM_TYPE::WEBSOCKET" << endl;
+//             websocket_ = ws;
+//             socket_type = COMM_TYPE::WEBSOCKET;
+//         }
+
+//         if (res)
+//         {
+//             cout << "IS COMM_TYPE::HTTP" << endl;
+//             http_response_ = res;
+//             socket_type = COMM_TYPE::HTTP;
+//         }
+//     }    
+
+//     virtual ~SocketCom()
+//     {
+//         cout << "~SocketCom() " << endl;
+//     }
+
+//     COMM_TYPE                       socket_type = COMM_TYPE::HTTP;
+//     HttpResponseThreadSafePtr       http_response_{nullptr};
+//     WebsocketClassThreadSafePtr     websocket_{nullptr};
+// };
+
 struct Socket
 {
-    Socket(HttpResponse* res):comm_type{COMM_TYPE::HTTP}
+    Socket() {}
+    Socket(ID_TYPE id, COMM_TYPE type):socket_type_{type}, socket_id_{id}
     {
-        http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
+
     }
 
-    Socket(HttpResponseThreadSafePtr res):comm_type{COMM_TYPE::HTTP}
-    {
-        http_response_ = res;
-    }    
-
-    Socket(WebsocketClass* ws):comm_type{COMM_TYPE::WEBSOCKET}
-    {
-        websocket_ = boost::make_shared<WebsocketClassThreadSafe>(ws);
-    }
-
-    Socket(WebsocketClassThreadSafePtr ws):comm_type{COMM_TYPE::WEBSOCKET}
-    {
-        websocket_ = ws;
-    }    
-
-    Socket(HttpResponse* res=nullptr, WebsocketClass* ws=nullptr)
-    {
-        if (ws)
-        {
-            // cout << "IS COMM_TYPE::WEBSOCKET" << endl;
-            websocket_ = boost::make_shared<WebsocketClassThreadSafe>(ws);
-            comm_type = COMM_TYPE::WEBSOCKET;
-        }
-
-        if (res)
-        {
-            // cout << "IS COMM_TYPE::HTTP" << endl;
-            http_response_ = boost::make_shared<HttpResponseThreadSafe>(res);
-            comm_type = COMM_TYPE::HTTP;
-        }
-    }
-
-    Socket(HttpResponseThreadSafePtr res=nullptr, WebsocketClassThreadSafePtr ws=nullptr)
-    {
-        if (ws)
-        {
-            cout << "IS COMM_TYPE::WEBSOCKET" << endl;
-            websocket_ = ws;
-            comm_type = COMM_TYPE::WEBSOCKET;
-        }
-
-        if (res)
-        {
-            cout << "IS COMM_TYPE::HTTP" << endl;
-            http_response_ = res;
-            comm_type = COMM_TYPE::HTTP;
-        }
-    }    
-
-    virtual ~Socket()
-    {
-        cout << "~Socket() " << endl;
-    }
-
-    COMM_TYPE                       comm_type = COMM_TYPE::HTTP;
-    HttpResponseThreadSafePtr       http_response_{nullptr};
-    WebsocketClassThreadSafePtr     websocket_{nullptr};
+    COMM_TYPE                       socket_type_ = COMM_TYPE::HTTP;
+    ID_TYPE                         socket_id_;
 };
+
 
 struct AtomKlineData
 {

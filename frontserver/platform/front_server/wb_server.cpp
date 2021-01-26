@@ -72,14 +72,14 @@ void WBServer::init_websocket_server()
 
 void WBServer::on_open(WebsocketClass * ws)
 {
-    cout << "\nWBServer::on_open ws: " << ws << endl;
-    store_ws(ws);
 
-    string symbols_str = front_server_->get_symbols_str();
+    process_on_open(ws);
+
+    // string symbols_str = front_server_->get_symbols_str();
 
     // cout << "all symbols str: " << symbols_str << endl;
 
-    ws->send(symbols_str, uWS::OpCode::TEXT);
+    // ws->send(symbols_str, uWS::OpCode::TEXT);
 }
 
 // 处理各种请求
@@ -104,8 +104,7 @@ void WBServer::on_close(WebsocketClass * ws)
 {
     cout << "one connection closed " << endl;
 
-    WebsocketClassThreadSafePtr thread_safe_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
-    clean_client(thread_safe_ws);
+    clean_ws(ws);
 }
 
 void WBServer::listen()
@@ -136,72 +135,140 @@ void WBServer::release()
 
 }
 
-void WBServer::store_ws(WebsocketClass * ws)
+void WBServer::process_on_open(WebsocketClass * ws)
+{
+    try
+    {
+        cout << "\nWBServer::on_open ws: " << ws << endl;
+
+        store_ws(ws);
+
+        WSData* pdata = (WSData*)(ws->getUserData());
+
+        ID_TYPE socket_id = pdata->id_;
+
+        PackagePtr package =  GetReqSymbolListDataPackage(socket_id, COMM_TYPE::WEBSOCKET, ID_MANAGER->get_id());
+
+        if (package)
+        {
+            cout << "WBServer::process_on_open Request SymbolList" << endl;
+            front_server_->deliver_request(package);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+}
+
+WebsocketClassThreadSafePtr WBServer::store_ws(WebsocketClass * ws)
 {
     std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
 
-    WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws);
+    WSData* pdata = (WSData*)(ws->getUserData());
 
-    auto iter = wss_con_set_.find(ws_safe);
-    if ( iter != wss_con_set_.end())
+    ID_TYPE cur_id = pdata->id_;
+
+    if (cur_id && wss_con_map_.find(cur_id) != wss_con_map_.end())
     {
-        (*iter)->set_alive(true);
+        return wss_con_map_[cur_id];
     }
     else
     {
+        cur_id = ID_MANAGER->get_id();
+        pdata->id_ = cur_id;
+        WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, cur_id);
         ws_safe->set_alive(true);
 
-        wss_con_set_.insert(ws_safe);
+        wss_con_map_[cur_id] = ws_safe;
+
+        cout << "store ws: " << ws << " id: " << cur_id << endl;
+
+        return ws_safe;
+    }
+}
+
+bool WBServer::check_ws(WebsocketClass * ws)
+{
+    
+
+    WSData* pdata = (WSData*)(ws->getUserData());
+
+    ID_TYPE cur_id = pdata->id_;
+
+    std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
+
+    if (cur_id && wss_con_map_.find(cur_id) != wss_con_map_.end())
+    {
+        return true;
+    }    
+    else
+    {
+        wss_con_map_[cur_id]->set_alive(true);
+        return false;
     }
 }
 
 void WBServer::broadcast(string msg)
 {
     // cout << "broadcast: " << msg << endl;
-    for (auto iter:wss_con_set_)
-    {
-        iter->send(msg);
-    }
+    // for (auto iter:wss_con_set_)
+    // {
+    //     iter->send(msg);
+    // }
 }
 
 void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 {
     try
     {
-        nlohmann::json js = nlohmann::json::parse(ori_msg);
-
-        if (js["type"].is_null())
+        if (!check_ws(ws))
         {
-            ws->send(get_error_send_rsp_string("Lost type Item!"), uWS::OpCode::TEXT);
+            cout << "ws: " << ws << " is not valid!" << endl;
+            return;
         }
         else
         {
-            store_ws(ws);
-            cout << "\nWBServer::process_on_message: ws: " << ws << endl;
+            nlohmann::json js = nlohmann::json::parse(ori_msg);
 
-            if (js["type"].get<string>() == "sub_symbol")
+            if (js["type"].is_null())
             {
-                process_sub_info(ori_msg, ws);
+                ws->send(get_error_send_rsp_string("Lost type Item!"), uWS::OpCode::TEXT);
             }
-
-            if (js["type"].get<string>() == HEARTBEAT)
+            else
             {
-                process_heartbeat(ws);
+                WSData* pdata = (WSData*)(ws->getUserData());
+
+                ID_TYPE socket_id = pdata->id_;
+
+                cout << "\nWBServer::process_on_message: ws: " << ws << endl;
+
+                if (js["type"].get<string>() == "sub_symbol")
+                {
+                    process_depth_req(ori_msg, socket_id);
+                }
+
+                if (js["type"].get<string>() == HEARTBEAT)
+                {
+                    process_heartbeat(socket_id);
+                }
+
+                if (js["type"].get<string>() == KLINE_UPDATE)
+                {
+                    process_kline_req(ori_msg, socket_id);
+                }            
             }
-
-            if (js["type"].get<string>() == KLINE_UPDATE)
-            {
-                process_kline_data(ori_msg, ws);
-            }            
         }
+ 
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
-    }        
+        std::cerr <<"WBServer::process_on_message " << e.what() << '\n';
+    }      
 }
 
-void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
+void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
 {
     // return;  
 
@@ -262,9 +329,7 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
         LOG_INFO(info_obj.str());
 
-        {
-            WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
-
+        { 
             if (error_id == 0)
             {
                 PackagePtr package = PackagePtr{new Package{}};
@@ -279,7 +344,8 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
 
                 if (p_req_kline_data)
                 {
-                    p_req_kline_data->set(symbol, start_time, end_time, data_count, frequency, tmp_ws);  
+                    p_req_kline_data->set(symbol, start_time, end_time, data_count, frequency, 
+                                          socket_id, COMM_TYPE::WEBSOCKET);  
 
                     front_server_->deliver_request(package);
                 }                   
@@ -287,7 +353,17 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
             else
             {
                 LOG_ERROR(err_msg);
-                ws->send(get_error_send_rsp_string(err_msg), uWS::OpCode::TEXT);
+
+                if (wss_con_map_.find(socket_id) != wss_con_map_.end())
+                {
+                    wss_con_map_[socket_id]->send(get_error_send_rsp_string(err_msg));
+                }
+                else
+                {
+                    stringstream s_obj;
+                    s_obj << "WBServer::process_kline_req websocket socket_id " << socket_id << " is invalid \n";
+                    LOG_ERROR(s_obj.str());
+                }
             }
         }
     }
@@ -301,7 +377,7 @@ void WBServer::process_kline_data(string ori_msg, WebsocketClass* ws)
     
 }
 
-void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
+void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
 {
     try
     {
@@ -311,11 +387,7 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
         {
             nlohmann::json symbol_list = js["symbol"];
 
-            WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
-
-            auto iter = wss_con_set_.find(tmp_ws);
-
-            if (iter != wss_con_set_.end())
+            if (wss_con_map_.find(socket_id) != wss_con_map_.end())
             {
                 // (*iter)->clear_sub_symbol_list();
 
@@ -325,7 +397,7 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
                     
                     // (*iter)->add_sub_symbol(cur_symbol);       
 
-                    PackagePtr package = GetReqRiskCtrledDepthDataPackage(cur_symbol, ID_MANAGER->get_id(), tmp_ws);
+                    PackagePtr package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
 
                     front_server_->deliver_request(package);
                 }                
@@ -341,17 +413,13 @@ void WBServer::process_sub_info(string ori_msg, WebsocketClass * ws)
     }
 }
 
-void WBServer::process_heartbeat(WebsocketClass* ws)
+void WBServer::process_heartbeat(ID_TYPE socket_id)
 {
     try
     {
-        WebsocketClassThreadSafePtr tmp_ws = boost::make_shared<WebsocketClassThreadSafe>(ws);
-
-        auto iter = wss_con_set_.find(tmp_ws);
-
-        if (iter != wss_con_set_.end())
+        if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
-            (*iter)->set_alive(true);
+            wss_con_map_[socket_id]->set_alive(true);
         }        
     }
     catch(const std::exception& e)
@@ -373,44 +441,64 @@ void WBServer::broadcast_enhanced_data(string symbol, string data_str)
     // }
 }
 
-void WBServer::send_data(ID_TYPE id, string msg)
+bool WBServer::send_data(ID_TYPE socket_id, string msg)
 {
-
+    if (wss_con_map_.find(socket_id) != wss_con_map_.end())
+    {
+        wss_con_map_[socket_id]->send(msg);
+        return true;
+    }
+    else
+    {
+        stringstream s_obj;
+        s_obj << "WBServer::send_data websocket socket_id " << socket_id << " is invalid \n";
+        LOG_ERROR(s_obj.str());
+        return false;
+    }    
 }
 
 bool WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg)
 {
 
-    auto iter = wss_con_set_.find(ws);
+    // auto iter = wss_con_set_.find(ws);
 
     
-    cout << "Stored WS: " << wss_con_set_.size() << endl;
-    for (auto ws:wss_con_set_)
-    {
-        cout << ws->get_ws() << endl;
-    }
-    cout << "currrent ws: " << ws->get_ws() << endl;
+    // cout << "Stored WS: " << wss_con_set_.size() << endl;
+    // for (auto ws:wss_con_set_)
+    // {
+    //     cout << ws->get_ws() << endl;
+    // }
+    // cout << "currrent ws: " << ws->get_ws() << endl;
 
-    if (iter != wss_con_set_.end())
-    {
-        // cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
-        (*iter)->send(msg);     
-        return true;     
-    }    
-    else
-    {
-        LOG_ERROR("WBServer::send_data can't find ws");
-        return false;
-    }    
+    // if (iter != wss_con_set_.end())
+    // {
+    //     // cout << "WBServer::send_data(WebsocketClassThreadSafePtr ws, string msg) " << endl;
+    //     (*iter)->send(msg);     
+    //     return true;     
+    // }    
+    // else
+    // {
+    //     LOG_ERROR("WBServer::send_data can't find ws");
+    //     return false;
+    // }    
 }
 
-void WBServer::clean_client(WebsocketClassThreadSafePtr ws)
+void WBServer::clean_ws(WebsocketClass* ws)
 {
+    WSData* pdata = (WSData*)(ws->getUserData());
+
+    ID_TYPE cur_id = pdata->id_;
+
     std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
 
-    if (wss_con_set_.find(ws) != wss_con_set_.end())
+    if (wss_con_map_.find(cur_id) != wss_con_map_.end())
     {
-        wss_con_set_.erase(ws);
+        wss_con_map_.erase(cur_id);
+        cout << "Erase Socket: " << ws << " id: " << cur_id << " successfully! " << endl;
+    }
+    else
+    {
+        cout << "Erase Socket: " << ws << " id: " << cur_id << " Failed! " << endl;
     }
 }
 
@@ -431,30 +519,28 @@ void WBServer::heartbeat_run()
 
 void WBServer::check_heartbeat()
 {
-    std::set<WebsocketClassThreadSafePtr, LessWebsocketClassThreadSafePtr> dead_ws_set;
-
-    for (auto ws:wss_con_set_)
-    {        
-        if (!ws->is_alive())
+    std::vector<ID_TYPE> id_vec;    
+    for (auto iter:wss_con_map_)
+    {
+        if (!iter.second->is_alive())
         {
-            dead_ws_set.emplace(ws);            
-        }        
+            id_vec.emplace_back(iter.first);
+        }
     }
 
-    for (auto ws:dead_ws_set)
     {
-        clean_client(ws);
-        ws->end();
+        std::lock_guard<std::mutex> lk(wss_con_set_mutex_);
+        for (auto id:id_vec)
+        {
+            wss_con_map_.erase(id);
+        }
     }
 
-    string heartbeat_str = get_heartbeat_str();
-
-    // cout << heartbeat_str << endl;
-
-    for (auto ws:wss_con_set_)
+    string heartbeat_str = get_heartbeat_str();    
+    for (auto iter:wss_con_map_)
     {
-        ws->set_alive(false);
-        ws->send(heartbeat_str);
+        iter.second->set_alive(false);
+        iter.second->send(heartbeat_str);
     }
 }
 

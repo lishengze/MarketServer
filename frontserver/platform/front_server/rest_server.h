@@ -2,6 +2,7 @@
 
 #include <thread>
 #include "../front_server_declare.h"
+#include "../data_structure/base_data.h"
 
 #include "App.h"
 #include "libusockets.h"
@@ -50,6 +51,9 @@ class RestServer:public utrade::pandora::ThreadBasePool
         int                                     server_port_{9001};
 
         boost::shared_ptr<std::thread>          listen_thread_;
+
+        std::map<ID_TYPE, HttpResponseThreadSafePtr> response_map_;
+        std::mutex                                   response_map_mutex_;
 
         FrontServer*                            front_server_;
 

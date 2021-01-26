@@ -12,31 +12,26 @@
 // {
 //     auto data_ptr = boost::make_shared<user_class>(std::forward<Args>(args)...);
 // }
+PackagePtr GetReqSymbolListDataPackage(ID_TYPE socket_id, COMM_TYPE socket_type, int package_id, bool is_cancel_request=false);
 
-PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, int package_id, WebsocketClassThreadSafePtr ws=nullptr);
+PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, ID_TYPE socket_id, int package_id, bool is_cancel_request=false);
 
-PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int package_id);
+PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id);
 
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id);
 
 PackagePtr GetNewKlineDataPackage(const KlineData& depth, int package_id);
 
-PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbol, int package_id);
+PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbol, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id);
 
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& main_data, int package_id);
 
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr& update_kline_data, int package_id);
 
-PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
-                                     frequency_type frequency, WebsocketClassThreadSafePtr ws,
-                                     KlineDataPtr& update_kline_data, int package_id);
+PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, ID_TYPE socket_id, COMM_TYPE socket_type);
 
-PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, HttpResponseThreadSafePtr res);
+PackagePtr GetRspEnquiryPackage(string symbol, double price, ID_TYPE socket_id, COMM_TYPE socket_type);
 
-PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadSafePtr res);
-
-PackagePtr GetRspErrMsgPackage(string err_msg, int err_id, 
-                                HttpResponseThreadSafePtr res=nullptr, 
-                                WebsocketClassThreadSafePtr ws=nullptr);
+PackagePtr GetRspErrMsgPackage(string err_msg, int err_id, ID_TYPE socket_id, COMM_TYPE socket_type);
 
 

@@ -256,9 +256,9 @@ bool RestServer::process_v1_request_enquiry(string& query_param, string& error_m
 
         HttpResponseThreadSafePtr res_ptr = boost::make_shared<HttpResponseThreadSafe>(res);
 
-        PackagePtr package = GetReqEnquiryPackage(symbol, volume, amount, type, res_ptr);
+        // PackagePtr package = GetReqEnquiryPackage(symbol, volume, amount, type, res_ptr);
         
-        front_server_->deliver_request(package);
+        // front_server_->deliver_request(package);
 
         result = true;
     }
