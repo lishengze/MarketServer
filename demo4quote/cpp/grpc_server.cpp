@@ -39,6 +39,10 @@ void ServerEndpoint::init(const string& grpc_addr)
 
 void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
 {
+    // streamengine生成时间，这个值在发送之前再做一次判断
+    type_tick now = get_miliseconds();
+    //tfm::printfln("publish_single %u", now);
+    snap->set_time_produced_by_streamengine(now);
     caller_subscribe_single_->add_data(snap);
     //std::cout << "publish_single finish " << exchange << " " << symbol << std::endl;
 };
@@ -58,15 +62,25 @@ void ServerEndpoint::_handle_rpcs()
     std::cout << "_handle_rpcs running on ..." << std::endl;
     void* tag;
     bool ok;
+    
+    int64 loop_id = 0;
+
     while(true) {
+        //tfm::printfln("cq->next");
         GPR_ASSERT(cq_->Next(&tag, &ok));
+        
+        type_tick begin = get_miliseconds();
+        BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
         if( ok ) {
-            BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            cd->proceed();
+            cd->proceed(loop_id);
         } else {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            cd->release();
+            cd->release(loop_id);
         }
+
+        type_tick end = get_miliseconds();
+        if( (end - begin) >= 10 )
+            tfm::printfln("grpc-loop[%d] handle %d cost %u", loop_id, cd->call_id_, end - begin);
     }
 }
 

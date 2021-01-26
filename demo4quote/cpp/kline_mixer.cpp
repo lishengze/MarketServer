@@ -68,6 +68,8 @@ void MixCalculator::set_symbol(const TSymbol& symbol, const unordered_set<TExcha
 
 bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& input, vector<KlineData>& output)
 {
+    output.clear();
+    
     std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
     
     // 寻找对应的cache
@@ -90,7 +92,7 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
             cache->klines.back() = kline;
         } else {
             // 倒着走
-            _log_and_print("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, kline.index);
+            tfm::printfln("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, kline.index);
             return false;
         }
 
@@ -103,15 +105,19 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
         {
             const TExchange& exchange = cache.first;
             const CalcCache* c = cache.second;
-            if( c->klines.size() ==0 || c->get_last_index() < kline.index ) {
-                _log_and_print("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
+
+            bool found = false;
+            for( const auto& v : c->klines ) {
+                if( v.index == kline.index ) {
+                    found = true;
+                    datas.push_back(v);
+                }
+            }
+            if( !found ) {
+                tfm::printfln("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
                 can_calculate = false;
                 break;
             }
-            KlineData tmp = c->klines.front();
-            if( tmp.volume.is_zero() )
-                continue;
-            datas.push_back(tmp);
         }
         if( !can_calculate ){
             continue;

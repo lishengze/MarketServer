@@ -12,45 +12,6 @@ void copy_protobuf_object(const T* src, T* dst) {
     dst->ParseFromString(tmp);
 }
 
-void trade_to_trade(const TradeWithDecimal* src, TradeWithDecimal* dst) {
-    dst->set_exchange(src->exchange());
-    dst->set_symbol(src->symbol());
-    dst->set_time(src->time());
-    set_decimal(dst->mutable_price(), src->price());
-    set_decimal(dst->mutable_volume(), src->volume());
-}
-
-void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWithDecimal* dst) {
-    dst->set_exchange(src->exchange());
-    dst->set_symbol(src->symbol());
-    dst->set_seq_no(src->seq_no());
-    dst->set_is_snap(src->is_snap());
-    dst->set_time(src->time());
-    dst->set_price_precise(src->price_precise());
-    dst->set_volume_precise(src->volume_precise());
-
-    // 卖盘
-    for( int i = 0 ; i < src->asks_size() ; ++i ) {
-        const DepthWithDecimal& src_depth = src->asks(i);
-        DepthWithDecimal* dst_depth = dst->add_asks();
-        set_decimal(dst_depth->mutable_price(), src_depth.price());
-        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
-        for( auto v : src_depth.data() ) {
-            (*dst_depth->mutable_data())[v.first] = v.second;
-        }
-    }
-    // 买盘
-    for( int i = 0 ; i < src->bids_size() ; ++i ) {
-        const DepthWithDecimal& src_depth = src->bids(i);
-        DepthWithDecimal* dst_depth = dst->add_bids();
-        set_decimal(dst_depth->mutable_price(), src_depth.price());
-        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
-        for( auto v : src_depth.data() ) {
-            (*dst_depth->mutable_data())[v.first] = v.second;
-        }
-    }
-};
-
 void kline_to_pbkline(const KlineData& src, Kline* dst)
 {
     dst->set_index(src.index);
@@ -71,7 +32,7 @@ SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCach
 
 void SubscribeSingleQuoteEntity::register_call()
 {
-    std::cout << "register SubscribeSingleQuoteEntity" << std::endl;
+    _log_and_print("%s register SubscribeSingleQuoteEntity", get_context()->peer());
     service_->RequestSubscribeQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -156,8 +117,13 @@ bool SubscribeSingleQuoteEntity::process()
     for( size_t i = 0 ; i < count ; i ++ ) {
         MarketStreamDataWithDecimal* quote = reply.add_quotes();
         copy_protobuf_object((MarketStreamDataWithDecimal*)ptrs[i].get(), quote);
+        TimeCostWatcher w(tfm::format("grpc-%u", quote->time_produced_by_streamengine()), quote->time_produced_by_streamengine());
         quote->set_time_produced_by_streamengine(now);
     }    
+    type_tick end = get_miliseconds();
+    if( (end - now) > 5 ) {
+        tfm::printfln("seriealize %u object cost %u", count, end-now);
+    }
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -196,7 +162,7 @@ SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* ca
 
 void SubscribeMixQuoteEntity::register_call()
 {
-    std::cout << "register SubscribeMixQuoteEntity" << std::endl;
+    _log_and_print("%s register SubscribeMixQuoteEntity", get_context()->peer());
     service_->RequestSubscribeMixQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -247,7 +213,7 @@ GetParamsEntity::GetParamsEntity(void* service)
 
 void GetParamsEntity::register_call()
 {
-    std::cout << "register GetParamsEntity" << std::endl;
+    _log_and_print("%s register GetParamsEntity", get_context()->peer());
     service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -270,7 +236,7 @@ GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher)
 
 void GetKlinesEntity::register_call()
 {
-    std::cout << "register GetKlinesEntity" << std::endl;
+    _log_and_print("%s register GetKlinesEntity", get_context()->peer());
     service_->RequestGetKlines(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -337,7 +303,7 @@ void GetLastEntity::add_data(const WrapperKlineData& data)
 
 void GetLastEntity::register_call()
 {
-    std::cout << "register GetLastEntity" << std::endl;
+    _log_and_print("%s register GetLastEntity", get_context()->peer());
     service_->RequestGetLast(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -377,7 +343,7 @@ SubscribeTradeEntity::SubscribeTradeEntity(void* service)
 
 void SubscribeTradeEntity::register_call()
 {
-    std::cout << "register SubscribeTradeEntity" << std::endl;
+    _log_and_print("%s register SubscribeTradeEntity", get_context()->peer());
     service_->RequestSubscribeTrade(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -417,7 +383,7 @@ GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher)
 
 void GetLastTradesEntity::register_call()
 {
-    std::cout << "register GetLastTradesEntity" << std::endl;
+    _log_and_print("%s register GetLastTradesEntity", get_context()->peer());
     service_->RequestGetLatestTrades(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 

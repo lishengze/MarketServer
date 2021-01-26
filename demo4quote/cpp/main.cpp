@@ -1,5 +1,6 @@
 #include "stream_engine_config.h"
 #include "stream_engine.h"
+#include "kline_mixer_test.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -16,6 +17,8 @@ void setup_signal_handler_callback()
 
 int main(int argc, char** argv) 
 {
+    test_kline_calculator();
+    
     // setup the signal here
     setup_signal_handler_callback();
     

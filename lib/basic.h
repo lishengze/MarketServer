@@ -68,3 +68,34 @@ inline type_tick parse_nano(const string& timestr)
     strptime(base.c_str(), "%Y-%m-%d %H:%M:%S", &_tm);
     return mktime(&_tm) * 1000000000 + atoi(remain.c_str());
 }
+
+class TimeCostWatcher
+{
+public:
+    TimeCostWatcher(const string& desc)
+    : threshold_(50)
+    , desc_(desc)
+    {
+        begin_ = get_miliseconds();
+    }
+
+    TimeCostWatcher(const string& desc, type_tick begin)
+    : begin_(begin) 
+    , threshold_(50)
+    , desc_(desc)
+    {
+
+    }
+
+    ~TimeCostWatcher() {
+        type_tick end = get_miliseconds();
+        if( (end-begin_) > threshold_ ) {
+            cout << "[TimeCostWatcher] " << desc_ << " cost " << (end-begin_) << endl;
+        }
+    }
+
+private:
+    type_tick begin_;
+    type_tick threshold_;
+    string desc_;
+};

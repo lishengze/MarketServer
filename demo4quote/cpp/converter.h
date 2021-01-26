@@ -75,7 +75,7 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     msd->set_price_precise(src.price_precise);
     msd->set_volume_precise(src.volume_precise);
     msd->set_time(src.origin_time);
-    msd->set_time_arrive(src.arrive_time);    
+    msd->set_time_arrive(src.arrive_time);
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);

@@ -51,14 +51,17 @@ void ServerEndpoint::_handle_rpcs()
 {
     void* tag;
     bool ok;
+
+    int64 loop_id = 0;
+
     while(true) {
         GPR_ASSERT(cq_->Next(&tag, &ok));
         if( ok ) {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            cd->proceed();
+            cd->proceed(loop_id);
         } else {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
-            cd->release();
+            cd->release(loop_id);
         }
     }
 }
