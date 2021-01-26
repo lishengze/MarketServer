@@ -352,7 +352,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     SDepthData* p_sdepth_data = GET_NON_CONST_FIELD(package, SDepthData);
-    
+
     p_sdepth_data->is_raw = false;
     
     deliver_response(package);
@@ -381,24 +381,24 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     {
         const KlineData& kline = klines[i];
 
-        // 过滤掉逆序的时间;
-        if (kline_symbol_last_time_.find(symbol)== kline_symbol_last_time_.end())
-        {
-            kline_symbol_last_time_[symbol] == kline.index;
-        }
-        else if (kline_symbol_last_time_[symbol] >= kline.index)
-        {
-            std::stringstream stream_obj;
-            stream_obj  << "[Kine] Time Seq is Error , "<< symbol << " current time is " << get_sec_time_str(kline.index)
-                        << ", last update time is " << get_sec_time_str(kline_symbol_last_time_[symbol]) << "\n";
+        // // 过滤掉逆序的时间;
+        // if (kline_symbol_last_time_.find(symbol)== kline_symbol_last_time_.end())
+        // {
+        //     kline_symbol_last_time_[symbol] == kline.index;
+        // }
+        // else if (kline_symbol_last_time_[symbol] >= kline.index)
+        // {
+        //     std::stringstream stream_obj;
+        //     stream_obj  << "[Kine] Time Seq is Error , "<< symbol << " current time is " << get_sec_time_str(kline.index)
+        //                 << ", last update time is " << get_sec_time_str(kline_symbol_last_time_[symbol]) << "\n";
 
-            // LOG_ERROR(stream_obj.str());
-            continue;
-        }
-        else
-        {
-           kline_symbol_last_time_[symbol] = kline.index;
-        }
+        //     // LOG_ERROR(stream_obj.str());
+        //     continue;
+        // }
+        // else
+        // {
+        //    kline_symbol_last_time_[symbol] = kline.index;
+        // }
         
         // kline.frequency_ = resolution;
 
@@ -410,6 +410,10 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         // LOG_INFO(stream_obj.str());
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
+
+        KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
+
+        pklineData->frequency_ = resolution;
 
         package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
 

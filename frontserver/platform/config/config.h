@@ -23,7 +23,7 @@ class Config
         int get_rest_port() { return rest_port_;}
 
         int get_frequency_numb() { return frequency_numb_;}
-        int get_frequency_base() { return frequency_base_;}
+        std::vector<int>& get_frequency_base() { return frequency_base_list_;}
         std::vector<int>& get_frequency_list() { return frequency_list_;}
 
     private:
@@ -32,6 +32,6 @@ class Config
         int                     rest_port_; 
         std::vector<int>        frequency_list_;
         int                     frequency_numb_{100};
-        int                     frequency_base_{60};
+        std::vector<int>        frequency_base_list_;
 
 };

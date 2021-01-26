@@ -106,7 +106,7 @@ private:
 
     vector<int>                                                 frequency_list_;
     int                                                         frequency_numb_{100};   
-    int                                                         frequency_base_;        
+    vector<int>                                                 frequency_base_list_;        
 };
 
 FORWARD_DECLARE_PTR(KlineProcess);

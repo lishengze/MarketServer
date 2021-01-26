@@ -68,7 +68,13 @@ void Config::load_config(string file_name)
 
                 if (js["market_cache"]["frequency_base"].is_number())
                 {
-                    frequency_base_ = js["market_cache"]["frequency_base"].get<int>();
+                    nlohmann::json frequency_base_list = js["market_cache"]["frequency_list"];
+
+                    for (json::iterator it = frequency_base_list.begin(); it != frequency_base_list.end(); ++it)
+                    {
+                        json &value = *it;
+                        frequency_base_list_.push_back(value.get<int>());                        
+                    }
                 }                
             }              
 
@@ -78,7 +84,11 @@ void Config::load_config(string file_name)
                 cout << freq << endl;
             }       
             cout << "frequency_numb_: " << frequency_numb_ << endl;
-            cout << "frequency_base: " << frequency_base_ <<endl;
+            cout << "frequency_base: " << endl;
+            for (auto freq:frequency_base_list_)
+            {
+                cout << freq << endl;
+            }               
         }
     
     }
