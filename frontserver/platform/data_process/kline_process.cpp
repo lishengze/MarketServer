@@ -613,33 +613,33 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
         for (auto& kline_update:updated_kline_data_[symbol])
         {                        
-            if ( kline_update.kline_data_.symbol == NULL)
+            if (!kline_update.kline_data_)
             {
-                kline_update.kline_data_.reset(*kline_data);
+                kline_update.kline_data_ = boost::make_shared<KlineData>(*kline_data);
             }
 
-            KlineData& last_kline = kline_update.kline_data_;
+            KlineDataPtr& last_kline = kline_update.kline_data_;
 
-            if (last_kline.is_clear())
+            if (last_kline->is_clear())
             {
-                last_kline.reset(*kline_data);
+                last_kline->reset(*kline_data);
 
-                cout << "last_kline: " <<"open: " << last_kline.px_open.get_value() << " " 
-                <<"close: " << last_kline.px_close.get_value() << " "
-                <<"high: " << last_kline.px_high.get_value() << " "
-                <<"low: " << last_kline.px_low.get_value() << " "                
+                cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
+                <<"close: " << last_kline->px_close.get_value() << " "
+                <<"high: " << last_kline->px_high.get_value() << " "
+                <<"low: " << last_kline->px_low.get_value() << " "                
                 << " ****"<< endl;
             }
             else
             {
-                last_kline.px_close = kline_data->px_close;
-                last_kline.px_low = last_kline.px_low > kline_data->px_low ? kline_data->px_low: last_kline.px_low;
-                last_kline.px_high = last_kline.px_high < kline_data->px_high ? kline_data->px_high: last_kline.px_high;
-                last_kline.index = kline_data->index;
-                assign(last_kline.symbol, kline_data->symbol);                
+                last_kline->px_close = kline_data->px_close;
+                last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
+                last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
+                last_kline->index = kline_data->index;
+                assign(last_kline->symbol, kline_data->symbol);                
             }
 
-            if (kline_data->index - kline_update.last_update_time_ >= kline_update.kline_data_.frequency_)
+            if (kline_data->index - kline_update.last_update_time_ >= kline_update.reqkline_data.frequency_)
             {
                 cout << "\n**** Kline Update Time: " << get_sec_time_str(kline_data->index) 
                 <<"open: " << kline_data->px_open.get_value() << " " 
@@ -648,12 +648,12 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
                 <<"low: " << kline_data->px_low.get_value() << " "                
                 << " ****"<< endl;
 
-                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(last_kline);
+                KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                cout << "last_kline: " <<"open: " << last_kline.px_open.get_value() << " " 
-                <<"close: " << last_kline.px_close.get_value() << " "
-                <<"high: " << last_kline.px_high.get_value() << " "
-                <<"low: " << last_kline.px_low.get_value() << " "                
+                cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
+                <<"close: " << last_kline->px_close.get_value() << " "
+                <<"high: " << last_kline->px_high.get_value() << " "
+                <<"low: " << last_kline->px_low.get_value() << " "                
                 << " ****"<< endl;     
 
                 cout << endl;           
@@ -669,7 +669,7 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
                 kline_update.last_update_time_ = kline_data->index;
 
-                last_kline.clear();
+                last_kline->clear();
             }
         }
     }

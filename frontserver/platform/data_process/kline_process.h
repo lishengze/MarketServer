@@ -46,7 +46,7 @@ class KlineDataUpdate
     // WebsocketClassThreadSafePtr     websocket_com_{nullptr};
     ReqKLineData        reqkline_data;
     type_tick           last_update_time_;
-    KlineData           kline_data_;
+    KlineDataPtr        kline_data_{nullptr};
 };
 FORWARD_DECLARE_PTR(KlineDataUpdate);
 
