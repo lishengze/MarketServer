@@ -623,6 +623,12 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
             if (last_kline.is_clear())
             {
                 last_kline.reset(*kline_data);
+
+                cout << "last_kline: " <<"open: " << last_kline.px_open.get_value() << " " 
+                <<"close: " << last_kline.px_close.get_value() << " "
+                <<"high: " << last_kline.px_high.get_value() << " "
+                <<"low: " << last_kline.px_low.get_value() << " "                
+                << " ****"<< endl;
             }
             else
             {
@@ -641,8 +647,16 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
                 <<"high: " << kline_data->px_high.get_value() << " "
                 <<"low: " << kline_data->px_low.get_value() << " "                
                 << " ****"<< endl;
-                
+
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(last_kline);
+
+                cout << "last_kline: " <<"open: " << last_kline.px_open.get_value() << " " 
+                <<"close: " << last_kline.px_close.get_value() << " "
+                <<"high: " << last_kline.px_high.get_value() << " "
+                <<"low: " << last_kline.px_low.get_value() << " "                
+                << " ****"<< endl;     
+
+                cout << endl;           
                 
                 PackagePtr rsp_package = GetNewRspKLineDataPackage(&(kline_update.reqkline_data), cur_kline_data, ID_MANAGER->get_id());
 
