@@ -33,27 +33,18 @@ def on_close(ws):
     print("Server Closed")
     print("### closed ###")
 
-def sub_btc_usdt(ws, sub_symbol):
-    time.sleep(15)
+ 
 
+def get_sub_depth_str(symbol="BTC_USDT"):
     sub_info = {
         "type":"sub_symbol",
-        "symbol":[sub_symbol]
-    }
-    sub_info_str = json.dumps(sub_info)
-    print("sub_info_str: %s" % (sub_info_str))
-    ws.send(sub_info_str)    
-
-def get_sub_depth_str():
-    sub_info = {
-        "type":"sub_symbol",
-        "symbol":["BTC_USDT"]
+        "symbol":[symbol]
     }
     sub_info_str = json.dumps(sub_info)
     print("sub_info_str: %s" % (sub_info_str))
     return sub_info_str
 
-def get_sub_kline_str():
+def get_sub_kline_str(symbl="BTC_USDT"):
     print("get_sub_kline_str")
     frequency = 60 * 2
     end_time = int(time.time())
@@ -70,7 +61,7 @@ def get_sub_kline_str():
 
     sub_info = {
         "type":"kline_update",
-        "symbol":"BTC_USDT",
+        "symbol":symbl,
         "data_count":str(100),
         "frequency":str(frequency)
     }
@@ -78,6 +69,20 @@ def get_sub_kline_str():
     sub_info_str = json.dumps(sub_info)
     print("sub_info_str: %s" % (sub_info_str))
     return sub_info_str
+
+def sub_btc_usdt(ws, sub_symbol):
+    time.sleep(15)
+
+    # sub_info = {
+    #     "type":"sub_symbol",
+    #     "symbol":[sub_symbol]
+    # }
+    # sub_info_str = json.dumps(sub_info)
+    # print("sub_info_str: %s" % (sub_info_str))
+
+    sub_info_str = get_sub_kline_str(sub_symbol)
+
+    ws.send(sub_info_str)   
 
 def on_open(ws):
     print("Connected")
@@ -88,7 +93,7 @@ def on_open(ws):
 
     ws.send(send_str)
 
-    # _thread.start_new_thread( sub_btc_usdt, (ws, "BTC_USDT", ) )
+    _thread.start_new_thread(sub_btc_usdt, (ws, "XRP_USDT", ) )
 
 def test_websocket():
     # websocket.enableTrace(True)

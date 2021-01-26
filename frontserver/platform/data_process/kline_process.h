@@ -10,18 +10,23 @@ class DataProcess;
 class KlineDataUpdate
 {
     public:
-        KlineDataUpdate(const ReqKLineData& other)
-        {
-            assign(symbol_, other.symbol_);
-            assign(start_time_, other.start_time_);
-            assign(end_time_, other.end_time_);
-            assign(data_count_, other.data_count_);
-            assign(frequency_, other.frequency_); 
-            websocket_ = other.websocket_->get_ws();
+        // KlineDataUpdate(const ReqKLineData& other)
+        // {
+        //     assign(symbol_, other.symbol_);
+        //     assign(start_time_, other.start_time_);
+        //     assign(end_time_, other.end_time_);
+        //     assign(data_count_, other.data_count_);
+        //     assign(frequency_, other.frequency_); 
+        //     websocket_ = other.websocket_->get_ws();
 
-            websocket_com_ = boost::make_shared<WebsocketClassThreadSafe>(other.websocket_->get_ws());
-            // websocket_ = other.websocket_;
+        //     websocket_com_ = boost::make_shared<WebsocketClassThreadSafe>(other.websocket_->get_ws());
+        //     websocket_ = other.websocket_;
+        // }
+
+        KlineDataUpdate(const ReqKLineData& other): reqkline_data{other}
+        {
         }
+
 
         ~KlineDataUpdate()
         {
@@ -30,15 +35,16 @@ class KlineDataUpdate
 
     // ReqKLineData   req_kline_data_;
 
-    symbol_type                     symbol_{NULL};
-    type_tick                       start_time_{0};
-    type_tick                       end_time_{0};
-    int                             data_count_{-1};
-    frequency_type                  frequency_{0};   
-    WebsocketClass*                 websocket_{nullptr};
+    // symbol_type                     symbol_{NULL};
+    // type_tick                       start_time_{0};
+    // type_tick                       end_time_{0};
+    // int                             data_count_{-1};
+    // frequency_type                  frequency_{0};   
 
-    WebsocketClassThreadSafePtr     websocket_com_{nullptr};
+    // WebsocketClass*                 websocket_{nullptr};
 
+    // WebsocketClassThreadSafePtr     websocket_com_{nullptr};
+    ReqKLineData        reqkline_data;
     type_tick           last_update_time_;
     KlineData           kline_data_;
 };
@@ -63,7 +69,7 @@ public:
 
     PackagePtr get_kline_package(PackagePtr package);
 
-    bool delete_kline_request_connect(ReqKLineData* pReqKlineData);
+    bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
 
     void store_kline_data(int frequency, KlineData* pkline_data);
 
@@ -91,8 +97,8 @@ private:
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
     map<string, vector<KlineDataUpdate>>                        updated_kline_data_;
-    std::map<WebsocketClassThreadSafePtr, string,
-             LessWebsocketClassThreadSafePtr>                   wss_con_map_;  
+    std::map<ID_TYPE, string>                                   wss_con_map_;  
+    std::mutex                                                  wss_con_map_mutex_;
 
     std::mutex                                                  updated_kline_data_mutex_;
 

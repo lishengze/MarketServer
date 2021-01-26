@@ -1,7 +1,27 @@
 #include "package_manage.h"
 #include "tools.h"
 
-PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, int package_id, WebsocketClassThreadSafePtr ws)
+PackagePtr GetReqSymbolListDataPackage(ID_TYPE socket_id, COMM_TYPE socket_type, int package_id, bool is_cancel_request)
+{
+    PackagePtr package =PackagePtr{new Package{}};
+    try
+    {        
+        package->SetPackageID(package_id);
+        package->prepare_request(UT_FID_ReqSymbolListData, package_id);
+        CREATE_FIELD(package, ReqSymbolListData);
+
+        ReqSymbolListData* p_req= GET_NON_CONST_FIELD(package, ReqSymbolListData);
+
+        p_req->set(socket_id, socket_type, is_cancel_request);        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
+    }    
+    return package;    
+}
+
+PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, ID_TYPE socket_id,  int package_id, bool is_cancel_request)
 {
     PackagePtr package =PackagePtr{new Package{}};
     try
@@ -12,7 +32,7 @@ PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, int package_id, Webs
 
         ReqRiskCtrledDepthData* p_req= GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
 
-        p_req->set(symbol, ws);        
+        p_req->set(symbol, socket_id, COMM_TYPE::WEBSOCKET, is_cancel_request);        
     }
     catch(const std::exception& e)
     {
@@ -27,6 +47,7 @@ PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
     try
     {        
         package->SetPackageID(package_id);
+        package->prepare_response(UT_FID_SDepthData, package_id);
 
         CREATE_FIELD(package, SDepthData);
 
@@ -60,7 +81,7 @@ PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_i
     return package;
 }
 
-PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int package_id)
+PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
 {
     PackagePtr package =PackagePtr{new Package{}};
 
@@ -68,13 +89,13 @@ PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int pack
     {        
         package->SetPackageID(package_id);
 
+        package->prepare_response(UT_FID_RspRiskCtrledDepthData, package_id); 
+
         CREATE_FIELD(package, RspRiskCtrledDepthData);
 
-        RspRiskCtrledDepthData* p_enhanced_depth_data = GET_NON_CONST_FIELD(package, RspRiskCtrledDepthData);
+        RspRiskCtrledDepthData* p_riskctrled_depth_data = GET_NON_CONST_FIELD(package, RspRiskCtrledDepthData);
 
-        p_enhanced_depth_data->init(&depth);
-
-        package->prepare_response(UT_FID_RspRiskCtrledDepthData, package->PackageID());        
+        p_riskctrled_depth_data->set(&depth, socket_id, socket_type);               
     }
     catch(const std::exception& e)
     {
@@ -84,18 +105,20 @@ PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, int pack
     return package;    
 }
 
-PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, int package_id)
+PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
     {    
         package->SetPackageID(package_id);
 
+        package->prepare_response(UT_FID_RspSymbolListData, package_id);
+
         CREATE_FIELD(package, RspSymbolListData);
 
         RspSymbolListData* p_symbol_data = GET_NON_CONST_FIELD(package, RspSymbolListData);
 
-        p_symbol_data->set_symbols(symbols);
+        p_symbol_data->set(symbols, socket_id, socket_type);
     }
     catch(const std::exception& e)
     {
@@ -118,7 +141,7 @@ PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int
 
         ReqEnquiry* p_req_enquiry = GET_NON_CONST_FIELD(package, ReqEnquiry);
 
-        p_req_enquiry->set(symbol, volume, amount, type, res);        
+        // p_req_enquiry->set(symbol, volume, amount, type, res);        
     }
     catch(const std::exception& e)
     {
@@ -128,7 +151,7 @@ PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int
     return package;  
 }
 
-PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& main_data, int package_id)
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& kline_data_vec, int package_id)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
@@ -139,23 +162,27 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<K
 
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
-        assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
-        assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
-        assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
+        p_rsp_kline_data->set(pReqKlineData, kline_data_vec);
 
-        assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
-        assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
-        assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
-        assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
-        assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
-        assign(p_rsp_kline_data->data_count_, main_data.size());
+        // p_rsp_kline_data->set(pReqKlineData->symbol_, pReqKlineData->start_time_, pReqKlineData->end_time_,
+        //                       pReqKlineData->frequency_, pReqKlineData->data_count_,
+        //                       pReqKlineData->socket_id_, pReqKlineData->socket_type_, 
+        //                       false, main_data);
 
-        cout << "GetNewRspKLineDataPackage: " << p_rsp_kline_data->websocket_->get_ws() << ", " << pReqKlineData->websocket_->get_ws() << endl;
+        // assign(p_rsp_kline_data->socket_type, pReqKlineData->socket_type);
+        // assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
+        // assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
 
-        for (KlineDataPtr atom_kline:main_data)
-        {
-            p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);
-        }
+        // assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
+        // assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
+        // assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
+        // assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
+        // assign(p_rsp_kline_data->data_count_, main_data.size());
+
+        // for (KlineDataPtr atom_kline:main_data)
+        // {
+        //     p_rsp_kline_data->kline_data_vec_.emplace_back(atom_kline);
+        // }
 
         return package;
     }
@@ -179,19 +206,7 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr&
 
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
-        p_rsp_kline_data->is_update = true;
-
-        assign(p_rsp_kline_data->comm_type, pReqKlineData->comm_type);
-        assign(p_rsp_kline_data->http_response_, pReqKlineData->http_response_);
-        assign(p_rsp_kline_data->websocket_, pReqKlineData->websocket_);
-
-        assign(p_rsp_kline_data->symbol_, pReqKlineData->symbol_);
-        assign(p_rsp_kline_data->start_time_, pReqKlineData->start_time_);
-        assign(p_rsp_kline_data->end_time_, pReqKlineData->end_time_);
-        assign(p_rsp_kline_data->frequency_, pReqKlineData->frequency_);
-        assign(p_rsp_kline_data->ws_id_, pReqKlineData->ws_id_);
-
-        p_rsp_kline_data->kline_data_vec_.emplace_back(update_kline_data);
+        p_rsp_kline_data->set(pReqKlineData, update_kline_data);
 
         return package;
     }
@@ -203,42 +218,42 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr&
     return package;        
 }
 
-PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
-                                     frequency_type frequency, WebsocketClassThreadSafePtr ws,
-                                     KlineDataPtr& update_kline_data, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
-    try
-    {    
-        package->SetPackageID(package_id);
+// PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
+//                                      frequency_type frequency, WebsocketClassThreadSafePtr ws,
+//                                      KlineDataPtr& update_kline_data, int package_id)
+// {
+//     PackagePtr package = PackagePtr{new Package{}};
+//     try
+//     {    
+//         package->SetPackageID(package_id);
 
-        CREATE_FIELD(package, RspKLineData);
+//         CREATE_FIELD(package, RspKLineData);
 
-        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+//         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
-        p_rsp_kline_data->is_update = true;
+//         p_rsp_kline_data->is_update = true;
 
-        assign(p_rsp_kline_data->comm_type, COMM_TYPE::WEBSOCKET);
-        assign(p_rsp_kline_data->websocket_, ws);
+//         assign(p_rsp_kline_data->socket_type, COMM_TYPE::WEBSOCKET);
+//         assign(p_rsp_kline_data->websocket_, ws);
 
-        assign(p_rsp_kline_data->symbol_, symbol);
-        assign(p_rsp_kline_data->start_time_, start_time);
-        assign(p_rsp_kline_data->end_time_, end_time);
-        assign(p_rsp_kline_data->frequency_, frequency);
+//         assign(p_rsp_kline_data->symbol_, symbol);
+//         assign(p_rsp_kline_data->start_time_, start_time);
+//         assign(p_rsp_kline_data->end_time_, end_time);
+//         assign(p_rsp_kline_data->frequency_, frequency);
 
-        p_rsp_kline_data->kline_data_vec_.emplace_back(update_kline_data);
+//         p_rsp_kline_data->kline_data_vec_.emplace_back(update_kline_data);
 
-        return package;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
-    }
+//         return package;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+//     }
     
-    return package;      
-}                                     
+//     return package;      
+// }                                     
 
-PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadSafePtr res)
+PackagePtr GetRspEnquiryPackage(string symbol, double price, ID_TYPE socket_id, COMM_TYPE socket_type)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
@@ -251,7 +266,7 @@ PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadS
 
         RspEnquiry* p_rsp_enquiry_data = GET_NON_CONST_FIELD(package, RspEnquiry);
 
-        p_rsp_enquiry_data->set(symbol, price, res);
+        p_rsp_enquiry_data->set(symbol, price, socket_id, socket_type);
     
         return package;
     }
@@ -263,9 +278,7 @@ PackagePtr GetRspEnquiryPackage(string symbol, double price, HttpResponseThreadS
     return package;      
 }
 
-PackagePtr GetRspErrMsgPackage(string err_msg, int err_id, 
-                                HttpResponseThreadSafePtr res, 
-                                WebsocketClassThreadSafePtr ws)
+PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,  ID_TYPE socket_id, COMM_TYPE socket_type)
 {
     PackagePtr package = PackagePtr{new Package{}};
     try
@@ -278,7 +291,7 @@ PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,
 
         RspErrorMsg* p_rsp_err = GET_NON_CONST_FIELD(package, RspErrorMsg);
 
-        p_rsp_err->set(err_msg, err_id, res, ws);
+        p_rsp_err->set(err_msg, err_id, socket_id, socket_type);
     
         return package;
     }

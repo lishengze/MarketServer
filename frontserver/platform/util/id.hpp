@@ -10,5 +10,5 @@ class ID
         ID_TYPE get_id() {return id_++;}
 
     private:
-        std::atomic_ullong      id_{0};
+        std::atomic_ullong      id_{1};
 };

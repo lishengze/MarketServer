@@ -66,8 +66,8 @@ void DataProcess::handle_request_message(PackagePtr package)
 
         switch (package->Tid())
         {
-            case UT_FID_RspSymbolListData:
-                request_symbol_package(package);
+            case UT_FID_ReqSymbolListData:
+                request_symbol_list_package(package);
                 return;    
 
             case UT_FID_ReqRiskCtrledDepthData:
@@ -89,8 +89,6 @@ void DataProcess::handle_request_message(PackagePtr package)
     {
         std::cerr << e.what() << '\n';
     }
-    
-
 }
 
 void DataProcess::handle_response_message(PackagePtr package)
@@ -148,13 +146,13 @@ void DataProcess::request_depth_package(PackagePtr package)
     }
 }
 
-void DataProcess::request_symbol_package(PackagePtr package)
+void DataProcess::request_symbol_list_package(PackagePtr package)
 {
     try
     {
         if (depth_process_)
         {
-            depth_process_->request_symbol_package(package);
+            depth_process_->request_symbol_list_package(package);
         }
     }
     catch(const std::exception& e)

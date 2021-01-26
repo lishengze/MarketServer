@@ -34,7 +34,7 @@ public:
 
     void request_depth_package(PackagePtr package);
 
-    void request_symbol_package(PackagePtr package);
+    void request_symbol_list_package(PackagePtr package);
 
     void request_enquiry_package(PackagePtr package);
 

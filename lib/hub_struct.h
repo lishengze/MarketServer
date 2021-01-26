@@ -99,11 +99,6 @@ struct KlineData
         assign(volume, SDecimal(volume));        
     }                
 
-    ~KlineData()
-    {
-        // cout << "~KlineData" << endl;
-    }
-
     KlineData(const KlineData& other)
     {
         assign(symbol, other.symbol);

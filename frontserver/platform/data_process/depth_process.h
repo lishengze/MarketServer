@@ -22,7 +22,7 @@ public:
 
     void request_depth_package(PackagePtr package);
 
-    void request_symbol_package(PackagePtr package);
+    void request_symbol_list_package(PackagePtr package);
 
     void request_enquiry_package(PackagePtr package);
 
@@ -32,12 +32,26 @@ public:
 
     double compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount, string& errr_msg, int& err_id);
 
-    using RspRiskCtrledDepthDataPackagePtr = PackagePtr; 
+    void response_updated_depth_data(SDepthData* p_depth_data);
 
+    void checkout_subdepth_connections(ReqRiskCtrledDepthData* p_req);
+
+    void delete_subdepth_connection(string symbol, ID_TYPE socket_id);
+
+    void delete_reqsymbollist_connection(ReqSymbolListData* pReqSymbolListData);
 
 private:
-    map<string, RspRiskCtrledDepthDataPackagePtr>    depth_data_;
+    map<string, SDepthDataPtr>                       depth_data_;
     map<string, SDepthDataPtr>                       raw_depth_data_;
+
+    std::map<ID_TYPE, ReqSymbolListDataPtr>          req_symbol_list_map_;
+    std::mutex                                       req_symbol_list_map_mutex_;
+
+    map<string, vector<ReqRiskCtrledDepthDataPtr>>   subdepth_map_;
+    std::mutex                                       subdepth_map_mutex_;
+
+    std::mutex                                       subdepth_con_map_mutex_;
+    std::map<ID_TYPE, string>                        subdepth_con_map_;  
 
     std::mutex                                       raw_depth_data_mutex_;
     std::mutex                                       depth_data_mutex_;

@@ -347,12 +347,14 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    
 
-    // LOG_INFO(stream_obj.str());
+    LOG_INFO(stream_obj.str());
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
-
+    SDepthData* p_sdepth_data = GET_NON_CONST_FIELD(package, SDepthData);
+    
+    p_sdepth_data->is_raw = false;
+    
     deliver_response(package);
 }
 

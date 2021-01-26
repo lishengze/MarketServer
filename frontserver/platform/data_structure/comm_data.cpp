@@ -2,26 +2,40 @@
 #include "../front_server_declare.h"
 #include "../log/log.h"
 
-
-RspRiskCtrledDepthData::RspRiskCtrledDepthData(const SDepthData* depth_data)
+string RspSymbolListData::get_json_str()
 {
-    init(depth_data);
-}
+    nlohmann::json json_data;
+    nlohmann::json symbol_json;
 
-RspRiskCtrledDepthData::RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other)
-{
-    cout << "RspRiskCtrledDepthData::RspRiskCtrledDepthData " << endl;
-    
-    depth_data_ = other.depth_data_;
-    for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
+    int i = 0;
+
+    string specified_first_symbol = "BTC_USDT";
+
+    if (symbols_.find(specified_first_symbol) != symbols_.end())
     {
-        ask_accumulated_volume_[i] = other.ask_accumulated_volume_[i];
-        bid_accumulated_volume_[i] = other.bid_accumulated_volume_[i];
+        symbols_.erase(specified_first_symbol);
+        symbol_json[i++] = specified_first_symbol;
     }
+    
+    for (string symbol:symbols_)
+    {
+        if (symbol.length()==0 ||symbol == "") continue;
+        
+        symbol_json[i++] = symbol;
+    }
+    json_data["symbol"] = symbol_json;    
+
+    json_data["type"] = SYMBOL_LIST;
+
+    return json_data.dump();
 }
+
 
 RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDepthData& other)
 {
+    socket_id_ = other.socket_id_;
+    socket_type_ = other.socket_type_;
+
     cout << "RspRiskCtrledDepthData::Operator = " << endl;
 
     depth_data_ = other.depth_data_;
@@ -32,31 +46,68 @@ RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDe
     }
 }
 
-void RspRiskCtrledDepthData::init(const SDepthData* depth_data)
+void RspRiskCtrledDepthData::set(const SDepthData* depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
 {
+    socket_id_ = socket_id;
+    socket_type_ = socket_type;
+
     // cout << "RspRiskCtrledDepthData::init SDepthData" << endl;
 
-    std::lock_guard<std::mutex> lg(mutex_);
+    // std::lock_guard<std::mutex> lg(mutex_);
 
     memcpy(&depth_data_, depth_data, sizeof(SDepthData));
 
     // depth_data_ = *depth_data;
-
-    // cout << "RspRiskCtrledDepthData::init 1" << endl;
 
     for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume.get_value() : depth_data_.asks[i].volume + ask_accumulated_volume_[i-1];
     }
 
-    // cout << "RspRiskCtrledDepthData::init 2" << endl;
-
     for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
     }
 
-    // cout << "RspRiskCtrledDepthData::init 3" << endl;
+}
+
+string RspRiskCtrledDepthData::get_json_str()
+{
+    string result;
+    nlohmann::json json_data;
+    json_data["symbol"] = string(depth_data_.symbol);
+    json_data["exchange"] = string(depth_data_.exchange);
+    json_data["tick"] = depth_data_.tick;
+    json_data["seqno"] = depth_data_.seqno;
+    json_data["ask_length"] = depth_data_.ask_length;
+    json_data["bid_length"] = depth_data_.bid_length;   
+
+    nlohmann::json asks_json;
+    for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
+    {
+        nlohmann::json depth_level_atom;
+        depth_level_atom[0] = depth_data_.asks[i].price.get_value();
+        depth_level_atom[1] = depth_data_.asks[i].volume.get_value();
+        depth_level_atom[2] = ask_accumulated_volume_[i].get_value();
+        asks_json[i] = depth_level_atom;
+    }
+    json_data["asks"] = asks_json;
+
+    nlohmann::json bids_json;
+    for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
+    {
+        nlohmann::json depth_level_atom;
+        depth_level_atom[0] = depth_data_.bids[i].price.get_value();
+        depth_level_atom[1] = depth_data_.bids[i].volume.get_value();
+        depth_level_atom[2] = bid_accumulated_volume_[i].get_value();
+        bids_json[i] = depth_level_atom;
+    }
+    json_data["bids"] = bids_json;
+    json_data["type"] = MARKET_DATA_UPDATE;
+
+    result = json_data.dump(); 
+    
+    return result;
 }
 
 string RspKLineData::get_json_str()
@@ -65,7 +116,7 @@ string RspKLineData::get_json_str()
     {
         string result;
         nlohmann::json json_data;       
-        if (is_update)
+        if (is_update_)
         {
             json_data["type"] = KLINE_UPDATE;
         } 
