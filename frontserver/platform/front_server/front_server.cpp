@@ -260,6 +260,8 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                      << "low: " << atom_kline->px_low.get_value() << endl;
             }
 
+            cout << kline_data_str << endl;
+
             if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
             {
                 if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
