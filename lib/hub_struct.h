@@ -99,11 +99,6 @@ struct KlineData
         assign(volume, SDecimal(volume));        
     }                
 
-    ~KlineData()
-    {
-        // cout << "~KlineData" << endl;
-    }
-
     KlineData(const KlineData& other)
     {
         assign(symbol, other.symbol);
@@ -134,8 +129,8 @@ struct KlineData
 
     bool is_clear() {return clear_;}    
                     
-    symbol_type symbol{NULL};
-    symbol_type exchange{NULL};
+    symbol_type symbol;
+    symbol_type exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

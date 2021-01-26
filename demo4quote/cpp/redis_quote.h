@@ -5,7 +5,7 @@
 struct RedisKlineHelper
 {
     uint32 resolution_;
-    unordered_map<TSymbol, unordered_map<TExchange, bool>> first_package_;
+    unordered_map<TSymbol, unordered_map<TExchange, type_tick>> first_package_;
 
     RedisKlineHelper(uint32 resolution): resolution_(resolution){};
 
