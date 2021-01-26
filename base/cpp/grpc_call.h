@@ -23,6 +23,7 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::ServerCompletionQueue;
 using grpc::Status;
+#include "base/cpp/basic.h"
 
 
 class CommonGrpcCall
@@ -49,13 +50,27 @@ public:
     int call_id_;
 
     ServerContext ctx_;
+
+    int64 current_loop_id_;
+
+    bool is_active_;
+    bool is_processing_;
 public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
     virtual void on_init() {};
 
-    BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1){}
+    BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1),is_active_(true),is_processing_(false){}
     virtual ~BaseGrpcEntity(){}
+
+    void make_active() {
+        if( !is_processing_ && !is_active_ ) {
+            is_active_ = true;
+            gpr_timespec t = gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME);
+            //tfm::printfln("make_active %u.%u", t.tv_sec, t.tv_nsec);
+            alarm_.Set(cq_, t, this);
+        }
+    }
 
     ServerContext* get_context() { return &ctx_; }
 
@@ -63,12 +78,16 @@ public:
     void set_completequeue(ServerCompletionQueue* cq) { cq_ = cq; }
     void set_parent(CommonGrpcCall* caller) { caller_ = caller; }
     
-    void release() {
+    void release(int64& loop_id) {
+        current_loop_id_ = loop_id ++;
+
         caller_->on_disconnect(this);
         delete this;
     }
 
-    void proceed() { 
+    void proceed(int64& loop_id) { 
+        current_loop_id_ = loop_id ++;
+
         if( status_ == PROCESS) {
             if ( is_first )
             {
@@ -78,12 +97,18 @@ public:
             
             // process返回true表示有消息发送
             // 返回false表示无消息，需要手动插入一个事件
-            if( !process() ) {
-                alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
+            {                
+                TimeCostWatcher w("_handle_rpcs");
+                is_processing_ = true;
+                if( !process() ) {
+                    is_active_ = false;
+                    //alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
+                }
+                is_processing_ = false;
             }
 
-            if( status_ != FINISH )
-                status_ = PUSH_TO_BACK;
+            //if( status_ != FINISH )
+            //    status_ = PUSH_TO_BACK;
         } else if(status_ == PUSH_TO_BACK) {
             status_ = PROCESS;
             alarm_.Set(cq_, gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME), this);
@@ -110,7 +135,7 @@ public:
         call_id++;
     }
 
-    void on_connect(void* entity) {    
+    void on_connect(void* entity) {
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             clients_.insert((ENTITY*)entity);
@@ -135,9 +160,12 @@ public:
 
     template<class DATA_TYPE>
     void add_data(const DATA_TYPE& data) {
-        std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
-        for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
-            (*iter)->add_data(data);
+        {
+            std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
+            for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
+                (*iter)->make_active();
+                (*iter)->add_data(data);
+            }
         }
     }
 private:

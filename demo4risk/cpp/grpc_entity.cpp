@@ -12,65 +12,6 @@ void copy_protobuf_object(const T* src, T* dst) {
     dst->ParseFromString(tmp);
 }
 
-void quote_to_quote(const MarketStreamData* src, MarketStreamData* dst) {
-    dst->set_exchange(src->exchange());
-    dst->set_symbol(src->symbol());
-    dst->set_is_snap(src->is_snap());
-    dst->set_price_precise(src->price_precise());
-    dst->set_volume_precise(src->volume_precise());
-
-    // 卖盘
-    for( int i = 0 ; i < src->asks_size() ; ++i ) {
-        const Depth& src_depth = src->asks(i);
-        Depth* depth = dst->add_asks();
-        depth->set_price(src_depth.price());
-        depth->set_volume(src_depth.volume());        
-        for( auto v : src_depth.data() ) {
-            (*depth->mutable_data())[v.first] = v.second;
-        }
-    }
-    // 买盘
-    for( int i = 0 ; i < src->bids_size() ; ++i ) {
-        const Depth& src_depth = src->bids(i);
-        Depth* depth = dst->add_bids();
-        depth->set_price(src_depth.price());
-        depth->set_volume(src_depth.volume());        
-        for( auto v : src_depth.data() ) {
-            (*depth->mutable_data())[v.first] = v.second;
-        }
-    }
-};
-
-void quote_to_quote(const MarketStreamDataWithDecimal* src, MarketStreamDataWithDecimal* dst) {
-    dst->set_exchange(src->exchange());
-    dst->set_symbol(src->symbol());
-    dst->set_seq_no(src->seq_no());
-    dst->set_price_precise(src->price_precise());
-    dst->set_volume_precise(src->volume_precise());
-    dst->set_is_snap(src->is_snap());
-
-    // 卖盘
-    for( int i = 0 ; i < src->asks_size() ; ++i ) {
-        const DepthWithDecimal& src_depth = src->asks(i);
-        DepthWithDecimal* dst_depth = dst->add_asks();
-        set_decimal(dst_depth->mutable_price(), src_depth.price());
-        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
-        for( auto v : src_depth.data() ) {
-            (*dst_depth->mutable_data())[v.first] = v.second;
-        }
-    }
-    // 买盘
-    for( int i = 0 ; i < src->bids_size() ; ++i ) {
-        const DepthWithDecimal& src_depth = src->bids(i);
-        DepthWithDecimal* dst_depth = dst->add_bids();
-        set_decimal(dst_depth->mutable_price(), src_depth.price());
-        set_decimal(dst_depth->mutable_volume(), src_depth.volume());
-        for( auto v : src_depth.data() ) {
-            (*dst_depth->mutable_data())[v.first] = v.second;
-        }
-    }
-};
-
 //////////////////////////////////////////////////
 MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service, IDataCacher* cacher)
 : responder_(get_context())
@@ -81,7 +22,7 @@ MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service, IDataCacher*
 
 void MarketStream4BrokerEntity::register_call()
 {
-    std::cout << "register MarketStream4BrokerEntity" << std::endl;
+    _log_and_print("%s register MarketStream4BrokerEntity", get_context()->peer());
     service_->RequestServeMarketStream4Broker(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -128,8 +69,9 @@ MarketStream4HedgeEntity::MarketStream4HedgeEntity(void* service, IDataCacher* c
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
-void MarketStream4HedgeEntity::register_call(){
-    std::cout << "register MarketStream4HedgeEntity" << std::endl;
+void MarketStream4HedgeEntity::register_call()
+{
+    _log_and_print("%s register MarketStream4HedgeEntity", get_context()->peer());
     service_->RequestServeMarketStream4Hedge(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -178,7 +120,7 @@ MarketStream4ClientEntity::MarketStream4ClientEntity(void* service, IDataCacher*
 
 void MarketStream4ClientEntity::register_call()
 {
-    std::cout << "register MarketStream4ClientEntity" << std::endl;
+    _log_and_print("%s register MarketStream4ClientEntity", get_context()->peer());
     service_->RequestServeMarketStream4Client(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -229,7 +171,7 @@ OtcQuoteEntity::OtcQuoteEntity(void* service, IDataCacher* cacher)
 
 void OtcQuoteEntity::register_call()
 {
-    std::cout << "register OtcQuoteEntity" << std::endl;
+    _log_and_print("%s register OtcQuoteEntity", get_context()->peer());
     service_->RequestOtcQuote(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -257,7 +199,7 @@ GetParamsEntity::GetParamsEntity(void* service, IDataCacher* cacher)
 
 void GetParamsEntity::register_call()
 {
-    std::cout << "register GetParamsEntity" << std::endl;
+    _log_and_print("%s register GetParamsEntity", get_context()->peer());
     service_->RequestGetParams(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
