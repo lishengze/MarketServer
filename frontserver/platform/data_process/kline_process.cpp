@@ -635,7 +635,13 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
             if (kline_data->index - kline_update.last_update_time_ >= kline_update.kline_data_.frequency_)
             {
-                cout << "\n**** Kline Update Time: " << get_sec_time_str(kline_data->index) << " ****"<< endl;
+                cout << "\n**** Kline Update Time: " << get_sec_time_str(kline_data->index) 
+                <<"open: " << kline_data->px_open.get_value() << " " 
+                <<"close: " << kline_data->px_close.get_value() << " "
+                <<"high: " << kline_data->px_high.get_value() << " "
+                <<"low: " << kline_data->px_low.get_value() << " "                
+                << " ****"<< endl;
+                
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(last_kline);
                 
                 PackagePtr rsp_package = GetNewRspKLineDataPackage(&(kline_update.reqkline_data), cur_kline_data, ID_MANAGER->get_id());
