@@ -130,7 +130,7 @@ public:
 
     void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
 
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 private:
     // callback
     QuoteSourceInterface *engine_interface_ = nullptr;

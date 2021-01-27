@@ -17,7 +17,8 @@ void setup_signal_handler_callback()
 
 int main(int argc, char** argv) 
 {
-    test_kline_calculator();
+    test_kline_calculator60();
+    test_kline_calculator3600();
     
     // setup the signal here
     setup_signal_handler_callback();

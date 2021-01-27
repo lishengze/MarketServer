@@ -17,7 +17,7 @@ public:
     { 
         type_tick now = get_miliseconds();
         type_tick delay = now-depth.tick1;
-        if( delay > 50 )
+        if( delay > 5000 )
             tfm::printfln("[raw_depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u tick=%u tick1=%u tick2=%u )", 
                 exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1,
                 depth.tick, depth.tick1, depth.tick2);
@@ -30,7 +30,7 @@ public:
     { 
         type_tick now = get_miliseconds();
         type_tick delay = now-depth.tick1;
-        if( delay > 50 )
+        if( delay > 5000 )
             tfm::printfln("[depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u rc_cost=%u)", 
                 exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1, depth.tick3 - depth.tick2);        
         return 0;
@@ -56,10 +56,14 @@ public:
 
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
     { 
+        if( klines.size() > 5 )
+            return 0;
         for( int i = 0 ; i < klines.size() ; i ++ )
         {
-            tfm::printfln("[kline] %s.%s index=%s open=%s", exchange, symbol, utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), 
-                klines[i].px_open.get_str_value());
+            tfm::printfln("[kline %u] %s.%s index=%s(%u) open=%s high=%s low=%s close=%s volume=%s", resolution, exchange, symbol, 
+                utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].index,
+                klines[i].px_open.get_str_value(), klines[i].px_high.get_str_value(), klines[i].px_low.get_str_value(),
+                klines[i].px_close.get_str_value(), klines[i].volume.get_str_value());
                 
             // 检查K线是否有倒着走            
             if( resolution == 60 ) 
@@ -78,7 +82,7 @@ public:
 
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
-        // tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 
