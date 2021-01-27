@@ -57,7 +57,7 @@ void Config::load_config(string file_name)
                     for (json::iterator it = frequency_list.begin(); it != frequency_list.end(); ++it)
                     {
                         json &value = *it;
-                        frequency_list_.push_back(value.get<int>());                        
+                        frequency_list_.emplace(value.get<int>());                        
                     }
                 }
 
@@ -66,14 +66,14 @@ void Config::load_config(string file_name)
                     frequency_numb_ = js["market_cache"]["frequency_numb"].get<int>();
                 }
 
-                if (js["market_cache"]["frequency_base"].is_number())
+                if (js["market_cache"]["frequency_base"].is_array())
                 {
-                    nlohmann::json frequency_base_list = js["market_cache"]["frequency_list"];
+                    nlohmann::json frequency_base_list = js["market_cache"]["frequency_base"];
 
                     for (json::iterator it = frequency_base_list.begin(); it != frequency_base_list.end(); ++it)
                     {
                         json &value = *it;
-                        frequency_base_list_.push_back(value.get<int>());                        
+                        frequency_base_list_.emplace(value.get<int>());                        
                     }
                 }                
             }              

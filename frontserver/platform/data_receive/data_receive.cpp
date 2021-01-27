@@ -347,7 +347,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    
 
-    LOG_INFO(stream_obj.str());
+    // LOG_INFO(stream_obj.str());
     
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -362,7 +362,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 {
     if (strlen(c_symbol) == 0) 
     {
-        LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
+        // LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
         return;
     }        
 
@@ -372,7 +372,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     }
 
     std::stringstream stream_obj;
-    stream_obj  << "[Kline] handle_kline_data " << c_symbol << " " << klines.size();
+    stream_obj  << "[Kline] handle_kline_data " << c_symbol << " " << resolution << " " << klines.size();
     LOG_DEBUG(stream_obj.str());
 
     string symbol = string(c_symbol);

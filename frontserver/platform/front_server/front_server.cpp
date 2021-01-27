@@ -239,7 +239,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
     {
-        cout << "FrontServer::response_kline_data_package " << endl;
+        cout << "\nFrontServer::response_kline_data_package " << endl;
 
         RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
 
@@ -259,8 +259,9 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                      << "high: " << atom_kline->px_high.get_value() << ", "
                      << "low: " << atom_kline->px_low.get_value() << endl;
             }
+            cout << endl;
 
-            cout << kline_data_str << endl;
+            // cout << kline_data_str << endl;
 
             if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
             {

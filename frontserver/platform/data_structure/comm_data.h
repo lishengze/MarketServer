@@ -344,7 +344,7 @@ class RspKLineData:public Socket
             assign(start_time_, pReqKlineData->start_time_);
             assign(end_time_, pReqKlineData->end_time_);
             assign(frequency_, pReqKlineData->frequency_);
-            assign(data_count_, pReqKlineData->data_count_);
+            assign(data_count_, kline_data_vec.size());
             assign(is_update_, false);
 
             socket_id_ = pReqKlineData->socket_id_;

@@ -23,15 +23,15 @@ class Config
         int get_rest_port() { return rest_port_;}
 
         int get_frequency_numb() { return frequency_numb_;}
-        std::vector<int>& get_frequency_base() { return frequency_base_list_;}
-        std::vector<int>& get_frequency_list() { return frequency_list_;}
+        std::set<int>& get_frequency_base() { return frequency_base_list_;}
+        std::set<int>& get_frequency_list() { return frequency_list_;}
 
     private:
         string                  hub_address_;
         int                     ws_port_;   
         int                     rest_port_; 
-        std::vector<int>        frequency_list_;
+        std::set<int>           frequency_list_;
         int                     frequency_numb_{100};
-        std::vector<int>        frequency_base_list_;
+        std::set<int>           frequency_base_list_;
 
 };

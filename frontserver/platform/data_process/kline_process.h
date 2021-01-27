@@ -71,13 +71,13 @@ public:
 
     bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
 
-    void store_kline_data(int frequency, KlineData* pkline_data);
+    bool store_kline_data(int frequency, KlineData* pkline_data, int base_frequency);
 
     void complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency);
 
-    void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time);
+    void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time, int cur_freq_base);
 
-    void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, int data_count);
+    void get_src_kline_data(string symbol, vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, int data_count, int cur_freq_base);
 
     vector<KlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
 
@@ -88,6 +88,12 @@ public:
     void update_kline_data(const KlineData* kline_data);
 
     void check_websocket_subinfo(ReqKLineData* pReqKlineData);
+
+    void update_frequency_aggreration_map(int src_fre);
+
+    int get_best_freq_base(int req_frequency);
+
+    // void get_append_data(type_tick start_time, type_tick end_time, int data_count, vector<KlineData>& append_result);
 
 private:
     DataProcessPtr                                              process_engine_;   
@@ -104,9 +110,10 @@ private:
 
     bool                                                        test_kline_data_{false};
 
-    vector<int>                                                 frequency_list_;
-    int                                                         frequency_numb_{100};   
-    vector<int>                                                 frequency_base_list_;        
+    int                                                         frequency_cache_numb_{1000}; 
+    map<int, int>                                               frequency_aggreration_map_;
+    set<int>                                                    frequency_cache_set_;
+    set<int>                                                    frequency_base_set_;        
 };
 
 FORWARD_DECLARE_PTR(KlineProcess);
