@@ -1,9 +1,8 @@
 #pragma once
 
-#include "base/cpp/grpc_call.h"
+#include "base/cpp/grpc_server.h"
 #include "base/cpp/concurrentqueue.h"
 #include "base/cpp/decimal.h"
-//#include "grpc_call.h"
 #include "stream_engine_define.h"
 #include "stream_engine.grpc.pb.h"
 #include "kline_mixer.h"

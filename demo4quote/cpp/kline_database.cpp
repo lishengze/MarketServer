@@ -8,6 +8,9 @@ string db_name = "klines.dat";
 // resolution=3600: YYYYMM
 int timet_to_index(type_tick t, int resolution)
 {
+    if( t == 0 )
+        return 0;
+
     struct tm *newtime = localtime( (const long int*)&t );
     if( resolution == 60 ) {
         //return t;
@@ -209,6 +212,9 @@ bool KlineDatabase::get_kline(const TExchange& exchange, const TSymbol& symbol, 
     klines.clear();
     int begin_index = timet_to_index(start_time, resolution);
     int end_index = timet_to_index(end_time, resolution);
+    // end_index无效的时候设置为最大值
+    if( end_index == 0 )
+        end_index = 999999999;
     return _read_range_klines(exchange, symbol, resolution, begin_index, end_index, klines);
 }
 

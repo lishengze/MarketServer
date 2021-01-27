@@ -1,26 +1,12 @@
 #pragma once
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <thread>
 
-#include "grpc/grpc.h"
-#include "grpcpp/channel.h"
-#include "grpcpp/client_context.h"
-#include "grpcpp/create_channel.h"
-#include "grpcpp/security/credentials.h"
-
+#include "base/cpp/grpc_client.h"
 #include "stream_engine.grpc.pb.h"
+#include "risk_controller_config.h"
 
-using grpc::Channel;
-using grpc::ClientContext;
 using grpc::ClientReader;
 using grpc::ClientReaderWriter;
 using grpc::ClientWriter;
-using grpc::Status;
 using quote::service::v1::StreamEngine;
 using quote::service::v1::SubscribeMixQuoteReq;
 using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
@@ -46,8 +32,7 @@ public:
 
 private:
 
-    void _request(const string& addr, IQuoteUpdater* callback) {
-        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+    void _request(std::shared_ptr<grpc::Channel> channel, IQuoteUpdater* callback) {
         std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
 
         SubscribeMixQuoteReq req;
@@ -57,46 +42,46 @@ private:
         std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeMixQuote(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                std::cout << "status is GRPC_CHANNEL_IDLE" << endl;
+                _log_and_print("status is GRPC_CHANNEL_IDLE");
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "status is GRPC_CHANNEL_CONNECTING" << endl;
+                _log_and_print("status is GRPC_CHANNEL_CONNECTING");
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                std::cout << "status is GRPC_CHANNEL_READY" << endl;
+                _log_and_print("status is GRPC_CHANNEL_READY");
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                _log_and_print("status is GRPC_CHANNEL_TRANSIENT_FAILURE");
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                _log_and_print("status is GRPC_CHANNEL_SHUTDOWN");
                 break;
             }
         }
         while (reader->Read(&multiQuote)) {
-            // split and convert
-            // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
             for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
                 const SEData& quote = multiQuote.quotes(i);
-                std::cout << "update symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
                 callback->on_snap(quote);
             }
         }
         Status status = reader->Finish();
         if (status.ok()) {
-            std::cout << "MultiSubscribeQuote rpc succeeded." << std::endl;
+            _log_and_print("MultiSubscribeQuote rpc succeeded.");
         } else {
-            std::cout << "MultiSubscribeQuote rpc failed." << std::endl;
+            _log_and_print("MultiSubscribeQuote rpc failed.");
         }
     }
 
-    void _run(const string& addr, IQuoteUpdater* callback) {
+    void _run(const string& addr, IQuoteUpdater* callback) 
+    {
+        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+
         while( 1 ) {            
-            _request(addr, callback);
+            _request(channel, callback);
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }

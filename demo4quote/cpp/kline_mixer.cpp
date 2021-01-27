@@ -320,6 +320,8 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
     }
 }
 
+// start_time 为0代表无效
+// end_time 为0代表无效
 bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines)
 {
     switch( resolution )
@@ -338,6 +340,26 @@ bool KlineHubber::get_kline(const TExchange& exchange, const TSymbol& symbol, in
         {
             return false;
         }
+    }
+
+    // 按照请求过滤
+    if( start_time != 0 ) {
+        auto iter = klines.begin();
+        for( ; iter != klines.end() ; iter++ ) {
+            if( iter->index >= start_time ) {
+                break;
+            }
+        }
+        klines.erase(klines.begin(), iter);
+    }
+    if( end_time != 0 ) {
+        auto iter = klines.rbegin();
+        for( ; iter != klines.rend() ; iter++ ) {
+            if( iter->index <= end_time ) {
+                break;
+            }
+        }
+        klines.erase(iter.base(), klines.end());
     }
     return true;
 }

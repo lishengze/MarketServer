@@ -75,13 +75,7 @@ struct SInnerQuote {
 class CallDataServeMarketStream;
 
 
-struct OtcParams{
-    double percent;
-};
-
-
 struct Params {
-    OtcParams otc_params;
     AccountInfo cache_account;
     map<TSymbol, QuoteConfiguration> cache_config;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
@@ -232,7 +226,7 @@ public:
     virtual QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price) = 0;
 
     // 查询内部参数
-    virtual void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts) = 0;
+    virtual void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations) = 0;
 
     // 查询快照
     virtual bool get_snaps(vector<SInnerQuote>& snaps) = 0;
@@ -267,7 +261,7 @@ public:
 
     bool get_snaps(vector<SInnerQuote>& snaps);
 
-    void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts);
+    void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations);
 private:
     set<IQuotePusher*> callbacks_;
 
