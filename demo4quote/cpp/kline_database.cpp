@@ -11,9 +11,9 @@ int timet_to_index(type_tick t, int resolution)
     struct tm *newtime = localtime( (const long int*)&t );
     if( resolution == 60 ) {
         //return t;
-        return newtime->tm_year * 10000 + newtime->tm_mon * 100 + newtime->tm_mday;
+        return (1900 + newtime->tm_year) * 10000 + (1 + newtime->tm_mon) * 100 + newtime->tm_mday;
     } else if( resolution == 3600 ) {
-        return newtime->tm_year * 100 + newtime->tm_mon;
+        return (1900 + newtime->tm_year) * 100 + (1 + newtime->tm_mon);
     } else {
         return 0;
     }
@@ -163,7 +163,7 @@ void KlineDatabase::start()
 
 void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    _log_and_print("Database %s-%s add %lu klines", exchange, symbol, klines.size());
+    _log_and_print("Database %s.%s kline%u add %lu klines", exchange, symbol, resolution, klines.size());
 
     std::unique_lock<std::mutex> inner_lock{ mutex_caches_ };
     switch( resolution )
@@ -177,7 +177,7 @@ void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, i
                 } else if( v.index == data.back().index ) {
                     data.back() = v;
                 } else {
-                    _log_and_print("%s-%s kline min1 go back error", exchange, symbol);
+                    _log_and_print("%s.%s kline min1 go back error", exchange, symbol);
                 }
             }
             break;
@@ -191,14 +191,14 @@ void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, i
                 } else if( v.index == data.back().index ) {
                     data.back() = v;
                 } else {
-                    _log_and_print("%s-%s kline min60 go back error", exchange, symbol);
+                    _log_and_print("%s.%s kline min60 go back error", exchange, symbol);
                 }
             }
             break;
         }
         default:
         {
-            _log_and_print("%s-%s unknown resolution %d", exchange, symbol, resolution);
+            _log_and_print("%s.%s unknown resolution %d", exchange, symbol, resolution);
             break;
         }
     }
@@ -332,7 +332,7 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
             }
             default:
             {
-                _log_and_print("%s-%s unknown resolution %d", exchange, symbol, resolution);
+                _log_and_print("%s.%s unknown resolution %d", exchange, symbol, resolution);
                 return false;
             }
         }
@@ -348,7 +348,7 @@ bool KlineDatabase::_write_klines(const TExchange& exchange, const TSymbol& symb
 
 bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol& symbol, int resolution, int index_begin, int index_end, vector<KlineData>& klines)
 {    
-    _log_and_print("exchange=%s symbol=%s resolution=%d begin=%d end=%d", exchange, symbol, resolution, index_begin, index_end);
+    _log_and_print("%s.%s symbol resolution=%d begin=%d end=%d", exchange, symbol, resolution, index_begin, index_end);
     klines.clear();
 
     string data;
@@ -392,7 +392,7 @@ bool KlineDatabase::_read_range_klines(const TExchange& exchange, const TSymbol&
                 break;
             }
             default:{
-                _log_and_print("%s-%s unknown resolution %d", exchange, symbol, resolution);
+                _log_and_print("%s.%s unknown resolution %d", exchange, symbol, resolution);
                 return false;
             }
         }
@@ -446,7 +446,7 @@ bool KlineDatabase::_read_klines(const TExchange& exchange, const TSymbol& symbo
                 break;
             }
             default:{
-                _log_and_print("%s-%s unknown resolution %d", exchange, symbol, resolution);
+                _log_and_print("%s.%s unknown resolution %d", exchange, symbol, resolution);
                 return false;
             }
         }

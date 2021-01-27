@@ -247,32 +247,19 @@ void KlineMixer::set_symbol(const TSymbol& symbol, const unordered_set<TExchange
     min60_kline_calculator_.set_symbol(symbol, exchanges);
 }
 
-void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline)
+void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init)
 {
+    vector<KlineData> output;
     switch( resolution ) 
     {
         case 60:
         {
-            vector<KlineData> output;
             min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
-            if( kline1min_firsttime_[symbol][exchange] == true ){
-                engine_interface_->on_kline("", symbol, resolution, output, false);
-            } else {
-                engine_interface_->on_kline("", symbol, resolution, output, true);
-                kline1min_firsttime_[symbol][exchange] = true;
-            }
             break;
         }
         case 3600:
         {
-            vector<KlineData> output;
-            min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
-            if( kline60min_firsttime_[symbol][exchange] == true ){
-                engine_interface_->on_kline("", symbol, resolution, output, false);
-            } else {
-                engine_interface_->on_kline("", symbol, resolution, output, true);
-                kline60min_firsttime_[symbol][exchange] = true;
-            }
+            min60_kline_calculator_.add_kline(exchange, symbol, kline, output);
             break;
         }
         default:
@@ -281,6 +268,8 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
             break;
         }
     }
+    
+    engine_interface_->on_kline("", symbol, resolution, output, is_init);
 }
 
 //////////////////////////////////////////////////////////////////

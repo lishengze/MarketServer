@@ -91,7 +91,7 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
     for( const auto& v : klines ) {        
-        _log_and_print("get %s-%s kline %d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
+        _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
             v.index,
             v.px_open.get_str_value().c_str(),
             v.px_high.get_str_value().c_str(),
@@ -105,7 +105,7 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
 
     if( exchange != "" )
-        kline_mixer_.on_kline(exchange, symbol, resolution, outputs);
+        kline_mixer_.on_kline(exchange, symbol, resolution, outputs, is_init);
 }
 
 void StreamEngine::signal_handler(int signum)
