@@ -107,7 +107,7 @@ void FrontServer::response_sdepth_package(PackagePtr package)
 
     string send_str = SDepthDataToJsonStr(*psdepth);
 
-    wb_server_->broadcast(send_str);
+    // wb_server_->broadcast(send_str);
 }
 
 void FrontServer::process_rtn_depth_package(PackagePtr package)
@@ -120,7 +120,7 @@ void FrontServer::process_rtn_depth_package(PackagePtr package)
 
     string send_str = convertUTData(prtn_depth, UT_FID_RtnDepth);
 
-    wb_server_->broadcast(send_str);
+    // wb_server_->broadcast(send_str);
 }
 
 void FrontServer::response_symbol_list_package(PackagePtr package)
