@@ -55,11 +55,6 @@ class WBServer
 
     void release();
 
-    void broadcast(string msg);
-
-
-    void broadcast_enhanced_data(string symbol, string data_str);
-    
     void process_on_open(WebsocketClass * ws);
 
     void process_on_message(string ori_msg, WebsocketClass * ws);
@@ -77,8 +72,6 @@ class WBServer
     void clean_ws(WebsocketClass* ws);
 
     bool send_data(ID_TYPE socket_id, string msg);
-
-    bool send_data(WebsocketClassThreadSafePtr ws, string msg);
 
     void heartbeat_run();
 

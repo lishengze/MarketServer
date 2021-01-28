@@ -221,6 +221,13 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         stream_obj << "[E] FrontServer::response_depth_data_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }    
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] WBServer::store_ws: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+        
 }
 
 string FrontServer::get_symbols_str()
