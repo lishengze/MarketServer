@@ -630,13 +630,13 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);
         } else {
-            return _calc_otc_by_volume(quote.asks, false, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);   
+            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);   
         }
     } 
     else
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.bids, true, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
         } else { 
             return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
         }
