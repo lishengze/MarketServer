@@ -256,7 +256,9 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 
-            cout << "Frequency: " << p_rsp_kline_data->frequency_ << ", data_size: " << p_rsp_kline_data->kline_data_vec_.size() << endl;
+            cout << "Frequency: " << p_rsp_kline_data->frequency_ << " "
+                 << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
+                 << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;
             for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
             {
                 cout << get_sec_time_str(atom_kline->index) << ", "
