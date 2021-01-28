@@ -54,3 +54,7 @@ inline int get_random_double(int max, int min)
 string get_sec_time_str(unsigned long time);
 
 void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src);
+
+string get_error_send_rsp_string(string err_msg);
+
+string get_heartbeat_str();

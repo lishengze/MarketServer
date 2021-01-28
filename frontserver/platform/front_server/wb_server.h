@@ -65,11 +65,11 @@ class WBServer
 
     void process_heartbeat(ID_TYPE socket_id);
 
-    WebsocketClassThreadSafePtr store_ws(WebsocketClass * ws);
+    ID_TYPE store_ws(WebsocketClass * ws);
 
-    bool check_ws(WebsocketClass * ws);
+    ID_TYPE check_ws(WebsocketClass * ws);
 
-    void clean_ws(WebsocketClass* ws);
+    ID_TYPE clean_ws(WebsocketClass* ws);
 
     bool send_data(ID_TYPE socket_id, string msg);
 
@@ -79,9 +79,7 @@ class WBServer
 
     void check_heartbeat();
 
-    string get_error_send_rsp_string(string err_msg);
-
-    string get_heartbeat_str();
+    ID_TYPE get_socket_id(WebsocketClass * ws);
 
     private:
         us_socket_context_options_t             socket_options_;
@@ -94,13 +92,15 @@ class WBServer
 
         std::map<ID_TYPE, WebsocketClassThreadSafePtr> wss_con_map_;
 
-        std::mutex                              wss_con_set_mutex_;
+        std::map<WebsocketClass*, ID_TYPE>      wss_pointer_id_map;
+
+        std::mutex                              wss_con_mutex_;
  
-        std::shared_ptr<std::thread>          listen_thread_;
+        std::shared_ptr<std::thread>            listen_thread_;
 
         FrontServer*                            front_server_{nullptr};
 
-        std::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
+        std::shared_ptr<std::thread>            heartbeat_thread_{nullptr};    
 
         int                                     heartbeat_seconds_{5};    
 

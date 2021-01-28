@@ -78,25 +78,27 @@ def sub_btc_usdt(ws, sub_symbol):
     # sub_info_str = json.dumps(sub_info)
     # print("sub_info_str: %s" % (sub_info_str))
 
-    sub_info_str = get_sub_kline_str(sub_symbol)
+    # sub_info_str = get_sub_kline_str(sub_symbol)
+
+    sub_info_str = get_sub_depth_str(sub_symbol)
 
     ws.send(sub_info_str)   
 
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
     ws.send(send_str)
 
-    # _thread.start_new_thread(sub_btc_usdt, (ws, "XRP_USDT", ) )
+    _thread.start_new_thread(sub_btc_usdt, (ws, "XRP_USDT", ) )
 
 def test_websocket():
     # websocket.enableTrace(True)
-    ip = "ws://36.255.220.139"
-    # ip = "ws://127.0.0.1"
+    # ip = "ws://36.255.220.139"
+    ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

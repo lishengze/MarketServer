@@ -4,6 +4,7 @@
 #include "../log/log.h"
 #include "pandora/util/time_util.h"
 #include "id.hpp"
+#include "../ErrorDefine.hpp"
 
 void copy_sdepthdata(SDepthData* des, const SDepthData* src)
 {
@@ -224,4 +225,53 @@ void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineD
         KlineDataPtr atom_ptr = boost::make_shared<KlineData>(atom);
         des.emplace_back(atom_ptr);
     }
+}
+
+string get_error_send_rsp_string(string err_msg)
+{
+    try
+    {
+        nlohmann::json json_obj;
+        json_obj["type"] = "error";
+        json_obj["error_id"] = LOST_TYPE_ITEM;
+        json_obj["error_msg"] = err_msg;
+        return json_obj.dump();
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] get_error_send_rsp_string: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] get_error_send_rsp_string: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+}
+
+string get_heartbeat_str()
+{
+    try
+    {
+        nlohmann::json json_obj;
+        json_obj["type"] = "heartbeat";
+        json_obj["time"] = utrade::pandora::NanoTimeStr();
+        return json_obj.dump();
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] get_heartbeat_str: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] get_heartbeat_str: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+        
+
 }
