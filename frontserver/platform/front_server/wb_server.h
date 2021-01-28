@@ -96,11 +96,11 @@ class WBServer
 
         std::mutex                              wss_con_set_mutex_;
  
-        boost::shared_ptr<std::thread>          listen_thread_;
+        std::shared_ptr<std::thread>          listen_thread_;
 
         FrontServer*                            front_server_{nullptr};
 
-        boost::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
+        std::shared_ptr<std::thread>          heartbeat_thread_{nullptr};    
 
         int                                     heartbeat_seconds_{5};    
 

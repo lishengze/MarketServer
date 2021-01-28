@@ -178,7 +178,7 @@ void WBServer::set_front_server(FrontServer* front_server)
 
 void WBServer::launch()
 {
-    listen_thread_ = boost::make_shared<std::thread>(&WBServer::listen, this);
+    listen_thread_ = std::make_shared<std::thread>(&WBServer::listen, this);
 }
 
 void WBServer::release()
@@ -603,7 +603,7 @@ void WBServer::start_heartbeat()
 {
     try
     {
-        heartbeat_thread_ = boost::make_shared<std::thread>(&WBServer::heartbeat_run, this);
+        heartbeat_thread_ = std::make_shared<std::thread>(&WBServer::heartbeat_run, this);
     }
     catch(const std::exception& e)
     {
