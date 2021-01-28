@@ -207,7 +207,8 @@ bool GetParamsEntity::process()
 {
     map<TSymbol, SDecimal> watermarks;
     map<TExchange, map<TSymbol, double>> accounts;
-    cacher_->get_params(watermarks, accounts);
+    map<TSymbol, string> configurations;
+    cacher_->get_params(watermarks, accounts, configurations);
 
     GetParamsResponse reply;
     for( const auto& v : watermarks ) {
@@ -219,6 +220,9 @@ bool GetParamsEntity::process()
         for( const auto& v2 : v.second ) {
             (*reply.mutable_accounts())[v.first + "." + v2.first] = v2.second;
         }
+    }
+    for( const auto& v : configurations ) {
+        (*reply.mutable_configuration())[v.first] = v.second;
     }
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);

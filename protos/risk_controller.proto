@@ -77,4 +77,5 @@ message QuoteResponse {
 message GetParamsResponse {
     map<string, Decimal> watermarks = 1;
     map<string, double> accounts = 2;
+    map<string, string> configuration = 3;
 }

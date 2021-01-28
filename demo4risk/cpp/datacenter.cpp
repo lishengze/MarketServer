@@ -528,7 +528,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     last_datas_[quote.symbol] = newQuote;
 }
 
-QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const OtcParams& params, double volume, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -558,15 +558,15 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
-        price *= ( 1 + params.percent * 1.0 / 100); 
+        price *= ( 1 + bias * 1.0 / 100); 
     } else {
-        price *= ( 1 - params.percent * 1.0 / 100); 
+        price *= ( 1 - bias * 1.0 / 100); 
     }
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const OtcParams& params, double amount, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -599,9 +599,9 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
     price = total_amount.get_value() / total_volume.get_value();
     if( is_ask ) {
-        price *= ( 1 + params.percent * 1.0 / 100); 
+        price *= ( 1 + bias * 1.0 / 100); 
     } else {
-        price *= ( 1 - params.percent * 1.0 / 100); 
+        price *= ( 1 - bias * 1.0 / 100); 
     }
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
@@ -628,24 +628,24 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     if( volume > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote.asks, true, params_.otc_params, volume, price, quote.precise);
+            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);
         } else {
-            return _calc_otc_by_volume(quote.bids, false, params_.otc_params, volume, price, quote.precise);   
+            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);   
         }
     } 
     else
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.bids, true, params_.otc_params, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
         } else { 
-            return _calc_otc_by_amount(quote.bids, false, params_.otc_params, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
         }
     }
 
     return QuoteResponse_Result_WRONG_DIRECTION;
 }
 
-void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts)
+void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations)
 {
     watermark_worker_.query(watermarks);
 
@@ -656,5 +656,9 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
             const TSymbol& symbol = v2.first;
             accounts[exchange][symbol] = v2.second.amount;
         }
+    }
+    for( const auto&v : params_.cache_config ) {
+        const TSymbol& symbol = v.first;
+        configurations[symbol] = v.second.desc();
     }
 }

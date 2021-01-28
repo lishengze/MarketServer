@@ -1,7 +1,7 @@
 #include "risk_controller.h"
 #include "risk_controller_config.h"
 #include "grpc_server.h"
-
+#include "base/cpp/grpc_client.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -44,6 +44,7 @@ RiskControllerServer::RiskControllerServer()
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file);
     
+    // init server
     utrade::pandora::Singleton<ServerEndpoint>::Instance();
     server_endpoint_.set_cacher(&datacenter_); // 必须在init之前
     server_endpoint_.init(CONFIG->grpc_publish_addr_);

@@ -1,28 +1,12 @@
 #pragma once
 
-#include <chrono>
-#include <thread>
-#include <unordered_map>
-#include <map>
-#include <set>
-#include <vector>
-using namespace std;
-#include "grpc/grpc.h"
-#include "grpcpp/channel.h"
-#include "grpcpp/client_context.h"
-#include "grpcpp/create_channel.h"
-#include "grpcpp/security/credentials.h"
+#include "base/cpp/grpc_client.h"
 #include "account.grpc.pb.h"
-#include "google/protobuf/empty.pb.h"
 #include "risk_controller_config.h"
-#include "account.grpc.pb.h"
 
-using grpc::Channel;
-using grpc::ClientContext;
 using grpc::ClientReader;
 using grpc::ClientReaderWriter;
 using grpc::ClientWriter;
-using grpc::Status;
 using asset::service::v1::Asset;
 using asset::service::v1::AccountStreamData;
 using asset::service::v1::AccountData;
@@ -91,12 +75,11 @@ public:
 
     void start(const string& addr, IAccountUpdater* callback) {
         thread_loop_ = new std::thread(&AccountUpdater::_run, this, addr, callback);
-        check_loop_ = new std::thread(&AccountUpdater::_check_loop, this);
     }
 
 private:
-    void _request(const string& addr, IAccountUpdater* callback) {
-        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+    void _request(std::shared_ptr<grpc::Channel> channel, IAccountUpdater* callback) 
+    {
         std::unique_ptr<Asset::Stub> stub = Asset::NewStub(channel);
 
         google::protobuf::Empty req;
@@ -106,23 +89,23 @@ private:
         std::unique_ptr<ClientReader<AccountStreamData> > reader(stub->GetAccountStream(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                std::cout << "AccountUpdater: status is GRPC_CHANNEL_IDLE" << endl;
+                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_IDLE");
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "AccountUpdater: status is GRPC_CHANNEL_CONNECTING" << endl;
+                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_CONNECTING");
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                std::cout << "AccountUpdater: status is GRPC_CHANNEL_READY" << endl;
+                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_READY");
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
+                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE");
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "AccountUpdater: status is GRPC_CHANNEL_SHUTDOWN" << endl;
+                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_SHUTDOWN");
                 break;
             }
         }
@@ -132,7 +115,7 @@ private:
                 std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
                 for( int i = 0 ; i < multiAccount.account_data_size() ; ++ i ) {
                     const AccountData& account = multiAccount.account_data(i);
-                    _log_and_print("update account %s-%s: %.03f", account.exchange_id().c_str(), account.currency().c_str(), account.available());
+                    _log_and_print("update account %s.%s: %.03f", account.exchange_id().c_str(), account.currency().c_str(), account.available());
                     account_.hedge_accounts_[account.exchange_id()].currencies[account.currency()].amount = account.available();
                 }
             }            
@@ -142,34 +125,15 @@ private:
 
         Status status = reader->Finish();
         if (status.ok()) {
-            std::cout << "AccountUpdater rpc succeeded." << std::endl;
+            _log_and_print("AccountUpdater rpc succeeded.");
         } else {
-            std::cout << "AccountUpdater rpc failed." << std::endl;
+            _log_and_print("AccountUpdater rpc failed.");
         }
     }
 
-    void _check_loop() const
+    void _run(const string& addr, IAccountUpdater* callback) 
     {
-        while( 1 ) 
-        {
-            tfm::printfln("-------------------");
-            std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
-            for( const auto& v : account_.hedge_accounts_ )
-            {
-                for( const auto& v2 : v.second.currencies ) 
-                {
-                    tfm::printfln("%s-%s: %.03f", v.first, v2.first, v2.second.amount);
-                }
-            }
-            tfm::printfln("-------------------");
-
-            // 休眠
-            std::this_thread::sleep_for(std::chrono::seconds(10));
-        }
-    }
-
-    void _run(const string& addr, IAccountUpdater* callback) {
-
+        /*
         // 手动加入测试数据
         account_.hedge_accounts_["ART"].currencies["ABC"].amount = 99999999;
         account_.hedge_accounts_["ART"].currencies["USDT"].amount = 99999999;
@@ -180,16 +144,16 @@ private:
         account_.hedge_accounts_["BINANCE"].currencies["BTC"].amount = 99999999;
         account_.hedge_accounts_["BINANCE"].currencies["USDT"].amount = 99999999;
         callback->on_account_update(account_);
-        
+        */
+        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+
         while( 1 ) {            
-            _request(addr, callback);
+            _request(channel, callback);
             std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
 
     std::thread*               thread_loop_ = nullptr;
-    std::thread*               check_loop_ = nullptr;
-
 
     mutable std::mutex         mutex_account_;
     AccountInfo                account_;
