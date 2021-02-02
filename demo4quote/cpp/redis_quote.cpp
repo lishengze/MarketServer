@@ -333,10 +333,12 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
 };
 
 void RedisQuote::OnConnected() {
+    connected_ = true;
     _log_and_print("Redis RedisQuote::OnConnected");
 };
 
 void RedisQuote::OnDisconnected(int status) {
+    connected_ = false;
     _log_and_print("Redis RedisQuote::OnDisconnected");
 };
 

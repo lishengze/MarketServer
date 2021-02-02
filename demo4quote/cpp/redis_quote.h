@@ -82,12 +82,16 @@ public:
 
     // 订阅
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
+        if( !connected_ )
+            return;
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
+        if( !connected_ )
+            return;
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
@@ -111,6 +115,7 @@ private:
     type_tick last_redis_time_;
     // redis接口对象
     RedisApiPtr redis_api_;
+    bool connected_ = false;
 
     // 管理exchange+symbol的基础信息
     mutable std::mutex mutex_metas_;
