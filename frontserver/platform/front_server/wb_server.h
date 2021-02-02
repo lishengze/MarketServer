@@ -92,7 +92,7 @@ class WBServer
 
         std::map<ID_TYPE, WebsocketClassThreadSafePtr> wss_con_map_;
 
-        std::map<WebsocketClass*, ID_TYPE>      wss_pointer_id_map;
+        // std::map<WebsocketClass*, ID_TYPE>      wss_pointer_id_map;
 
         std::mutex                              wss_con_mutex_;
  

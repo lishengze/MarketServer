@@ -47,8 +47,19 @@ FORWARD_DECLARE_PTR(HttpResponseThreadSafe);
 struct WSData
 {
     ID_TYPE                id_{0};
-    bool                   is_alive{false};
-    // std::set<symbol_type>  sub_symbol_set;
+    // std::mutex             mutex_;
+
+    ID_TYPE get_id() 
+    { 
+        // std::lock_guard<std::mutex> lk(mutex_);
+        return id_;
+    }
+
+    void set_id(ID_TYPE id) 
+    {
+        // std::lock_guard<std::mutex> lk(mutex_);
+        id_ = id;
+    }
 };
 
 class WebsocketClassThreadSafe
@@ -63,7 +74,6 @@ class WebsocketClassThreadSafe
     void send(const string& msg)
     {
         std::lock_guard<std::mutex> lk(mutex);
-        // cout << "ws send: " << msg << endl;
         ws_->send(msg, uWS::OpCode::TEXT);
     }
 
@@ -85,13 +95,13 @@ class WebsocketClassThreadSafe
 
     bool is_alive() {
         std::lock_guard<std::mutex> lk(mutex_);
-        return user_data_.is_alive;
+        return is_alive_;
     }
 
     void set_alive(bool value)
     {
         std::lock_guard<std::mutex> lk(mutex_);
-        user_data_.is_alive = value;
+        is_alive_ = value;
     }
 
     ID_TYPE get_id()
@@ -100,37 +110,11 @@ class WebsocketClassThreadSafe
         return id_;
     }
 
-    // void clear_sub_symbol_list()
-    // {
-    //     std::lock_guard<std::mutex> lk(mutex_);
-    //     user_data_.sub_symbol_set.clear();
-    // }
-
-    // void add_sub_symbol(std::string symbol)
-    // {
-    //     std::lock_guard<std::mutex> lk(mutex_);
-    //     user_data_.sub_symbol_set.emplace(symbol);
-    // }
-
-    // bool is_symbol_subed(std::string symbol)
-    // {
-    //     std::lock_guard<std::mutex> lk(mutex_);
-
-    //     if (user_data_.sub_symbol_set.find(symbol) != user_data_.sub_symbol_set.end())
-    //     {
-    //         return true;
-    //     }
-    //     else
-    //     {
-    //         return false;
-    //     }
-    // }
-
     WebsocketClass* get_ws() { return ws_;}
 
 
     private:
-        WSData                 user_data_;
+        bool                   is_alive_{false};
         WebsocketClass*        ws_{nullptr};
         std::mutex             mutex_;
         ID_TYPE                id_;

@@ -77,7 +77,6 @@ void WBServer::set_front_server(FrontServer* front_server)
 
 void WBServer::on_open(WebsocketClass * ws)
 {
-
     process_on_open(ws);
 }
 
@@ -136,8 +135,6 @@ void WBServer::on_close(WebsocketClass * ws)
         stream_obj << "[E] WBServer::on_close: unkonwn exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }
-    
-
 }
 
 void WBServer::listen()
@@ -236,12 +233,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     try
     {
         ID_TYPE socket_id = check_ws(ws);
-        if (!socket_id)
-        {
-            cout << "ws: " << ws << " is not valid!" << endl;
-            return;
-        }
-        else
+        if (socket_id)
         {
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
@@ -251,8 +243,6 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
             }
             else
             {
-                cout << "\nWBServer::process_on_message: ws: " << ws << endl;
-
                 if (js["type"].get<string>() == "sub_symbol")
                 {
                     process_depth_req(ori_msg, socket_id);
@@ -461,7 +451,7 @@ bool WBServer::send_data(ID_TYPE socket_id, string msg)
     try
     {
         std::lock_guard<std::mutex> lk(wss_con_mutex_);
-        if (wss_con_map_.find(socket_id) != wss_con_map_.end())
+        if (wss_con_map_.find(socket_id) != wss_con_map_.end() && wss_con_map_[socket_id]->is_alive())
         {
             wss_con_map_[socket_id]->send(msg);
             return true;
@@ -517,24 +507,29 @@ void WBServer::check_heartbeat()
 {
     try
     {
-        std::vector<WebsocketClass*> ws_vec;    
+        {
+            std::vector<ID_TYPE> ws_vec;    
 
-        std::lock_guard<std::mutex> lk(wss_con_mutex_);
-        for (auto iter:wss_pointer_id_map)
-        {
-            if (wss_con_map_.find(iter.second) != wss_con_map_.end() && !wss_con_map_[iter.second]->is_alive())
+            std::lock_guard<std::mutex> lk(wss_con_mutex_);
+            for (auto iter:wss_con_map_)
             {
-                ws_vec.push_back(iter.first);
+                if (!iter.second->is_alive())
+                {
+                    ws_vec.push_back(iter.first);
+                }
             }
-        }
-            
-        for (auto ws:ws_vec)
-        {
-            ID_TYPE socket_id = wss_pointer_id_map[ws];
-            wss_con_map_.erase(socket_id);
-            wss_pointer_id_map.erase(ws);
-            cout << "ws: " << ws << " , id: " << socket_id << " check heartbeat failed!" << endl;
-        }        
+                
+            for (auto socket_id:ws_vec)
+            {
+                cout << "ws: " << wss_con_map_[socket_id] << " , id: " << socket_id << " check heartbeat failed!" << endl;
+                WebsocketClass * ws = wss_con_map_[socket_id]->get_ws();
+                WSData* data_ptr = (WSData*)(ws->getUserData());
+                data_ptr->set_id(0);
+
+                wss_con_map_[socket_id]->set_alive(false);
+                wss_con_map_.erase(socket_id);            
+            }     
+        }   
 
         string heartbeat_str = get_heartbeat_str();    
         for (auto iter:wss_con_map_)
@@ -542,8 +537,6 @@ void WBServer::check_heartbeat()
             iter.second->set_alive(false);
             iter.second->send(heartbeat_str);
         }
-
-
     }
     catch(const std::exception& e)
     {
@@ -563,20 +556,17 @@ void WBServer::check_heartbeat()
 ID_TYPE WBServer::store_ws(WebsocketClass * ws)
 {
     try
-    {
-        std::lock_guard<std::mutex> lk(wss_con_mutex_);
+    {                
+        WSData* data_ptr = (WSData*)(ws->getUserData());
+        ID_TYPE socket_id = data_ptr->get_id();
 
-        ID_TYPE socket_id = 0;
-        if (wss_pointer_id_map.find(ws) != wss_pointer_id_map.end())
-        {
-            socket_id = wss_pointer_id_map[ws];
-        }
-        else
+        if (!socket_id)
         {
             socket_id = ID_MANAGER->get_id();
-            wss_pointer_id_map[ws] = socket_id;
+            data_ptr->set_id(socket_id);
         }
 
+        std::lock_guard<std::mutex> lk(wss_con_mutex_);
         if (wss_con_map_.find(socket_id) == wss_con_map_.end())
         {
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
@@ -598,32 +588,38 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         stream_obj << "[E] WBServer::store_ws: unkonwn exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }
-    
-
 }
 
 ID_TYPE WBServer::check_ws(WebsocketClass * ws)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(wss_con_mutex_);
-
-        if (wss_pointer_id_map.find(ws) != wss_pointer_id_map.end())
+        WSData* data_ptr = (WSData*)(ws->getUserData());
+        ID_TYPE socket_id = data_ptr->get_id();
+        if (socket_id)
         {
-            ID_TYPE socket_id = wss_pointer_id_map[ws];
             if (wss_con_map_.find(socket_id) == wss_con_map_.end())
             {
-                WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
-                ws_safe->set_alive(true);
-                wss_con_map_[socket_id] = ws_safe;                
+                stringstream s_obj;
+                s_obj << "ws " << ws << " id: " << socket_id << " was not stored in wss_con_map_!" << "\n";
+                LOG_INFO(s_obj.str());
+
+                data_ptr->set_id(0);
             }
-            wss_con_map_[socket_id]->set_alive(true);
-            return socket_id;
-        }    
+            else
+            {
+                wss_con_map_[socket_id]->set_alive(true);
+            }
+
+            
+            cout << "\nWBServer::check_ws: " << data_ptr->get_id() << " " << ws << endl;
+        }
         else
         {
-            return 0;
+            cout << "\nWBServer ws " << ws << " is invalid now! " << endl;
         }
+
+        return data_ptr->get_id();
     }
     catch(const std::exception& e)
     {
@@ -643,27 +639,30 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(wss_con_mutex_);
+        WSData* data_ptr = (WSData*)(ws->getUserData());
+        ID_TYPE socket_id = data_ptr->get_id();
 
-        if (wss_pointer_id_map.find(ws) != wss_pointer_id_map.end())
+        if (socket_id)
         {
-            ID_TYPE socket_id = wss_pointer_id_map[ws];
-            wss_pointer_id_map.erase(ws);
+            data_ptr->set_id(0);
 
+            std::lock_guard<std::mutex> lk(wss_con_mutex_);
             if (wss_con_map_.find(socket_id) != wss_con_map_.end())
             {
+                wss_con_map_[socket_id]->set_alive(false);
                 wss_con_map_.erase(socket_id);
-                cout << "Close Socket: " << ws << " id: " << socket_id << " successfully! " << endl;
+                cout << "clean_ws Socket: " << ws << " id: " << socket_id << " successfully! " << endl;
             }
             else
             {
-                cout << "Close Socket: " << ws << " id: " << socket_id << " Failed! " << endl;
+                cout << "clean_ws Socket: " << ws << " id: " << socket_id << " Already Cleaned! " << endl;
             }
             return socket_id;
+        
         }
         else
         {
-            cout << "Close Socket: " << ws << " Failed! No WS!" << endl;
+            cout << "clean_ws Socket: " << socket_id << " was not stored!" << endl;
         }
 
         return 0;
@@ -685,14 +684,6 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
 
 ID_TYPE WBServer::get_socket_id(WebsocketClass * ws)
 {
-    std::lock_guard<std::mutex> lk(wss_con_mutex_);
-
-    if (wss_pointer_id_map.find(ws) != wss_pointer_id_map.end())
-    {
-        return wss_pointer_id_map[ws];
-    }
-    else
-    {
-        return 0;
-    }
+    WSData* data_ptr = (WSData*)(ws->getUserData());
+    return data_ptr->get_id();
 }
