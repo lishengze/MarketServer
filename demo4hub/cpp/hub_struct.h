@@ -34,7 +34,7 @@ struct SDepthData:virtual public PacakgeBaseData
         assign(bid_length, other.bid_length);
         assign(is_raw, other.is_raw);
     
-        cout << "SDepthData: " << symbol << " src symbol: " << other.symbol << endl;
+        // cout << "SDepthData: " << symbol << " src symbol: " << other.symbol << endl;
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
