@@ -13,33 +13,27 @@
 #include <random>
 #include <algorithm>
 #include <mutex>
-
-#include "pandora/envdeclare.h"
-#include "pandora/util/json.hpp"
-#include "pandora/util/thread_basepool.h"
-#include "quark/cxx/assign.h"
-#include "pandora/package/package_station.h"
-#include "boost/make_shared.hpp"
-#include "boost/enable_shared_from_this.hpp"
-#include "pandora/package/package_manager.h"
-#include "pandora/util/thread_safe_singleton.hpp"
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
-#include "common_datatype_define.h"
-#include "quark/cxx/assign.h"
-
-#include "util/id.hpp"
-
 #include <iostream>
 
-#include "App.h"
+#include "pandora/package/package_simple.h"
+#include "pandora/util/json.hpp"
+#include "pandora/util/thread_basepool.h"
+#include "pandora/util/thread_safe_singleton.hpp"
 
+
+#include "quark/cxx/assign.h"
+
+#include <boost/make_shared.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include "common_datatype_define.h"
+
+#include "util/id.hpp"
+#include "App.h"
 #include "libusockets.h"
 
 #define PACKAGE_MANAGER utrade::pandora::ThreadSafeSingleton<utrade::pandora::PackageManager>::DoubleCheckInstance()
-
 #define ID_MANAGER utrade::pandora::ThreadSafeSingleton<ID>::DoubleCheckInstance()
 
 using namespace std;

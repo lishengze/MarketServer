@@ -32,13 +32,13 @@ public:
 
     double compute_enquiry_price(SDepthDataPtr depth_data, int type, double volume, double amount, string& errr_msg, int& err_id);
 
-    void response_updated_depth_data(SDepthData* p_depth_data);
+    void response_updated_depth_data(SDepthDataPtr p_depth_data);
 
-    void checkout_subdepth_connections(ReqRiskCtrledDepthData* p_req);
+    void checkout_subdepth_connections(ReqRiskCtrledDepthDataPtr p_req);
 
     void delete_subdepth_connection(string symbol, ID_TYPE socket_id);
 
-    void delete_reqsymbollist_connection(ReqSymbolListData* pReqSymbolListData);
+    void delete_reqsymbollist_connection(ReqSymbolListDataPtr pReqSymbolListData);
 
 private:
     map<string, SDepthDataPtr>                       depth_data_;

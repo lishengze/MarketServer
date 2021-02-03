@@ -10,12 +10,13 @@
 
 #include "../util/tools.h"
 #include "../util/package_manage.h"
+#include "../ErrorDefine.hpp"
+#include "../util/id.hpp"
 #include "../config/config.h"
 #include "../log/log.h"
 
 #include "../front_server_declare.h"
-#include "../ErrorDefine.hpp"
-#include "../util/id.hpp"
+
 
 using namespace std::placeholders;
 
@@ -339,23 +340,31 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
         { 
             if (error_id == 0)
             {
-                PackagePtr package = PackagePtr{new Package{}};
-        
-                package->SetPackageID(ID_MANAGER->get_id());
-
-                package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
-
-                CREATE_FIELD(package, ReqKLineData);
-
-                ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
-
-                if (p_req_kline_data)
+                COMM_TYPE socket_type = COMM_TYPE::WEBSOCKET;
+                PackagePtr package = CreatePackage<ReqKLineData>(symbol, start_time, end_time, data_count, frequency, 
+                                                                 socket_id, socket_type);
+                
+                if (package)
                 {
-                    p_req_kline_data->set(symbol, start_time, end_time, data_count, frequency, 
-                                          socket_id, COMM_TYPE::WEBSOCKET);  
-
+                    package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
                     front_server_->deliver_request(package);
-                }                   
+                }
+                else
+                {
+                    LOG_ERROR("WBServer::process_kline_req CreatePackage Failed!");
+                }
+
+                // PackagePtr package = PackagePtr{new Package{}};
+                // package->SetPackageID(ID_MANAGER->get_id());
+                // CREATE_FIELD(package, ReqKLineData);
+                // ReqKLineData* p_req_kline_data = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+                // if (p_req_kline_data)
+                // {
+                //     p_req_kline_data->set(symbol, start_time, end_time, data_count, frequency, 
+                //                           socket_id, COMM_TYPE::WEBSOCKET);  
+                //     front_server_->deliver_request(package);
+                // }                   
             }
             else
             {
@@ -404,7 +413,14 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
                     
                 PackagePtr package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
 
-                front_server_->deliver_request(package);
+                if (package)
+                {
+                    front_server_->deliver_request(package);
+                }
+                else
+                {
+                    LOG_ERROR("WBServer::process_depth_req GetReqRiskCtrledDepthDataPackage Failed");
+                }                
             }     
         }
     }

@@ -46,7 +46,7 @@ RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDe
     }
 }
 
-void RspRiskCtrledDepthData::set(const SDepthData* depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
+void RspRiskCtrledDepthData::set(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
 {
     socket_id_ = socket_id;
     socket_type_ = socket_type;
@@ -55,7 +55,7 @@ void RspRiskCtrledDepthData::set(const SDepthData* depth_data, ID_TYPE socket_id
 
     // std::lock_guard<std::mutex> lg(mutex_);
 
-    memcpy(&depth_data_, depth_data, sizeof(SDepthData));
+    memcpy(&depth_data_, &depth_data, sizeof(SDepthData));
 
     // depth_data_ = *depth_data;
 

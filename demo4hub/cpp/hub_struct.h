@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include "common_datatype_define.h"
 #include "quark/cxx/assign.h"
+#include "pandora/package/package_simple.h"
 
 using std::string;
 
@@ -20,8 +21,8 @@ struct SDepthLevelData
     }
 };
 
-const long UT_FID_SDepthData = 0x10000;
-struct SDepthData
+const long UT_FID_SDepthData = 10000;
+struct SDepthData:virtual public PacakgeBaseData
 {
     SDepthData(const SDepthData& other)
     {
@@ -33,6 +34,8 @@ struct SDepthData
         assign(bid_length, other.bid_length);
         assign(is_raw, other.is_raw);
     
+        cout << "SDepthData: " << symbol << " src symbol: " << other.symbol << endl;
+
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
             asks[i] = other.asks[i];
@@ -84,8 +87,8 @@ struct SDepthData
 };
 using SDepthDataPtr = boost::shared_ptr<SDepthData>;
 
-const long UT_FID_KlineData = 0x10001;
-struct KlineData
+const long UT_FID_KlineData = 10001;
+struct KlineData:virtual public PacakgeBaseData
 {
     KlineData(string symbol_str, type_tick time, double open, double high, 
                 double low, double close, double volume_str)
@@ -149,8 +152,7 @@ struct KlineData
 
 using KlineDataPtr = boost::shared_ptr<KlineData>;
 
-
-struct Trade
+struct Trade:virtual public PacakgeBaseData
 {
     symbol_type symbol;
     symbol_type exchange;

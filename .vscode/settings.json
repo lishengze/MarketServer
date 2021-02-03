@@ -69,6 +69,14 @@
         "any": "cpp",
         "valarray": "cpp",
         "hash_map": "c",
-        "hash_set": "c"
+        "hash_set": "c",
+        "front_server_declare.h": "c",
+        "pandora_declare.h": "c",
+        "envdeclare.h": "c",
+        "common_datatype_define.h": "c",
+        "package_station.h": "c",
+        "thread_basepool.h": "c",
+        "json.hpp": "c",
+        "package_simple.h": "c"
     }
 }

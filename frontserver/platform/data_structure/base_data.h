@@ -6,6 +6,7 @@
 #include "../front_server_declare.h"
 #include "../util/id.hpp"
 #include "hub_struct.h"
+#include "pandora/package/package_simple.h"
 
 enum class COMM_TYPE {
     HTTP = 0,
@@ -14,7 +15,7 @@ enum class COMM_TYPE {
     WEBSECKETS,
 };
 
-class HttpRequestThreadSafe
+class HttpRequestThreadSafe:virtual public PacakgeBaseData
 {
     public:
 
@@ -23,7 +24,7 @@ class HttpRequestThreadSafe
 };
 FORWARD_DECLARE_PTR(HttpRequestThreadSafe);
 
-class HttpResponseThreadSafe
+class HttpResponseThreadSafe:virtual public PacakgeBaseData
 {
     public:
 
@@ -62,7 +63,7 @@ struct WSData
     }
 };
 
-class WebsocketClassThreadSafe
+class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 {
     public:
 
@@ -197,7 +198,7 @@ public:
 //     WebsocketClassThreadSafePtr     websocket_{nullptr};
 // };
 
-struct Socket
+struct Socket:virtual public PacakgeBaseData
 {
     Socket() {}
     Socket(ID_TYPE id, COMM_TYPE type):socket_type_{type}, socket_id_{id}
@@ -210,7 +211,7 @@ struct Socket
 };
 
 
-struct AtomKlineData
+struct AtomKlineData:virtual public PacakgeBaseData
 {
     AtomKlineData(double open, double high, double low, double close, double volume):
         open_{open}, close_{close}, high_{high}, low_{low}, volume_{volume} {}

@@ -1,10 +1,7 @@
 #include "server_engine.h"
 #include "front_server_declare.h"
 
-#include "server_engine.h"
-
 volatile int ServerEngine::signal_sys = -1;
-
 
 ServerEngine::ServerEngine(utrade::pandora::io_service_pool& pool)
 {

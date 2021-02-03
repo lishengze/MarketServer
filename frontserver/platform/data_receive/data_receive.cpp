@@ -2,7 +2,6 @@
 #include "../front_server_declare.h"
 #include "quark/cxx/assign.h"
 #include "pandora/util/time_util.h"
-#include "pandora/package/package.h"
 #include "../util/tools.h"
 #include "../util/package_manage.h"
 #include "../log/log.h"
@@ -140,15 +139,15 @@ void DataReceive::test_rsp_package()
     {
         cout << "Send Message " << endl;
 
-        PackagePtr package_new = PACKAGE_MANAGER->AllocateRtnDepth();
+        // PackagePtr package_new = CreateField<>;
 
-        auto p_rtn_depth = GET_NON_CONST_FIELD(package_new, CUTRtnDepthField);
-        package_new->prepare_response(UT_FID_RtnDepth, ID_MANAGER->get_id());
+        // auto p_rtn_depth = GET_NON_CONST_FIELD(package_new, CUTRtnDepthField);
+        // package_new->prepare_response(UT_FID_RtnDepth, ID_MANAGER->get_id());
 
-        assign(p_rtn_depth->ExchangeID, "HUOBI");
-        assign(p_rtn_depth->LocalTime, utrade::pandora::NanoTimeStr());
+        // assign(p_rtn_depth->ExchangeID, "HUOBI");
+        // assign(p_rtn_depth->LocalTime, utrade::pandora::NanoTimeStr());
 
-        deliver_response(package_new);  
+        // deliver_response(package_new);  
 
         std::this_thread::sleep_for(std::chrono::milliseconds(3000));
     }
@@ -208,33 +207,10 @@ void DataReceive::handle_request_message(PackagePtr package)
     switch (package->Tid())
     {
         case UT_FID_ReqKLineData:
-            request_kline_package(package);
             return;
         default:
             break;
     }
-}
-
-void DataReceive::request_kline_package(PackagePtr package)
-{
-    try
-    {
-        ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
-        if (pReqKlineData)
-        {
-
-        }
-        else
-        {
-            LOG_ERROR("DataReceive::request_kline_package ReqKLineData NULL!");
-        }        
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] DataReceive::request_kline_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }    
 }
 
 void DataReceive::handle_response_message(PackagePtr package)
@@ -255,7 +231,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
 
 // K线数据（推送）
 int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines)
-{    
+{   
     if (is_test_kline)
     {
         return -1;
@@ -289,8 +265,7 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
         // 只处理聚合数据;
         return;
     }
-
-    std::stringstream stream_obj;
+        std::stringstream stream_obj;
     stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     LOG_DEBUG(stream_obj.str());
 
@@ -309,12 +284,24 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    SDepthData* p_sdepth_data = GET_NON_CONST_FIELD(package, SDepthData);
-    p_sdepth_data->is_raw = true;
+    if (package)
+    {
+        SDepthDataPtr pSDepthData = GetField<SDepthData>(package);
 
-    package->prepare_response(UT_FID_SDepthData, ID_MANAGER->get_id());
-
-    deliver_response(package);
+        if (pSDepthData)
+        {
+            pSDepthData->is_raw = true;
+            deliver_response(package);
+        }
+        else
+        {
+            LOG_ERROR("DataReceive::handle_raw_depth GetField Failed!");
+        }
+    }
+    else
+    {
+        LOG_ERROR("DataReceive::handle_raw_depth GetNewSDepthDataPackage Failed!");
+    }
 }
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
@@ -347,15 +334,33 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    
 
-    // LOG_INFO(stream_obj.str());
-    
+
+    LOG_INFO(stream_obj.str());
+
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
-    SDepthData* p_sdepth_data = GET_NON_CONST_FIELD(package, SDepthData);
+    if (package)
+    {
+        SDepthDataPtr pSDepthData = GetField<SDepthData>(package);
+        if (pSDepthData)
+        {
+            pSDepthData->is_raw = false;
+            deliver_response(package);
+        }
+        else
+        {
+            LOG_ERROR("DataReceive::handle_raw_depth GetField Failed!");
+        }
+    }
+    else
+    {
+        LOG_ERROR("DataReceive::handle_raw_depth GetNewSDepthDataPackage Failed!");
+    }
 
-    p_sdepth_data->is_raw = false;
-    
-    deliver_response(package);
+    // PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
+    // SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
+    // pSDepthData->is_raw = false;
+    // deliver_response(package);
 }
 
 void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, type_resolution resolution, const vector<KlineData>& klines)
@@ -411,13 +416,24 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
-        KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
+        if (package)
+        {
+            KlineDataPtr pklineData = GetField<KlineData>(package);
 
-        pklineData->frequency_ = resolution;
-
-        package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
-
-        deliver_response(package);
+            if (pklineData)
+            {
+                pklineData->frequency_ = resolution;
+                deliver_response(package);
+            }
+            else
+            {
+                LOG_ERROR("DataReceive::handle_kline_data GetField Failed!");
+            }
+        }
+        else
+        {
+            LOG_ERROR("DataReceive::handle_kline_data GetNewKlineDataPackage Failed!");
+        }
     }   
 }
 

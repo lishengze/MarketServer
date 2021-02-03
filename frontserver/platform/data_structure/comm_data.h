@@ -8,11 +8,12 @@
 #include "base_data.h"
 #include "hub_struct.h"
 
-const long UT_FID_ReqSymbolListData = 0x10002;
-class ReqSymbolListData:public Socket
+const long UT_FID_ReqSymbolListData = 10002;
+class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
 {
     public:
-        ReqSymbolListData(ID_TYPE socket_id, COMM_TYPE socket_type): Socket(socket_id, socket_type)
+        ReqSymbolListData(ID_TYPE socket_id, COMM_TYPE socket_type, bool is_canacel_request=false): 
+            Socket(socket_id, socket_type), is_canacel_request_(is_canacel_request)
         {
 
         }
@@ -35,10 +36,17 @@ class ReqSymbolListData:public Socket
 };
 FORWARD_DECLARE_PTR(ReqSymbolListData);
 
-const long UT_FID_RspSymbolListData = 0x10003;
-class RspSymbolListData:public Socket
+const long UT_FID_RspSymbolListData = 10003;
+class RspSymbolListData:public Socket, virtual public PacakgeBaseData
 {
     public:
+        RspSymbolListData(std::set<std::string>& symbols, ID_TYPE socket_id, COMM_TYPE socket_type)
+        {
+            assign(symbols_, symbols);
+            socket_id_ = socket_id;
+            socket_type_ = socket_type;
+        }
+
         void add_symbol(string symbol)
         {
             symbols_.emplace(symbol);
@@ -62,11 +70,12 @@ class RspSymbolListData:public Socket
 };
 FORWARD_DECLARE_PTR(RspSymbolListData);
 
-const long UT_FID_ReqRiskCtrledDepthData = 0x10004;
-class ReqRiskCtrledDepthData:public Socket
+const long UT_FID_ReqRiskCtrledDepthData = 10004;
+class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
 {
     public:
-    ReqRiskCtrledDepthData(string symbol, ID_TYPE socket_id, COMM_TYPE type):Socket(socket_id, type)
+    ReqRiskCtrledDepthData(string symbol, ID_TYPE socket_id, COMM_TYPE socket_type=COMM_TYPE::WEBSOCKET, bool is_canacel_request=false)
+                            :Socket(socket_id, socket_type), is_canacel_request_(is_canacel_request)
     {
         assign(symbol_, symbol);
     }
@@ -92,11 +101,11 @@ class ReqRiskCtrledDepthData:public Socket
 };
 FORWARD_DECLARE_PTR(ReqRiskCtrledDepthData);
 
-const long UT_FID_RspRiskCtrledDepthData = 0x10005;
-class RspRiskCtrledDepthData:public Socket, public boost::enable_shared_from_this<RspRiskCtrledDepthData>
+const long UT_FID_RspRiskCtrledDepthData = 10005;
+class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, public boost::enable_shared_from_this<RspRiskCtrledDepthData>
 {
     public:
-        RspRiskCtrledDepthData(const SDepthData* depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
+        RspRiskCtrledDepthData(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
         {
             set(depth_data, socket_id, socket_type);
         }
@@ -115,7 +124,7 @@ class RspRiskCtrledDepthData:public Socket, public boost::enable_shared_from_thi
 
         RspRiskCtrledDepthData & operator=(const RspRiskCtrledDepthData& other);
 
-        void set(const SDepthData* depth_data, ID_TYPE socket_id, COMM_TYPE socket_type);
+        void set(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type);
 
         virtual ~RspRiskCtrledDepthData() {}
 
@@ -139,8 +148,8 @@ class RspRiskCtrledDepthData:public Socket, public boost::enable_shared_from_thi
 };
 FORWARD_DECLARE_PTR(RspRiskCtrledDepthData);
 
-const long UT_FID_ReqEnquiry = 0x10006;
-class ReqEnquiry:public Socket
+const long UT_FID_ReqEnquiry = 10006;
+class ReqEnquiry:public Socket, virtual public PacakgeBaseData
 {
     public:
         ReqEnquiry(string symbol, double volumn, double amount, int type, ID_TYPE socket_id, COMM_TYPE socket_type):
@@ -183,8 +192,8 @@ class ReqEnquiry:public Socket
 };
 FORWARD_DECLARE_PTR(ReqEnquiry);
 
-const long UT_FID_RspEnquiry = 0x10007;
-class RspEnquiry:public Socket
+const long UT_FID_RspEnquiry = 10007;
+class RspEnquiry:public Socket, virtual public PacakgeBaseData
 {
     public:
         RspEnquiry(string symbol, double price, ID_TYPE socket_id, COMM_TYPE socket_type):
@@ -213,8 +222,8 @@ class RspEnquiry:public Socket
 };
 FORWARD_DECLARE_PTR(RspEnquiry);
 
-const long UT_FID_ReqKLineData = 0x10008;
-class ReqKLineData:public Socket
+const long UT_FID_ReqKLineData = 10008;
+class ReqKLineData:public Socket, virtual public PacakgeBaseData
 {
     public:
     ReqKLineData():Socket()
@@ -264,17 +273,6 @@ class ReqKLineData:public Socket
         return *this;        
     }
 
-    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
-                 ID_TYPE socket_id, COMM_TYPE socket_type):
-    Socket(socket_id, socket_type)
-    {
-        assign(symbol_, symbol);
-        assign(start_time_, start_time);
-        assign(end_time_, end_time);
-        assign(data_count_, data_count);
-        assign(frequency_, freq);
-    }    
-
     void set(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
              ID_TYPE socket_id, COMM_TYPE socket_type, bool is_canacel_request=false)
     {
@@ -318,10 +316,41 @@ class ReqKLineData:public Socket
 };
 FORWARD_DECLARE_PTR(ReqKLineData);
 
-const long UT_FID_RspKLineData = 0x10009;
-class RspKLineData:public Socket
+const long UT_FID_RspKLineData = 10009;
+class RspKLineData:public Socket, virtual public PacakgeBaseData
 {
     public: 
+        RspKLineData(ReqKLineData& pReqKlineData,
+                    std::vector<KlineDataPtr>& kline_data_vec)
+        {
+            assign(symbol_, pReqKlineData.symbol_);
+            assign(start_time_, pReqKlineData.start_time_);
+            assign(end_time_, pReqKlineData.end_time_);
+            assign(frequency_, pReqKlineData.frequency_);
+            assign(data_count_, kline_data_vec.size());
+            assign(is_update_, false);
+
+            socket_id_ = pReqKlineData.socket_id_;
+            socket_type_ = pReqKlineData.socket_type_;
+
+            kline_data_vec_.swap(kline_data_vec);
+        }   
+
+        RspKLineData(ReqKLineData& pReqKlineData,
+                    KlineDataPtr& kline_data)
+        {
+            assign(symbol_, pReqKlineData.symbol_);
+            assign(start_time_, pReqKlineData.start_time_);
+            assign(end_time_, pReqKlineData.end_time_);
+            assign(frequency_, pReqKlineData.frequency_);
+            assign(data_count_, pReqKlineData.data_count_);
+            assign(is_update_, true);
+
+            socket_id_ = pReqKlineData.socket_id_;
+            socket_type_ = pReqKlineData.socket_type_;
+
+            kline_data_vec_.push_back(kline_data);
+        }     
 
         void set(string symbol, type_tick start_time, type_tick end_time, frequency_type frequency, 
                  int data_count,  ID_TYPE socket_id, COMM_TYPE socket_type, bool is_update,
@@ -336,7 +365,7 @@ class RspKLineData:public Socket
 
             kline_data_vec_.swap(kline_data_vec);
         }
-
+   
         void set(ReqKLineData * pReqKlineData,
                  std::vector<KlineDataPtr>& kline_data_vec)
         {
@@ -385,8 +414,8 @@ class RspKLineData:public Socket
 };
 FORWARD_DECLARE_PTR(RspKLineData);
 
-const long UT_FID_RspErrorMsg = 0x100010;
-class RspErrorMsg:public Socket
+const long UT_FID_RspErrorMsg = 100010;
+class RspErrorMsg:public Socket, virtual public PacakgeBaseData
 {
     public:
         RspErrorMsg(string err_msg, int err_id, 

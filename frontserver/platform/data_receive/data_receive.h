@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pandora/package/package_station.h"
+#include "pandora/package/package_simple.h"
 #include "pandora/util/singleton.hpp"
 #include "pandora/util/thread_basepool.h"
 
@@ -50,8 +50,6 @@ public:
     void handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth);
 
     void handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines);    
-
-    void request_kline_package(PackagePtr package);
 
     void test_kline_data();
 

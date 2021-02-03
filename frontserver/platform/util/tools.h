@@ -1,6 +1,5 @@
 #pragma once
 
-#include "pandora/package/package.h"
 #include "hub_struct.h"
 #include "../data_structure/comm_data.h"
 #include "../front_server_declare.h"

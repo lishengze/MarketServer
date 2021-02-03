@@ -50,7 +50,9 @@ void KlineProcess::request_kline_package(PackagePtr package)
     try
     {
         cout << "KlineProcess::request_kline_package " << endl;
-        ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
+
+        ReqKLineDataPtr pReqKlineData = GetField<ReqKLineData>(package);
+
         if (pReqKlineData)
         {
             if(pReqKlineData -> is_canacel_request_)
@@ -102,7 +104,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
     {
         if (test_kline_data_) return;
 
-        KlineData* pkline_data = GET_NON_CONST_FIELD(package, KlineData);
+        KlineDataPtr pkline_data = GetField<KlineData>(package);
 
         update_kline_data(pkline_data);
 
@@ -199,7 +201,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
     }    
 }
 
-bool KlineProcess::store_kline_data(int frequency, KlineData* pkline_data, int base_frequency)
+bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int base_frequency)
 {
     try
     {
@@ -325,9 +327,8 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 {
     cout << "KlineProcess::get_kline_package  " << endl;
     try
-    {    
-
-        ReqKLineData * pReqKlineData = GET_NON_CONST_FIELD(package, ReqKLineData);
+    {  
+        ReqKLineDataPtr pReqKlineData = GetField<ReqKLineData>(package);
 
         stringstream s_obj;
         s_obj << "\nsymbol_: " << pReqKlineData->symbol_ << ", \n"
@@ -418,9 +419,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
             if (target_kline_data.size() > 0)
             {
-                rsp_package = GetNewRspKLineDataPackage(pReqKlineData, target_kline_data, ID_MANAGER->get_id());
-
-                rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());                
+                rsp_package = GetNewRspKLineDataPackage(*pReqKlineData, target_kline_data, ID_MANAGER->get_id());              
             }
             else
             {
@@ -432,6 +431,15 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                 string err_msg = s_obj.str();
                 int err_id = 1;
                 rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->socket_id_, pReqKlineData->socket_type_);
+
+                if (rsp_package)
+                {
+
+                }
+                else
+                {
+                    LOG_ERROR("KlineProcess::get_kline_package GetRspErrMsgPackage Failed!");
+                }
             }
             
             return rsp_package;                       
@@ -641,19 +649,19 @@ void KlineProcess::init_test_kline_data()
     // cout << "init end!" << endl;
 }
 
-void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineData * pReqKlineData)
+void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData)
 {
-    const RspKLineData* p_rsp_kline_data = GET_FIELD(rsp_package, RspKLineData);
-
-    if (p_rsp_kline_data)
+    RspKLineDataPtr pRspKlineData = GetField<RspKLineData>(rsp_package);
+    if (pRspKlineData)
     {
-        auto iter = p_rsp_kline_data->kline_data_vec_.rbegin();
-
+        auto iter = pRspKlineData->kline_data_vec_.rbegin();
         KlineDataUpdate kline_update(*pReqKlineData);
 
         kline_update.last_update_time_ = (*iter)->index;
 
-        cout <<"\nInit update_kline_data socket_id: " << pReqKlineData->socket_id_ << " " << pReqKlineData->symbol_ << " Last Update Time: " << get_sec_time_str(kline_update.last_update_time_) << endl; 
+        cout << "\nInit update_kline_data socket_id: " << pReqKlineData->socket_id_ << " " 
+             << pReqKlineData->symbol_ << " Last Update Time: " 
+             << get_sec_time_str(kline_update.last_update_time_) << endl; 
 
         updated_kline_data_[string(pReqKlineData->symbol_)].emplace_back(kline_update);          
     }
@@ -726,7 +734,7 @@ bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id
     }
 }
 
-void KlineProcess::update_kline_data(const KlineData* kline_data)
+void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
 {
     string symbol = kline_data->symbol;
 
@@ -792,13 +800,15 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
 
                 cout << endl;           
                 
-                PackagePtr rsp_package = GetNewRspKLineDataPackage(&(kline_update.reqkline_data), cur_kline_data, ID_MANAGER->get_id());
+                PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
 
                 if (rsp_package)
                 {
-                    rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
-
                     process_engine_->deliver_response(rsp_package);
+                }
+                else
+                {
+                    LOG_ERROR("KlineProcess::update_kline_data GetNewRspKLineDataPackage Failed!");
                 }
 
                 kline_update.last_update_time_ = kline_data->index;
@@ -808,7 +818,6 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
             else
             {
                 // 推送更新作为当前 k 线时间数据;
-
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
                 cur_kline_data->index = kline_update.last_update_time_;
 
@@ -819,12 +828,14 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
                 <<"low: " << cur_kline_data->px_low.get_value() << " "                
                 << endl;  
 
-                PackagePtr rsp_package = GetNewRspKLineDataPackage(&(kline_update.reqkline_data), cur_kline_data, ID_MANAGER->get_id());
-
+                PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
                 if (rsp_package)
                 {
-                    rsp_package->prepare_response(UT_FID_RspKLineData, rsp_package->PackageID());
                     process_engine_->deliver_response(rsp_package);
+                }
+                else
+                {
+                    LOG_ERROR("KlineProcess::update_kline_data GetNewRspKLineDataPackage Failed!");
                 }
 
             }
@@ -832,7 +843,7 @@ void KlineProcess::update_kline_data(const KlineData* kline_data)
     }
 }
 
-void KlineProcess::check_websocket_subinfo(ReqKLineData* pReqKlineData)
+void KlineProcess::check_websocket_subinfo(ReqKLineDataPtr pReqKlineData)
 {
     cout << "KlineProcess::check_websocket_subinfo " << pReqKlineData->symbol_ <<" " << pReqKlineData->socket_id_ << endl;
     std::lock_guard<std::mutex> lk(wss_con_map_mutex_);

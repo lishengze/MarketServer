@@ -2,167 +2,204 @@
 #include "tools.h"
 
 PackagePtr GetReqSymbolListDataPackage(ID_TYPE socket_id, COMM_TYPE socket_type, int package_id, bool is_cancel_request)
-{
-    PackagePtr package =PackagePtr{new Package{}};
+{    
     try
     {        
-        package->SetPackageID(package_id);
-        package->prepare_request(UT_FID_ReqSymbolListData, package_id);
-        CREATE_FIELD(package, ReqSymbolListData);
+        PackagePtr package = CreatePackage<ReqSymbolListData>(socket_id, socket_type, is_cancel_request);        
+        if (package)
+        {
+            package->prepare_request(UT_FID_ReqSymbolListData, package_id);
+        }
 
-        ReqSymbolListData* p_req= GET_NON_CONST_FIELD(package, ReqSymbolListData);
+        // PackagePtr package =PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // package->prepare_request(UT_FID_ReqSymbolListData, package_id);
+        // CREATE_FIELD(package, ReqSymbolListData);
+        // ReqSymbolListData* p_req= GET_NON_CONST_FIELD(package, ReqSymbolListData);
+        // p_req->set(socket_id, socket_type, is_cancel_request);      
 
-        p_req->set(socket_id, socket_type, is_cancel_request);        
+        return package;  
     }
     catch(const std::exception& e)
     {
         std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
     }    
-    return package;    
+        
 }
 
 PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, ID_TYPE socket_id,  int package_id, bool is_cancel_request)
-{
-    PackagePtr package =PackagePtr{new Package{}};
+{    
     try
     {        
-        package->SetPackageID(package_id);
-        package->prepare_request(UT_FID_ReqRiskCtrledDepthData, package_id);
-        CREATE_FIELD(package, ReqRiskCtrledDepthData);
+        COMM_TYPE socket_type = COMM_TYPE::WEBSOCKET;
+        PackagePtr package = CreatePackage<ReqRiskCtrledDepthData>(symbol, socket_id, socket_type, is_cancel_request);
+        if (package)
+        {
+            package->prepare_request(UT_FID_ReqRiskCtrledDepthData, package_id);
+        }        
 
-        ReqRiskCtrledDepthData* p_req= GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // package->prepare_request(UT_FID_ReqRiskCtrledDepthData, package_id);
+        // CREATE_FIELD(package, ReqRiskCtrledDepthData);
+        // ReqRiskCtrledDepthData* p_req= GET_NON_CONST_FIELD(package, ReqRiskCtrledDepthData);
+        // p_req->set(symbol, socket_id, COMM_TYPE::WEBSOCKET, is_cancel_request);        
 
-        p_req->set(symbol, socket_id, COMM_TYPE::WEBSOCKET, is_cancel_request);        
+        return package;
     }
     catch(const std::exception& e)
     {
         std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
-    }    
-    return package;
+    }        
 }
 
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
-{
-    PackagePtr package =PackagePtr{new Package{}};
+{    
     try
-    {        
-        package->SetPackageID(package_id);
-        package->prepare_response(UT_FID_SDepthData, package_id);
+    {       
+        PackagePtr package = CreatePackage<SDepthData>(depth);
+        if (package)
+        {
+            package->prepare_response(UT_FID_SDepthData, package_id);
+        }        
 
-        CREATE_FIELD(package, SDepthData);
+        // PackagePtr package =PackagePtr{new Package{}};        
+        // package->SetPackageID(package_id);
+        // package->prepare_response(UT_FID_SDepthData, package_id);
+        // CREATE_FIELD(package, SDepthData);
+        // SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
+        // copy_sdepthdata(pSDepthData, &depth);        
 
-        SDepthData* pSDepthData = GET_NON_CONST_FIELD(package, SDepthData);
-
-        copy_sdepthdata(pSDepthData, &depth);        
+        return package;
     }
     catch(const std::exception& e)
     {
         std::cerr <<"GetNewSDepthDataPackage " << e.what() << '\n';
     }    
-    return package;
+    
 }
 
 PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_id)
-{
-    PackagePtr package =PackagePtr{new Package{}};
+{    
     try
     {        
-        package->SetPackageID(package_id);
-        CREATE_FIELD(package, KlineData);
+        PackagePtr package = CreatePackage<KlineData>(ori_kline_data);
+        if (package)
+        {
+            package->prepare_response(UT_FID_KlineData, package_id);
+        }        
 
-        KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
+        // PackagePtr package =PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // CREATE_FIELD(package, KlineData);
+        // KlineData* pklineData = GET_NON_CONST_FIELD(package, KlineData);
+        // copy_klinedata(pklineData, &ori_kline_data);    
 
-        copy_klinedata(pklineData, &ori_kline_data);        
+        return package;   
     }
     catch(const std::exception& e)
     {
         std::cerr <<"GetNewKlineDataPackage " << e.what() << '\n';
     }    
-    return package;
+    
 }
 
 PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
 {
-    PackagePtr package =PackagePtr{new Package{}};
-
     try
     {        
-        package->SetPackageID(package_id);
+        PackagePtr package = CreatePackage<RspRiskCtrledDepthData>(depth, socket_id, socket_type);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspRiskCtrledDepthData, package_id); 
+        }        
 
-        package->prepare_response(UT_FID_RspRiskCtrledDepthData, package_id); 
+        // PackagePtr package =PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // package->prepare_response(UT_FID_RspRiskCtrledDepthData, package_id); 
+        // CREATE_FIELD(package, RspRiskCtrledDepthData);
+        // RspRiskCtrledDepthData* p_riskctrled_depth_data = GET_NON_CONST_FIELD(package, RspRiskCtrledDepthData);
+        // p_riskctrled_depth_data->set(&depth, socket_id, socket_type);         
 
-        CREATE_FIELD(package, RspRiskCtrledDepthData);
-
-        RspRiskCtrledDepthData* p_riskctrled_depth_data = GET_NON_CONST_FIELD(package, RspRiskCtrledDepthData);
-
-        p_riskctrled_depth_data->set(&depth, socket_id, socket_type);               
+        return package;      
     }
     catch(const std::exception& e)
     {
         std::cerr <<"GetNewRspRiskCtrledDepthDataPackage " << e.what() << '\n';
     }
     
-    return package;    
+        
 }
 
 PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+{  
     try
     {    
-        package->SetPackageID(package_id);
+        PackagePtr package = CreatePackage<RspSymbolListData>(symbols, socket_id, socket_type);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspSymbolListData, package_id);
+        }       
 
-        package->prepare_response(UT_FID_RspSymbolListData, package_id);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // package->prepare_response(UT_FID_RspSymbolListData, package_id);
+        // CREATE_FIELD(package, RspSymbolListData);
+        // RspSymbolListData* p_symbol_data = GET_NON_CONST_FIELD(package, RspSymbolListData);
+        // p_symbol_data->set(symbols, socket_id, socket_type);
 
-        CREATE_FIELD(package, RspSymbolListData);
-
-        RspSymbolListData* p_symbol_data = GET_NON_CONST_FIELD(package, RspSymbolListData);
-
-        p_symbol_data->set(symbols, socket_id, socket_type);
+        return package;     
     }
     catch(const std::exception& e)
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;       
+    }      
 }
 
 PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, HttpResponseThreadSafePtr res)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+{    
     try
     {    
-        ID_TYPE id = ID_MANAGER->get_id();
-        package->SetPackageID(id);
-        package->prepare_request(UT_FID_ReqEnquiry, id);
+        // PackagePtr package = CreatePackage<ReqEnquiry>(symbol, volume, amount, type, res);
+        // if (package)
+        // {
+        //     ID_TYPE package_id = ID_MANAGER->get_id();
+        //     package->prepare_response(UT_FID_ReqEnquiry, package_id);
+        // }  
 
-        CREATE_FIELD(package, ReqEnquiry);
-
-        ReqEnquiry* p_req_enquiry = GET_NON_CONST_FIELD(package, ReqEnquiry);
-
+        // PackagePtr package = PackagePtr{new Package{}};
+        // ID_TYPE id = ID_MANAGER->get_id();
+        // package->SetPackageID(id);
+        // package->prepare_request(UT_FID_ReqEnquiry, id);
+        // CREATE_FIELD(package, ReqEnquiry);
+        // ReqEnquiry* p_req_enquiry = GET_NON_CONST_FIELD(package, ReqEnquiry);
         // p_req_enquiry->set(symbol, volume, amount, type, res);        
+
+        // return package;  
     }
     catch(const std::exception& e)
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
     }
     
-    return package;  
+    
 }
 
-PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<KlineDataPtr>& kline_data_vec, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData& pReqKlineData, std::vector<KlineDataPtr>& kline_data_vec, int package_id)
+{    
     try
     {    
-        package->SetPackageID(package_id);
+        PackagePtr package = CreatePackage<RspKLineData>(pReqKlineData, kline_data_vec);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspKLineData, package_id);
+        }  
 
-        CREATE_FIELD(package, RspKLineData);
-
-        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
-
-        p_rsp_kline_data->set(pReqKlineData, kline_data_vec);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
+        // CREATE_FIELD(package, RspKLineData);
+        // RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+        // p_rsp_kline_data->set(pReqKlineData, kline_data_vec);
 
         // p_rsp_kline_data->set(pReqKlineData->symbol_, pReqKlineData->start_time_, pReqKlineData->end_time_,
         //                       pReqKlineData->frequency_, pReqKlineData->data_count_,
@@ -189,33 +226,35 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, std::vector<K
     catch(const std::exception& e)
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;        
+    }     
 }
 
 
-PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr& update_kline_data, int package_id)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+PackagePtr GetNewRspKLineDataPackage(ReqKLineData& pReqKlineData, KlineDataPtr& update_kline_data, int package_id)
+{    
     try
     {    
-        package->SetPackageID(package_id);
+        PackagePtr package = CreatePackage<RspKLineData>(pReqKlineData, update_kline_data);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspKLineData, package_id);
+        }  
 
-        CREATE_FIELD(package, RspKLineData);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // package->SetPackageID(package_id);
 
-        RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+        // CREATE_FIELD(package, RspKLineData);
 
-        p_rsp_kline_data->set(pReqKlineData, update_kline_data);
+        // RspKLineData* p_rsp_kline_data = GET_NON_CONST_FIELD(package, RspKLineData);
+
+        // p_rsp_kline_data->set(pReqKlineData, update_kline_data);
 
         return package;
     }
     catch(const std::exception& e)
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;        
+    } 
 }
 
 // PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
@@ -254,44 +293,52 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData * pReqKlineData, KlineDataPtr&
 // }                                     
 
 PackagePtr GetRspEnquiryPackage(string symbol, double price, ID_TYPE socket_id, COMM_TYPE socket_type)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+{    
     try
     {    
-        ID_TYPE id = ID_MANAGER->get_id();
-        package->SetPackageID(id);
-        package->prepare_response(UT_FID_RspEnquiry, id);
+        PackagePtr package = CreatePackage<RspEnquiry>(symbol, price, socket_id, socket_type);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspEnquiry, ID_MANAGER->get_id());
+        }  
 
-        CREATE_FIELD(package, RspEnquiry);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // ID_TYPE id = ID_MANAGER->get_id();
+        // package->SetPackageID(id);
+        // package->prepare_response(UT_FID_RspEnquiry, id);
 
-        RspEnquiry* p_rsp_enquiry_data = GET_NON_CONST_FIELD(package, RspEnquiry);
+        // CREATE_FIELD(package, RspEnquiry);
 
-        p_rsp_enquiry_data->set(symbol, price, socket_id, socket_type);
+        // RspEnquiry* p_rsp_enquiry_data = GET_NON_CONST_FIELD(package, RspEnquiry);
+
+        // p_rsp_enquiry_data->set(symbol, price, socket_id, socket_type);
     
         return package;
     }
     catch(const std::exception& e)
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
-    }
-    
-    return package;      
+    } 
 }
 
 PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,  ID_TYPE socket_id, COMM_TYPE socket_type)
-{
-    PackagePtr package = PackagePtr{new Package{}};
+{    
     try
     {    
-        ID_TYPE id = ID_MANAGER->get_id();
-        package->SetPackageID(id);
-        package->prepare_response(UT_FID_RspErrorMsg, id);
+        PackagePtr package = CreatePackage<RspErrorMsg>(err_msg, err_id, socket_id, socket_type);
+        if (package)
+        {
+            package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());;
+        }  
 
-        CREATE_FIELD(package, RspErrorMsg);
+        // PackagePtr package = PackagePtr{new Package{}};
+        // ID_TYPE id = ID_MANAGER->get_id();
+        // package->SetPackageID(id);
+        // package->prepare_response(UT_FID_RspErrorMsg, id);
 
-        RspErrorMsg* p_rsp_err = GET_NON_CONST_FIELD(package, RspErrorMsg);
-
-        p_rsp_err->set(err_msg, err_id, socket_id, socket_type);
+        // CREATE_FIELD(package, RspErrorMsg);
+        // RspErrorMsg* p_rsp_err = GET_NON_CONST_FIELD(package, RspErrorMsg);
+        // p_rsp_err->set(err_msg, err_id, socket_id, socket_type);
     
         return package;
     }
@@ -299,6 +346,4 @@ PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,  ID_TYPE socket_id, C
     {
         std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
     }
-    
-    return package;
 }                                

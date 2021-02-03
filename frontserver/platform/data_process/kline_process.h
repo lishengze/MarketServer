@@ -71,7 +71,7 @@ public:
 
     bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
 
-    bool store_kline_data(int frequency, KlineData* pkline_data, int base_frequency);
+    bool store_kline_data(int frequency, KlineDataPtr pkline_data, int base_frequency);
 
     void complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency);
 
@@ -83,11 +83,11 @@ public:
 
     void init_test_kline_data();
 
-    void init_update_kline_data(PackagePtr rsp_package, ReqKLineData * pReqKlineData);
+    void init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData);
 
-    void update_kline_data(const KlineData* kline_data);
+    void update_kline_data(const KlineDataPtr kline_data);
 
-    void check_websocket_subinfo(ReqKLineData* pReqKlineData);
+    void check_websocket_subinfo(ReqKLineDataPtr pReqKlineData);
 
     void update_frequency_aggreration_map(int src_fre);
 
