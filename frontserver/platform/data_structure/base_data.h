@@ -210,7 +210,6 @@ struct Socket:virtual public PacakgeBaseData
     ID_TYPE                         socket_id_;
 };
 
-
 struct AtomKlineData:virtual public PacakgeBaseData
 {
     AtomKlineData(double open, double high, double low, double close, double volume):

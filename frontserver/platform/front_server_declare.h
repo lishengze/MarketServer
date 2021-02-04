@@ -52,6 +52,8 @@ using WebsocketClass = uWS::WebSocket<false, true>;
 #define KLINE_UPDATE "kline_update"
 #define HEARTBEAT "heartbeat"
 
+#define TRADE "trade"
+
 #define RSP_ENQUIRY "enquiry"
 #define RSP_ERROR "error"
 

@@ -445,3 +445,81 @@ class RspErrorMsg:public Socket, virtual public PacakgeBaseData
         error_msg_type  err_msg_;
 };
 FORWARD_DECLARE_PTR(RspErrorMsg);
+
+const long UT_FID_TradeData = 100011;
+struct TradeData:virtual public PacakgeBaseData
+{
+    TradeData(string symbol, string exchange, type_tick time, SDecimal price, SDecimal volume):
+    time_{time}, price_{price}, volume_{volume}
+    {
+        assign(symbol_, symbol);
+        assign(exchange_, exchange);
+    }
+
+    symbol_type symbol_;
+    symbol_type exchange_;
+    type_tick time_;
+    SDecimal price_;
+    SDecimal volume_;
+    virtual ~TradeData() {}
+};
+FORWARD_DECLARE_PTR(TradeData);
+
+const long UT_FID_ReqTrade = 100012;
+class ReqTrade:public Socket, virtual public PacakgeBaseData
+{
+public:
+    ReqTrade(string symbol, bool is_cancel, ID_TYPE socket_id, COMM_TYPE socket_type):
+        Socket(socket_id, socket_type)
+    {
+        assign(symbol_, symbol);
+    }
+
+    ReqTrade(const ReqTrade& other):Socket(other.socket_id_, other.socket_type_)
+    {
+        assign(symbol_, other.symbol_);
+        assign(is_cancel_, other.is_cancel_);
+    }
+
+    static const long Fid = UT_FID_ReqTrade;
+
+    virtual ~ReqTrade() {}
+
+    symbol_type symbol_;
+    bool        is_cancel_{false};
+};
+FORWARD_DECLARE_PTR(ReqTrade);
+
+const long UT_FID_RspTrade = 100013;
+class RspTrade:public Socket, virtual public PacakgeBaseData
+{
+public:
+    RspTrade(string symbol, SDecimal price, SDecimal volume, 
+             SDecimal max_change, SDecimal max_change_rate,
+             SDecimal high, SDecimal low, ID_TYPE socket_id, COMM_TYPE socket_type):
+             Socket(socket_id, socket_type)
+    {
+        assign(symbol_, symbol);
+        assign(price_, price);
+        assign(volume_, volume);
+        assign(max_change_, max_change);
+        assign(max_change_rate_, max_change_rate);
+        assign(high_, high);
+        assign(low_, low);
+    }
+
+    virtual ~RspTrade() {}
+
+    string get_json_str();
+
+    symbol_type symbol_;
+    SDecimal    price_;
+    SDecimal    volume_;
+    SDecimal    max_change_;
+    SDecimal    max_change_rate_;
+    SDecimal    high_;
+    SDecimal    low_;
+
+    static const long Fid = UT_FID_RspTrade;
+};
+FORWARD_DECLARE_PTR(RspTrade);

@@ -185,3 +185,19 @@ string RspErrorMsg::get_json_str()
 
     return json_data.dump();
 }
+
+string RspTrade::get_json_str()
+{
+    nlohmann::json json_data;
+
+    json_data["type"] = TRADE;
+    json_data["symbol"] = string(symbol_);
+    json_data["price"] = price_.get_str_value();   
+    json_data["volume"] = volume_.get_str_value();   
+    json_data["max_change"] = max_change_.get_str_value();   
+    json_data["max_change_rate"] = max_change_rate_.get_str_value();   
+    json_data["high"] = high_.get_str_value();   
+    json_data["low"] = low_.get_str_value(); 
+
+    return json_data.dump();    
+}

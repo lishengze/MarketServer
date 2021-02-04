@@ -438,6 +438,46 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
     }    
 }
 
+void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
+{
+    try
+    {
+        cout << "ori_msg: " << ori_msg << endl;
+        nlohmann::json js = nlohmann::json::parse(ori_msg);
+        if (!js["symbol"].is_null())
+        {
+            string symbol = js["symbol"].get<string>();
+
+            PackagePtr package = CreatePackage<ReqTrade>(symbol, socket_id, false, COMM_TYPE::WEBSOCKET);
+
+            if (package)
+            {
+                package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
+                front_server_->deliver_request(package);
+            }
+            else
+            {
+                stringstream stream_msg;
+                stream_msg << "WBServer::process_trade_req Create Package Failed " << symbol << " " << socket_id << "\n";                
+                LOG_ERROR(stream_msg.str());
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+        stream_msg << "[E] WBServer::process_trade_req " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] WBServer::process_trade_req: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }  
+    
+}
+
 void WBServer::process_heartbeat(ID_TYPE socket_id)
 {
     try

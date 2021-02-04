@@ -35,6 +35,8 @@ public:
 
     void response_kline_data_package(PackagePtr package);
 
+    void response_trade_data_package(PackagePtr package);
+
     void response_enquiry_data_package(PackagePtr package);
 
     void response_errmsg_package(PackagePtr package);

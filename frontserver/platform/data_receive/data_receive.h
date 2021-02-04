@@ -43,13 +43,15 @@ public:
     // virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth);
 
     // 成交
-    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) { return 0; }
+    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade);
 
     void handle_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth);
 
     void handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth);
 
     void handle_kline_data(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines);    
+
+    void handle_trade_data(const char* exchange, const char* symbol, const Trade& trade);
 
     void test_kline_data();
 

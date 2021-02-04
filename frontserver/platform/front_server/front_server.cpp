@@ -274,6 +274,73 @@ void FrontServer::response_kline_data_package(PackagePtr package)
     
 }
 
+void FrontServer::response_trade_data_package(PackagePtr package)
+{
+    try
+    {
+        cout << "\nFrontServer::response_trade_data_package " << endl;
+        
+        RspTradePtr pRspTradeData = GetField<RspTrade>(package);
+
+        if (pRspTradeData)
+        {
+            string trade_data_str = pRspTradeData->get_json_str();
+
+            // cout << "kline_data_str: " << kline_data_str << endl;
+
+            cout << "symbol: " << pRspTradeData->symbol_ << " "
+                 << "price: " << pRspTradeData->price_.get_value() << " "
+                 << "volume: " << pRspTradeData->volume_.get_value() << " "
+                 << "price: " << pRspTradeData->price_.get_value() << " "
+                 << "max_change_: " << pRspTradeData->max_change_.get_value() << " "
+                 << "max_change_rate_: " << pRspTradeData->max_change_rate_.get_value() << " "
+                 << "high_: " << pRspTradeData->high_.get_value() << " "  
+                 << "low_: " << pRspTradeData->low_.get_value() << " "                                  
+                 << endl;
+
+            if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
+            {
+                if (!wb_server_->send_data(pRspTradeData->socket_id_, trade_data_str))
+                {
+                    cout << "Request Delete Trade Connect" << endl;
+
+                    bool is_cancel_request = true;
+                    PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, true,
+                                                                pRspTradeData->socket_id_, pRspTradeData->socket_type_);
+                    if(package)
+                    {   
+                        package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
+
+                        deliver_request(package);
+                    }
+                    else
+                    {
+                        LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
+                    } 
+                }
+            }
+        }
+        else
+        {
+            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+        }
+        
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_trade_data_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_trade_data_package: unknown exceptions!\n";
+        LOG_ERROR(stream_obj.str());        
+    }
+    
+}
+
 void FrontServer::response_enquiry_data_package(PackagePtr package)
 {
     try

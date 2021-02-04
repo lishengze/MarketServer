@@ -31,6 +31,8 @@ public:
 
     void request_kline_package(PackagePtr package);
 
+    void request_trade_package(PackagePtr package);
+
     void request_depth_package(PackagePtr package);
 
     void request_symbol_list_package(PackagePtr package);
@@ -40,6 +42,8 @@ public:
     void response_src_sdepth_package(PackagePtr package);    
 
     void response_src_kline_package(PackagePtr package);
+
+    void response_src_trade_package(PackagePtr package);
 
 private:
     KlineProcessPtr         kline_process_{nullptr};

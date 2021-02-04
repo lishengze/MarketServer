@@ -33,22 +33,24 @@ class KlineDataUpdate
             cout << "~KlineDataUpdate() " << endl;
         }
 
-    // ReqKLineData   req_kline_data_;
-
-    // symbol_type                     symbol_{NULL};
-    // type_tick                       start_time_{0};
-    // type_tick                       end_time_{0};
-    // int                             data_count_{-1};
-    // frequency_type                  frequency_{0};   
-
-    // WebsocketClass*                 websocket_{nullptr};
-
-    // WebsocketClassThreadSafePtr     websocket_com_{nullptr};
     ReqKLineData        reqkline_data;
     type_tick           last_update_time_;
     KlineDataPtr        kline_data_{nullptr};
 };
 FORWARD_DECLARE_PTR(KlineDataUpdate);
+
+class TradeDataUpdate
+{
+    public:
+    TradeDataUpdate(const ReqTrade& reqTrade)
+    {
+        pReqTrade_ = boost::make_shared<ReqTrade>(reqTrade);
+    }    
+
+    ReqTradePtr    pReqTrade_{nullptr};
+
+};
+FORWARD_DECLARE_PTR(TradeDataUpdate);
 
 class KlineProcess
 {
@@ -65,7 +67,11 @@ public:
 
     void response_src_kline_package(PackagePtr package);
 
+    void response_src_trade_package(PackagePtr package);
+
     void request_kline_package(PackagePtr package);
+
+    void request_trade_package(PackagePtr package);
 
     PackagePtr get_kline_package(PackagePtr package);
 
@@ -81,8 +87,6 @@ public:
 
     vector<KlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
 
-    void init_test_kline_data();
-
     void init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData);
 
     void update_kline_data(const KlineDataPtr kline_data);
@@ -93,6 +97,16 @@ public:
 
     int get_best_freq_base(int req_frequency);
 
+    void init_update_trade_map(ReqTradePtr pReqTrade);
+
+    void check_websocket_trade_req(ReqTradePtr pReqTrade);
+
+    void update_trade_data(const TradeDataPtr pTradeDataPtr);
+
+    PackagePtr get_trade_package(ReqTradePtr pReqTrade);
+    
+    std::map<type_tick, KlineDataPtr>& get_trade_kline_data(int freq,int start_time);
+
     // void get_append_data(type_tick start_time, type_tick end_time, int data_count, vector<KlineData>& append_result);
 
 private:
@@ -102,11 +116,21 @@ private:
     map<string, map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
-    map<string, vector<KlineDataUpdate>>                        updated_kline_data_;
+    map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
+
+    map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;
+    std::mutex                                                  updated_trade_data_map_mutex_;
+
+    map<string, TradeDataPtr>                                   trade_data_map_;
+    std::mutex                                                  trade_data_map_mutex_;
+
+    std::map<ID_TYPE, string>                                   trade_wss_con_map_;  
+    std::mutex                                                  trade_wss_con_map_mutex_;
+
     std::map<ID_TYPE, string>                                   wss_con_map_;  
     std::mutex                                                  wss_con_map_mutex_;
 
-    std::mutex                                                  updated_kline_data_mutex_;
+    std::mutex                                                  updated_kline_data_map_mutex_;
 
     bool                                                        test_kline_data_{false};
 

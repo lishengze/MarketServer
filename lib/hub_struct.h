@@ -34,7 +34,7 @@ struct SDepthData:virtual public PacakgeBaseData
         assign(bid_length, other.bid_length);
         assign(is_raw, other.is_raw);
     
-        // cout << "SDepthData &" << endl;
+        cout << "SDepthData &" << endl;
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -45,7 +45,7 @@ struct SDepthData:virtual public PacakgeBaseData
 
     SDepthData & operator =(const SDepthData& other) 
     {
-        // cout << "SDepthData operator = " << endl;
+        cout << "SDepthData operator = " << endl;
 
         assign(symbol, other.symbol);
         assign(exchange, other.exchange);

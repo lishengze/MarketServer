@@ -63,6 +63,8 @@ class WBServer
 
     void process_kline_req(string ori_msg, ID_TYPE socket_id);
 
+    void process_trade_req(string ori_msg, ID_TYPE socket_id);
+
     void process_heartbeat(ID_TYPE socket_id);
 
     ID_TYPE store_ws(WebsocketClass * ws);

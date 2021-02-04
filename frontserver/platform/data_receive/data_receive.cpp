@@ -225,7 +225,10 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
     {
         return -1;
     }    
-    get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, depth));
+    get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, std::ref(depth)));
+
+    // handle_depth_data(exchange, symbol, depth);
+
     return 1;
 }
 
@@ -236,7 +239,11 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
     {
         return -1;
     }
-    get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, klines));
+
+    get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, std::ref(klines)));
+
+    // handle_kline_data(exchange, symbol, resolution, klines);
+
     return 1;
 }
 
@@ -251,6 +258,15 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 //     get_io_service().post(std::bind(&DataReceive::handle_raw_depth, this, exchange, symbol, depth));
 //     return 1;
 // }
+
+int DataReceive::on_trade(const char* exchange, const char* symbol, const Trade& trade) 
+{ 
+    get_io_service().post(std::bind(&DataReceive::handle_trade_data, this, exchange, symbol, std::ref(trade)));
+
+    // handle_trade_data(exchange, symbol, trade);
+
+    return 0; 
+}
 
 void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {    
@@ -305,8 +321,7 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
 }
 
 void DataReceive::handle_depth_data(const char* exchange, const char* symbol, const SDepthData& depth)
-{
-    
+{    
     if (strlen(symbol) == 0) 
     {
         LOG_ERROR("DataReceive::handle_depth_data symbol is null! \n");
@@ -437,3 +452,43 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     }   
 }
 
+void DataReceive::handle_trade_data(const char* exchange, const char* symbol, const Trade& trade)
+{
+    try
+    {
+        if (strlen(symbol) == 0) 
+        {
+            // LOG_ERROR ("DataReceive::handle_trade_data symbol is null!");
+            return;
+        }        
+        if (strlen(exchange) != 0)
+        {
+            return;
+        }
+
+        PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time, trade.price, trade.volume);
+
+        if (package)
+        {
+            package->prepare_response(UT_FID_TradeData, ID_MANAGER->get_id());
+            deliver_response(package);
+        }
+        else
+        {
+            LOG_ERROR("DataReceive::handle_trade_data CreatePackage Failed!");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] DataReceive::handle_trade_data: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] DataReceive::handle_trade_data: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }
+    
+}

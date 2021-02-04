@@ -81,6 +81,11 @@ void DataProcess::handle_request_message(PackagePtr package)
             case UT_FID_ReqEnquiry:
                 request_enquiry_package(package);
                 return;
+
+            case UT_FID_ReqTrade:
+                request_trade_package(package);
+                return;                
+
             default:
                 break;
         }
@@ -102,6 +107,10 @@ void DataProcess::handle_response_message(PackagePtr package)
         case UT_FID_KlineData:
             response_src_kline_package(package);
             return;
+
+        case UT_FID_TradeData:
+            response_src_trade_package(package);
+            return;            
 
         default:
             cout << "Unknow Package" << endl;
@@ -129,6 +138,11 @@ void DataProcess::request_kline_package(PackagePtr package)
     {
         std::cerr << e.what() << '\n';
     }
+}
+
+void DataProcess::request_trade_package(PackagePtr package)
+{
+    kline_process_->request_trade_package(package);
 }
 
 void DataProcess::request_depth_package(PackagePtr package)
@@ -183,6 +197,21 @@ void DataProcess::response_src_kline_package(PackagePtr package)
         if (kline_process_)
         {
             kline_process_->response_src_kline_package(package);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void DataProcess::response_src_trade_package(PackagePtr package)
+{
+    try
+    {
+        if (kline_process_)
+        {
+            kline_process_->response_src_trade_package(package);
         }
     }
     catch(const std::exception& e)
