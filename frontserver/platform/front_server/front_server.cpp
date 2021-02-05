@@ -78,6 +78,10 @@ void FrontServer::handle_response_message(PackagePtr package)
             response_kline_data_package(package);
             break;
 
+        case UT_FID_RspTrade:
+            response_trade_data_package(package);
+            break;            
+
         case UT_FID_RspEnquiry:
             response_enquiry_data_package(package);
             break;
@@ -296,7 +300,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                  << "max_change_rate_: " << pRspTradeData->max_change_rate_.get_value() << " "
                  << "high_: " << pRspTradeData->high_.get_value() << " "  
                  << "low_: " << pRspTradeData->low_.get_value() << " "                                  
-                 << endl;
+                 << "\n" << endl;
 
             if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
             {

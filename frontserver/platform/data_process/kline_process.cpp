@@ -106,17 +106,25 @@ void KlineProcess::request_trade_package(PackagePtr package)
 
         if (pReqTradePtr)
         {
-            check_websocket_trade_req(pReqTradePtr);
 
-            PackagePtr package = get_trade_package(pReqTradePtr);
-
-            if (package)
+            if (pReqTradePtr->is_cancel_)
             {
-                process_engine_->deliver_response(package);
+                delete_trade_wss(pReqTradePtr);
             }
             else
             {
-                LOG_ERROR("KlineProcess::request_trade_package get_trade_package Failed!");
+                check_websocket_trade_req(pReqTradePtr);
+
+                PackagePtr package = get_trade_package(pReqTradePtr);
+
+                if (package)
+                {
+                    process_engine_->deliver_response(package);
+                }
+                else
+                {
+                    LOG_ERROR("KlineProcess::request_trade_package get_trade_package Failed!");
+                }
             }
         }
         else
@@ -238,35 +246,6 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
     {
         std::stringstream stream_obj;
         stream_obj << "[E] KlineProcess::response_src_kline_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }    
-}
-
-void KlineProcess::response_src_trade_package(PackagePtr package)
-{
-    try
-    {
-        TradeDataPtr pTradeDataPtr = GetField<TradeData>(package);
-        if (pTradeDataPtr)
-        {
-            std::lock_guard<std::mutex> lk(trade_data_map_mutex_);
-            trade_data_map_[string(pTradeDataPtr->symbol_)] = pTradeDataPtr;
-        }
-        else 
-        {
-            LOG_ERROR("KlineProcess::response_src_trade_package GetField Failed!");
-        }        
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::response_src_trade_package " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::response_src_trade_package: unkonwn exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }    
 }
@@ -915,6 +894,37 @@ int KlineProcess::get_best_freq_base(int req_frequency)
     return result;
 }
 
+void KlineProcess::response_src_trade_package(PackagePtr package)
+{
+    try
+    {
+        TradeDataPtr pTradeDataPtr = GetField<TradeData>(package);
+        if (pTradeDataPtr)
+        {
+            // std::lock_guard<std::mutex> lk(trade_data_map_mutex_);
+            // trade_data_map_[string(pTradeDataPtr->symbol_)] = pTradeDataPtr;
+
+            update_trade_data(pTradeDataPtr);
+        }
+        else 
+        {
+            LOG_ERROR("KlineProcess::response_src_trade_package GetField Failed!");
+        }        
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+        stream_msg << "[E] KlineProcess::response_src_trade_package " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] KlineProcess::response_src_trade_package: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
+}
+
 void KlineProcess::init_update_trade_map(ReqTradePtr pReqTrade)
 {
 
@@ -924,6 +934,7 @@ void KlineProcess::check_websocket_trade_req(ReqTradePtr pReqTrade)
 {
     try
     {
+        cout << "\nKlineProcess::check_websocket_trade_req " << endl;
         std::lock_guard<std::mutex> lk(trade_wss_con_map_mutex_);
         if (trade_wss_con_map_.find(pReqTrade->socket_id_) != trade_wss_con_map_.end() 
         && string(pReqTrade->symbol_) != trade_wss_con_map_[pReqTrade->socket_id_])
@@ -935,15 +946,27 @@ void KlineProcess::check_websocket_trade_req(ReqTradePtr pReqTrade)
             && updated_trade_data_map_[ori_symbol].find(pReqTrade->socket_id_) != updated_trade_data_map_[ori_symbol].end())
             {
                 updated_trade_data_map_[ori_symbol].erase(pReqTrade->socket_id_);
+
+                cout << "ReqTrade Erase  " << ori_symbol << " socket: " << pReqTrade->socket_id_ << endl;
             }
 
             string new_symbol = pReqTrade->symbol_;
             TradeDataUpdatePtr pTradeDataUpdate = boost::make_shared<TradeDataUpdate>(*pReqTrade);
             updated_trade_data_map_[new_symbol][pReqTrade->socket_id_] = pTradeDataUpdate;
+
+            cout << "ReqTrade Add  " << new_symbol << " socket: " << pReqTrade->socket_id_ << endl;
         }
         else
         {
-            trade_wss_con_map_[pReqTrade->socket_id_] = pReqTrade->symbol_;
+            string new_symbol = pReqTrade->symbol_;
+            trade_wss_con_map_[pReqTrade->socket_id_] = new_symbol;
+
+            TradeDataUpdatePtr pTradeDataUpdate = boost::make_shared<TradeDataUpdate>(*pReqTrade);
+
+            std::lock_guard<std::mutex> lk(updated_trade_data_map_mutex_);
+            updated_trade_data_map_[new_symbol][pReqTrade->socket_id_] = pTradeDataUpdate;         
+
+            cout << "ReqTrade Add  " << pReqTrade->symbol_ << " socket: " << pReqTrade->socket_id_ << endl;
         }
     }
     catch(const std::exception& e)
@@ -1002,6 +1025,42 @@ void KlineProcess::update_trade_data(const TradeDataPtr pTradeDataPtr)
     }    
 }
 
+void KlineProcess::delete_trade_wss(ReqTradePtr pReqTrade)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(trade_wss_con_map_mutex_);
+        if (trade_wss_con_map_.find(pReqTrade->socket_id_) != trade_wss_con_map_.end())
+        {
+            string ori_symbol = trade_wss_con_map_[pReqTrade->socket_id_];
+
+            std::lock_guard<std::mutex> lk(updated_trade_data_map_mutex_);
+            if (updated_trade_data_map_.find(ori_symbol) != updated_trade_data_map_.end()
+            && updated_trade_data_map_[ori_symbol].find(pReqTrade->socket_id_) != updated_trade_data_map_[ori_symbol].end())
+            {
+                updated_trade_data_map_[ori_symbol].erase(pReqTrade->socket_id_);
+
+                cout << "ReqTrade Erase  " << ori_symbol << " socket: " << pReqTrade->socket_id_ << endl;
+            }
+
+            trade_wss_con_map_.erase(pReqTrade->socket_id_);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        stringstream stream_msg;
+        stream_msg << "[E] KlineProcess::delete_trade_wss " << e.what() << "\n";
+        LOG_ERROR(stream_msg.str());
+    }
+    catch(...)
+    {
+        std::stringstream stream_obj;
+        stream_obj << "[E] KlineProcess::delete_trade_wss: unkonwn exception! " << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
+    
+}
+
 PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade)
 {
     try
@@ -1012,16 +1071,54 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade)
         {
             TradeDataPtr pTradeData = trade_data_map_[symbol];
 
-            int start_time = pTradeData->time_ - 24 * 60 * 60;
             int fre_base = 60;
-            std::map<type_tick, KlineDataPtr>& kline_data_map = get_trade_kline_data(fre_base, start_time);
+            int end_time = pTradeData->time_;
+            int start_time = end_time - 24 * 60 * 60;
+            start_time -= start_time % fre_base;
 
-            SDecimal price;
-            SDecimal volume;
-            SDecimal max_change;
-            SDecimal max_change_rate;
-            SDecimal high;
-            SDecimal low;
+            std::vector<KlineDataPtr> src_kline_data = get_trade_kline_data(symbol, fre_base, start_time, end_time);
+
+            if (src_kline_data.size() > 0)
+            {
+                SDecimal start_price = src_kline_data[0]->index > start_time 
+                                        ? src_kline_data[0]->px_open 
+                                        : src_kline_data[0]->px_close;
+
+                SDecimal high = src_kline_data[0]->px_high > pTradeData->price_ ? src_kline_data[0]->px_high : pTradeData->price_;
+                SDecimal low = src_kline_data[0]->px_low < pTradeData->price_?src_kline_data[0]->px_low : pTradeData->price_;
+                SDecimal price = pTradeData->price_;
+                SDecimal volume = 0;
+                SDecimal max_change = pTradeData->price_ - start_price;
+                SDecimal max_change_rate = max_change / start_price.get_value();
+
+                for (KlineDataPtr& kline : src_kline_data)
+                {
+                    high = high < kline->px_high ? kline->px_high : high;
+                    low = low > kline->px_low ? kline->px_low : low;
+                    volume += kline->volume;
+                }
+
+                cout << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " "
+                     << "curr_time: " << get_sec_time_str(pTradeData->time_) << " "
+                     << "start_price: " << start_price.get_value() << " "
+                     << "cur_price: " << price.get_value() << " "
+                     << "max_range: " << max_change.get_value() << " "
+                     << "max_range_rate: " << max_change_rate.get_value() << " "
+                     << "volume: " << volume.get_value() << " "
+                     << endl;
+
+                result = CreatePackage<RspTrade>(pReqTrade->symbol_, price, volume, 
+                                                 max_change, max_change_rate, high, low, 
+                                                 pReqTrade->socket_id_, pReqTrade->socket_type_);
+                if (!result)
+                {
+                    LOG_ERROR("KlineProcess::get_trade_package CreatePackage<RspTrade> Failed!");
+                }
+                else
+                {
+                    result->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
+                }
+            }
         }
 
         return result;     
@@ -1040,11 +1137,86 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade)
     }    
 }
 
-std::map<type_tick, KlineDataPtr>& KlineProcess::get_trade_kline_data(int freq,int start_time)
+ std::vector<KlineDataPtr> KlineProcess::get_trade_kline_data(string symbol,  int freq_base, int start_time, int end_time)
 {
     try
     {
-        std::map<type_tick, KlineDataPtr> result;
+         std::vector<KlineDataPtr> result;
+        bool need_more_data = false;
+        std::map<type_tick, KlineDataPtr> cur_src_data;
+        if (kline_data_.find(symbol) == kline_data_.end() || 
+            kline_data_[symbol].find(freq_base) ==  kline_data_[symbol].end())
+        {
+            need_more_data = true;      
+        }
+        else if (kline_data_[symbol][freq_base].begin()->first > start_time)
+        {
+            end_time = kline_data_[symbol][freq_base].begin()->first;
+            need_more_data = true;
+            cur_src_data = kline_data_[symbol][freq_base];
+        }
+        else
+        {
+            cur_src_data = kline_data_[symbol][freq_base];
+        }
+
+        cout << "req_start_time: " << get_sec_time_str(start_time) << " "
+             << "req_end_time: " << get_sec_time_str(end_time) << " "
+             << endl;            
+
+        if (need_more_data)
+        {
+            vector<KlineData> append_result;
+            HubInterface::get_kline("", symbol.c_str(), freq_base, start_time, end_time, append_result);
+
+            cout << "req_start_time: " << get_sec_time_str(start_time) << " "
+                 << "req_end_time: " << get_sec_time_str(end_time) << " "
+                 << "recv_append_count: " << append_result.size() << " "             
+                 << "cur_freq_base: " << freq_base << " "
+                 << endl; 
+
+            // cout << "\nAppend RecvData: " <<endl;
+            for (KlineData& kline_data:append_result)
+            {
+                result.emplace_back(boost::make_shared<KlineData>(kline_data));
+                // cout << get_sec_time_str(kline_data.index) << " "
+                //     << kline_data.px_open.get_value() << " "
+                //     << kline_data.px_close.get_value() << " "
+                //     << kline_data.px_high.get_value() << " "
+                //     << kline_data.px_low.get_value() << " "
+                //     << endl;
+            }
+        }
+        else
+        {
+            cout << "Don't need Appended Data Cached Data StartTime is : " << get_sec_time_str(kline_data_[symbol][freq_base].begin()->first) << " "
+                 << "EndTime is: " << get_sec_time_str(kline_data_[symbol][freq_base].rbegin()->first)
+                 << endl;
+        }
+
+        if (cur_src_data.size() > 0)
+        {
+            // cout << "\nCached Data: " <<endl;
+            std::map<type_tick, KlineDataPtr>::iterator iter = cur_src_data.begin();
+            while (iter != cur_src_data.end() && iter->first < start_time)
+            {
+                ++iter;
+            }
+
+            while(iter != cur_src_data.end() && iter->first <= end_time ) 
+            {
+                result.push_back(iter->second);
+                // cout << get_sec_time_str(iter->second->index) << " "
+                //     << iter->second->px_open.get_value() << " "
+                //     << iter->second->px_close.get_value() << " "
+                //     << iter->second->px_high.get_value() << " "
+                //     << iter->second->px_low.get_value() << " "
+                //     << endl;                
+                ++iter;
+            }
+        }
+
+        cout << "Complete result.size: " << result.size() << endl;
 
         return result;    
     }

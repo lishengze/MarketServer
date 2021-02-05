@@ -221,13 +221,14 @@ void DataReceive::handle_response_message(PackagePtr package)
 // 深度数据（推送）
 int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepthData& depth)
 {   
+    // return 1;
     if (is_test_depth)
     {
         return -1;
     }    
-    get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, std::ref(depth)));
+    // get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, std::ref(depth)));
 
-    // handle_depth_data(exchange, symbol, depth);
+    handle_depth_data(exchange, symbol, depth);
 
     return 1;
 }
@@ -240,9 +241,27 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
         return -1;
     }
 
-    get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, std::ref(klines)));
+    std::stringstream stream_obj;
+    stream_obj  << "[Kline] handle_kline_data " << symbol << " " << resolution << " " << klines.size();
+    LOG_DEBUG(stream_obj.str());
 
-    // handle_kline_data(exchange, symbol, resolution, klines);
+    
+
+    // string symbol = string(c_symbol);
+
+    if (resolution == 60)
+    {
+        std::stringstream stream_obj;
+        stream_obj  << "[Kine] " << get_sec_time_str(klines.back().index) << " "<< exchange << " " << symbol << ", "
+                    << "open: " << klines.back().px_open.get_value() << ", high: " << klines.back().px_high.get_value() << ", "
+                    << "low: " << klines.back().px_low.get_value() << ", close: " << klines.back().px_close.get_value();
+        
+        LOG_INFO(stream_obj.str());        
+    }
+
+    // get_io_service().post(std::bind(&DataReceive::handle_kline_data, this, exchange, symbol, resolution, std::ref(klines)));
+
+    handle_kline_data(exchange, symbol, resolution, klines);
 
     return 1;
 }
@@ -261,9 +280,17 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
 
 int DataReceive::on_trade(const char* exchange, const char* symbol, const Trade& trade) 
 { 
-    get_io_service().post(std::bind(&DataReceive::handle_trade_data, this, exchange, symbol, std::ref(trade)));
+    // cout << "[on_trade] " << get_sec_time_str(trade.time/1000000) << " "
+    //         << exchange << " " 
+    //         << symbol << " "
+    //         << trade.price.get_value() << " "
+    //         << trade.volume.get_value() << " "
+    //         << endl;
 
-    // handle_trade_data(exchange, symbol, trade);
+
+    // get_io_service().post(std::bind(&DataReceive::handle_trade_data, this, exchange, symbol, std::ref(trade)));
+
+    handle_trade_data(exchange, symbol, trade);
 
     return 0; 
 }
@@ -336,6 +363,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     std::stringstream stream_obj;
     stream_obj  << "[Depth] handle_depth_data " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    // LOG_INFO(stream_obj.str());
     
     // cout << "Ask: length: " << depth.ask_length << endl;
     // for ( int i = 0; i < depth.ask_length; ++i)
@@ -350,7 +378,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     // }    
 
 
-    LOG_INFO(stream_obj.str());
+    
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -391,11 +419,21 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         return;
     }
 
-    std::stringstream stream_obj;
-    stream_obj  << "[Kline] handle_kline_data " << c_symbol << " " << resolution << " " << klines.size();
-    LOG_DEBUG(stream_obj.str());
-
     string symbol = string(c_symbol);
+
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Kline] handle_kline_data " << c_symbol << " " << resolution << " " << klines.size();
+    // LOG_DEBUG(stream_obj.str());
+
+    // if (resolution == 60)
+    // {
+    //     std::stringstream stream_obj;
+    //     stream_obj  << "[Kine] " << get_sec_time_str(klines.back().index) << " "<< exchange << " " << symbol << ", "
+    //                 << "open: " << klines.back().px_open.get_value() << ", high: " << klines.back().px_high.get_value() << ", "
+    //                 << "low: " << klines.back().px_low.get_value() << ", close: " << klines.back().px_close.get_value();
+        
+    //     LOG_INFO(stream_obj.str());        
+    // }
     
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
@@ -461,12 +499,14 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
             // LOG_ERROR ("DataReceive::handle_trade_data symbol is null!");
             return;
         }        
-        if (strlen(exchange) != 0)
-        {
-            return;
-        }
 
-        PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time, trade.price, trade.volume);
+        PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
+
+        // cout << "[handle_trade_data] " << get_sec_time_str(trade.time/1000000000) << " "
+        //      << symbol << " "
+        //      << trade.price.get_value() << " "
+        //      << trade.volume.get_value() << " "
+        //      << endl;
 
         if (package)
         {

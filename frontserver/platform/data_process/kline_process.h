@@ -103,9 +103,11 @@ public:
 
     void update_trade_data(const TradeDataPtr pTradeDataPtr);
 
+    void delete_trade_wss(ReqTradePtr pReqTrade);
+
     PackagePtr get_trade_package(ReqTradePtr pReqTrade);
     
-    std::map<type_tick, KlineDataPtr>& get_trade_kline_data(int freq,int start_time);
+    std::vector<KlineDataPtr> get_trade_kline_data(string symbol, int freq_base, int start_time, int end_time);
 
     // void get_append_data(type_tick start_time, type_tick end_time, int data_count, vector<KlineData>& append_result);
 

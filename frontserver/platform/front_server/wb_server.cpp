@@ -257,7 +257,12 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
                 if (js["type"].get<string>() == KLINE_UPDATE)
                 {
                     process_kline_req(ori_msg, socket_id);
-                }            
+                }     
+
+                if (js["type"].get<string>() == "trade")
+                {
+                    process_trade_req(ori_msg, socket_id);
+                }                            
             }
         }
  
@@ -448,7 +453,7 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
         {
             string symbol = js["symbol"].get<string>();
 
-            PackagePtr package = CreatePackage<ReqTrade>(symbol, socket_id, false, COMM_TYPE::WEBSOCKET);
+            PackagePtr package = CreatePackage<ReqTrade>(symbol, false, socket_id,  COMM_TYPE::WEBSOCKET);
 
             if (package)
             {

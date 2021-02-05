@@ -496,7 +496,8 @@ class RspTrade:public Socket, virtual public PacakgeBaseData
 public:
     RspTrade(string symbol, SDecimal price, SDecimal volume, 
              SDecimal max_change, SDecimal max_change_rate,
-             SDecimal high, SDecimal low, ID_TYPE socket_id, COMM_TYPE socket_type):
+             SDecimal high, SDecimal low, 
+             ID_TYPE socket_id, COMM_TYPE socket_type):
              Socket(socket_id, socket_type)
     {
         assign(symbol_, symbol);
