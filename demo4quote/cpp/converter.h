@@ -55,12 +55,22 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second.volume);
+            for(const auto &v : iter->second.volume_by_exchanges) {
+                Decimal tmp;
+                set_decimal(&tmp, v.second);
+                (*depth->mutable_data())[v.first] = tmp;
+            }
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second.volume);
+            for(const auto &v : iter->second.volume_by_exchanges) {
+                Decimal tmp;
+                set_decimal(&tmp, v.second);
+                (*depth->mutable_data())[v.first] = tmp;
+            }
         }
     }
 }

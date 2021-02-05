@@ -187,6 +187,7 @@ private:
     mutable std::mutex mutex_snaps_;
     unordered_map<TSymbol, SymbolWatermark*> watermark_;
     std::thread* thread_loop_ = nullptr;
+    std::atomic<bool> thread_run_;
     void _calc_watermark();
 
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);

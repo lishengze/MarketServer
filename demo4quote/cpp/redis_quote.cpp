@@ -101,22 +101,22 @@ bool valida_kline(const KlineData& kline) {
     return !(kline.index < 1000000000 || kline.index > 1900000000);
 }
 
-bool RedisKlineHelper::on_get_message(const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines)
+bool on_get_message(RedisKlineHelper& helper, const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines)
 {
-    type_tick last_index = first_package_[symbol][exchange];
+    type_tick last_index = helper.first_package_[symbol][exchange];
     for (auto iter = body.begin(); iter != body.end(); ++iter) 
     {
         KlineData kline;
         redisquote_to_kline(*iter, kline, config);
         if( !valida_kline(kline) ) {
-            _log_and_print("[kline min%u] get abnormal kline %s", resolution_, iter->dump());
+            _log_and_print("[kline min%u] get abnormal kline %s", helper.resolution_, iter->dump());
             continue;
         }
         if( kline.index < last_index ) {
             continue;
         }
 
-        _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, resolution_,
+        _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, helper.resolution_,
             kline.index,
             kline.px_open.get_str_value(),
             kline.px_high.get_str_value(),
@@ -128,18 +128,20 @@ bool RedisKlineHelper::on_get_message(const njson& body, const TExchange& exchan
     }
 
     if( klines.size() > 0 )
-        first_package_[symbol][exchange] = klines.back().index;
+        helper.first_package_[symbol][exchange] = klines.back().index;
 
     return last_index == 0;
 }
 
 RedisQuote::RedisQuote()
-: kline_min1_(60)
+: thread_run_(true)
+, kline_min1_(60)
 , kline_min60_(3600)
 {}
 
 RedisQuote::~RedisQuote()
 {
+    thread_run_ = false;
     if (checker_loop_) {
         if (checker_loop_->joinable()) {
             checker_loop_->join();
@@ -148,8 +150,10 @@ RedisQuote::~RedisQuote()
     }
 }
 
-void RedisQuote::init(const RedisParams& params, UTLogPtr logger, QuoteSourceInterface* callback)
+void RedisQuote::init(QuoteSourceCallbackInterface* callback, const RedisParams& params, UTLogPtr logger, bool dump)
 {    
+    dump_ = dump;
+
     engine_interface_ = callback;
 
     // 请求全量
@@ -161,73 +165,49 @@ void RedisQuote::init(const RedisParams& params, UTLogPtr logger, QuoteSourceInt
     redis_api_->RegisterRedis(params.host, params.port, params.password, utrade::pandora::RM_Subscribe);
 }
 
-void RedisQuote::start() 
+void RedisQuote::init_replay(QuoteSourceCallbackInterface* callback, int ratio, int replicas)
 {
+    replay_ = true;
+
+    engine_interface_ = callback;
+
+    quote_replayer_.init(this, ratio, replicas);
+}
+
+bool RedisQuote::start() 
+{    
+    // 启动录数据线程
+    if( dump_ ) {
+       quote_dumper_.start();
+    }
+
+    // 回放数据
+    if( replay_ ) {
+        quote_replayer_.start();
+    }
+
     redis_snap_requester_.start();
 
     if( checker_loop_ )
-        return;
+        return false;
     type_tick now = get_miliseconds();
     last_time_ = now;
     checker_loop_ = new std::thread(&RedisQuote::_looping, this);
-};
-
-// return false 会重新请求快照
-bool RedisQuote::_on_snap(const TExchange& exchange, const TSymbol& symbol, const string& msg) 
-{    
-    njson body;
-    SExchangeConfig config;
-
-    if( !decode_channelmsg(msg, body) )
-    {
-        _log_and_print("decode json fail %s. [exchange=%s, symbol=%s]", msg, exchange, symbol);
-        return false;
-    }
-    
-    if( !_get_config(exchange, symbol, config) ) 
-    {
-        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
-        return false;
-    }
-
-    SDepthQuote quote;
-    if( !redisquote_to_quote(body, quote, config, true))
-    {
-        _log_and_print("redisquote_to_quote failed. [exchange=%s, symbol=%s, msg=%s]", exchange, symbol, msg);
-        return false;
-    }
-    quote.raw_length = msg.length();
-
-    // 同步snap和updates
-    list<SDepthQuote> updates_queue; // 跟在snap后面的updates
-    int result = _sync_by_snap(quote.exchange, quote.symbol, quote, updates_queue);
-    if( result == SYNC_STARTING )
-    {
-        engine_interface_->on_snap(exchange, symbol, quote);
-        // 合并更新
-        SDepthQuote fake_update = quote;
-        fake_update.asks.clear();
-        fake_update.bids.clear();
-        for( const auto& v: updates_queue ) 
-        {
-            fake_update.arrive_time = v.arrive_time;
-            fake_update.server_time = v.server_time;
-            fake_update.sequence_no = v.sequence_no;
-            update_depth_diff(v.asks, fake_update.asks);
-            update_depth_diff(v.bids, fake_update.bids);
-        }
-        engine_interface_->on_update(exchange, symbol, fake_update);
-    }
-    else if( result == SYNC_SNAPAGAIN ) 
-    {
-        return false;
-    }
-
     return true;
 };
 
-void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
+bool RedisQuote::stop()
 {
+    return true;
+};
+
+void RedisQuote::on_message(const std::string& channel, const std::string& msg, bool& retry)
+{
+    // 录数据
+    if( dump_ ) {
+       quote_dumper_.add_message(channel, msg);
+    }
+
     last_time_ = get_miliseconds();
     
     TExchange exchange;
@@ -245,7 +225,8 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
     if( channel_type != DEPTH_UPDATE_HEAD &&
         channel_type != TRADE_HEAD &&
         channel_type != KLINE_1MIN_HEAD &&
-        channel_type != KLINE_60MIN_HEAD )
+        channel_type != KLINE_60MIN_HEAD &&
+        channel_type != SNAP_HEAD )
     {
         _log_and_print("unknown message type.[channel=%s]", channel);
         return;
@@ -263,7 +244,47 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
         return;
     }
     
-    if ( channel_type == DEPTH_UPDATE_HEAD )
+    if( channel_type == SNAP_HEAD )
+    {
+        // 设置默认不重试
+        retry = false;
+
+        SDepthQuote quote;
+        if( !redisquote_to_quote(body, quote, config, true))
+        {
+            _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
+            retry = true;
+            return;
+        }
+        quote.raw_length = msg.length();
+
+        // 同步snap和updates
+        list<SDepthQuote> updates_queue; // 跟在snap后面的updates
+        int result = _sync_by_snap(quote.exchange, quote.symbol, quote, updates_queue);
+        if( result == SYNC_STARTING )
+        {
+            engine_interface_->on_snap(exchange, symbol, quote);
+            // 合并更新
+            SDepthQuote fake_update = quote;
+            fake_update.asks.clear();
+            fake_update.bids.clear();
+            for( const auto& v: updates_queue ) 
+            {
+                fake_update.arrive_time = v.arrive_time;
+                fake_update.server_time = v.server_time;
+                fake_update.sequence_no = v.sequence_no;
+                update_depth_diff(v.asks, fake_update.asks);
+                update_depth_diff(v.bids, fake_update.bids);
+            }
+            engine_interface_->on_update(exchange, symbol, fake_update);
+        }
+        else if( result == SYNC_SNAPAGAIN ) 
+        {
+            retry = true;
+            return;
+        }
+    }
+    else if ( channel_type == DEPTH_UPDATE_HEAD )
     {
         SDepthQuote quote;
         if( !redisquote_to_quote(body, quote, config, false) ) 
@@ -318,7 +339,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
             return;
 
         vector<KlineData> klines;
-        bool first_package = kline_min1_.on_get_message(body, exchange, symbol, config, klines);
+        bool first_package = on_get_message(kline_min1_, body, exchange, symbol, config, klines);
         engine_interface_->on_kline(exchange, symbol, kline_min1_.resolution_, klines, first_package);
     }
     else if( channel.find(KLINE_60MIN_HEAD) != string::npos )
@@ -327,7 +348,7 @@ void RedisQuote::OnMessage(const std::string& channel, const std::string& msg)
             return;
 
         vector<KlineData> klines;
-        bool first_package = kline_min60_.on_get_message(body, exchange, symbol, config, klines);
+        bool first_package = on_get_message(kline_min60_, body, exchange, symbol, config, klines);
         engine_interface_->on_kline(exchange, symbol, kline_min60_.resolution_, klines, first_package);
     }
 };
@@ -627,7 +648,7 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
     return true;
 }
 
-void RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
+bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 {
     // 打印入参
     for( const auto& v : config ) 
@@ -655,6 +676,7 @@ void RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
         // 赋值
         symbols_[symbol] = config;
     }
+    return true;
 }
 
 bool RedisQuote::_get_config(const TExchange& exchange, const TSymbol& symbol, SExchangeConfig& config) const 

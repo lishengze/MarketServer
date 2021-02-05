@@ -43,6 +43,13 @@ inline type_tick get_miliseconds() {
     return duration_in_ms.count();
 }
 
+inline uint64 ToUint64(const string& s) {
+    std::istringstream iss(s);
+    uint64 i64;
+    iss >> i64;
+    return i64;
+}
+
 template <typename T>
 std::string ToString(const T& t)
 {

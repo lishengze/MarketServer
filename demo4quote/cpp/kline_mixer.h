@@ -126,14 +126,14 @@ public:
     KlineMixer();
     ~KlineMixer();
 
-    void set_engine(QuoteSourceInterface* ptr) { engine_interface_ = ptr; }
+    void set_engine(QuoteSourceCallbackInterface* ptr) { engine_interface_ = ptr; }
 
     void set_symbol(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
 
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
 private:
     // callback
-    QuoteSourceInterface *engine_interface_ = nullptr;
+    QuoteSourceCallbackInterface *engine_interface_ = nullptr;
     
     MixCalculator min1_kline_calculator_;
     MixCalculator min60_kline_calculator_;

@@ -82,7 +82,8 @@ public:
 
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
-        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        if( strcmp(exchange, "") == 0 )
+            tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 

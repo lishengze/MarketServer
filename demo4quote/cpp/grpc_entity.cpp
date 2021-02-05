@@ -39,7 +39,7 @@ void SubscribeSingleQuoteEntity::register_call()
 void SubscribeSingleQuoteEntity::on_init() 
 {
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
-    if( cacher_->get_lastsnap(snaps) )
+    if( cacher_->get_lastsnaps(snaps) )
     {            
         for( const auto& v : snaps ) {
             if( _is_filtered(v->exchange(), v->symbol()) )
@@ -153,7 +153,7 @@ void SubscribeSingleQuoteEntity::add_data(StreamDataPtr data)
 }
 
 //////////////////////////////////////////////////
-SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher)
+SubscribeMixQuoteEntity::SubscribeMixQuoteEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -169,7 +169,8 @@ void SubscribeMixQuoteEntity::register_call()
 void SubscribeMixQuoteEntity::on_init() 
 {
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
-    cacher_->get_lastsnaps(snaps);
+    TExchange exchange = "";
+    cacher_->get_lastsnaps(snaps, &exchange);
     tfm::printfln("get_lastsnaps %u items", snaps.size());
 
     for( const auto& v : snaps ){

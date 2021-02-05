@@ -23,12 +23,11 @@ void Config::parse_config(const std::string& file_name)
         grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
 
         // system
+        mode_ = js["debug"]["mode"].get<string>();
         sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
-        publish_data_ = bool(js["debug"]["publish_data"].get<int>());
-        dump_binary_ = bool(js["debug"]["dump_binary"].get<int>());
-        output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
-        replay_mode_ = bool(js["debug"]["replay_mode"].get<int>());
+        dump_ = bool(js["debug"]["dump"].get<int>());
         replay_ratio_ = js["debug"]["replay_ratio"].get<int>();
+        replay_replicas_ = js["debug"]["replay_replicas"].get<int>();
 
         // redis quote
         quote_redis_host_ = js["redis_quote"]["host"].get<string>();

@@ -24,7 +24,7 @@ void ServerEndpoint::init(const string& grpc_addr)
 
     caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 
-    caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), mixer_cacher_);
+    caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 
     caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get());
 
