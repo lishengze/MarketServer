@@ -3,6 +3,8 @@
 #include "redis_quote_snap.h"
 #include "redis_quote_dumper.h"
 
+bool decode_channelname(const string& channel_name, string& channel_type, TSymbol& symbol, TExchange& exchange);
+
 struct RedisKlineHelper
 {
     uint32 resolution_;

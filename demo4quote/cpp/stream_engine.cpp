@@ -46,8 +46,6 @@ void StreamEngine::init()
 void StreamEngine::start() 
 {
     quote_mixer2_.start();
-    
-    quote_source_->start();
 
     // 启动db线程
     kline_db_.start();
@@ -150,6 +148,26 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
     return ret;
 }
 
+void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs)
+{
+    if( CONFIG->replay_replicas_ == 0 ) {
+        return;
+    }
+
+    set<TSymbol> symbols;
+    for( const auto& v : configs ) 
+    {
+        symbols.insert(v.first);
+    }
+
+    for( const auto& v : symbols ) {        
+        for( unsigned int i = 0 ; i < CONFIG->replay_replicas_ ; i ++ ) {
+            configs[tfm::format("%s_%d", v, i)] = configs[v];
+            cout << tfm::format("%s_%d", v, i) << endl;
+        }
+    }
+}
+
 void StreamEngine::on_config_channged(const NacosString& configInfo)
 {    
     _log_and_print("parse json %s", configInfo);
@@ -205,9 +223,11 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         _log_and_print("decode config fail %s", e.what());
         return;
     }    
-    
-    // quote_source_ 涉及交易所+交易币种+原始行情精度，原始行情更新频率
-    // quote_mixer2_ 涉及交易币种的精度，深度，频率，各交易所手续费
+
+    // 如果是测试/回放，扩展配置数据
+    if( CONFIG->mode_ == MODE_REPLAY ) {
+        expand_replay_config(symbols);
+    }
     
     for( const auto& v : symbols )
     {
@@ -253,4 +273,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
     symbols_ = symbols;
 
     CONFIG->set_config(configInfo);
+    
+    // 启动数据接收
+    quote_source_->start();
 }

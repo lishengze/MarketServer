@@ -1,16 +1,21 @@
 #include "redis_quote_dumper.h"
 #include "redis_quote.h"
 
+string make_fake_symbol(const string& channel_type, int id, const TSymbol& symbol, const TExchange& exchange)
+{
+    return tfm::format("%s|%s_%d.%s", channel_type, symbol, id, exchange);
+}
+
 string encode_msg(const string& channel, const string& msg){
     return tfm::format("%u,%s,%s\n", get_miliseconds(), channel, msg);
 }
 
-bool decode_msg(const string& raw, type_tick ts, string& channel, string& msg)
+bool decode_msg(const string& raw, type_tick& ts, string& channel, string& msg)
 {
     std::string::size_type pos = raw.find(",");
     if( pos == std::string::npos )
         return false;
-    std::string::size_type pos2 = raw.find(",", pos);
+    std::string::size_type pos2 = raw.find(",", pos+1);
     if( pos2 == std::string::npos )
         return false;
 
@@ -18,11 +23,17 @@ bool decode_msg(const string& raw, type_tick ts, string& channel, string& msg)
     ts = ToUint64(raw.substr(0, pos));
 
     // channel
-    channel = raw.substr(pos+1, pos2);
+    channel = raw.substr(pos+1, pos2-pos-1);
 
     // msg
     msg = raw.substr(pos2+1);
 
+    /*
+    cout << raw << endl;
+    cout << pos << " " << pos2 << endl;
+    cout << ts << endl;
+    cout << channel << endl;
+    cout << msg << endl;*/
     return true;
 }
 
@@ -74,7 +85,7 @@ bool QuoteReplayer::_get_pkg(ifstream& fin, type_tick& ts, string& channel, stri
     string line;
     if( !getline(fin, line)  )
         return false;
-
+    //cout << line << endl;
     if( !decode_msg(line, ts, channel, msg) )
         return false;
 
@@ -87,6 +98,19 @@ void QuoteReplayer::_send_pkg(const string& channel, const string& msg)
     
     if( replicas_ == 0 ) {
         quote_interface_->on_message(channel, msg, retry);
+        return;
+    }
+
+    string channel_type;
+    TSymbol symbol;
+    TExchange exchange;
+    if( !decode_channelname(channel, channel_type, symbol, exchange) )
+        return;
+        
+    for( int i = 0 ; i < replicas_ ; i++ )
+    {
+        string _channel = make_fake_symbol(channel_type, i, symbol, exchange);
+        quote_interface_->on_message(_channel, msg, retry);
     }
 }
 
@@ -118,6 +142,7 @@ void QuoteReplayer::_load_and_send()
 
         if( first_pkg_time == 0 ) {
             if( !_get_pkg(fin, ts, channel, msg) ) {
+                std::cout << "get_pkg fail1" << endl;
                 exit = true;
                 break;
             }
@@ -132,10 +157,12 @@ void QuoteReplayer::_load_and_send()
             }
 
             if( !_get_pkg(fin, ts, channel, msg) ) {
+                std::cout << "get_pkg fail2" << endl;
                 exit = true;
                 break;
             }
 
+            //cout << ts << ", " << first_pkg_time << ", " << limit_timespan << endl;
             if( ts >= (first_pkg_time + limit_timespan ) ) {
                 break;
             }

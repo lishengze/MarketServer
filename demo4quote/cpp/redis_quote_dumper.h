@@ -2,6 +2,8 @@
 
 #include "stream_engine_define.h"
 
+string make_fake_symbol(const string& channel_type, int id, const TSymbol& symbol, const TExchange& exchange);
+
 class QuoteDumper
 {
 public:

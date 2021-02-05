@@ -57,15 +57,14 @@ bool redisquote_to_quote(const njson& snap_json, SDepthQuote& quote, const SExch
     quote.asks.clear();
     quote.bids.clear();
     
-    string symbol = snap_json["Symbol"].get<std::string>();
-    string exchange = snap_json["Exchange"].get<std::string>();
+    // 使用channel里面的交易所和代码，不使用json中的
+    //string symbol = snap_json["Symbol"].get<std::string>();
+    //string exchange = snap_json["Exchange"].get<std::string>();
     string timeArrive = snap_json["TimeArrive"].get<std::string>();
     long long sequence_no = snap_json["Msg_seq_symbol"].get<long long>(); 
     
     quote.price_precise = config.precise;
     quote.volume_precise = config.vprecise;
-    quote.exchange = exchange;
-    quote.symbol = symbol;
     vassign(quote.sequence_no, sequence_no);
     vassign(quote.origin_time, parse_nano(timeArrive));
     quote.arrive_time = get_miliseconds();
@@ -184,15 +183,17 @@ bool RedisQuote::start()
     // 回放数据
     if( replay_ ) {
         quote_replayer_.start();
+    } else {
+        redis_snap_requester_.start();
+
+        if( checker_loop_ )
+            return false;
+
+        type_tick now = get_miliseconds();
+        last_time_ = now;
+        checker_loop_ = new std::thread(&RedisQuote::_looping, this);
     }
-
-    redis_snap_requester_.start();
-
-    if( checker_loop_ )
-        return false;
-    type_tick now = get_miliseconds();
-    last_time_ = now;
-    checker_loop_ = new std::thread(&RedisQuote::_looping, this);
+    
     return true;
 };
 
@@ -250,6 +251,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         retry = false;
 
         SDepthQuote quote;
+        quote.exchange = exchange;
+        quote.symbol = symbol;
         if( !redisquote_to_quote(body, quote, config, true))
         {
             _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
@@ -353,9 +356,18 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     }
 };
 
-void RedisQuote::OnConnected() {
+void RedisQuote::OnConnected() 
+{
     connected_ = true;
     _log_and_print("Redis RedisQuote::OnConnected");
+
+    // 设置交易所配置
+    std::unique_lock<std::mutex> l{ mutex_symbol_ };
+    for( const auto& v : symbols_ ) {
+        for( const auto& v2 : v.second ) {
+            subscribe(v2.first, v.first);
+        }
+    }
 };
 
 void RedisQuote::OnDisconnected(int status) {
