@@ -1,10 +1,9 @@
 #pragma once
 
 #include "pandora/messager/ut_log.h"
-#include "pandora/util/json.hpp"
 #include "pandora/redis/redis_api.h"
 #include "redis_quote_define.h"
-using njson = nlohmann::json;
+
 #include <boost/thread/thread.hpp>
 #include <boost/asio.hpp>
 
@@ -31,12 +30,14 @@ private:
 
 private:
     // redis api对象
-    RedisApiPtr                redis_sync_api_ = nullptr;
+    RedisApiPtr         redis_sync_api_ = nullptr;
 
     // 回调对象
-    RedisQuote*                quote_interface_ = nullptr;
+    RedisQuote*         quote_interface_ = nullptr;
+    
     // 请求线程
-    std::thread*               thread_loop_ = nullptr;
+    std::thread*        thread_loop_ = nullptr;
+    std::atomic<bool>   thread_run_;
 
     // 维护所有品种列表，作为请求全量的基础
     mutable std::mutex         mutex_symbols_;

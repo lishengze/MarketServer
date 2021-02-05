@@ -34,12 +34,11 @@ public:
     string grpc_publish_addr_;          // grpc服务发布地址
 
     // 服务配置
+    string mode_;                       // realtime | replay
     string sample_symbol_;              // 采样品种
-    bool publish_data_;                 // 是否发布行情更新
-    bool dump_binary_;                  // 是否保存原始二进制数据
-    bool output_to_screen_;             // 是否打印采样信息到屏幕
-    bool replay_mode_;                   // 回放模式
-    unsigned int replay_ratio_;                  // 回放速度：倍速
+    unsigned int replay_ratio_;         // 回放速度：倍速
+    unsigned int replay_replicas_;      // 复制行情，测试容量
+    bool dump_;                         // 是否保存原始二进制数据
 
     // redis行情源地址
     string quote_redis_host_;

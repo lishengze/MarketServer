@@ -1,28 +1,26 @@
 #pragma once
-
-#include "redis_quote.h"
-#include "redis_quote_replay.h"
+#include "redis_quote_define.h"
 #include "quote_mixer2.h"
-#include "quote_dumper.h"
 #include "grpc_server.h"
 #include "kline_mixer.h"
 #include "kline_database.h"
 #include "nacos_client.h"
 
-class StreamEngine : public QuoteSourceInterface, public INacosCallback
+class StreamEngine : public QuoteSourceCallbackInterface, public INacosCallback
 {
 public:
     StreamEngine();
     ~StreamEngine();
 
+    void init();
     void start();
 
     // from QuoteSourceInterface
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
     void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
-    void on_nodata_exchange(const TSymbol& symbol);
     void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init);
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
+    void on_nodata_exchange(const TSymbol& symbol);
 
     // from INacosCallback
     void on_config_channged(const NacosString& symbols);
@@ -32,14 +30,7 @@ public:
     static void signal_handler(int signum);
 
 private:
-    // redis quote replay
-    RedisQuoteReplay quote_replay_;
-
-    // quotation dumper
-    QuoteDumper quote_dumper_;
-
-    // redis quote upstream
-    RedisQuote quote_source_;
+    QuoteSourceInterface* quote_source_ = nullptr;
 
     QuoteCacher quote_cacher_;
     

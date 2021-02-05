@@ -136,7 +136,8 @@ void KlineDatabase::Table::createTableKlineMin60(SQLite::Database& db) {
 }
 
 KlineDatabase::KlineDatabase()
-: db_(db_name, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE)
+: thread_run_(true)
+, db_(db_name, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE)
 , table_(db_)
 , stmtMin1SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
 , stmtMin1ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN1_TABLENAME " VALUES (?,?,?,?,?,?,?);")
@@ -150,6 +151,7 @@ KlineDatabase::KlineDatabase()
 
 KlineDatabase::~KlineDatabase()
 {
+    thread_run_ = false;
     if (_flush_thrd) {
         if (_flush_thrd->joinable()) {
             _flush_thrd->join();
@@ -220,7 +222,7 @@ bool KlineDatabase::get_kline(const TExchange& exchange, const TSymbol& symbol, 
 
 void KlineDatabase::_flush_thread()
 {
-    while( true ) 
+    while( thread_run_ ) 
     {
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> caches_min1;
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> caches_min60;

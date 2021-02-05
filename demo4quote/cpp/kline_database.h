@@ -42,6 +42,7 @@ private:
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> caches_min1_;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> caches_min60_;
     std::thread* _flush_thrd = nullptr;
+    std::atomic<bool> thread_run_;
     void _flush_thread();
 
     void _write_to_db(const unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache, int resolution);

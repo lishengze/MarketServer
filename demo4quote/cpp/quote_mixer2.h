@@ -11,16 +11,10 @@ public:
     virtual void publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade) = 0;
 };
 
-class IMixerCacher
+class QuoteMixer2
 {
 public:
-    virtual bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps) = 0;
-};
-
-class QuoteMixer2 : public IMixerCacher
-{
-public:
-    struct SSymbolConfig
+    struct SMixerConfig
     {
         type_uint32 depth;
         type_uint32 precise;
@@ -28,22 +22,53 @@ public:
         float frequency;
         unordered_map<TExchange, SymbolFee> fees;
 
-        bool operator==(const SSymbolConfig &rhs) const {
+        bool operator==(const SMixerConfig &rhs) const {
             return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
         }
-        bool operator!=(const SSymbolConfig &rhs) const {
+        bool operator!=(const SMixerConfig &rhs) const {
             return !(*this == rhs);
         }
     };
 public:
+
+    QuoteMixer2();
+    ~QuoteMixer2();
+
+    void start();
+
+    void set_engine(QuoteSourceCallbackInterface* ptr) { engine_interface_ = ptr; }
+
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
-    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
+    void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
 
-    void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
+    void set_config(const TSymbol& symbol, const SMixerConfig& config);
 
-    bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
+    //void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
+
+    //bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
 private:
+    // callback
+    QuoteSourceCallbackInterface *engine_interface_ = nullptr;
+
+    // 计算线程
+    std::thread*        thread_loop_ = nullptr;
+    std::atomic<bool>   thread_run_;
+    void _thread_loop();
+
+    // 配置信息
+    mutable std::mutex mutex_config_;
+    unordered_map<TSymbol, SMixerConfig> configs_; 
+
+    // 控制频率    
+    unordered_map<TSymbol, type_tick> last_clocks_;
+
+    // 缓存数据
+    void _calc_symbol(const TSymbol& symbol, const SMixerConfig& config, type_seqno seqno);
+    mutable std::mutex mutex_quotes_;
+    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> quotes_;
+    unordered_map<TSymbol, unordered_map<TExchange, Trade>> trades_;
+    /*
     set<IMixerQuotePusher*> callbacks_;
 
     mutable std::mutex mutex_quotes_;
@@ -57,11 +82,13 @@ private:
 
     // 发布频率控制
     mutable std::mutex mutex_clocks_;
-    unordered_map<TSymbol, type_tick> last_clocks_;
-    bool _check_update_clocks(const TSymbol& symbol, float frequency);
+    unordered_map<TSymbol, type_tick> last_snap_clocks_;
+    unordered_map<TSymbol, type_tick> last_trade_clocks_;
+    bool _check_clocks(const TSymbol& symbol, float frequency, unordered_map<TSymbol, type_tick>& clocks);
 
     mutable std::mutex mutex_config_;
     unordered_map<TSymbol, SSymbolConfig> configs_; 
+    */
 };
 
 /*
@@ -72,17 +99,15 @@ class IQuoteCacher
 public:
     // 请求缓存中的K线
     virtual bool get_latetrades(vector<TradeWithDecimal>& trades) = 0;
-    virtual bool get_lastsnap(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps) = 0;
+    virtual bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL) = 0;
 };
 
 class QuoteCacher : public IQuoteCacher
 {
 public:
-    void set_mixer(QuoteMixer2* mixer) { mixer_ = mixer; }
-
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
-    void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
+    void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& snap);
 
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
 
@@ -92,11 +117,9 @@ public:
 
     bool get_latetrades(vector<TradeWithDecimal>& trades);
 
-    bool get_lastsnap(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
+    bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
 private:
     set<IMixerQuotePusher*> callbacks_;
-
-    QuoteMixer2* mixer_ = nullptr;
 
     mutable std::mutex mutex_quotes_;
     unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>> singles_;

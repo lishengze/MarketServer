@@ -86,7 +86,7 @@ private:
 class SubscribeMixQuoteEntity : public BaseGrpcEntity
 {
 public:
-    SubscribeMixQuoteEntity(void* service, IMixerCacher* cacher);
+    SubscribeMixQuoteEntity(void* service, IQuoteCacher* cacher);
 
     void register_call();
 
@@ -104,7 +104,7 @@ private:
     SubscribeMixQuoteReq request_;
     ServerAsyncWriter<MultiMarketStreamDataWithDecimal> responder_;
 
-    IMixerCacher* cacher_ = nullptr;
+    IQuoteCacher* cacher_ = nullptr;
 
     // 
     moodycamel::ConcurrentQueue<StreamDataPtr> datas_;

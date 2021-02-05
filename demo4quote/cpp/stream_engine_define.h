@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <fstream>
 using namespace std;
 #include "redis_quote_define.h"
 

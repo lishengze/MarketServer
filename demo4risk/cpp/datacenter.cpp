@@ -139,11 +139,13 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
 WatermarkComputerWorker::WatermarkComputerWorker() 
 {
+    thread_run_ = true;
     thread_loop_ = new std::thread(&WatermarkComputerWorker::_calc_watermark, this);
 }
 
 WatermarkComputerWorker::~WatermarkComputerWorker() 
 {
+    thread_run_ = false;
     if (thread_loop_) {
         if (thread_loop_->joinable()) {
             thread_loop_->join();
@@ -208,7 +210,7 @@ bool WatermarkComputerWorker::get_watermark(const string& symbol, SDecimal& wate
 
 void WatermarkComputerWorker::_calc_watermark() {
 
-    while( true ) {
+    while( thread_run_ ) {
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
             // 计算watermark

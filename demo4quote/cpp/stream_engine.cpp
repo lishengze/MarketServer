@@ -1,21 +1,15 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
+#include "redis_quote.h"
 
+#define MODE_REALTIME "realtime"
+#define MODE_REPLAY "replay"
+ 
 StreamEngine::StreamEngine()
 {
-    // 启动redis
-    RedisParams params;
-    params.host = CONFIG->quote_redis_host_;
-    params.port = CONFIG->quote_redis_port_;
-    params.password = CONFIG->quote_redis_password_;
-    quote_source_.init(params, CONFIG->logger_, this);
-
-    // 
-    quote_replay_.set_engine(this);
-    quote_cacher_.set_mixer(&quote_mixer2_);
-
     // 启动聚合K线计算线程
-    kline_mixer_.set_engine(this);
+    kline_mixer_.set_engine(this);    
+    quote_mixer2_.set_engine(this);
 
     // 
     kline_hubber_.register_callback(&server_endpoint_);
@@ -24,31 +18,37 @@ StreamEngine::StreamEngine()
     // init grpc server
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
-    server_endpoint_.set_mixer_cacher(&quote_mixer2_);
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
     quote_cacher_.register_callback(&server_endpoint_);
-    quote_mixer2_.register_callback(&server_endpoint_);
 }
 
 StreamEngine::~StreamEngine(){
 }
 
+void StreamEngine::init()
+{
+    if( CONFIG->mode_ == MODE_REALTIME ) {
+        RedisParams params;
+        params.host = CONFIG->quote_redis_host_;
+        params.port = CONFIG->quote_redis_port_;
+        params.password = CONFIG->quote_redis_password_;
+        RedisQuote* ptr = new RedisQuote();
+        ptr->init(this, params, CONFIG->logger_, CONFIG->dump_);
+        quote_source_ = ptr;
+    } else if( CONFIG->mode_ == MODE_REPLAY ) {
+        RedisQuote* ptr = new RedisQuote();
+        ptr->init_replay(this, CONFIG->replay_ratio_, CONFIG->replay_replicas_);
+        quote_source_ = ptr;
+    } else {
+    }
+}
+
 void StreamEngine::start() 
 {
-    if( !CONFIG->replay_mode_ ) 
-    {
-        quote_source_.start();
+    quote_mixer2_.start();
 
-        // 启动录数据线程
-        quote_dumper_.start();
-
-        // 启动db线程
-        kline_db_.start();
-        
-    } else {
-        // 
-        quote_replay_.start(CONFIG->replay_ratio_);
-    }
+    // 启动db线程
+    kline_db_.start();
 
     // start grpc server
     server_endpoint_.start();
@@ -57,40 +57,37 @@ void StreamEngine::start()
     nacos_client_.start(CONFIG->nacos_addr_, this);    
 }
 
-void StreamEngine::on_snap(const string& exchange, const string& symbol, const SDepthQuote& quote){
-    if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
-        quote_dumper_.on_snap(exchange, symbol, quote);
-    }
-    
-    if( CONFIG->publish_data_ ) {
-        quote_cacher_.on_snap(exchange, symbol, quote);
-    }
-};
-
-void StreamEngine::on_update(const string& exchange, const string& symbol, const SDepthQuote& quote){  
-    //quote.print();
-    if( !CONFIG->replay_mode_ && CONFIG->dump_binary_ ) {
-        quote_dumper_.on_update(exchange, symbol, quote);
-    }
-
-    if( CONFIG->publish_data_ ) {
-        quote_cacher_.on_update(exchange, symbol, quote);
-    }
-};
-
-void StreamEngine::on_nodata_exchange(const TExchange& exchange) 
+void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
-    quote_cacher_.clear_exchange(exchange);
-}
+    quote_cacher_.on_snap(exchange, symbol, quote);
+
+    if( exchange != "" ) {
+        quote_mixer2_.on_snap(exchange, symbol, quote);
+    }
+};
+
+void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
+{
+    SDepthQuote snap;
+    quote_cacher_.on_update(exchange, symbol, quote, snap);
+
+    if( exchange != "" ) {
+        quote_mixer2_.on_snap(exchange, symbol, snap);
+    }
+};
 
 void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
 {
     quote_cacher_.on_trade(exchange, symbol, trade);
+
+    if( exchange != "" ) {
+        quote_mixer2_.on_trade(exchange, symbol, trade);
+    }
 }
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    for( const auto& v : klines ) {        
+       for( const auto& v : klines ) {        
         _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
             v.index,
             v.px_open.get_str_value().c_str(),
@@ -108,6 +105,11 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
         kline_mixer_.on_kline(exchange, symbol, resolution, outputs, is_init);
 }
 
+void StreamEngine::on_nodata_exchange(const TExchange& exchange) 
+{
+    quote_cacher_.clear_exchange(exchange);
+}
+
 void StreamEngine::signal_handler(int signum)
 {
     UT_LOG_INFO(CONFIG->logger_, "StreamEngine::signal_handler " << signum);
@@ -117,9 +119,9 @@ void StreamEngine::signal_handler(int signum)
     exit(0);
 } 
 
-QuoteMixer2::SSymbolConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
+QuoteMixer2::SMixerConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
 {    
-    QuoteMixer2::SSymbolConfig config;
+    QuoteMixer2::SMixerConfig config;
     config.depth = depth;
     config.precise = precise;
     config.vprecise = vprecise;
@@ -135,15 +137,35 @@ QuoteMixer2::SSymbolConfig to_mixer_config(type_uint32 depth, type_uint32 precis
     return config;
 }
 
-RedisQuote::SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExchange>& configs)
+SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExchange>& configs)
 {
-    RedisQuote::SSymbolConfig ret;
+    SSymbolConfig ret;
     for( const auto& v : configs ) {
         ret[v.first].precise = v.second.precise;
         ret[v.first].vprecise = v.second.vprecise;
         ret[v.first].frequency = v.second.frequency;
     }
     return ret;
+}
+
+void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs)
+{
+    if( CONFIG->replay_replicas_ == 0 ) {
+        return;
+    }
+
+    set<TSymbol> symbols;
+    for( const auto& v : configs ) 
+    {
+        symbols.insert(v.first);
+    }
+
+    for( const auto& v : symbols ) {        
+        for( unsigned int i = 0 ; i < CONFIG->replay_replicas_ ; i ++ ) {
+            configs[tfm::format("%s_%d", v, i)] = configs[v];
+            cout << tfm::format("%s_%d", v, i) << endl;
+        }
+    }
 }
 
 void StreamEngine::on_config_channged(const NacosString& configInfo)
@@ -201,9 +223,11 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         _log_and_print("decode config fail %s", e.what());
         return;
     }    
-    
-    // quote_source_ 涉及交易所+交易币种+原始行情精度，原始行情更新频率
-    // quote_mixer2_ 涉及交易币种的精度，深度，频率，各交易所手续费
+
+    // 如果是测试/回放，扩展配置数据
+    if( CONFIG->mode_ == MODE_REPLAY ) {
+        expand_replay_config(symbols);
+    }
     
     for( const auto& v : symbols )
     {
@@ -215,7 +239,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         {
             quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
-            quote_source_.set_config(symbol, to_redis_config(config.exchanges));
+            quote_source_->set_config(symbol, to_redis_config(config.exchanges));
         }
         // 已有的品种
         else 
@@ -223,7 +247,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
             const SNacosConfig& last_config = symbols_[symbol];
             // 源头配置变更
             if( to_redis_config(last_config.exchanges) != to_redis_config(config.exchanges) ) {
-                quote_source_.set_config(symbol, to_redis_config(config.exchanges));
+                quote_source_->set_config(symbol, to_redis_config(config.exchanges));
             }
             // 交易所数量变更
             if( last_config.get_exchanges() != config.get_exchanges() ) {
@@ -241,7 +265,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
     // 删除品种
     for( const auto& v : symbols_ ) {
         if( symbols.find(v.first) == symbols.end() ) {
-            quote_source_.set_config(v.first, RedisQuote::SSymbolConfig());
+            quote_source_->set_config(v.first, SSymbolConfig());
         }
     }
 
@@ -249,4 +273,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
     symbols_ = symbols;
 
     CONFIG->set_config(configInfo);
+    
+    // 启动数据接收
+    quote_source_->start();
 }

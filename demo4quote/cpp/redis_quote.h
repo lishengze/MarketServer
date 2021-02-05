@@ -1,6 +1,9 @@
 #pragma once
 
 #include "redis_quote_snap.h"
+#include "redis_quote_dumper.h"
+
+bool decode_channelname(const string& channel_name, string& channel_type, TSymbol& symbol, TExchange& exchange);
 
 struct RedisKlineHelper
 {
@@ -8,11 +11,9 @@ struct RedisKlineHelper
     unordered_map<TSymbol, unordered_map<TExchange, type_tick>> first_package_;
 
     RedisKlineHelper(uint32 resolution): resolution_(resolution){};
-
-    bool on_get_message(const njson& body, const TExchange& exchange, const TSymbol& symbol, const SExchangeConfig& config, vector<KlineData>& klines);
 };
 
-class RedisQuote : public utrade::pandora::CRedisSpi
+class RedisQuote : public utrade::pandora::CRedisSpi, public QuoteSourceInterface
 {
 public:
     
@@ -64,21 +65,29 @@ public:
         }
     };
 
-    using SSymbolConfig = unordered_map<TExchange, SExchangeConfig>;
     using RedisApiPtr = boost::shared_ptr<utrade::pandora::CRedisApi>;
     using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 public:
     RedisQuote();
     ~RedisQuote();
 
-    // 动态修改配置
-    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
+    // 继承自QuoteSourceInterface
+    bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
+    bool start();
+    bool stop();
 
-    // 初始化
-    void init(const RedisParams& params, UTLogPtr logger, QuoteSourceInterface* callback);
-    
-    // 启动
-    void start();
+    // 继承自CRedisSpi
+    virtual void OnConnected();
+    virtual void OnDisconnected(int status);
+    virtual void OnMessage(const std::string& channel, const std::string& msg) {
+        bool retry = false;
+        on_message(channel, msg, retry);
+    }
+
+    // 初始化连接redis
+    void init(QuoteSourceCallbackInterface* callback, const RedisParams& params, UTLogPtr logger, bool dump);
+    // 初始化回放
+    void init_replay(QuoteSourceCallbackInterface* callback, int ratio, int replicas);
 
     // 订阅
     void subscribe(const TExchange& exchange, const TSymbol& symbol) {
@@ -97,17 +106,8 @@ public:
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
-    
-    // callback from RedisSnapRequester
-    bool _on_snap(const TExchange& exchange, const TSymbol& symbol, const string& data);
 
-    // redis connect notify
-    virtual void OnConnected();    
-    // redis disconnect notify
-    virtual void OnDisconnected(int status);
-    // redis message notify
-    virtual void OnMessage(const std::string& channel, const std::string& msg);
-
+    void on_message(const std::string& channel, const std::string& msg, bool& retry);
 private:
     // redis连接参数
     RedisParams params_;
@@ -133,12 +133,13 @@ private:
     int _sync_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& updates_queue);
     
     // callback
-    QuoteSourceInterface *engine_interface_ = nullptr;
+    QuoteSourceCallbackInterface *engine_interface_ = nullptr;
 
     // 独立线程检查redis数据通道
     //std::mutex mutex_checker_;
     type_tick last_time_; // 上一次从redis收到行情的时间
     std::thread* checker_loop_ = nullptr;
+    std::atomic<bool> thread_run_;
     void _looping();
     void _loopng_check_heartbeat();
     type_tick last_statistic_time_; // 上一次计算统计信息时间
@@ -166,4 +167,10 @@ private:
     // K线更新相关
     RedisKlineHelper kline_min1_;
     RedisKlineHelper kline_min60_;
+
+    // 录取/回放行情源头数据
+    bool dump_ = false;
+    QuoteDumper quote_dumper_;
+    bool replay_ = false;
+    QuoteReplayer quote_replayer_;
 };

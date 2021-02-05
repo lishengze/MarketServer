@@ -3,12 +3,12 @@
         "publish_addr": "0.0.0.0:9000"
     },
     "debug": {
-        "replay_mode": 0,
+        "mode": "realtime",
+        "mode_bak": "realtime|replay",
         "replay_ratio": 2,
+        "replay_replicas": 0,
         "sample_symbol": "BTC_USDT",
-        "output_to_screen": 0,
-        "publish_data": 1,
-        "dump_binary": 0
+        "dump": 0
     },
     "nacos": {
         "addr": "36.255.220.139:8848"

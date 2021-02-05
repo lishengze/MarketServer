@@ -50,6 +50,7 @@ using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
 #define GET_DEPTH_HEAD "DEPTHx"
 #define KLINE_1MIN_HEAD "KLINEx"
 #define KLINE_60MIN_HEAD "SLOW_KLINEx"
+#define SNAP_HEAD "__SNAPx" // 为了统一接口，自定义的消息头
 
 inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
     return symbol + "." + exchange;
@@ -102,21 +103,6 @@ struct RedisParams {
     string     password;
 };
 
-class QuoteSourceInterface
-{
-public:
-    // 行情接口
-    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_nodata_exchange(const TExchange& exchange){};
-
-    // K线接口
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
-
-    // 交易接口
-    virtual void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade) = 0;
-};
-
 struct SExchangeConfig
 {
     int precise; // 交易所原始价格精度
@@ -130,4 +116,29 @@ struct SExchangeConfig
     string desc() const {
         return tfm::format("precise=%s vprecise=%s frequency=%s", ToString(precise), ToString(vprecise), ToString(frequency));
     }
+};
+using SSymbolConfig = unordered_map<TExchange, SExchangeConfig>;
+class QuoteSourceInterface
+{
+public:
+    virtual bool start() = 0;
+    virtual bool stop() = 0;
+    virtual bool set_config(const TSymbol& symbol, const SSymbolConfig& config) { return true; };
+};
+
+class QuoteSourceCallbackInterface
+{
+public:
+    // 行情接口
+    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
+    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
+
+    // K线接口
+    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
+
+    // 交易接口
+    virtual void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade) = 0;
+
+    // 交易所异常无数据
+    virtual void on_nodata_exchange(const TExchange& exchange){};
 };
