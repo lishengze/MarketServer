@@ -1,5 +1,9 @@
 # bcts_quote
 
+## demo4quote
+
+set enviroment LOCAL=true TO COMPILE LOCALLY AND WITH GPROFTOOLS
+
 ## gprof
 
 1. link with "-pg" argument in CMakeLists.txt
