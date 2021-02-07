@@ -473,6 +473,7 @@ public:
         Socket(socket_id, socket_type)
     {
         assign(symbol_, symbol);
+        assign(is_cancel_, is_cancel);
     }
 
     ReqTrade(const ReqTrade& other):Socket(other.socket_id_, other.socket_type_)
@@ -495,7 +496,7 @@ class RspTrade:public Socket, virtual public PacakgeBaseData
 {
 public:
     RspTrade(string symbol, SDecimal price, SDecimal volume, 
-             SDecimal max_change, SDecimal max_change_rate,
+             SDecimal change, SDecimal change_rate,
              SDecimal high, SDecimal low, 
              ID_TYPE socket_id, COMM_TYPE socket_type):
              Socket(socket_id, socket_type)
@@ -503,11 +504,26 @@ public:
         assign(symbol_, symbol);
         assign(price_, price);
         assign(volume_, volume);
-        assign(max_change_, max_change);
-        assign(max_change_rate_, max_change_rate);
+        assign(change_, change.get_value());
+        assign(change_rate_, change_rate.get_value());
         assign(high_, high);
         assign(low_, low);
     }
+
+    RspTrade(string symbol, SDecimal price, SDecimal volume, 
+             double change, double change_rate,
+             SDecimal high, SDecimal low, 
+             ID_TYPE socket_id, COMM_TYPE socket_type):
+             Socket(socket_id, socket_type)
+    {
+        assign(symbol_, symbol);
+        assign(price_, price);
+        assign(volume_, volume);
+        assign(change_, change);
+        assign(change_rate_, change_rate);
+        assign(high_, high);
+        assign(low_, low);
+    }    
 
     virtual ~RspTrade() {}
 
@@ -516,8 +532,8 @@ public:
     symbol_type symbol_;
     SDecimal    price_;
     SDecimal    volume_;
-    SDecimal    max_change_;
-    SDecimal    max_change_rate_;
+    double      change_;
+    double      change_rate_;
     SDecimal    high_;
     SDecimal    low_;
 

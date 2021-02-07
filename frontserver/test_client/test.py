@@ -45,7 +45,7 @@ def get_sub_depth_str(symbol="BTC_USDT"):
 def get_sub_trade_str(symbol="BTC_USDT"):
     sub_info = {
         "type":"trade",
-        "symbol":symbol
+        "symbol":[symbol]
     }
     sub_info_str = json.dumps(sub_info)
     print("sub_info_str: %s" % (sub_info_str))
@@ -74,11 +74,11 @@ def get_sub_kline_str(symbl="BTC_USDT"):
     }
 
     sub_info_str = json.dumps(sub_info)
-    print("sub_info_str: %s" % (sub_info_str))
+    print("\n\n\n****************************** sub_info_str: %s ****************************" % (sub_info_str))
     return sub_info_str
 
 def sub_btc_usdt(ws, sub_symbol):
-    time.sleep(15)
+    time.sleep(5)
 
     # sub_info = {
     #     "type":"sub_symbol",
@@ -91,7 +91,9 @@ def sub_btc_usdt(ws, sub_symbol):
 
     # sub_info_str = get_sub_depth_str(sub_symbol)
 
-    send_str = get_sub_trade_str()
+    sub_info_str = get_sub_trade_str(sub_symbol)
+
+    print("\n\n\n****************************** sub_info_str: %s ****************************" % (sub_info_str))
 
     ws.send(sub_info_str)   
 
@@ -105,6 +107,13 @@ def on_open(ws):
     send_str = get_sub_trade_str()
 
     ws.send(send_str)
+
+    time.sleep(3)
+
+    send_str = get_sub_kline_str()
+
+    ws.send(send_str)
+
 
     _thread.start_new_thread(sub_btc_usdt, (ws, "XRP_USDT", ) )
 

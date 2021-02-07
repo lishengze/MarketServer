@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "pandora/util/thread_safe_singleton.hpp"
+#include "pandora/util/time_util.h"
 
 using std::string;
 using std::cout;
@@ -26,7 +27,7 @@ class Log
 
         void log(string msg, string flag)
         {
-            cout << flag << ": " << msg << endl;
+            cout << utrade::pandora::SecTimeStr() << " " << flag << ": " << msg << endl;
 
             if (!log_file_.is_open())
             {

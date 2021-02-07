@@ -84,7 +84,7 @@
         "type":"kline_update"     // type 类型   
     }        
 
-4. 询价接口  
+<!-- 4. 询价接口  
     通过 http 请求获取数据
     1) 请求参数: 
        symbol: 请求的合约名称  
@@ -105,4 +105,19 @@
         "error_msg":"",  // 错误信息  
         "error_id":"",   // 错误id  
         "type":"error"       // 类型  
-    }   
+    }    -->
+
+3. 最新成交信息推送  
+   请求信息从 depth 请求的字段中获取，不需要额外请求.  
+   回复信息，通过websocket 推送获取:  
+    {  
+        "type": "trade",  
+        "symbol":  合约名称,  
+        "price": 最新价 ,  
+        "volume": 成交量// 暂时不需要显示,  
+        "change": 涨跌幅  ,  
+        "change_rate": 涨跌幅比率 ,  
+        "high": 最高价,  
+        "low": 最低价,  
+    }
+

@@ -233,6 +233,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 {
     try
     {
+        cout << utrade::pandora::NanoTimeStr() << " ws: " << ws << " " << ori_msg << endl;
+
         ID_TYPE socket_id = check_ws(ws);
         if (socket_id)
         {
@@ -247,6 +249,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
                 if (js["type"].get<string>() == "sub_symbol")
                 {
                     process_depth_req(ori_msg, socket_id);
+
+                    process_trade_req(ori_msg, socket_id);
                 }
 
                 if (js["type"].get<string>() == HEARTBEAT)
@@ -262,8 +266,14 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
                 if (js["type"].get<string>() == "trade")
                 {
                     process_trade_req(ori_msg, socket_id);
-                }                            
+                }   
+
+                // cout << "WBServer::process_on_message Type: " << js["type"].get<string>() << endl;
             }
+        }
+        else
+        {
+            cout << "WBServer::process_on_message ws: " << ws << ", socket_id: " << socket_id << " is invalid" << endl;
         }
  
     }
@@ -416,11 +426,11 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
             {
                 string cur_symbol = *it;
                     
-                PackagePtr package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
+                PackagePtr request_depth_package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
 
-                if (package)
+                if (request_depth_package)
                 {
-                    front_server_->deliver_request(package);
+                    front_server_->deliver_request(request_depth_package);
                 }
                 else
                 {
@@ -451,22 +461,26 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
         nlohmann::json js = nlohmann::json::parse(ori_msg);
         if (!js["symbol"].is_null())
         {
-            string symbol = js["symbol"].get<string>();
-
-            PackagePtr package = CreatePackage<ReqTrade>(symbol, false, socket_id,  COMM_TYPE::WEBSOCKET);
-
-            if (package)
+            nlohmann::json symbol_list = js["symbol"];
+            for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
             {
-                package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
-                front_server_->deliver_request(package);
-            }
-            else
-            {
-                stringstream stream_msg;
-                stream_msg << "WBServer::process_trade_req Create Package Failed " << symbol << " " << socket_id << "\n";                
-                LOG_ERROR(stream_msg.str());
-            }
-        }
+                string symbol = *it;
+                    
+                PackagePtr package = CreatePackage<ReqTrade>(symbol, false, socket_id,  COMM_TYPE::WEBSOCKET);
+
+                if (package)
+                {
+                    package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
+                    front_server_->deliver_request(package);
+                }
+                else
+                {
+                    stringstream stream_msg;
+                    stream_msg << "WBServer::process_trade_req Create Package Failed " << symbol << " " << socket_id << "\n";                
+                    LOG_ERROR(stream_msg.str());
+                }          
+            }     
+        }        
     }
     catch(const std::exception& e)
     {
@@ -492,6 +506,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id)
         {
             wss_con_map_[socket_id]->set_alive(true);
         }        
+        // cout << "\nWBServer::process_heartbeat: " << socket_id << " " << wss_con_map_[socket_id] << endl;
     }
     catch(const std::exception& e)
     {
@@ -673,7 +688,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             }
 
             
-            cout << "\nWBServer::check_ws: " << data_ptr->get_id() << " " << ws << endl;
+            // cout << "\nWBServer::check_ws: " << data_ptr->get_id() << " " << ws << endl;
         }
         else
         {

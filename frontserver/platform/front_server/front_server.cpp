@@ -296,8 +296,8 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                  << "price: " << pRspTradeData->price_.get_value() << " "
                  << "volume: " << pRspTradeData->volume_.get_value() << " "
                  << "price: " << pRspTradeData->price_.get_value() << " "
-                 << "max_change_: " << pRspTradeData->max_change_.get_value() << " "
-                 << "max_change_rate_: " << pRspTradeData->max_change_rate_.get_value() << " "
+                 << "change_: " << pRspTradeData->change_ << " "
+                 << "change_rate_: " << pRspTradeData->change_rate_ << " "
                  << "high_: " << pRspTradeData->high_.get_value() << " "  
                  << "low_: " << pRspTradeData->low_.get_value() << " "                                  
                  << "\n" << endl;
