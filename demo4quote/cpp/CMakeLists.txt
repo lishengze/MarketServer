@@ -1,8 +1,16 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(demo4quote)
 
+if(DEFINED ENV{LOCAL})
+    MESSAGE(STATUS "defined env.LOCAL")
+endif()
+
 ###############################################################################################
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -pg -Wall -pthread")
+if(DEFINED ENV{LOCAL})
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -pg -Wall -pthread")
+else()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+endif()
 set(BOOST_ROOT /usr/local/boost_1_68)
 
 FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
@@ -36,7 +44,11 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
 add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS})
-target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
+if(DEFINED ENV{LOCAL})
+    target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
+else()
+    target_link_libraries(demo4quote ${Boost_LIBRARIES})
+endif()
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
 target_link_libraries(demo4quote protobuf protoc protobuf-lite)
