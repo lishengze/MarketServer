@@ -204,6 +204,7 @@ bool RedisQuote::stop()
 
 void RedisQuote::on_message(const std::string& channel, const std::string& msg, bool& retry)
 {
+    //cout << channel << endl;
     // 录数据
     if( dump_ ) {
        quote_dumper_.add_message(channel, msg);

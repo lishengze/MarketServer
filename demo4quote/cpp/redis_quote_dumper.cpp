@@ -96,18 +96,14 @@ void QuoteReplayer::_send_pkg(const string& channel, const string& msg)
 {
     bool retry;
     
-    if( replicas_ == 0 ) {
-        quote_interface_->on_message(channel, msg, retry);
-        return;
-    }
-
     string channel_type;
     TSymbol symbol;
     TExchange exchange;
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
         return;
         
-    for( int i = 0 ; i < replicas_ ; i++ )
+    quote_interface_->on_message(channel, msg, retry);
+    for( int i = 1 ; i <= replicas_ ; i++ )
     {
         string _channel = make_fake_symbol(channel_type, i, symbol, exchange);
         quote_interface_->on_message(_channel, msg, retry);

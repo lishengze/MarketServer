@@ -31,12 +31,12 @@
         "precise":4,
         "vprecise":6,
         "depth":200,
-        "frequency":0,
+        "frequency":1,
         "exchanges":{
             "HUOBI":{
                 "precise":4,
                 "vprecise":6,
-                "frequency":0.1,
+                "frequency":0,
                 "depth":200,
                 "fee_type":1,
                 "fee_maker":10,
@@ -49,12 +49,12 @@
         "precise":5,
         "vprecise":6,
         "depth":200,
-        "frequency":0,
+        "frequency":1,
         "exchanges":{
             "HUOBI":{
                 "precise":6,
                 "vprecise":6,
-                "frequency":0.1,
+                "frequency":0,
                 "depth":200,
                 "fee_type":1,
                 "fee_maker":0,
@@ -67,7 +67,7 @@
         "precise":4,
         "vprecise":2,
         "depth":200,
-        "frequency":0.1,
+        "frequency":1,
         "exchanges":{
             "ART":{
                 "precise":3,

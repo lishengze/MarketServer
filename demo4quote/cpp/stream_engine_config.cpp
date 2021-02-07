@@ -36,6 +36,9 @@ void Config::parse_config(const std::string& file_name)
         quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
         nacos_addr_ = js["nacos"]["addr"].get<string>();
+        nacos_group_ = js["nacos"]["group"].get<string>();
+        nacos_dataid_ = js["nacos"]["dataid"].get<string>();
+        
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)

@@ -161,17 +161,22 @@ void QuoteMixer2::_thread_loop()
             type_tick now = get_miliseconds();
             std::unique_lock<std::mutex> l{ mutex_config_ };
             for( const auto& cfg : configs_ )
-            {                
-                auto iter = last_clocks_.find(cfg.first);
-                if( iter != last_clocks_.end() && (now - iter->second) < (1000/cfg.second.frequency) )
+            {      
+                const TSymbol& symbol = cfg.first;    
+                float frequency = cfg.second.frequency;
+                if( frequency == 0 )
+                    frequency = 1;
+                auto iter = last_clocks_.find(symbol);                
+                if( iter != last_clocks_.end() && (now - iter->second) < (1000/frequency) )
                 {
                     continue;
                 }
-                calculate_symbols.push_back(make_pair(cfg.first, cfg.second));
-                last_clocks_[cfg.first] = now;
+                calculate_symbols.push_back(make_pair(symbol, cfg.second));
+                last_clocks_[symbol] = now;
             }
         }
         
+        // 逐个计算
         for( const auto& symbol : calculate_symbols ) {
             sequences[symbol.first] ++;
             _calc_symbol(symbol.first, symbol.second, sequences[symbol.first]);
@@ -216,6 +221,7 @@ void normalize(map<SDecimal, SDepth>& src, const QuoteMixer2::SMixerConfig& conf
 
 void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config, type_seqno seqno)
 {
+    //cout << "calulate " << symbol << endl;
     SDepthQuote snap;
     snap.sequence_no = seqno;
     snap.origin_time = snap.arrive_time = get_miliseconds();
@@ -546,6 +552,7 @@ SMixDepthPrice* QuoteMixer2::_mix_exchange(const TExchange& exchange, SMixDepthP
 
 void QuoteMixer2::set_config(const TSymbol& symbol, const SMixerConfig& config)
 {
+    _log_and_print("QuoteMixer2::set_config %s", symbol);
     std::unique_lock<std::mutex> l{ mutex_config_ };
     configs_[symbol] = config;
 }
