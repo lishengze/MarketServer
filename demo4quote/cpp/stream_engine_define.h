@@ -90,6 +90,7 @@ struct SNacosConfigByExchange
 
 struct SNacosConfig
 {
+    string raw;
     type_uint32 depth; // 【原始】深度
     float frequency;    // 【原始】更新频率
     type_uint32 precise;    // 【聚合】最小价格单位

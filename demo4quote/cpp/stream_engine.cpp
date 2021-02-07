@@ -54,7 +54,7 @@ void StreamEngine::start()
     server_endpoint_.start();
 
     // 连接配置服务器
-    nacos_client_.start(CONFIG->nacos_addr_, this);    
+    nacos_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_group_, CONFIG->nacos_dataid_, this);    
 }
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
@@ -148,22 +148,25 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
     return ret;
 }
 
-void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs)
+void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs, njson& js)
 {
     if( CONFIG->replay_replicas_ == 0 ) {
         return;
     }
 
+    // 待复制的代码
     set<TSymbol> symbols;
     for( const auto& v : configs ) 
     {
         symbols.insert(v.first);
     }
 
-    for( const auto& v : symbols ) {        
-        for( unsigned int i = 0 ; i < CONFIG->replay_replicas_ ; i ++ ) {
-            configs[tfm::format("%s_%d", v, i)] = configs[v];
-            cout << tfm::format("%s_%d", v, i) << endl;
+    // 执行复制
+    for( const auto& v : symbols ) {     
+        for( unsigned int i = 1 ; i <= CONFIG->replay_replicas_ ; i ++ ) {
+            string key = tfm::format("%s_%d", v, i);
+            js[key] = js[v];
+            configs[key] = configs[v];
         }
     }
 }
@@ -197,6 +200,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
             if( enable < 1 )
                 continue;
             SNacosConfig cfg;
+            cfg.raw = symbol_cfgs.dump();
             cfg.precise = symbol_cfgs["precise"].get<int>();
             cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
             cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
@@ -226,7 +230,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
 
     // 如果是测试/回放，扩展配置数据
     if( CONFIG->mode_ == MODE_REPLAY ) {
-        expand_replay_config(symbols);
+        expand_replay_config(symbols, js);
     }
     
     for( const auto& v : symbols )
@@ -272,7 +276,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
     // 赋值
     symbols_ = symbols;
 
-    CONFIG->set_config(configInfo);
+    CONFIG->set_config(js.dump());
     
     // 启动数据接收
     quote_source_->start();

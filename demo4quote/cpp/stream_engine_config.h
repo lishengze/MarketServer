@@ -48,6 +48,8 @@ public:
 
     // nacos配置服务器地址
     string nacos_addr_;
+    string nacos_group_;
+    string nacos_dataid_;
 
     // nacos配置信息缓存
     mutable std::mutex mutex_faw_config_;   

@@ -25,9 +25,7 @@ NacosListener::NacosListener(ConfigService* server, string group, string dataid,
 
 void NacosListener::on_get_config(const NacosString &configInfo) const
 {
-    if( group_ == "quotation" && dataid_ == "symbols" ) {
-        callback_->on_config_channged(configInfo);
-    }
+    callback_->on_config_channged(configInfo);
 }
 
 void NacosListener::receiveConfigInfo(const NacosString &configInfo) {
@@ -35,8 +33,12 @@ void NacosListener::receiveConfigInfo(const NacosString &configInfo) {
 }
 
 
-void NacosClient::start(const string& addr, INacosCallback* callback) 
+void NacosClient::start(const string& addr, const string& group, const string& dataid, INacosCallback* callback) 
 {
-    _log_and_print("connect nacos addr %s.", addr.c_str());
-    _run_thread_ = new std::thread(&NacosClient::_run, this, addr, callback);
+    addr_ = addr;
+    group_ = group;
+    dataid_ = dataid;
+
+    _log_and_print("connect nacos addr=%s group=%s dataid=%s", addr_, group_, dataid_);
+    _run_thread_ = new std::thread(&NacosClient::_run, this, callback);
 }
