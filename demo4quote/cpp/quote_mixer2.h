@@ -99,7 +99,7 @@ class IQuoteCacher
 {
 public:
     // 请求缓存中的K线
-    virtual bool get_latetrades(vector<TradeWithDecimal>& trades) = 0;
+    virtual bool get_latetrades(vector<std::shared_ptr<TradeWithDecimal>>& trades) = 0;
     virtual bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL) = 0;
 };
 
@@ -116,7 +116,7 @@ public:
 
     void clear_exchange(const TExchange& exchange);
 
-    bool get_latetrades(vector<TradeWithDecimal>& trades);
+    bool get_latetrades(vector<std::shared_ptr<TradeWithDecimal>>& trades);
 
     bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
 private:
