@@ -392,7 +392,7 @@ void GetLastTradesEntity::register_call()
 
 bool GetLastTradesEntity::process()
 {
-    vector<TradeWithDecimal> trades;
+    vector<std::shared_ptr<TradeWithDecimal>> trades;
     cacher_->get_latetrades(trades);
 
     GetLatestTradesResp reply;
