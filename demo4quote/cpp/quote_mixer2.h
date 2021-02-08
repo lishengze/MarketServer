@@ -116,7 +116,7 @@ public:
 
     void clear_exchange(const TExchange& exchange);
 
-    bool get_latetrades(vector<TradeWithDecimal>& trades);
+    bool get_latetrades(vector<std::shared_ptr<TradeWithDecimal>>& trades);
 
     bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
 private:
