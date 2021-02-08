@@ -30,7 +30,7 @@ public:
     { 
         type_tick now = get_miliseconds();
         type_tick delay = now-depth.tick1;
-        if( delay > 5000 )
+        //if( delay > 5000 )
             tfm::printfln("[depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u rc_cost=%u)", 
                 exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1, depth.tick3 - depth.tick2);        
         return 0;
