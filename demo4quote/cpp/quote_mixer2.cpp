@@ -2,7 +2,7 @@
 #include "quote_mixer2.h"
 #include "converter.h"
 
-bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange& fix_exchange)
+bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     for( const auto& v : singles_ ) {

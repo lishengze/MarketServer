@@ -207,7 +207,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
             cfg.precise = symbol_cfgs["precise"].get<int>();
             cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
             cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
-            cfg.frequecy = symbol_cfgs["frequency"].get<float>();
+            cfg.frequency = symbol_cfgs["frequency"].get<float>();
             for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
             {
                 const TExchange& exchange = iter2.key();
@@ -218,8 +218,8 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
                 exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
                 exchange_cfg.frequency = exchange_cfgs["frequency"].get<float>();
                 exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].get<int>();
-                exchange_cfg.fee.fee_maker = exchange_cfgs["fee_maker"].get<float>();
-                exchange_cfg.fee.fee_taker = exchange_cfgs["fee_taker"].get<float>();
+                exchange_cfg.fee.maker_fee = exchange_cfgs["fee_maker"].get<float>();
+                exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].get<float>();
                 cfg.exchanges[exchange] = exchange_cfg;
             } 
             symbols[symbol] = cfg;
@@ -244,7 +244,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         // 新增品种
         if( symbols_.find(symbol) == symbols_.end() ) 
         {
-            quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
+            quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequency, config.exchanges));
             kline_mixer_.set_symbol(symbol, config.get_exchanges());
             quote_source_->set_config(symbol, to_redis_config(config.exchanges));
         }
@@ -261,9 +261,9 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
                 kline_mixer_.set_symbol(symbol, config.get_exchanges());
             }
             // mixer配置变更
-            if( to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges) != 
-                to_mixer_config(last_config.depth, last_config.precise, last_config.vprecise, last_config.frequecy, last_config.exchanges) ) {
-                quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequecy, config.exchanges));
+            if( to_mixer_config(config.depth, config.precise, config.vprecise, config.frequency, config.exchanges) != 
+                to_mixer_config(last_config.depth, last_config.precise, last_config.vprecise, last_config.frequency, last_config.exchanges) ) {
+                quote_mixer2_.set_config(symbol, to_mixer_config(config.depth, config.precise, config.vprecise, config.frequency, config.exchanges));
             }
         }
     }
