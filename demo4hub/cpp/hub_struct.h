@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decimal.h"
+#include "quote.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include "common_datatype_define.h"

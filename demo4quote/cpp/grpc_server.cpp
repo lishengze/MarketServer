@@ -22,9 +22,9 @@ void ServerEndpoint::init(const string& grpc_addr)
     
     int call_id = 0;
 
-    caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
+    //caller_subscribe_single_ = new GrpcCall<SubscribeSingleQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 
-    caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
+    //caller_subscribe_mix_ = new GrpcCall<SubscribeMixQuoteEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 
     caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get());
 
@@ -32,11 +32,27 @@ void ServerEndpoint::init(const string& grpc_addr)
 
     caller_getlast_ = new GrpcCall<GetLastEntity>(call_id, &service_, cq_.get(), cacher_);
 
-    caller_subscribe_trade_ = new GrpcCall<SubscribeTradeEntity>(call_id, &service_, cq_.get());
+    //caller_subscribe_trade_ = new GrpcCall<SubscribeTradeEntity>(call_id, &service_, cq_.get());
 
     caller_getlast_trades_ = new GrpcCall<GetLastTradesEntity>(call_id, &service_, cq_.get(), quote_cacher_);
+
+    caller_subscribe_in_binary_ = new GrpcCall<SubscribeQuoteInBinaryEntity>(call_id, &service_, cq_.get(), quote_cacher_);
 }
 
+void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
+{
+    string tmp;
+    if( !snap->SerializeToString(&tmp) )
+        return;
+    
+    uint32 length = tmp.size();
+    uint32 data_type = QUOTE_TYPE_DEPTH;
+    string data = tfm::format("%u;%u;", length, data_type);
+    data.insert(data.end(), tmp.begin(), tmp.end());
+
+    caller_subscribe_in_binary_->add_data(exchange, symbol, data);
+}
+/*
 void ServerEndpoint::publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
 {
     // streamengine生成时间，这个值在发送之前再做一次判断
@@ -51,11 +67,44 @@ void ServerEndpoint::publish_mix(const TSymbol& symbol, std::shared_ptr<MarketSt
 {
     caller_subscribe_mix_->add_data(snap);
 };
-
+*/
 void ServerEndpoint::publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade)
 {
-    caller_subscribe_trade_->add_data(trade);
+    //caller_subscribe_trade_->add_data(trade);
+    
+    string tmp;
+    if( !trade->SerializeToString(&tmp) )
+        return;
+    
+    uint32 length = tmp.size();
+    uint32 data_type = QUOTE_TYPE_TRADE;
+    string data = tfm::format("%u;%u;", length, data_type);
+    data.insert(data.end(), tmp.begin(), tmp.end());
+
+    caller_subscribe_in_binary_->add_data(exchange, symbol, data);
 };
+
+void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
+{
+    WrapperKlineData tmp;
+    vassign(tmp.exchange, exchange);
+    vassign(tmp.symbol, symbol);
+    vassign(tmp.resolution, resolution);
+    tmp.klines = klines;
+    caller_getlast_->add_data(tmp);
+
+    for( const auto& v : klines ) 
+    {
+        
+        _log_and_print("publish %s.%s resolution=%d index=%lu open=%s high=%s low=%s close=%s", exchange, symbol, resolution,
+            v.index,
+            v.px_open.get_str_value(),
+            v.px_high.get_str_value(),
+            v.px_low.get_str_value(),
+            v.px_close.get_str_value()
+            );
+    }
+}
 
 void ServerEndpoint::_handle_rpcs() 
 {
@@ -83,26 +132,3 @@ void ServerEndpoint::_handle_rpcs()
             tfm::printfln("grpc-loop[%d] handle %d cost %u", loop_id, cd->call_id_, end - begin);
     }
 }
-
-void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines)
-{
-    WrapperKlineData tmp;
-    vassign(tmp.exchange, exchange);
-    vassign(tmp.symbol, symbol);
-    vassign(tmp.resolution, resolution);
-    tmp.klines = klines;
-    caller_getlast_->add_data(tmp);
-
-    for( const auto& v : klines ) 
-    {
-        
-        _log_and_print("publish %s.%s resolution=%d index=%lu open=%s high=%s low=%s close=%s", exchange, symbol, resolution,
-            v.index,
-            v.px_open.get_str_value(),
-            v.px_high.get_str_value(),
-            v.px_low.get_str_value(),
-            v.px_close.get_str_value()
-            );
-    }
-}
-

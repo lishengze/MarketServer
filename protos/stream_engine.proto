@@ -6,10 +6,10 @@ package quote.service.v1;
 // Stream Engine API
 service StreamEngine {
     // 订阅行情
-    rpc SubscribeQuote(SubscribeQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
+    //rpc SubscribeQuote(SubscribeQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
 
     // 订阅聚合行情
-    rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
+    //rpc SubscribeMixQuote(SubscribeMixQuoteReq) returns (stream MultiMarketStreamDataWithDecimal);
 
     // demo
     //rpc Demo(DemoReq) returns (stream DemoResp);
@@ -27,10 +27,13 @@ service StreamEngine {
     rpc GetLast(GetKlinesRequest) returns (stream MultiGetKlinesResponse){}
 
     // 订阅交易信息
-    rpc SubscribeTrade(SubscribeTradeReq) returns (stream MultiTradeWithDecimal);
+    //rpc SubscribeTrade(SubscribeTradeReq) returns (stream MultiTradeWithDecimal);
     
     // 查询最近数据
     rpc GetLatestTrades(GetLatestTradesReq) returns (GetLatestTradesResp);
+
+    // 订阅二进制行情
+    rpc SubscribeQuoteInBinary(SubscribeQuoteReq) returns (stream DataInBinary);
 }
 
 message SubscribeQuoteReq {
@@ -102,4 +105,8 @@ message GetKlinesResponse {
 
 message MultiGetKlinesResponse {
     repeated GetKlinesResponse data = 1;
+}
+
+message DataInBinary{
+    bytes data = 1;     // [字符串lenght + 字符串类型 + pb数据]
 }

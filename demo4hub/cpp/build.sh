@@ -8,3 +8,4 @@ cp hub_struct.h ../../lib/
 cp hub_interface.h ../../lib/
 cp ../../base/cpp/basic.h ../../lib/
 cp ../../base/cpp/decimal.h ../../lib/
+cp ../../base/cpp/quote.h ../../lib/

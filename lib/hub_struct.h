@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decimal.h"
+#include "quote.h"
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include "common_datatype_define.h"
@@ -34,7 +35,7 @@ struct SDepthData:virtual public PacakgeBaseData
         assign(bid_length, other.bid_length);
         assign(is_raw, other.is_raw);
     
-        // cout << "SDepthData &" << endl;
+        // cout << "SDepthData: " << symbol << " src symbol: " << other.symbol << endl;
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -45,7 +46,7 @@ struct SDepthData:virtual public PacakgeBaseData
 
     SDepthData & operator =(const SDepthData& other) 
     {
-        // cout << "SDepthData operator = " << endl;
+        // cout << "SDepthData & operator = " << endl;
 
         assign(symbol, other.symbol);
         assign(exchange, other.exchange);
@@ -61,11 +62,6 @@ struct SDepthData:virtual public PacakgeBaseData
             bids[i] = other.bids[i];
         }
         return *this;
-    }
-
-    virtual ~SDepthData()
-    {
-        // cout << "~SDepthData" << endl;
     }
     
     symbol_type symbol;
