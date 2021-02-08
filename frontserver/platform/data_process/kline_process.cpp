@@ -514,18 +514,18 @@ void KlineProcess::get_src_kline_data(string symbol, vector<KlineDataPtr>& resul
              << "req_end_time: " << get_sec_time_str(cur_earliest_time) << "\n"
              << endl; 
 
-        cout << "\nrecv_data: " <<endl;
+        // cout << "\nrecv_data: " <<endl;
         for (KlineData& kline_data:append_result)
         {
             result.emplace_back(boost::make_shared<KlineData>(kline_data));
-            cout << get_sec_time_str(kline_data.index) << " "
-                 << kline_data.px_open.get_value() << " "
-                 << kline_data.px_close.get_value() << " "
-                 << kline_data.px_high.get_value() << " "
-                 << kline_data.px_low.get_value() << " "
-                 << endl;
+            // cout << get_sec_time_str(kline_data.index) << " "
+            //      << kline_data.px_open.get_value() << " "
+            //      << kline_data.px_close.get_value() << " "
+            //      << kline_data.px_high.get_value() << " "
+            //      << kline_data.px_low.get_value() << " "
+            //      << endl;
         }
-        cout << endl;
+        // cout << endl;
     }
     else
     {
