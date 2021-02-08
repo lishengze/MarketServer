@@ -57,3 +57,5 @@ void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineD
 string get_error_send_rsp_string(string err_msg);
 
 string get_heartbeat_str();
+
+string set_double_string_scale(string ori_data, int num);

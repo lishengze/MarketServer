@@ -275,3 +275,49 @@ string get_heartbeat_str()
         
 
 }
+
+vector<string>  split(const string& src,const string& delim) 
+{
+    vector<string> des;  
+    if("" == src) return  des;  
+      
+    string tmpstrs = src + delim;
+    size_t pos;  
+    size_t size = tmpstrs.size();  
+  
+    for (size_t i = 0; i < size; ++i) {  
+        pos = tmpstrs.find(delim, i); 
+        if( pos < size) {
+            des.push_back(tmpstrs.substr(i, pos - i)); 
+            i = pos + delim.size() - 1;  
+        }  
+    }  
+    return des;   
+}  
+
+string set_double_string_scale(string ori_data, int num)
+{
+    string result = ori_data;
+    vector<string> vec_str = split(ori_data, ".");
+    if (vec_str.size() == 2)
+    {
+        string dot_numb_str = vec_str[1];
+        if (num > 0)
+        {
+            if (dot_numb_str.length() > num)
+            {                        
+                dot_numb_str = dot_numb_str.substr(0, num);
+                // if (num == 4)
+                // {
+                //     cout << vec_str[0] << "  " << vec_str[1] << " " << vec_str[1].length() << " " << dot_numb_str << endl;
+                // }
+                
+        
+            }        
+            result = vec_str[0] + "." + dot_numb_str;
+            // if (num == 4) cout << vec_str[0] << " " << dot_numb_str << " " << result << endl;
+        }
+    }
+    // if (num == 4) cout << result << endl;
+    return result;
+}

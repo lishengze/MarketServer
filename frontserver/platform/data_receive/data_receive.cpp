@@ -359,7 +359,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     std::stringstream stream_obj;
     stream_obj  << "[Depth] " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    // LOG_INFO(stream_obj.str());
+    LOG_INFO(stream_obj.str());
     
     // cout << "Ask: length: " << depth.ask_length << endl;
     // for ( int i = 0; i < depth.ask_length; ++i)
@@ -419,7 +419,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
     std::stringstream stream_obj;
     stream_obj  << "[Kline] " << c_symbol << " " << resolution << " " << klines.size();
-    // LOG_DEBUG(stream_obj.str());
+    LOG_INFO(stream_obj.str());
 
     // if (resolution == 60)
     // {
@@ -508,7 +508,7 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
              << symbol << " "
              << trade.price.get_value() << " "
              << trade.volume.get_value() << " ";
-        // LOG_INFO(stream_obj.str());
+        LOG_INFO(stream_obj.str());
 
         if (package)
         {

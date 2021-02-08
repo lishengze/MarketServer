@@ -101,11 +101,21 @@ public:
 
     void check_websocket_trade_req(ReqTradePtr pReqTrade);
 
-    void update_trade_data(const TradeDataPtr pTradeDataPtr);
+    void update_trade_data(TradeDataPtr pTradeDataPtr);
+
+    void compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
+
+    bool need_compute_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
+
+    void compute_new_trade(TradeDataPtr curTradeDataPtr);
+
+    void update_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
 
     void delete_trade_wss(ReqTradePtr pReqTrade);
 
     PackagePtr get_trade_package(ReqTradePtr pReqTrade);
+
+    PackagePtr get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr pTradeDataPtr);
     
     std::vector<KlineDataPtr> get_trade_kline_data(string symbol, int freq_base, int start_time, int end_time);
 
@@ -125,6 +135,8 @@ private:
 
     map<string, TradeDataPtr>                                   trade_data_map_;
     std::mutex                                                  trade_data_map_mutex_;
+
+    int                                                         trade_data_freq_base_{60};
 
     std::map<ID_TYPE, string>                                   trade_wss_con_map_;  
     std::mutex                                                  trade_wss_con_map_mutex_;

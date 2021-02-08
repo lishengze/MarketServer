@@ -77,6 +77,8 @@
         "package_station.h": "c",
         "thread_basepool.h": "c",
         "json.hpp": "c",
-        "package_simple.h": "c"
+        "package_simple.h": "c",
+        "regex": "cpp",
+        "shared_mutex": "cpp"
     }
 }

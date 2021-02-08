@@ -62,7 +62,7 @@ void FrontServer::request_all_symbol()
 
 void FrontServer::handle_response_message(PackagePtr package)
 {
-    // cout << "FrontServer::handle_response_message" << endl;
+    // cout << "FrontServer::handle_response_message " << endl;
 
     switch (package->Tid())
     {
@@ -163,6 +163,9 @@ void FrontServer::response_depth_data_package(PackagePtr package)
 
         string depth_str = pRspRiskCtrledDepthData->get_json_str();
 
+        cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << " \n"
+             << depth_str << endl;
+
         if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
         {
             cout << "FrontServer::response_depth_data_package Failed " << pRspRiskCtrledDepthData->socket_id_ << endl;
@@ -214,7 +217,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
     {
-        cout << "\nFrontServer::response_kline_data_package " << endl;
+        // cout << "\nFrontServer::response_kline_data_package " << endl;
         
         RspKLineDataPtr p_rsp_kline_data = GetField<RspKLineData>(package);
 
@@ -224,7 +227,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 
-            cout << "Frequency: " << p_rsp_kline_data->frequency_ << " "
+            cout << "[Front Kline] Frequency: " << p_rsp_kline_data->frequency_ << " "
                  << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
                  << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;
             for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
@@ -282,7 +285,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 {
     try
     {
-        cout << "\nFrontServer::response_trade_data_package " << endl;
+        // cout << "\nFrontServer::response_trade_data_package " << endl;
         
         RspTradePtr pRspTradeData = GetField<RspTrade>(package);
 
@@ -290,17 +293,18 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            // cout << "kline_data_str: " << kline_data_str << endl;
+            cout << "[Front Trade]: " << trade_data_str << endl;
 
-            cout << "symbol: " << pRspTradeData->symbol_ << " "
-                 << "price: " << pRspTradeData->price_.get_value() << " "
-                 << "volume: " << pRspTradeData->volume_.get_value() << " "
-                 << "price: " << pRspTradeData->price_.get_value() << " "
-                 << "change_: " << pRspTradeData->change_ << " "
-                 << "change_rate_: " << pRspTradeData->change_rate_ << " "
-                 << "high_: " << pRspTradeData->high_.get_value() << " "  
-                 << "low_: " << pRspTradeData->low_.get_value() << " "                                  
-                 << "\n" << endl;
+            // cout << "[Front Trade] symbol: " << pRspTradeData->symbol_ << " "
+            //      << "price: " << pRspTradeData->price_.get_value() << " "
+            //      << "volume: " << pRspTradeData->volume_.get_value() << " "
+            //      << "price: " << pRspTradeData->price_.get_value() << " \n"
+            //      << "change_: " << pRspTradeData->change_ << " "
+            //      << "change_rate_: " << pRspTradeData->change_rate_ << " "
+            //      << "high_: " << pRspTradeData->high_.get_value() << " "  
+            //      << "low_: " << pRspTradeData->low_.get_value() << " "        
+            //      << "socket_id: " <<      pRspTradeData->socket_id_ << ""                     
+            //      << "\n" << endl;
 
             if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
             {

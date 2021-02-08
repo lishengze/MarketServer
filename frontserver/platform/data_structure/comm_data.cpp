@@ -1,6 +1,7 @@
 #include "comm_data.h"
 #include "../front_server_declare.h"
 #include "../log/log.h"
+#include "../util/tools.h"
 
 string RspSymbolListData::get_json_str()
 {
@@ -192,12 +193,12 @@ string RspTrade::get_json_str()
 
     json_data["type"] = TRADE;
     json_data["symbol"] = string(symbol_);
-    json_data["price"] = price_.get_str_value();   
-    json_data["volume"] = volume_.get_str_value();   
-    json_data["change"] = std::to_string(change_);   
-    json_data["change_rate"] = std::to_string(change_rate_);   
-    json_data["high"] = high_.get_str_value();   
-    json_data["low"] = low_.get_str_value(); 
+    json_data["price"] = set_double_string_scale(price_.get_str_value(), DOT_NUMB);   
+    json_data["volume"] = set_double_string_scale(volume_.get_str_value(), DOT_NUMB);   
+    json_data["change"] = set_double_string_scale(std::to_string(change_), DOT_NUMB);  
+    json_data["change_rate"] = set_double_string_scale(std::to_string(change_rate_), PERSENT_DOT_NUMB); ;
+    json_data["high"] = set_double_string_scale(high_.get_str_value(), DOT_NUMB);   
+    json_data["low"] = set_double_string_scale(low_.get_str_value(), DOT_NUMB); 
 
     return json_data.dump();    
 }

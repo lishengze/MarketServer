@@ -458,9 +458,17 @@ struct TradeData:virtual public PacakgeBaseData
 
     symbol_type symbol_;
     symbol_type exchange_;
-    type_tick time_;
+    type_tick time_;    
     SDecimal price_;
     SDecimal volume_;
+
+    SDecimal    start_price_;
+    SDecimal    total_volume_;
+    double      change_;
+    double      change_rate_;
+    SDecimal    high_;
+    SDecimal    low_;
+
     virtual ~TradeData() {}
 };
 FORWARD_DECLARE_PTR(TradeData);
@@ -495,20 +503,20 @@ const long UT_FID_RspTrade = 100013;
 class RspTrade:public Socket, virtual public PacakgeBaseData
 {
 public:
-    RspTrade(string symbol, SDecimal price, SDecimal volume, 
-             SDecimal change, SDecimal change_rate,
-             SDecimal high, SDecimal low, 
-             ID_TYPE socket_id, COMM_TYPE socket_type):
-             Socket(socket_id, socket_type)
-    {
-        assign(symbol_, symbol);
-        assign(price_, price);
-        assign(volume_, volume);
-        assign(change_, change.get_value());
-        assign(change_rate_, change_rate.get_value());
-        assign(high_, high);
-        assign(low_, low);
-    }
+    // RspTrade(string symbol, SDecimal price, SDecimal volume, 
+    //          SDecimal change, SDecimal change_rate,
+    //          SDecimal high, SDecimal low, 
+    //          ID_TYPE socket_id, COMM_TYPE socket_type):
+    //          Socket(socket_id, socket_type)
+    // {
+    //     assign(symbol_, symbol);
+    //     assign(price_, price);
+    //     assign(volume_, volume);
+    //     assign(change_, change.get_value());
+    //     assign(change_rate_, change_rate.get_value());
+    //     assign(high_, high);
+    //     assign(low_, low);
+    // }
 
     RspTrade(string symbol, SDecimal price, SDecimal volume, 
              double change, double change_rate,
