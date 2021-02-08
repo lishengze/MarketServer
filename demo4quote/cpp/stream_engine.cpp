@@ -61,7 +61,7 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 {
     quote_cacher_.on_snap(exchange, symbol, quote);
 
-    if( exchange != "" ) {
+    if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, quote);
     }
 };
@@ -71,7 +71,7 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
     SDepthQuote snap;
     quote_cacher_.on_update(exchange, symbol, quote, snap);
 
-    if( exchange != "" ) {
+    if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, snap);
     }
 };
@@ -80,7 +80,7 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 {
     quote_cacher_.on_trade(exchange, symbol, trade);
 
-    if( exchange != "" ) {
+    if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_trade(exchange, symbol, trade);
     }
 }
@@ -101,7 +101,7 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
     vector<KlineData> outputs;
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
 
-    if( exchange != "" )
+    if( exchange != MIX_EXCHANGE_NAME  )
         kline_mixer_.on_kline(exchange, symbol, resolution, outputs, is_init);
 }
 

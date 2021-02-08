@@ -17,7 +17,7 @@ public:
     { 
         type_tick now = get_miliseconds();
         type_tick delay = now-depth.tick1;
-        if( delay > 5000 )
+        if( delay > 100 )
             tfm::printfln("[raw_depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u tick=%u tick1=%u tick2=%u )", 
                 exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1,
                 depth.tick, depth.tick1, depth.tick2);
@@ -82,8 +82,8 @@ public:
 
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
-        if( strcmp(exchange, "") == 0 )
-            tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        //if( string(exchange) == MIX_EXCHANGE_NAME )
+        //    tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 

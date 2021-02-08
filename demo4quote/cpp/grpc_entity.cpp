@@ -23,6 +23,7 @@ void kline_to_pbkline(const KlineData& src, Kline* dst)
 }
 
 //////////////////////////////////////////////////
+/*
 SubscribeSingleQuoteEntity::SubscribeSingleQuoteEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
@@ -49,7 +50,6 @@ void SubscribeSingleQuoteEntity::on_init()
     }
 }
 
-/*
 void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
 {
     std::cout << "---------------------" << std::endl;
@@ -106,7 +106,7 @@ void compare_pb_json2(const MarketStreamDataWithDecimal& quote)
     std::cout << "parse json use:" << (tend - tbegin) << std::endl;
     std::cout << "---------------------" << std::endl;
 }
-*/
+
 bool SubscribeSingleQuoteEntity::process()
 {
     MultiMarketStreamDataWithDecimal reply;
@@ -181,6 +181,7 @@ void SubscribeMixQuoteEntity::on_init()
 bool SubscribeMixQuoteEntity::process()
 {    
     MultiMarketStreamDataWithDecimal reply;
+    reply.mutable_quotes()->Reserve(ONE_ROUND_MESSAGE_NUMBRE);
     type_tick now = get_miliseconds();
 
     StreamDataPtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
@@ -203,7 +204,7 @@ bool SubscribeMixQuoteEntity::process()
 void SubscribeMixQuoteEntity::add_data(StreamDataPtr data) 
 {
     datas_.enqueue(data);
-}
+}*/
 
 //////////////////////////////////////////////////
 GetParamsEntity::GetParamsEntity(void* service)
@@ -336,6 +337,7 @@ bool GetLastEntity::process()
 }
 
 //////////////////////////////////////////////////
+/*
 SubscribeTradeEntity::SubscribeTradeEntity(void* service)
 : responder_(get_context())
 {
@@ -373,7 +375,7 @@ void SubscribeTradeEntity::add_data(TradePtr data)
     //std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     //datas_.push_back(data);
 }
-
+*/
 //////////////////////////////////////////////////
 GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
@@ -402,4 +404,67 @@ bool GetLastTradesEntity::process()
     status_ = FINISH;
     responder_.Finish(reply, Status::OK, this);
     return true;
+}
+
+//////////////////////////////////////////////////
+SubscribeQuoteInBinaryEntity::SubscribeQuoteInBinaryEntity(void* service, IQuoteCacher* cacher)
+: responder_(get_context())
+, cacher_(cacher)
+{
+    service_ = (GrpcStreamEngineService::AsyncService*)service;
+}
+
+void SubscribeQuoteInBinaryEntity::register_call()
+{
+    _log_and_print("%s register SubscribeQuoteInBinaryEntity", get_context()->peer());
+    service_->RequestSubscribeQuoteInBinary(&ctx_, &request_, &responder_, cq_, cq_, this);
+}
+
+void SubscribeQuoteInBinaryEntity::on_init() 
+{
+    vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
+    cacher_->get_lastsnaps(snaps);
+    tfm::printfln("get_lastsnaps %u items", snaps.size());
+    
+    for( const auto& v : snaps ){
+        string tmp;
+        v->SerializeToString(&tmp);
+
+        uint32 length = tmp.size();
+        uint32 data_type = 1;
+        string data = tfm::format("%u;%u;", length, data_type);
+        data.insert(data.end(), tmp.begin(), tmp.end());
+
+        add_data(v->exchange(), v->symbol(), data);
+    }
+}
+
+bool SubscribeQuoteInBinaryEntity::process()
+{    
+    string& data_ref = (*reply_.mutable_data());
+    data_ref.clear();
+
+    string ptrs[ONE_ROUND_MESSAGE_NUMBRE];
+    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+    for( size_t i = 0 ; i < count ; i ++ ) {
+        data_ref.insert(data_ref.end(), ptrs[i].begin(), ptrs[i].end());
+    }    
+
+    // 执行发送
+    if( reply_.data().length() > 0 ) {
+        responder_.Write(reply_, this);      
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void SubscribeQuoteInBinaryEntity::add_data(const TExchange& exchange, const TSymbol& symbol, const string& data) 
+{
+    if( request_.exchange() != "" && exchange != request_.exchange() )
+        return;
+    if( request_.symbol() != "" && symbol != request_.symbol() )
+        return;
+        
+    datas_.enqueue(data);
 }

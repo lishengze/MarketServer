@@ -6,9 +6,10 @@
 class IMixerQuotePusher
 {
 public:
-    virtual void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
-    virtual void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
+    //virtual void publish_single(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
+    //virtual void publish_mix(const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
     virtual void publish_trade(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<TradeWithDecimal> trade) = 0;
+    virtual void publish_binary(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
 };
 
 class QuoteMixer2
@@ -119,6 +120,8 @@ public:
 
     bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
 private:
+    uint32 publish_depths_ = 100; // 仅向下游发布有限的档位
+    
     set<IMixerQuotePusher*> callbacks_;
 
     mutable std::mutex mutex_quotes_;

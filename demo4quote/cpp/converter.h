@@ -6,6 +6,7 @@
 
 using FuncAddDepth2 = std::function<DepthWithDecimal*()>;
 
+/*
 inline void mixquote_to_pbquote2_depth(const SMixDepthPrice* depths, FuncAddDepth2 func, type_uint32 depth, bool is_ask, uint32 vprecise)
 {
     unsigned int depth_count = 0;
@@ -47,11 +48,12 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
 
     return msd;
 };
-
-inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDepth>& depths, FuncAddDepth2 func, bool is_ask)
+*/
+inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDepth>& depths, FuncAddDepth2 func, uint32 depths_limit, bool is_ask)
 {
     if( is_ask ) {
-        for( auto iter = depths.begin() ; iter != depths.end() ; iter++ ) {
+        uint32 count = 0;
+        for( auto iter = depths.begin() ; iter != depths.end() && count <= depths_limit ; iter++, count++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second.volume);
@@ -62,7 +64,8 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
             }
         }
     } else {
-        for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter++ ) {
+        uint32 count = 0;
+        for( auto iter = depths.rbegin() ; iter != depths.rend() && count <= depths_limit ; iter++, count++ ) {
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second.volume);
@@ -75,7 +78,7 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
     }
 }
 
-inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, bool is_snap)
+inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, uint32 depths_limit, bool is_snap)
 {
     std::shared_ptr<MarketStreamDataWithDecimal> msd = std::make_shared<MarketStreamDataWithDecimal>();
     msd->set_exchange(exchange);
@@ -89,14 +92,15 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
 
     // 卖盘
     FuncAddDepth2 f1 = std::bind(&MarketStreamDataWithDecimal::add_asks, msd);
-    depth_to_pbquote2_depth(exchange, symbol, src.asks, f1, true);
+    depth_to_pbquote2_depth(exchange, symbol, src.asks, f1, depths_limit, true);
     // 买盘
     FuncAddDepth2 f2 = std::bind(&MarketStreamDataWithDecimal::add_bids, msd);
-    depth_to_pbquote2_depth(exchange, symbol, src.bids, f2, false);
+    depth_to_pbquote2_depth(exchange, symbol, src.bids, f2, depths_limit, false);
 
     return msd;
 };
 
+/*
 inline void process_precise_mixdepth(SMixDepthPrice* dst, int precise, const SMixDepthPrice* src, bool is_ask)
 {
     SMixDepthPrice* current = dst;
@@ -129,7 +133,7 @@ inline void process_precise_mixdepth(SMixDepthPrice* dst, int precise, const SMi
         src = src->next;
     }
 }
-
+*/
 inline void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth>& dst)
 {
     for( const auto& v : update ) {

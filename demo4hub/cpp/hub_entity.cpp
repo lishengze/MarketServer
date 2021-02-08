@@ -44,7 +44,7 @@ int HubEntity::start()
     cout << "HubEntity::start "<< endl;
     quote_updater_.start(CONFIG->risk_controller_addr_, this);
     kline_updater_.start(CONFIG->stream_engine_addr_, this);
-    trade_updater_.start(CONFIG->stream_engine_addr_, this);
+    //trade_updater_.start(CONFIG->stream_engine_addr_, this);
     depth_updater_.start(CONFIG->stream_engine_addr_, this);
     return 0;
 }

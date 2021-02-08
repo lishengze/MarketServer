@@ -31,3 +31,9 @@ inline void vassign(char * r, unsigned int len, const std::string &v)
     strncpy(r, v.c_str(), l);
     r[l] = '\0';
 }
+
+#define QUOTE_TYPE_DEPTH 1
+#define QUOTE_TYPE_TRADE 2
+#define QUOTE_TYPE_KLINE 3
+
+#define MIX_EXCHANGE_NAME "_bcts_"

@@ -269,7 +269,7 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
         }
     }
     
-    engine_interface_->on_kline("", symbol, resolution, output, is_init);
+    engine_interface_->on_kline(MIX_EXCHANGE_NAME, symbol, resolution, output, is_init);
 }
 
 //////////////////////////////////////////////////////////////////

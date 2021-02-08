@@ -158,13 +158,13 @@ public:
         }
     }
 
-    template<class DATA_TYPE>
-    void add_data(const DATA_TYPE& data) {
+    template<class ...Args>
+    void add_data(Args... rest) {
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
                 (*iter)->make_active();
-                (*iter)->add_data(data);
+                (*iter)->add_data(rest...);
             }
         }
     }

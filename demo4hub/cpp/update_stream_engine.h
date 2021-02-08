@@ -31,6 +31,7 @@ using SETrade = quote::service::v1::TradeWithDecimal;
 using quote::service::v1::MultiTradeWithDecimal;
 using quote::service::v1::GetLatestTradesReq;
 using quote::service::v1::GetLatestTradesResp;
+using quote::service::v1::DataInBinary;
 
 
 class IStreamEngineUpdater {
@@ -59,6 +60,7 @@ inline void RequestLastTrades(const string& addr, vector<SETrade>& trades)
 }
 
 // 从StreamEngine订阅成交数据
+/*
 class TradeUpdater 
 {
 public:
@@ -128,7 +130,7 @@ private:
 
     std::thread*               thread_loop_ = nullptr;
 };
-
+*/
 // 从StreamEngine订阅行情数据
 class DepthUpdater 
 {
@@ -146,9 +148,11 @@ private:
 
         SubscribeQuoteReq req;
         SEMultiData multiQuote;
+        DataInBinary dataInBinary;
         ClientContext context;
 
-        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeQuote(&context, req));
+        //std::unique_ptr<ClientReader<SEMultiData> > reader(stub->SubscribeQuote(&context, req));
+        std::unique_ptr<ClientReader<DataInBinary> > reader(stub->SubscribeQuoteInBinary(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
                 std::cout << "[DepthUpdater] status is GRPC_CHANNEL_IDLE" << endl;
@@ -171,6 +175,7 @@ private:
                 break;
             }
         }
+        /*
         while (reader->Read(&multiQuote)) {
             // split and convert
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
@@ -180,12 +185,56 @@ private:
                 callback->on_raw_depth(quote);
             }
         }
+        */
+        while (reader->Read(&dataInBinary)) {
+            const string& data = dataInBinary.data();                
+            if( !this->_decode_one_package(callback, data) )
+                break;
+        }
+
         Status status = reader->Finish();
         if (status.ok()) {
             std::cout << "SubscribeQuote rpc succeeded." << std::endl;
         } else {
             std::cout << "SubscribeQuote rpc failed." << std::endl;
         }
+    }
+
+    bool _decode_one_package(IStreamEngineUpdater* callback, const string& data)
+    {
+        std::string::size_type startpos = 0;
+        while( startpos < data.size() )
+        {
+            std::string::size_type pos = data.find(";", startpos);
+            if( pos == std::string::npos )
+                return false;
+            std::string::size_type pos2 = data.find(";", pos+1);
+            if( pos2 == std::string::npos )
+                return false;
+            
+            // length
+            uint64 length = ToUint64(data.substr(startpos, pos));
+
+            // datatype
+            uint64 datatype = ToUint64(data.substr(pos+1, pos2-pos-1));
+
+            string quoteData = data.substr(pos2+1, length);
+
+            if( datatype == QUOTE_TYPE_DEPTH ) {
+                SEData quote;
+                if( !quote.ParseFromString(quoteData) )
+                    return false;
+                callback->on_raw_depth(quote);
+            } else if( datatype == QUOTE_TYPE_TRADE ) {
+                SETrade trade;
+                if( !trade.ParseFromString(quoteData) )
+                    return false;
+                callback->on_trade(trade);
+            }
+            startpos = pos2 + 1 + length;
+            //cout << startpos << ", " << data.size() << endl;
+        } 
+        return true;
     }
 
     void _run(const string& addr, IStreamEngineUpdater* callback) {

@@ -30,12 +30,13 @@ using quote::service::v1::TradeWithDecimal;
 using quote::service::v1::MultiTradeWithDecimal;
 using quote::service::v1::GetLatestTradesReq;
 using quote::service::v1::GetLatestTradesResp;
+using quote::service::v1::DataInBinary;
 
 class IQuoteCacher;
-class IMixerCacher;
+//class IMixerCacher;
 
-using TradePtr = std::shared_ptr<TradeWithDecimal>;
-using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
+//using TradePtr = std::shared_ptr<TradeWithDecimal>;
+//using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
@@ -50,6 +51,7 @@ inline void set_decimal(Decimal* dst, const Decimal& src)
 }
 
 //////////////////////////////////////////////////
+/*
 class SubscribeSingleQuoteEntity : public BaseGrpcEntity
 {
 public:
@@ -110,7 +112,7 @@ private:
     moodycamel::ConcurrentQueue<StreamDataPtr> datas_;
     //mutable std::mutex                 mutex_datas_;
     //vector<std::shared_ptr<void>> datas_;
-};
+};*/
 
 //////////////////////////////////////////////////
 class GetParamsEntity : public BaseGrpcEntity
@@ -201,6 +203,7 @@ private:
 };
 
 //////////////////////////////////////////////////
+/*
 class SubscribeTradeEntity : public BaseGrpcEntity
 {
 public:
@@ -224,7 +227,7 @@ private:
     moodycamel::ConcurrentQueue<TradePtr> datas_;
     //mutable std::mutex                 mutex_datas_;
     //vector<std::shared_ptr<void>> datas_;
-};
+};*/
 
 //////////////////////////////////////////////////////////////
 class GetLastTradesEntity : public BaseGrpcEntity
@@ -248,4 +251,35 @@ private:
     ServerAsyncResponseWriter<GetLatestTradesResp> responder_;
     
     IQuoteCacher* cacher_;    
+};
+
+//////////////////////////////////////////////////
+class SubscribeQuoteInBinaryEntity : public BaseGrpcEntity
+{
+public:
+    SubscribeQuoteInBinaryEntity(void* service, IQuoteCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    void on_init();
+
+    void add_data(const TExchange& exchange, const TSymbol& symbol, const string& data);
+
+    SubscribeQuoteInBinaryEntity* spawn() {
+        return new SubscribeQuoteInBinaryEntity(service_, cacher_);
+    }
+private:
+    GrpcStreamEngineService::AsyncService* service_;
+    SubscribeQuoteReq request_;
+    ServerAsyncWriter<DataInBinary> responder_;
+
+    IQuoteCacher* cacher_ = nullptr;
+
+    // 
+    DataInBinary reply_;
+    moodycamel::ConcurrentQueue<string> datas_;
+    //mutable std::mutex                 mutex_datas_;
+    //vector<std::shared_ptr<void>> datas_;
 };

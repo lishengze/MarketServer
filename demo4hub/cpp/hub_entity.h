@@ -44,7 +44,7 @@ private:
     KlineUpdater kline_updater_;
     
     // 成交接入
-    TradeUpdater trade_updater_;
+    //TradeUpdater trade_updater_;
 
     // 原始行情接入
     DepthUpdater depth_updater_;
