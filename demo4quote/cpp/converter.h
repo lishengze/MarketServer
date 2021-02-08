@@ -100,7 +100,7 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     return msd;
 };
 
-inline std::shared_ptr<TradeWithDecimal> trade_to_pbtrade(const string& exchange, const string& symbol, const trade& src)
+inline std::shared_ptr<TradeWithDecimal> trade_to_pbtrade(const string& exchange, const string& symbol, const Trade& src)
 {
     std::shared_ptr<TradeWithDecimal> msd = std::make_shared<TradeWithDecimal>();
     msd->set_exchange(exchange);

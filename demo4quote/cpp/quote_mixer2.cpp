@@ -18,7 +18,7 @@ bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecim
     return true;
 }
 
-bool QuoteCacher::get_latetrades(vector<TradeWithDecimal>& trades)
+bool QuoteCacher::get_latetrades(vector<std::shared_ptr<TradeWithDecimal>>& trades)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     for( const auto& s : trades_ ) {
@@ -26,8 +26,7 @@ bool QuoteCacher::get_latetrades(vector<TradeWithDecimal>& trades)
             const TSymbol& symbol = s.first;
             const TExchange& exchange = e.first;
             const Trade& trade = e.second;
-            TradeWithDecimal tmp;
-            trade_to_pbtrade(exchange, symbol, trade, &tmp);
+            std::shared_ptr<TradeWithDecimal> tmp = trade_to_pbtrade(exchange, symbol, trade);
             trades.push_back(tmp);
         }
     }
@@ -183,7 +182,6 @@ void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, con
 
     for( auto iter = src.begin() ; iter != src.end() ; iter++ ) 
     {
-        // 卖价往上取整
         SDecimal scaledPrice;
         fee.compute(iter->first, scaledPrice, is_ask);
         scaledPrice.scale(config.precise, is_ask);
