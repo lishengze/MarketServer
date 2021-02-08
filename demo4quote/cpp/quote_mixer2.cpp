@@ -2,16 +2,7 @@
 #include "quote_mixer2.h"
 #include "converter.h"
 
-void trade_to_pbtrade(const TExchange& exchange, const TSymbol& symbol, const Trade& src, TradeWithDecimal* dst)
-{
-    dst->set_exchange(exchange);
-    dst->set_symbol(symbol);
-    dst->set_time(src.time);
-    set_decimal(dst->mutable_price(), src.price);
-    set_decimal(dst->mutable_volume(), src.volume);
-}
-
-bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange)
+bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange& fix_exchange)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     for( const auto& v : singles_ ) {
@@ -45,17 +36,15 @@ bool QuoteCacher::get_latetrades(vector<TradeWithDecimal>& trades)
 
 void QuoteCacher::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
 {
-    std::shared_ptr<TradeWithDecimal> pub_trade = std::make_shared<TradeWithDecimal>();
-    trade_to_pbtrade(exchange, symbol, trade, pub_trade.get());
-    
-    for( const auto& v : callbacks_) 
-    {
-        v->publish_trade(exchange, symbol, pub_trade);
-    }
-
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         trades_[symbol][exchange] = trade;
+    }
+
+    std::shared_ptr<TradeWithDecimal> pub_trade = trade_to_pbtrade(exchange, symbol, trade);
+    for( const auto& v : callbacks_) 
+    {
+        v->publish_trade(exchange, symbol, pub_trade);
     }
 }
 
@@ -69,10 +58,7 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
     for( const auto& v : callbacks_) 
     {
-        //v->publish_single(exchange, symbol, pub_snap);
         v->publish_binary(exchange, symbol, pub_snap);
-        //if( exchange == "" )
-        //    v->publish_mix(symbol, pub_snap);
     }
 }
 
@@ -101,7 +87,6 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
         for( const auto& v : callbacks_) 
         {
             std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
-            //v->publish_single(exchange, symbol, pub_snap);
             v->publish_binary(exchange, symbol, pub_snap);
         }
     }
@@ -117,12 +102,10 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
         snap = cache;
     }
 
-    std::shared_ptr<MarketStreamDataWithDecimal> pub_snap, pub_diff;
-    //pub_snap = depth_to_pbquote2(exchange, symbol, snap, true);
+    std::shared_ptr<MarketStreamDataWithDecimal> pub_diff;
     pub_diff = depth_to_pbquote2(exchange, symbol, update, publish_depths_*2, false); // 增量的档位应该是2倍
     for( const auto& v : callbacks_) 
     {
-        //v->publish_single(exchange, symbol, pub_diff);
         v->publish_binary(exchange, symbol, pub_diff);
     }
 }
@@ -202,7 +185,7 @@ void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, con
     {
         // 卖价往上取整
         SDecimal scaledPrice;
-        fee.compute(iter->first, scaledPrice, true);
+        fee.compute(iter->first, scaledPrice, is_ask);
         scaledPrice.scale(config.precise, is_ask);
         dst[scaledPrice].volume_by_exchanges[exchange] += iter->second.volume;
     }
@@ -224,6 +207,7 @@ void normalize(map<SDecimal, SDepth>& src, const QuoteMixer2::SMixerConfig& conf
 
 void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config, type_seqno seqno)
 {
+    // 行情
     //cout << "calulate " << symbol << endl;
     SDepthQuote snap;
     snap.sequence_no = seqno;
@@ -244,10 +228,11 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     normalize(snap.bids, config);
 
     if( snap.origin_time > 0 ) {
-        std::cout << "publish(snap) " << symbol << " " << snap.asks.size() << "/" << snap.bids.size() << std::endl;
+        _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
     }
 
+    // 交易
     Trade trade;
     {        
         std::unique_lock<std::mutex> l{ mutex_quotes_ };

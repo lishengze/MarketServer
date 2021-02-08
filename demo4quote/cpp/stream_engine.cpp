@@ -7,26 +7,32 @@
  
 StreamEngine::StreamEngine()
 {
-    // 启动聚合K线计算线程
-    kline_mixer_.set_engine(this);    
+    // 设置聚合K线计算回调
+    kline_mixer_.set_engine(this);
+
+    // 设置聚合行情计算回调
     quote_mixer2_.set_engine(this);
 
-    // 
+    // K线缓存设置
     kline_hubber_.register_callback(&server_endpoint_);
     kline_hubber_.set_db_interface(&kline_db_);
+
+    // 行情缓存设置
+    quote_cacher_.register_callback(&server_endpoint_);
     
-    // init grpc server
+    // 初始化服务端
     server_endpoint_.set_cacher(&kline_hubber_); // 必须在init之前
     server_endpoint_.set_quote_cacher(&quote_cacher_); // 必须在init之前
     server_endpoint_.init(CONFIG->grpc_publish_addr_);
-    quote_cacher_.register_callback(&server_endpoint_);
 }
 
-StreamEngine::~StreamEngine(){
+StreamEngine::~StreamEngine()
+{
 }
 
 void StreamEngine::init()
 {
+    _log_and_print("run mode %s", CONFIG->mode_);
     if( CONFIG->mode_ == MODE_REALTIME ) {
         RedisParams params;
         params.host = CONFIG->quote_redis_host_;
@@ -40,17 +46,19 @@ void StreamEngine::init()
         ptr->init_replay(this, CONFIG->replay_ratio_, CONFIG->replay_replicas_);
         quote_source_ = ptr;
     } else {
+        _log_and_print("unknown mode %s", CONFIG->mode_);
     }
 }
 
 void StreamEngine::start() 
 {
+    // 启动行情聚合线程
     quote_mixer2_.start();
 
-    // 启动db线程
+    // 启动db写入
     kline_db_.start();
 
-    // start grpc server
+    // 启动grpc服务器
     server_endpoint_.start();
 
     // 连接配置服务器
@@ -68,7 +76,7 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 
 void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
-    SDepthQuote snap;
+    SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
@@ -87,7 +95,7 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-       for( const auto& v : klines ) {        
+    for( const auto& v : klines ) {        
         _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
             v.index,
             v.px_open.get_str_value().c_str(),
@@ -98,7 +106,7 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
         );
     }
     
-    vector<KlineData> outputs;
+    vector<KlineData> outputs; // 
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
 
     if( exchange != MIX_EXCHANGE_NAME  )
@@ -128,11 +136,7 @@ QuoteMixer2::SMixerConfig to_mixer_config(type_uint32 depth, type_uint32 precise
     config.frequency = frequency;
     for( const auto& v : exchanges ) 
     {
-        SymbolFee tmp;
-        tmp.fee_type = v.second.fee_type;
-        tmp.maker_fee = v.second.fee_maker;
-        tmp.taker_fee = v.second.fee_taker;
-        config.fees[v.first] = tmp;
+        config.fees[v.first] = v.second.fee;
     }
     return config;
 }
@@ -200,7 +204,6 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
             if( enable < 1 )
                 continue;
             SNacosConfig cfg;
-            cfg.raw = symbol_cfgs.dump();
             cfg.precise = symbol_cfgs["precise"].get<int>();
             cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
             cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
@@ -214,9 +217,9 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
                 exchange_cfg.vprecise = exchange_cfgs["vprecise"].get<int>();
                 exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
                 exchange_cfg.frequency = exchange_cfgs["frequency"].get<float>();
-                exchange_cfg.fee_type = exchange_cfgs["fee_type"].get<int>();
-                exchange_cfg.fee_maker = exchange_cfgs["fee_maker"].get<float>();
-                exchange_cfg.fee_taker = exchange_cfgs["fee_taker"].get<float>();
+                exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].get<int>();
+                exchange_cfg.fee.fee_maker = exchange_cfgs["fee_maker"].get<float>();
+                exchange_cfg.fee.fee_taker = exchange_cfgs["fee_taker"].get<float>();
                 cfg.exchanges[exchange] = exchange_cfg;
             } 
             symbols[symbol] = cfg;
@@ -273,9 +276,10 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         }
     }
 
-    // 赋值
+    // 保存
     symbols_ = symbols;
 
+    // 配置信息缓存在config中，供接口请求
     CONFIG->set_config(js.dump());
     
     // 启动数据接收
