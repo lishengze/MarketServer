@@ -163,8 +163,8 @@ void FrontServer::response_depth_data_package(PackagePtr package)
 
         string depth_str = pRspRiskCtrledDepthData->get_json_str();
 
-        cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << " \n"
-             << depth_str << endl;
+        // cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << " \n"
+        //      << depth_str << endl;
 
         if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
         {
@@ -227,19 +227,19 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 
-            cout << "[Front Kline] Frequency: " << p_rsp_kline_data->frequency_ << " "
-                 << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
-                 << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;
-            for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
-            {
-                cout << get_sec_time_str(atom_kline->index) << ", "
-                     << p_rsp_kline_data->symbol_ << ", "
-                     << "open: " << atom_kline->px_open.get_value() << ", "
-                     << "close: " << atom_kline->px_close.get_value() << ", "
-                     << "high: " << atom_kline->px_high.get_value() << ", "
-                     << "low: " << atom_kline->px_low.get_value() << endl;
-            }
-            cout << endl;
+            // cout << "[Front Kline] Frequency: " << p_rsp_kline_data->frequency_ << " "
+            //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
+            //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;
+            // for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
+            // {
+            //     cout << get_sec_time_str(atom_kline->index) << ", "
+            //          << p_rsp_kline_data->symbol_ << ", "
+            //          << "open: " << atom_kline->px_open.get_value() << ", "
+            //          << "close: " << atom_kline->px_close.get_value() << ", "
+            //          << "high: " << atom_kline->px_high.get_value() << ", "
+            //          << "low: " << atom_kline->px_low.get_value() << endl;
+            // }
+            // cout << endl;
 
             // cout << kline_data_str << endl;
 
@@ -293,7 +293,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            cout << "[Front Trade]: " << trade_data_str << endl;
+            // cout << "[Front Trade]: " << trade_data_str << endl;
 
             // cout << "[Front Trade] symbol: " << pRspTradeData->symbol_ << " "
             //      << "price: " << pRspTradeData->price_.get_value() << " "
