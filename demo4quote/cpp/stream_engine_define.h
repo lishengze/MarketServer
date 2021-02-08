@@ -77,36 +77,6 @@ struct SMixQuote {
     }
 };
 
-struct SNacosConfigByExchange
-{
-    int fee_type;
-    float fee_maker;
-    float fee_taker;
-    type_uint32 depth;
-    type_uint32 precise;    // 最小价格单位
-    type_uint32 vprecise;   // 最小挂单量单位
-    float frequency;
-};
-
-struct SNacosConfig
-{
-    string raw;
-    type_uint32 depth; // 【原始】深度
-    float frequency;    // 【原始】更新频率
-    type_uint32 precise;    // 【聚合】最小价格单位
-    type_uint32 vprecise;   // 【聚合】最小挂单量单位
-    float frequecy; // 【聚合】更新频率
-    unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
-
-    unordered_set<TExchange> get_exchanges() const {
-        unordered_set<TExchange> ret;
-        for( const auto& v : exchanges ) {
-            ret.insert(v.first);
-        }
-        return ret;
-    }
-};
-
 struct SymbolFee
 {
     int fee_type;       // 0表示fee不需要处理（默认），1表示fee值为比例，2表示fee值为绝对值
@@ -139,5 +109,34 @@ struct SymbolFee
         } else {
             dst = src;
         }
+    }
+};
+
+struct SNacosConfigByExchange
+{
+    SymbolFee fee;          // 手续费参数
+    //int fee_type;           // 手续费类型
+    //double fee_maker;        // maker手续费率
+    //double fee_taker;        // taker手续费率
+    type_uint32 depth;      // 行情深度（暂时没用）
+    type_uint32 precise;    // 最小价格单位
+    type_uint32 vprecise;   // 最小挂单量单位
+    float frequency;        // 更新频率(每秒frequency次)
+};
+
+struct SNacosConfig
+{
+    type_uint32 depth;      // 【聚合】发布深度（暂时没用）
+    float frequency;        // 【聚合】更新频率（每秒frequency次）
+    type_uint32 precise;    // 【聚合】最小价格单位
+    type_uint32 vprecise;   // 【聚合】最小挂单量单位
+    unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
+
+    unordered_set<TExchange> get_exchanges() const {
+        unordered_set<TExchange> ret;
+        for( const auto& v : exchanges ) {
+            ret.insert(v.first);
+        }
+        return ret;
     }
 };

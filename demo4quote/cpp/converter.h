@@ -100,6 +100,17 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     return msd;
 };
 
+inline std::shared_ptr<TradeWithDecimal> trade_to_pbtrade(const string& exchange, const string& symbol, const trade& src)
+{
+    std::shared_ptr<TradeWithDecimal> msd = std::make_shared<TradeWithDecimal>();
+    msd->set_exchange(exchange);
+    msd->set_symbol(symbol);
+    msd->set_time(src.time);
+    set_decimal(msd->mutable_price(), src.price);
+    set_decimal(msd->mutable_volume(), src.volume);
+
+    return msd;
+};
 /*
 inline void process_precise_mixdepth(SMixDepthPrice* dst, int precise, const SMixDepthPrice* src, bool is_ask)
 {
