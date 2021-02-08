@@ -5,6 +5,7 @@
 
 inline void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd, bool check_total_volume) 
 {
+    msd->set_exchange(quote.exchange);
     msd->set_symbol(quote.symbol);
     msd->set_is_snap(true);
     msd->set_price_precise(quote.precise);
@@ -41,6 +42,7 @@ inline void innerquote_to_msd2(const SInnerQuote& quote, MarketStreamData* msd, 
 
 inline void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDecimal* msd, bool check_total_volume) 
 {
+    msd->set_exchange(quote.exchange);
     msd->set_symbol(quote.symbol);
     msd->set_is_snap(true);
     msd->set_price_precise(quote.precise);

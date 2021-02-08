@@ -39,6 +39,7 @@ struct SInnerDepth {
 };
 
 struct SInnerQuote {
+    string exchange;
     string symbol;
     type_tick time_origin;      // 交易所原始时间
     type_tick time_arrive_at_streamengine;   // se收到的时间

@@ -7,6 +7,7 @@
 const char* config_file = "config.json";
 
 void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
+    dst.exchange = src.exchange();
     dst.symbol = src.symbol();
     dst.precise = src.price_precise();
     dst.vprecise = src.volume_precise();
