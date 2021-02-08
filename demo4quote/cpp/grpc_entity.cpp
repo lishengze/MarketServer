@@ -398,7 +398,7 @@ bool GetLastTradesEntity::process()
     GetLatestTradesResp reply;
     for( size_t i = 0 ; i < trades.size() ; i ++ ) 
     {
-        copy_protobuf_object(&trades[i], reply.add_trades());
+        copy_protobuf_object(trades[i].get(), reply.add_trades());
     }
 
     status_ = FINISH;
