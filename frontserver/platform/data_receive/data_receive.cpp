@@ -5,6 +5,7 @@
 #include "../util/tools.h"
 #include "../util/package_manage.h"
 #include "../log/log.h"
+#include "quote.h"
 
 #include <chrono>
 #include <sstream>
@@ -228,6 +229,10 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
     }    
     // get_io_service().post(std::bind(&DataReceive::handle_depth_data, this, exchange, symbol, std::ref(depth)));
 
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    // LOG_INFO(stream_obj.str());
+
     handle_depth_data(exchange, symbol, depth);
 
     return 1;
@@ -242,7 +247,7 @@ int DataReceive::on_kline(const char* exchange, const char* symbol, type_resolut
     }
 
     // std::stringstream stream_obj;
-    // stream_obj  << "[Kline] handle_kline_data " << symbol << " " << resolution << " " << klines.size();
+    // stream_obj  << "[Kline] handle_kline_data " << exchange << " " << symbol << " " << resolution << " " << klines.size();
     // LOG_DEBUG(stream_obj.str());
 
     // if (resolution == 60)
@@ -299,7 +304,7 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
         return;
     }
 
-    if (strlen(exchange) != 0)
+    if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
         // 只处理聚合数据;
         return;
@@ -351,16 +356,17 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    if (strlen(exchange) != 0)
+    if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
         // 只处理聚合数据;
         return;
     }
 
     std::stringstream stream_obj;
-    stream_obj  << "[Depth] " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     LOG_INFO(stream_obj.str());
     
+
     // cout << "Ask: length: " << depth.ask_length << endl;
     // for ( int i = 0; i < depth.ask_length; ++i)
     // {
@@ -410,15 +416,16 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         return;
     }        
 
-    if (strlen(exchange) != 0)
+    if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
+        // 只处理聚合数据;
         return;
     }
 
     string symbol = string(c_symbol);
 
     std::stringstream stream_obj;
-    stream_obj  << "[Kline] " << c_symbol << " " << resolution << " " << klines.size();
+    stream_obj  << "[Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
     LOG_INFO(stream_obj.str());
 
     // if (resolution == 60)
@@ -496,8 +503,9 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
             return;
         }        
 
-        if (strlen(exchange) != 0)
+        if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
         {
+            // 只处理聚合数据;
             return;
         }
 
@@ -505,7 +513,7 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
 
         std::stringstream stream_obj;
         stream_obj << "[Trade] " 
-             << symbol << " "
+             << exchange<< " " << symbol << " "
              << trade.price.get_value() << " "
              << trade.volume.get_value() << " ";
         LOG_INFO(stream_obj.str());
