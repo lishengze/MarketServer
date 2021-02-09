@@ -71,6 +71,8 @@ struct SDepthData:virtual public PacakgeBaseData
     type_tick tick2;    // 来自streamengine发出数据包的时间戳
     type_tick tick3;    // 来自riskcontrol发出的数据包的时间戳
     type_seqno seqno;
+    uint32 precise;     // 价格精度
+    uint32 vprecise;    // 成交量、挂单量精度
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];
     type_length ask_length;
     SDepthLevelData bids[DEPCH_LEVEL_COUNT];

@@ -83,7 +83,7 @@ public:
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
         //if( string(exchange) == MIX_EXCHANGE_NAME )
-        //    tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 
