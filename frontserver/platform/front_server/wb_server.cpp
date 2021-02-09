@@ -527,7 +527,7 @@ bool WBServer::send_data(ID_TYPE socket_id, string msg)
     try
     {
         std::lock_guard<std::mutex> lk(wss_con_mutex_);
-        if (wss_con_map_.find(socket_id) != wss_con_map_.end() && wss_con_map_[socket_id]->is_alive())
+        if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
             wss_con_map_[socket_id]->send(msg);
             return true;
