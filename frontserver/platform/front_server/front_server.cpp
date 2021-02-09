@@ -236,10 +236,11 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             //          << "high: " << atom_kline->px_high.get_value() << ", "
             //          << "low: " << atom_kline->px_low.get_value() << endl;
             // }
-            cout << "[Front Kline] Frequency: " << p_rsp_kline_data->frequency_ << " "
-                 << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
-                 << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
-            cout << endl;
+            // cout << "[Front Kline]: Frequency: " << p_rsp_kline_data->frequency_ << " "
+            //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
+            //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
+
+            cout << "[Front Kline] socket_id: " << p_rsp_kline_data->socket_id_ << endl;
 
             // cout << kline_data_str << endl;
 
@@ -293,7 +294,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            cout << "[Front Trade]: " << "socket_id: " << pRspTradeData->socket_id_ << endl;   
+            cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;   
 
             // cout << "[Front Trade] symbol: " << pRspTradeData->symbol_ << " "
             //      << "price: " << pRspTradeData->price_.get_value() << " "
