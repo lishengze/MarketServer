@@ -321,3 +321,45 @@ string set_double_string_scale(string ori_data, int num)
     // if (num == 4) cout << result << endl;
     return result;
 }
+
+string simplize_string(string ori_data)
+{
+    string result = ori_data;
+    if (result.find(".")!=std::string::npos)
+    {
+        int end_pos = result.length() - 1;
+        for (; end_pos > 0 && result[end_pos] != '.'; --end_pos)
+        {
+            if (result[end_pos] != '0') 
+            {
+                // cout << "result: " << result << endl;
+                break;
+            }            
+        }
+        result = result.substr(0, end_pos+1);
+    }
+    return result;
+}
+
+string append_zero(string ori_data, int count)
+{
+    string result = ori_data;
+    vector<string> vec_str = split(ori_data, ".");
+    if (vec_str.size() == 2)
+    {
+        string dot_numb_str = vec_str[1];
+        if (dot_numb_str.length() > count)
+        {
+            dot_numb_str = dot_numb_str.substr(0, count);
+        }
+        else if (dot_numb_str.length() < count)
+        {
+            while(dot_numb_str.length() != count)
+            {
+                dot_numb_str += "0";
+            }
+        }
+        result = vec_str[0] + "." + dot_numb_str;
+    }
+    return result;    
+}

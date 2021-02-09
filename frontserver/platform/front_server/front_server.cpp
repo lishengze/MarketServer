@@ -164,6 +164,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         string depth_str = pRspRiskCtrledDepthData->get_json_str();
 
         cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << endl;
+        // cout << depth_str << endl;
 
         if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
         {
@@ -294,7 +295,9 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;   
+            cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;  
+
+            // cout << "trade_data_strl: "  << trade_data_str << endl;
 
             // cout << "[Front Trade] symbol: " << pRspTradeData->symbol_ << " "
             //      << "price: " << pRspTradeData->price_.get_value() << " "

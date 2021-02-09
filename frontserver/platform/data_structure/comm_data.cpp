@@ -87,9 +87,9 @@ string RspRiskCtrledDepthData::get_json_str()
     for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         nlohmann::json depth_level_atom;
-        depth_level_atom[0] = depth_data_.asks[i].price.get_value();
-        depth_level_atom[1] = depth_data_.asks[i].volume.get_value();
-        depth_level_atom[2] = ask_accumulated_volume_[i].get_value();
+        depth_level_atom[0] = append_zero(depth_data_.asks[i].price.get_str_value(), depth_data_.precise);
+        depth_level_atom[1] = append_zero(depth_data_.asks[i].volume.get_str_value(), depth_data_.vprecise);
+        depth_level_atom[2] = append_zero(ask_accumulated_volume_[i].get_str_value(), depth_data_.vprecise);
         asks_json[i] = depth_level_atom;
     }
     json_data["asks"] = asks_json;
@@ -98,9 +98,9 @@ string RspRiskCtrledDepthData::get_json_str()
     for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
     {
         nlohmann::json depth_level_atom;
-        depth_level_atom[0] = depth_data_.bids[i].price.get_value();
-        depth_level_atom[1] = depth_data_.bids[i].volume.get_value();
-        depth_level_atom[2] = bid_accumulated_volume_[i].get_value();
+        depth_level_atom[0] = append_zero(depth_data_.bids[i].price.get_str_value(), depth_data_.precise);
+        depth_level_atom[1] = append_zero(depth_data_.bids[i].volume.get_str_value(), depth_data_.vprecise);
+        depth_level_atom[2] = append_zero(bid_accumulated_volume_[i].get_str_value(), depth_data_.vprecise);
         bids_json[i] = depth_level_atom;
     }
     json_data["bids"] = bids_json;
@@ -195,8 +195,8 @@ string RspTrade::get_json_str()
     json_data["symbol"] = string(symbol_);
     json_data["price"] = price_.get_str_value();
     json_data["volume"] = volume_.get_str_value(); 
-    json_data["change"] = std::to_string(change_);
-    json_data["change_rate"] = set_double_string_scale(std::to_string(change_rate_), PERSENT_DOT_NUMB); ;
+    json_data["change"] = simplize_string(std::to_string(change_));
+    json_data["change_rate"] = simplize_string(set_double_string_scale(std::to_string(change_rate_), PERSENT_DOT_NUMB)); 
     json_data["high"] = high_.get_str_value();
     json_data["low"] = low_.get_str_value();
 
