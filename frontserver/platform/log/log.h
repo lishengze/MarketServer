@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <mutex>
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/util/time_util.h"
 
@@ -27,6 +28,8 @@ class Log
 
         void log(string msg, string flag)
         {
+            std::lock_guard<std::mutex> lk(mutex_);
+            
             cout << utrade::pandora::SecTimeStr() << " " << flag << ": " << msg << endl;
 
             if (!log_file_.is_open())
@@ -46,4 +49,5 @@ class Log
     private:
         string              file_name_{"server.log"};
         std::ofstream       log_file_;
+        std::mutex          mutex_;
 };
