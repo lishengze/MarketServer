@@ -309,9 +309,10 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
         // 只处理聚合数据;
         return;
     }
-        std::stringstream stream_obj;
-    stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    LOG_DEBUG(stream_obj.str());
+    
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    // LOG_DEBUG(stream_obj.str());
 
     // cout << "Ask: length: " << depth.ask_length << endl;
     // for ( int i = 0; i < depth.ask_length; ++i)
@@ -362,9 +363,9 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    std::stringstream stream_obj;
-    stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    LOG_INFO(stream_obj.str());
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    // LOG_INFO(stream_obj.str());
     
 
     // cout << "Ask: length: " << depth.ask_length << endl;
@@ -424,9 +425,9 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
     string symbol = string(c_symbol);
 
-    std::stringstream stream_obj;
-    stream_obj  << "[Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
-    LOG_INFO(stream_obj.str());
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
+    // LOG_INFO(stream_obj.str());
 
     // if (resolution == 60)
     // {
@@ -511,12 +512,12 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 
-        std::stringstream stream_obj;
-        stream_obj << "[Trade] " 
-             << exchange<< " " << symbol << " "
-             << trade.price.get_value() << " "
-             << trade.volume.get_value() << " ";
-        LOG_INFO(stream_obj.str());
+        // std::stringstream stream_obj;
+        // stream_obj << "[Trade] " 
+        //      << exchange<< " " << symbol << " "
+        //      << trade.price.get_value() << " "
+        //      << trade.volume.get_value() << " ";
+        // LOG_INFO(stream_obj.str());
 
         if (package)
         {
