@@ -1178,6 +1178,7 @@ void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
                 volume += kline->volume;
             }
 
+            pTradeData->start_time_ = src_kline_data[0]->index;
             pTradeData->start_price_ = start_price;
             pTradeData->total_volume_ = volume;
             pTradeData->high_ = high;
@@ -1208,6 +1209,7 @@ void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr o
 {
     try
     {
+        curTradeDataPtr->start_time_ = oldTradeDataPtr->start_time_;
         curTradeDataPtr->high_ = oldTradeDataPtr->high_;
         curTradeDataPtr->low_ = oldTradeDataPtr->low_;        
         curTradeDataPtr->start_price_ = oldTradeDataPtr->start_price_;
@@ -1335,6 +1337,12 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
                                                     pTradeDataPtr->change_, pTradeDataPtr->change_rate_, 
                                                     pTradeDataPtr->high_, pTradeDataPtr->low_, 
                                                     pReqTrade->socket_id_, pReqTrade->socket_type_);
+
+        cout << "\nTradeData: " << get_sec_time_str(pTradeDataPtr->start_time_) << " "
+             << pReqTrade->symbol_ << " start_price: " << pTradeDataPtr->start_price_.get_value() << " "
+             << "cur_price: " << pTradeDataPtr->price_.get_value() << " "
+             << "change_: " << pTradeDataPtr->change_ << " "
+             << "change_rate_: " << pTradeDataPtr->change_rate_ << endl;
         
         if (!result)
         {

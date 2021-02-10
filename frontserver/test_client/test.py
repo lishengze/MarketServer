@@ -100,11 +100,11 @@ def sub_btc_usdt(ws, sub_symbol):
 def on_open(ws):
     print("Connected")
 
-    send_str = get_sub_depth_str()
+    # send_str = get_sub_depth_str()
 
     # send_str = get_sub_kline_str()
 
-    # send_str = get_sub_trade_str()
+    send_str = get_sub_trade_str()
 
     ws.send(send_str)
 

@@ -37,8 +37,6 @@ RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDe
     socket_id_ = other.socket_id_;
     socket_type_ = other.socket_type_;
 
-    cout << "RspRiskCtrledDepthData::Operator = " << endl;
-
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
     {

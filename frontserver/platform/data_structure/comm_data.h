@@ -462,6 +462,7 @@ struct TradeData:virtual public PacakgeBaseData
     SDecimal price_;
     SDecimal volume_;
 
+    type_tick   start_time_;
     SDecimal    start_price_;
     SDecimal    total_volume_;
     double      change_;
