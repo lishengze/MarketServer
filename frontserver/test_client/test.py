@@ -69,7 +69,7 @@ def get_sub_kline_str(symbl="BTC_USDT"):
     sub_info = {
         "type":"kline_update",
         "symbol":symbl,
-        "data_count":str(1500),
+        "data_count":str(1000),
         "frequency":str(frequency)
     }
 
@@ -102,9 +102,9 @@ def on_open(ws):
 
     # send_str = get_sub_depth_str()
 
-    # send_str = get_sub_kline_str()
+    send_str = get_sub_kline_str()
 
-    send_str = get_sub_trade_str()
+    # send_str = get_sub_trade_str()
 
     ws.send(send_str)
 

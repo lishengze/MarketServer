@@ -451,7 +451,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                     }
 
 
-                    cout << pReqKlineData->symbol_ << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
+                    cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
                         << " low: " << max_min_kline_info.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info.low_time)
                         << endl;
                 }
