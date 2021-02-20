@@ -69,7 +69,7 @@ void KlineProcess::request_kline_package(PackagePtr package)
                 {
                     init_update_kline_data(rsp_package, pReqKlineData);
 
-                    cout << "deliver_response " << endl;
+                    // cout << "deliver_response " << endl;
                     process_engine_->deliver_response(rsp_package);
                 }
                 else
@@ -419,6 +419,43 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
             if (target_kline_data.size() > 0)
             {
+                cout << "target_kline_data Data" << endl;
+
+                if (strcmp(pReqKlineData->symbol_, "BTC_USDT") == 0)
+                {
+                    MaxMinKlineInfo max_min_kline_info;
+                    max_min_kline_info.px_high = MIN_DOUBLE;
+                    max_min_kline_info.px_low = MAX_DOUBLE;
+                    max_min_kline_info.symbol = "BTC_USDT";     
+
+                    for (auto kline_data:target_kline_data)
+                    {
+                        cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                            << kline_data->px_open.get_value() << " "
+                            << kline_data->px_close.get_value() << " "
+                            << kline_data->px_high.get_value() << " "
+                            << kline_data->px_low.get_value() << " "
+                            << endl;    
+
+                        if (max_min_kline_info.px_high < kline_data->px_high)
+                        {
+                            max_min_kline_info.px_high = kline_data->px_high;
+                            max_min_kline_info.high_time = kline_data->index;
+                        }
+
+                        if (max_min_kline_info.px_low > kline_data->px_low)
+                        {
+                            max_min_kline_info.px_low = kline_data->px_low;
+                            max_min_kline_info.low_time = kline_data->index;
+                        }                                            
+                    }
+
+
+                    cout << pReqKlineData->symbol_ << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
+                        << " low: " << max_min_kline_info.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info.low_time)
+                        << endl;
+                }
+
                 rsp_package = GetNewRspKLineDataPackage(*pReqKlineData, target_kline_data, ID_MANAGER->get_id());              
             }
             else
@@ -699,7 +736,7 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
 
     if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
     {
-        cout << "KlineProcess::update_kline_data " << symbol << endl;
+        // cout << "KlineProcess::update_kline_data " << symbol << endl;
 
         // vector<KlineDataUpdatePtr>& vec = updated_kline_data_map_[symbol];
 
@@ -1039,7 +1076,7 @@ void KlineProcess::update_trade_data(TradeDataPtr pTradeDataPtr)
 
             if (trade_data_map_.find(symbol) == trade_data_map_.end())
             {
-                cout << "KlineProcess::update_trade_data New Symbol: " << symbol << endl;
+                // cout << "KlineProcess::update_trade_data New Symbol: " << symbol << endl;
                 oldTradeDataPtr = nullptr;
             }
             else
@@ -1164,19 +1201,78 @@ void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
                                     ? src_kline_data[0]->px_open 
                                     : src_kline_data[0]->px_close;
 
-            SDecimal high = src_kline_data[0]->px_high > pTradeData->price_ ? src_kline_data[0]->px_high : pTradeData->price_;
-            SDecimal low = src_kline_data[0]->px_low < pTradeData->price_?src_kline_data[0]->px_low : pTradeData->price_;
+            type_tick high_time;
+            type_tick low_time;
+            SDecimal high;
+            SDecimal low;
+
+            if (src_kline_data[0]->px_high > pTradeData->price_)
+            {
+                high = src_kline_data[0]->px_high;
+                high_time = src_kline_data[0]->index;
+            }
+            else
+            {
+                high = pTradeData->price_;
+                high_time = pTradeData->time_;
+            }
+
+            if (src_kline_data[0]->px_low < pTradeData->price_)
+            {
+                low = src_kline_data[0]->px_low;
+                low_time = src_kline_data[0]->index;
+            }
+            else
+            {
+                low = pTradeData->price_;
+                low_time = pTradeData->time_;
+            }
+
             SDecimal price = pTradeData->price_;
             SDecimal volume = 0;
             double change = price.get_value() - start_price.get_value();
             double change_rate = change / start_price.get_value();
 
+           
             for (KlineDataPtr& kline : src_kline_data)
             {
-                high = high < kline->px_high ? kline->px_high : high;
+                // high = high < kline->px_high ? kline->px_high : high;
                 low = low > kline->px_low ? kline->px_low : low;
                 volume += kline->volume;
+
+                if (high < kline->px_high)
+                {
+                    high = kline->px_high;
+                    high_time = kline->index;
+                }
+
+                if (low > kline->px_low)
+                {
+                    low = kline->px_low;
+                    low_time = kline->index;
+                }
+
+                // cout << get_sec_time_str(kline->index) << " "
+                //     << kline->px_open.get_value() << " "
+                //     << kline->px_close.get_value() << " "
+                //     << kline->px_high.get_value() << " "
+                //     << kline->px_low.get_value() << " "
+                //     << endl;                
             }
+
+            if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
+            {
+                cout << "TradeData: "<<  pTradeData->symbol_ 
+                    << " start_time: " << get_sec_time_str(src_kline_data[0]->index) << " "
+                    << " end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
+                    << " \t\t\thigh: " << high.get_value() << " high_time: " << get_sec_time_str(high_time)
+                    << " low: " << low.get_value() << " low_time: " << get_sec_time_str(low_time)  
+                    << endl;
+            }
+
+            // cout << "\n"<<  pTradeData->symbol_ << " start_time: " << get_sec_time_str(src_kline_data[0]->index) << " "
+            //      << " end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index)
+            //      << " high_time: " << get_sec_time_str(high_time) << " high: " << high.get_value() << endl;
 
             pTradeData->start_time_ = src_kline_data[0]->index;
             pTradeData->start_price_ = start_price;
@@ -1338,11 +1434,11 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
                                                     pTradeDataPtr->high_, pTradeDataPtr->low_, 
                                                     pReqTrade->socket_id_, pReqTrade->socket_type_);
 
-        cout << "\nTradeData: " << get_sec_time_str(pTradeDataPtr->start_time_) << " "
-             << pReqTrade->symbol_ << " start_price: " << pTradeDataPtr->start_price_.get_value() << " "
-             << "cur_price: " << pTradeDataPtr->price_.get_value() << " "
-             << "change_: " << pTradeDataPtr->change_ << " "
-             << "change_rate_: " << pTradeDataPtr->change_rate_ << endl;
+        // cout << "\nTradeData: " << get_sec_time_str(pTradeDataPtr->start_time_) << " "
+        //      << pReqTrade->symbol_ << " start_price: " << pTradeDataPtr->start_price_.get_value() << " "
+        //      << "cur_price: " << pTradeDataPtr->price_.get_value() << " "
+        //      << "change_: " << pTradeDataPtr->change_ << " "
+        //      << "change_rate_: " << pTradeDataPtr->change_rate_ << endl;
         
         if (!result)
         {
@@ -1393,9 +1489,15 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
             cur_src_data = kline_data_[symbol][freq_base];
         }
 
-        // cout << "req_start_time: " << get_sec_time_str(start_time) << " "
-        //      << "req_end_time: " << get_sec_time_str(end_time) << " "
-        //      << endl;            
+        if (symbol == "BTC_USDT" && cur_src_data.size() > 0)
+        {
+            cout<< "TradeData: req_start_time: " << get_sec_time_str(start_time) << " "
+                << "req_end_time: " << get_sec_time_str(end_time) << " "
+                << "src start_time: " << get_sec_time_str(cur_src_data.begin()->first) << " "
+                << "src end_time: " << get_sec_time_str(cur_src_data.rbegin()->first) << " "
+                << endl;     
+        }
+       
 
         if (need_more_data)
         {
@@ -1412,7 +1514,7 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
             for (KlineData& kline_data:append_result)
             {
                 result.emplace_back(boost::make_shared<KlineData>(kline_data));
-                // cout << get_sec_time_str(kline_data.index) << " "
+                // cout << kline_data.symbol << " " << get_sec_time_str(kline_data.index) << " "
                 //     << kline_data.px_open.get_value() << " "
                 //     << kline_data.px_close.get_value() << " "
                 //     << kline_data.px_high.get_value() << " "
@@ -1422,8 +1524,8 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
         }
         else
         {
-            // cout << "Don't need Appended Data Cached Data StartTime is : " << get_sec_time_str(kline_data_[symbol][freq_base].begin()->first) << " "
-            //      << "EndTime is: " << get_sec_time_str(kline_data_[symbol][freq_base].rbegin()->first)
+            // cout << "Don't need Appended Data Cached Data StartTime is : " << get_sec_time_str(cur_src_data.begin()->first) << " "
+            //      << "EndTime is: " << get_sec_time_str(cur_src_data.rbegin()->first)
             //      << endl;
         }
 
@@ -1439,12 +1541,14 @@ PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr p
             while(iter != cur_src_data.end() && iter->first <= end_time ) 
             {
                 result.push_back(iter->second);
-                // cout << get_sec_time_str(iter->second->index) << " "
+                // cout <<iter->second->symbol << " " << get_sec_time_str(iter->second->index) << " "
                 //     << iter->second->px_open.get_value() << " "
                 //     << iter->second->px_close.get_value() << " "
                 //     << iter->second->px_high.get_value() << " "
                 //     << iter->second->px_low.get_value() << " "
-                //     << endl;                
+                //     << endl;          
+
+
                 ++iter;
             }
         }

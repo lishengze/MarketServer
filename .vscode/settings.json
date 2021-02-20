@@ -79,6 +79,7 @@
         "json.hpp": "c",
         "package_simple.h": "c",
         "regex": "cpp",
-        "shared_mutex": "cpp"
+        "shared_mutex": "cpp",
+        "base_data.h": "c"
     }
 }

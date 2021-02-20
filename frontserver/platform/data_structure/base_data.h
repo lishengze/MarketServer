@@ -239,3 +239,12 @@ struct AtomKlineData:virtual public PacakgeBaseData
     type_tick tick_;
 };
 FORWARD_DECLARE_PTR(AtomKlineData);
+
+struct MaxMinKlineInfo
+{
+    type_tick high_time{0};
+    type_tick low_time{0};
+    SDecimal px_low;
+    SDecimal px_high;     
+    string   symbol; 
+};

@@ -64,6 +64,13 @@ void DataReceive::test_main()
         test_kline_thread_ = std::make_shared<std::thread>(&DataReceive::test_kline_data, this);
     }
     
+
+    if (is_test_maxmin_kline)
+    {
+        max_min_kline_info.px_high = MIN_DOUBLE;
+        max_min_kline_info.px_low = MAX_DOUBLE;
+        max_min_kline_info.symbol = "BTC_USDT";
+    }
 }
 
 void DataReceive::test_kline_data()
@@ -442,35 +449,51 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
         const KlineData& kline = klines[i];
-
-        // // 过滤掉逆序的时间;
-        // if (kline_symbol_last_time_.find(symbol)== kline_symbol_last_time_.end())
-        // {
-        //     kline_symbol_last_time_[symbol] == kline.index;
-        // }
-        // else if (kline_symbol_last_time_[symbol] >= kline.index)
-        // {
-        //     std::stringstream stream_obj;
-        //     stream_obj  << "[Kine] Time Seq is Error , "<< symbol << " current time is " << get_sec_time_str(kline.index)
-        //                 << ", last update time is " << get_sec_time_str(kline_symbol_last_time_[symbol]) << "\n";
-
-        //     // LOG_ERROR(stream_obj.str());
-        //     continue;
-        // }
-        // else
-        // {
-        //    kline_symbol_last_time_[symbol] = kline.index;
-        // }
         
-        // kline.frequency_ = resolution;
-
-        std::stringstream stream_obj;
-        stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
-                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
+        // std::stringstream stream_obj;
+        // stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
+        //             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //             << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
         
-        // LOG_INFO(stream_obj.str());
+        // if (strcmp(c_symbol, "BTC_USDT") == 0 && klines.size() > 100 && resolution == 60)
+        // {
+        //     LOG_INFO(stream_obj.str());
 
+        //     if (is_test_maxmin_kline)
+        //     {
+        //         if (max_min_kline_info.px_high < kline.px_high)
+        //         {
+        //             max_min_kline_info.px_high = kline.px_high;
+        //             max_min_kline_info.high_time = kline.index;
+        //         }
+
+        //         if (max_min_kline_info.px_low > kline.px_low)
+        //         {
+        //             max_min_kline_info.px_low = kline.px_low;
+        //             max_min_kline_info.low_time = kline.index;
+        //         }
+        //     }
+        // }
+
+        if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
+        {
+            if (is_test_maxmin_kline)
+            {
+                if (max_min_kline_info.px_high < kline.px_high)
+                {
+                    max_min_kline_info.px_high = kline.px_high;
+                    max_min_kline_info.high_time = kline.index;
+                }
+
+                if (max_min_kline_info.px_low > kline.px_low)
+                {
+                    max_min_kline_info.px_low = kline.px_low;
+                    max_min_kline_info.low_time = kline.index;
+                }
+            }
+        }
+                
+        
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
         if (package)
@@ -492,6 +515,15 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             LOG_ERROR("DataReceive::handle_kline_data GetNewKlineDataPackage Failed!");
         }
     }   
+
+
+    if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
+    {
+        cout <<"\nKlineSrc: " << c_symbol 
+             << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
+             << " low: " << max_min_kline_info.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info.low_time)
+             << endl;
+    }
 }
 
 void DataReceive::handle_trade_data(const char* exchange, const char* symbol, const Trade& trade)

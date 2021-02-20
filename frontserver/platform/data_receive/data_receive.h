@@ -9,7 +9,7 @@
 
 #include "hub_interface.h"
 #include "hub_struct.h"
-
+#include "../data_structure/base_data.h"
 
 // 用于处理数据: 为 front-server 提供全量或增量的更新;
 // 设置缓冲;
@@ -68,6 +68,6 @@ public:
     bool                          is_test_depth{false};    
     bool                          is_test_enquiry{false};
 
-    map<string, int>              kline_symbol_data_count_;
-    map<string, type_tick>        kline_symbol_last_time_;
+    bool                is_test_maxmin_kline{true};
+    MaxMinKlineInfo     max_min_kline_info;
 };
