@@ -516,22 +516,22 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         }
     }   
 
-
     if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
     {
+        if (klines.size() > 100)
+        {
+            cout << "\nKlineSrc: start_time: " << get_sec_time_str(klines.begin()->index) << " "
+                << "end_time: " << get_sec_time_str(klines.rbegin()->index) 
+                << " data_count: " << klines.size()
+                << endl;
+        }
         cout <<"\nKlineSrc: " << c_symbol 
              << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
              << " low: " << max_min_kline_info.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info.low_time)
              << endl;
     }
 
-    if (strcmp(c_symbol, "BTC_USDT") == 0 && klines.size() > 100 && resolution == 60)
-    {
-        cout << "\nKlineSrc: start_time: " << get_sec_time_str(klines.begin()->index) << " "
-             << "end_time: " << get_sec_time_str(klines.rbegin()->index) 
-             << " data_count: " << klines.size()
-             << endl;
-    }
+
 
 }
 
