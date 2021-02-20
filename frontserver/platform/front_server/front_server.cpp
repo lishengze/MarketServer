@@ -295,7 +295,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;  
+            // cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;  
 
             // cout << "trade_data_strl: "  << trade_data_str << endl;
 

@@ -102,9 +102,9 @@ def on_open(ws):
 
     # send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
-    # send_str = get_sub_trade_str()
+    send_str = get_sub_trade_str()
 
     ws.send(send_str)
 

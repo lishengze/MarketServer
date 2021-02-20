@@ -430,12 +430,12 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
                     for (auto kline_data:target_kline_data)
                     {
-                        cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
-                            << kline_data->px_open.get_value() << " "
-                            << kline_data->px_close.get_value() << " "
-                            << kline_data->px_high.get_value() << " "
-                            << kline_data->px_low.get_value() << " "
-                            << endl;    
+                        // cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                        //     << kline_data->px_open.get_value() << " "
+                        //     << kline_data->px_close.get_value() << " "
+                        //     << kline_data->px_high.get_value() << " "
+                        //     << kline_data->px_low.get_value() << " "
+                        //     << endl;    
 
                         if (max_min_kline_info.px_high < kline_data->px_high)
                         {
