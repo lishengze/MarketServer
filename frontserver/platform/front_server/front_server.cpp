@@ -163,7 +163,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
 
         string depth_str = pRspRiskCtrledDepthData->get_json_str();
 
-        cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << endl;
+        // cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << endl;
         // cout << depth_str << endl;
 
         if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
@@ -241,7 +241,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
             //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
 
-            cout << "[Front Kline] socket_id: " << p_rsp_kline_data->socket_id_ << endl;
+            // cout << "[Front Kline] socket_id: " << p_rsp_kline_data->socket_id_ << endl;
 
             // cout << kline_data_str << endl;
 
