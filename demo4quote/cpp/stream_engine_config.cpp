@@ -36,8 +36,7 @@ void Config::parse_config(const std::string& file_name)
         quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
         nacos_addr_ = js["nacos"]["addr"].get<string>();
-        nacos_group_ = js["nacos"]["group"].get<string>();
-        nacos_dataid_ = js["nacos"]["dataid"].get<string>();
+        nacos_namespace_ = js["nacos"]["namespace"].get<string>();
         
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
@@ -59,6 +58,7 @@ string Config::get_config() const
 
 void Config::set_config(const string& config)
 {
+    _log_and_print("set config %s", config);
     std::unique_lock<std::mutex> inner_lock{ mutex_faw_config_ };
     faw_config_ = config;
 }

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <thread>
+#include <atomic>
 
 #include "factory/NacosServiceFactory.h"
 #include "ResourceGuard.h"
@@ -13,11 +14,25 @@
 using namespace std;
 using namespace nacos;
 
+// for json
+#include "base/cpp/rapidjson/document.h"
+#include "base/cpp/rapidjson/writer.h"
+#include "base/cpp/rapidjson/stringbuffer.h"
+using namespace rapidjson;
+
+inline string ToJson(const Document& d) 
+{
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
 class INacosCallback {
 public:
-    virtual void on_config_channged(const NacosString& symbols) = 0;
+    virtual void on_config_channged(const Document& symbols) = 0;
 };
-
+/*
 class NacosListener : public Listener 
 {
 private:
@@ -32,7 +47,30 @@ public:
 
     void receiveConfigInfo(const NacosString &configInfo);
 };
+*/
+class NacosClient
+{
+public:
+    void start(const string& addr, const string& ns, INacosCallback* callback);
 
+private:
+    std::thread* _run_thread_ = nullptr;
+    std::atomic<bool> thread_run_;
+    void _run(INacosCallback* callback);
+
+    string addr_;
+    string namespace_;
+    ConfigService* server_ = nullptr;
+    INacosCallback* callback_ = nullptr;
+
+    void _request_configs();
+
+    // 缓存
+    NacosString hedge_params_;
+    NacosString symbol_params_;
+};
+
+/*
 class NacosClient
 {
 public:
@@ -73,4 +111,4 @@ private:
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
-};
+};*/

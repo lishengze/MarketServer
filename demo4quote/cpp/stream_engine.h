@@ -23,7 +23,7 @@ public:
     void on_nodata_exchange(const TSymbol& symbol);
 
     // from INacosCallback
-    void on_config_channged(const NacosString& symbols);
+    void on_config_channged(const Document& d);
 
     // signal handler function
     static volatile int signal_sys;

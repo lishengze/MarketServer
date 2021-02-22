@@ -62,7 +62,7 @@ void StreamEngine::start()
     server_endpoint_.start();
 
     // 连接配置服务器
-    nacos_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_group_, CONFIG->nacos_dataid_, this);    
+    nacos_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_, this);    
 }
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
@@ -152,7 +152,7 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
     return ret;
 }
 
-void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs, njson& js)
+void expand_replay_config(const Document& src, Document& dst)
 {
     if( CONFIG->replay_replicas_ == 0 ) {
         return;
@@ -160,23 +160,29 @@ void expand_replay_config(unordered_map<TSymbol, SNacosConfig>& configs, njson& 
 
     // 待复制的代码
     set<TSymbol> symbols;
-    for( const auto& v : configs ) 
+    for (auto iter = src.MemberBegin() ; iter != src.MemberEnd() ; ++iter )
     {
-        symbols.insert(v.first);
+        const TSymbol& symbol = iter->name.GetString();
+        const Value& symbol_cfgs = iter->value;
+        bool enable = symbol_cfgs["enable"].GetBool();
+        if( !enable )
+            continue;
+        symbols.insert(symbol);
     }
 
     // 执行复制
     for( const auto& v : symbols ) {     
         for( unsigned int i = 1 ; i <= CONFIG->replay_replicas_ ; i ++ ) {
             string key = tfm::format("%s_%d", v, i);
-            js[key] = js[v];
-            configs[key] = configs[v];
+            Value symbol_key(key.c_str(), key.size(), dst.GetAllocator());
+            dst.AddMember(symbol_key, dst[v.c_str()], dst.GetAllocator());
         }
     }
 }
 
-void StreamEngine::on_config_channged(const NacosString& configInfo)
-{    
+void StreamEngine::on_config_channged(const Document& src)
+{   
+    /* 
     _log_and_print("parse json %s", configInfo);
 
     // json 解析
@@ -191,35 +197,44 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         return;
     }    
     _log_and_print("parse config from nacos finish");
+    */
+
+    Document d(rapidjson::Type::kObjectType);
+    string content = ToJson(src);
+    d.Parse(content.c_str());
+    // 如果是测试/回放，扩展配置数据
+    if( CONFIG->mode_ == MODE_REPLAY ) {
+        expand_replay_config(src, d);
+    }
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     try
     {
-        for (auto iter = js.begin() ; iter != js.end() ; ++iter )
+        for (auto iter = src.MemberBegin() ; iter != src.MemberEnd() ; ++iter )
         {
-            const TSymbol& symbol = iter.key();
-            const njson& symbol_cfgs = iter.value();
-            int enable = symbol_cfgs["enable"].get<int>();
-            if( enable < 1 )
+            const TSymbol& symbol = iter->name.GetString();
+            const Value& symbol_cfgs = iter->value;
+            bool enable = symbol_cfgs["enable"].GetBool();
+            if( !enable )
                 continue;
             SNacosConfig cfg;
-            cfg.precise = symbol_cfgs["precise"].get<int>();
-            cfg.vprecise = symbol_cfgs["vprecise"].get<int>();
-            cfg.depth = symbol_cfgs["depth"].get<unsigned int>();
-            cfg.frequency = symbol_cfgs["frequency"].get<float>();
-            for( auto iter2 = symbol_cfgs["exchanges"].begin() ; iter2 != symbol_cfgs["exchanges"].end() ; ++iter2 )
+            cfg.precise = symbol_cfgs["precise"].GetUint();
+            cfg.vprecise = symbol_cfgs["vprecise"].GetUint();
+            cfg.depth = symbol_cfgs["depth"].GetUint();
+            cfg.frequency = symbol_cfgs["frequency"].GetFloat();
+            for( auto iter2 = symbol_cfgs["exchanges"].MemberBegin() ; iter2 != symbol_cfgs["exchanges"].MemberEnd() ; ++iter2 )
             {
-                const TExchange& exchange = iter2.key();
-                const njson& exchange_cfgs = iter2.value();
+                const TExchange& exchange = iter2->name.GetString();
+                const Value& exchange_cfgs = iter2->value;
                 SNacosConfigByExchange exchange_cfg;
-                exchange_cfg.precise = exchange_cfgs["precise"].get<int>();
-                exchange_cfg.vprecise = exchange_cfgs["vprecise"].get<int>();
-                exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
-                exchange_cfg.frequency = exchange_cfgs["frequency"].get<float>();
-                exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].get<int>();
-                exchange_cfg.fee.maker_fee = exchange_cfgs["fee_maker"].get<float>();
-                exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].get<float>();
+                exchange_cfg.precise = exchange_cfgs["precise"].GetUint();
+                exchange_cfg.vprecise = exchange_cfgs["vprecise"].GetUint();
+                //exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
+                exchange_cfg.frequency = exchange_cfgs["frequency"].GetFloat();
+                exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].GetUint();
+                exchange_cfg.fee.maker_fee = exchange_cfgs["fee_maker"].GetDouble();
+                exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].GetDouble();
                 cfg.exchanges[exchange] = exchange_cfg;
             } 
             symbols[symbol] = cfg;
@@ -230,11 +245,6 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
         _log_and_print("decode config fail %s", e.what());
         return;
     }    
-
-    // 如果是测试/回放，扩展配置数据
-    if( CONFIG->mode_ == MODE_REPLAY ) {
-        expand_replay_config(symbols, js);
-    }
     
     for( const auto& v : symbols )
     {
@@ -280,7 +290,7 @@ void StreamEngine::on_config_channged(const NacosString& configInfo)
     symbols_ = symbols;
 
     // 配置信息缓存在config中，供接口请求
-    CONFIG->set_config(js.dump());
+    CONFIG->set_config(ToJson(d));
     
     // 启动数据接收
     quote_source_->start();

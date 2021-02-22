@@ -674,7 +674,7 @@ bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
     // 打印入参
     for( const auto& v : config ) 
     {
-        _log_and_print("[%s.%s] %s", v.first, symbol, v.second.desc());
+        _log_and_print("RedisQuote::set_config [%s.%s] %s", v.first, symbol, v.second.desc());
     }
 
     // 设置交易所配置
