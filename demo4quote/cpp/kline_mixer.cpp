@@ -241,6 +241,10 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ )
         {
             const KlineData& kline = *iter;
+            // 非整点直接过滤
+            if( dst_60min.size() == 0 && kline.index % 3600 != 0 ) { 
+                continue;
+            }
             if( dst_60min.size() > 0 && is_same_interval(dst_60min.back().index, kline.index, 3600) ) {
                 // 更新到最后一根
                 KlineData& dst = dst_60min.back();

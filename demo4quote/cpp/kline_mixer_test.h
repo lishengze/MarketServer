@@ -190,19 +190,20 @@ class FakeDB : public IDataProvider
                 klines[0].print_debug();
                 klines[1].print_debug();
 
+/*
                 assert( klines[0].index == 1614045600 );
                 assert( klines[0].px_open.get_str_value() == "1.97" );
                 assert( klines[0].px_high.get_str_value() == "4.04" );
                 assert( klines[0].px_low.get_str_value() == "0.96" );
                 assert( klines[0].px_close.get_str_value() == "1.97" );
                 assert( klines[0].volume.get_str_value() == "3.3" );
-
-                assert( klines[1].index == 1614049200 );
-                assert( klines[1].px_open.get_str_value() == "2.97" );
-                assert( klines[1].px_high.get_str_value() == "4.97" );
-                assert( klines[1].px_low.get_str_value() == "1.97" );
-                assert( klines[1].px_close.get_str_value() == "3.97" );
-                assert( klines[1].volume.get_str_value() == "1.1" );
+*/
+                assert( klines[0].index == 1614049200 );
+                assert( klines[0].px_open.get_str_value() == "2.97" );
+                assert( klines[0].px_high.get_str_value() == "4.97" );
+                assert( klines[0].px_low.get_str_value() == "1.97" );
+                assert( klines[0].px_close.get_str_value() == "3.97" );
+                assert( klines[0].volume.get_str_value() == "1.1" );
             } else {
                 assert( klines[0].index == 1614049200 );
                 assert( klines[0].px_open.get_str_value() == "2.97" );
