@@ -336,7 +336,7 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         case 60:
         {
             min1_cache_.update_kline(exchange, symbol, klines, outputs, output_60mins);        
-            min60_cache_.update_kline(exchange, symbol, klines, output_60mins, nouse);    
+            min60_cache_.update_kline(exchange, symbol, output_60mins, nouse, nouse);    
             break;
         }
         case 3600:
