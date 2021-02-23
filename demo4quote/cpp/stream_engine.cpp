@@ -202,7 +202,7 @@ void StreamEngine::on_config_channged(const Document& src)
     Document d(rapidjson::Type::kObjectType);
     string content = ToJson(src);
     d.Parse(content.c_str());
-    // 如果是测试/回放，扩展配置数据
+    // 压测扩展配置参数
     if( CONFIG->mode_ == MODE_REPLAY ) {
         expand_replay_config(src, d);
     }

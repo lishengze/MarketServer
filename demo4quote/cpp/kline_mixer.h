@@ -82,7 +82,7 @@ public:
     void set_limit(size_t limit) { limit_ = limit; }
     void set_resolution(uint32 resolution) { resolution_ = resolution; }
 
-    void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs);
+    void update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs, vector<KlineData>& output_60mins);
 
     void fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache);
 private:
@@ -93,6 +93,7 @@ private:
 
     mutable std::mutex mutex_data_;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_;
+    unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_60min_;
 };
 
 class KlineHubber : public IKlineCacher

@@ -96,7 +96,7 @@ public:
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
-        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
+        //redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
         if( !connected_ )
@@ -104,7 +104,7 @@ public:
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
-        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
+        //redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
 
     void on_message(const std::string& channel, const std::string& msg, bool& retry);

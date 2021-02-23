@@ -83,6 +83,11 @@ struct KlineData
         index = 0;
         volume = 0;
     }
+
+    void print_debug() const {
+        tfm::printf("index=%lu, open=%s, high=%s, low=%s, close=%s, vol=%s", index, px_open.get_str_value(), px_high.get_str_value(), px_low.get_str_value(), 
+        px_close.get_str_value(), volume.get_str_value());
+    }
 };
 
 struct Trade

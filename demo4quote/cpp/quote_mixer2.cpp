@@ -226,7 +226,9 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     normalize(snap.bids, config);
 
     if( snap.origin_time > 0 ) {
-        _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
+        if( (get_miliseconds() / 1000 % 10) == 0 ) { // 每10秒输出一次
+            _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
+        }
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
     }
 

@@ -162,7 +162,10 @@ void KlineCache::fill_klines(unordered_map<TExchange, unordered_map<TSymbol, vec
     cache = data_;
 }
 
-void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs)
+bool is_same_interval(type_tick index1, type_tick index2, int interval){
+    return index1/interval == index2/interval;
+}
+void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, const vector<KlineData>& klines, vector<KlineData>& outputs, vector<KlineData>& output_60mins)
 {
     // 锁住对象
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
@@ -228,6 +231,44 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         }
     }
 
+    // 根据1分钟计算60分钟周期K线
+    if( resolution_ == 60 ) 
+    {
+        output_60mins.clear();
+        vector<KlineData>& dst_60min = data_60min_[exchange][symbol];
+        
+        // 更新到60分钟K线
+        for( auto iter = outputs.begin() ; iter != outputs.end() ; iter++ )
+        {
+            const KlineData& kline = *iter;
+            if( dst_60min.size() > 0 && is_same_interval(dst_60min.back().index, kline.index, 3600) ) {
+                // 更新到最后一根
+                KlineData& dst = dst_60min.back();
+                if( dst.px_high < kline.px_high ) {
+                    dst.px_high = kline.px_high;                    
+                }
+                if( dst.px_low > kline.px_low ) {
+                    dst.px_low = kline.px_low;
+                }
+                dst.px_close = kline.px_close;
+                dst.volume += kline.volume;
+                if( output_60mins.size() == 0 || output_60mins.back().index < dst.index ) {
+                    output_60mins.push_back(dst);
+                } else {
+                    output_60mins.back() = dst;
+                }
+            } else if( dst_60min.size() == 0 || (kline.index > dst_60min.back().index) ) {
+                // 新增一根
+                KlineData tmp = kline;
+                tmp.index = kline.index / 3600 * 3600;
+                dst_60min.push_back(tmp);
+                output_60mins.push_back(tmp);
+            } else {
+                // 倒退，直接丢弃
+            }
+        }
+    }
+
     _shorten(dst);
 }
 
@@ -288,17 +329,18 @@ KlineHubber::~KlineHubber()
 
 void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs)
 {
+    vector<KlineData> output_60mins;
     // 写入cache
     switch( resolution ) 
     {
         case 60:
         {
-            min1_cache_.update_kline(exchange, symbol, klines, outputs);
+            min1_cache_.update_kline(exchange, symbol, klines, outputs, output_60mins);            
             break;
         }
         case 3600:
         {
-            min60_cache_.update_kline(exchange, symbol, klines, outputs);
+            //min60_cache_.update_kline(exchange, symbol, klines, outputs);
             break;
         }
         default:
@@ -310,12 +352,14 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
 
     // 写入db缓存区
     db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
+    db_interface_->on_kline(exchange, symbol, 3600, output_60mins, is_init);
 
     // 更新回调
     if( !is_init && outputs.size() > 0 )
     {
         for( const auto& v : callbacks_) {
             v->on_kline(exchange, symbol, resolution, outputs);
+            v->on_kline(exchange, symbol, 3600, output_60mins);
         }
     }
 }
