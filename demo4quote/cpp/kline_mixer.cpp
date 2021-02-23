@@ -329,13 +329,14 @@ KlineHubber::~KlineHubber()
 
 void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs)
 {
-    vector<KlineData> output_60mins;
+    vector<KlineData> output_60mins, nouse;
     // 写入cache
     switch( resolution ) 
     {
         case 60:
         {
-            min1_cache_.update_kline(exchange, symbol, klines, outputs, output_60mins);            
+            min1_cache_.update_kline(exchange, symbol, klines, outputs, output_60mins);        
+            min60_cache_.update_kline(exchange, symbol, klines, output_60mins, nouse);    
             break;
         }
         case 3600:

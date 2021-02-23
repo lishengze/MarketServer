@@ -175,7 +175,9 @@ void expand_replay_config(const Document& src, Document& dst)
         for( unsigned int i = 1 ; i <= CONFIG->replay_replicas_ ; i ++ ) {
             string key = tfm::format("%s_%d", v, i);
             Value symbol_key(key.c_str(), key.size(), dst.GetAllocator());
-            dst.AddMember(symbol_key, dst[v.c_str()], dst.GetAllocator());
+            Value value;
+            value.CopyFrom(dst[v.c_str()], dst.GetAllocator());
+            dst.AddMember(symbol_key, value, dst.GetAllocator());
         }
     }
 }
@@ -211,7 +213,7 @@ void StreamEngine::on_config_channged(const Document& src)
     std::unordered_map<TSymbol, SNacosConfig> symbols;
     try
     {
-        for (auto iter = src.MemberBegin() ; iter != src.MemberEnd() ; ++iter )
+        for (auto iter = d.MemberBegin() ; iter != d.MemberEnd() ; ++iter )
         {
             const TSymbol& symbol = iter->name.GetString();
             const Value& symbol_cfgs = iter->value;
