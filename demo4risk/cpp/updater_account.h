@@ -134,17 +134,18 @@ private:
     void _run(const string& addr, IAccountUpdater* callback) 
     {
         /*
-        // 手动加入测试数据
-        account_.hedge_accounts_["ART"].currencies["ABC"].amount = 99999999;
-        account_.hedge_accounts_["ART"].currencies["USDT"].amount = 99999999;
-        account_.hedge_accounts_["ALAMEDA"].currencies["BTC"].amount = 99999999;
-        account_.hedge_accounts_["ALAMEDA"].currencies["USDT"].amount = 99999999;
-        account_.hedge_accounts_["HUOBI"].currencies["BTC"].amount = 99999999;
-        account_.hedge_accounts_["HUOBI"].currencies["USDT"].amount = 99999999;
-        account_.hedge_accounts_["BINANCE"].currencies["BTC"].amount = 99999999;
-        account_.hedge_accounts_["BINANCE"].currencies["USDT"].amount = 99999999;
-        callback->on_account_update(account_);
-        */
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        for( int i = 0 ; i < 1000000 ; i ++ ){
+            account_.hedge_accounts_["ART"].currencies["ABC"].amount = 99999999;
+            account_.hedge_accounts_["ART"].currencies["USDT"].amount = 99999999;
+            account_.hedge_accounts_["ALAMEDA"].currencies["BTC"].amount = 99999999;
+            account_.hedge_accounts_["ALAMEDA"].currencies["USDT"].amount = 99999999;
+            account_.hedge_accounts_["HUOBI"].currencies["BTC"].amount = 99999999;
+            account_.hedge_accounts_["HUOBI"].currencies["USDT"].amount = 99999999 - i;
+            account_.hedge_accounts_["BINANCE"].currencies["BTC"].amount = 99999999;
+            account_.hedge_accounts_["BINANCE"].currencies["USDT"].amount = 99999999;
+            callback->on_account_update(account_);
+        }*/        
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
 
         while( 1 ) {            

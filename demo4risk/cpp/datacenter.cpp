@@ -506,15 +506,15 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     auto iter = last_datas_.find(quote.symbol);
     if( iter != last_datas_.end() ) {
         const SInnerQuote& last_quote = iter->second;
-        if( memcmp(&last_quote, &quote, sizeof(SInnerQuote)) == 0 )
+        if( quote.time_origin <= last_quote.time_origin )
             return;
     }
 
-    std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
+    //std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
     //std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    _log_and_print("publish %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
+    //_log_and_print("publish %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
     for( const auto& v : callbacks_) 
     {
         v->publish4Broker(quote.symbol, ptrData, NULL);

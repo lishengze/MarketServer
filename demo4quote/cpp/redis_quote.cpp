@@ -2,7 +2,6 @@
 #include "stream_engine_config.h"
 #include "converter.h"
 // json库
-//#include "pandora/util/json.hpp"
 #include "base/cpp/rapidjson/document.h"
 #include "base/cpp/rapidjson/writer.h"
 #include "base/cpp/rapidjson/stringbuffer.h"
@@ -27,22 +26,6 @@ bool decode_channelname(const string& channel_name, string& channel_type, TSymbo
 
 bool decode_channelmsg(const string& msg, Document& body)
 {
-    /*
-    try
-    {
-        body = njson::parse(msg);        
-    }
-    catch(nlohmann::detail::exception& e)
-    {
-        _log_and_print("catch exception %s", e.what());
-        return false;
-    } 
-    catch(...)
-    {
-        _log_and_print("catch unknown exception");
-        return false;
-    }
-    */
     body.Parse(msg.c_str());
     if(body.HasParseError())
     {
@@ -58,11 +41,9 @@ void redisquote_to_quote_depth(const Value& data, const SExchangeConfig& config,
     {
         const string& price = iter->name.GetString();
         const double& volume = iter->value.GetDouble();
-        SDecimal dPrice = SDecimal::parse(price, config.precise);        
+        SDecimal dPrice = SDecimal::parse(price, config.precise);
         SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
-        //cout << volume << " " << config.vprecise << " " << dVolume.get_str_value() << endl;
         depths[dPrice].volume = dVolume;
-        //cout << price << "\t" << dPrice.get_str_value() << "\t" << volume << "\t" << dVolume.get_str_value() << endl;
     }
 }
 
@@ -128,6 +109,7 @@ bool on_get_message(RedisKlineHelper& helper, const Document& body, const TExcha
             continue;
         }
 
+        /*
         _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, helper.resolution_,
             kline.index,
             kline.px_open.get_str_value(),
@@ -135,7 +117,7 @@ bool on_get_message(RedisKlineHelper& helper, const Document& body, const TExcha
             kline.px_low.get_str_value(),
             kline.px_close.get_str_value(),
             kline.volume.get_str_value()
-            );
+            );*/
         klines.push_back(kline);
     }
 
@@ -256,9 +238,11 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     
     if( !_get_config(exchange, symbol, config) ) 
     {
-        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
+        //_log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
         return;
     }
+    if( !config.enable )
+        return;
     
     if( channel_type == SNAP_HEAD )
     {
@@ -389,7 +373,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     std::unique_lock<std::mutex> l{ mutex_metas_ };
 
     ExchangeMeta& meta = metas_[symbol];
-    SymbolMeta& symbol_meta = meta.symbols[exchange];
+    SymbolMeta& symbol_meta = meta.exchanges[exchange];
 
     // 已经启动推送
     if( symbol_meta.publishing )
@@ -449,7 +433,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     std::unique_lock<std::mutex> l{ mutex_metas_ };
 
     ExchangeMeta& meta = metas_[symbol];
-    SymbolMeta& symbol_meta = meta.symbols[exchange];
+    SymbolMeta& symbol_meta = meta.exchanges[exchange];
 
     // 更新统计信息
     meta.pkg_count += 1;
@@ -671,31 +655,48 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
 
 bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 {
-    // 打印入参
+    // 打印参数
     for( const auto& v : config ) 
     {
-        _log_and_print("RedisQuote::set_config [%s.%s] %s", v.first, symbol, v.second.desc());
+        const TExchange& exchange = v.first;
+        const SExchangeConfig& cfg = v.second;
+        _log_and_print("RedisQuote::set_config [%s.%s] %s", exchange, symbol, cfg.desc());
     }
 
-    // 设置交易所配置
+    // 取消订阅之前的数据（改为disable，不再取消）
+    unordered_set<TExchange> subscribed_exchanges;
     {
         std::unique_lock<std::mutex> l{ mutex_symbol_ };
         const auto& iter = symbols_.find(symbol);
         if( iter != symbols_.end() )
         {
-            for( const auto& v : iter->second ) {
-                unsubscribe(v.first, symbol);
+            for( const auto& v : iter->second ) 
+            {
+                const TExchange& exchange = v.first;
+                if( v.second.enable )
+                    subscribed_exchanges.insert(exchange);
+                //unsubscribe(exchange, symbol);
             }
         }
-
-        // 添加新的    
-        for( const auto& v : config )
-        {
-            subscribe(v.first, symbol);
-        }
-
-        // 赋值
         symbols_[symbol] = config;
+    }
+
+    // 清空metas_中的缓存
+    {
+        std::unique_lock<std::mutex> l{ mutex_metas_ };
+        auto iter = metas_.find(symbol);
+        if( iter != metas_.end() )
+        {
+            iter->second.exchanges.clear();
+        }
+    }
+
+    // 新增订阅
+    for( const auto& v : config )
+    {
+        const TExchange& exchange = v.first;
+        if( subscribed_exchanges.find(exchange) == subscribed_exchanges.end() )
+            subscribe(exchange, symbol);
     }
     return true;
 }

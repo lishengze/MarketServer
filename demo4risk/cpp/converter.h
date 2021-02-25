@@ -56,10 +56,10 @@ inline void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDec
     //sprintf(sequence, "%lld", quote.seq_no);
     //msd->set_msg_seq(sequence);
     // 卖盘
-    cout << "msd3, origin: " << quote.symbol << ", "
-         << "ask: " << quote.asks.size() << ", "
-         << "bid: " << quote.bids.size() << " "
-         << endl;
+    //cout << "msd3, origin: " << quote.symbol << ", "
+    //     << "ask: " << quote.asks.size() << ", "
+    //     << "bid: " << quote.bids.size() << " "
+    //     << endl;
 
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++) {
         if( check_total_volume && iter->second.total_volume.is_zero() )
@@ -81,7 +81,7 @@ inline void innerquote_to_msd3(const SInnerQuote& quote, MarketStreamDataWithDec
         set_decimal(depth->mutable_price(), iter->first);
         set_decimal(depth->mutable_volume(), iter->second.total_volume);
     }
-    cout << "msd3, transd:" << quote.symbol << ", ask: " << msd->asks_size() << ", bid: " << msd->bids_size() << endl;
+    //cout << "msd3, transd:" << quote.symbol << ", ask: " << msd->asks_size() << ", bid: " << msd->bids_size() << endl;
 
     //if (msd->asks_size() != quote.asks.size())
     //{

@@ -114,7 +114,7 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
                 }
             }
             if( !found ) {
-                tfm::printfln("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
+                //tfm::printfln("%s wait for exchange %s", symbol.c_str(), exchange.c_str());
                 can_calculate = false;
                 break;
             }

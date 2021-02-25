@@ -195,7 +195,7 @@ bool combine_config(const Document& hedges, const Document& symbols, Document& o
         uint32 fee_type = helper_get_uint32(*iter, "fee_kind", 0);
         uint32 fee_taker = helper_get_uint32(*iter, "taker_fee", 0);
         uint32 fee_maker = helper_get_uint32(*iter, "maker_fee", 0);
-        uint32 frequency = helper_get_uint32(*iter, "frequency", 5);
+        uint32 frequency = helper_get_uint32(*iter, "frequency", 0);
 
         if( exchange == "" || symbol == "" || !enable )
             continue;

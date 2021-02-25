@@ -67,6 +67,9 @@ void StreamEngine::start()
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
+    if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
+    //    tfm::printfln("snap: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
+    }
     quote_cacher_.on_snap(exchange, symbol, quote);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
@@ -78,6 +81,10 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
 {
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
+    if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
+    //    _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(quote.origin_time/1000000000), get_miliseconds()/1000 - quote.origin_time/1000000000);
+    //    tfm::printfln("update to snap: %s.%s ask/bid %lu/%lu", exchange, symbol, snap.asks.size(), snap.bids.size());
+    }
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, snap);
@@ -95,7 +102,7 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    for( const auto& v : klines ) {        
+    /*for( const auto& v : klines ) {        
         _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
             v.index,
             v.px_open.get_str_value().c_str(),
@@ -104,7 +111,7 @@ void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, in
             v.px_close.get_str_value().c_str(),
             v.volume.get_str_value().c_str()
         );
-    }
+    }*/
     
     vector<KlineData> outputs; // 
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
@@ -145,6 +152,7 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
 {
     SSymbolConfig ret;
     for( const auto& v : configs ) {
+        ret[v.first].enable = true;
         ret[v.first].precise = v.second.precise;
         ret[v.first].vprecise = v.second.vprecise;
         ret[v.first].frequency = v.second.frequency;

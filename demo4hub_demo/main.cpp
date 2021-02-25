@@ -13,15 +13,35 @@ class PressurePerformanceClient : public HubCallback
 {
 public:
     PressurePerformanceClient() {
-        delays_.reserve(1024*1024);
         stopped_ = true;
+        
+        delays_.reserve(1024*1024);
+        trade_cnt_ = 0;
+
+        delays_raw_.reserve(1024*1024);
+        trade_raw_cnt_ = 0;
     }
 private:
-    bool stopped_;    
-    vector<type_tick> delays_;
+    bool stopped_;
+    // 聚合行情统计
+    vector<type_tick> delays_;  
+    uint64 trade_cnt_;
+    // 原始行情统计
+    vector<type_tick> delays_raw_;
+    uint64 trade_raw_cnt_;
+
 public:
     // 风控前数据（推送）
-    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) { return 0; }
+    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
+    { 
+        if( stopped_ )
+            return 0;
+
+        type_tick now = get_miliseconds();
+        type_tick delay = now - depth.tick1;
+        delays_raw_.push_back(delay);
+        return 0;
+    }
 
     // 风控后数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
@@ -39,7 +59,50 @@ public:
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { return 0; }
 
     // trade（推送）
-    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) { return 0; }
+    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) { 
+        if( stopped_ )
+            return 0;
+        if( string(exchange) == MIX_EXCHANGE_NAME ) {
+            trade_cnt_ ++;
+        } else {
+            trade_raw_cnt_ ++;
+        }
+        return 0; 
+    }
+
+    void _print_statistics(vector<type_tick>& delays, uint64& trade_cnt)
+    {
+        // 排序
+        sort(delays.begin(), delays.end());
+
+        // total
+        tfm::printfln("总共%u次行情更新", delays.size());
+        tfm::printfln("总共%u笔成交", trade_cnt);
+        // 平均值
+        type_tick total = 0, max_value = 0, min_value = 999999;
+        for( auto v : delays ) {
+            total += v;
+            if( v > max_value ) {
+                max_value = v;
+            }
+            if( v < min_value ) {
+                min_value = v;
+            }
+        }
+        tfm::printfln("平均值%lums", total / delays.size());
+        // 中位数
+        tfm::printfln("中位数%lums", delays[delays.size() / 2]);
+        // 最大值
+        tfm::printfln("最大值%lums", max_value);
+        // 最小值
+        tfm::printfln("最小值%lums", min_value);
+        // 85%位置值
+        tfm::printfln("85%%位置值%lums", delays[int(delays.size() * 0.85)]);
+        // 90%位置值
+        tfm::printfln("90%%位置值%lums", delays[int(delays.size() * 0.9)]);
+        // 95%位置值
+        tfm::printfln("95%%位置值%lums", delays[int(delays.size() * 0.95)]);
+    }
 
     void print_debug() {
         // 延迟10秒启动
@@ -52,34 +115,10 @@ public:
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         // 排序
-        sort(delays_.begin(), delays_.end());
-
-        // total
-        tfm::printfln("总共%u个采样", delays_.size());
-        // 平均值
-        type_tick total = 0, max_value = 0, min_value = 999999;
-        for( auto v : delays_ ) {
-            total += v;
-            if( v > max_value ) {
-                max_value = v;
-            }
-            if( v < min_value ) {
-                min_value = v;
-            }
-        }
-        tfm::printfln("平均值%lums", total / delays_.size());
-        // 中位数
-        tfm::printfln("中位数%lums", delays_[delays_.size() / 2]);
-        // 最大值
-        tfm::printfln("最大值%lums", max_value);
-        // 最小值
-        tfm::printfln("最小值%lums", min_value);
-        // 85%位置值
-        tfm::printfln("85%%位置值%lums", delays_[int(delays_.size() * 0.85)]);
-        // 90%位置值
-        tfm::printfln("90%%位置值%lums", delays_[int(delays_.size() * 0.9)]);
-        // 95%位置值
-        tfm::printfln("95%%位置值%lums", delays_[int(delays_.size() * 0.95)]);
+        tfm::printfln("输出聚合行情统计结果：");
+        _print_statistics(delays_, trade_cnt_);
+        tfm::printfln("输出原始行情统计结果：");
+        _print_statistics(delays_raw_, trade_raw_cnt_);
     }
 };
 
@@ -213,8 +252,8 @@ void test_get_lasttrades()
 
 int main()
 {
-    Client client;
-    //PressurePerformanceClient client;
+    //Client client;
+    PressurePerformanceClient client;
     HubInterface::set_callback(&client);
     HubInterface::start();
 

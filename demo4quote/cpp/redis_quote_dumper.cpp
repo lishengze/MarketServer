@@ -1,5 +1,6 @@
 #include "redis_quote_dumper.h"
 #include "redis_quote.h"
+#include "stream_engine_config.h"
 
 string make_fake_symbol(const string& channel_type, int id, const TSymbol& symbol, const TExchange& exchange)
 {
@@ -112,14 +113,16 @@ void QuoteReplayer::_send_pkg(const string& channel, const string& msg)
 
 void QuoteReplayer::_load_and_send()
 {
+    _log_and_print("QuoteReplayer starting: ratio=%d replicas=%d", ratio_, replicas_);
+
     if( ratio_ < 1 ) {
-        std::cout << "unsurpport ratio " << ratio_  << std::endl;
+        _log_and_print("unsurpport ratio %d", ratio_);
         return;
     }
 
     ifstream fin(filepath_, ios::in);
     if( !fin ) {
-        std::cout << "open " << filepath_ << " failed." << std::endl;
+        _log_and_print("open %s failed", filepath_);
         return;
     }
 

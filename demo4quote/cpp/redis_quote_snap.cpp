@@ -38,7 +38,7 @@ void RedisSnapRequester::start()
 
 void RedisSnapRequester::async_request_symbol(const TExchange& exchange, const TSymbol& symbol) 
 {    
-    _log_and_print("RedisSnapRequester: async_request_symbol %s.%s", exchange, symbol);
+    //_log_and_print("RedisSnapRequester: async_request_symbol %s.%s", exchange, symbol);
     string combinedSymbol = make_symbolkey(exchange, symbol);
 
     // 避免重复请求
@@ -60,7 +60,7 @@ void RedisSnapRequester::_add_event(const TExchange& exchange, const TSymbol& sy
     evt.symbol = symbol;
     evt.event_time = delay_seconds * 1000 + get_miliseconds();
 
-    _log_and_print("RedisSnapRequester: _add_event");
+    //_log_and_print("RedisSnapRequester: _add_event");
     events_.enqueue(evt);
 }
 
@@ -92,7 +92,7 @@ void RedisSnapRequester::_thread_loop()
     {
         EventData evt;
         while( events_.try_dequeue(evt) ) {
-            _log_and_print("RedisSnapRequester: get event %s.%s", evt.exchange, evt.symbol);
+            //_log_and_print("RedisSnapRequester: get event %s.%s", evt.exchange, evt.symbol);
 
             while( true ) {                
                 type_tick now = get_miliseconds();
