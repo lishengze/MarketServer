@@ -132,7 +132,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     src.get_bids(depths);
     _calc_depth_bias(depths, price_bias, volume_bias, false, tmp.bids);
     src.bids.swap(tmp.bids);
-    tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    //tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
 
     return src;
 }
@@ -249,7 +249,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     _filter_by_watermark(src, watermark);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     
-    tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    //tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -357,7 +357,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
-    tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    //tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -506,8 +506,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     auto iter = last_datas_.find(quote.symbol);
     if( iter != last_datas_.end() ) {
         const SInnerQuote& last_quote = iter->second;
-        if( quote.time_origin <= last_quote.time_origin )
+        if( quote.time_origin <= last_quote.time_origin ) {
+            //tfm::printfln("%s %ul %ul", quote.symbol, quote.time_origin, last_quote.time_origin);
             return;
+        }
     }
 
     //std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;

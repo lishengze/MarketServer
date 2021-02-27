@@ -20,6 +20,8 @@ public:
 
         delays_raw_.reserve(1024*1024);
         trade_raw_cnt_ = 0;
+
+        last_output_time_ = get_miliseconds() / 1000;
     }
 private:
     bool stopped_;
@@ -29,6 +31,8 @@ private:
     // 原始行情统计
     vector<type_tick> delays_raw_;
     uint64 trade_raw_cnt_;
+    // 临时变量
+    type_tick last_output_time_;
 
 public:
     // 风控前数据（推送）
@@ -40,6 +44,10 @@ public:
         type_tick now = get_miliseconds();
         type_tick delay = now - depth.tick1;
         delays_raw_.push_back(delay);
+        if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" && (now/1000 - last_output_time_) >= 1) {
+            _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(depth.tick/1000000000), now/1000 - depth.tick/1000000000);
+            last_output_time_ = now / 1000;
+        }
         return 0;
     }
 

@@ -406,7 +406,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
         return SYNC_SNAPAGAIN;
     }
     else // left <= quote.sequence_no <= right
-    {        
+    {
         assert( left <= quote.sequence_no && quote.sequence_no <= right );
 
         for( const auto& v : symbol_meta.caches ) 

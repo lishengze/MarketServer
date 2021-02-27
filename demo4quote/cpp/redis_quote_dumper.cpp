@@ -111,6 +111,21 @@ void QuoteReplayer::_send_pkg(const string& channel, const string& msg)
     }
 }
 
+struct record
+{
+    type_tick ts;
+    string channel;
+    string msg;
+};
+
+bool pop_record(queue<record>& records, record& r) {
+    if( records.size() == 0 )
+        return false;
+    r = records.front();
+    records.pop();
+    return true;
+}
+
 void QuoteReplayer::_load_and_send()
 {
     _log_and_print("QuoteReplayer starting: ratio=%d replicas=%d", ratio_, replicas_);
@@ -134,35 +149,45 @@ void QuoteReplayer::_load_and_send()
     type_tick ts = 0; // 解压后时间戳
     string channel, msg; // 解压后的频道和消息
 
+    // 预读取文件
+    queue<record> records;
+    while( true ) {
+        if( !_get_pkg(fin, ts, channel, msg) ) {
+            std::cout << "get_pkg fail1" << endl;
+            break;
+        }
+        records.push(record{ts, channel, msg});
+    }
+
+    // 开始发送
+    record r;
     while( !exit ) 
     {
         type_tick now = get_miliseconds();
         type_tick limit_timespan = (now - start_time) * ratio_; // 时间范围在 first_pkg_time + limit_timespan 之间的允许发送
 
         if( first_pkg_time == 0 ) {
-            if( !_get_pkg(fin, ts, channel, msg) ) {
-                std::cout << "get_pkg fail1" << endl;
+            if( !pop_record(records, r) ) {
                 exit = true;
                 break;
             }
-            first_pkg_time = ts;
+            first_pkg_time = r.ts;
 
-            _send_pkg(channel, msg);
+            _send_pkg(r.channel, r.msg);
         }
 
         while( !exit ) {
             if( ts != 0 ) {
-                _send_pkg(channel, msg);
+                _send_pkg(r.channel, r.msg);
             }
-
-            if( !_get_pkg(fin, ts, channel, msg) ) {
-                std::cout << "get_pkg fail2" << endl;
+            
+            if( !pop_record(records, r) ) {
                 exit = true;
                 break;
             }
 
             //cout << ts << ", " << first_pkg_time << ", " << limit_timespan << endl;
-            if( ts >= (first_pkg_time + limit_timespan ) ) {
+            if( r.ts >= (first_pkg_time + limit_timespan ) ) {
                 break;
             }
         }
