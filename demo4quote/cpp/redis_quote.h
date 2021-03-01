@@ -39,7 +39,7 @@ public:
         int pkg_count; // 收到包的数量
         int pkg_size;  // 收到包的大小
         int pkg_skip_count; // 丢包次数
-        unordered_map<TSymbol, SymbolMeta> symbols;        
+        unordered_map<TExchange, SymbolMeta> exchanges;        
 
         ExchangeMeta() {
             reset();
@@ -72,6 +72,7 @@ public:
     ~RedisQuote();
 
     // 继承自QuoteSourceInterface
+    // ！不支持运行时变更精度
     bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
     bool start();
     bool stop();
@@ -96,7 +97,6 @@ public:
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
-        redis_api_->SubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
     void unsubscribe(const TExchange& exchange, const TSymbol& symbol) {
         if( !connected_ )
@@ -104,7 +104,6 @@ public:
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", DEPTH_UPDATE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", TRADE_HEAD, symbol, exchange));
         redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_1MIN_HEAD, symbol, exchange));
-        redis_api_->UnSubscribeTopic(tfm::format("%s|%s.%s", KLINE_60MIN_HEAD, symbol, exchange));
     }
 
     void on_message(const std::string& channel, const std::string& msg, bool& retry);
@@ -119,7 +118,7 @@ private:
 
     // 管理exchange+symbol的基础信息
     mutable std::mutex mutex_metas_;
-    unordered_map<TExchange, ExchangeMeta> metas_;
+    unordered_map<TSymbol, ExchangeMeta> metas_;
 
     // redis snap requester
     RedisSnapRequester redis_snap_requester_;

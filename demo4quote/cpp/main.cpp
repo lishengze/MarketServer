@@ -20,6 +20,7 @@ int main(int argc, char** argv)
 {
     test_kline_calculator60();
     test_kline_calculator3600();
+    test_kline_hubber();
     
     // setup the signal here
     setup_signal_handler_callback();

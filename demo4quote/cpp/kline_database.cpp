@@ -168,7 +168,7 @@ void KlineDatabase::start()
 
 void KlineDatabase::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    _log_and_print("Database %s.%s kline%u add %lu klines", exchange, symbol, resolution, klines.size());
+    //_log_and_print("Database %s.%s kline%u add %lu klines", exchange, symbol, resolution, klines.size());
 
     std::unique_lock<std::mutex> inner_lock{ mutex_caches_ };
     switch( resolution )

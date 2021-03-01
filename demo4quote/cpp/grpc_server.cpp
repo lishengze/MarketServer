@@ -93,6 +93,7 @@ void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, 
     tmp.klines = klines;
     caller_getlast_->add_data(tmp);
 
+    /*
     for( const auto& v : klines ) 
     {
         
@@ -104,6 +105,7 @@ void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, 
             v.px_close.get_str_value()
             );
     }
+    */
 }
 
 void ServerEndpoint::_handle_rpcs() 
