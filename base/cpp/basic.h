@@ -81,22 +81,21 @@ inline type_tick parse_nano(const string& timestr)
 class TimeCostWatcher
 {
 public:
-    TimeCostWatcher(const string& desc)
-    : threshold_(50)
-    , desc_(desc)
-    {
-        begin_ = get_miliseconds();
-    }
-
-    TimeCostWatcher(const string& desc, type_tick begin)
+    TimeCostWatcher(const string& desc, type_tick begin=0, type_tick threshold=50)
     : begin_(begin) 
-    , threshold_(50)
+    , threshold_(threshold)
     , desc_(desc)
     {
-
+        if( begin_ == 0 ) {
+            begin_ = get_miliseconds();            
+        }
     }
 
     ~TimeCostWatcher() {
+        finish();
+    }
+
+    void finish() {
         type_tick end = get_miliseconds();
         if( (end-begin_) > threshold_ ) {
             cout << "[TimeCostWatcher] " << desc_ << " cost " << (end-begin_) << endl;

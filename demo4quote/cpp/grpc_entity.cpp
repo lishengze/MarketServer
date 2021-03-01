@@ -337,46 +337,6 @@ bool GetLastEntity::process()
 }
 
 //////////////////////////////////////////////////
-/*
-SubscribeTradeEntity::SubscribeTradeEntity(void* service)
-: responder_(get_context())
-{
-    service_ = (GrpcStreamEngineService::AsyncService*)service;
-}
-
-void SubscribeTradeEntity::register_call()
-{
-    _log_and_print("%s register SubscribeTradeEntity", get_context()->peer());
-    service_->RequestSubscribeTrade(&ctx_, &request_, &responder_, cq_, cq_, this);
-}
-
-bool SubscribeTradeEntity::process()
-{    
-    MultiTradeWithDecimal reply;
-    
-    TradePtr ptrs[ONE_ROUND_MESSAGE_NUMBRE];
-    size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
-    for( size_t i = 0 ; i < count ; i ++ ) {
-        TradeWithDecimal* quote = reply.add_trades();
-        copy_protobuf_object((TradeWithDecimal*)ptrs[i].get(), quote);
-    }
-
-    if( reply.trades_size() > 0 ) {
-        responder_.Write(reply, this);      
-        return true;
-    } else {
-        return false;
-    } 
-}
-
-void SubscribeTradeEntity::add_data(TradePtr data) 
-{   
-    datas_.enqueue(data);
-    //std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    //datas_.push_back(data);
-}
-*/
-//////////////////////////////////////////////////
 GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)

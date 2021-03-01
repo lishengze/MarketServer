@@ -1,6 +1,12 @@
 #include "redis_quote_dumper.h"
 #include "redis_quote.h"
 #include "stream_engine_config.h"
+#include "redis_quote.h" // for decode_channelname
+// json库
+#include "base/cpp/rapidjson/document.h"
+#include "base/cpp/rapidjson/writer.h"
+#include "base/cpp/rapidjson/stringbuffer.h"
+using namespace rapidjson;
 
 string make_fake_symbol(const string& channel_type, int id, const TSymbol& symbol, const TExchange& exchange)
 {
@@ -151,12 +157,67 @@ void QuoteReplayer::_load_and_send()
 
     // 预读取文件
     queue<record> records;
+    vector<string> depths; // 用于统计纯json解析耗时
+    vector<string> klines; // 用于统计纯json解析耗时
+    vector<string> trades; // 用于统计纯json解析耗时
     while( true ) {
         if( !_get_pkg(fin, ts, channel, msg) ) {
             std::cout << "get_pkg fail1" << endl;
             break;
         }
         records.push(record{ts, channel, msg});
+        
+        string chl_type;
+        TSymbol chl_symbol;
+        TExchange chl_exchange;
+        if( decode_channelname(channel, chl_type, chl_symbol, chl_exchange) ) {
+            if( chl_type == "__SNAPx" || chl_type == "UPDATEx" ) {
+                depths.push_back(msg);
+            } else if( chl_type == "TRADEx" ) {
+                trades.push_back(msg);
+            } else {
+                klines.push_back(msg);
+            }
+
+        }
+    }
+
+    // 统计解析耗时
+    cout << "total " << depths.size() << " depths" << endl;
+    {
+        TimeCostWatcher w("parse depths", 0, 0);
+        for( const auto& v : depths ){
+            Document body;
+            body.Parse(v.c_str());
+            if(body.HasParseError())
+            {
+                cout << "parse depths error" << endl;
+            }
+        }
+    }
+    cout << "total " << klines.size() << " klines" << endl;
+    {
+        TimeCostWatcher w("parse klines", 0, 0);
+        for( const auto& v : klines ){
+            Document body;
+            body.Parse(v.c_str());
+            if(body.HasParseError())
+            {
+                cout << "parse klines error" << endl;
+            }
+        }
+    }
+    cout << "total " << trades.size() << " trades" << endl;
+    {
+        TimeCostWatcher w("parse trades", 0, 0);
+        for( const auto& v : trades ){
+            Document body;
+            body.Parse(v.c_str());
+            if(body.HasParseError())
+            {
+                cout << "parse trades error" << endl;
+            }
+        }
     }
 
     // 开始发送
