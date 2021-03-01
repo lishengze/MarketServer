@@ -69,5 +69,7 @@ public:
     bool                          is_test_enquiry{false};
 
     bool                is_test_maxmin_kline{true};
-    MaxMinKlineInfo     max_min_kline_info;
+    string              test_kline_symbol{"BTC_USDT"};
+    MaxMinKlineInfo     max_min_kline_info_60;
+    MaxMinKlineInfo     max_min_kline_info_3600;
 };

@@ -423,10 +423,10 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
                 if (strcmp(pReqKlineData->symbol_, "BTC_USDT") == 0)
                 {
-                    MaxMinKlineInfo max_min_kline_info;
-                    max_min_kline_info.px_high = MIN_DOUBLE;
-                    max_min_kline_info.px_low = MAX_DOUBLE;
-                    max_min_kline_info.symbol = "BTC_USDT";     
+                    MaxMinKlineInfo max_min_kline_info_60;
+                    max_min_kline_info_60.px_high = MIN_DOUBLE;
+                    max_min_kline_info_60.px_low = MAX_DOUBLE;
+                    max_min_kline_info_60.symbol = "BTC_USDT";     
 
                     for (auto kline_data:target_kline_data)
                     {
@@ -437,22 +437,22 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                         //     << kline_data->px_low.get_value() << " "
                         //     << endl;    
 
-                        if (max_min_kline_info.px_high < kline_data->px_high)
+                        if (max_min_kline_info_60.px_high < kline_data->px_high)
                         {
-                            max_min_kline_info.px_high = kline_data->px_high;
-                            max_min_kline_info.high_time = kline_data->index;
+                            max_min_kline_info_60.px_high = kline_data->px_high;
+                            max_min_kline_info_60.high_time = kline_data->index;
                         }
 
-                        if (max_min_kline_info.px_low > kline_data->px_low)
+                        if (max_min_kline_info_60.px_low > kline_data->px_low)
                         {
-                            max_min_kline_info.px_low = kline_data->px_low;
-                            max_min_kline_info.low_time = kline_data->index;
+                            max_min_kline_info_60.px_low = kline_data->px_low;
+                            max_min_kline_info_60.low_time = kline_data->index;
                         }                                            
                     }
 
 
-                    cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info.high_time)
-                        << " low: " << max_min_kline_info.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info.low_time)
+                    cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
+                        << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
                         << endl;
                 }
 

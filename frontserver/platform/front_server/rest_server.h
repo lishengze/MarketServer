@@ -50,7 +50,7 @@ class RestServer:public utrade::pandora::ThreadBasePool
     private:
         int                                     server_port_{9001};
 
-        boost::shared_ptr<std::thread>          listen_thread_;
+        boost::shared_ptr<std::thread>          listen_thread_{nullptr};
 
         std::map<ID_TYPE, HttpResponseThreadSafePtr> response_map_;
         std::mutex                                   response_map_mutex_;

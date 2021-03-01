@@ -69,7 +69,7 @@ def get_sub_kline_str(symbl="BTC_USDT"):
     sub_info = {
         "type":"kline_update",
         "symbol":symbl,
-        "data_count":str(1000),
+        "data_count":str(1440),
         "frequency":str(frequency)
     }
 
