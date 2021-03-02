@@ -13,7 +13,7 @@ void copy_protobuf_object(const T* src, T* dst) {
 }
 
 //////////////////////////////////////////////////
-MarketStream4BrokerEntity::MarketStream4BrokerEntity(void* service, IDataCacher* cacher)
+MarketStream4BrokerEntity::MarketStream4BrokerEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -62,7 +62,7 @@ void MarketStream4BrokerEntity::add_data(StreamDataPtr2 snap)
 }
 
 //////////////////////////////////////////////////
-MarketStream4HedgeEntity::MarketStream4HedgeEntity(void* service, IDataCacher* cacher)
+MarketStream4HedgeEntity::MarketStream4HedgeEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -111,7 +111,7 @@ void MarketStream4HedgeEntity::add_data(StreamDataPtr2 snap)
 }
 
 //////////////////////////////////////////////////
-MarketStream4ClientEntity::MarketStream4ClientEntity(void* service, IDataCacher* cacher)
+MarketStream4ClientEntity::MarketStream4ClientEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -162,7 +162,7 @@ void MarketStream4ClientEntity::add_data(StreamDataPtr snap)
 }
 
 //////////////////////////////////////////////////
-OtcQuoteEntity::OtcQuoteEntity(void* service, IDataCacher* cacher)
+OtcQuoteEntity::OtcQuoteEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -190,7 +190,7 @@ bool OtcQuoteEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service, IDataCacher* cacher)
+GetParamsEntity::GetParamsEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {

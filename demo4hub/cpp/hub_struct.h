@@ -37,6 +37,7 @@ struct SDepthData:virtual public PacakgeBaseData
         
         assign(precise, other.precise);
         assign(vprecise, other.vprecise);
+        assign(aprecise, other.aprecise);
     
         // cout << "SDepthData: " << symbol << " src symbol: " << other.symbol << endl;
 
@@ -60,7 +61,8 @@ struct SDepthData:virtual public PacakgeBaseData
         assign(is_raw, other.is_raw);
 
         assign(precise, other.precise);
-        assign(vprecise, other.vprecise);        
+        assign(vprecise, other.vprecise);    
+        assign(aprecise, other.aprecise);    
 
         for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
         {
@@ -79,6 +81,7 @@ struct SDepthData:virtual public PacakgeBaseData
     type_seqno seqno;
     uint32 precise;     // 价格精度
     uint32 vprecise;    // 成交量、挂单量精度
+    uint32 aprecise;    // 成交额精度
     SDepthLevelData asks[DEPCH_LEVEL_COUNT];
     type_length ask_length;
     SDepthLevelData bids[DEPCH_LEVEL_COUNT];

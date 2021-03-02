@@ -14,12 +14,6 @@
         "addr": "36.255.220.139:8848",
         "namespace": "bcts"
     },
-    "redis_quote_": {
-        "host": "45.249.244.59",
-        "port": 6666,
-        "password": "rkqFB4,wpoMmHqT6he}r",
-        "snap_interval": 10
-    },
     "redis_quote": {
         "host": "36.255.220.139",
         "port": 6379,

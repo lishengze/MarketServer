@@ -47,6 +47,7 @@ public:
 
             // nacos
             nacos_addr_ = js["nacos"]["addr"].get<string>();
+            nacos_namespace_ = js["nacos"]["namespace"].get<string>();
             
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
@@ -74,6 +75,7 @@ public:
 
     // nacos
     string nacos_addr_;
+    string nacos_namespace_;
 
     // [for debug] sample symbol
     string sample_symbol_;

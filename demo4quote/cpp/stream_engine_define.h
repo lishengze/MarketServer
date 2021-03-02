@@ -115,21 +115,20 @@ struct SymbolFee
 struct SNacosConfigByExchange
 {
     SymbolFee fee;          // 手续费参数
-    //int fee_type;           // 手续费类型
-    //double fee_maker;        // maker手续费率
-    //double fee_taker;        // taker手续费率
     type_uint32 depth;      // 行情深度（暂时没用）
-    type_uint32 precise;    // 最小价格单位
-    type_uint32 vprecise;   // 最小挂单量单位
+    type_uint32 precise;    // 价格精度
+    type_uint32 vprecise;   // 成交量精度
+    type_uint32 aprecise;   // 成交额精度（暂时没用）
     float frequency;        // 更新频率(每秒frequency次)
 };
 
 struct SNacosConfig
 {
-    type_uint32 depth;      // 【聚合】发布深度（暂时没用）
+    type_uint32 depth;      // 【聚合】发布深度
     float frequency;        // 【聚合】更新频率（每秒frequency次）
-    type_uint32 precise;    // 【聚合】最小价格单位
-    type_uint32 vprecise;   // 【聚合】最小挂单量单位
+    type_uint32 precise;    // 价格精度
+    type_uint32 vprecise;   // 成交量精度
+    type_uint32 aprecise;   // 成交额精度
     unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
 
     unordered_set<TExchange> get_exchanges() const {

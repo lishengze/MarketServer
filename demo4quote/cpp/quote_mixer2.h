@@ -20,6 +20,7 @@ public:
         type_uint32 depth;
         type_uint32 precise;
         type_uint32 vprecise;
+        type_uint32 aprecise;
         float frequency;
         unordered_map<TExchange, SymbolFee> fees;
 

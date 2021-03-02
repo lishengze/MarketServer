@@ -92,6 +92,7 @@ void SEData_to_SDepthData(const SEData& src, SDepthData& dst)
     dst.tick3 = src.time_produced_by_riskcontrol();
     dst.precise = src.price_precise();
     dst.vprecise = src.volume_precise();
+    dst.aprecise = src.amount_precise();
     for( int i = 0 ; i < src.asks_size() && i < DEPCH_LEVEL_COUNT; i ++ ) {
         const SEDepth& depth = src.asks(i);
         Decimal_to_SDecimal(dst.asks[i].price, depth.price());

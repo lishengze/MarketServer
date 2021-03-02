@@ -7,7 +7,7 @@ endif()
 
 ###############################################################################################
 if(DEFINED ENV{LOCAL})
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pg -g3 -Wall -pthread")
 else()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
 endif()
@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES("../../protos/cpp")
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
@@ -43,7 +44,7 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS})
+add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 if(DEFINED ENV{LOCAL})
     target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
 else()

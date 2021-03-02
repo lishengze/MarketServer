@@ -125,7 +125,7 @@ class GrpcCall : public CommonGrpcCall
 {
 public:
     template<class ...Args>
-    GrpcCall(int& call_id, void* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
+    GrpcCall(int& call_id, ::grpc::Service* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
     {
         ENTITY* ptr = new ENTITY(service, rest...);
         ptr->set_callid(call_id);
@@ -170,7 +170,7 @@ public:
     }
 private:
     int call_id_;
-    void* service_;
+    ::grpc::Service* service_;
     ServerCompletionQueue* cq_ = nullptr;
 
     mutable std::mutex mutex_clients_;

@@ -59,6 +59,7 @@ bool redisquote_to_quote(const Document& snap_json, SDepthQuote& quote, const SE
     
     quote.price_precise = config.precise;
     quote.volume_precise = config.vprecise;
+    quote.amount_precise = config.aprecise;
     vassign(quote.sequence_no, sequence_no);
     vassign(quote.origin_time, parse_nano(timeArrive));
     quote.arrive_time = get_miliseconds();

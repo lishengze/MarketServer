@@ -38,7 +38,7 @@ inline void set_decimal(Decimal* dst, const Decimal& src)
 class MarketStream4BrokerEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4BrokerEntity(void* service, IDataCacher* cacher);
+    MarketStream4BrokerEntity(::grpc::Service* service, IDataCacher* cacher);
 
     void register_call();
 
@@ -64,7 +64,7 @@ private:
 class MarketStream4HedgeEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4HedgeEntity(void* service, IDataCacher* cacher);
+    MarketStream4HedgeEntity(::grpc::Service* service, IDataCacher* cacher);
 
     void register_call();
 
@@ -90,7 +90,7 @@ private:
 class MarketStream4ClientEntity : public BaseGrpcEntity
 {
 public:
-    MarketStream4ClientEntity(void* service, IDataCacher* cacher);
+    MarketStream4ClientEntity(::grpc::Service* service, IDataCacher* cacher);
 
     void register_call();
 
@@ -116,7 +116,7 @@ private:
 class OtcQuoteEntity : public BaseGrpcEntity
 {
 public:
-    OtcQuoteEntity(void* service, IDataCacher* cacher);
+    OtcQuoteEntity(::grpc::Service* service, IDataCacher* cacher);
 
     void register_call();
 
@@ -137,7 +137,7 @@ private:
 class GetParamsEntity : public BaseGrpcEntity
 {
 public:
-    GetParamsEntity(void* service, IDataCacher* cacher);
+    GetParamsEntity(::grpc::Service* service, IDataCacher* cacher);
 
     void register_call();
 

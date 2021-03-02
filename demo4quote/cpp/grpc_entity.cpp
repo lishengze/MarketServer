@@ -207,7 +207,7 @@ void SubscribeMixQuoteEntity::add_data(StreamDataPtr data)
 }*/
 
 //////////////////////////////////////////////////
-GetParamsEntity::GetParamsEntity(void* service)
+GetParamsEntity::GetParamsEntity(::grpc::Service* service)
 : responder_(get_context())
 {
     service_ = (GrpcStreamEngineService::AsyncService*)service;
@@ -229,7 +229,7 @@ bool GetParamsEntity::process(){
 }
 
 //////////////////////////////////////////////////
-GetKlinesEntity::GetKlinesEntity(void* service, IKlineCacher* cacher)
+GetKlinesEntity::GetKlinesEntity(::grpc::Service* service, IKlineCacher* cacher)
 : responder_(&ctx_)
 , cacher_(cacher)
 {
@@ -263,7 +263,7 @@ bool GetKlinesEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastEntity::GetLastEntity(void* service, IKlineCacher* cacher)
+GetLastEntity::GetLastEntity(::grpc::Service* service, IKlineCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -337,7 +337,7 @@ bool GetLastEntity::process()
 }
 
 //////////////////////////////////////////////////
-GetLastTradesEntity::GetLastTradesEntity(void* service, IQuoteCacher* cacher)
+GetLastTradesEntity::GetLastTradesEntity(::grpc::Service* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
@@ -367,7 +367,7 @@ bool GetLastTradesEntity::process()
 }
 
 //////////////////////////////////////////////////
-SubscribeQuoteInBinaryEntity::SubscribeQuoteInBinaryEntity(void* service, IQuoteCacher* cacher)
+SubscribeQuoteInBinaryEntity::SubscribeQuoteInBinaryEntity(::grpc::Service* service, IQuoteCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {

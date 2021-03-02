@@ -130,3 +130,46 @@ inline std::string FormatISO8601DateTime(int64_t nTime){
                                                                      \
         tfm::printfln("%s - %s:%d - %s", FormatISO8601DateTime(get_miliseconds()/1000), __FILE__, __LINE__, log_msg);    \
     } while(0)                                                          
+
+
+// for json
+#include "base/cpp/rapidjson/document.h"
+#include "base/cpp/rapidjson/writer.h"
+#include "base/cpp/rapidjson/stringbuffer.h"
+using namespace rapidjson;
+
+inline string ToJson(const Document& d) 
+{
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
+inline bool helper_get_bool(const Value& v, const string& key, bool default_value)
+{
+    if( !v.HasMember(key.c_str()) || !v[key.c_str()].IsBool() )
+        return default_value;
+    return v[key.c_str()].GetBool();
+}
+
+inline string helper_get_string(const Value& v, const string& key, string default_value)
+{
+    if( !v.HasMember(key.c_str()) || !v[key.c_str()].IsString() )
+        return default_value;
+    return v[key.c_str()].GetString();
+}
+
+inline double helper_get_double(const Value& v, const string& key, double default_value)
+{
+    if( !v.HasMember(key.c_str()) || !v[key.c_str()].IsDouble() )
+        return default_value;
+    return v[key.c_str()].GetDouble();
+}
+
+inline uint32 helper_get_uint32(const Value& v, const string& key, uint32 default_value)
+{
+    if( !v.HasMember(key.c_str()) || !v[key.c_str()].IsUint() )
+        return default_value;
+    return v[key.c_str()].GetUint();
+}
