@@ -17,6 +17,7 @@ void NacosListener::init(ConfigService* service, string group, string dataid, Na
         catch (NacosException &e) {
             tfm::printfln("request %s-%s errcode: %d Reason: %s", group_, dataid_, e.errorcode(), e.what());
         }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     receiveConfigInfo(ss);
 
