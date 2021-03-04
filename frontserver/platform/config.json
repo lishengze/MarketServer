@@ -2,7 +2,7 @@
     "hub": 
     {
         "risk_controller_addr": "36.255.220.139:9111",
-        "stream_enginne_addr": "36.255.220.139:9110"
+        "stream_engine_addr": "36.255.220.139:9110"
     },
     "ws_server":
     {
@@ -14,8 +14,8 @@
     },
     "market_cache":
     {
-        "frequency_list": [60, 300],
-        "frequency_numb": 1000,
-        "frequency_base": 60
+        "frequency_list": [60, 300, 3600, 7200, 14400],
+        "frequency_numb": 1500,
+        "frequency_base": [60, 3600]
     }
 }
