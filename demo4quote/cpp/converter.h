@@ -87,6 +87,7 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const stri
     msd->set_is_snap(is_snap);
     msd->set_price_precise(src.price_precise);
     msd->set_volume_precise(src.volume_precise);
+    msd->set_amount_precise(src.amount_precise);
     msd->set_time(src.origin_time);
     msd->set_time_arrive(src.arrive_time);
 

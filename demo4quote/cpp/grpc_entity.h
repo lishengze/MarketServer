@@ -118,7 +118,7 @@ private:
 class GetParamsEntity : public BaseGrpcEntity
 {
 public:
-    GetParamsEntity(void* service);
+    GetParamsEntity(::grpc::Service* service);
 
     void register_call();
 
@@ -137,7 +137,7 @@ private:
 class GetKlinesEntity : public BaseGrpcEntity
 {
 public:
-    GetKlinesEntity(void* service, IKlineCacher* cacher);
+    GetKlinesEntity(::grpc::Service* service, IKlineCacher* cacher);
 
     void register_call();
 
@@ -167,7 +167,7 @@ struct WrapperKlineData: KlineData
 class GetLastEntity : public BaseGrpcEntity
 {
 public:
-    GetLastEntity(void* service, IKlineCacher* cacher);
+    GetLastEntity(::grpc::Service* service, IKlineCacher* cacher);
 
     void register_call();
 
@@ -233,7 +233,7 @@ private:
 class GetLastTradesEntity : public BaseGrpcEntity
 {
 public:
-    GetLastTradesEntity(void* service, IQuoteCacher* cacher);
+    GetLastTradesEntity(::grpc::Service* service, IQuoteCacher* cacher);
 
     void register_call();
 
@@ -257,7 +257,7 @@ private:
 class SubscribeQuoteInBinaryEntity : public BaseGrpcEntity
 {
 public:
-    SubscribeQuoteInBinaryEntity(void* service, IQuoteCacher* cacher);
+    SubscribeQuoteInBinaryEntity(::grpc::Service* service, IQuoteCacher* cacher);
 
     void register_call();
 

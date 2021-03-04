@@ -1,24 +1,8 @@
 #pragma once
 
-#include "factory/NacosServiceFactory.h"
-#include "ResourceGuard.h"
-#include "listen/Listener.h"
-#include "PropertyKeyConst.h"
-#include "DebugAssertion.h"
-#include "Debug.h"
-using namespace nacos;
-
-#include <chrono>
-#include <thread>
-#include <unordered_map>
-#include <map>
-#include <set>
-#include <vector>
-using namespace std;
-#include "pandora/util/json.hpp"
-using njson = nlohmann::json;
+#include "base/cpp/basic.h"
+#include "base/cpp/nacos_client.h"
 #include "risk_controller_define.h"
-#include "risk_controller_config.h"
 
 struct QuoteConfiguration
 {
@@ -40,104 +24,23 @@ public:
     virtual void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config) = 0;
 };
 
-class NacosListener : public Listener 
+class ConfigurationClient: public NacosClient
 {
-private:
-    string group_;
-    string dataid_;
-    ConfigService* server_;
-    IConfigurationUpdater* callback_;
 public:
-    NacosListener(ConfigService* server, string group, string dataid, IConfigurationUpdater* callback) {    
-        group_ = group;
-        dataid_ = dataid;
-        server_ = server;
-        callback_ = callback;
-
-        NacosString ss = "";
-        try {
-            ss = server_->getConfig(dataid_, group_, 1000);
-        }
-        catch (NacosException &e) {
-            _log_and_print("[fatal] Request failed with curl code:%d Reason:%s", e.errorcode(), e.what());
-            return;
-        }
-        on_get_config(ss);
-    }
-
-    void on_get_config(const NacosString &configInfo) const {        
-        if( group_ == "riskcontrol" && dataid_ == "symbols" ) {
-            _log_and_print("on_get_config: %s", configInfo);
-            // json 解析
-            njson js;    
-            try
-            {
-                js = njson::parse(configInfo);
-            }
-            catch(nlohmann::detail::exception& e)
-            {
-                _log_and_print("[fatal] parse json fail %s", e.what());
-                return;
-            }    
-            _log_and_print("parse config from nacos finish");
-
-            map<TSymbol, QuoteConfiguration> config;            
-            for (auto iter = js.begin() ; iter != js.end() ; ++iter )
-            {
-                const TSymbol& symbol = iter.key();
-                const njson& symbol_cfgs = iter.value();
-                int enable = symbol_cfgs["enable"].get<int>();
-                if( enable < 1 )
-                    continue;
-                QuoteConfiguration cfg;
-                cfg.PriceBias = symbol_cfgs["price_bias"].get<double>();
-                cfg.VolumeBias = symbol_cfgs["volume_bias"].get<double>();
-                cfg.HedgePercent = symbol_cfgs["hedge_percent"].get<double>();
-                cfg.OtcBias = symbol_cfgs["otc_bias"].get<double>();
-                config[symbol] = cfg;
-            }
-            callback_->on_configuration_update(config);
-        }
-    }
-
-    void receiveConfigInfo(const NacosString &configInfo) {
-        on_get_config(configInfo);
-    }
-};
-
-class ConfigurationUpdater {
-public:
-    ConfigurationUpdater(){}
-    ~ConfigurationUpdater(){}
-
-    void start(const string& addr, IConfigurationUpdater* callback) {
-        thread_loop_ = new std::thread(&ConfigurationUpdater::_run, this, addr, callback);
-    }
-
+    void set_callback(IConfigurationUpdater* callback) { callback_ = callback; }
+    
+    // derive from NacosClient
+    void config_changed(const string& group, const string& dataid, const NacosString &configInfo);
 private:
-    void _run(const string& addr, IConfigurationUpdater* callback) 
-    {        
-        Properties props;
-        props[PropertyKeyConst::SERVER_ADDR] = addr;
-        props[PropertyKeyConst::NAMESPACE] = "bcts";
-        NacosServiceFactory *factory = new NacosServiceFactory(props);
-        ResourceGuard <NacosServiceFactory> _guardFactory(factory);
-        ConfigService *n = factory->CreateConfigService();
-        ResourceGuard <ConfigService> _serviceFactory(n);
+    // derive from NacosClient
+    void _run();
 
-        try {
-            NacosListener *listener1 = new NacosListener(n, "riskcontrol", "symbols", callback);
-            n->addListener("symbols", "riskcontrol", listener1);
-        }
-        catch (NacosException &e) {
-            _log_and_print("[fatal] Request failed with curl code:%d Reason:%s", e.errorcode(), e.what());
-            return;
-        }
+    IConfigurationUpdater* callback_ = nullptr;
 
-        while( true ) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    }
+    // NacosListener
+    NacosListener risk_watcher_;
 
-    std::thread*               thread_loop_ = nullptr;
+    // 处理配置数据
+    void _parse_config();
+    NacosString risk_params_; // for 品种更新频率 和 品种更新深度
 };

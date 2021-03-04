@@ -37,6 +37,8 @@ message MarketStreamDataWithDecimal {
     int64 time_produced_by_streamengine = 11;
     // 行情时间（从riskcontrol发出）
     int64 time_produced_by_riskcontrol = 12;
+    // 成交额精度
+    int32 amount_precise = 13;
 }
 
 message DepthWithDecimal {

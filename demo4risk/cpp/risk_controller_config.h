@@ -43,10 +43,10 @@ public:
             grpc_quote_addr_ = js["grpc"]["quote_addr"].get<string>();
             grpc_account_addr_ = js["grpc"]["account_addr"].get<string>();
             grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
-            grpc_publish_depth_ = js["grpc"]["publish_depth"].get<int>();
 
             // nacos
             nacos_addr_ = js["nacos"]["addr"].get<string>();
+            nacos_namespace_ = js["nacos"]["namespace"].get<string>();
             
             // debug
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
@@ -70,10 +70,10 @@ public:
     string grpc_quote_addr_;
     string grpc_account_addr_;
     string grpc_publish_addr_;
-    int grpc_publish_depth_;
 
     // nacos
     string nacos_addr_;
+    string nacos_namespace_;
 
     // [for debug] sample symbol
     string sample_symbol_;

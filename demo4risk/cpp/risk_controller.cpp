@@ -57,7 +57,8 @@ RiskControllerServer::~RiskControllerServer(){
 
 void RiskControllerServer::start() {
     quote_updater_.start(CONFIG->grpc_quote_addr_, this);
-    configuration_updater_.start(CONFIG->nacos_addr_, this);
+    configuration_client_.set_callback(this);
+    configuration_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);
     account_updater_.start(CONFIG->grpc_account_addr_, this);
 
     // start grpc server

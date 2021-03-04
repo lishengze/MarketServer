@@ -4,7 +4,7 @@
 #include "grpc_server.h"
 #include "kline_mixer.h"
 #include "kline_database.h"
-#include "nacos_client.h"
+#include "configuration_client.h"
 
 class StreamEngine : public QuoteSourceCallbackInterface, public INacosCallback
 {
@@ -38,7 +38,7 @@ private:
     QuoteMixer2 quote_mixer2_;
 
     // nacos client
-    NacosClient nacos_client_;
+    ConfigurationClient config_client_;
 
     // 聚合K线，K线缓存
     // 缓存短期K线，计算聚合结果

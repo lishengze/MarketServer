@@ -125,7 +125,7 @@ class GrpcCall : public CommonGrpcCall
 {
 public:
     template<class ...Args>
-    GrpcCall(int& call_id, void* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
+    GrpcCall(int& call_id, ::grpc::Service* service, ServerCompletionQueue* cq, Args... rest): call_id_(call_id), service_(service), cq_(cq)
     {
         ENTITY* ptr = new ENTITY(service, rest...);
         ptr->set_callid(call_id);
@@ -139,10 +139,10 @@ public:
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             clients_.insert((ENTITY*)entity);
-            ((ENTITY*)entity)->on_init();
         }
-        ENTITY* last = (ENTITY*)entity;
-        ENTITY* ptr = last->spawn();
+        ((ENTITY*)entity)->on_init();
+
+        ENTITY* ptr = ((ENTITY*)entity)->spawn();
         //ENTITY* ptr = new ENTITY(service_);
         ptr->set_callid(call_id_);
         ptr->set_completequeue(cq_);
@@ -170,7 +170,7 @@ public:
     }
 private:
     int call_id_;
-    void* service_;
+    ::grpc::Service* service_;
     ServerCompletionQueue* cq_ = nullptr;
 
     mutable std::mutex mutex_clients_;

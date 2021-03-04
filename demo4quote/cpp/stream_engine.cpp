@@ -62,7 +62,8 @@ void StreamEngine::start()
     server_endpoint_.start();
 
     // 连接配置服务器
-    nacos_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_, this);    
+    config_client_.set_callback(this);
+    config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
 }
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
@@ -155,6 +156,7 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
         ret[v.first].enable = true;
         ret[v.first].precise = v.second.precise;
         ret[v.first].vprecise = v.second.vprecise;
+        ret[v.first].aprecise = v.second.aprecise;
         ret[v.first].frequency = v.second.frequency;
     }
     return ret;
@@ -231,6 +233,7 @@ void StreamEngine::on_config_channged(const Document& src)
             SNacosConfig cfg;
             cfg.precise = symbol_cfgs["precise"].GetUint();
             cfg.vprecise = symbol_cfgs["vprecise"].GetUint();
+            cfg.aprecise = symbol_cfgs["aprecise"].GetUint();
             cfg.depth = symbol_cfgs["depth"].GetUint();
             cfg.frequency = symbol_cfgs["frequency"].GetFloat();
             for( auto iter2 = symbol_cfgs["exchanges"].MemberBegin() ; iter2 != symbol_cfgs["exchanges"].MemberEnd() ; ++iter2 )

@@ -215,6 +215,7 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     snap.arrive_time = get_miliseconds();
     snap.price_precise = config.precise;
     snap.volume_precise = config.vprecise;
+    snap.amount_precise = config.aprecise;
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         for( const auto& data : quotes_[symbol] ) 
