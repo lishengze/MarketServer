@@ -2,6 +2,20 @@
 #include "quote_mixer2.h"
 #include "converter.h"
 
+void set_static_variable(const TExchange& exchange, const TSymbol& symbol, const type_tick& origin_time)
+{
+    if( string(exchange) == "HUOBI" && string(symbol) == "BTC_USDT" ) {
+        CONFIG->GLOBAL_HUOBI_BTC = origin_time/1000000000;
+    } else if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
+        CONFIG->GLOBAL_BINANCE_BTC = origin_time/1000000000;
+    } else if( string(exchange) == "OKEX" && string(symbol) == "BTC_USDT" ) {
+        CONFIG->GLOBAL_OKEX_BTC = origin_time/1000000000;
+    } else if( string(exchange) == MIX_EXCHANGE_NAME && string(symbol) == "BTC_USDT" ) {
+        CONFIG->GLOBAL_BCTS_BTC = origin_time/1000000000;
+    } else {
+
+    }
+}
 bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
@@ -79,6 +93,8 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
 
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
+    set_static_variable(exchange, symbol, quote.origin_time);
+
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         singles_[symbol][exchange] = quote;
@@ -93,6 +109,8 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
 void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& update, SDepthQuote& snap) 
 {
+    set_static_variable(exchange, symbol, update.origin_time);
+
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         SDepthQuote& cache = singles_[symbol][exchange];

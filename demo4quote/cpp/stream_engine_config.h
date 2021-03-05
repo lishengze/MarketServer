@@ -12,6 +12,8 @@ using njson = nlohmann::json;
 using namespace std;
 #include "stream_engine_define.h"
 
+#define PROG_VERSION "1.0.0.1"
+
 #define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
 
 using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
@@ -53,9 +55,18 @@ public:
     // nacos配置信息缓存
     mutable std::mutex mutex_faw_config_;   
     string faw_config_;
+
+    // reporter
+    string reporter_addr_;
+    string reporter_port_;
     
     // logger
     UTLogPtr logger_;
+
+    type_tick GLOBAL_HUOBI_BTC;
+    type_tick GLOBAL_BINANCE_BTC;
+    type_tick GLOBAL_OKEX_BTC;
+    type_tick GLOBAL_BCTS_BTC;
 };
 
 

@@ -2,6 +2,7 @@
 #include "stream_engine.h"
 #include "kline_mixer_test.h"
 #include "pandora/util/io_service_pool.h"
+#include "report.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -32,6 +33,9 @@ int main(int argc, char** argv)
     StreamEngine streamEngine;
     streamEngine.init();
     streamEngine.start();
+
+    Report report;
+    report.start();
     
     utrade::pandora::io_service_pool engine_pool(3);
     // start pool

@@ -35,6 +35,11 @@ void Config::parse_config(const std::string& file_name)
         quote_redis_password_ = js["redis_quote"]["password"].get<string>();
         quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
+        // reporter
+        reporter_addr_ = js["reporter"]["addr"].get<string>();
+        reporter_port_ = js["reporter"]["port"].get<string>();
+
+        // nacos
         nacos_addr_ = js["nacos"]["addr"].get<string>();
         nacos_namespace_ = js["nacos"]["namespace"].get<string>();
         

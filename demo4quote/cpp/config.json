@@ -14,6 +14,10 @@
         "addr": "36.255.220.139:8848",
         "namespace": "bcts"
     },
+    "reporter": {
+        "addr": "0.0.0.0",
+        "port": "8181"
+    },
     "redis_quote": {
         "host": "36.255.220.139",
         "port": 6379,

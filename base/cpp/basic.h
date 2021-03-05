@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <sstream>
 #include <sys/time.h>
+#include <thread>
+#include <atomic>
 using namespace std;
 #include "tinyformat.h"
 

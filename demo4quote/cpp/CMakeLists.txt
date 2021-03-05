@@ -55,6 +55,7 @@ target_link_libraries(demo4quote log4cplus)
 target_link_libraries(demo4quote protobuf protoc protobuf-lite)
 target_link_libraries(demo4quote grpc++_reflection grpc++ gpr ssl crypto)
 target_link_libraries(demo4quote nacos-cli)
+target_link_libraries(demo4quote reporter)
 target_link_libraries(demo4quote SQLiteCpp sqlite3 dl)
 
 ###############################################################################################
