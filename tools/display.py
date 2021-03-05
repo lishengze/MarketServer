@@ -20,6 +20,8 @@ from google.protobuf import empty_pb2
 import struct
 import json
 
+MIX_EXCHANGE_NAME = '_bcts_'
+
 def decode_decimal(v):
     return v.base * 1.0 / (10**v.prec)
 
@@ -47,80 +49,133 @@ def CallGetStreamEngineParams(addr):
         resp = stub.GetParams(request)
         return resp
 
+def CallGetRiskControlParams(addr):
+    with grpc.insecure_channel(addr) as channel:
+        stub = risk_controller_pb2_grpc.RiskControllerStub(channel)
+        resp = stub.GetParams(empty_pb2.Empty())
+        return resp
+
+def CallOtcQuery(addr):
+    with grpc.insecure_channel(addr) as channel:
+        stub = risk_controller_pb2_grpc.RiskControllerStub(channel)
+        request = risk_controller_pb2.QuoteRequest()
+        request.symbol = "BTC_USDT"
+        request.direction = 0
+        request.amount = 0.025
+        request.turnover = 0
+        resp = stub.OtcQuote(request)
+        return resp
+
 def CallGetKlinesStreamEngine(addr):
     with grpc.insecure_channel(addr) as channel:
         stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+
+        index = 1611687600
+
+        '''
         request = stream_engine_pb2.GetKlinesRequest()
         request.exchange = "HUOBI"
-        request.symbol = "IRIS_USDT"
+        request.symbol = "BTC_USDT"
         request.resolution = 60
-        request.start_time = 1608177711
-        request.end_time = 1608177711
+        request.start_time = index
+        request.end_time = index
         resp = stub.GetKlines(request)
+        for kline in resp.klines:
+            if kline.index == index:
+                print(kline)
+
+        request = stream_engine_pb2.GetKlinesRequest()
+        request.exchange = "OKEX"
+        request.symbol = "BTC_USDT"
+        request.resolution = 60
+        request.start_time = index
+        request.end_time = index
+        resp = stub.GetKlines(request)
+        for kline in resp.klines:
+            if kline.index == index:
+                print(kline)
+
+        request = stream_engine_pb2.GetKlinesRequest()
+        request.exchange = "BINANCE"
+        request.symbol = "BTC_USDT"
+        request.resolution = 60
+        request.start_time = index
+        request.end_time = index
+        resp = stub.GetKlines(request)
+        for kline in resp.klines:
+            if kline.index == index:
+                print(kline)
+        '''
+
+        request = stream_engine_pb2.GetKlinesRequest()
+        request.exchange = ""
+        request.symbol = "BTC_USDT"
+        request.resolution = 3600
+        request.start_time = 1611684000
+        request.end_time = 1611687500
+        resp = stub.GetKlines(request)
+        print(resp)
+
         return resp
 
-
 class GrpcStreamThread(QThread):
-    def __init__(self, addr, parent=None):
+    def __init__(self, addr, name, parent=None):
         super().__init__(parent)
+        self.name = name
         self.addr = addr
+        self.channel = None
+        self.stopped = False
 
     def run(self):
-        while True:            
+        while not self.stopped:
             try:
-                with grpc.insecure_channel(self.addr) as channel:
-                    if self.run_grpc(channel) == False:
-                        return
+                print(self.name, "connect to", self.addr)
+                self.channel = grpc.insecure_channel(self.addr)
+                self.run_grpc(self.channel)
             except Exception as ex:
-                print(ex)
-                time.sleep(5)
+                print(self.name, "error connect to", self.addr, ex)
+                continue
 
     def run_grpc(self, channel):
         pass
 
-class QueryApiThread(GrpcStreamThread):
+    def stop_stream(self):
+        if self.channel:
+            self.channel.close()
+            self.channel = None
+        self.stopped = True
+        self.exit()
+        self.stopped = False
+
+class QueryRiskControlThread(GrpcStreamThread):
     breakSignal = pyqtSignal(quote_data_pb2.MarketStreamDataWithDecimal)
   
     def __init__(self, addr, parent=None):
-        super().__init__(addr, parent)
+        super().__init__(addr, 'QueryApiThread', parent)
   
     def run_grpc(self, channel):
-        stub = risk_controller_pb2_grpc.RiskControllerStub(channel)
+        stub = risk_controller_pb2_grpc.RiskControllerStub(channel)        
         responses = stub.ServeMarketStream4Client(empty_pb2.Empty())
         for resp in responses:
             for quote in resp.quotes:
-                if quote.symbol == "ABC_USDT":
-                    print(quote)
                 self.breakSignal.emit(quote)
 
 class SubscribeKlineThread(GrpcStreamThread):
     breakSignal = pyqtSignal(stream_engine_pb2.GetKlinesResponse)
   
     def __init__(self, addr, parent=None):
-        super().__init__(addr, parent)
+        super().__init__(addr, 'SubscribeKlineThread', parent)
   
     def run_grpc(self, channel):
         print("SubscribeKlineThread running...")
         stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
         responses = stub.GetLast(stream_engine_pb2.GetKlinesRequest())
         for resp in responses:
-            print(struct.unpack("=QQHQHQHQHQH", resp.data))
+            print(resp)
+            #print(struct.unpack("=QQHQHQHQHQH", resp.data))
+            pass
 
-class QueryStreamEngineThread(GrpcStreamThread):
-    breakSignal = pyqtSignal(quote_data_pb2.MarketStreamDataWithDecimal)
-  
-    def __init__(self, addr, parent=None):
-        super().__init__(addr, parent)
-  
-    def run_grpc(self, channel):
-        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
-        responses = stub.SubscribeMixQuote(stream_engine_pb2.SubscribeMixQuoteReq())
-        for resp in responses:
-            for quote in resp.quotes:
-                #print(quote)
-                self.breakSignal.emit(quote)
-
-class QueryConfigThread(QThread):
+class QueryStreamEngineConfigThread(QThread):
     breakSignal = pyqtSignal(str)
 
     def __init__(self, addr, parent=None):
@@ -136,20 +191,114 @@ class QueryConfigThread(QThread):
                 pass
             time.sleep(5)
 
-class QueryRawThread(GrpcStreamThread):
+class QueryRiskControlConfigThread(QThread):
+    breakSignal = pyqtSignal(risk_controller_pb2.GetParamsResponse)
+
+    def __init__(self, addr, parent=None):
+        super().__init__(parent)
+        self.addr = addr
+
+    def run(self):
+        while True:
+            try:
+                resp = CallGetRiskControlParams(self.addr)
+                self.breakSignal.emit(resp)
+            except:
+                pass
+            time.sleep(5)
+
+class QueryStreamEngineThread(GrpcStreamThread):
     breakSignal = pyqtSignal(dict)
   
     def __init__(self, exchange, symbol, addr, parent=None):
-        super().__init__(addr, parent)
+        super().__init__(addr, 'QueryRawThread', parent)
         self.exchange = exchange
         self.symbol = symbol
-        self.stopped = False
-        print("restart single thread @", self.exchange, self.symbol)
+        self.cache = collections.defaultdict(dict)
+        self.cache4mix = collections.defaultdict(dict)
 
-    def stop_grpc(self):
-        self.stopped = True
+    def set_params(self, exchange, symbol):
+        self.exchange = exchange
+        self.symbol = symbol
+
+    def __decode_one_resp(self, resp):
+        data = resp.data
+        while data:
+            fields = data.split(b';', 2)
+            length = fields[0]
+            datatype = fields[1]
+            subdata = fields[2];
+            #print(length[:20], datatype[:20], subdata[:20])
+            
+            l = int(bytes.decode(length))
+            dt = int(bytes.decode(datatype))
+            binary = subdata[:l]
+            if dt == 1:
+                quote = quote_data_pb2.MarketStreamDataWithDecimal()
+                quote.ParseFromString(binary)
+                self.__on_quote(quote)
+            elif dt == 2:
+                trade = quote_data_pb2.TradeWithDecimal()
+                trade.ParseFromString(binary)
+                self.__on_trade(trade)
+            data = subdata[l:]
+                #print(data[:20])
+
+    def __on_trade(self, trade):
+        #print(trade)
+        pass
+
+    def __on_quote(self, quote):
+        def refresh_cache(cache, key, depths):
+            cache[key] = {}
+            for depth in depths:
+                cache[key][decode_decimal(depth.price)] = decode_decimal(depth.volume)
+
+        def update_cache(cache, key, depths):
+            for depth in depths:
+                price = decode_decimal(depth.price)
+                volume = decode_decimal(depth.volume)
+                #print(key, price, volume)
+                if volume < 0.00001:
+                    try:
+                        del cache[key][price]
+                    except:
+                        pass
+                else:
+                    cache[key][price] = volume
+
+        cache = None
+        if quote.exchange == MIX_EXCHANGE_NAME:
+            if quote.symbol != self.symbol:
+                return
+            cache = self.cache4mix
+        else:
+            if quote.exchange != self.exchange or quote.symbol != self.symbol:
+                return
+            cache = self.cache
+
+        #print(quote.exchange, quote.symbol, quote.is_snap)
+        cache['exchange'] = quote.exchange
+        cache['symbol'] = quote.symbol
+        # 全量
+        if quote.is_snap:
+            refresh_cache(cache, 'ask', quote.asks)
+            refresh_cache(cache, 'bid', quote.bids)
+        # 增量
+        else:
+            update_cache(cache, 'ask', quote.asks)
+            update_cache(cache, 'bid', quote.bids)
+        self.breakSignal.emit(cache)
 
     def run_grpc(self, channel):
+        stub = stream_engine_pb2_grpc.StreamEngineStub(channel)
+        request = stream_engine_pb2.SubscribeQuoteReq()
+        request.symbol = self.symbol
+        responses = stub.SubscribeQuoteInBinary(request)
+        for resp in responses:
+            self.__decode_one_resp(resp)
+
+    def run_grpc1(self, channel):
         def refresh_cache(cache, key, depths):
             cache[key] = {}
             for depth in depths:
@@ -176,9 +325,6 @@ class QueryRawThread(GrpcStreamThread):
 
         cache = collections.defaultdict(dict)
         for resp in responses:
-            if self.stopped:
-                print("exit single thread @", self.exchange, self.symbol)
-                return False
             for quote in resp.quotes:
                 #print(quote.is_snap)
                 # 全量
@@ -256,52 +402,84 @@ class AskBidWidget(object):
             lbl_price.setText( str(price) )
             lbl_volumes.setText( str(volume) )
 
+def init_logger(name):
+    fh = logging.FileHandler(name, mode='w')
+    fh.setLevel(logging.DEBUG)
+    logger = logging.getLogger(name)
+    logger.propagate = False
+    #formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+    #fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    return logger
+
+def log_depth(logger, symbol, asks, bids):
+    logger.info('[{}] {}'.format(symbol, time.ctime()))
+    for (s_price, s_desc) in asks:
+        logger.info('asks: {} {}'.format(s_price, s_desc))
+    for (s_price, s_desc) in bids:
+        logger.info('bids: {} {}'.format(s_price, s_desc))
+    logger.info('')
+    logger.info('')
+
 class DisplayWidget(QWidget):
     DISPLAY_DEPTH = 20 # 这个值固定不变
     DEPTH = 20
     FREQUENCY = 1
     RAW_FREQUENCY = 1
-    STREAMENGINE_ADDR = "172.25.3.207:9000"
-    #API_ADDR = "172.25.3.207:9900"
-    #STREAMENGINE_ADDR = "36.255.220.139:9110"
-    API_ADDR = "36.255.220.139:9111"
+    #STREAMENGINE_ADDR = "172.25.3.207:9000"
+    #RISKCONTROL_ADDR = "172.25.3.207:9900"
+    STREAMENGINE_ADDR = "36.255.220.139:9110"
+    RISKCONTROL_ADDR = "36.255.220.139:9111"
     
     def __init__(self):
         super().__init__()
 
-        ret = CallGetKlinesStreamEngine(self.STREAMENGINE_ADDR)
-        print(ret)
+        #ret = CallGetStreamEngineParams(self.STREAMENGINE_ADDR)
+        #print(ret)
+
+        #ret = CallGetRiskControlParams(self.RISKCONTROL_ADDR)
+        #print(ret)
+
+        #ret = CallOtcQuery(self.RISKCONTROL_ADDR)
+        #print(ret)
+
+        #ret = CallGetKlinesStreamEngine(self.STREAMENGINE_ADDR)
+        #exit(1)
 
         self.current_symbol = ''
         self.current_exchange = ''
 
+        # 初始化日志对象
+        logging.basicConfig(level=logging.INFO)
+        self.logger_riskcontrol = init_logger('riskcontrol.log')
+        self.logger_streamengine = init_logger('streamengine.log')
+
         # 初始化ui
         self.initUI()
         
-        # 启动获取api聚合行情接口
-        self.api_thread = QueryApiThread(self.API_ADDR)
-        self.api_thread.breakSignal.connect(self.update_api_data)
-        self.api_thread.start()
-        
-        # 启动获取stream engine聚合行情接口
-        self.streamengine_thread = QueryStreamEngineThread(self.STREAMENGINE_ADDR)
-        self.streamengine_thread.breakSignal.connect(self.update_streamengine_data)
-        self.streamengine_thread.start()
+        # 启动获取风控后行情接口
+        self.riskctl_thread = QueryRiskControlThread(self.RISKCONTROL_ADDR)
+        self.riskctl_thread.breakSignal.connect(self.update_riskctl_data)
+        self.riskctl_thread.start()
 
-        # 原始行情聚合接口需要动态获取
-        #self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
-        self.raw_thread = QueryRawThread('', '', self.STREAMENGINE_ADDR)
-        self.raw_thread.breakSignal.connect(self.update_raw_data)
-        self.raw_thread.start()
+        # 原始行情接口需要动态获取
+        self.stream_thread = QueryStreamEngineThread('', '', self.STREAMENGINE_ADDR)
+        self.stream_thread.breakSignal.connect(self.update_stream_data)
+        self.stream_thread.start()
 
         # 查询服务器配置参数
-        self.cfg_thread = QueryConfigThread(self.STREAMENGINE_ADDR)
+        self.cfg_thread = QueryStreamEngineConfigThread(self.STREAMENGINE_ADDR)
         self.cfg_thread.breakSignal.connect(self.update_config_data)
         self.cfg_thread.start()
 
+        # 查询风控参数
+        self.riskcontrol_status_thread = QueryRiskControlConfigThread(self.RISKCONTROL_ADDR)
+        self.riskcontrol_status_thread.breakSignal.connect(self.update_riskcontrol_params)
+        self.riskcontrol_status_thread.start()
+
         # 启动K线更新接口
-        self.kline_thread = SubscribeKlineThread(self.STREAMENGINE_ADDR)
-        self.kline_thread.start()
+        #self.kline_thread = SubscribeKlineThread(self.STREAMENGINE_ADDR)
+        #self.kline_thread.start()
 
     def _create_combobox(self, options, init_val=None):
         ret = QComboBox(self)
@@ -400,7 +578,13 @@ class DisplayWidget(QWidget):
         self.setWindowTitle('聚合行情展示')
         self.show()
 
-    def update_api_data(self, msg):
+    def log_riskcontrol(self, symbol, asks, bids):
+        log_depth(self.logger_riskcontrol, symbol, asks, bids)
+
+    def log_streamengine(self, symbol, asks, bids):
+        log_depth(self.logger_streamengine, symbol, asks, bids)
+
+    def update_riskctl_data(self, msg):
         def _make_data(depths):
             ret = []
             for depth in depths:
@@ -420,35 +604,42 @@ class DisplayWidget(QWidget):
             return
         ask_data = _make_data(msg.asks)
         bid_data = _make_data(msg.bids)
+        self.log_riskcontrol(msg.symbol, ask_data, bid_data)
         self.api_widget.bind_data(ask_data, bid_data)
 
+    '''
     def update_streamengine_data(self, msg):
-        def _make_data(depths):
-            ret = []
-            for i, depth in enumerate(depths):
-                # 价位数据
-                txt_price = decode_decimal(depth.price)
-                # 挂单数据
-                total = 0
-                desc = ""
-                for exchange, volume in depth.data.items():
-                    #self._add_exchange(data.exchange, msg.symbol)
-                    total += decode_decimal(volume)
-                    desc += "{0}:{1},".format(exchange, decode_decimal(volume))
-                txt_volumes = "{0} - ".format(total) + desc
-                # 添加数据
-                ret.append((txt_price, txt_volumes))
-            return ret
+        try:
+            def _make_data(depths):
+                ret = []
+                for depth in depths:
+                    # 价位数据
+                    txt_price = decode_decimal(depth.price)
+                    # 挂单数据
+                    total = 0
+                    desc = ""
+                    for exchange, volume in depth.data.items():
+                        #self._add_exchange(data.exchange, msg.symbol)
+                        total += decode_decimal(volume)
+                        desc += "{0}:{1},".format(exchange, decode_decimal(volume))
+                    txt_volumes = "{0:.4f} - ".format(total) + desc
+                    # 添加数据
+                    ret.append((txt_price, txt_volumes))
+                return ret
 
-        # 添加品种
-        #self._add_symbol(msg.symbol)
-        if msg.symbol != self.current_symbol:
-            return
-        ask_data = _make_data(msg.asks)
-        bid_data = _make_data(msg.bids)
-        self.streamengine_widget.bind_data(ask_data, bid_data)
+            # 添加品种
+            #self._add_symbol(msg.symbol)
+            if msg.symbol != self.current_symbol:
+                return
+            ask_data = _make_data(msg.asks)
+            bid_data = _make_data(msg.bids)
+            self.log_streamengine(msg.symbol, ask_data, bid_data)
+            self.streamengine_widget.bind_data(ask_data, bid_data)
+        except Exception as ex:
+            print(ex)
+    '''
 
-    def update_raw_data(self, msg):
+    def update_stream_data(self, msg):
         def _make_data(depths, is_ask):
             ret = []
             keys = sorted(depths.keys())
@@ -460,12 +651,28 @@ class DisplayWidget(QWidget):
 
         ask_data = _make_data(msg['ask'], True)
         bid_data = _make_data(msg['bid'], False)
-        self.raw_widget.bind_data(ask_data, bid_data)
+        if msg['exchange'] == MIX_EXCHANGE_NAME:
+            self.streamengine_widget.bind_data(ask_data, bid_data)
+        else:
+            #print(msg)
+            self.raw_widget.bind_data(ask_data, bid_data)
+        
+    def update_riskcontrol_params(self, msg):
+        for k, v in msg.watermarks.items():
+            print('watermark', k, decode_decimal(v))
+
+        for k, v in msg.accounts.items():
+            print('accounts', k, v)
+
+        for k, v in msg.configuration.items():
+            print("configuration", k, v)
+        
+        print('---------------------')
 
     def update_config_data(self, msg):
         # 解析完整的配置信息
         self.configs = json.loads(msg)
-        print(self.configs)
+        #print(self.configs)
 
         # 解析符号和交易所信息，用于列表展示
         symbols = {}
@@ -500,14 +707,21 @@ class DisplayWidget(QWidget):
         cfg = self.configs[self.current_symbol]
         self.precise_lbl.setText(str(cfg['precise']))
         self.frequency_lbl.setText(str(cfg['frequency']))
-        self.mixdepth_lbl.setText(str(cfg['mix_depth']))
-        self.mixfrequency_lbl.setText(str(cfg['mix_frequency']))
+        self.mixdepth_lbl.setText(str(cfg['depth']))
+        self.mixfrequency_lbl.setText(str(cfg['frequency']))
         fee = cfg['exchanges'][self.current_exchange]    
         self.fee_lbl.setText('{},{:.03f},{:.03f}'.format(fee['fee_type'], fee['fee_maker'], fee['fee_taker']))
 
     def symbol_changed(self, symbol):
-        print('symbol_changed', symbol)
+        #print()
+        #print()
+        #print('symbol_changed', symbol)
         self.current_symbol = symbol
+
+        #self.streamengine_thread.stop_stream()
+        #self.streamengine_thread.start()
+        self.riskctl_thread.stop_stream()
+        self.riskctl_thread.start()
 
         exchanges = list(self.configs[self.current_symbol]['exchanges'].keys())
         # exchange_combox
@@ -516,9 +730,12 @@ class DisplayWidget(QWidget):
             self.exchange_combox.addItems(exchanges)
             if self.current_exchange in exchanges: # 重新设置选中项
                 self.exchange_combox.setCurrentText(self.current_exchange)
+                self.exchange_combox.activated[str].emit(self.current_exchange)
             elif exchanges: # 默认设置第一个
                 self.current_exchange = exchanges[0]
                 self.exchange_combox.activated[str].emit(self.current_exchange)
+        else:
+            pass
 
         # 设置其他
         self.set_others()
@@ -528,13 +745,9 @@ class DisplayWidget(QWidget):
         self.current_exchange = exchange
 
         # 停止之前的数据线程
-        if self.raw_thread:
-            self.raw_thread.stop_grpc()
-            self.raw_thread.exit()
-        # 创建新的数据线程
-        self.raw_thread = QueryRawThread(self.current_exchange, self.current_symbol, self.STREAMENGINE_ADDR)
-        self.raw_thread.breakSignal.connect(self.update_raw_data)
-        self.raw_thread.start()
+        self.stream_thread.stop_stream()
+        self.stream_thread.set_params(self.current_exchange, self.current_symbol)
+        self.stream_thread.start()
 
         # 设置其他
         self.set_others()
