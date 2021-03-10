@@ -99,6 +99,7 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
         // 更新了时间为 kline.index 的K线
         // 1. 检查是否可以计算，计算条件：所有市场时间>=kline.index
         // 2. 如果可以计算，则清除所有市场时间<kline.index的数据
+        
         bool can_calculate = true;
         vector<KlineData> datas;
         for( const auto& cache : symbol_cache ) 
@@ -109,7 +110,7 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
             bool found = false;
             for( const auto& v : c->klines ) {
                 if( v.index == kline.index ) {
-                    found = true;
+                    found = true;   // QS: 只要有一个交易所的有和当前 k 线时间一致的 数据，就会进行计算；有逻辑错误，应该是所有交易所都有当前k线时间数据；
                     datas.push_back(v);
                 }
             }
@@ -171,7 +172,7 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
     std::unique_lock<std::mutex> inner_lock{ mutex_data_ };
     vector<KlineData>& dst = data_[exchange][symbol];
 
-    // 填补跳空数据
+    // 填补跳空数据, 待修改!
     outputs = klines;
     if( dst.size() > 0 && outputs.size() > 0 ) {
         const KlineData& last = dst.back();
