@@ -87,6 +87,10 @@ public:
 
     vector<KlineDataPtr> compute_target_kline_data(vector<KlineDataPtr>& kline_data, int frequency);
 
+    vector<KlineDataPtr> compute_kline_atom_data(vector<KlineDataPtr>& kline_data, int frequency);
+
+    vector<KlineDataPtr> compute_day_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency);
+
     void init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData);
 
     void update_kline_data(const KlineDataPtr kline_data);

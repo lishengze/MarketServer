@@ -50,7 +50,7 @@ inline int get_random_double(int max, int min)
     return dis(gen);
 }
 
-string get_sec_time_str(unsigned long time);
+// string get_sec_time_str(unsigned long time);
 
 void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src);
 
@@ -63,3 +63,8 @@ string set_double_string_scale(string ori_data, int num);
 string simplize_string(string ori_data);
 
 string append_zero(string result, int count);
+
+inline string get_sec_time_str(unsigned long time)
+{
+    return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
+}

@@ -213,10 +213,10 @@ string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
     
 }
 
-string get_sec_time_str(unsigned long time)
-{
-    return utrade::pandora::ToSecondStr(time * NanoPerSec, "%Y-%m-%d %H:%M:%S");
-}
+// string get_sec_time_str(unsigned long time)
+// {
+//     return utrade::pandora::ToSecondStr(time * NanoPerSec, "%Y-%m-%d %H:%M:%S");
+// }
 
 void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src)
 {

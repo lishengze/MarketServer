@@ -63,6 +63,7 @@ void StreamEngine::start()
 
     // 连接配置服务器
     config_client_.set_callback(this);
+    std::cout << "Nacos Address: " << CONFIG->nacos_addr_ << " name: " << CONFIG->nacos_namespace_ << std::endl;
     config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
 }
 
@@ -218,6 +219,9 @@ void StreamEngine::on_config_channged(const Document& src)
     if( CONFIG->mode_ == MODE_REPLAY ) {
         expand_replay_config(src, d);
     }
+
+    std::cout << "\n\n *** StreamEngine::on_config_channged *** "
+              << content << std::endl;
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;

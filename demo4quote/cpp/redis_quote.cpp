@@ -5,6 +5,8 @@
 #include "base/cpp/rapidjson/document.h"
 #include "base/cpp/rapidjson/writer.h"
 #include "base/cpp/rapidjson/stringbuffer.h"
+
+#include "pandora/util/time_util.h"
 using namespace rapidjson;
 
 // channel_name = [channel_type]|[symbol].[exchange]
@@ -29,7 +31,7 @@ bool decode_channelmsg(const string& msg, Document& body)
     body.Parse(msg.c_str());
     if(body.HasParseError())
     {
-        _log_and_print("catch exception %s", body.GetParseError());
+        // _log_and_print("catch exception %s", body.GetParseError());
         return false;
     }
     return true;
@@ -103,15 +105,29 @@ bool on_get_message(RedisKlineHelper& helper, const Document& body, const TExcha
         KlineData kline;
         redisquote_to_kline(*iter, kline, config);
         if( !valida_kline(kline) ) {
-            _log_and_print("[kline min%u] get abnormal kline data", helper.resolution_);
+            // _log_and_print("[kline min%u] get abnormal kline data", helper.resolution_);
             continue;
         }
         if( kline.index < last_index ) {
             continue;
         }
 
+        if (symbol == "BTC_USDT")
+        {
+            std::cout << utrade::pandora::get_sec_time_str(kline.index) << " " 
+                        << exchange << " "
+                        <<"open: " << kline.px_open.get_str_value() << " "
+                        <<"high: " << kline.px_high.get_str_value() << " "
+                        <<"low: " << kline.px_low.get_str_value() << " "
+                        <<"close: " << kline.px_close.get_str_value() << " "
+                        <<"volume: " << kline.volume.get_str_value() << " "
+                        << std::endl;
+        }
+
+
+
         /*
-        _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, helper.resolution_,
+        // _log_and_print("[%s.%s] get kline%u index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange, symbol, helper.resolution_,
             kline.index,
             kline.px_open.get_str_value(),
             kline.px_high.get_str_value(),
@@ -217,7 +233,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
     {
-        _log_and_print("decode channel name fail. [channel=%s]", channel);
+        // _log_and_print("decode channel name fail. [channel=%s]", channel);
         return;
     }
     // 仅处理指定的频道
@@ -227,19 +243,19 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         channel_type != KLINE_60MIN_HEAD &&
         channel_type != SNAP_HEAD )
     {
-        _log_and_print("unknown message type.[channel=%s]", channel);
+        // _log_and_print("unknown message type.[channel=%s]", channel);
         return;
     }
 
     if( !decode_channelmsg(msg, body) )
     {
-        _log_and_print("decode json fail %s.[channel=%s]", msg, channel);
+        // _log_and_print("decode json fail %s.[channel=%s]", msg, channel);
         return;
     }
     
     if( !_get_config(exchange, symbol, config) ) 
     {
-        //_log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
+        //// _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
         return;
     }
     if( !config.enable )
@@ -255,7 +271,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         quote.symbol = symbol;
         if( !redisquote_to_quote(body, quote, config, true))
         {
-            _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
+            // _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
             retry = true;
             return;
         }
@@ -292,7 +308,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         SDepthQuote quote;
         if( !redisquote_to_quote(body, quote, config, false) ) 
         {
-            _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
+            // _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
             return;
         }
         quote.raw_length = msg.length();
@@ -320,7 +336,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
             SDepthQuote tmp;
             if( !_ctrl_update(exchange, symbol, quote, config, tmp) ) 
             {
-                //_log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
+                //// _log_and_print("skip %s-%s update.", exchange.c_str(), symbol.c_str());
                 return;
             }
             engine_interface_->on_update(exchange, symbol, tmp);
@@ -331,7 +347,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         Trade trade;
         if( !redisquote_to_trade(body, trade, config) )
         {
-            _log_and_print("redisquote_to_trade failed. [channel=%s, msg=%s]", channel, msg);
+            // _log_and_print("redisquote_to_trade failed. [channel=%s, msg=%s]", channel, msg);
             return;
         }
         engine_interface_->on_trade(exchange, symbol, trade);
@@ -353,7 +369,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 void RedisQuote::OnConnected() 
 {
     connected_ = true;
-    _log_and_print("Redis RedisQuote::OnConnected");
+    // _log_and_print("Redis RedisQuote::OnConnected");
 
     // 设置交易所配置
     std::unique_lock<std::mutex> l{ mutex_symbol_ };
@@ -366,7 +382,7 @@ void RedisQuote::OnConnected()
 
 void RedisQuote::OnDisconnected(int status) {
     connected_ = false;
-    _log_and_print("Redis RedisQuote::OnDisconnected");
+    // _log_and_print("Redis RedisQuote::OnDisconnected");
 };
 
 int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& updates_queue)
@@ -379,7 +395,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     // 已经启动推送
     if( symbol_meta.publishing )
     {
-        _log_and_print("%s.%s recv snap during publishing. SKIP.", exchange, symbol);
+        // _log_and_print("%s.%s recv snap during publishing. SKIP.", exchange, symbol);
         return SYNC_SKIP;
     }
 
@@ -388,22 +404,22 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     // 以下尚未启动推送
     type_seqno left = symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.front().sequence_no;
     type_seqno right =  symbol_meta.caches.size() == 0 ? 0 : symbol_meta.caches.back().sequence_no;
-    _log_and_print("%s.%s recv snap %lu, updates from %lu to %lu.", exchange, symbol, quote.sequence_no, 
-        symbol_meta.caches.front().sequence_no,
-        symbol_meta.caches.back().sequence_no
-    );
+    // _log_and_print("%s.%s recv snap %lu, updates from %lu to %lu.", exchange, symbol, quote.sequence_no, 
+        // symbol_meta.caches.front().sequence_no,
+        // symbol_meta.caches.back().sequence_no
+    // );
 
     if( right == 0 || quote.sequence_no > right ) 
     {
         symbol_meta.caches.clear();
         symbol_meta.seq_no = quote.sequence_no;
         symbol_meta.publishing = true;
-        _log_and_print("%s.%s start without updates.", exchange, symbol);
+        // _log_and_print("%s.%s start without updates.", exchange, symbol);
         return SYNC_STARTING;
     }
     else if( quote.sequence_no < (left - 1) ) 
     {
-        _log_and_print("%s.%s request snap again.", exchange, symbol);
+        // _log_and_print("%s.%s request snap again.", exchange, symbol);
         return SYNC_SNAPAGAIN;
     }
     else // left <= quote.sequence_no <= right
@@ -420,7 +436,7 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
         symbol_meta.caches.clear();
         symbol_meta.seq_no = right;
         symbol_meta.publishing = true;
-        _log_and_print("%s.%s start with %lu updates.", exchange, symbol, updates_queue.size());
+        // // _log_and_print("%s.%s start with %lu updates.", exchange, symbol, updates_queue.size());
         return SYNC_STARTING;
     }
 
@@ -443,8 +459,8 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     // 序号不连续
     if( quote.sequence_no != (symbol_meta.seq_no + 1) ) 
     {
-        _log_and_print("%s.%s sequence skip from %lu to %lu. refresh snap again.", 
-                        exchange, symbol, symbol_meta.seq_no, quote.sequence_no);
+        // _log_and_print("%s.%s sequence skip from %lu to %lu. refresh snap again.", 
+                        // exchange, symbol, symbol_meta.seq_no, quote.sequence_no);
         redis_snap_requester_.async_request_symbol(exchange, symbol);
         symbol_meta.caches.clear();
         symbol_meta.caches.push_back(quote);
@@ -460,7 +476,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
 
     if( symbol_meta.publishing )
     {
-        return SYNC_OK;
+        return SYNC_OK; 
     }
 
     // 尚未启动推送
@@ -488,7 +504,7 @@ void RedisQuote::_looping()
         
         // 检查心跳
         if( now > last_time_ && (now - last_time_) > 10 * 1000 ) {
-            _log_and_print("heartbeat expired. [now=%ld, last=%ld]", now, last_time_);
+            // _log_and_print("heartbeat expired. [now=%ld, last=%ld]", now, last_time_);
             _loopng_check_heartbeat();
         }
 
@@ -542,7 +558,7 @@ void RedisQuote::_looping_force_to_update()
                 tmp.asks.swap(cache.asks);
                 tmp.bids.swap(cache.bids);
                 forced_to_update.push_back(tmp);
-                _log_and_print("force to flush %s.%s updates.", exchange, symbol);
+                // _log_and_print("force to flush %s.%s updates.", exchange, symbol);
             }
         }
     }
@@ -557,13 +573,13 @@ void RedisQuote::_looping_force_to_update()
 void RedisQuote::_loopng_check_heartbeat()
 {
     // 请求增量
-    _log_and_print("reconnect redis ...");
+    // _log_and_print("reconnect redis ...");
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
     redis_api_->RegisterSpi(this);
     redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
     last_time_ = get_miliseconds();
     last_redis_time_ = get_miliseconds();
-    _log_and_print("reconnect redis ok.");
+    // _log_and_print("reconnect redis ok.");
 
 }
 
@@ -575,7 +591,7 @@ void RedisQuote::_looping_check_nodata()
         for( const auto& v : metas_ ) {
             if( v.second.pkg_count == 0 ) {
                 nodata_exchanges.insert(v.first);
-                _log_and_print("exchange %s no data", v.first);
+                // _log_and_print("exchange %s no data", v.first);
             }
         }
 
@@ -661,7 +677,7 @@ bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
     {
         const TExchange& exchange = v.first;
         const SExchangeConfig& cfg = v.second;
-        _log_and_print("RedisQuote::set_config [%s.%s] %s", exchange, symbol, cfg.desc());
+        // _log_and_print("RedisQuote::set_config [%s.%s] %s", exchange, symbol, cfg.desc());
     }
 
     // 取消订阅之前的数据（改为disable，不再取消）

@@ -597,6 +597,11 @@ vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr
 
     cout << "compute_target_kline_data" << endl;
 
+    if (src_kline_data.size() == 0)
+    {
+        return result;
+    }
+
     KlineDataPtr cur_data = src_kline_data[0];
     // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
 
@@ -643,6 +648,115 @@ vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr
         }
     }
     return result;
+}
+
+vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>& src_kline_data, int frequency)
+{
+    vector<KlineDataPtr> result;
+
+    cout << "compute_target_kline_data" << endl;
+
+    if (src_kline_data.size() == 0)
+    {
+        return result;
+    }
+
+    KlineDataPtr cur_data = src_kline_data[0];
+    // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+
+    result.push_back(cur_data); 
+
+    SDecimal low(MAX_DOUBLE);
+    SDecimal high(MIN_DOUBLE);
+    SDecimal open;
+
+    // cout << "kline_data.size: " << src_kline_data.size() << endl;
+
+    src_kline_data.erase(src_kline_data.begin());
+
+    bool is_first = true;
+    for (KlineDataPtr atom:src_kline_data)
+    {
+        low = low > atom->px_low ? atom->px_low:low;
+        high = high < atom->px_high ? atom->px_high:high;
+
+        if (is_first)
+        {
+            open = atom->px_open;
+            is_first = false;
+        }
+        
+        if (atom->index > (*result.rbegin())->index && atom->index - (*result.rbegin())->index >= frequency)
+        {            
+            KlineDataPtr cur_data = boost::make_shared<KlineData>(*atom);
+            cur_data->px_low = low;
+            cur_data->px_high = high;
+            cur_data->px_open = open;
+
+            is_first = true;
+
+            // cout << "cur_data: " << get_sec_time_str(atom->index) << " "
+            //      << "last_data: " << get_sec_time_str((*result.rbegin())->index) << " "
+            //      << "delta: " << atom->index - (*result.rbegin())->index << " "
+            //      << "fre: " << frequency << endl;
+
+            result.push_back(cur_data); 
+
+            low = MAX_DOUBLE;
+            high = MIN_DOUBLE;
+        }
+    }
+    return result;
+}
+
+
+
+vector<KlineDataPtr> KlineProcess::compute_day_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
+{
+    try
+    {
+    vector<KlineDataPtr> result;
+
+    cout << "compute_target_kline_data" << endl;
+
+    KlineDataPtr last_data = src_kline_data[src_kline_data.size()-1];
+    // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
+
+    SDecimal low = last_data->px_low;
+    SDecimal high = last_data->px_high;
+    SDecimal open = last_data->px_open;
+
+    // cout << "kline_data.size: " << src_kline_data.size() << endl;
+
+    src_kline_data.pop_back();
+
+    int day_secs = 24 * 3600;
+
+    while(src_kline_data.size() > 0 && src_kline_data[src_kline_data.size()-1]->index % day_secs == 0)
+    {
+        KlineDataPtr atom = src_kline_data[src_kline_data.size()-1];
+        low = low > atom->px_low ? atom->px_low:low;
+        high = high < atom->px_high ? atom->px_high:high;        
+        open = atom->px_open;
+        src_kline_data.pop_back();
+    }
+
+    last_data->px_low = low;
+    last_data->px_high = high;
+    last_data->px_open = open;
+
+    result = compute_target_kline_data(src_kline_data, frequency);
+
+    result.push_back(last_data);
+
+    return result;
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 }
 
 void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData)

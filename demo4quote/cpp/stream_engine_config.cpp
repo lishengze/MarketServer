@@ -13,10 +13,13 @@ void Config::parse_config(const std::string& file_name)
         // append the prefix
         //string intact_file_name = WorkFolder + file_name;
         UT_LOG_INFO(logger_, "System Parse Config File " << file_name);
+
+        std::cout << "\n***** Config FileName:  " << file_name << std::endl;
+
         // read the config file
         std::ifstream in_config(file_name);
         std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
-        // std::cout << contents << std::endl;
+        std::cout << contents << std::endl;
         njson js = njson::parse(contents);
 
         // grpc
@@ -36,8 +39,8 @@ void Config::parse_config(const std::string& file_name)
         quote_redis_snap_interval_ = js["redis_quote"]["snap_interval"].get<int>();
 
         // reporter
-        reporter_addr_ = js["reporter"]["addr"].get<string>();
-        reporter_port_ = js["reporter"]["port"].get<string>();
+        // reporter_addr_ = js["reporter"]["addr"].get<string>();
+        // reporter_port_ = js["reporter"]["port"].get<string>();
 
         // nacos
         nacos_addr_ = js["nacos"]["addr"].get<string>();

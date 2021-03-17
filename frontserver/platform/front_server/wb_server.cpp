@@ -601,6 +601,7 @@ void WBServer::check_heartbeat()
                 WebsocketClass * ws = wss_con_map_[socket_id]->get_ws();
                 WSData* data_ptr = (WSData*)(ws->getUserData());
                 data_ptr->set_id(0);
+                ws->close();
 
                 wss_con_map_[socket_id]->set_alive(false);
                 wss_con_map_.erase(socket_id);            
