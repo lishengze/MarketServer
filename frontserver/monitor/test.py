@@ -113,7 +113,7 @@ def basic_test():
     print(len(result_list))    
 
 def test_all_info():
-    p = psutil.Process(9359)
+    p = psutil.Process(560730)
     print(p.name())      #进程名
     print(p.exe())         #进程的bin路径
     print(p.cwd())        #进程的工作目录绝对路径
@@ -134,15 +134,20 @@ def test_all_info():
     print(p.memory_percent())  #进程内存利用率
     print(p.memory_info())    #进程内存rss,vms信息
 
+    print("p.io_counters()")
     print(p.io_counters())    #进程的IO信息,包括读写IO数字及参数
+
+    print("p.ionice()")
+    print(p.ionice())
+
     # print(p.connectios())    #返回进程列表
     print(p.num_threads())  #进程开启的线程数
+
 
     # from subprocess import PIPE
     # p = psutil.Popen(["/usr/bin/python", "-c", "print('hello')"],stdout=PIPE)
     # p.name()
     # p.username()    
-
 
 def test_psutil():
     for proc in psutil.process_iter():
@@ -179,22 +184,61 @@ def print_dict(dict_data):
             print(str(index)+": ")
             print(dict_data[index])
 
+def print_list(list_data):
+    for item in list_data:
+        print(item)
+
+
+def print_info(data):
+    if type(data) is dict:
+        print_dict(data)
+    elif type(data) is list:
+        print_list(data)    
+    else:
+        print(data)
+
 def get_disk_io():
     # n_c = tuple(psutil.disk_io_counters())
     # # n_c = [(100.0*n_c[i+1]) / n_c[i] for i in range(0, len(n_c), 2)]
     # print(n_c)
 
-    perdisk = psutil.disk_io_counters(perdisk=True)
+    # perdisk = psutil.disk_io_counters(perdisk=True)
+
+    perdisk = psutil.disk_io_counters()
 
     if type(perdisk) is dict:
         print_dict(perdisk)
     else:
         print(perdisk)
+
+def get_mount_path():
+    disk_info = psutil.disk_partitions()
+    path_list = []
+    for disk_atom in disk_info:
+        path_list.append(disk_atom.mountpoint)
+        # print_info(disk_atom)
+    return path_list
+
+def get_disk():
+    # print("psutil.disk_partitions()")
+    # info1 = psutil.disk_partitions()
+    # print_info(info1)
+
+    # print("psutil.disk_usage(/)")
+    path_list = get_mount_path()
+    for path in path_list:
+        info2 = psutil.disk_usage(path)
+        print(path + ": " + str(info2))
+
+    print_info(info2)
             
 if __name__ == '__main__':
     # get_cpu_usage()
     # get_mem_usage()
     # get_net_usage()
     # test_all_info()
-    get_disk_io()
+    # get_disk_io()
+
+    get_disk()
+    # get_mount_path()
 
