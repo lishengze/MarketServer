@@ -169,12 +169,32 @@ def get_disk_info():
     print(content)
 
     # return content
-# def send_dingding_msg():            
-                      
 
+def print_dict(dict_data):
+    for index in dict_data:
+        if type(dict_data[index]) is dict:
+            print(str(index)+": ")
+            print_dict(dict_data[index])
+        else:
+            print(str(index)+": ")
+            print(dict_data[index])
+
+def get_disk_io():
+    # n_c = tuple(psutil.disk_io_counters())
+    # # n_c = [(100.0*n_c[i+1]) / n_c[i] for i in range(0, len(n_c), 2)]
+    # print(n_c)
+
+    perdisk = psutil.disk_io_counters(perdisk=True)
+
+    if type(perdisk) is dict:
+        print_dict(perdisk)
+    else:
+        print(perdisk)
             
 if __name__ == '__main__':
     # get_cpu_usage()
     # get_mem_usage()
     # get_net_usage()
-    test_all_info()
+    # test_all_info()
+    get_disk_io()
+
