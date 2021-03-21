@@ -102,3 +102,36 @@ def get_mem_usage():
     counters = readMemInfo()          
     usage = calcMemUsage(counters)
     return usage
+
+def get_disk_info(file_sys_path):
+    disk_info = psutil.disk_usage(file_sys_path)
+    # print(disk_info)
+    return disk_info.percent
+
+def get_disk_io_info():
+    info = psutil.disk_io_counters()
+    read_io = info.read_bytes / 8 / 1024 / info.read_time
+    write_io = info.write_bytes / 8 / 1024 / info.write_time
+    return [read_io, write_io]
+
+def get_process_disk_io(pid):
+    p = psutil.Process(pid)
+    info = p.io_counters()
+    read_io = info.read_bytes / 1024 / 8
+    write_io = info.write_bytes / 1024 / 8
+    return [read_io, write_io]
+
+class Test(object):
+    def __init__(self):
+        super().__init__()
+        self.__name__ = "Test"
+
+        self.test_get_disk_info()
+
+    def test_get_disk_info(self):
+        file_sys_path = "/"
+        disk_info = get_disk_info(file_sys_path)
+        print("file_sys_path: %s, Percent: %f \n" % (file_sys_path, disk_info))
+
+if __name__ == '__main__':
+    test_obj = Test()

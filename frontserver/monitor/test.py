@@ -113,7 +113,7 @@ def basic_test():
     print(len(result_list))    
 
 def test_all_info():
-    p = psutil.Process(560730)
+    p = psutil.Process(9265)
     print(p.name())      #进程名
     print(p.exe())         #进程的bin路径
     print(p.cwd())        #进程的工作目录绝对路径
@@ -236,9 +236,9 @@ if __name__ == '__main__':
     # get_cpu_usage()
     # get_mem_usage()
     # get_net_usage()
-    # test_all_info()
+    test_all_info()
     # get_disk_io()
 
-    get_disk()
+    # get_disk()
     # get_mount_path()
 

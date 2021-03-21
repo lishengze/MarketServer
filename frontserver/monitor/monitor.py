@@ -7,7 +7,7 @@ import psutil
 from util import *
 
 def get_process():
-    return ["front_server", "demo4risk", "demo4quote", "python3"]
+    return ["front_server", "demo4risk", "demo4quote", "python3", "redis"]
 
 class MonitorUtrade(object):
     def __init__(self):
@@ -17,6 +17,8 @@ class MonitorUtrade(object):
         self._program_pid = {}
 
         process_list = get_process()
+
+        filesys_list = ["/", "/data"]
 
         for process_name in process_list:
             self._program_last_status[process_name] = -1
@@ -62,7 +64,6 @@ class MonitorUtrade(object):
         except Exception as e:            
             print("Exception send_dingding_msg")
             print(e)
-
         
     def get_opu_pid(self, ori_str_list, out=True):
         result = 0
@@ -128,11 +129,20 @@ class MonitorUtrade(object):
         try:
             mem_info = 0
             cpu_info = 0
+            read_io = 0
+            write_io = 0
+
             for program_id in self._program_pid[program]:
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
-            msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s \n" % (program, str(mem_info), str(cpu_info)))
+
+                info = get_process_disk_io(process)
+                read_io += info[0]
+                write_io += info[1]
+
+            msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s, read_io: %5s KB/S, write_io: %5s KB/s \n" %\
+                         (program, str(mem_info), str(cpu_info), str(read_io), str(write_io)))
         except Exception as e:
             print("Exception get_usage_info")
             print(e)
@@ -168,11 +178,17 @@ class MonitorUtrade(object):
                 if self._program_curr_status[program] == 1:
                     msg = self.get_usage_info(program)
                     record_msg += msg
-            
+
+            for file_sys in self.filesys_list:
+                msg = ("FileDir: %s, UsePercent: %f \n" % (file_sys, get_disk_info(file_sys)))
+                record_msg += msg
+        
             mem_usage = get_mem_usage()
             cpu_usage = get_cpu_usage()
+            disk_io_usage = get_disk_io_info()
             all_cpu_info = get_datetime_str() + (" [All] cpu usage: %s \n" % (cpu_usage))
             all_mem_info = get_datetime_str() + (" [All] mem usage: %s \n" % (mem_usage))
+            all_disk_io_info = get_datetime_str() + (" [All] disk_io read_io: %s, write_io: %s \n" % (str(disk_io_usage[0]), str(disk_io_usage[1])))
 
             if mem_usage > 85:
                 msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
@@ -180,13 +196,12 @@ class MonitorUtrade(object):
             
             record_msg += all_cpu_info
             record_msg += all_mem_info
-            # record_msg += self.get_disk_info()
+            record_msg += self.all_disk_io_info
             self.log_info(record_msg)     
                     
         except Exception as e:
             print("Exception record_usage_info")
             print(e)
-
 
     def check_program_status(self):
         try:
@@ -234,7 +249,7 @@ class MonitorUtrade(object):
         print("Test")
 
         self.set_timer()        
-        
+  
 def start_monitor():
     try:
         monitor_obj = MonitorUtrade()
