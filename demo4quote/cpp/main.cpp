@@ -34,8 +34,8 @@ int main(int argc, char** argv)
     streamEngine.init();
     streamEngine.start();
 
-    Report report;
-    report.start();
+    // Report report;
+    // report.start();
     
     utrade::pandora::io_service_pool engine_pool(3);
     // start pool
