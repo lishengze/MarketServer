@@ -306,17 +306,17 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
 
             if (symbol == "BTC_USDT")
             {
-                std::cout << "OriData: " << exchange << " " << symbol << " " << output.size() << std::endl;
-                for (auto& kline:output)
-                {
-                    std::cout << utrade::pandora::get_sec_time_str(kline.index) << " "
-                            <<"open: " << kline.px_open.get_str_value() << " "
-                            <<"high: " << kline.px_high.get_str_value() << " "
-                            <<"low: " << kline.px_low.get_str_value() << " "
-                            <<"close: " << kline.px_close.get_str_value() << " "
-                            <<"volume: " << kline.volume.get_str_value() << " "
-                            << std::endl;
-                }
+                std::cout << "KlineMixer::on_kline: " << exchange << " " << symbol << " " << output.size() << std::endl;
+                // for (auto& kline:output)
+                // {
+                //     std::cout << utrade::pandora::get_sec_time_str(kline.index) << " "
+                //             <<"open: " << kline.px_open.get_str_value() << " "
+                //             <<"high: " << kline.px_high.get_str_value() << " "
+                //             <<"low: " << kline.px_low.get_str_value() << " "
+                //             <<"close: " << kline.px_close.get_str_value() << " "
+                //             <<"volume: " << kline.volume.get_str_value() << " "
+                //             << std::endl;
+                // }
                           
             }
             break;
