@@ -374,9 +374,9 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    // std::stringstream stream_obj;
-    // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    // LOG_INFO(stream_obj.str());
+    std::stringstream stream_obj;
+    stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    LOG_INFO(stream_obj.str());
     
 
     // cout << "Ask: length: " << depth.ask_length << endl;
@@ -454,11 +454,11 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     {
         const KlineData& kline = klines[i];
         
-        std::stringstream stream_obj;
-        stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
-                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
-        LOG_INFO(stream_obj.str());
+        // std::stringstream stream_obj;
+        // stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
+        //             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //             << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
+        // LOG_INFO(stream_obj.str());
 
         // if (strcmp(c_symbol, "BTC_USDT") == 0 && klines.size() > 100)
         // {
@@ -576,7 +576,7 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
              << exchange<< " " << symbol << " "
              << trade.price.get_value() << " "
              << trade.volume.get_value() << " ";
-        // LOG_INFO(stream_obj.str());
+        LOG_INFO(stream_obj.str());
 
         if (package)
         {
