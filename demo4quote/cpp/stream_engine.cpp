@@ -220,7 +220,7 @@ void StreamEngine::on_config_channged(const Document& src)
         expand_replay_config(src, d);
     }
 
-    std::cout << "\n\n *** StreamEngine::on_config_channged *** "
+    std::cout << "\n\n *** StreamEngine::on_config_channged *** \n"
               << content << std::endl;
 
     // string -> 结构化数据

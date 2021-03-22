@@ -123,6 +123,8 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
         volume_bias = iter->second.VolumeBias;
     }
 
+    std::cout << src.symbol << " price_bias: " << price_bias << ", volume_bias: " << volume_bias << std::endl;
+
     // 风控的价格和成交量处理
     SInnerQuote tmp;
     vector<pair<SDecimal, SInnerDepth>> depths;
@@ -464,9 +466,19 @@ void DataCenter::change_account(const AccountInfo& info)
 void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
 {
     tfm::printfln("change_configuration");
+
+
+
     
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.cache_config = config;
+
+    std::cout << "\nDataCenter::change_configuration  " << std::endl;
+
+    for (auto iter:params_.cache_config)
+    {
+        std::cout << iter.first << "  PriceBias: " << iter.second.PriceBias  << ", VolumeBias: " << iter.second.VolumeBias << std::endl;
+    }    
     _push_to_clients();
 }
 
@@ -500,6 +512,14 @@ void DataCenter::_push_to_clients(const TSymbol& symbol)
 void DataCenter::_publish_quote(const SInnerQuote& quote) 
 {    
     SInnerQuote newQuote;
+
+    std::cout << "\nparams_.cache_config  " << std::endl;
+
+    for (auto iter:params_.cache_config)
+    {
+        std::cout << iter.first << "  PriceBias: " << iter.second.PriceBias  << ", VolumeBias: " << iter.second.VolumeBias << std::endl;
+    }
+
     pipeline_.run(quote, params_, newQuote);
 
     // 检查是否发生变化

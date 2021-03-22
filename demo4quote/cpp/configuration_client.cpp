@@ -161,6 +161,12 @@ void ConfigurationClient::_parse_config()
         return;
     }
 
+
+    std::cout << "\nhedgeParamsObject: \n " << ToJson(hedgeParamsObject) << "\n"
+            << "\nsymbolParamsObject: \n " << ToJson(symbolParamsObject) << "\n"
+            << "\nriskParamsObject: \n " << ToJson(riskParamsObject) << "\n"
+            << std::endl;
+
     // 合并为内置配置格式
     Document output(rapidjson::Type::kObjectType);
     if( combine_config(hedgeParamsObject, symbolParamsObject, riskParamsObject, output) ) {

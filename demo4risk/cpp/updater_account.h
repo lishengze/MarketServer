@@ -112,6 +112,7 @@ private:
 
         while (reader->Read(&multiAccount)) {
             {
+                _log_and_print("\nAccountUpdater Read Data ");
                 std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
                 for( int i = 0 ; i < multiAccount.account_data_size() ; ++ i ) {
                     const AccountData& account = multiAccount.account_data(i);
