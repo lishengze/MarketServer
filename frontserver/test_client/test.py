@@ -53,7 +53,7 @@ def get_sub_trade_str(symbol="BTC_USDT"):
 
 def get_sub_kline_str(symbl="BTC_USDT"):
     print("get_sub_kline_str")
-    frequency = 60
+    frequency = 60 * 60 * 24
     end_time = int(time.time())
     end_time = end_time - end_time % frequency - frequency
     start_time = end_time - 60 * 30
@@ -69,7 +69,7 @@ def get_sub_kline_str(symbl="BTC_USDT"):
     sub_info = {
         "type":"kline_update",
         "symbol":symbl,
-        "data_count":str(1440),
+        "data_count":str(10),
         "frequency":str(frequency)
     }
 
@@ -119,8 +119,8 @@ def on_open(ws):
 
 def test_websocket():
     # websocket.enableTrace(True)
-    ip = "ws://36.255.220.139"
-    # ip = "ws://127.0.0.1"
+    # ip = "ws://36.255.220.139"
+    ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

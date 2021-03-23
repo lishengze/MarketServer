@@ -412,6 +412,15 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
             }            
 
             cout << "sum_src_kline_data.size: " << src_kline_data.size() << endl;
+            for (auto kline_data:src_kline_data)
+            {
+                cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                    << kline_data->px_open.get_value() << " "
+                    << kline_data->px_close.get_value() << " "
+                    << kline_data->px_high.get_value() << " "
+                    << kline_data->px_low.get_value() << " "
+                    << endl;    
+            }
 
             vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
@@ -430,12 +439,12 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
                     for (auto kline_data:target_kline_data)
                     {
-                        // cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
-                        //     << kline_data->px_open.get_value() << " "
-                        //     << kline_data->px_close.get_value() << " "
-                        //     << kline_data->px_high.get_value() << " "
-                        //     << kline_data->px_low.get_value() << " "
-                        //     << endl;    
+                        cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                            << kline_data->px_open.get_value() << " "
+                            << kline_data->px_close.get_value() << " "
+                            << kline_data->px_high.get_value() << " "
+                            << kline_data->px_low.get_value() << " "
+                            << endl;    
 
                         if (max_min_kline_info_60.px_high < kline_data->px_high)
                         {
@@ -605,8 +614,7 @@ vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr
         {
             result = compute_kline_atom_data(src_kline_data, frequency);
         }
-        
-
+    
         return result;
     }
     catch(const std::exception& e)
@@ -683,47 +691,37 @@ vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>&
         return result;
     }
 
-    KlineDataPtr cur_data = src_kline_data[src_kline_data.size()-1];
+    KlineDataPtr last_data = src_kline_data[src_kline_data.size()-1];
     src_kline_data.pop_back();
-    // cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
 
+    KlineDataPtr cur_data = boost::make_shared<KlineData>(*last_data);
     result.push_back(cur_data); 
 
     SDecimal low = cur_data->px_low;
     SDecimal high = cur_data->px_high;
     SDecimal close;
 
-    bool is_first = true;
     for (int i = src_kline_data.size()-1; i >=0; --i)
     {
         KlineDataPtr atom = src_kline_data[i];
-        low = low > atom->px_low ? atom->px_low:low;
-        high = high < atom->px_high ? atom->px_high:high;
-
-        if (is_first)
-        {
-            close = atom->px_close;
-        }
+        cur_data->px_low = cur_data->px_low > atom->px_low ? atom->px_low:cur_data->px_low;
+        cur_data->px_high = cur_data->px_high < atom->px_high ? atom->px_high:cur_data->px_high;
+        cur_data->px_open = atom->px_open;
 
         if (atom->index < (*result.rbegin())->index && (*result.rbegin())->index - atom->index >= frequency)
         {
-            KlineDataPtr cur_data = boost::make_shared<KlineData>(*atom);
-            cur_data->px_low = low;
-            cur_data->px_high = high;
-            cur_data->px_close = close;
+            cur_data->index = cur_data->index -  cur_data->index % frequency;
 
-            is_first = true;
+            cur_data = boost::make_shared<KlineData>(*atom);
 
-            // cout << "cur_data: " << get_sec_time_str(atom->index) << " "
-            //      << "last_data: " << get_sec_time_str((*result.rbegin())->index) << " "
-            //      << "delta: " << atom->index - (*result.rbegin())->index << " "
-            //      << "fre: " << frequency << endl;
-
-            result.push_back(cur_data); 
-
-            low = MAX_DOUBLE;
-            high = MIN_DOUBLE;
+            result.push_back(cur_data);
         }
+    }
+
+    // 最后末尾时间区间不够一个完整的 frequency；
+    if (cur_data->index % frequency != 0)
+    {
+        cur_data->index = cur_data->index -  cur_data->index % frequency;
     }
 
     for (int i = 0; i < result.size()/2; ++i)
@@ -755,18 +753,26 @@ vector<KlineDataPtr> KlineProcess::compute_day_kline_data(vector<KlineDataPtr>& 
 
     int day_secs = 24 * 3600;
 
-    while(src_kline_data.size() > 0 && src_kline_data[src_kline_data.size()-1]->index % day_secs == 0)
+    while(src_kline_data.size() > 0)
     {
         KlineDataPtr atom = src_kline_data[src_kline_data.size()-1];
         low = low > atom->px_low ? atom->px_low:low;
         high = high < atom->px_high ? atom->px_high:high;        
         open = atom->px_open;
+
+        if (src_kline_data[src_kline_data.size()-1]->index % day_secs == 0)
+        {
+            src_kline_data.pop_back();
+            break;
+        }
         src_kline_data.pop_back();
     }
 
     last_data->px_low = low;
     last_data->px_high = high;
     last_data->px_open = open;
+
+    last_data->index = last_data->index -  last_data->index % frequency;
 
     result = compute_kline_atom_data(src_kline_data, frequency);
 
