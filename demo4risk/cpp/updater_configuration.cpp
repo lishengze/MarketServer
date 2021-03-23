@@ -37,27 +37,45 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             return false;        
         for( auto iter = risks.Begin() ; iter != risks.End() ; iter++ ) {
             string symbol = helper_get_string(*iter, "symbol_id", "");
-            bool enable = helper_get_bool(*iter, "switch", true);
-            uint32 price_bias_kind = helper_get_uint32(*iter, "price_offset_kind", 1); // 暂时没用
-            double price_bias = helper_get_double(*iter, "price_offset", 0);
-            uint32 volume_bias_kind = helper_get_uint32(*iter, "amount_offset_kind", 1); // 暂时没用
-            double volume_bias = helper_get_double(*iter, "amount_offset", 0);
-            uint32 otc_bias_kind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
-            double otc_bias = helper_get_double(*iter, "poll_offset", 0);
-            double deposit_percent = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
-            double hedge_percent = helper_get_double(*iter, "hedge_fund_ratio", 100);
+            bool IsPublish = helper_get_bool(*iter, "switch", true);
+            uint32 PublishFrequency = helper_get_uint32(*iter, "publish_frequency", 1); // 暂时没用
+            uint32 PublishLevel = helper_get_uint32(*iter, "publish_level", 1); // 暂时没用
 
-            // if( symbol == "" || !enable )
-            //     continue;
+            uint32 PriceOffsetKind = helper_get_uint32(*iter, "price_offset_kind", 1); // 暂时没用
+            double PriceOffset = helper_get_double(*iter, "price_offset", 0);
+
+            uint32 AmountOffsetKind = helper_get_uint32(*iter, "amount_offset_kind", 1); // 暂时没用
+            double AmountOffset = helper_get_double(*iter, "amount_offset", 0);
+
+            double DepositFundRatio = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
+
+            double HedgeFundRatio = helper_get_double(*iter, "hedge_fund_ratio", 100);
+
+            uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
+            double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
+            
+
+            if( symbol == "")
+                continue;
 
             QuoteConfiguration cfg;
-            cfg.PriceBias = price_bias;
-            cfg.VolumeBias = volume_bias;
-            cfg.HedgePercent = hedge_percent;
-            cfg.OtcBias = otc_bias;
+
+            cfg.symbol = symbol;
+            cfg.PublishFrequency = PublishFrequency;
+            cfg.PublishLevel = PublishLevel;
+            cfg.PriceOffsetKind = PriceOffsetKind;
+            cfg.PriceOffset = PriceOffset;
+            cfg.AmountOffsetKind = AmountOffsetKind;
+            cfg.AmountOffset = AmountOffset;
+            cfg.DepositFundRatio = DepositFundRatio;
+            cfg.HedgeFundRatio = HedgeFundRatio;
+            cfg.OTCOffsetKind = OTCOffsetKind;
+            cfg.OtcOffset = OtcOffset;
+            cfg.IsPublish = IsPublish;
+
             output[symbol] = cfg;
 
-            std::cout << symbol << " PriceBias: " << price_bias << " VolumeBias: " << volume_bias << std::endl;
+            // std::cout << symbol << " PriceOffset: " << price_bias << " AmountOffset: " << volume_bias << std::endl;
         }
     }
     catch(const std::exception& e)

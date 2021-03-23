@@ -4,18 +4,38 @@
 #include "base/cpp/nacos_client.h"
 #include "risk_controller_define.h"
 
+#include "pandora/util/thread_safe_singleton.hpp"
+
 struct QuoteConfiguration
 {
     //double MakerFee; // 百分比；maker手续费
     //double TakerFee; // 百分比；taker手续费
-    double PriceBias; // 百分比；价格偏移量（买卖盘相同）
-    double VolumeBias; // 百分比；单量偏移量（买卖盘相同）
-    //double UserPercent; // 百分比；用户账户可动用比例
-    double HedgePercent; // 百分比；对冲账户可动用比例
-    double OtcBias; // 百分比，otc查询
+    string symbol;
+    uint32 PublishFrequency;
+    uint32 PublishLevel;
+    uint32 PriceOffsetKind;  // 价格偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
+    double PriceOffset;      // 百分比；价格偏移量（买卖盘相同）
+
+    uint32 AmountOffsetKind; // 数量偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
+    double AmountOffset;     // 行情数量偏移
+
+    double DepositFundRatio; // 充值资金动用比例
+
+    //double UserPercent;    // 百分比；用户账户可动用比例
+    double HedgeFundRatio;   // 百分比；对冲账户可动用比例
+
+    uint32 OTCOffsetKind;    // 询价偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
+
+    double OtcOffset;        // 询价偏移
+    bool   IsPublish{true};
 
     string desc() const {
-        return tfm::format("priceBias=%.2f volumeBias=%.2f otcBias=%.2f hedge=%.2f", PriceBias, VolumeBias, OtcBias, HedgePercent);
+        return tfm::format("symbol = %s, PublishFrequency: %d, PublishLevel:%d, PriceOffsetKind:%d, PriceOffset: %f, \
+                            AmountOffsetKind:%d, AmountOffset:%d, DepositFundRatio:%.2f, HedgeFundRatio=%.2f, OTCOffsetKind=%d, \
+                            OtcOffset:%.2f, IsPublish:%d", 
+                            PublishFrequency, PublishLevel, PriceOffsetKind, PriceOffset, IsPublish,
+                            AmountOffsetKind, AmountOffset, DepositFundRatio, HedgeFundRatio, OTCOffsetKind,
+                            OtcOffset, IsPublish);
     }
 };
 
@@ -31,6 +51,10 @@ public:
     
     // derive from NacosClient
     void config_changed(const string& group, const string& dataid, const NacosString &configInfo);
+
+    map<TSymbol, QuoteConfiguration>& get_risk_config() { return risk_config_;}
+
+
 private:
     // derive from NacosClient
     void _run();
@@ -43,4 +67,8 @@ private:
     // 处理配置数据
     void _parse_config();
     NacosString risk_params_; // for 品种更新频率 和 品种更新深度
+
+    map<TSymbol, QuoteConfiguration> risk_config_;
 };
+
+#define RISK_CONFIG utrade::pandora::ThreadSafeSingleton<ConfigurationClient>::DoubleCheckInstance() 

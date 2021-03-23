@@ -119,11 +119,11 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     double volume_bias = 0;
     auto iter = ctx.params.cache_config.find(src.symbol);
     if( iter != ctx.params.cache_config.end() ) {
-        price_bias = iter->second.PriceBias;
-        volume_bias = iter->second.VolumeBias;
+        price_bias = iter->second.PriceOffset;
+        volume_bias = iter->second.AmountOffset;
     }
 
-    std::cout << src.symbol << " price_bias: " << price_bias << ", volume_bias: " << volume_bias << std::endl;
+    // std::cout << src.symbol << " price_bias: " << price_bias << ", volume_bias: " << volume_bias << std::endl;
 
     // 风控的价格和成交量处理
     SInnerQuote tmp;
@@ -291,7 +291,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     double hedge_percent = 0;
     auto iter = ctx.params.cache_config.find(src.symbol);
     if( iter != ctx.params.cache_config.end() ) {
-        hedge_percent = iter->second.HedgePercent;
+        hedge_percent = iter->second.HedgeFundRatio;
     }
 
     // 获取币种出现次数
@@ -477,7 +477,7 @@ void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& co
 
     for (auto iter:params_.cache_config)
     {
-        std::cout << iter.first << "  PriceBias: " << iter.second.PriceBias  << ", VolumeBias: " << iter.second.VolumeBias << std::endl;
+        std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
     }    
     _push_to_clients();
 }
@@ -513,12 +513,12 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 {    
     SInnerQuote newQuote;
 
-    std::cout << "\nparams_.cache_config  " << std::endl;
+    // std::cout << "\nparams_.cache_config  " << std::endl;
 
-    for (auto iter:params_.cache_config)
-    {
-        std::cout << iter.first << "  PriceBias: " << iter.second.PriceBias  << ", VolumeBias: " << iter.second.VolumeBias << std::endl;
-    }
+    // for (auto iter:params_.cache_config)
+    // {
+    //     std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
+    // }
 
     pipeline_.run(quote, params_, newQuote);
 
@@ -653,17 +653,17 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     if( volume > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);
+            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol].OtcOffset, volume, price, quote.precise);
         } else {
-            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol].OtcBias, volume, price, quote.precise);   
+            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol].OtcOffset, volume, price, quote.precise);   
         }
     } 
     else
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
         } else { 
-            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcBias, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
         }
     }
 
