@@ -33,7 +33,7 @@ struct QuoteConfiguration
         return tfm::format("symbol = %s, PublishFrequency: %d, PublishLevel:%d, PriceOffsetKind:%d, PriceOffset: %f, \
                             AmountOffsetKind:%d, AmountOffset:%d, DepositFundRatio:%.2f, HedgeFundRatio=%.2f, OTCOffsetKind=%d, \
                             OtcOffset:%.2f, IsPublish:%d", 
-                            PublishFrequency, PublishLevel, PriceOffsetKind, PriceOffset, IsPublish,
+                            symbol.c_str(), PublishFrequency, PublishLevel, PriceOffsetKind, PriceOffset,
                             AmountOffsetKind, AmountOffset, DepositFundRatio, HedgeFundRatio, OTCOffsetKind,
                             OtcOffset, IsPublish);
     }
