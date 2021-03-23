@@ -135,9 +135,9 @@ class MonitorUtrade(object):
             for program_id in self._program_pid[program]:
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
-                cpu_info += get_process_cpu_usage(program_id)
+                cpu_info += get_process_cpu_usage(process)
 
-                info = get_process_disk_io(process)
+                info = get_process_disk_io(program_id)
                 read_io += info[0]
                 write_io += info[1]
 
