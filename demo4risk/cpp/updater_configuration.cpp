@@ -109,3 +109,20 @@ void ConfigurationClient::_parse_config()
         callback_->on_configuration_update(output);
     }
 }
+
+
+bool ConfigurationClient::check_symbol(string symbol)
+{
+    bool result = false;
+
+    if (risk_config_.find(symbol) != risk_config_.end())
+    {
+        return risk_config_[symbol].IsPublish;
+    }
+    else
+    {
+        return false;
+    }    
+
+    return false;
+}

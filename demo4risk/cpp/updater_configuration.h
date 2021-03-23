@@ -52,6 +52,8 @@ public:
     // derive from NacosClient
     void config_changed(const string& group, const string& dataid, const NacosString &configInfo);
 
+    bool check_symbol(string symbol);
+
     map<TSymbol, QuoteConfiguration>& get_risk_config() { return risk_config_;}
 
 

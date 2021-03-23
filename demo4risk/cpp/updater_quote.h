@@ -3,6 +3,7 @@
 #include "base/cpp/grpc_client.h"
 #include "stream_engine.grpc.pb.h"
 #include "risk_controller_config.h"
+#include "updater_configuration.h"
 
 using grpc::ClientReader;
 using grpc::ClientReaderWriter;
@@ -113,6 +114,12 @@ private:
                 SEData quote;
                 if( !quote.ParseFromString(quoteData) )
                     return false;
+
+                if (!RISK_CONFIG->check_symbol(quote.symbol()))
+                {
+                    continue;
+                }
+
                 callback->on_snap(quote);
             } else if( datatype == QUOTE_TYPE_TRADE ) {
             }
