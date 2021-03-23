@@ -377,7 +377,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     std::stringstream stream_obj;
     stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    // LOG_INFO(stream_obj.str());
+    LOG_INFO(stream_obj.str());
     
 
     // cout << "Ask: length: " << depth.ask_length << endl;

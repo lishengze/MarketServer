@@ -106,6 +106,9 @@ void ConfigurationClient::_parse_config()
     // 合并为内置配置格式
     map<TSymbol, QuoteConfiguration> output;
     if( combine_config(riskParamsObject, output) ) {
+
+        risk_config_ = output;
+        
         callback_->on_configuration_update(output);
     }
 }
