@@ -114,6 +114,7 @@ void HubEntity::on_snap(const SEData& quote)
 {
     SDepthData quote_depth;
     SEData_to_SDepthData(quote, quote_depth);
+    // std::cout << "HubEntity::on_snap: " << quote.exchange().c_str() << " " << quote.symbol().c_str() << " "  << quote_depth.ask_length << "/" << quote_depth.bid_length << std::endl;
     callback_->on_depth(quote.exchange().c_str(), quote.symbol().c_str(), quote_depth);
 }
 

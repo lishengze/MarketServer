@@ -244,6 +244,7 @@ int DataReceive::on_depth(const char* exchange, const char* symbol, const SDepth
     // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     // LOG_INFO(stream_obj.str());
 
+
     handle_depth_data(exchange, symbol, depth);
 
     return 1;
@@ -571,12 +572,14 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 
-        std::stringstream stream_obj;
-        stream_obj << "[Trade] " 
-             << exchange<< " " << symbol << " "
-             << trade.price.get_value() << " "
-             << trade.volume.get_value() << " ";
-        LOG_INFO(stream_obj.str());
+
+
+        // std::stringstream stream_obj;
+        // stream_obj << "[Trade] " 
+        //      << exchange<< " " << symbol << " "
+        //      << trade.price.get_value() << " "
+        //      << trade.volume.get_value() << " ";
+        // LOG_INFO(stream_obj.str());
 
         if (package)
         {

@@ -95,7 +95,7 @@ void ConfigurationClient::_parse_config()
     Document riskParamsObject;
     riskParamsObject.Parse(risk_params_.c_str());
 
-    std::cout << "risk_params_: " << risk_params_.c_str() << std::endl;
+    // std::cout << "risk_params_: " << risk_params_.c_str() << std::endl;
 
     if(riskParamsObject.HasParseError())
     {

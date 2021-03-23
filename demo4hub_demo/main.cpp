@@ -57,6 +57,8 @@ public:
         if( stopped_ )
             return 0;
 
+        cout << exchange << " " << symbol << " " << depth.ask_length << " / " <<  depth.bid_length << std::endl;
+
         type_tick now = get_miliseconds();
         type_tick delay = now - depth.tick1;
         delays_.push_back(delay);

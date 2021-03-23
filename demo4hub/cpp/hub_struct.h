@@ -162,7 +162,7 @@ struct KlineData:virtual public PacakgeBaseData
     int         frequency_{60};
 };
 
-// using KlineDataPtr = boost::shared_ptr<KlineData>;
+using KlineDataPtr = boost::shared_ptr<KlineData>;
 
 struct Trade:virtual public PacakgeBaseData
 {

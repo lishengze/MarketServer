@@ -114,6 +114,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double 
 
 SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    // std::cout << "QuoteBiasWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
     // 获取配置
     double price_bias = 0;
     double volume_bias = 0;
@@ -134,7 +135,8 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     src.get_bids(depths);
     _calc_depth_bias(depths, price_bias, volume_bias, false, tmp.bids);
     src.bids.swap(tmp.bids);
-    //tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+
+    // tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
 
     return src;
 }
@@ -244,6 +246,7 @@ void WatermarkComputerWorker::_calc_watermark() {
    
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    // std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
     set_snap(src);
 
     SDecimal watermark;
@@ -251,7 +254,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     _filter_by_watermark(src, watermark);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     
-    //tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    // tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -287,6 +290,7 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    // std::cout << "AccountAjdustWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
     // 获取配置
     double hedge_percent = 0;
     auto iter = ctx.params.cache_config.find(src.symbol);
@@ -359,7 +363,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
-    //tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    // tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     return src;
 }
 
@@ -439,7 +443,8 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    //std::cout << "publish for broker(raw) " << quote.symbol << " " << quote.ask_length << "/"<< quote.bid_length << std::endl;
+    // std::cout << "\npublish for broker(raw) " << quote.symbol << " " << quote.asks.size() << " / "<< quote.bids.size() << std::endl;
+
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
@@ -522,6 +527,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     pipeline_.run(quote, params_, newQuote);
 
+    // std::cout << "\nAfter Pipeline:  " << newQuote.symbol << " " << newQuote.asks.size() << " / "<< newQuote.bids.size() << std::endl;
+
     // 检查是否发生变化
     auto iter = last_datas_.find(quote.symbol);
     if( iter != last_datas_.end() ) {
@@ -532,11 +539,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         }
     }
 
-    //std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
+    // std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
     //std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    //_log_and_print("publish %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
+    // _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
     for( const auto& v : callbacks_) 
     {
         v->publish4Broker(quote.symbol, ptrData, NULL);
@@ -545,6 +552,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     // send to clients
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
+
+    //  _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
     for( const auto& v : callbacks_) 
     {
         v->publish4Client(quote.symbol, ptrData2, NULL);

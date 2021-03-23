@@ -85,7 +85,7 @@ private:
             // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
             for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
                 const SEData& quote = multiQuote.quotes(i);
-                // std::cout << "update symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
+                // std::cout << "QuoteUpdater  symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
                 callback->on_snap(quote);
             }
         }
