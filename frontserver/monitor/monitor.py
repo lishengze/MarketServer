@@ -18,7 +18,7 @@ class MonitorUtrade(object):
 
         process_list = get_process()
 
-        filesys_list = ["/", "/data"]
+        self.filesys_list = ["/", "/data"]
 
         for process_name in process_list:
             self._program_last_status[process_name] = -1
