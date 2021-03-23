@@ -196,7 +196,7 @@ class MonitorUtrade(object):
             
             record_msg += all_cpu_info
             record_msg += all_mem_info
-            record_msg += self.all_disk_io_info
+            record_msg += all_disk_io_info
             self.log_info(record_msg)     
                     
         except Exception as e:
