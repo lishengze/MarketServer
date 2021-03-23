@@ -107,7 +107,10 @@ void ConfigurationClient::_parse_config()
     map<TSymbol, QuoteConfiguration> output;
     if( combine_config(riskParamsObject, output) ) {
 
-        risk_config_ = output;
+        {
+            // std::lock_guard<std::mutex> lk(risk_config_mutex_);
+            risk_config_ = output;
+        }
         
         callback_->on_configuration_update(output);
     }
@@ -116,10 +119,19 @@ void ConfigurationClient::_parse_config()
 
 bool ConfigurationClient::check_symbol(string symbol)
 {
+    // std::lock_guard<std::mutex> lk(risk_config_mutex_);
+
     bool result = false;
+
+    // std::cout << "ConfigurationClient::check_symbol " << risk_config_.size() << std::endl;
+    // for(auto iter:risk_config_)
+    // {
+    //     std::cout << iter.second.desc() << std::endl;
+    // }
 
     if (risk_config_.find(symbol) != risk_config_.end())
     {
+        // std::cout << "risk_config_ " << symbol << " , " << risk_config_[symbol].IsPublish << std::endl;
         return risk_config_[symbol].IsPublish;
     }
     else

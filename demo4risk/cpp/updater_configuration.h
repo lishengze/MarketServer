@@ -5,6 +5,7 @@
 #include "risk_controller_define.h"
 
 #include "pandora/util/thread_safe_singleton.hpp"
+#include <mutex>
 
 struct QuoteConfiguration
 {
@@ -71,6 +72,7 @@ private:
     NacosString risk_params_; // for 品种更新频率 和 品种更新深度
 
     map<TSymbol, QuoteConfiguration> risk_config_;
+    // std::mutex                       risk_config_mutex_;
 };
 
 #define RISK_CONFIG utrade::pandora::ThreadSafeSingleton<ConfigurationClient>::DoubleCheckInstance() 

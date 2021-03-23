@@ -2,6 +2,7 @@
 #include "datacenter.h"
 #include "grpc_server.h"
 #include "converter.h"
+#include "updater_configuration.h"
 
 bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string& buy_currency) {
     // 获取标的币种
@@ -537,6 +538,13 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
             //tfm::printfln("%s %ul %ul", quote.symbol, quote.time_origin, last_quote.time_origin);
             return;
         }
+    }
+
+
+    if (!RISK_CONFIG->check_symbol(quote.symbol))
+    {
+        // std::cout << quote.symbol << " UnPublished!" << std::endl;
+        return;
     }
 
     // std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;

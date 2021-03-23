@@ -37,7 +37,7 @@ public:
     void on_order_update(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
 private:
 
-    ConfigurationClient configuration_client_;
+    // ConfigurationClient configuration_client_;
 
     AccountUpdater account_updater_;
 

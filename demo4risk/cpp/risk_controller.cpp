@@ -2,6 +2,7 @@
 #include "risk_controller_config.h"
 #include "grpc_server.h"
 #include "base/cpp/grpc_client.h"
+#include "updater_configuration.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -57,8 +58,8 @@ RiskControllerServer::~RiskControllerServer(){
 
 void RiskControllerServer::start() {
     quote_updater_.start(CONFIG->grpc_quote_addr_, this);
-    configuration_client_.set_callback(this);
-    configuration_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);
+    RISK_CONFIG->set_callback(this);
+    RISK_CONFIG->start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);
     account_updater_.start(CONFIG->grpc_account_addr_, this);
 
     // start grpc server

@@ -115,11 +115,6 @@ private:
                 if( !quote.ParseFromString(quoteData) )
                     return false;
 
-                // if (!RISK_CONFIG->check_symbol(quote.symbol()))
-                // {
-                //     continue;
-                // }
-
                 callback->on_snap(quote);
             } else if( datatype == QUOTE_TYPE_TRADE ) {
             }
