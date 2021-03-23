@@ -75,6 +75,8 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
 
             output[symbol] = cfg;
 
+            std::cout << cfg.desc() << std::endl;
+
             // std::cout << symbol << " PriceOffset: " << price_bias << " AmountOffset: " << volume_bias << std::endl;
         }
     }
