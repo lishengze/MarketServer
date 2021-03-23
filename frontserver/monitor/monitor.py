@@ -7,7 +7,7 @@ import psutil
 from util import *
 
 def get_process():
-    return ["front_server", "demo4risk", "demo4quote", "python3", "redis"]
+    return ["front_server", "demo4risk", "demo4quote", "python3", "redis-server"]
 
 class MonitorUtrade(object):
     def __init__(self):
@@ -135,7 +135,7 @@ class MonitorUtrade(object):
             for program_id in self._program_pid[program]:
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
-                cpu_info += get_process_cpu_usage(process)
+                cpu_info += get_process_cpu_usage(program_id)
 
                 info = get_process_disk_io(process)
                 read_io += info[0]
