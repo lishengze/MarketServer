@@ -47,18 +47,7 @@ def calcCpuUsage(counters1, counters2):
     total = counters2['total'] - counters1['total']
     return 100 - (idle*100/total)
             
-def get_cpu_usage():
-    counters1 = readCpuInfo()
-    # print(counters1)
 
-    time.sleep(0.1)
-
-    counters2 = readCpuInfo()
-    # print(counters2)
-
-    useage = calcCpuUsage(counters1, counters2)
-
-    return useage
 
 def readMemInfo():
     res = {'total':0, 'free':0, 'buffers':0, 'cached':0}
@@ -121,17 +110,45 @@ def get_process_disk_io(pid):
     write_io = info.write_bytes / 1024 / 8
     return [read_io, write_io]
 
+def get_cpu_info_ps():
+    # print("CPU 逻辑数量 %s" % psutil.cpu_count())
+    # # CPU 物理核心 2 说明是双核超线程
+    # print("CPU 物理核心 %s" % psutil.cpu_count(logical = False))
+    # # scputimes(user=34319.75390625, system=18179.125, idle=934659.6875, interrupt=3766.7846422195435, dp
+    # print("CPU 运行时间 " ,psutil.cpu_times())
+    # print("CPU 使用率 " ,psutil.cpu_percent(interval=1))
+
+    return psutil.cpu_percent(interval=1)
+
+def get_cpu_usage():
+    # counters1 = readCpuInfo()
+    # # print(counters1)
+
+    # time.sleep(0.1)
+
+    # counters2 = readCpuInfo()
+    # # print(counters2)
+
+    # useage = calcCpuUsage(counters1, counters2)
+
+    return get_cpu_info_ps()
+
 class Test(object):
     def __init__(self):
         super().__init__()
         self.__name__ = "Test"
 
-        self.test_get_disk_info()
+        # self.test_get_disk_info()
+
+        self.test_get_cpu_info_ps()
 
     def test_get_disk_info(self):
         file_sys_path = "/"
         disk_info = get_disk_info(file_sys_path)
         print("file_sys_path: %s, Percent: %f \n" % (file_sys_path, disk_info))
+
+    def test_get_cpu_info_ps(self):
+        get_cpu_info_ps()
 
 if __name__ == '__main__':
     test_obj = Test()
