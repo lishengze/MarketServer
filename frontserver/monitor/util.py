@@ -197,7 +197,6 @@ def get_disk_io_info_shell():
         cmd = "iostat -x -d 1 2"
 
         val = os.popen(cmd)
-        first_device 
         for atom_data in val.readlines():
             if len(atom_data) < 10:
                 continue
