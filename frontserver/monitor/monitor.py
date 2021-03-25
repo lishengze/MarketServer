@@ -148,8 +148,8 @@ class MonitorUtrade(object):
                     print(e)
 
 
-            msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s, read_io: %5s KB/S, write_io: %5s KB/s \n" %\
-                         (program, str(mem_info), str(cpu_info), str(read_io), str(write_io)))
+            msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io: %.2f KB/S, write_io: %.2f KB/s \n" %\
+                         (program, mem_info, cpu_info, read_io, write_io))
 
         except Exception as e:
             print("Exception get_usage_info")
@@ -196,13 +196,14 @@ class MonitorUtrade(object):
 
             disk_io_usage = get_disk_io_info_shell()
 
-            all_cpu_info = get_datetime_str() + (" [All] cpu usage: %s \n" % (cpu_usage))
-            all_mem_info = get_datetime_str() + (" [All] mem usage: %s \n" % (mem_usage))
+            all_cpu_info = get_datetime_str() + (" [All] cpu usage: %.2f \n" % (cpu_usage))
+            all_mem_info = get_datetime_str() + (" [All] mem usage: %.2f \n" % (mem_usage))
 
             max_rw_rate = 1024 * 20
             max_wait = 5
-            max_util = 80            
-            all_disk_io_info = str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
+            max_util = 80     
+            all_disk_io_info = "Disk IO Info: \n"       
+            all_disk_io_info += str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
             all_disk_io_info += str(["MaxValue", max_rw_rate, max_wait, max_rw_rate, max_wait, max_util]) + "\n"
             for data in disk_io_usage:
                 all_disk_io_info += str(data) + "\n"
