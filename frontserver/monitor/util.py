@@ -257,10 +257,14 @@ def get_process_disk_io_shell():
             i = i + 1
 
             if atom_data_list[1] == "UID" or atom_data_list[2] == "UID":
+                print("cur_data_start")
+                print(atom_data_list)   
                 cur_data_start = True
                 continue
         
             if cur_data_start and (atom_data_list[1] == "UID" or atom_data_list[2] == "UID"):
+                print("ave_data_start")
+                print(atom_data_list)                   
                 ave_data_start = True
                 continue
 
