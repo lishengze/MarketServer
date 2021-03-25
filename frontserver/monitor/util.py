@@ -5,6 +5,27 @@ import threading
 import psutil
 import time
 
+def print_dict(dict_data):
+    for index in dict_data:
+        if type(dict_data[index]) is dict:
+            print(str(index)+": ")
+            print_dict(dict_data[index])
+        else:
+            print(str(index)+": ")
+            print(dict_data[index])
+
+def print_list(list_data):
+    for item in list_data:
+        print(item)
+
+def print_info(data):
+    if type(data) is dict:
+        print_dict(data)
+    elif type(data) is list:
+        print_list(data)    
+    else:
+        print(data)
+
 def get_datetime_str():
     return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -96,10 +117,11 @@ def get_disk_info(file_sys_path):
     return disk_info.percent
 
 def get_disk_io_info():
-    info = psutil.disk_io_counters()
-    read_io = info.read_bytes / 8 / 1024 / info.read_time
-    write_io = info.write_bytes / 8 / 1024 / info.write_time
-    return [read_io, write_io]
+    info = psutil.disk_io_counters(perdisk=True)
+    print_info(info)
+    # read_io = info.read_bytes / 8 / 1024 / info.read_time
+    # write_io = info.write_bytes / 8 / 1024 / info.write_time
+    # return [read_io, write_io]
 
 def get_process_disk_io(pid):
     p = psutil.Process(pid)
@@ -138,7 +160,9 @@ class Test(object):
 
         # self.test_get_disk_info()
 
-        self.test_get_cpu_info_ps()
+        # self.test_get_cpu_info_ps()
+
+        self.test_get_disk_io_info()
 
     def test_get_disk_info(self):
         file_sys_path = "/"
@@ -147,6 +171,11 @@ class Test(object):
 
     def test_get_cpu_info_ps(self):
         get_cpu_info_ps()
+
+    def test_get_disk_io_info(self):
+        while (True):
+            get_disk_io_info()
+            time.sleep(1)
 
 if __name__ == '__main__':
     test_obj = Test()

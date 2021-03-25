@@ -188,7 +188,6 @@ def print_list(list_data):
     for item in list_data:
         print(item)
 
-
 def print_info(data):
     if type(data) is dict:
         print_dict(data)

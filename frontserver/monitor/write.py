@@ -29,7 +29,7 @@ class Write(object):
 def write_main():
     write_obj = Write()
     while (True):
-        write_obj.log_info("1234567890")
+        write_obj.log_info("12345678901234567890")
 
 if __name__ == '__main__':
     write_main()
