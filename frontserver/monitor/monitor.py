@@ -139,9 +139,14 @@ class MonitorUtrade(object):
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
                 
-                if process_info is not None and str(program_id) in process_info:
-                    read_io += process_info[str(program_id)][0]
-                    write_io += process_info[str(program_id)][1]
+                try:
+                    if process_info is not None and str(program_id) in process_info:
+                        read_io += process_info[str(program_id)][0]
+                        write_io += process_info[str(program_id)][1]
+                except Exception as e:
+                    print("process_info is Error")
+                    print(e)
+
 
             msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s, read_io: %5s KB/S, write_io: %5s KB/s \n" %\
                          (program, str(mem_info), str(cpu_info), str(read_io), str(write_io)))
