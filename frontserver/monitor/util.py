@@ -194,9 +194,10 @@ def remove_all_empty_str(atom_data_list):
 def get_disk_io_info_shell():
     try:
         result = []
-        cmd = "iostat -x -d 1 1"
+        cmd = "iostat -x -d 1 2"
 
         val = os.popen(cmd)
+        first_device 
         for atom_data in val.readlines():
             if len(atom_data) < 10:
                 continue
@@ -206,6 +207,7 @@ def get_disk_io_info_shell():
 
             # print(atom_data_list) 
             cur_data = []
+
             if "Device" not in atom_data_list[0] and "Linux" not in atom_data_list[0] :
                 # print(atom_data_list)
 
@@ -309,16 +311,16 @@ class Test(object):
         get_cpu_info_ps()
 
     def test_get_disk_io_info(self):
-        # data = get_disk_io_info_shell()
-        # print(data)
+        data = get_disk_io_info_shell()
+        print(data)
 
         # get_process_disk_io_shell()
 
-        while (True):
-            get_disk_io_info_shell()
-            # get_process_disk_io_shell()
-            time.sleep(1)
-            print("\n\n")
+        # while (True):
+        #     get_disk_io_info_shell()
+        #     # get_process_disk_io_shell()
+        #     time.sleep(1)
+        #     print("\n\n")
 
 if __name__ == '__main__':
     test_obj = Test()
