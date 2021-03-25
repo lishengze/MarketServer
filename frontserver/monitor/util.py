@@ -265,6 +265,7 @@ def get_process_disk_io_shell():
                 continue
 
             if cur_data_start and ave_data_start:
+                print(atom_data_list)
                 result[atom_data_list[2]] = [float(atom_data_list[3]), float(atom_data_list[4])] 
 
                 # print(atom_data_list[2], str(pid))
