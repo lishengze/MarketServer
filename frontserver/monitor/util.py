@@ -206,7 +206,7 @@ def get_disk_io_info_shell():
 
             # print(atom_data_list) 
             cur_data = []
-            if atom_data_list[0] != "Device" and atom_data_list[0] != "Linux":
+            if "Device" not in atom_data_list[0] and "Linux" not in atom_data_list[0] :
                 print(atom_data_list)
 
                 rKB = 0
