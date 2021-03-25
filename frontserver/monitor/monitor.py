@@ -221,7 +221,7 @@ class MonitorUtrade(object):
                 self.send_dingding_msg(record_msg)
             else:
                 # 判断 io 状态：r_kB w_kB < 1024 * 20, wait < 5, util < 80
-                del disk_io_usage[0:1]
+                del disk_io_usage[0:2]
                 for disk_io in disk_io_usage:
                     if disk_io[1] > max_rw_rate or disk_io[3] > max_rw_rate \
                     or disk_io[2] > max_wait or disk_io[4] > max_wait \
