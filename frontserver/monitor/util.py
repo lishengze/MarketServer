@@ -260,6 +260,7 @@ def get_process_disk_io_shell(pid):
 
         # print("result!")
         # print(result)
+        return result
 
     except Exception as e:
         print("Exception get_process_disk_io_shell")
