@@ -47,8 +47,6 @@ def calcCpuUsage(counters1, counters2):
     total = counters2['total'] - counters1['total']
     return 100 - (idle*100/total)
             
-
-
 def readMemInfo():
     res = {'total':0, 'free':0, 'buffers':0, 'cached':0}
     f = open('/proc/meminfo')

@@ -412,15 +412,15 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
             }            
 
             cout << "sum_src_kline_data.size: " << src_kline_data.size() << endl;
-            for (auto kline_data:src_kline_data)
-            {
-                cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
-                    << kline_data->px_open.get_value() << " "
-                    << kline_data->px_close.get_value() << " "
-                    << kline_data->px_high.get_value() << " "
-                    << kline_data->px_low.get_value() << " "
-                    << endl;    
-            }
+            // for (auto kline_data:src_kline_data)
+            // {
+            //     cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+            //         << kline_data->px_open.get_value() << " "
+            //         << kline_data->px_close.get_value() << " "
+            //         << kline_data->px_high.get_value() << " "
+            //         << kline_data->px_low.get_value() << " "
+            //         << endl;    
+            // }
 
             vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
 
@@ -428,7 +428,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
             if (target_kline_data.size() > 0)
             {
-                cout << "target_kline_data Data" << endl;
+                // cout << "target_kline_data Data" << endl;
 
                 if (strcmp(pReqKlineData->symbol_, "BTC_USDT") == 0)
                 {
@@ -439,12 +439,12 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
 
                     for (auto kline_data:target_kline_data)
                     {
-                        cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
-                            << kline_data->px_open.get_value() << " "
-                            << kline_data->px_close.get_value() << " "
-                            << kline_data->px_high.get_value() << " "
-                            << kline_data->px_low.get_value() << " "
-                            << endl;    
+                        // cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                        //     << kline_data->px_open.get_value() << " "
+                        //     << kline_data->px_close.get_value() << " "
+                        //     << kline_data->px_high.get_value() << " "
+                        //     << kline_data->px_low.get_value() << " "
+                        //     << endl;    
 
                         if (max_min_kline_info_60.px_high < kline_data->px_high)
                         {
@@ -460,9 +460,9 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                     }
 
 
-                    cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
-                        << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
-                        << endl;
+                    // cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
+                    //     << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
+                    //     << endl;
                 }
 
                 rsp_package = GetNewRspKLineDataPackage(*pReqKlineData, target_kline_data, ID_MANAGER->get_id());              
