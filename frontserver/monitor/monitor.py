@@ -124,7 +124,7 @@ class MonitorUtrade(object):
 
         return result
 
-    def get_usage_info(self, program):
+    def get_usage_info(self, program, process_disk_info):
         msg = "get_usage_info"
         try:
             mem_info = 0
@@ -132,7 +132,7 @@ class MonitorUtrade(object):
             read_io = 0
             write_io = 0
 
-            process_info = get_process_disk_io_shell()
+            # process_info = get_process_disk_io_shell()
 
             for program_id in self._program_pid[program]:
                 process = psutil.Process(program_id)
@@ -182,9 +182,10 @@ class MonitorUtrade(object):
     def record_usage_info(self):        
         try:
             record_msg = ""
+            process_disk_info = get_process_disk_io_shell()
             for program in self._program_curr_status: 
                 if self._program_curr_status[program] == 1:
-                    msg = self.get_usage_info(program)
+                    msg = self.get_usage_info(program, process_disk_info)
                     record_msg += msg
 
             for file_sys in self.filesys_list:
