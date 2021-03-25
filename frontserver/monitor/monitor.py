@@ -138,7 +138,7 @@ class MonitorUtrade(object):
                 cpu_info += get_process_cpu_usage(process)
 
                 info = get_process_disk_io_shell(program_id)
-                if len(info) > 0:
+                if info is not None and len(info) > 0:
                     read_io += info[0]
                     write_io += info[1]
 
