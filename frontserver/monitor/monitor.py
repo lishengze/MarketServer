@@ -18,7 +18,7 @@ class MonitorUtrade(object):
 
         process_list = get_process()
 
-        self.filesys_list = ["/", "/data"]
+        self.filesys_list = ["/"]
 
         for process_name in process_list:
             self._program_last_status[process_name] = -1
@@ -26,7 +26,7 @@ class MonitorUtrade(object):
             self._program_pid[process_name] = []
             
         self.dingding = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
-        self._check_secs = 10
+        self._check_secs = 1
         self._log_file = "log/monitor.log"
         self._logger = open(self._log_file, 'w')
         self._logger.close()
@@ -185,18 +185,38 @@ class MonitorUtrade(object):
         
             mem_usage = get_mem_usage()
             cpu_usage = get_cpu_usage()
-            disk_io_usage = get_disk_io_info()
+
+            disk_io_usage = get_disk_io_info_shell()
+
             all_cpu_info = get_datetime_str() + (" [All] cpu usage: %s \n" % (cpu_usage))
             all_mem_info = get_datetime_str() + (" [All] mem usage: %s \n" % (mem_usage))
-            all_disk_io_info = get_datetime_str() + (" [All] disk_io read_io: %s, write_io: %s \n" % (str(disk_io_usage[0]), str(disk_io_usage[1])))
 
-            if mem_usage > 85:
-                msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
-                self.send_dingding_msg(msg)
-            
+            max_rw_rate = 1024 * 20
+            max_wait = 5
+            max_util = 80            
+            all_disk_io_info = str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
+            all_disk_io_info += str(["MaxValue", max_rw_rate, max_wait, max_rw_rate, max_wait, max_util]) + "\n"
+            for data in disk_io_usage:
+                all_disk_io_info += str(data) + "\n"
+
             record_msg += all_cpu_info
             record_msg += all_mem_info
             record_msg += all_disk_io_info
+
+            if mem_usage > 85:
+                msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
+                self.send_dingding_msg(record_msg)
+            elif cpu_usage > 80:
+                msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
+                self.send_dingding_msg(record_msg)
+            else:
+                # 判断 io 状态：r_kB w_kB < 1024 * 20, wait < 5, util < 80
+                for disk_io in disk_io_usage:
+                    if disk_io[1] > max_rw_rate or disk_io[3] > max_rw_rate \
+                    or disk_io[2] > max_wait or disk_io[4] > max_wait \
+                    or disk_io[5] > max_util:
+                        self.send_dingding_msg(record_msg)
+
             self.log_info(record_msg)     
                     
         except Exception as e:

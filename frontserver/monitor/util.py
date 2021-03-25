@@ -5,6 +5,9 @@ import threading
 import psutil
 import time
 
+import subprocess
+import os
+
 def print_dict(dict_data):
     for index in dict_data:
         if type(dict_data[index]) is dict:
@@ -121,9 +124,13 @@ def get_disk_io_info():
 
     for item in info:
         if info[item].read_time != 0 and info[item].write_time != 0:
-            read_io = info[item].read_bytes / 8 / 1024 / info[item].read_time
-            write_io = info[item].write_bytes / 8 / 1024 / info[item].write_time
-            print("%s, read_io: %f, write_io: %f" % (item, read_io, write_io))
+            # read_io = info[item].read_bytes / 8 / 1024 / info[item].read_time
+            # write_io = info[item].write_bytes / 8 / 1024 / info[item].write_time
+            print(info[item])
+
+            read_io = info[item].read_bytes / 8 / 1024 
+            write_io = info[item].write_bytes / 8 / 1024    
+            # print("%s, read_io: %f, write_io: %f" % (item, read_io, write_io))
         
     # # print_info(info)
     # read_io = info.read_bytes / 8 / 1024 / info.read_time
@@ -160,6 +167,105 @@ def get_cpu_usage():
 
     return get_cpu_info_ps()
 
+def remove_all_empty_str(atom_data_list):
+    i = 0
+    while i < len(atom_data_list):
+        if atom_data_list[i] == '':
+            atom_data_list.remove(atom_data_list[i])
+            i -= 1 
+        i += 1    
+    return atom_data_list
+
+# data = subprocess.run(cmd, shell=True)
+# print(data)
+
+# ori_data = os.system(cmd)
+
+# if type(ori_data) is list:
+#     data_list = ori_data.split("\n")
+#     for atom_data in data_list:
+#         if len(atom_data) < 10:
+#             continue
+
+#         atom_data_list = atom_data.split(" ")
+#         print(len(atom_data_list))
+#         print(atom_data_list)
+
+def get_disk_io_info_shell():
+    try:
+        result = []
+        cmd = "iostat -x -d 1 1"
+
+        val = os.popen(cmd)
+        for atom_data in val.readlines():
+            if len(atom_data) < 10:
+                continue
+
+            atom_data_list = atom_data.split(" ")
+            atom_data_list = remove_all_empty_str(atom_data_list)
+
+            # print(atom_data_list) 
+            cur_data = []
+            if atom_data_list[0] != "Device" and atom_data_list[0] != "Linux":
+                rKB = 0
+                r_wait = 0
+                wKB = 0
+                w_wait = 0
+                util = 0
+
+                if len(atom_data_list) < 15:
+                    rKB = float(atom_data_list[5])
+                    r_wait = float(atom_data_list[10])
+                    wKB = float(atom_data_list[6])
+                    w_wait = float(atom_data_list[11])
+                    util = float(atom_data_list[len(atom_data_list)-1])
+                elif len(atom_data_list) >15:
+                    rKB = float(atom_data_list[1])
+                    r_wait = float(atom_data_list[5])
+                    wKB = float(atom_data_list[8])
+                    w_wait = float(atom_data_list[11])
+                    util = float(atom_data_list[len(atom_data_list)-1])
+                    
+                result.append([atom_data_list[0], rKB, r_wait, wKB, w_wait, util])
+
+        return result
+
+    except Exception as e:
+        print("Exception get_disk_io_info_shell")
+        print(e)
+
+def get_process_disk_io_shell(pid):
+    try:
+        result = []
+        cmd = "pidstat -d 1 1"
+
+        val = os.popen(cmd)
+        
+        i = 0
+        for atom_data in val.readlines():
+            if len(atom_data) < 10:
+                continue
+
+            atom_data_list = atom_data.split(" ")
+            atom_data_list = remove_all_empty_str(atom_data_list)
+
+            print(atom_data_list)            
+
+            i = i + 1
+
+            if i > 4:
+                if atom_data_list[2] == str(pid):
+                    result = [float(atom_data_list[3]), float(atom_data_list[4])]
+                    
+        print("result!")
+        print(result)
+
+    except Exception as e:
+        print("Exception get_process_disk_io_shell")
+        print(e)
+
+
+
 class Test(object):
     def __init__(self):
         super().__init__()
@@ -180,10 +286,15 @@ class Test(object):
         get_cpu_info_ps()
 
     def test_get_disk_io_info(self):
-        while (True):
-            get_disk_io_info()
-            time.sleep(1)
-            print("\n\n")
+        # data = get_disk_io_info_shell()
+        # print(data)
+
+        get_process_disk_io_shell(27535)
+
+        # while (True):
+        #     get_disk_io_info_shell()
+        #     time.sleep(1)
+        #     print("\n\n")
 
 if __name__ == '__main__':
     test_obj = Test()
