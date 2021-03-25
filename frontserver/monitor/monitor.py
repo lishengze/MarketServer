@@ -18,7 +18,7 @@ class MonitorUtrade(object):
 
         process_list = get_process()
 
-        self.filesys_list = ["/", "/data"]
+        self.filesys_list = ["/"]
 
         for process_name in process_list:
             self._program_last_status[process_name] = -1
@@ -132,15 +132,16 @@ class MonitorUtrade(object):
             read_io = 0
             write_io = 0
 
+            process_info = get_process_disk_io_shell()
+
             for program_id in self._program_pid[program]:
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
-
-                info = get_process_disk_io_shell(program_id)
-                if info is not None and len(info) > 0:
-                    read_io += info[0]
-                    write_io += info[1]
+                
+                if process_info is not None and str(program_id) in process_info:
+                    read_io += process_info[str(program_id)][0]
+                    write_io += process_info[str(program_id)][1]
 
             msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s, read_io: %5s KB/S, write_io: %5s KB/s \n" %\
                          (program, str(mem_info), str(cpu_info), str(read_io), str(write_io)))

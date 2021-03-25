@@ -234,14 +234,17 @@ def get_disk_io_info_shell():
         print("Exception get_disk_io_info_shell")
         print(e)
 
-def get_process_disk_io_shell(pid):
+def get_process_disk_io_shell():
     try:
-        result = []
+        result = {}
         cmd = "pidstat -d 1 1"
 
         val = os.popen(cmd)
         
         i = 0
+        ave_data_start = False
+        cur_data_start = False
+
         for atom_data in val.readlines():
             if len(atom_data) < 10:
                 continue
@@ -249,18 +252,28 @@ def get_process_disk_io_shell(pid):
             atom_data_list = atom_data.split(" ")
             atom_data_list = remove_all_empty_str(atom_data_list)
 
-            # print(atom_data_list)            
+            print(atom_data_list)            
 
             i = i + 1
 
-            if i > 4:
-                # print(atom_data_list[2], str(pid))
-                if atom_data_list[2] == str(pid):
-                    print(atom_data_list)
-                    result = [float(atom_data_list[3]), float(atom_data_list[4])]     
+            if atom_data_list[1] == "UID":
+                cur_data_start = True
+                continue
+        
+            if cur_data_start and atom_data_list[1] == "UID":
+                ave_data_start = True
+                continue
 
-        # print("result!")
-        # print(result)
+            if cur_data_start and ave_data_start:
+                result[atom_data_list[2]] = [float(atom_data_list[3]), float(atom_data_list[4])] 
+
+                # print(atom_data_list[2], str(pid))
+                # if atom_data_list[2] == str(pid):
+                #     print(atom_data_list)
+                #     result = [float(atom_data_list[3]), float(atom_data_list[4])]     
+
+        print("result!")
+        print(result)
         return result
 
     except Exception as e:
@@ -292,7 +305,7 @@ class Test(object):
         # data = get_disk_io_info_shell()
         # print(data)
 
-        get_process_disk_io_shell(27535)
+        get_process_disk_io_shell()
 
         # while (True):
         #     get_disk_io_info_shell()
