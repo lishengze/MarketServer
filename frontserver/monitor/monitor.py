@@ -201,7 +201,7 @@ class MonitorUtrade(object):
             all_mem_info = get_datetime_str() + (" [All] mem usage: %.2f \n" % (mem_usage))
 
             max_rw_rate = 1024 * 10
-            max_wait = 5
+            max_wait = 10
             max_util = 80     
             all_disk_io_info = "Disk IO Info: \n"       
             all_disk_io_info += str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
