@@ -118,7 +118,14 @@ def get_disk_info(file_sys_path):
 
 def get_disk_io_info():
     info = psutil.disk_io_counters(perdisk=True)
-    print_info(info)
+
+    for item in info:
+        if info[item].read_time != 0 and info[item].write_time != 0:
+            read_io = info[item].read_bytes / 8 / 1024 / info[item].read_time
+            write_io = info[item].write_bytes / 8 / 1024 / info[item].write_time
+            print("%s, read_io: %f, write_io: %f" % (item, read_io, write_io))
+        
+    # # print_info(info)
     # read_io = info.read_bytes / 8 / 1024 / info.read_time
     # write_io = info.write_bytes / 8 / 1024 / info.write_time
     # return [read_io, write_io]
@@ -176,6 +183,7 @@ class Test(object):
         while (True):
             get_disk_io_info()
             time.sleep(1)
+            print("\n\n")
 
 if __name__ == '__main__':
     test_obj = Test()
