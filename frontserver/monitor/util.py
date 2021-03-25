@@ -268,7 +268,7 @@ def get_process_disk_io_shell():
                 print("cur_data_start and ave_data_start")
                 print(atom_data_list)
 
-                # result[atom_data_list[2]] = [float(atom_data_list[3]), float(atom_data_list[4])] 
+                result[atom_data_list[2]] = [float(atom_data_list[3]), float(atom_data_list[4])] 
 
                 # print(atom_data_list[2], str(pid))
                 # if atom_data_list[2] == str(pid):
@@ -310,10 +310,11 @@ class Test(object):
 
         get_process_disk_io_shell()
 
-        # while (True):
-        #     get_disk_io_info_shell()
-        #     time.sleep(1)
-        #     print("\n\n")
+        while (True):
+            # get_disk_io_info_shell()
+            get_process_disk_io_shell()
+            time.sleep(1)
+            print("\n\n")
 
 if __name__ == '__main__':
     test_obj = Test()
