@@ -200,7 +200,7 @@ class MonitorUtrade(object):
             all_cpu_info = get_datetime_str() + (" [All] cpu usage: %.2f \n" % (cpu_usage))
             all_mem_info = get_datetime_str() + (" [All] mem usage: %.2f \n" % (mem_usage))
 
-            max_rw_rate = 1024 * 20
+            max_rw_rate = 1024 * 10
             max_wait = 5
             max_util = 80     
             all_disk_io_info = "Disk IO Info: \n"       
@@ -221,6 +221,7 @@ class MonitorUtrade(object):
                 self.send_dingding_msg(record_msg)
             else:
                 # 判断 io 状态：r_kB w_kB < 1024 * 20, wait < 5, util < 80
+                del disk_io_usage[0:1]
                 for disk_io in disk_io_usage:
                     if disk_io[1] > max_rw_rate or disk_io[3] > max_rw_rate \
                     or disk_io[2] > max_wait or disk_io[4] > max_wait \
