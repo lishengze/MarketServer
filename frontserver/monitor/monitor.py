@@ -18,7 +18,7 @@ class MonitorUtrade(object):
 
         process_list = get_process()
 
-        self.filesys_list = ["/"]
+        self.filesys_list = ["/", "/data"]
 
         for process_name in process_list:
             self._program_last_status[process_name] = -1
@@ -138,11 +138,13 @@ class MonitorUtrade(object):
                 cpu_info += get_process_cpu_usage(process)
 
                 info = get_process_disk_io(program_id)
-                read_io += info[0]
-                write_io += info[1]
+                if len(info) > 0:
+                    read_io += info[0]
+                    write_io += info[1]
 
             msg = get_datetime_str() + (" %12s mem_usage: %5s, cpu_usage: %5s, read_io: %5s KB/S, write_io: %5s KB/s \n" %\
                          (program, str(mem_info), str(cpu_info), str(read_io), str(write_io)))
+
         except Exception as e:
             print("Exception get_usage_info")
             print(e)

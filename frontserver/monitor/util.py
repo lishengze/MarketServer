@@ -255,8 +255,7 @@ def get_process_disk_io_shell(pid):
 
             if i > 4:
                 if atom_data_list[2] == str(pid):
-                    result = [float(atom_data_list[3]), float(atom_data_list[4])]
-                    
+                    result = [float(atom_data_list[3]), float(atom_data_list[4])]                    
         print("result!")
         print(result)
 
