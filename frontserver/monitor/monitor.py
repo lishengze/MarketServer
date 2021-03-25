@@ -124,7 +124,7 @@ class MonitorUtrade(object):
 
         return result
 
-    def get_usage_info(self, program, process_disk_info):
+    def get_usage_info(self, program, process_info):
         msg = "get_usage_info"
         try:
             mem_info = 0
