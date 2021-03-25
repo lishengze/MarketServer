@@ -137,7 +137,7 @@ class MonitorUtrade(object):
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
 
-                info = get_process_disk_io(program_id)
+                info = get_process_disk_io_shell(program_id)
                 if len(info) > 0:
                     read_io += info[0]
                     write_io += info[1]
