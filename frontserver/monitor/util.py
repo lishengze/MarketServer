@@ -207,6 +207,8 @@ def get_disk_io_info_shell():
             # print(atom_data_list) 
             cur_data = []
             if atom_data_list[0] != "Device" and atom_data_list[0] != "Linux":
+                print(atom_data_list)
+
                 rKB = 0
                 r_wait = 0
                 wKB = 0
@@ -252,25 +254,25 @@ def get_process_disk_io_shell():
             atom_data_list = atom_data.split(" ")
             atom_data_list = remove_all_empty_str(atom_data_list)
 
-            print(atom_data_list)            
+            # print(atom_data_list)            
 
             i = i + 1
 
             if (not cur_data_start) and (atom_data_list[1] == "UID" or atom_data_list[2] == "UID"):
-                print("cur_data_start")
-                print(atom_data_list)   
+                # print("cur_data_start")
+                # print(atom_data_list)   
                 cur_data_start = True
                 continue
         
             if cur_data_start and (atom_data_list[1] == "UID" or atom_data_list[2] == "UID"):
-                print("ave_data_start")
-                print(atom_data_list)                   
+                # print("ave_data_start")
+                # print(atom_data_list)                   
                 ave_data_start = True
                 continue
 
             if cur_data_start and ave_data_start:
-                print("cur_data_start and ave_data_start")
-                print(atom_data_list)
+                # print("cur_data_start and ave_data_start")
+                # print(atom_data_list)
 
                 result[atom_data_list[2]] = [float(atom_data_list[3]), float(atom_data_list[4])] 
 
@@ -279,15 +281,13 @@ def get_process_disk_io_shell():
                 #     print(atom_data_list)
                 #     result = [float(atom_data_list[3]), float(atom_data_list[4])]     
 
-        print("result!")
-        print(result)
+        # print("result!")
+        # print(result)
         return result
 
     except Exception as e:
         print("Exception get_process_disk_io_shell")
         print(e)
-
-
 
 class Test(object):
     def __init__(self):
@@ -312,11 +312,11 @@ class Test(object):
         # data = get_disk_io_info_shell()
         # print(data)
 
-        get_process_disk_io_shell()
+        # get_process_disk_io_shell()
 
         while (True):
-            # get_disk_io_info_shell()
-            get_process_disk_io_shell()
+            get_disk_io_info_shell()
+            # get_process_disk_io_shell()
             time.sleep(1)
             print("\n\n")
 
