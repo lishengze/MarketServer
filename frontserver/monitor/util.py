@@ -249,18 +249,17 @@ def get_process_disk_io_shell(pid):
             atom_data_list = atom_data.split(" ")
             atom_data_list = remove_all_empty_str(atom_data_list)
 
-            print(atom_data_list)            
+            # print(atom_data_list)            
 
             i = i + 1
 
             if i > 4:
-                print(atom_data_list[2], str(pid))
-
+                # print(atom_data_list[2], str(pid))
                 if atom_data_list[2] == str(pid):
                     result = [float(atom_data_list[3]), float(atom_data_list[4])]     
 
-        print("result!")
-        print(result)
+        # print("result!")
+        # print(result)
 
     except Exception as e:
         print("Exception get_process_disk_io_shell")
