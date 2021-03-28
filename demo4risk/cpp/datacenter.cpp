@@ -444,8 +444,10 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    // std::cout << "\npublish for broker(raw) " << quote.symbol << " " << quote.asks.size() << " / "<< quote.bids.size() << std::endl;
-
+    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    {
+        _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
+    }
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
@@ -472,19 +474,16 @@ void DataCenter::change_account(const AccountInfo& info)
 void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
 {
     tfm::printfln("change_configuration");
-
-
-
     
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.cache_config = config;
 
     std::cout << "\nDataCenter::change_configuration  " << std::endl;
 
-    for (auto iter:params_.cache_config)
-    {
-        std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
-    }    
+    // for (auto iter:params_.cache_config)
+    // {
+    //     std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
+    // }    
     _push_to_clients();
 }
 
@@ -541,8 +540,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     }
 
 
-    if (!RISK_CONFIG->check_symbol(quote.symbol))
+    if (!(params_.cache_config.find(quote.symbol) != params_.cache_config.end()
+    && params_.cache_config[quote.symbol].IsPublish))
     {
+        _log_and_print(" %s UnPublished", quote.symbol);
         // std::cout << quote.symbol << " UnPublished!" << std::endl;
         return;
     }
@@ -561,7 +562,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    //  _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
+    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    {
+        _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
+    }
+    
     for( const auto& v : callbacks_) 
     {
         v->publish4Client(quote.symbol, ptrData2, NULL);

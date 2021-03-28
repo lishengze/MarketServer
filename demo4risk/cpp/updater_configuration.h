@@ -55,7 +55,7 @@ public:
 
     bool check_symbol(string symbol);
 
-    map<TSymbol, QuoteConfiguration>& get_risk_config() { return risk_config_;}
+    // map<TSymbol, QuoteConfiguration>& get_risk_config() { return risk_config_;}
 
 
 private:
@@ -71,7 +71,7 @@ private:
     void _parse_config();
     NacosString risk_params_; // for 品种更新频率 和 品种更新深度
 
-    map<TSymbol, QuoteConfiguration> risk_config_;
+    // map<TSymbol, QuoteConfiguration> risk_config_;
     // std::mutex                       risk_config_mutex_;
 };
 

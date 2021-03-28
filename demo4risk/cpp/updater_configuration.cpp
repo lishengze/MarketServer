@@ -95,8 +95,6 @@ void ConfigurationClient::_parse_config()
     Document riskParamsObject;
     riskParamsObject.Parse(risk_params_.c_str());
 
-    // std::cout << "risk_params_: " << risk_params_.c_str() << std::endl;
-
     if(riskParamsObject.HasParseError())
     {
         _log_and_print("parse RiskParams error %d", riskParamsObject.GetParseError());
@@ -107,10 +105,10 @@ void ConfigurationClient::_parse_config()
     map<TSymbol, QuoteConfiguration> output;
     if( combine_config(riskParamsObject, output) ) {
 
-        {
-            // std::lock_guard<std::mutex> lk(risk_config_mutex_);
-            risk_config_ = output;
-        }
+        // {
+        //     std::lock_guard<std::mutex> lk(risk_config_mutex_);
+        //     risk_config_ = output;
+        // }
         
         callback_->on_configuration_update(output);
     }
@@ -121,23 +119,23 @@ bool ConfigurationClient::check_symbol(string symbol)
 {
     // std::lock_guard<std::mutex> lk(risk_config_mutex_);
 
-    bool result = false;
+    // bool result = false;
 
-    // std::cout << "ConfigurationClient::check_symbol " << risk_config_.size() << std::endl;
-    // for(auto iter:risk_config_)
+    // // std::cout << "ConfigurationClient::check_symbol " << risk_config_.size() << std::endl;
+    // // for(auto iter:risk_config_)
+    // // {
+    // //     std::cout << iter.second.desc() << std::endl;
+    // // }
+
+    // if (risk_config_.find(symbol) != risk_config_.end())
     // {
-    //     std::cout << iter.second.desc() << std::endl;
+    //     // std::cout << "risk_config_ " << symbol << " , " << risk_config_[symbol].IsPublish << std::endl;
+    //     return risk_config_[symbol].IsPublish;
     // }
-
-    if (risk_config_.find(symbol) != risk_config_.end())
-    {
-        // std::cout << "risk_config_ " << symbol << " , " << risk_config_[symbol].IsPublish << std::endl;
-        return risk_config_[symbol].IsPublish;
-    }
-    else
-    {
-        return false;
-    }    
+    // else
+    // {
+    //     return false;
+    // }    
 
     return false;
 }
