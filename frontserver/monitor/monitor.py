@@ -24,8 +24,13 @@ class MonitorUtrade(object):
             self._program_last_status[process_name] = -1
             self._program_curr_status[process_name] = -1
             self._program_pid[process_name] = []
-            
-        self.dingding = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
+        
+        self.dingding = {
+        }
+        self.dingding["source"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
+
+        self.dingding["run"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
+
         self._check_secs = 1
         self._log_file = "log/monitor.log"
         self._logger = open(self._log_file, 'w')
@@ -57,10 +62,11 @@ class MonitorUtrade(object):
             print("Exception output_program_info")
             print(e)
 
-    def send_dingding_msg(self, msg):
+    def send_dingding_msg(self, msg, ding_type="source"):
         try:
             msg = 'msg ' + msg
-            self.dingding.send_text(msg, False)        
+            if ding_type in self.dingding:                
+                self.dingding[ding_type].send_text(msg, False)        
         except Exception as e:            
             print("Exception send_dingding_msg")
             print(e)
@@ -244,13 +250,13 @@ class MonitorUtrade(object):
                 if self._program_last_status[program] == 0 and self._program_curr_status[program] == 1:
                     msg = get_datetime_str() + "  Start: " + str(program) + ' start! \n'
                     self.log_info(msg)
-                    self.send_dingding_msg(msg)
+                    self.send_dingding_msg(msg, "run")
                     # self.output_program_info(program)
 
                 if self._program_last_status[program] == 1 and self._program_curr_status[program] == 0:
                     msg = get_datetime_str() + "  Warining: " + str(program) + ' crashed! \n'
                     self.log_info(msg)
-                    self.send_dingding_msg(msg)   
+                    self.send_dingding_msg(msg, "run")   
                     #self.output_program_info(program)
 
                 self._program_last_status[program] = self._program_curr_status[program]
