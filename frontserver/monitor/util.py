@@ -137,12 +137,38 @@ def get_disk_io_info():
     # write_io = info.write_bytes / 8 / 1024 / info.write_time
     # return [read_io, write_io]
 
+def get_process_disk_io_atom(pid):
+    try:
+        p = psutil.Process(pid)
+        info = p.io_counters()
+        return info
+    except Exception as e:
+        print("get_process_disk_io_atom")
+        print(e)
+
 def get_process_disk_io(pid):
-    p = psutil.Process(pid)
-    info = p.io_counters()
-    read_io = info.read_bytes / 1024 / 8
-    write_io = info.write_bytes / 1024 / 8
-    return [read_io, write_io]
+    info1 = get_process_disk_io_atom(pid)
+    sleep_secs = 0.1
+    time.sleep(sleep_secs)
+    info2 = get_process_disk_io_atom(pid)
+
+    read_count = (info2.read_count - info1.read_count) / sleep_secs
+    write_count = (info2.write_count - info1.write_count) / sleep_secs
+
+    read_io = (info2.read_chars - info1.read_chars) / sleep_secs / 1024
+    write_io = (info2.write_chars - info1.write_chars) / sleep_secs / 1024
+
+    # print("read_cout: %.2f, write_count: %.2f, read_io: %.2fKB, write_io: %.2f KB" % \
+    #         (read_count, write_count, read_io, write_io))
+    return [read_count, write_count, read_io, write_io]
+
+def get_process_id(process_str=""):
+    for proc in psutil.process_iter():
+        if "python" in proc.name():
+            print(proc)
+        if proc.name() == process_str:
+            return proc
+        
 
 def get_cpu_info_ps():
     # print("CPU 逻辑数量 %s" % psutil.cpu_count())
@@ -299,7 +325,11 @@ class Test(object):
 
         # self.test_get_cpu_info_ps()
 
-        self.test_get_disk_io_info()
+        # self.test_get_disk_io_info()
+
+        self.test_get_read_count()
+
+        # self.test_get_process_pid()
 
     def test_get_disk_info(self):
         file_sys_path = "/"
@@ -320,6 +350,13 @@ class Test(object):
         #     # get_process_disk_io_shell()
         #     time.sleep(1)
         #     print("\n\n")
+
+    def test_get_read_count(self):
+        get_process_disk_io(50748)
+
+    def test_get_process_pid(self):
+        process_str = "python3 write.py"
+        get_process_id(process_str)
 
 if __name__ == '__main__':
     test_obj = Test()

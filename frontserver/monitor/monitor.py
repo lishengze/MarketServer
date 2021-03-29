@@ -130,13 +130,15 @@ class MonitorUtrade(object):
 
         return result
 
-    def get_usage_info(self, program, process_info):
+    def get_usage_info(self, program, process_info={}):
         msg = "get_usage_info"
         try:
             mem_info = 0
             cpu_info = 0
             read_io = 0
             write_io = 0
+            read_io_count = 0
+            write_io_count = 0            
 
             # process_info = get_process_disk_io_shell()
 
@@ -144,18 +146,23 @@ class MonitorUtrade(object):
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
-                
-                try:
-                    if process_info is not None and str(program_id) in process_info:
-                        read_io += process_info[str(program_id)][0]
-                        write_io += process_info[str(program_id)][1]
-                except Exception as e:
-                    print("process_info is Error")
-                    print(e)
 
+                io_info = get_process_disk_io(program_id)
+                read_io_count += io_info[0]
+                write_io_count += io_info[1]
+                read_io += io_info[2]
+                write_io += io_info[3]
 
-            msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io: %.2f KB/S, write_io: %.2f KB/s \n" %\
-                         (program, mem_info, cpu_info, read_io, write_io))
+                # try:
+                #     if process_info is not None and str(program_id) in process_info:
+                #         read_io += process_info[str(program_id)][0]
+                #         write_io += process_info[str(program_id)][1]
+                # except Exception as e:
+                #     print("process_info is Error")
+                #     print(e)
+
+            msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io_count: %.2f, read_io: %.2f KB/S, write_io_count: %.2f, write_io: %.2f KB/s \n" %\
+                                        (program, mem_info, cpu_info, read_io_count, read_io, write_io_count, write_io))
 
         except Exception as e:
             print("Exception get_usage_info")
@@ -188,7 +195,8 @@ class MonitorUtrade(object):
     def record_usage_info(self):        
         try:
             record_msg = ""
-            process_disk_info = get_process_disk_io_shell()
+            # process_disk_info = get_process_disk_io_shell()
+            process_disk_info = {}
             for program in self._program_curr_status: 
                 if self._program_curr_status[program] == 1:
                     msg = self.get_usage_info(program, process_disk_info)

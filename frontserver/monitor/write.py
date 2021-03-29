@@ -29,6 +29,7 @@ class Write(object):
 def write_main():
     write_obj = Write()
     while (True):
+        time.sleep(0.01)
         write_obj.log_info("12345678901234567890")
         
 
