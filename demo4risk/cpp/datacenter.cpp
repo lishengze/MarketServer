@@ -444,10 +444,10 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    {
-        _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
-    }
+    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    // {
+    //     _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
+    // }
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
@@ -543,7 +543,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     if (!(params_.cache_config.find(quote.symbol) != params_.cache_config.end()
     && params_.cache_config[quote.symbol].IsPublish))
     {
-        _log_and_print(" %s UnPublished", quote.symbol);
+        // _log_and_print(" %s UnPublished", quote.symbol);
         // std::cout << quote.symbol << " UnPublished!" << std::endl;
         return;
     }
@@ -562,10 +562,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    {
-        _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
-    }
+    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    // {
+    //     // _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
+    // }
     
     for( const auto& v : callbacks_) 
     {
