@@ -158,8 +158,8 @@ def get_process_disk_io(pid):
     read_io = (info2.read_chars - info1.read_chars) / sleep_secs / 1024
     write_io = (info2.write_chars - info1.write_chars) / sleep_secs / 1024
 
-    # print("read_cout: %.2f, write_count: %.2f, read_io: %.2fKB, write_io: %.2f KB" % \
-    #         (read_count, write_count, read_io, write_io))
+    print("read_cout: %.2f, write_count: %.2f, read_io: %.2fKB, write_io: %.2f KB" % \
+            (read_count, write_count, read_io, write_io))
     return [read_count, write_count, read_io, write_io]
 
 def get_process_id(process_str=""):
