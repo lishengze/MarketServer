@@ -352,7 +352,7 @@ class Test(object):
         #     print("\n\n")
 
     def test_get_read_count(self):
-        get_process_disk_io(50748)
+        get_process_disk_io(1657)
 
     def test_get_process_pid(self):
         process_str = "python3 write.py"
