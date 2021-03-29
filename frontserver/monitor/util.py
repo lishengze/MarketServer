@@ -148,7 +148,7 @@ def get_process_disk_io_atom(pid):
 
 def get_process_disk_io(pid):
     info1 = get_process_disk_io_atom(pid)
-    sleep_secs = 1
+    sleep_secs = 0.1
     time.sleep(sleep_secs)
     info2 = get_process_disk_io_atom(pid)
 
@@ -158,11 +158,12 @@ def get_process_disk_io(pid):
     read_io = (info2.read_chars - info1.read_chars) / sleep_secs / 1024
     write_io = (info2.write_chars - info1.write_chars) / sleep_secs / 1024
 
-    print(info1)
-    print(info2)
+    # print(info1)
+    # print(info2)
 
-    print("read_cout: %.2f, write_count: %.2f, read_io: %.2fKB, write_io: %.2f KB" % \
-            (read_count, write_count, read_io, write_io))
+    # print("read_cout: %.2f, write_count: %.2f, read_io: %.2fKB, write_io: %.2f KB" % \
+    #         (read_count, write_count, read_io, write_io))
+            
     return [read_count, write_count, read_io, write_io]
 
 def get_process_id(process_str=""):
@@ -237,7 +238,7 @@ def get_disk_io_info_shell():
             cur_data = []
 
             if "Device" not in atom_data_list[0] and "Linux" not in atom_data_list[0] :
-                # print(atom_data_list)
+                print(atom_data_list)
 
                 rKB = 0
                 r_wait = 0
