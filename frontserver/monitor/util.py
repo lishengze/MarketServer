@@ -148,7 +148,7 @@ def get_process_disk_io_atom(pid):
 
 def get_process_disk_io(pid):
     info1 = get_process_disk_io_atom(pid)
-    sleep_secs = 0.1
+    sleep_secs = 1
     time.sleep(sleep_secs)
     info2 = get_process_disk_io_atom(pid)
 
