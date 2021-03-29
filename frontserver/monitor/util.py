@@ -234,7 +234,7 @@ def get_disk_io_info_shell():
             atom_data_list = atom_data.split(" ")
             atom_data_list = remove_all_empty_str(atom_data_list)
 
-            # print(atom_data_list) 
+            print(atom_data_list) 
             cur_data = []
 
             if "Device" not in atom_data_list[0] and "Linux" not in atom_data_list[0] :
