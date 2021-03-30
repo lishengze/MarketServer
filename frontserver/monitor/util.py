@@ -120,22 +120,45 @@ def get_disk_info(file_sys_path):
     return disk_info.percent
 
 def get_disk_io_info():
-    info = psutil.disk_io_counters(perdisk=True)
+    info1 = psutil.disk_io_counters(perdisk=True)
 
-    for item in info:
-        if info[item].read_time != 0 and info[item].write_time != 0:
-            # read_io = info[item].read_bytes / 8 / 1024 / info[item].read_time
-            # write_io = info[item].write_bytes / 8 / 1024 / info[item].write_time
-            print(info[item])
+    sleep_secs = 0.1
 
-            read_io = info[item].read_bytes / 8 / 1024 
-            write_io = info[item].write_bytes / 8 / 1024    
+    time.sleep(sleep_secs)
+
+    info2 = psutil.disk_io_counters(perdisk=True)
+    
+    result = {}
+
+    for item in info1:
+        read_count = (info2[item].read_count - info1[item].read_count) / sleep_secs
+        write_count = (info2[item].write_count - info1[item].write_count) / sleep_secs
+
+        read_io = (info2[item].read_bytes - info1[item].read_bytes) / 1024 / 8 / sleep_secs
+        write_io = (info2[item].write_bytes - info1[item].write_bytes) / 1024 / 8 / sleep_secs
+
+        result[item] = [read_count, write_count, read_io, write_io]
+
+        print("%s: %s" % (item, str(result[item])))
+
+        # print(info[item])
+
+        # if info[item].read_time != 0 and info[item].write_time != 0:
+        #     # read_io = info[item].read_bytes / 8 / 1024 / info[item].read_time
+        #     # write_io = info[item].write_bytes / 8 / 1024 / info[item].write_time
+        #     print(info[item])
+
+            # read_io = info[item].read_bytes / 8 / 1024 
+            # write_io = info[item].write_bytes / 8 / 1024    
             # print("%s, read_io: %f, write_io: %f" % (item, read_io, write_io))
         
     # # print_info(info)
     # read_io = info.read_bytes / 8 / 1024 / info.read_time
     # write_io = info.write_bytes / 8 / 1024 / info.write_time
     # return [read_io, write_io]
+
+    # print(result)
+    return result
 
 def get_process_disk_io_atom(pid):
     try:
@@ -331,7 +354,9 @@ class Test(object):
 
         # self.test_get_disk_io_info()
 
-        self.test_get_read_count()
+        get_disk_io_info()
+
+        # self.test_get_read_count()
 
         # self.test_get_process_pid()
 
