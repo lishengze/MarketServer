@@ -528,29 +528,29 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
     if (strcmp(c_symbol, test_kline_symbol.c_str()) == 0)
     {
-        // if (klines.size() > 10)
-        // {
-        //     cout << "\nKlineSrc:" << resolution << " start_time: " << get_sec_time_str(klines.begin()->index) << " "
-        //          << "end_time: " << get_sec_time_str(klines.rbegin()->index) << " "
-        //          << "data_count: " << klines.size()
-        //          << endl;
-        // }
+        if (klines.size() > 10)
+        {
+            cout << "\nKlineSrc:" << resolution << " start_time: " << get_sec_time_str(klines.begin()->index) << " "
+                 << "end_time: " << get_sec_time_str(klines.rbegin()->index) << " "
+                 << "data_count: " << klines.size()
+                 << endl;
+        }
 
-        // if (resolution == 60)
-        // {
-        //     cout <<"\nKlineSrc: " << c_symbol << " " << resolution << " "
-        //         << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
-        //         << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
-        //         << endl;
-        // }
+        if (resolution == 60)
+        {
+            cout <<"\nKlineSrc: " << c_symbol << " " << resolution << " "
+                << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
+                << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
+                << endl;
+        }
 
-        // if (resolution == 3600)
-        // {
-        //     cout <<"\nKlineSrc: " << c_symbol << " " << resolution << " "
-        //         << " high: " << max_min_kline_info_3600.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_3600.high_time)
-        //         << " low: " << max_min_kline_info_3600.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_3600.low_time)
-        //         << endl;
-        // }
+        if (resolution == 3600)
+        {
+            cout <<"\nKlineSrc: " << c_symbol << " " << resolution << " "
+                << " high: " << max_min_kline_info_3600.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_3600.high_time)
+                << " low: " << max_min_kline_info_3600.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_3600.low_time)
+                << endl;
+        }
     }
 }
 
