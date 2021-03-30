@@ -217,7 +217,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
     {
-        // cout << "\nFrontServer::response_kline_data_package " << endl;
+        cout << "\nFrontServer::response_kline_data_package " << endl;
         
         RspKLineDataPtr p_rsp_kline_data = GetField<RspKLineData>(package);
 
@@ -228,15 +228,16 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             // cout << "kline_data_str: " << kline_data_str << endl;
 
 
-            // for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
-            // {
-            //     cout << get_sec_time_str(atom_kline->index) << ", "
-            //          << p_rsp_kline_data->symbol_ << ", "
-            //          << "open: " << atom_kline->px_open.get_value() << ", "
-            //          << "close: " << atom_kline->px_close.get_value() << ", "
-            //          << "high: " << atom_kline->px_high.get_value() << ", "
-            //          << "low: " << atom_kline->px_low.get_value() << endl;
-            // }
+            for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
+            {
+                cout << get_sec_time_str(atom_kline->index) << ", "
+                     << p_rsp_kline_data->symbol_ << ", "
+                     << "open: " << atom_kline->px_open.get_value() << ", "
+                     << "close: " << atom_kline->px_close.get_value() << ", "
+                     << "high: " << atom_kline->px_high.get_value() << ", "
+                     << "low: " << atom_kline->px_low.get_value() << endl;
+            }
+            
             // cout << "[Front Kline]: Frequency: " << p_rsp_kline_data->frequency_ << " "
             //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
             //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            

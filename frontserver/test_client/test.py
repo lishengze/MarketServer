@@ -15,6 +15,13 @@ def process_heartbeat(ws):
     print("heartbeat_info_str: %s" % (heartbeat_info_str))
     ws.send(heartbeat_info_str)    
 
+def get_time(secs):
+    #转换成localtime
+    time_local = time.localtime(secs)
+    #转换成新的时间格式(2016-05-05 20:28:54)
+    dt = time.strftime("%Y-%m-%d %H:%M:%S",time_local)   
+    return dt 
+
 def on_message(ws, message):
     print("New Message")
     print(message)
@@ -24,7 +31,12 @@ def on_message(ws, message):
         process_heartbeat(ws)
     elif dic["type"] == "symbol_update":
         pass
-    
+    elif dic["type"] == "kline_rsp":
+        rsp_data = dic["data"]
+        for item in rsp_data:
+            print("time: %s, open: %s, high: %s, low: %s, close: %s " % \
+                (get_time(float(item["tick"])), item["open"], item["high"], item["low"], item["close"]))
+
 def on_error(ws, error):
     print("Error")
     print(error)
@@ -53,7 +65,7 @@ def get_sub_trade_str(symbol="BTC_USDT"):
 
 def get_sub_kline_str(symbl="BTC_USDT"):
     print("get_sub_kline_str")
-    frequency = 60 * 5
+    frequency = 60 * 60 * 2
     end_time = int(time.time())
     end_time = end_time - end_time % frequency - frequency
     start_time = end_time - 60 * 30
@@ -69,7 +81,7 @@ def get_sub_kline_str(symbl="BTC_USDT"):
     sub_info = {
         "type":"kline_update",
         "symbol":symbl,
-        "data_count":str(100),
+        "data_count":str(3000),
         "frequency":str(frequency)
     }
 
@@ -120,6 +132,7 @@ def on_open(ws):
 def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.255.220.139"
+    # ip = "ws://118.193.35.160"
     ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)

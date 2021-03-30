@@ -290,9 +290,20 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
                 // cout << "Add data: " << "cur_time: " << get_sec_time_str(cur_time) 
                 //      << ", last_update_time: " << get_sec_time_str(last_update_time) << endl;
 
-                if (kline_data_[cur_symbol][frequency].size() == frequency_cache_numb_)
+                if (kline_data_[cur_symbol][frequency].size() > frequency_cache_numb_ * 2)
                 {
-                    kline_data_[cur_symbol][frequency].erase(kline_data_[cur_symbol][frequency].begin());
+                    // kline_data_[cur_symbol][frequency].erase(kline_data_[cur_symbol][frequency].begin());
+
+                    // kline_data_[cur_symbol][frequency].erase()
+
+                    std::map<type_tick, KlineDataPtr>::iterator erase_end_iter =  kline_data_[cur_symbol][frequency].begin();
+
+                    for (int i = 0; i < frequency_cache_numb_; ++i)
+                    {
+                        erase_end_iter++; 
+                    }
+                    
+                    kline_data_[cur_symbol][frequency].erase(kline_data_[cur_symbol][frequency].begin(), erase_end_iter);
                 }
 
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
@@ -560,18 +571,18 @@ void KlineProcess::get_src_kline_data(string symbol, vector<KlineDataPtr>& resul
              << "req_end_time: " << get_sec_time_str(cur_earliest_time) << "\n"
              << endl; 
 
-        // cout << "\nrecv_data: " <<endl;
+        cout << "\nrecv_data: " <<endl;
         for (KlineData& kline_data:append_result)
         {
             result.emplace_back(boost::make_shared<KlineData>(kline_data));
-            // cout << get_sec_time_str(kline_data.index) << " "
-            //      << kline_data.px_open.get_value() << " "
-            //      << kline_data.px_close.get_value() << " "
-            //      << kline_data.px_high.get_value() << " "
-            //      << kline_data.px_low.get_value() << " "
-            //      << endl;
+            cout << get_sec_time_str(kline_data.index) << " "
+                 << kline_data.px_open.get_value() << " "
+                 << kline_data.px_close.get_value() << " "
+                 << kline_data.px_high.get_value() << " "
+                 << kline_data.px_low.get_value() << " "
+                 << endl;
         }
-        // cout << endl;
+        cout << endl;
     }
     else
     {
@@ -588,16 +599,16 @@ void KlineProcess::get_src_kline_data(string symbol, vector<KlineDataPtr>& resul
         ++iter;
     }
 
-    // cout << "\n All Src Data" << endl;
-    // for (KlineDataPtr& kline_data:result)
-    // {
-    //     cout << get_sec_time_str(kline_data->index) << " "
-    //             << kline_data->px_open.get_value() << " "
-    //             << kline_data->px_close.get_value() << " "
-    //             << kline_data->px_high.get_value() << " "
-    //             << kline_data->px_low.get_value() << " "
-    //             << endl;
-    // }    
+    cout << "\n All Src Data" << endl;
+    for (KlineDataPtr& kline_data:result)
+    {
+        cout << get_sec_time_str(kline_data->index) << " "
+                << kline_data->px_open.get_value() << " "
+                << kline_data->px_close.get_value() << " "
+                << kline_data->px_high.get_value() << " "
+                << kline_data->px_low.get_value() << " "
+                << endl;
+    }    
 }
 
 vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
@@ -818,7 +829,10 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
         {            
             int cur_fre = kline_update.reqkline_data.frequency_;
 
-            if (kline_data->frequency_ > cur_fre) continue;
+            // if (kline_data->frequency_ > cur_fre) continue;
+
+            if (frequency_aggreration_map_[cur_fre] != kline_data->frequency_) continue;
+
 
             if (!kline_update.kline_data_)
             {
