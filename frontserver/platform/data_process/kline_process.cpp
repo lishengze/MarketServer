@@ -1399,8 +1399,9 @@ void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr o
     try
     {
         curTradeDataPtr->start_time_ = oldTradeDataPtr->start_time_;
-        curTradeDataPtr->high_ = curTradeDataPtr->high_ > oldTradeDataPtr->high_ ? curTradeDataPtr->high_: oldTradeDataPtr->high_;
-        curTradeDataPtr->low_ = curTradeDataPtr->low_ < oldTradeDataPtr->low_ ? curTradeDataPtr->low_ : oldTradeDataPtr->low_;        
+        curTradeDataPtr->high_ = curTradeDataPtr->price_ > oldTradeDataPtr->high_ ? curTradeDataPtr->price_: oldTradeDataPtr->high_;
+        curTradeDataPtr->low_ = curTradeDataPtr->price_ < oldTradeDataPtr->low_ ? curTradeDataPtr->price_ : oldTradeDataPtr->low_;
+
         curTradeDataPtr->start_price_ = oldTradeDataPtr->start_price_;
         curTradeDataPtr->total_volume_ += (curTradeDataPtr->volume_ - oldTradeDataPtr->volume_);
         curTradeDataPtr->change_ = curTradeDataPtr->price_.get_value() - curTradeDataPtr->start_price_.get_value();
