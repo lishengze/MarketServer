@@ -646,7 +646,8 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         // {
         //     std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
         // }
-        
+
+        std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
 
         int i = 0;
         for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
@@ -666,6 +667,8 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         // {
         //     std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
         // }        
+
+        std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
     }
 
     return result;
