@@ -43,7 +43,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
                         fake.exchanges[v.first] = v.second;
                     }
 
-                    depth.mix_exchanges(fake, 0);
+                    depth.mix_exchanges(fake, 0, 1);
                 } else {
                     break;
                 }
@@ -79,7 +79,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
                         fake.exchanges[v.first] = v.second;
                     }
 
-                    depth.mix_exchanges(fake, 0);
+                    depth.mix_exchanges(fake, 0, 1);
                 } else {
                     break;
                 }
@@ -96,47 +96,96 @@ void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark)
     _filter_depth_by_watermark(src.bids, watermark, false);
 }
 
-void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, double price_bias, double volume_bias, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
+void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteConfiguration& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
 {
+    double price_bias = config.PriceOffset;
+    double volume_bias = config.AmountOffset;
+
+    // if (config.symbol == "BTC_USDT")
+    // {
+    //     std::cout << config.symbol << " " << config.PriceOffsetKind << " " << config.PriceOffset << " "
+    //             << config.AmountOffsetKind << " " << config.AmountOffset << std::endl;
+    // }
+
+    map<SDecimal, SInnerDepth> result;
+
     for( const auto& v: depths )
     {
         SDecimal scaledPrice = v.first;
-        if( is_ask ) {
-            scaledPrice *= ( 1 + price_bias * 1.0 / 100);
-        } else {
-            if( price_bias < 100 )
-                scaledPrice *= ( 1 - price_bias * 1.0 / 100);
-            else
-                scaledPrice = 0;
+
+        if (config.PriceOffsetKind == 1)
+        {
+            if( is_ask ) 
+            {
+                scaledPrice *= ( 1 + price_bias * 1.0 / 100);
+            } 
+            else 
+            {
+                if( price_bias < 100 )
+                    scaledPrice *= ( 1 - price_bias * 1.0 / 100);
+                else
+                    scaledPrice = 0;
+            }
         }
-        dst[scaledPrice].mix_exchanges(v.second, volume_bias * (-1));
+        else if (config.PriceOffsetKind == 2)
+        {
+            if( is_ask ) 
+            {
+                scaledPrice += price_bias;
+            } 
+            else 
+            {
+                scaledPrice -= price_bias;
+            }
+
+            scaledPrice = scaledPrice > 0 ? scaledPrice : 0;
+        }
+
+        dst[v.first].mix_exchanges(v.second, 0);
+        result[scaledPrice].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
+
+        // if (config.symbol == "BTC_USDT")
+        // {
+        //     std::cout << config.symbol << " " << is_ask 
+        //               << " ori_price: " << v.first.get_str_value() 
+        //               << " offset_price: " << scaledPrice.get_str_value()
+        //               << " ori_volume: " << dst[v.first].total_volume.get_str_value() 
+        //               << " offset_volume: " << result[scaledPrice].total_volume.get_str_value()
+        //               << std::endl;
+        // }
+
+
+        // dst[scaledPrice].mix_exchanges(v.second, volume_bias * (-1), config.AmountOffsetKind);
     }
+
+    dst.swap(result);
 }
 
 SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    // std::cout << "QuoteBiasWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
-    // 获取配置
-    double price_bias = 0;
-    double volume_bias = 0;
-    auto iter = ctx.params.cache_config.find(src.symbol);
-    if( iter != ctx.params.cache_config.end() ) {
-        price_bias = iter->second.PriceOffset;
-        volume_bias = iter->second.AmountOffset;
+    try
+    {
+        if( ctx.params.cache_config.find(src.symbol) != ctx.params.cache_config.end() ) 
+        {
+            SInnerQuote tmp;
+            vector<pair<SDecimal, SInnerDepth>> depths;
+            src.get_asks(depths);
+            _calc_depth_bias(depths, ctx.params.cache_config[src.symbol],  true, tmp.asks);
+            src.asks.swap(tmp.asks);
+            src.get_bids(depths);
+            _calc_depth_bias(depths, ctx.params.cache_config[src.symbol],  false, tmp.bids);
+            src.bids.swap(tmp.bids);
+        }
+        else
+        {
+            /* code */
+        }
     }
-
-    // std::cout << src.symbol << " price_bias: " << price_bias << ", volume_bias: " << volume_bias << std::endl;
-
-    // 风控的价格和成交量处理
-    SInnerQuote tmp;
-    vector<pair<SDecimal, SInnerDepth>> depths;
-    src.get_asks(depths);
-    _calc_depth_bias(depths, price_bias, volume_bias, true, tmp.asks);
-    src.asks.swap(tmp.asks);
-    src.get_bids(depths);
-    _calc_depth_bias(depths, price_bias, volume_bias, false, tmp.bids);
-    src.bids.swap(tmp.bids);
-
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
     // tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
 
     return src;
@@ -593,7 +642,11 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
-        // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+        // }
+        
 
         int i = 0;
         for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
@@ -609,7 +662,10 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         }
         quote.bids.swap(new_bids);
 
-        // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+        // }        
     }
 
     return result;
