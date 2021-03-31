@@ -164,9 +164,22 @@ inline string helper_get_string(const Value& v, const string& key, string defaul
 
 inline double helper_get_double(const Value& v, const string& key, double default_value)
 {
-    if( !v.HasMember(key.c_str()) || !v[key.c_str()].IsDouble() )
+    if( !v.HasMember(key.c_str()))
+    {
         return default_value;
-    return v[key.c_str()].GetDouble();
+    }
+        
+    if (v[key.c_str()].IsDouble() )
+    {
+        return v[key.c_str()].GetDouble();
+    }
+        
+    if (v[key.c_str()].IsUint())
+    {
+        return v[key.c_str()].GetUint();
+    }
+    
+    return default_value;
 }
 
 inline uint32 helper_get_uint32(const Value& v, const string& key, uint32 default_value)
