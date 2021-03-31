@@ -22,9 +22,21 @@ def get_time(secs):
     dt = time.strftime("%Y-%m-%d %H:%M:%S",time_local)   
     return dt 
 
+def print_depth_data(dic):
+    print("symbol: %s, time: %s, ask_len: %f, bid_len: %f" \
+        % (dic["symbol"], get_time(int(dic["tick"]) / 1000000000), dic["ask_length"], dic["bid_length"]))
+
+    print("asks")
+    for item in dic["asks"]:
+        print(item)
+
+    print("bids")
+    for item in dic["bids"]:
+        print(item)        
+
 def on_message(ws, message):
-    print("New Message")
-    print(message)
+    # print("New Message")
+    # print(message)
 
     dic = json.loads(message)
     if dic["type"] == "heartbeat":
@@ -36,7 +48,9 @@ def on_message(ws, message):
         for item in rsp_data:
             print("time: %s, open: %s, high: %s, low: %s, close: %s " % \
                 (get_time(float(item["tick"])), item["open"], item["high"], item["low"], item["close"]))
-
+    elif dic["type"] == "market_data_update":
+        print_depth_data(dic)
+        
 def on_error(ws, error):
     print("Error")
     print(error)
@@ -99,9 +113,9 @@ def sub_btc_usdt(ws, sub_symbol):
     # sub_info_str = json.dumps(sub_info)
     # print("sub_info_str: %s" % (sub_info_str))
 
-    sub_info_str = get_sub_kline_str(sub_symbol)
+    # sub_info_str = get_sub_kline_str(sub_symbol)
 
-    # sub_info_str = get_sub_depth_str(sub_symbol)
+    sub_info_str = get_sub_depth_str(sub_symbol)
 
     # sub_info_str = get_sub_trade_str(sub_symbol)
 
@@ -112,9 +126,9 @@ def sub_btc_usdt(ws, sub_symbol):
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
     # send_str = get_sub_trade_str()
 

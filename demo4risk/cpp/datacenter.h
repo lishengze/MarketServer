@@ -32,7 +32,7 @@ struct SInnerDepth {
         {
             for( const auto& v : src.exchanges ) 
             {                
-                exchanges[v.first] += (v.second * (1 + bias * 1.0 / 100)) > 0 ? (v.second * (1 + bias * 1.0 / 100)) : 0;
+                exchanges[v.first] += (v.second * (1 + bias)) > 0 ? (v.second * (1 + bias)) : 0;
             }
         }
         else if (kind == 2)

@@ -117,12 +117,12 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteCo
         {
             if( is_ask ) 
             {
-                scaledPrice *= ( 1 + price_bias * 1.0 / 100);
+                scaledPrice *= ( 1 + price_bias );
             } 
             else 
             {
                 if( price_bias < 100 )
-                    scaledPrice *= ( 1 - price_bias * 1.0 / 100);
+                    scaledPrice *= ( 1 - price_bias);
                 else
                     scaledPrice = 0;
             }
@@ -493,10 +493,10 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    // {
-    //     _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
-    // }
+    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    {
+        _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
+    }
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
@@ -675,7 +675,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
     
 }
 
-QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double volume, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -713,7 +713,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double amount, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -763,29 +763,29 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
     return true;
 }
 
-QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
+QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double amount, double turnover, SDecimal& price)
 {
-    _log_and_print("[otc_query] %s.%s direction=%s volume=%s amount=%s", exchange, symbol, direction, volume, amount);
+    _log_and_print("[otc_query] %s.%s direction=%s volume=%s amount=%s", exchange, symbol, direction, amount, amount);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
     if( iter == last_datas_.end() )
         return QuoteResponse_Result_WRONG_SYMBOL;
 
     SInnerQuote& quote = iter->second;
-    if( volume > 0 )
+    if( amount > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol].OtcOffset, volume, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
         } else {
-            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol].OtcOffset, volume, price, quote.precise);   
+            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);   
         }
     } 
     else
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
+            return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol].OtcOffset, turnover, price, quote.precise);
         } else { 
-            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
+            return _calc_otc_by_turnover(quote.bids, false, params_.cache_config[symbol].OtcOffset, turnover, price, quote.precise);
         }
     }
 

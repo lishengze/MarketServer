@@ -178,6 +178,9 @@ void OtcQuoteEntity::register_call()
 bool OtcQuoteEntity::process()
 {
     SDecimal price;
+    std::cout << "OTC: " << request_.symbol() << " direction: " << request_.direction() << " amount: " << request_.amount() << " "
+              << "turnover: " << request_.turnover() << std::endl;
+
     QuoteResponse_Result result = cacher_->otc_query("", request_.symbol(), request_.direction(), request_.amount(), request_.turnover(), price);
 
     QuoteResponse reply;
