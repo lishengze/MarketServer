@@ -264,6 +264,8 @@ public:
     bool get_snaps(vector<SInnerQuote>& snaps);
 
     void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations);
+
+    bool check_quote(SInnerQuote& quote);
 private:
     set<IQuotePusher*> callbacks_;
 

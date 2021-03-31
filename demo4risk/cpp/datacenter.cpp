@@ -540,11 +540,16 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     }
 
 
-    if (!(params_.cache_config.find(quote.symbol) != params_.cache_config.end()
-    && params_.cache_config[quote.symbol].IsPublish))
+    // if (!(params_.cache_config.find(quote.symbol) != params_.cache_config.end()
+    // && params_.cache_config[quote.symbol].IsPublish))
+    // {
+    //     // _log_and_print(" %s UnPublished", quote.symbol);
+    //     // std::cout << quote.symbol << " UnPublished!" << std::endl;
+    //     return;
+    // }
+
+    if (!check_quote(newQuote))
     {
-        // _log_and_print(" %s UnPublished", quote.symbol);
-        // std::cout << quote.symbol << " UnPublished!" << std::endl;
         return;
     }
 
@@ -573,6 +578,42 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     }
 
     last_datas_[quote.symbol] = newQuote;
+}
+
+bool DataCenter::check_quote(SInnerQuote& quote)
+{
+    bool result = false;
+    if (params_.cache_config.find(quote.symbol) != params_.cache_config.end())
+    {
+        result = params_.cache_config[quote.symbol].IsPublish;
+
+        if (!result) return result;
+
+        uint32 publis_level = params_.cache_config[quote.symbol].PublishLevel;
+        map<SDecimal, SInnerDepth> new_asks;
+        map<SDecimal, SInnerDepth> new_bids;     
+
+        // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+
+        int i = 0;
+        for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
+        {
+            new_asks[iter->first] = iter->second;
+        }   
+        quote.asks.swap(new_asks);
+
+        i = 0;
+        for(auto iter = quote.bids.rbegin(); iter != quote.bids.rend() && i < publis_level; ++iter, ++i)
+        {
+            new_bids[iter->first] = iter->second;
+        }
+        quote.bids.swap(new_bids);
+
+        // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+    }
+
+    return result;
+    
 }
 
 QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double volume, SDecimal& price, uint32 precise)
