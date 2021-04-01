@@ -518,7 +518,7 @@ void RedisQuote::_looping()
         // 打印统计信息
         if( (now - last_statistic_time_) > 10*1000 ) 
         {
-            _looping_print_statistics();
+            // _looping_print_statistics();
             last_statistic_time_ = now;
         }
     }

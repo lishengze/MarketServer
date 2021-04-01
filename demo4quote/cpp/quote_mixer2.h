@@ -121,7 +121,7 @@ public:
 
     bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
 private:
-    uint32 publish_depths_ = 100; // 仅向下游发布有限的档位
+    uint32 publish_depths_ = 1000; // 仅向下游发布有限的档位
     
     set<IMixerQuotePusher*> callbacks_;
 

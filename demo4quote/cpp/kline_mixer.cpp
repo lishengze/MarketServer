@@ -374,10 +374,10 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if (exchange == MIX_EXCHANGE_NAME)
-    {
-        std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
-    }
+    // if (exchange == MIX_EXCHANGE_NAME)
+    // {
+    //     std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
+    // }
 
     // 写入db缓存区
     db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);

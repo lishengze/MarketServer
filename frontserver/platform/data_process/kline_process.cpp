@@ -12,6 +12,8 @@
 KlineProcess::KlineProcess()
 {
     init_config();
+
+    one_day_kline_data_ = boost::make_shared<TimeKlineData>(60, 60*60*24)
 }
 
 void KlineProcess::init_config()
@@ -107,6 +109,8 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
         KlineDataPtr pkline_data = GetField<KlineData>(package);
 
         update_kline_data(pkline_data);
+
+        one_day_kline_data_->update(pkline_data);
 
         if (pkline_data)
         {
@@ -1219,7 +1223,7 @@ void KlineProcess::compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr
         }
         else 
         {
-            update_new_trade(curTradeDataPtr, oldTradeDataPtr);
+            update_new_trade(curTradeDataPtr);
         }         
     }
     catch(const std::exception& e)
@@ -1340,15 +1344,15 @@ void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
                     low_time = kline->index;
                 }
 
-                // if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
-                // {
-                //     cout << get_sec_time_str(kline->index) << " "
-                //         << kline->px_open.get_value() << " "
-                //         << kline->px_close.get_value() << " "
-                //         << kline->px_high.get_value() << " "
-                //         << kline->px_low.get_value() << " "
-                //         << endl; 
-                // }
+                if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
+                {
+                    cout << get_sec_time_str(kline->index) << " "
+                        << kline->px_open.get_value() << " "
+                        << kline->px_close.get_value() << " "
+                        << kline->px_high.get_value() << " "
+                        << kline->px_low.get_value() << " "
+                        << endl; 
+                }
                
             }
 
@@ -1394,16 +1398,19 @@ void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
     }  
 }
 
-void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr)
+void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr)
 {
     try
     {
-        curTradeDataPtr->start_time_ = oldTradeDataPtr->start_time_;
-        curTradeDataPtr->high_ = curTradeDataPtr->price_ > oldTradeDataPtr->high_ ? curTradeDataPtr->price_: oldTradeDataPtr->high_;
-        curTradeDataPtr->low_ = curTradeDataPtr->price_ < oldTradeDataPtr->low_ ? curTradeDataPtr->price_ : oldTradeDataPtr->low_;
+        curTradeDataPtr->start_time_ = one_day_kline_data_->start_time_;
 
-        curTradeDataPtr->start_price_ = oldTradeDataPtr->start_price_;
-        curTradeDataPtr->total_volume_ += (curTradeDataPtr->volume_ - oldTradeDataPtr->volume_);
+        curTradeDataPtr->high_ = curTradeDataPtr->price_ > one_day_kline_data_->high_ ? curTradeDataPtr->price_: one_day_kline_data_->high_;
+        curTradeDataPtr->low_ = curTradeDataPtr->price_ < one_day_kline_data_->low_ ? curTradeDataPtr->price_ : one_day_kline_data_->low_;
+
+        curTradeDataPtr->start_price_ = one_day_kline_data_->start_price_;
+
+        // curTradeDataPtr->total_volume_ += (curTradeDataPtr->volume_ - oldTradeDataPtr->volume_);
+
         curTradeDataPtr->change_ = curTradeDataPtr->price_.get_value() - curTradeDataPtr->start_price_.get_value();
         curTradeDataPtr->change_rate_ = curTradeDataPtr->change_ / curTradeDataPtr->start_price_.get_value();         
     }

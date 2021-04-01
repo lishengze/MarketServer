@@ -39,6 +39,36 @@ class KlineDataUpdate
 };
 FORWARD_DECLARE_PTR(KlineDataUpdate);
 
+class TimeKlineData
+{
+    public:
+
+        TimeKlineData(int freq, int last_secs):
+        frequency_{freq}, last_secs_{last_secs}
+        {
+
+        }
+
+        void update(KlineDataPtr kline_data)
+        {
+
+        }
+
+        std::map<type_tick, KlineDataPtr>   ori_data_;
+        int                                 frequency_{0};
+        int                                 last_secs_{0}
+
+        SDecimal                            start_price_;
+        type_tick                           start_time_;
+
+        SDecimal                            high_;
+        type_tick                           high_time_;
+        SDecimal                            low_;
+        type_tick                           low_time_;   
+
+};
+FORWARD_DECLARE_PTR(TimeKlineData);
+
 class TradeDataUpdate
 {
     public:
@@ -115,7 +145,7 @@ public:
 
     void compute_new_trade(TradeDataPtr curTradeDataPtr);
 
-    void update_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
+    void update_new_trade(TradeDataPtr curTradeDataPtr);
 
     void delete_trade_wss(ReqTradePtr pReqTrade);
 
@@ -135,6 +165,8 @@ private:
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
     map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
+    TimeKlineDataPtr                                            one_day_kline_data_;
+
 
     map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;
     std::mutex                                                  updated_trade_data_map_mutex_;

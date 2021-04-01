@@ -14,10 +14,11 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
     return true;
 }
 
-void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SDecimal& watermark, bool is_ask)
+void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, bool is_ask)
 {
     if( is_ask )
     {
+        map<SDecimal, SInnerDepth>& src_depths = src.asks;
         bool patched = false;
         unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
 
@@ -25,6 +26,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
+
             // cout << price.get_str_value() << " " << watermark.get_str_value() << endl;
             if( is_ask ? (price <= watermark) : (price >= watermark) ) {
                 // 过滤价位
@@ -32,6 +34,10 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
                     volumes[v2.first] += v2.second;
                 }
                 src_depths.erase(v++);
+                // if (src.symbol == "BTC_USDT")
+                // {
+                //     std::cout << "filed_price: " << price.get_str_value() << " watermark: " << watermark.get_str_value() << endl;
+                // }
                 // cout << "delete ask depth " << price.get_str_value() << endl;
             } else {
                 // 保留价位
@@ -54,6 +60,7 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
     }
     else 
     {
+        map<SDecimal, SInnerDepth>& src_depths = src.bids;
         bool patched = false;
         unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
 
@@ -92,8 +99,8 @@ void _filter_depth_by_watermark(map<SDecimal, SInnerDepth>& src_depths, const SD
 
 void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark)
 {
-    _filter_depth_by_watermark(src.asks, watermark, true);
-    _filter_depth_by_watermark(src.bids, watermark, false);
+    _filter_depth_by_watermark(src, watermark, true);
+    _filter_depth_by_watermark(src, watermark, false);
 }
 
 void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteConfiguration& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
@@ -222,21 +229,69 @@ void WatermarkComputerWorker::set_snap(const SInnerQuote& quote)
     // 提取各交易所的买卖一
     unordered_map<TExchange, SDecimal> first_ask, first_bid;
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << "ask price " << iter->first.get_str_value() << " ";
+        // }
+
         for( const auto& v : iter->second.exchanges ) {
             const TExchange& exchange = v.first;
+
+            // if (quote.symbol == "BTC_USDT")
+            // {
+            //     std::cout << exchange << " volume: " << v.second.get_str_value() << " ";
+            // }
+
+            
             if( first_ask.find(exchange) == first_ask.end() ) {
                 first_ask[exchange] = iter->first;
             }
         }
+
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << std::endl;
+        // }        
     }
     for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << "bid price " << iter->first.get_str_value() << " ";
+        // }
+
         for( const auto& v : iter->second.exchanges ) {
+
+            // if (quote.symbol == "BTC_USDT")
+            // {
+            //     std::cout << v.first << " volume: " << v.second.get_str_value() << " ";
+            // }
+
             const TExchange& exchange = v.first;
             if( first_bid.find(exchange) == first_bid.end() ) {
                 first_bid[exchange] = iter->first;
             }
         }
+
+        // if (quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << std::endl;
+        // }           
     }
+
+    // if (quote.symbol == "BTC_USDT")
+    // {
+    //     for (auto iter:first_ask)
+    //     {
+    //         std::cout << "first_ask " << iter.first << " " << iter.second.get_str_value() << std::endl;
+    //     }
+
+    //     for (auto iter:first_bid)
+    //     {
+    //         std::cout << "first_bid " << iter.first << " " << iter.second.get_str_value() << std::endl;
+    //     }        
+    // }    
+
+
 
     std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
     auto iter = watermark_.find(quote.symbol);
@@ -275,16 +330,26 @@ void WatermarkComputerWorker::_calc_watermark() {
                 for( auto &v : obj->bids ) { bids.push_back(v.second); }
                 // 排序
                 sort(asks.begin(), asks.end());
-                //for( const auto& v : asks ) {
-                    // cout << "ask " << v.get_str_value() << endl;
-                //}
+
+                // if (iter->first == "BTC_USDT")
+                // {
+                // for( const auto& v : asks ) {
+                //     cout << "ask " << v.get_str_value() << endl;
+                // }                
+                // }
+
+
                 sort(bids.begin(), bids.end());
                 //for( const auto& v : bids ) {
                     // cout << "bid " << v.get_str_value() << endl;
                 //}
                 if( asks.size() > 0 && bids.size() > 0 ) {
                     iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
-                    // cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
+
+                    // if (iter->first == "BTC_USDT")
+                    // {
+                    //     cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
+                    // }
                 }
             }
         }
@@ -296,15 +361,21 @@ void WatermarkComputerWorker::_calc_watermark() {
    
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    // std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
+    if (src.symbol == "BTC_USDT")
+    {
+        std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << "/" <<  src.bids.size()<< std::endl;        
+    }
     set_snap(src);
 
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _filter_by_watermark(src, watermark);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
-    
-    // tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    if (src.symbol == "BTC_USDT")
+    {
+        tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    }
+
     return src;
 }
 
@@ -340,7 +411,11 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    // std::cout << "AccountAjdustWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
+    // if (src.symbol == "BTC_USDT")
+    // {
+    //     std::cout << "AccountAjdustWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
+    // }
+
     // 获取配置
     double hedge_percent = 0;
     auto iter = ctx.params.cache_config.find(src.symbol);
@@ -413,7 +488,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
-    // tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+
+    // if (src.symbol == "BTC_USDT")
+    // {
+    //     tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+    // }
+
+    
     return src;
 }
 
@@ -493,10 +574,36 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
     {
         _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
+        // for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) 
+        // {
+
+        //         std::cout << "ask price " << iter->first.get_str_value() << " ";
+
+        //     for( const auto& v : iter->second.exchanges ) {
+        //         const TExchange& exchange = v.first;
+
+        //         std::cout << exchange << " volume: " << v.second.get_str_value() << " ";
+
+        //     }
+        //     std::cout << std::endl;     
+        // }
+        // for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
+
+        //     std::cout << "bid price " << iter->first.get_str_value() << " ";
+            
+        //     for( const auto& v : iter->second.exchanges ) {
+        //         std::cout << v.first << " volume: " << v.second.get_str_value() << " ";                
+        //     }
+
+        //     std::cout << std::endl;       
+        // }
     }
+
+
+
     innerquote_to_msd2(quote, ptrData.get(), false);
     //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
     for( const auto& v : callbacks_) 
@@ -642,12 +749,12 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
-        // }
+        if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
+        {
+            std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+        }
 
-        std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+        // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
 
         int i = 0;
         for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
@@ -663,12 +770,12 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         }
         quote.bids.swap(new_bids);
 
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
-        // }        
+        if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
+        {
+            std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+        }        
 
-        std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+        // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
     }
 
     return result;

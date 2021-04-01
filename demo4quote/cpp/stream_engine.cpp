@@ -69,8 +69,9 @@ void StreamEngine::start()
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
-    if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
-    //    tfm::printfln("snap: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
+    if( string(exchange) == MIX_EXCHANGE_NAME && string(symbol) == "BTC_USDT" ) {
+    //    tfm::printfln("StreamEngine: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
+       std::cout << "StreamEngine::on_snap " << exchange << " " << symbol << " " << quote.asks.size() << "/" << quote.bids.size() << std::endl;
     }
     quote_cacher_.on_snap(exchange, symbol, quote);
 

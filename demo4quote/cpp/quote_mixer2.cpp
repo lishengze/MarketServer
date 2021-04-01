@@ -253,7 +253,9 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         //if( (get_miliseconds() / 1000 % 10) == 0 ) { // 每10秒输出一次
         //    _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
         //}
-        //tfm::printfln("%s %lu", symbol, snap.origin_time);
+        // tfm::printfln("%s %lu", symbol, snap.origin_time);
+        // if (symbol == "BTC_USDT")
+        //     std::cout << MIX_EXCHANGE_NAME << " " << symbol << " " << snap.asks.size() << "/" << snap.bids.size() << std::endl;
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
     }
 
