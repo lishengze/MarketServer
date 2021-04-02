@@ -39,32 +39,56 @@ class KlineDataUpdate
 };
 FORWARD_DECLARE_PTR(KlineDataUpdate);
 
+class ReverseCompare
+{
+public:
+    bool operator () (const type_tick& p1, const type_tick& p2) const
+    {
+        return p1 > p2;
+    }
+};
+
+
+class KlineProcess;
+
 class TimeKlineData
 {
     public:
+        TimeKlineData() { }
 
-        TimeKlineData(int freq, int last_secs):
-        frequency_{freq}, last_secs_{last_secs}
+
+        TimeKlineData(int freq, int last_secs, string symbol, KlineProcess* kline_process):
+        frequency_{freq}, last_secs_{last_secs}, symbol_{symbol}, kline_process_{kline_process}
         {
 
         }
 
-        void update(KlineDataPtr kline_data)
-        {
+        void refresh_high_low();
 
-        }
+        void update(KlineDataPtr kline_data);
+
+        void init(type_tick end_time);
+
+        void complete(type_tick end_time);
+
+        bool is_full();
 
         std::map<type_tick, KlineDataPtr>   ori_data_;
         int                                 frequency_{0};
-        int                                 last_secs_{0}
+        int                                 last_secs_{0};
 
+        string                              symbol_;
         SDecimal                            start_price_;
-        type_tick                           start_time_;
 
         SDecimal                            high_;
+        SDecimal                            low_; 
+
         type_tick                           high_time_;
-        SDecimal                            low_;
-        type_tick                           low_time_;   
+        type_tick                           low_time_;
+
+        KlineProcess*                       kline_process_;
+
+        int                                 wait_times_{0};
 
 };
 FORWARD_DECLARE_PTR(TimeKlineData);
@@ -127,6 +151,8 @@ public:
 
     void update_kline_data(const KlineDataPtr kline_data);
 
+    void update_one_day_kline_data(const KlineDataPtr kline_data);
+
     void check_websocket_subinfo(ReqKLineDataPtr pReqKlineData);
 
     void update_frequency_aggreration_map(int src_fre);
@@ -165,7 +191,7 @@ private:
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
     map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
-    TimeKlineDataPtr                                            one_day_kline_data_;
+    map<string, TimeKlineData>                                  one_day_kline_data_;
 
 
     map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;

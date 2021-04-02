@@ -71,7 +71,7 @@ private:
     unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>> caches_;
 };
 
-#define KLINE_CACHE_MIN1 1440
+#define KLINE_CACHE_MIN1 2880
 #define KLINE_CACHE_MIN60 240
 class KlineCache
 {
