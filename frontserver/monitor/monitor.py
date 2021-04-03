@@ -31,7 +31,7 @@ class MonitorUtrade(object):
 
         self.dingding["run"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
 
-        self._check_secs = 1
+        self._check_secs = 5
         self._log_file = "log/monitor.log"
         self._logger = open(self._log_file, 'w')
         self._logger.close()
@@ -186,14 +186,17 @@ class MonitorUtrade(object):
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
 
-                io_info = get_process_disk_io(program_id)
-                read_io_count += io_info[0]
-                write_io_count += io_info[1]
-                read_io += io_info[2]
-                write_io += io_info[3]
+                # io_info = get_process_disk_io(program_id)
+                # read_io_count += io_info[0]
+                # write_io_count += io_info[1]
+                # read_io += io_info[2]
+                # write_io += io_info[3]
 
-            msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io_count: %.2f, read_io: %.2f KB/S, write_io_count: %.2f, write_io: %.2f KB/s \n" %\
-                                        (program, mem_info, cpu_info, read_io_count, read_io, write_io_count, write_io))
+            # msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io_count: %.2f, read_io: %.2f KB/S, write_io_count: %.2f, write_io: %.2f KB/s \n" %\
+            #                             (program, mem_info, cpu_info, read_io_count, read_io, write_io_count, write_io))
+
+            msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, \n" %\
+                                        (program, mem_info, cpu_info))                                        
 
             if mem_info > 30:
                 self.send_dingding_msg(msg)
@@ -252,23 +255,22 @@ class MonitorUtrade(object):
             mem_usage = get_mem_usage()
             cpu_usage = get_cpu_usage()
 
-            disk_io_usage = get_disk_io_info_shell()
-
             all_cpu_info = get_datetime_str() + (" [All] cpu usage: %.2f \n" % (cpu_usage))
-            all_mem_info = get_datetime_str() + (" [All] mem usage: %.2f \n" % (mem_usage))
+            all_mem_info = get_datetime_str() + (" [All] mem usage: %.2f \n" % (mem_usage))            
 
-            max_rw_rate = 1024 * 10
-            max_wait = 10
-            max_util = 80     
-            all_disk_io_info = "Disk IO Info: \n"       
-            all_disk_io_info += str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
-            all_disk_io_info += str(["MaxValue", max_rw_rate, max_wait, max_rw_rate, max_wait, max_util]) + "\n"
-            for data in disk_io_usage:
-                all_disk_io_info += str(data) + "\n"
+            # disk_io_usage = get_disk_io_info_shell()
+            # max_rw_rate = 1024 * 10
+            # max_wait = 10
+            # max_util = 80     
+            # all_disk_io_info = "Disk IO Info: \n"       
+            # all_disk_io_info += str(["Device","rKB","r_wait", "wKB", "w_wait", "util" ]) + "\n"
+            # all_disk_io_info += str(["MaxValue", max_rw_rate, max_wait, max_rw_rate, max_wait, max_util]) + "\n"
+            # for data in disk_io_usage:
+            #     all_disk_io_info += str(data) + "\n"
 
             record_msg += all_cpu_info
             record_msg += all_mem_info
-            record_msg += all_disk_io_info
+            # record_msg += all_disk_io_info
 
             if mem_usage > 85:
                 msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
