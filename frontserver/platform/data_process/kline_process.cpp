@@ -190,19 +190,18 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                     low_time_ = low_ == kline_data->px_low ? kline_data->index : low_time_;
                 }
 
-                // if (symbol_ == "BTC_USDT")
-                // {
-                //     std::cout << symbol_ << " Start: " << get_sec_time_str(ori_data_.begin()->first) 
-                //               << " End: " << get_sec_time_str(ori_data_.rbegin()->first) << " "
-                //               << "size: " << ori_data_.size() << " "                              
-                //               << std::endl;
-                // }
+                if (symbol_ == "BTC_USDT")
+                {
+                    std::cout << symbol_ << " CurTime: " << get_sec_time_str(curr_time) << " Start: " << get_sec_time_str(ori_data_.begin()->first) 
+                              << " End: " << get_sec_time_str(ori_data_.rbegin()->first) << " "
+                              << "size: " << ori_data_.size() << " "                              
+                              << std::endl;
+                }
 
-                // if (is_full())
-                // {
-                //     std::cout << "\n" << symbol_ << "  is Full Now! Start: " << get_sec_time_str(ori_data_.begin()->first) 
-                //               << " End: " << get_sec_time_str(ori_data_.rbegin()->first) << std::endl;
-                // }
+                if (is_full() && symbol_ == "BTC_USDT")
+                {
+                    std::cout << "\n" << symbol_ << "  is Full Now! " << std::endl;
+                }
             }
 
             start_price_ = ori_data_.begin()->second->px_open;            
@@ -1701,6 +1700,9 @@ void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr)
                             << "price: " << curTradeDataPtr->price_.get_value() << " \n"
                             << "high_time: " << get_sec_time_str(high_time) << " high: " << curTradeDataPtr->high_.get_value() << " \n"
                             << "low_time:  " << get_sec_time_str(low_time) << " low:  " << curTradeDataPtr->low_.get_value() << " \n"
+                            << "start_time: " << get_sec_time_str(cur_time_data.ori_data_.begin()->first) << " \n"
+                            << "end_time: " << get_sec_time_str(cur_time_data.ori_data_.rbegin()->first) << " \n"
+                            << "data_size: " << cur_time_data.ori_data_.size() << " \n"
                             << std::endl;
             }
         }
