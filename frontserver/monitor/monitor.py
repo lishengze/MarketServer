@@ -31,7 +31,7 @@ class MonitorUtrade(object):
 
         self.dingding["run"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
 
-        self._check_secs = 5
+        self._check_secs = 2
         self._log_file = "log/monitor.log"
         self._logger = open(self._log_file, 'w')
         self._logger.close()
