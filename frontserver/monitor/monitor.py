@@ -130,6 +130,45 @@ class MonitorUtrade(object):
 
         return result
 
+    def restart_demo4risk(self):
+        try:
+            cmd_list = ["cd /mnt/bcts_quote/demo4risk/cpp/build/", \
+                        "./stop.sh", "./start.sh"]
+            
+            for cmd in cmd_list:
+                val = os.popen(cmd)
+                time.sleep(2)
+        except Exception as e:
+            print("Exception restart_demo4risk")
+            print(e)
+
+
+    def restart_demo4quote(self):
+        try:
+            cmd_list = ["cd /mnt/bcts_quote/demo4quote/cpp/build/", \
+                        "./stop.sh", "./start.sh"]
+            
+            for cmd in cmd_list:
+                val = os.popen(cmd)
+                time.sleep(2) 
+        except Exception as e:
+            print("Exception restart_demo4quote")
+            print(e)
+    
+
+    def restart_frontserver(self):
+        try:
+            cmd_list = ["cd /mnt/bcts_quote/frontserver/platform/build/", \
+                        "./stop.sh", "./start.sh"]
+            
+            for cmd in cmd_list:
+                val = os.popen(cmd)
+                time.sleep(2)  
+        except Exception as e:
+            print("Exception restart_frontserver")
+            print(e)
+                 
+
     def get_usage_info(self, program, process_info={}):
         msg = "get_usage_info"
         try:
@@ -153,16 +192,20 @@ class MonitorUtrade(object):
                 read_io += io_info[2]
                 write_io += io_info[3]
 
-                # try:
-                #     if process_info is not None and str(program_id) in process_info:
-                #         read_io += process_info[str(program_id)][0]
-                #         write_io += process_info[str(program_id)][1]
-                # except Exception as e:
-                #     print("process_info is Error")
-                #     print(e)
-
             msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, read_io_count: %.2f, read_io: %.2f KB/S, write_io_count: %.2f, write_io: %.2f KB/s \n" %\
                                         (program, mem_info, cpu_info, read_io_count, read_io, write_io_count, write_io))
+
+            if mem_info > 30:
+                self.send_dingding_msg(msg)
+
+                if mem_info > 50 and len(self._program_pid[program]) == 1:
+                    process = psutil.Process(self._program_pid[0])
+                    if process.name() == "demo4risk":
+                        self.restart_demo4risk()
+                    elif process.name() == "demo4quote":
+                        self.restart_demo4quote()
+                    elif process.name() == "front_server":
+                        self.restart_frontserver()
 
         except Exception as e:
             print("Exception get_usage_info")
@@ -233,18 +276,18 @@ class MonitorUtrade(object):
             elif cpu_usage > 80:
                 msg = ("[All] mem usage: %s, too high!, cpu usage: %s" %(mem_usage, cpu_usage))
                 self.send_dingding_msg(record_msg)
-            else:
-                # 判断 io 状态：r_kB w_kB < 1024 * 20, wait < 5, util < 80
-                del disk_io_usage[0:2]
+            # else:
+            #     # 判断 io 状态：r_kB w_kB < 1024 * 20, wait < 5, util < 80
+            #     del disk_io_usage[0:2]
 
-                # print("After delete")
-                # print(disk_io_usage)
+            #     # print("After delete")
+            #     # print(disk_io_usage)
 
-                for disk_io in disk_io_usage:
-                    if disk_io[1] > max_rw_rate or disk_io[3] > max_rw_rate \
-                    or disk_io[2] > max_wait or disk_io[4] > max_wait \
-                    or disk_io[5] > max_util:
-                        self.send_dingding_msg(record_msg)
+            #     for disk_io in disk_io_usage:
+            #         if disk_io[1] > max_rw_rate or disk_io[3] > max_rw_rate \
+            #         or disk_io[2] > max_wait or disk_io[4] > max_wait \
+            #         or disk_io[5] > max_util:
+            #             self.send_dingding_msg(record_msg)
 
             self.log_info(record_msg)     
                     

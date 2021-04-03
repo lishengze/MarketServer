@@ -438,8 +438,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     string symbol = string(c_symbol);
 
     std::stringstream stream_obj;
-    // stream_obj  << "[Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
-    // LOG_INFO(stream_obj.str());
+    stream_obj  << "[Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
+    LOG_INFO(stream_obj.str());
 
     // if (resolution == 60)
     // {

@@ -73,6 +73,8 @@ class TimeKlineData
 
         bool is_full();
 
+        bool is_empty() { return ori_data_.size() == 0;}
+
         std::map<type_tick, KlineDataPtr>   ori_data_;
         int                                 frequency_{0};
         int                                 last_secs_{0};
