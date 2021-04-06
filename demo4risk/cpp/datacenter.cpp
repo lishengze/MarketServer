@@ -200,8 +200,8 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
 WatermarkComputerWorker::WatermarkComputerWorker() 
 {
-    thread_run_ = true;
-    thread_loop_ = new std::thread(&WatermarkComputerWorker::_calc_watermark, this);
+    // thread_run_ = true;
+    // thread_loop_ = new std::thread(&WatermarkComputerWorker::_calc_watermark, this);
 }
 
 WatermarkComputerWorker::~WatermarkComputerWorker() 
@@ -317,42 +317,55 @@ bool WatermarkComputerWorker::get_watermark(const string& symbol, SDecimal& wate
     return true;
 };
 
-void WatermarkComputerWorker::_calc_watermark() {
+void WatermarkComputerWorker::_calc_watermark() 
+{
+    try
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
+        // 计算watermark
+        for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) {
+            SymbolWatermark* obj= iter->second;
+            vector<SDecimal> asks, bids;
+            for( auto &v : obj->asks ) { asks.push_back(v.second); }
+            for( auto &v : obj->bids ) { bids.push_back(v.second); }
+            // 排序
+            sort(asks.begin(), asks.end());
 
-    while( thread_run_ ) {
-        {
-            std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
-            // 计算watermark
-            for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) {
-                SymbolWatermark* obj= iter->second;
-                vector<SDecimal> asks, bids;
-                for( auto &v : obj->asks ) { asks.push_back(v.second); }
-                for( auto &v : obj->bids ) { bids.push_back(v.second); }
-                // 排序
-                sort(asks.begin(), asks.end());
+            // if (iter->first == "BTC_USDT")
+            // {
+            // for( const auto& v : asks ) {
+            //     cout << "ask " << v.get_str_value() << endl;
+            // }                
+            // }
+
+
+            sort(bids.begin(), bids.end());
+            //for( const auto& v : bids ) {
+                // cout << "bid " << v.get_str_value() << endl;
+            //}
+            if( asks.size() > 0 && bids.size() > 0 ) {
+                iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
 
                 // if (iter->first == "BTC_USDT")
                 // {
-                // for( const auto& v : asks ) {
-                //     cout << "ask " << v.get_str_value() << endl;
-                // }                
+                //     cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
                 // }
-
-
-                sort(bids.begin(), bids.end());
-                //for( const auto& v : bids ) {
-                    // cout << "bid " << v.get_str_value() << endl;
-                //}
-                if( asks.size() > 0 && bids.size() > 0 ) {
-                    iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
-
-                    // if (iter->first == "BTC_USDT")
-                    // {
-                    //     cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
-                    // }
-                }
             }
         }
+    }
+    catch(const std::exception& e)
+    {
+        _log_and_print("Exception: %s", e.what());
+
+        // std::cerr << "" << e.what() << '\n';
+    }        
+}
+
+void WatermarkComputerWorker::thread_func() {
+
+    while( thread_run_ ) {
+
+        _calc_watermark();
 
         // 休眠
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -369,6 +382,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
+    _calc_watermark();
     _filter_by_watermark(src, watermark);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     if (src.symbol == "BTC_USDT")

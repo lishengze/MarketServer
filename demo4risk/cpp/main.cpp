@@ -1,5 +1,5 @@
 #include "risk_controller.h"
-
+#include "pandora/util/time_util.h"
 
 // exit handler function
 void setup_signal_handler_callback()
@@ -11,10 +11,23 @@ void setup_signal_handler_callback()
     signal(SIGKILL, RiskControllerServer::signal_handler);
 }
 
+void test_log_print()
+{
+    #include <chrono>
+    #include <thread>
+    while(true)
+    {
+        _log_and_print("%s Test LOG AND PRINT! \n", utrade::pandora::NanoTimeStr().c_str());        
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
 int main(int argc, char** argv) {
 
     // setup the signal here
     setup_signal_handler_callback();
+
+    
 
     RiskControllerServer riskControllerServer;
     riskControllerServer.start();

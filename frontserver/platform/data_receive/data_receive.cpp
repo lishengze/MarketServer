@@ -458,12 +458,12 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         std::stringstream stream_obj;
         stream_obj  << "[Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();
+                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
         // LOG_INFO(stream_obj.str());
 
-        if (strcmp(c_symbol, "BTC_USDT") == 0)
+        if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
         {
-            // LOG_INFO(stream_obj.str());
+            LOG_INFO(stream_obj.str());
         }
 
         if (strcmp(c_symbol, test_kline_symbol.c_str()) == 0)

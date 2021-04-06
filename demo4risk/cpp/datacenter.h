@@ -196,6 +196,7 @@ public:
     bool get_watermark(const string& symbol, SDecimal& watermark) const;
     void set_snap(const SInnerQuote& quote);
     void query(map<TSymbol, SDecimal>& watermarks) const;
+    void _calc_watermark();
 
 private:
     // 独立线程计算watermark
@@ -203,7 +204,7 @@ private:
     unordered_map<TSymbol, SymbolWatermark*> watermark_;
     std::thread* thread_loop_ = nullptr;
     std::atomic<bool> thread_run_;
-    void _calc_watermark();
+    void thread_func();
 
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
