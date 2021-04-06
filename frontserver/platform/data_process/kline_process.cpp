@@ -207,7 +207,7 @@ void TimeKlineData::update(KlineDataPtr kline_data)
 
                 if (is_full() && symbol_ == "BTC_USDT")
                 {
-                    std::cout << symbol_ << "  is Full Now! " << std::endl;
+                    std::cout << symbol_ << "  is Full Now! \n" << std::endl;
                 }
             }
 
@@ -345,7 +345,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
                 {
                     bool store_new = store_kline_data(cur_frequency, pkline_data, src_freq);
 
-                    if (cur_frequency == 60 && strcmp(pkline_data->symbol, "BTC_USDT") == 0)
+                    if (cur_frequency == 60*1 && strcmp(pkline_data->symbol, "BTC_USDT") == 0)
                     {
                         std::map<type_tick, KlineDataPtr>& cur_fre_data = kline_data_[cur_symbol][cur_frequency];
 
@@ -355,7 +355,7 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
                         //             + ", size: " + std::to_string(kline_data_[cur_symbol][cur_frequency].size()) + ", "
                         //             + get_sec_time_str(pkline_data->index) + "\n");   
 
-                        cout << "KlineUpdate: " << get_sec_time_str(pkline_data->index) << ", " << pkline_data->symbol << ", "
+                        cout << "KlineUpdate: " << get_sec_time_str(cur_fre_data.rbegin()->second->index) << ", " << pkline_data->symbol << ", "
                                 << "open: " << cur_fre_data.rbegin()->second->px_open.get_value() << ", high: " << cur_fre_data.rbegin()->second->px_high.get_value() << ", "
                                 << "low: " << cur_fre_data.rbegin()->second->px_low.get_value() << ", close: " << cur_fre_data.rbegin()->second->px_close.get_value() << "\n"
                                 << endl;   
@@ -550,7 +550,7 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
                     assign(last_kline->symbol, cur_symbol);
                 }
 
-                if (cur_time - last_update_time >= frequency)
+                if (cur_time - last_update_time >= frequency || cur_time % frequency == 0)
                 {
                     // cout << "Add data: " << "cur_time: " << get_sec_time_str(cur_time) 
                     //      << ", last_update_time: " << get_sec_time_str(last_update_time) << endl;
@@ -911,25 +911,20 @@ KlineDataPtr KlineProcess::get_last_kline_data(vector<KlineDataPtr>& src_kline_d
 
         src_kline_data.pop_back();
 
-        while(src_kline_data.size() > 0)
+        while(src_kline_data.size() > 0 && last_data->index % frequency != 0)
         {
             KlineDataPtr atom = src_kline_data[src_kline_data.size()-1];
             low = low > atom->px_low ? atom->px_low:low;
             high = high < atom->px_high ? atom->px_high:high;        
             open = atom->px_open;
+            last_data->index = atom->index;
 
-            if (src_kline_data[src_kline_data.size()-1]->index % frequency == 0)
-            {
-                src_kline_data.pop_back();
-                break;
-            }
             src_kline_data.pop_back();
         }
 
         last_data->px_low = low;
         last_data->px_high = high;
         last_data->px_open = open;
-        last_data->index -= last_data->index % frequency;
 
         return last_data;
     }
@@ -950,29 +945,33 @@ vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>&
     }
 
     KlineDataPtr last_data = src_kline_data[src_kline_data.size()-1];
+    result.push_back(last_data); 
     src_kline_data.pop_back();
 
-    KlineDataPtr cur_data = boost::make_shared<KlineData>(*last_data);
-    result.push_back(cur_data); 
-
-    SDecimal low = cur_data->px_low;
-    SDecimal high = cur_data->px_high;
-    SDecimal close;
+    KlineDataPtr cur_data = boost::make_shared<KlineData>(*last_data);    
 
     for (int i = src_kline_data.size()-1; i >=0; --i)
     {
         KlineDataPtr atom = src_kline_data[i];
-        cur_data->px_low = cur_data->px_low > atom->px_low ? atom->px_low:cur_data->px_low;
-        cur_data->px_high = cur_data->px_high < atom->px_high ? atom->px_high:cur_data->px_high;
-        cur_data->px_open = atom->px_open;
+        type_tick last_time = (*result.rbegin())->index;
 
-        if (atom->index < (*result.rbegin())->index && (*result.rbegin())->index - atom->index >= frequency)
+        // cur_data 已经遍历完当前的时间区间;
+        // atom 作为下一个时间区间的 截止时间数据,开始进行遍历; 
+        if (atom->index < last_time && last_time - atom->index >= frequency)
         {
-            cur_data->index = cur_data->index -  cur_data->index % frequency;
+            cur_data->index = cur_data->index - cur_data->index % frequency;
+
+            KlineDataPtr data = boost::make_shared<KlineData>(*cur_data);
+
+            result.push_back(data);
 
             cur_data = boost::make_shared<KlineData>(*atom);
-
-            result.push_back(cur_data);
+        }
+        else
+        {
+            cur_data->px_low = cur_data->px_low > atom->px_low ? atom->px_low:cur_data->px_low;
+            cur_data->px_high = cur_data->px_high < atom->px_high ? atom->px_high:cur_data->px_high;
+            cur_data->px_open = atom->px_open;
         }
     }
 
