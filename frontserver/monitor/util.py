@@ -358,7 +358,7 @@ def run_cmd_list(cmd_list):
 
 def restart_demo4risk():
     try:nohup /mnt/bcts_quote/demo4risk/cpp/build/demo4risk &
-        cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", "nohup /mnt/bcts_quote/demo4risk/cpp/build/demo4risk &"]
+        cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", "nohup /mnt/bcts_quote/demo4risk/cpp/build/demo4risk "]
         
         run_cmd_list(cmd_list)
 
