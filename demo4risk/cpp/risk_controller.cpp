@@ -40,11 +40,11 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     }
 }
 
-RiskControllerServer::RiskControllerServer()
+RiskControllerServer::RiskControllerServer(std::string config_file_name)
 {
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
-    CONFIG->parse_config(config_file);
+    CONFIG->parse_config(config_file_name);
     
     // init server
     utrade::pandora::Singleton<ServerEndpoint>::Instance();

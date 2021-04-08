@@ -27,9 +27,14 @@ int main(int argc, char** argv) {
     // setup the signal here
     setup_signal_handler_callback();
 
-    
+    string config_file_name = "config.json";
+    if(argc == 2)
+    {
+        config_file_name = argv[1];
+        cout << "config_file_name: " << config_file_name << endl;
+    }
 
-    RiskControllerServer riskControllerServer;
+    RiskControllerServer riskControllerServer(config_file_name);
     riskControllerServer.start();
     
     utrade::pandora::io_service_pool engine_pool(3);

@@ -15,7 +15,7 @@
 class RiskControllerServer : public IAccountUpdater, public IQuoteUpdater, public IConfigurationUpdater, public IOrderUpdater
 {
 public:
-    RiskControllerServer();
+    RiskControllerServer(string file_name="config.json");
     ~RiskControllerServer();
 
     void start();
