@@ -343,11 +343,8 @@ def get_process_disk_io_shell():
         print("Exception get_process_disk_io_shell")
         print(e)
 
-def restart_demo4risk():
+def run_cmd_list(cmd_list):
     try:
-        cmd_list = ["cd /mnt/bcts_quote/demo4risk/cpp/build/", \
-                    "ls -al", "./stop.sh", "./start.sh"]
-        
         for cmd in cmd_list:
             val = os.popen(cmd)
 
@@ -356,18 +353,26 @@ def restart_demo4risk():
 
             time.sleep(2)
     except Exception as e:
+        print("Exception run_cmd_list")
+        print(e)
+
+def restart_demo4risk():
+    try:
+        cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", "/mnt/bcts_quote/demo4risk/cpp/build/start.sh"]
+        
+        run_cmd_list(cmd_list)
+
+    except Exception as e:
         print("Exception restart_demo4risk")
         print(e)
 
 
 def restart_demo4quote():
     try:
-        cmd_list = ["cd /mnt/bcts_quote/demo4quote/cpp/build/", \
-                    "ls -al", "./stop.sh", "./start.sh"]
+        cmd_list = ["/mnt/bcts_quote/demo4quote/cpp/build/stop.sh", "/mnt/bcts_quote/demo4quote/cpp/build/start.sh"]
         
-        for cmd in cmd_list:
-            val = os.popen(cmd)
-            time.sleep(2) 
+        run_cmd_list(cmd_list)
+
     except Exception as e:
         print("Exception restart_demo4quote")
         print(e)
@@ -375,12 +380,10 @@ def restart_demo4quote():
 
 def restart_frontserver():
     try:
-        cmd_list = ["cd /mnt/bcts_quote/frontserver/platform/build/", \
-                    "ls -al", "./stop.sh", "./start.sh"]
+        cmd_list = ["/mnt/bcts_quote/frontserver/platform/build/stop.sh", "/mnt/bcts_quote/frontserver/platform/build/start.sh"]
         
-        for cmd in cmd_list:
-            val = os.popen(cmd)
-            time.sleep(2)  
+        run_cmd_list(cmd_list)
+
     except Exception as e:
         print("Exception restart_frontserver")
         print(e)
