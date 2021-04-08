@@ -360,7 +360,6 @@ def get_process_status(program_name):
     result = 0
     for proc in psutil.process_iter():
         if proc.name() == program_name:
-            self._program_pid[program_name].append(proc.pid)
             result = 1        
 
     return result
