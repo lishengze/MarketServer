@@ -348,8 +348,8 @@ def run_cmd_list(cmd_list):
         for cmd in cmd_list:
             val = os.popen(cmd)
 
-            for atom_data in val.readlines():
-                print(atom_data)
+            # for atom_data in val.readlines():
+            #     print(atom_data)
 
             time.sleep(2)
     except Exception as e:
