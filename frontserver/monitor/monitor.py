@@ -160,16 +160,19 @@ class MonitorUtrade(object):
                                         (program, mem_info, cpu_info))                                        
 
             if mem_info > 30:
-                self.send_dingding_msg(msg)
-
                 if mem_info > 50 and len(self._program_pid[program]) == 1:
                     process = psutil.Process(self._program_pid[0])
                     if process.name() == "demo4risk":
-                        restart_demo4risk()
+                        msg += "Restart demo4risk"
+                        restart_demo4risk()                        
                     elif process.name() == "demo4quote":
+                        msg += "Restart demo4quote"
                         restart_demo4quote()
                     elif process.name() == "front_server":
+                        msg += "Restart front_server"
                         restart_frontserver()
+
+                self.send_dingding_msg(msg)
 
         except Exception as e:
             print("Exception get_usage_info")

@@ -351,19 +351,34 @@ def run_cmd_list(cmd_list):
             # for atom_data in val.readlines():
             #     print(atom_data)
 
-            time.sleep(2)
+            time.sleep(5)
     except Exception as e:
         print("Exception run_cmd_list")
         print(e)
 
+def get_process_status(program_name):
+    result = 0
+    for proc in psutil.process_iter():
+        if proc.name() == program_name:
+            self._program_pid[program_name].append(proc.pid)
+            result = 1        
+
+    return result
+
 def restart_demo4risk():
     try:
         cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", "/mnt/bcts_quote/demo4risk/cpp/build/start.sh"]
-
-        # cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", \
-        #             "nohup /mnt/bcts_quote/demo4risk/cpp/build/demo4risk /mnt/bcts_quote/demo4risk/cpp/build/config.json  &"]
         
         run_cmd_list(cmd_list)
+
+        program_name = "demo4risk"
+
+        status = get_process_status()
+
+        if status == 1:
+            print(" %s restart successfully!" % (program_name))
+        else:
+            print(" %s restart failed!" % (program_name))
 
     except Exception as e:
         print("Exception restart_demo4risk")
