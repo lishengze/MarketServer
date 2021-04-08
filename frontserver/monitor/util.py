@@ -343,14 +343,17 @@ def get_process_disk_io_shell():
         print("Exception get_process_disk_io_shell")
         print(e)
 
-
 def restart_demo4risk():
     try:
         cmd_list = ["cd /mnt/bcts_quote/demo4risk/cpp/build/", \
-                    "./stop.sh", "./start.sh"]
+                    "ls -al", "./stop.sh", "./start.sh"]
         
         for cmd in cmd_list:
             val = os.popen(cmd)
+
+            for atom_data in val.readlines():
+                print(atom_data)
+
             time.sleep(2)
     except Exception as e:
         print("Exception restart_demo4risk")
@@ -360,7 +363,7 @@ def restart_demo4risk():
 def restart_demo4quote():
     try:
         cmd_list = ["cd /mnt/bcts_quote/demo4quote/cpp/build/", \
-                    "./stop.sh", "./start.sh"]
+                    "ls -al", "./stop.sh", "./start.sh"]
         
         for cmd in cmd_list:
             val = os.popen(cmd)
@@ -373,7 +376,7 @@ def restart_demo4quote():
 def restart_frontserver():
     try:
         cmd_list = ["cd /mnt/bcts_quote/frontserver/platform/build/", \
-                    "./stop.sh", "./start.sh"]
+                    "ls -al", "./stop.sh", "./start.sh"]
         
         for cmd in cmd_list:
             val = os.popen(cmd)
