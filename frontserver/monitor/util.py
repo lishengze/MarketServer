@@ -343,6 +343,46 @@ def get_process_disk_io_shell():
         print("Exception get_process_disk_io_shell")
         print(e)
 
+
+def restart_demo4risk():
+    try:
+        cmd_list = ["cd /mnt/bcts_quote/demo4risk/cpp/build/", \
+                    "./stop.sh", "./start.sh"]
+        
+        for cmd in cmd_list:
+            val = os.popen(cmd)
+            time.sleep(2)
+    except Exception as e:
+        print("Exception restart_demo4risk")
+        print(e)
+
+
+def restart_demo4quote():
+    try:
+        cmd_list = ["cd /mnt/bcts_quote/demo4quote/cpp/build/", \
+                    "./stop.sh", "./start.sh"]
+        
+        for cmd in cmd_list:
+            val = os.popen(cmd)
+            time.sleep(2) 
+    except Exception as e:
+        print("Exception restart_demo4quote")
+        print(e)
+
+
+def restart_frontserver():
+    try:
+        cmd_list = ["cd /mnt/bcts_quote/frontserver/platform/build/", \
+                    "./stop.sh", "./start.sh"]
+        
+        for cmd in cmd_list:
+            val = os.popen(cmd)
+            time.sleep(2)  
+    except Exception as e:
+        print("Exception restart_frontserver")
+        print(e)
+                 
+
 class Test(object):
     def __init__(self):
         super().__init__()
@@ -354,11 +394,13 @@ class Test(object):
 
         # self.test_get_disk_io_info()
 
-        get_disk_io_info()
+        # get_disk_io_info()
 
         # self.test_get_read_count()
 
         # self.test_get_process_pid()
+
+        self.test_restart()
 
     def test_get_disk_info(self):
         file_sys_path = "/"
@@ -386,6 +428,9 @@ class Test(object):
     def test_get_process_pid(self):
         process_str = "python3 write.py"
         get_process_id(process_str)
+
+    def test_restart(self):
+        restart_demo4risk()
 
 if __name__ == '__main__':
     test_obj = Test()

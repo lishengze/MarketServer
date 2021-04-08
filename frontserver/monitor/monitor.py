@@ -130,45 +130,6 @@ class MonitorUtrade(object):
 
         return result
 
-    def restart_demo4risk(self):
-        try:
-            cmd_list = ["cd /mnt/bcts_quote/demo4risk/cpp/build/", \
-                        "./stop.sh", "./start.sh"]
-            
-            for cmd in cmd_list:
-                val = os.popen(cmd)
-                time.sleep(2)
-        except Exception as e:
-            print("Exception restart_demo4risk")
-            print(e)
-
-
-    def restart_demo4quote(self):
-        try:
-            cmd_list = ["cd /mnt/bcts_quote/demo4quote/cpp/build/", \
-                        "./stop.sh", "./start.sh"]
-            
-            for cmd in cmd_list:
-                val = os.popen(cmd)
-                time.sleep(2) 
-        except Exception as e:
-            print("Exception restart_demo4quote")
-            print(e)
-    
-
-    def restart_frontserver(self):
-        try:
-            cmd_list = ["cd /mnt/bcts_quote/frontserver/platform/build/", \
-                        "./stop.sh", "./start.sh"]
-            
-            for cmd in cmd_list:
-                val = os.popen(cmd)
-                time.sleep(2)  
-        except Exception as e:
-            print("Exception restart_frontserver")
-            print(e)
-                 
-
     def get_usage_info(self, program, process_info={}):
         msg = "get_usage_info"
         try:
@@ -204,11 +165,11 @@ class MonitorUtrade(object):
                 if mem_info > 50 and len(self._program_pid[program]) == 1:
                     process = psutil.Process(self._program_pid[0])
                     if process.name() == "demo4risk":
-                        self.restart_demo4risk()
+                        restart_demo4risk()
                     elif process.name() == "demo4quote":
-                        self.restart_demo4quote()
+                        restart_demo4quote()
                     elif process.name() == "front_server":
-                        self.restart_frontserver()
+                        restart_frontserver()
 
         except Exception as e:
             print("Exception get_usage_info")
