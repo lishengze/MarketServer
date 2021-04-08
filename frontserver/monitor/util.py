@@ -373,7 +373,7 @@ def restart_demo4risk():
 
         program_name = "demo4risk"
 
-        status = get_process_status()
+        status = get_process_status(program_name)
 
         if status == 1:
             print(" %s restart successfully!" % (program_name))
