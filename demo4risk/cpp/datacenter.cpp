@@ -796,7 +796,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
     
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double volume, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -825,16 +825,32 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
 
     price = total_amount.get_value() / total_volume.get_value();
-    if( is_ask ) {
-        price *= ( 1 + bias * 1.0 / 100); 
-    } else {
-        price *= ( 1 - bias * 1.0 / 100); 
+    std::cout << "ori_price: " << price.get_value() << " ";
+    if (config.OTCOffsetKind == 1)
+    {
+        if( is_ask ) {
+            price *= ( 1 + config.OtcOffset); 
+        } else {
+            price *= ( 1 - config.OtcOffset); 
+        }
     }
+    else if (config.OTCOffsetKind == 2)
+    {
+        if( is_ask ) {
+            price += config.OtcOffset;
+        } else {
+            price -= config.OtcOffset;
+        }        
+    }
+    std::cout << "bias_price: " << price.get_value() 
+              << " bias_kind: " << config.OTCOffsetKind 
+              << " bias_value: " << config.OtcOffset 
+              << std::endl;
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& depths, bool is_ask, const double& bias, double amount, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
@@ -866,11 +882,30 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
 
     price = total_amount.get_value() / total_volume.get_value();
-    if( is_ask ) {
-        price *= ( 1 + bias * 1.0 / 100); 
-    } else {
-        price *= ( 1 - bias * 1.0 / 100); 
+
+    std::cout << "ori_price: " << price.get_value() << " ";
+    if (config.OTCOffsetKind == 1)
+    {
+        if( is_ask ) {
+            price *= ( 1 + config.OtcOffset); 
+        } else {
+            price *= ( 1 - config.OtcOffset); 
+        }
     }
+    else if (config.OTCOffsetKind == 2)
+    {
+        if( is_ask ) {
+            price += config.OtcOffset;
+        } else {
+            price -= config.OtcOffset;
+        }        
+    }
+
+    std::cout << "bias_price: " << price.get_value() 
+              << " bias_kind: " << config.OTCOffsetKind 
+              << " bias_value: " << config.OtcOffset 
+              << std::endl;
+
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
 }
@@ -896,17 +931,17 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     if( amount > 0 )
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
         } else {
-            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol].OtcOffset, amount, price, quote.precise);   
+            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol], amount, price, quote.precise);   
         }
     } 
     else
     {
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol].OtcOffset, turnover, price, quote.precise);
+            return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol], turnover, price, quote.precise);
         } else { 
-            return _calc_otc_by_turnover(quote.bids, false, params_.cache_config[symbol].OtcOffset, turnover, price, quote.precise);
+            return _calc_otc_by_turnover(quote.bids, false, params_.cache_config[symbol], turnover, price, quote.precise);
         }
     }
 
