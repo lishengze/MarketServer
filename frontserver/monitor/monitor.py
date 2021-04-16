@@ -161,7 +161,7 @@ class MonitorUtrade(object):
 
             if mem_info > 0.1:
                 if program == "demo4risk":
-                    msg += "Restart demo4risk"
+                    self.send_dingding_msg("Restart demo4risk")
                     restart_demo4risk()
                 # elif program == "demo4quote":
                 #     msg += "Restart demo4quote"
