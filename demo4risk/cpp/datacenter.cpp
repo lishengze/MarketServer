@@ -844,6 +844,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, true);
+            cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
@@ -857,6 +858,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, false);
+
+            cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
@@ -904,6 +907,8 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, true);
+            cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << endl;
+
             SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
                 total_volume += iter->second.total_volume;
@@ -918,6 +923,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, false);
+            cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << endl;
             SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
                 total_volume += iter->second.total_volume;
