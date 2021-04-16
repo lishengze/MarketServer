@@ -978,7 +978,7 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
 
 QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double amount, double turnover, SDecimal& price)
 {
-    _log_and_print("[otc_query] %s.%s direction=%s volume=%s amount=%s", exchange, symbol, direction, amount, amount);
+    _log_and_print("[otc_query] %s.%s direction=%s amount=%s turnover=%s", exchange, symbol, direction, amount, turnover);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
     if( iter == last_datas_.end() )
@@ -987,6 +987,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     SInnerQuote& quote = iter->second;
     if( amount > 0 )
     {
+        cout << "Compute "<< symbol << " Amount" <<  amount << endl;
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
         } else {
@@ -995,6 +996,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     } 
     else
     {
+        cout << "Compute "<< symbol << " turnover" <<  turnover << endl;
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol], turnover, price, quote.precise);
         } else { 
