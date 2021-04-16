@@ -992,6 +992,10 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         return QuoteResponse_Result_WRONG_SYMBOL;
 
     SInnerQuote& quote = iter->second;
+
+    std::cout << "\n*****Config Info: " << endl;
+    std::cout << params_.cache_config[symbol].desc() << std::endl;
+
     if( amount > 0 )
     {
         cout << "Compute "<< symbol << " Amount" <<  amount << endl;
