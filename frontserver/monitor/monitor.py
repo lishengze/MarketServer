@@ -64,6 +64,7 @@ class MonitorUtrade(object):
 
     def send_dingding_msg(self, msg, ding_type="source"):
         try:
+            self.log_info(msg)
             msg = 'msg ' + msg
             if ding_type in self.dingding:                
                 self.dingding[ding_type].send_text(msg, False)        
@@ -159,16 +160,16 @@ class MonitorUtrade(object):
             msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, \n" %\
                                         (program, mem_info, cpu_info))                                        
 
-            if mem_info > 0.1:
+            if mem_info > 30:
                 if program == "demo4risk":
                     self.send_dingding_msg("Restart demo4risk")
                     restart_demo4risk()
-                # elif program == "demo4quote":
-                #     msg += "Restart demo4quote"
-                #     restart_demo4quote()
-                # elif program == "front_server":
-                #     msg += "Restart front_server"
-                #     restart_frontserver()
+                elif program == "demo4quote":
+                    self.send_dingding_msg("Restart demo4quote")
+                    restart_demo4quote()
+                elif program == "front_server":
+                    self.send_dingding_msg("Restart front_server")
+                    restart_frontserver()
 
                 self.send_dingding_msg(msg)
 
@@ -264,13 +265,11 @@ class MonitorUtrade(object):
             for program in self._program_last_status:
                 if self._program_last_status[program] == 0 and self._program_curr_status[program] == 1:
                     msg = get_datetime_str() + "  Start: " + str(program) + ' start! \n'
-                    self.log_info(msg)
                     self.send_dingding_msg(msg, "run")
                     # self.output_program_info(program)
 
                 if self._program_last_status[program] == 1 and self._program_curr_status[program] == 0:
-                    msg = get_datetime_str() + "  Warining: " + str(program) + ' crashed! \n'
-                    self.log_info(msg)
+                    msg = get_datetime_str() + "  Warining: " + str(program) + ' crashed! \n'                    
                     self.send_dingding_msg(msg, "run")   
                     #self.output_program_info(program)
 
