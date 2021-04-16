@@ -159,16 +159,16 @@ class MonitorUtrade(object):
             msg = get_datetime_str() + (" %12s mem_usage: %.2f, cpu_usage: %.2f, \n" %\
                                         (program, mem_info, cpu_info))                                        
 
-            if mem_info > 30:
+            if mem_info > 0.1:
                 if program == "demo4risk":
                     msg += "Restart demo4risk"
-                    restart_demo4risk()                        
-                elif program == "demo4quote":
-                    msg += "Restart demo4quote"
-                    restart_demo4quote()
-                elif program == "front_server":
-                    msg += "Restart front_server"
-                    restart_frontserver()
+                    restart_demo4risk()
+                # elif program == "demo4quote":
+                #     msg += "Restart demo4quote"
+                #     restart_demo4quote()
+                # elif program == "front_server":
+                #     msg += "Restart front_server"
+                #     restart_frontserver()
 
                 self.send_dingding_msg(msg)
 
