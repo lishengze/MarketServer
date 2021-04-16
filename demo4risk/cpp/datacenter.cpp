@@ -981,6 +981,10 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     _log_and_print("[otc_query] %s.%s direction=%s amount=%s turnover=%s", exchange, symbol, direction, amount, turnover);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
+    for (auto iter:last_datas_)
+    {
+        cout << iter.first << endl;
+    }
     if( iter == last_datas_.end() )
         return QuoteResponse_Result_WRONG_SYMBOL;
 
