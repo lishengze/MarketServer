@@ -717,6 +717,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     //     // std::cout << quote.symbol << " UnPublished!" << std::endl;
     //     return;
     // }
+    
+    last_datas_[quote.symbol] = newQuote;
 
     if (!check_quote(newQuote))
     {
@@ -747,7 +749,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         v->publish4Client(quote.symbol, ptrData2, NULL);
     }
 
-    last_datas_[quote.symbol] = newQuote;
+    
 }
 
 bool DataCenter::check_quote(SInnerQuote& quote)
@@ -985,6 +987,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     {
         cout << iter.first << endl;
     }
+    cout << "last_datas_.size: " << last_datas_.size() << endl;
     if( iter == last_datas_.end() )
         return QuoteResponse_Result_WRONG_SYMBOL;
 
