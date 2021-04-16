@@ -128,7 +128,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteCo
             } 
             else 
             {
-                if( price_bias < 100 )
+                if( price_bias < 1 )
                     scaledPrice *= ( 1 - price_bias);
                 else
                     scaledPrice = 0;
@@ -796,26 +796,73 @@ bool DataCenter::check_quote(SInnerQuote& quote)
     
 }
 
+void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
+{
+    try
+    {
+        double price_bias = config.PriceOffset;
+
+        if (config.PriceOffsetKind == 1)
+        {
+            if( is_ask ) 
+            {
+                price /= ( 1 + price_bias );
+            } 
+            else 
+            {
+                if( price_bias < 1 )
+                    price /= ( 1 - price_bias);
+                else
+                    price = 0;
+            }
+        }
+        else if (config.PriceOffsetKind == 2)
+        {
+            if( is_ask ) 
+            {
+                price -= price_bias;
+            } 
+            else 
+            {
+                price += price_bias;
+            }
+
+            price = price > 0 ? price : 0;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
 QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
+
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
+            double price = iter->first.get_value();
+            reset_price(price, config, true);
+
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
-                total_amount += iter->second.total_volume * iter->first.get_value();
+                total_amount += iter->second.total_volume * price;
             } else {
-                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
             }
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
+            double price = iter->first.get_value();
+            reset_price(price, config, false);
+
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
-                total_amount += iter->second.total_volume * iter->first.get_value();
+                total_amount += iter->second.total_volume * price;
             } else {
-                total_amount += (volume - total_volume.get_value()) * iter->first.get_value();
+                total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
             }
         }
@@ -855,24 +902,28 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
-            SDecimal amounts = iter->second.total_volume * iter->first.get_value();
+            double price = iter->first.get_value();
+            reset_price(price, config, true);
+            SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_volume += (amount - total_amount.get_value()) / price;
                 total_amount = amount;
                 break;
             }
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
-            SDecimal amounts = iter->second.total_volume * iter->first.get_value();
+            double price = iter->first.get_value();
+            reset_price(price, config, false);
+            SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
                 total_volume += iter->second.total_volume;
                 total_amount += amounts;
             } else {
-                total_volume += (amount - total_amount.get_value()) / iter->first.get_value();
+                total_volume += (amount - total_amount.get_value()) / price;
                 total_amount = amount;
                 break;
             }
