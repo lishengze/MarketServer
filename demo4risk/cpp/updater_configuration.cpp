@@ -54,14 +54,14 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
             double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
             
-            if (PriceOffsetKind != 1 && PriceOffsetKind != 2) return false;
-            if (PriceOffset < 0 || PriceOffset >= 1) return false;
+            if (PriceOffsetKind != 1 && PriceOffsetKind != 2) continue;
+            if (PriceOffset < 0 || PriceOffset >= 1) continue;
 
-            if (AmountOffsetKind != 1 && AmountOffsetKind != 2) return false;
-            if (AmountOffset < 0 || AmountOffset >= 1) return false;
+            if (AmountOffsetKind != 1 && AmountOffsetKind != 2) continue;
+            if (AmountOffset < 0 || AmountOffset >= 1) continue;
 
-            if (OTCOffsetKind != 1 && OTCOffsetKind != 2) return false;
-            if (OtcOffset < 0 || OtcOffset >= 1) return false;            
+            if (OTCOffsetKind != 1 && OTCOffsetKind != 2) continue;
+            if (OtcOffset < 0 || OtcOffset >= 1) continue;            
 
             if( symbol == "")
                 continue;
