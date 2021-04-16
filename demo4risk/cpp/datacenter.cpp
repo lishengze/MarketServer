@@ -648,6 +648,11 @@ void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& co
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.cache_config = config;
 
+    for (auto iter:config)
+    {
+        cout << iter.second.desc() << endl;
+    }
+
     std::cout << "\nDataCenter::change_configuration  " << std::endl;
 
     // for (auto iter:params_.cache_config)
@@ -993,7 +998,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 
     SInnerQuote& quote = iter->second;
 
-    std::cout << "\n*****Config Info: " << endl;
+    std::cout << "\n*****Config Info: " << symbol << endl;
     std::cout << params_.cache_config[symbol].desc() << std::endl;
 
     if( amount > 0 )
