@@ -860,6 +860,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
             }
+
+            cout << "total_volume: " << total_volume.get_value() << endl;
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
@@ -875,6 +877,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
             }
+
+            cout << "total_volume: " << total_volume.get_value() << endl;
         }
     }
 
@@ -1003,7 +1007,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 
     if( amount > 0 )
     {
-        cout << "Compute "<< symbol << " Amount" <<  amount << endl;
+        cout << "Compute "<< symbol << " Amount " <<  amount << endl;
         if( direction == QuoteRequest_Direction_BUY ) {
             return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
         } else {
