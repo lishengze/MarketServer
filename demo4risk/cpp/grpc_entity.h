@@ -4,8 +4,12 @@
 #include "base/cpp/decimal.h"
 #include "base/cpp/concurrentqueue.h"
 
+using namespace quote::service::v1;
+
 using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
+using grpc::ServerAsyncReader;
+
 using quote::service::v1::MultiMarketStreamData;
 using quote::service::v1::MarketStreamData;
 using quote::service::v1::Depth;
@@ -16,8 +20,10 @@ using quote::service::v1::Decimal;
 using quote::service::v1::QuoteRequest;
 using quote::service::v1::QuoteResponse;
 using quote::service::v1::GetParamsResponse;
+using quote::service::v1::TradedOrderStreamData;
+
 using GrpcRiskControllerService = quote::service::v1::RiskController;
-using namespace quote::service::v1;
+
 
 class IDataCacher;
 using StreamDataPtr = std::shared_ptr<MarketStreamDataWithDecimal>;
@@ -130,6 +136,30 @@ private:
     GrpcRiskControllerService::AsyncService* service_;
     QuoteRequest request_;
     ServerAsyncResponseWriter<QuoteResponse> responder_;
+
+    IDataCacher* cacher_ = nullptr;
+};
+
+
+class TradeOrderEntity: public BaseGrpcEntity
+{
+public:
+    TradeOrderEntity(::grpc::Service* service, IDataCacher* cacher);
+
+    void register_call();
+
+    bool process();
+
+    TradeOrderEntity* spawn() {
+        return new TradeOrderEntity(service_, cacher_);
+    }
+
+
+private:
+    GrpcRiskControllerService::AsyncService* service_;
+    TradedOrderStreamData request_;
+
+    ServerAsyncReader<google::protobuf::Empty, TradedOrderStreamData> responder_;
 
     IDataCacher* cacher_ = nullptr;
 };

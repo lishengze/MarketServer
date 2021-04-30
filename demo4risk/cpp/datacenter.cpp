@@ -14,8 +14,10 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
     return true;
 }
 
-void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, bool is_ask)
+void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, bool is_ask, PipelineContent& ctx)
 {
+    
+
     if( is_ask )
     {
         map<SDecimal, SInnerDepth>& src_depths = src.asks;
@@ -49,7 +51,25 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                         fake.exchanges[v.first] = v.second;
                     }
 
-                    depth.mix_exchanges(fake, 0, 1);
+                    
+
+                    if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+                    {
+                        SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+
+                        SDecimal new_price = watermark;
+
+                        src_depths[new_price] = fake;
+
+                    }
+                    else
+                    {
+                        depth.mix_exchanges(fake, 0, 1);
+                    }
+
+
+
+                    // 
                 } else {
                     break;
                 }
@@ -86,7 +106,20 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                         fake.exchanges[v.first] = v.second;
                     }
 
-                    depth.mix_exchanges(fake, 0, 1);
+                    if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+                    {
+                        SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+
+                        SDecimal new_price = watermark;
+
+                        src_depths[new_price] = fake;
+
+                    }
+                    else
+                    {
+                        depth.mix_exchanges(fake, 0, 1);
+                    }
+                    
                 } else {
                     break;
                 }
@@ -97,10 +130,10 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
     }
 }
 
-void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark)
+void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark, PipelineContent& ctx)
 {
-    _filter_depth_by_watermark(src, watermark, true);
-    _filter_depth_by_watermark(src, watermark, false);
+    _filter_depth_by_watermark(src, watermark, true, ctx);
+    _filter_depth_by_watermark(src, watermark, false, ctx);
 }
 
 void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteConfiguration& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
@@ -380,10 +413,12 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     }
     set_snap(src);
 
+    
+
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _calc_watermark();
-    _filter_by_watermark(src, watermark);
+    _filter_by_watermark(src, watermark, ctx);
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     if (src.symbol == "BTC_USDT")
     {
@@ -513,7 +548,66 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 }
 
 SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
-{
+{        
+    if (ctx.params.hedage_info.find(src.symbol) != ctx.params.hedage_info.end())
+    {
+        HedgeInfo& hedage_info = ctx.params.hedage_info[src.symbol];
+
+        if (hedage_info.ask_amount > 0)
+        {
+            double ask_amount = hedage_info.ask_amount;
+
+            std::vector<SDecimal> delete_price;
+
+            for ( map<SDecimal, SInnerDepth>::reverse_iterator iter=src.asks.rbegin(); iter != src.asks.rend(); ++iter)
+            {
+                if (iter->second.total_volume > ask_amount)
+                {
+                    iter->second.total_volume -= ask_amount;
+                    break;
+                }
+                else
+                {
+                    iter->second.total_volume = 0;
+                    ask_amount -= iter->second.total_volume.get_value();
+                    delete_price.push_back(iter->first);
+                }
+            }
+
+            for (auto price: delete_price)
+            {
+                src.asks.erase(price);
+            }            
+        }
+
+        if (hedage_info.bid_amount > 0)
+        {
+            double bid_amount = hedage_info.bid_amount;
+
+            std::vector<SDecimal> delete_price;
+
+            for (auto iter: src.bids)
+            {
+                if (iter.second.total_volume > bid_amount)
+                {
+                    iter.second.total_volume -= bid_amount;
+                    break;
+                }
+                else
+                {
+                    iter.second.total_volume = 0;
+                    bid_amount -= iter.second.total_volume.get_value();
+                    delete_price.push_back(iter.first);
+                }
+            }
+
+            for (auto price: delete_price)
+            {
+                src.bids.erase(price);
+            }
+        }
+
+    }
     return src;
     /*
     auto orderBookIter = ctx.params.cache_order.find(src->symbol);
@@ -1042,5 +1136,24 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
     for( const auto&v : params_.cache_config ) {
         const TSymbol& symbol = v.first;
         configurations[symbol] = v.second.desc();
+    }
+}
+
+void DataCenter::hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade)
+{
+    try
+    {
+        if (params_.hedage_info.find(symbol) == params_.hedage_info.end() && !is_trade)
+        {
+            params_.hedage_info[symbol] = HedgeInfo(symbol, price, amount, direction, is_trade);
+        }
+        else
+        {
+            params_.hedage_info[symbol].set(symbol, price, amount, direction, is_trade);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
     }
 }

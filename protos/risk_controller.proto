@@ -24,7 +24,30 @@ service RiskController {
 
     // 查询状态参数
     rpc GetParams(.google.protobuf.Empty) returns (GetParamsResponse){}
+
+    // 客户端 成交订单推流
+    rpc PutTradedOrderStream(stream TradedOrderStreamData) returns (.google.protobuf.Empty){}    
 }
+
+message TradedOrderStreamData {
+    enum Direction
+    {
+      BUY = 0;
+      SELL = 1;
+    }
+    // 币对
+    string symbol = 1 [(gogoproto.customname) = "Symbol", (gogoproto.jsontag) = "symbol"];
+    // 成交价格
+    string price = 2 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
+    // 成交量
+    double order_amount = 3 [(gogoproto.customname) = "OrderAmount", (gogoproto.jsontag) = "order_amount"];
+    // 交易方向
+    Direction direction = 4 [(gogoproto.customname) = "Direction", (gogoproto.jsontag) = "direction"];
+    // 时间戳
+    int64 time = 5 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
+
+    bool traded = 6 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];    
+  }
 
 message MultiOrderStreamData {
     repeated OrderStreamData orders = 1 [(gogoproto.customname) = "Orders", (gogoproto.jsontag) = "orders"];
@@ -35,7 +58,7 @@ message OrderStreamData {
     string price = 2 [(gogoproto.customname) = "Price", (gogoproto.jsontag) = "price"];
     double order_amount = 3 [(gogoproto.customname) = "OrderAmount", (gogoproto.jsontag) = "order_amount"];
     double hedged_amount = 4 [(gogoproto.customname) = "HedgedAmount", (gogoproto.jsontag) = "hedged_amount"];
-    int64 time = 5 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
+    int64  time = 5 [(gogoproto.customname) = "Time", (gogoproto.jsontag) = "time", (gogoproto.casttype) = "wx/pkg/time.Time"];
 }
 
 message QuoteRequest {

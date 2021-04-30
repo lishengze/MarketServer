@@ -192,6 +192,61 @@ bool OtcQuoteEntity::process()
     return true;
 }
 
+TradeOrderEntity::TradeOrderEntity(::grpc::Service* service, IDataCacher* cacher):
+responder_(get_context())
+, cacher_(cacher)
+{
+    try
+    {
+        service_ = (GrpcRiskControllerService::AsyncService*)service;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "\n[E] TradeOrderEntity" << e.what() << '\n';
+    }
+}
+
+void TradeOrderEntity::register_call()
+{
+    try
+    {
+        _log_and_print("%s register TradeOrderEntity", get_context()->peer());
+
+        service_->RequestPutTradedOrderStream(&ctx_, &responder_, cq_, cq_, this);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "\n[E] TradeOrderEntity register_call" << e.what() << '\n';
+    }
+}
+
+bool TradeOrderEntity::process()
+{
+    try
+    {
+        responder_.Read(&request_, this);
+        string symbol = request_.symbol();
+        double price = std::stod(request_.price());
+        double amount = request_.order_amount();
+        TradedOrderStreamData_Direction direction = request_.direction();
+        bool is_trade = request_.traded();
+
+        cout << "\nTradeOrderEntity: \n"
+             << "symbol: " << symbol << "\n"
+             << "price: " << price << " \n"
+             << "amount: " << amount << " \n"
+             << "direction: " << direction << "\n"
+             << endl;
+
+        cacher_->hedge_trade_order(symbol, price, amount, direction, is_trade);
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "\n[E] TradeOrderEntity process" << e.what() << '\n';
+    }
+}
+
 //////////////////////////////////////////////////
 GetParamsEntity::GetParamsEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())

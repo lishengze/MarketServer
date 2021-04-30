@@ -52,6 +52,70 @@ struct SInnerDepth {
     }
 };
 
+struct HedgeInfo
+{
+    HedgeInfo(string symbol_value, double price_value, double amount_value, 
+            TradedOrderStreamData_Direction direction_value, bool is_trade):
+            symbol{symbol_value}
+            {
+                if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
+                {
+                    ask_amount = amount_value;
+                }
+                else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
+                {
+                    bid_amount = amount_value;
+                }
+                else
+                {
+                    cout << "HedgeInfo Unknow Direction!" << endl;
+                }
+
+            }
+    
+    HedgeInfo()
+    {
+
+    }
+
+    void set(string symbol_value, double price_value, double amount_value, 
+            TradedOrderStreamData_Direction direction_value, bool is_trade)
+    {
+        symbol = symbol_value;
+
+        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
+        {
+            if (is_trade)
+            {
+                ask_amount -= amount_value;
+            }
+            else
+            {
+                ask_amount += amount_value;
+            }            
+        }
+        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
+        {
+            if (is_trade)
+            {
+                bid_amount -= amount_value;
+            }
+            else
+            {
+                bid_amount += amount_value;
+            }
+        }
+        else
+        {
+            cout << "HedgeInfo Set Unknow Direction!" << endl;
+        }        
+    }
+
+    string symbol;
+    double ask_amount;
+    double bid_amount;
+};
+
 struct SInnerQuote {
     string exchange;
     string symbol;
@@ -93,6 +157,8 @@ class CallDataServeMarketStream;
 struct Params {
     AccountInfo cache_account;
     map<TSymbol, QuoteConfiguration> cache_config;
+    map<TSymbol, SymbolConfiguration> symbol_config;
+    map<TSymbol, HedgeInfo> hedage_info;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
 };
 
@@ -242,6 +308,8 @@ public:
     // 返回1 没有找到币对
     virtual QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price) = 0;
 
+    virtual void hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade) = 0;
+
     // 查询内部参数
     virtual void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations) = 0;
 
@@ -281,6 +349,9 @@ public:
     void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations);
 
     bool check_quote(SInnerQuote& quote);
+
+    virtual void hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade);
+
 private:
     set<IQuotePusher*> callbacks_;
 
@@ -292,6 +363,8 @@ private:
     unordered_map<TSymbol, SInnerQuote> datas_;
     unordered_map<TSymbol, SInnerQuote> last_datas_;
     Params params_;
+
+
 
     // 处理流水线
     QuotePipeline pipeline_;
