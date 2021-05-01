@@ -50,14 +50,12 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     for( const auto &v : volumes ) {
                         fake.exchanges[v.first] = v.second;
                     }
-
                     
-
                     if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
                     {
                         SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
 
-                        SDecimal new_price = watermark;
+                        SDecimal new_price = watermark + symbol_config.PricePrecision;
 
                         src_depths[new_price] = fake;
 
@@ -110,7 +108,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     {
                         SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
 
-                        SDecimal new_price = watermark;
+                        SDecimal new_price = watermark - symbol_config.PricePrecision;
 
                         src_depths[new_price] = fake;
 
@@ -119,7 +117,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     {
                         depth.mix_exchanges(fake, 0, 1);
                     }
-                    
+
                 } else {
                     break;
                 }
