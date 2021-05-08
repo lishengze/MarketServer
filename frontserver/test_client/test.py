@@ -35,8 +35,8 @@ def print_depth_data(dic):
         print(item)        
 
 def on_message(ws, message):
-    # print("New Message")
-    # print(message)
+    print("on_message")
+    print(message)
 
     dic = json.loads(message)
     if dic["type"] == "heartbeat":
@@ -126,9 +126,9 @@ def sub_btc_usdt(ws, sub_symbol):
 def on_open(ws):
     print("Connected")
 
-    # send_str = get_sub_depth_str()
+    send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    # send_str = get_sub_kline_str()
 
     # send_str = get_sub_trade_str()
 
@@ -146,8 +146,8 @@ def on_open(ws):
 def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.255.220.139"
-    # ip = "ws://118.193.35.160"
-    ip = "ws://127.0.0.1"
+    ip = "ws://118.193.35.160"
+    # ip = "ws://127.0.0.1"
     port = 9114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

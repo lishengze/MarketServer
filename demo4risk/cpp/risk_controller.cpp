@@ -90,6 +90,11 @@ void RiskControllerServer::on_configuration_update(const map<TSymbol, QuoteConfi
     datacenter_.change_configuration(config);
 }
 
+void RiskControllerServer::on_configuration_update(const map<TSymbol, SymbolConfiguration>& config)
+{
+    datacenter_.change_configuration(config);
+}
+
 void RiskControllerServer::on_account_update(const AccountInfo& account)
 {
     datacenter_.change_account(account);

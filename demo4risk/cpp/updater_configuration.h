@@ -6,6 +6,7 @@
 
 #include "pandora/util/thread_safe_singleton.hpp"
 #include <mutex>
+#include <sstream>
 
 #include <string>
 using std::string;
@@ -34,12 +35,22 @@ struct QuoteConfiguration
     bool   IsPublish{true};
 
     std::string desc() const {
-        return tfm::format("symbol = %s, PublishFrequency: %d, PublishLevel:%d, PriceOffsetKind:%d, PriceOffset: %f, \
-                            AmountOffsetKind:%d, AmountOffset:%d, DepositFundRatio:%.2f, HedgeFundRatio=%.2f, OTCOffsetKind=%d, \
-                            OtcOffset:%.2f, IsPublish:%d", 
-                            symbol.c_str(), PublishFrequency, PublishLevel, PriceOffsetKind, PriceOffset,
-                            AmountOffsetKind, AmountOffset, DepositFundRatio, HedgeFundRatio, OTCOffsetKind,
-                            OtcOffset, IsPublish);
+
+        stringstream s_obj;
+        s_obj << "symbol: " << symbol << "\n"
+              << "PublishFrequency: " << PublishFrequency << "\n"
+              << "PublishLevel: " << PublishLevel << "\n"
+              << "PriceOffsetKind: " << PriceOffsetKind << "\n"
+              << "PriceOffset: " << PriceOffset << "\n"
+              << "AmountOffsetKind: " << AmountOffsetKind << "\n"
+              << "AmountOffset: " << AmountOffset << "\n"
+              << "DepositFundRatio: " << DepositFundRatio << "\n"
+              << "HedgeFundRatio: " << HedgeFundRatio << "\n"
+              << "OTCOffsetKind: " << OTCOffsetKind << "\n"
+              << "OtcOffset: " << OtcOffset << "\n"
+              << "IsPublish: " << IsPublish << "\n";
+        
+        return s_obj.str();
     }
 };
 
@@ -73,11 +84,48 @@ struct SymbolConfiguration {
   double OtcMaxPrice;     //`json:"otc_max_price"` //OTC最大金额
   std::string User;       //`json:"user"` //操作员
   std::string Time;          //`json:"time"` //操作时间
+
+    std::string desc() const {
+        stringstream s_obj;
+        s_obj << "SymbolId: " << SymbolId << "\n"
+              << "SymbolKind: " << SymbolKind << "\n"
+              << "Bid: " << Bid << "\n"
+              << "PrimaryCurrency: " << PrimaryCurrency << "\n"
+              << "BidCurrency: " << BidCurrency << "\n"
+              << "SettleCurrency: " << SettleCurrency << "\n"
+              << "Switch: " << Switch << "\n"
+              << "AmountPrecision: " << AmountPrecision << "\n"
+              << "PricePrecision: " << PricePrecision << "\n"
+              << "SumPrecision: " << SumPrecision << "\n"
+              << "MinUnit: " << MinUnit << "\n"
+              << "MinChangePrice: " << MinChangePrice << "\n"
+
+              << "Spread: " << Spread << "\n"
+              << "FeeKind: " << FeeKind << "\n"
+              << "TakerFee: " << TakerFee << "\n"
+              << "MakerFee: " << MakerFee << "\n"
+              << "MinOrder: " << MinOrder << "\n"
+              << "MaxOrder: " << MaxOrder << "\n"
+              << "MinMoney: " << MinMoney << "\n"
+              << "MaxMoney: " << MaxMoney << "\n"
+              << "MaxMatchLevel: " << MaxMatchLevel << "\n"
+              << "OtcMinOrder: " << OtcMinOrder << "\n"
+              << "OtcMaxOrder: " << OtcMaxOrder << "\n"
+
+              << "OtcMinPrice: " << OtcMinPrice << "\n"
+              << "OtcMaxPrice: " << OtcMaxPrice << "\n"
+              << "User: " << User << "\n"
+              << "Time: " << Time << "\n";                           
+
+        return s_obj.str();
+    }  
 };
 
 class IConfigurationUpdater {
 public:
     virtual void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config) = 0;
+
+    virtual void on_configuration_update(const map<TSymbol, SymbolConfiguration>& config) = 0;
 };
 
 class ConfigurationClient: public NacosClient
@@ -87,6 +135,8 @@ public:
     
     // derive from NacosClient
     void config_changed(const std::string& group, const std::string& dataid, const NacosString &configInfo);
+
+    void load_symbol_params(const NacosString &configInfo);
 
     bool check_symbol(std::string symbol);
 
@@ -101,6 +151,8 @@ private:
 
     // NacosListener
     NacosListener risk_watcher_;
+
+    NacosListener symbol_watcher_;
     
     SymbolConfiguration symbol_params_;
 

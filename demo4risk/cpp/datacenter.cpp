@@ -17,7 +17,6 @@ bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string
 void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, bool is_ask, PipelineContent& ctx)
 {
     
-
     if( is_ask )
     {
         map<SDecimal, SInnerDepth>& src_depths = src.asks;
@@ -50,15 +49,21 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     for( const auto &v : volumes ) {
                         fake.exchanges[v.first] = v.second;
                     }
+                    fake.set_total_volume();
                     
                     if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
                     {
                         SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
 
-                        SDecimal new_price = watermark + symbol_config.PricePrecision;
+                        SDecimal new_price = watermark + symbol_config.MinChangePrice;
 
                         src_depths[new_price] = fake;
 
+                        cout << "Add New Price: " << src.symbol << ", "
+                             << "new price: " << new_price.get_value() << ", "
+                             << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                             << "is_ask: " << is_ask
+                             << endl;                        
                     }
                     else
                     {
@@ -103,14 +108,21 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     for( const auto &v : volumes ) {
                         fake.exchanges[v.first] = v.second;
                     }
+                    fake.set_total_volume();
 
                     if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
                     {
                         SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
 
-                        SDecimal new_price = watermark - symbol_config.PricePrecision;
+                        SDecimal new_price = watermark - symbol_config.MinChangePrice;
 
                         src_depths[new_price] = fake;
+
+                        cout << "Add New Price: " << src.symbol << ", "
+                             << "new price: " << new_price.get_value() << ", "
+                             << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                             << "is_ask: " << is_ask
+                             << endl;
 
                     }
                     else
@@ -407,12 +419,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 {
     if (src.symbol == "BTC_USDT")
     {
-        std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << "/" <<  src.bids.size()<< std::endl;        
+        // std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << "/" <<  src.bids.size()<< std::endl;        
     }
     set_snap(src);
-
     
-
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _calc_watermark();
@@ -420,7 +430,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     if (src.symbol == "BTC_USDT")
     {
-        tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+        // tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
     }
 
     return src;
@@ -752,6 +762,23 @@ void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& co
     //     std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
     // }    
     _push_to_clients();
+}
+
+void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& config)
+{
+    try
+    {
+        cout << "DataCenter::change_configuration SymbolConfiguration" << endl;
+
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        params_.symbol_config = config;
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 }
 
 void DataCenter::change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)

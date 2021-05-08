@@ -30,6 +30,9 @@ public:
     // 配置修改回调
     void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config);
 
+    void on_configuration_update(const map<TSymbol, SymbolConfiguration>& config);
+
+
     // 账户相关回调
     void on_account_update(const AccountInfo& info);
 

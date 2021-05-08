@@ -50,6 +50,14 @@ struct SInnerDepth {
             total_volume += v.second;
         }
     }
+
+    void set_total_volume()
+    {
+        total_volume = 0;
+        for( const auto& v : exchanges ) {
+            total_volume += v.second;
+        }        
+    }
 };
 
 struct HedgeInfo
@@ -337,6 +345,9 @@ public:
     void change_account(const AccountInfo& info);
     // 触发重新计算，并下发行情给所有client
     void change_configuration(const map<TSymbol, QuoteConfiguration>& config);
+
+    void change_configuration(const map<TSymbol, SymbolConfiguration>& config);
+
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
     // 询价查询

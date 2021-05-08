@@ -4,6 +4,7 @@
 void ConfigurationClient::_run()
 {
     add_listener("BCTS", "MarketRisk", risk_watcher_);
+    add_listener("BCTS", "SymbolParams", symbol_watcher_);
 
     while( is_running() ) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -14,16 +15,105 @@ void ConfigurationClient::config_changed(const string& group, const string& data
 {
     _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
     
-    if( group == "BCTS" && dataid == "MarketRisk" ) {
-        risk_params_ = configInfo;
+    if( group == "BCTS" ) {
+
+        if (dataid == "MarketRisk")
+        {
+            risk_params_ = configInfo;
+
+            if( risk_params_.length() > 0 ) {
+                this->_parse_config();
+            }
+
+        }
+
+        if (dataid == "SymbolParams")
+        {
+            load_symbol_params(configInfo);
+        }
+        
     } else {
         _log_and_print("unknown configuration.");
         return;
     }
     
-    if( risk_params_.length() > 0 ) {
-        this->_parse_config();
+
+}
+
+void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
+{
+    try
+    {
+        Document paramsObject;
+        paramsObject.Parse(configInfo.c_str());
+
+        if(paramsObject.HasParseError())
+        {
+            _log_and_print("ConfigurationClient::load_symbol_params error %d", paramsObject.GetParseError());
+            return;
+        }
+
+        if( !paramsObject.IsArray() )
+            return ;
+
+        map<TSymbol, SymbolConfiguration> output;
+
+
+        for( auto iter = paramsObject.Begin() ; iter != paramsObject.End() ; iter++ ) 
+        {
+            SymbolConfiguration config;
+            config.SymbolId = helper_get_string(*iter, "symbol_id", "");
+            config.SymbolKind = helper_get_string(*iter, "symbol_kind", "");
+            config.Bid = helper_get_string(*iter, "bid", "");
+            config.PrimaryCurrency = helper_get_string(*iter, "primary_currency", "");
+            config.BidCurrency = helper_get_string(*iter, "bid_currency", "");
+            config.SettleCurrency = helper_get_string(*iter, "settle_currency", "");
+
+            config.Switch = helper_get_bool(*iter, "switch", false);
+
+            config.AmountPrecision = helper_get_uint32(*iter, "amount_precision", 0);
+            config.PricePrecision = helper_get_uint32(*iter, "price_precision", 0);
+            config.SumPrecision = helper_get_uint32(*iter, "sum_precision", 0);
+
+            config.MinUnit = helper_get_double(*iter, "min_unit", 0);
+            config.MinChangePrice = helper_get_double(*iter, "min_change_price", 0);
+            config.Spread = helper_get_double(*iter, "spread", 0);
+
+            config.FeeKind = helper_get_uint32(*iter, "fee_kind", 0);
+
+            config.TakerFee = helper_get_double(*iter, "taker_fee", 0);
+            config.MakerFee = helper_get_double(*iter, "maker_fee", 0);
+            config.MinOrder = helper_get_double(*iter, "min_order", 0);
+            config.MaxOrder = helper_get_double(*iter, "max_order", 0);
+            config.MinMoney = helper_get_double(*iter, "min_money", 0);
+            config.MaxMoney = helper_get_double(*iter, "max_money", 0);       
+
+            config.BuyPriceLimit = helper_get_double(*iter, "buy_price_limit", 0);         
+            config.SellPriceLimit = helper_get_double(*iter, "sell_price_limit", 0);     
+
+            config.MaxMatchLevel = helper_get_uint32(*iter, "max_match_level", 0);       
+
+            config.OtcMinOrder = helper_get_double(*iter, "otc_min_order", 0);
+            config.OtcMaxOrder = helper_get_double(*iter, "otc_max_order", 0);
+            config.OtcMinPrice = helper_get_double(*iter, "otc_min_price", 0);
+            config.OtcMaxPrice = helper_get_double(*iter, "otc_max_price", 0);                        
+
+
+            config.User = helper_get_string(*iter, "user", "");
+            config.Time = helper_get_string(*iter, "time", "");
+
+            cout << config.desc() << endl;
+
+        }
+
+
+        callback_->on_configuration_update(output);
+
     }
+    catch(const std::exception& e)
+    {
+        std::cerr << "\n[E] ConfigurationClient::load_symbol_params " << e.what() << '\n';
+    }    
 }
 
 bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& output)
@@ -112,16 +202,10 @@ void ConfigurationClient::_parse_config()
     // 合并为内置配置格式
     map<TSymbol, QuoteConfiguration> output;
     if( combine_config(riskParamsObject, output) ) {
-
-        // {
-        //     std::lock_guard<std::mutex> lk(risk_config_mutex_);
-        //     risk_config_ = output;
-        // }
         
         callback_->on_configuration_update(output);
     }
 }
-
 
 bool ConfigurationClient::check_symbol(string symbol)
 {

@@ -190,25 +190,25 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                     low_time_ = low_ == kline_data->px_low ? kline_data->index : low_time_;
                 }
 
-                if (symbol_ == "BTC_USDT")
-                {
-                    std::cout << "TradeKline: " << get_sec_time_str(curr_time) << " "
-                              << "Start: " << get_sec_time_str(ori_data_.begin()->first) << " "
-                              << "End: " << get_sec_time_str(ori_data_.rbegin()->first) << " "
-                              << "size: " << ori_data_.size() << " \n"            
-                              << "open: " << kline_data->px_open.get_value() << " "
-                              << "close: " << kline_data->px_close.get_value() << " "
-                              << "high: " << kline_data->px_high.get_value() << " "
-                              << "low: " << kline_data->px_low.get_value() << " \n"
-                              << "high_time: " << get_sec_time_str(high_time_) << " " << high_.get_value() << " "
-                              << "low_time: " << get_sec_time_str(low_time_) << " " << low_.get_value() << " \n"
-                              << std::endl;
-                }
+                // if (symbol_ == "BTC_USDT")
+                // {
+                //     std::cout << "TradeKline: " << get_sec_time_str(curr_time) << " "
+                //               << "Start: " << get_sec_time_str(ori_data_.begin()->first) << " "
+                //               << "End: " << get_sec_time_str(ori_data_.rbegin()->first) << " "
+                //               << "size: " << ori_data_.size() << " \n"            
+                //               << "open: " << kline_data->px_open.get_value() << " "
+                //               << "close: " << kline_data->px_close.get_value() << " "
+                //               << "high: " << kline_data->px_high.get_value() << " "
+                //               << "low: " << kline_data->px_low.get_value() << " \n"
+                //               << "high_time: " << get_sec_time_str(high_time_) << " " << high_.get_value() << " "
+                //               << "low_time: " << get_sec_time_str(low_time_) << " " << low_.get_value() << " \n"
+                //               << std::endl;
+                // }
 
-                if (is_full() && symbol_ == "BTC_USDT")
-                {
-                    std::cout << symbol_ << "  is Full Now! \n" << std::endl;
-                }
+                // if (is_full() && symbol_ == "BTC_USDT")
+                // {
+                //     std::cout << symbol_ << "  is Full Now! \n" << std::endl;
+                // }
             }
 
             start_price_ = ori_data_.begin()->second->px_open;            
@@ -355,10 +355,10 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
                         //             + ", size: " + std::to_string(kline_data_[cur_symbol][cur_frequency].size()) + ", "
                         //             + get_sec_time_str(pkline_data->index) + "\n");   
 
-                        cout << "KlineUpdate: " << get_sec_time_str(cur_fre_data.rbegin()->second->index) << ", " << pkline_data->symbol << ", "
-                                << "open: " << cur_fre_data.rbegin()->second->px_open.get_value() << ", high: " << cur_fre_data.rbegin()->second->px_high.get_value() << ", "
-                                << "low: " << cur_fre_data.rbegin()->second->px_low.get_value() << ", close: " << cur_fre_data.rbegin()->second->px_close.get_value() << "\n"
-                                << endl;   
+                        // cout << "KlineUpdate: " << get_sec_time_str(cur_fre_data.rbegin()->second->index) << ", " << pkline_data->symbol << ", "
+                        //         << "open: " << cur_fre_data.rbegin()->second->px_open.get_value() << ", high: " << cur_fre_data.rbegin()->second->px_high.get_value() << ", "
+                        //         << "low: " << cur_fre_data.rbegin()->second->px_low.get_value() << ", close: " << cur_fre_data.rbegin()->second->px_close.get_value() << "\n"
+                        //         << endl;   
 
                         // cout << "detailed data" << endl;
                         // for (auto atom_iter:cur_fre_data)
@@ -499,7 +499,7 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
             if (cur_time < last_update_time)
             {
                 std::stringstream stream_obj;
-                stream_obj  << "[Kine] Time Seq is Error , "<< cur_symbol << " current time is " << get_sec_time_str(cur_time)
+                stream_obj  << "[K-Kine] Time Seq is Error , "<< cur_symbol << " current time is " << get_sec_time_str(cur_time)
                             << ", last update time is " << get_sec_time_str(last_update_time) << "\n";
 
                 LOG_ERROR(stream_obj.str());
@@ -1109,11 +1109,11 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
             {
                 last_kline->reset(*kline_data);
 
-                cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
-                <<"close: " << last_kline->px_close.get_value() << " "
-                <<"high: " << last_kline->px_high.get_value() << " "
-                <<"low: " << last_kline->px_low.get_value() << " "                
-                << " ****"<< endl;
+                // cout << "last_kline: " <<"open: " << last_kline->px_open.get_value() << " " 
+                // <<"close: " << last_kline->px_close.get_value() << " "
+                // <<"high: " << last_kline->px_high.get_value() << " "
+                // <<"low: " << last_kline->px_low.get_value() << " "                
+                // << " ****"<< endl;
             }
             else
             {
@@ -1612,28 +1612,28 @@ void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
                     low_time = kline->index;
                 }
 
-                if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
-                {
-                    cout << get_sec_time_str(kline->index) << " "
-                        << kline->px_open.get_value() << " "
-                        << kline->px_close.get_value() << " "
-                        << kline->px_high.get_value() << " "
-                        << kline->px_low.get_value() << " "
-                        << endl; 
-                }
+                // if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
+                // {
+                //     cout << get_sec_time_str(kline->index) << " "
+                //         << kline->px_open.get_value() << " "
+                //         << kline->px_close.get_value() << " "
+                //         << kline->px_high.get_value() << " "
+                //         << kline->px_low.get_value() << " "
+                //         << endl; 
+                // }
                
             }
 
-            if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
-            {
-                cout << "compute_new_trade TradeData: "<<  pTradeData->symbol_ << "\n"
-                    << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
-                    << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
-                    << "high_time: " << get_sec_time_str(high_time) << " high: " << high.get_value() << "\n"
-                    << "low_time: " << get_sec_time_str(low_time)   << " low: " << low.get_value() << "\n"
-                    << "kline_data.size: " << src_kline_data.size() << " \n"
-                    << endl;
-            }
+            // if (strcmp(pTradeData->symbol_, "BTC_USDT") == 0)
+            // {
+            //     cout << "compute_new_trade TradeData: "<<  pTradeData->symbol_ << "\n"
+            //         << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
+            //         << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
+            //         << "high_time: " << get_sec_time_str(high_time) << " high: " << high.get_value() << "\n"
+            //         << "low_time: " << get_sec_time_str(low_time)   << " low: " << low.get_value() << "\n"
+            //         << "kline_data.size: " << src_kline_data.size() << " \n"
+            //         << endl;
+            // }
 
             // cout << "\n"<<  pTradeData->symbol_ << " start_time: " << get_sec_time_str(src_kline_data[0]->index) << " "
             //      << " end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index)
@@ -1708,18 +1708,18 @@ void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr)
             curTradeDataPtr->change_ = curTradeDataPtr->price_.get_value() - cur_time_data.start_price_.get_value();
             curTradeDataPtr->change_rate_ = curTradeDataPtr->change_ / cur_time_data.start_price_.get_value();   
 
-            if (strcmp(curTradeDataPtr->symbol_, "BTC_USDT") == 0)
-            {
-                std::cout << "KlineProcess::update_new_trade: \n" << get_sec_time_str(curTradeDataPtr->time_) << " "
-                            << curTradeDataPtr->symbol_ << " "
-                            << "price: " << curTradeDataPtr->price_.get_value() << " \n"
-                            << "high_time: " << get_sec_time_str(high_time) << " high: " << curTradeDataPtr->high_.get_value() << " \n"
-                            << "low_time:  " << get_sec_time_str(low_time) << " low:  " << curTradeDataPtr->low_.get_value() << " \n"
-                            << "start_time: " << get_sec_time_str(cur_time_data.ori_data_.begin()->first) << " \n"
-                            << "end_time: " << get_sec_time_str(cur_time_data.ori_data_.rbegin()->first) << " \n"
-                            << "data_size: " << cur_time_data.ori_data_.size() << " \n"
-                            << std::endl;
-            }
+            // if (strcmp(curTradeDataPtr->symbol_, "BTC_USDT") == 0)
+            // {
+            //     std::cout << "KlineProcess::update_new_trade: \n" << get_sec_time_str(curTradeDataPtr->time_) << " "
+            //                 << curTradeDataPtr->symbol_ << " "
+            //                 << "price: " << curTradeDataPtr->price_.get_value() << " \n"
+            //                 << "high_time: " << get_sec_time_str(high_time) << " high: " << curTradeDataPtr->high_.get_value() << " \n"
+            //                 << "low_time:  " << get_sec_time_str(low_time) << " low:  " << curTradeDataPtr->low_.get_value() << " \n"
+            //                 << "start_time: " << get_sec_time_str(cur_time_data.ori_data_.begin()->first) << " \n"
+            //                 << "end_time: " << get_sec_time_str(cur_time_data.ori_data_.rbegin()->first) << " \n"
+            //                 << "data_size: " << cur_time_data.ori_data_.size() << " \n"
+            //                 << std::endl;
+            // }
         }
 
     }
