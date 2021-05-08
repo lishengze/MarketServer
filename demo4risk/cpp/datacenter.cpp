@@ -39,7 +39,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                 // {
                 //     std::cout << "filed_price: " << price.get_str_value() << " watermark: " << watermark.get_str_value() << endl;
                 // }
-                // cout << "delete ask depth " << price.get_str_value() << endl;
+                cout << "-- delete ask depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -50,28 +50,33 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                         fake.exchanges[v.first] = v.second;
                     }
                     fake.set_total_volume();
+
+                    if (fake.total_volume.get_value() != 0)
+                    {
+                        if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+                        {
+                            SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+
+                            SDecimal new_price = watermark + symbol_config.MinChangePrice;
+
+                            src_depths[new_price] = fake;
+
+                            cout << "Add New Price: " << src.symbol << ", "
+                                << "new price: " << new_price.get_value() << ", "
+                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask
+                                << endl;                        
+                        }
+                        else
+                        {
+                            cout << "No New Price " << src.symbol << ", "
+                                << "volume: " << fake.total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask
+                                << endl;                             
+                            depth.mix_exchanges(fake, 0, 1);
+                        }
+                    }
                     
-                    if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
-                    {
-                        SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
-
-                        SDecimal new_price = watermark + symbol_config.MinChangePrice;
-
-                        src_depths[new_price] = fake;
-
-                        cout << "Add New Price: " << src.symbol << ", "
-                             << "new price: " << new_price.get_value() << ", "
-                             << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                             << "is_ask: " << is_ask
-                             << endl;                        
-                    }
-                    else
-                    {
-                        depth.mix_exchanges(fake, 0, 1);
-                    }
-
-
-
                     // 
                 } else {
                     break;
@@ -98,7 +103,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                // cout << "delete bid depth " << price.get_str_value() << endl;
+                cout << "-- delete bid depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -110,25 +115,34 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     }
                     fake.set_total_volume();
 
-                    if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+                    if (fake.total_volume.get_value() != 0)
                     {
-                        SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+                        if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+                        {
+                            SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
 
-                        SDecimal new_price = watermark - symbol_config.MinChangePrice;
+                            SDecimal new_price = watermark - symbol_config.MinChangePrice;
 
-                        src_depths[new_price] = fake;
+                            src_depths[new_price] = fake;
 
-                        cout << "Add New Price: " << src.symbol << ", "
-                             << "new price: " << new_price.get_value() << ", "
-                             << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                             << "is_ask: " << is_ask
-                             << endl;
+                            cout << "Add New Price: " << src.symbol << ", "
+                                << "new price: " << new_price.get_value() << ", "
+                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask
+                                << endl;
 
+                        }
+                        else
+                        {
+                            cout << "No New Price " << src.symbol << ", "
+                                << "volume: " << fake.total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask
+                                << endl;                        
+                            depth.mix_exchanges(fake, 0, 1);
+                        }
                     }
-                    else
-                    {
-                        depth.mix_exchanges(fake, 0, 1);
-                    }
+
+
 
                 } else {
                     break;
@@ -426,7 +440,11 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
     _calc_watermark();
-    _filter_by_watermark(src, watermark, ctx);
+    if (watermark.get_value() != 0 )
+    {
+        _filter_by_watermark(src, watermark, ctx);
+    }
+    
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     if (src.symbol == "BTC_USDT")
     {
@@ -772,6 +790,11 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.symbol_config = config;
+
+        for (auto iter:params_.symbol_config)
+        {
+            cout << iter.second.desc() << endl;
+        }
 
     }
     catch(const std::exception& e)

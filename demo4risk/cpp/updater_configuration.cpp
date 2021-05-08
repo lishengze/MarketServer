@@ -102,8 +102,9 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
             config.User = helper_get_string(*iter, "user", "");
             config.Time = helper_get_string(*iter, "time", "");
 
-            cout << config.desc() << endl;
+            // cout << config.desc() << endl;
 
+            output[config.SymbolId] = config;
         }
 
 
