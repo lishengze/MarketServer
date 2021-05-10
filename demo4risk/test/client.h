@@ -35,7 +35,7 @@ using quote::service::v1::QuoteResponse;
 using quote::service::v1::GetParamsResponse;
 using quote::service::v1::TradedOrderStreamData;
 
-using quote::service::v1::MultiOrderStreamData;
+using quote::service::v1::TradedOrderStreamData;
 
 using GrpcRiskControllerService = quote::service::v1::RiskController;
 
@@ -45,10 +45,10 @@ public:
     SyncClient(std::shared_ptr<Channel> channel):
         stub_{GrpcRiskControllerService::NewStub(channel)}
     {
-        // cout << "Client connect: " << stub_-> 
+
     }
 
     void PutOrderStream();
 
-    std::unique_ptr<GrpcRiskControllerService::Stub>  stub_;    
+    std::unique_ptr<GrpcRiskControllerService::Stub>  stub_{nullptr};    
 };

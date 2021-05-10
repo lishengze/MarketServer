@@ -33,11 +33,10 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
 add_executable(test ${DIR_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
-target_link_libraries(demo4risk ${Boost_LIBRARIES})
-target_link_libraries(demo4risk pandora)
-target_link_libraries(demo4risk log4cplus)
-target_link_libraries(demo4risk nacos-cli)
-target_link_libraries(demo4risk protobuf protoc protobuf-lite)
-target_link_libraries(demo4risk grpc++_reflection grpc++ gpr ssl crypto)
+target_link_libraries(test ${Boost_LIBRARIES})
+target_link_libraries(test pandora)
+target_link_libraries(test nacos-cli)
+target_link_libraries(test protobuf protoc protobuf-lite)
+target_link_libraries(test grpc++_reflection grpc++ gpr ssl crypto)
 
 ###############################################################################################

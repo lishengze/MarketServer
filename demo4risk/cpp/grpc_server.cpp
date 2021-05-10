@@ -22,14 +22,22 @@ void ServerEndpoint::init(const string& grpc_addr)
     int call_id = 0;
 
     caller_marketstream4broker_ = new GrpcCall<MarketStream4BrokerEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
 
     caller_marketstream4hedge_ = new GrpcCall<MarketStream4HedgeEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
     
     caller_marketstream4client_ = new GrpcCall<MarketStream4ClientEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
 
     caller_otcquete_ = new GrpcCall<OtcQuoteEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
     
     caller_getparams_ = new GrpcCall<GetParamsEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
+
+    caller_hedge_order_ = new GrpcCall<TradeOrderEntity>(call_id, &service_, cq_.get(), cacher_);
+    ++call_id;
 }
 
 void ServerEndpoint::publish4Hedge(const string& symbol, std::shared_ptr<MarketStreamData> snap, std::shared_ptr<MarketStreamData> update)

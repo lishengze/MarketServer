@@ -61,4 +61,6 @@ private:
     GrpcCall<OtcQuoteEntity>* caller_otcquete_;
     // 查询内部参数
     GrpcCall<GetParamsEntity>* caller_getparams_;
+
+    GrpcCall<TradeOrderEntity>* caller_hedge_order_;
 };

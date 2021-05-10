@@ -39,7 +39,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                 // {
                 //     std::cout << "filed_price: " << price.get_str_value() << " watermark: " << watermark.get_str_value() << endl;
                 // }
-                cout << "-- delete ask depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
+                // cout << "-- delete ask depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -61,18 +61,18 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                             src_depths[new_price] = fake;
 
-                            cout << "Add New Price: " << src.symbol << ", "
-                                << "new price: " << new_price.get_value() << ", "
-                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask
-                                << endl;                        
+                            // cout << "Add New Price: " << src.symbol << ", "
+                            //     << "new price: " << new_price.get_value() << ", "
+                            //     << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                            //     << "is_ask: " << is_ask
+                            //     << endl;                        
                         }
                         else
                         {
-                            cout << "No New Price " << src.symbol << ", "
-                                << "volume: " << fake.total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask
-                                << endl;                             
+                            // cout << "No New Price " << src.symbol << ", "
+                            //     << "volume: " << fake.total_volume.get_value() << ", "
+                            //     << "is_ask: " << is_ask
+                            //     << endl;                             
                             depth.mix_exchanges(fake, 0, 1);
                         }
                     }
@@ -103,7 +103,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                cout << "-- delete bid depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
+                // cout << "-- delete bid depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -125,19 +125,19 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                             src_depths[new_price] = fake;
 
-                            cout << "Add New Price: " << src.symbol << ", "
-                                << "new price: " << new_price.get_value() << ", "
-                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask
-                                << endl;
+                            // cout << "Add New Price: " << src.symbol << ", "
+                            //     << "new price: " << new_price.get_value() << ", "
+                            //     << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                            //     << "is_ask: " << is_ask
+                            //     << endl;
 
                         }
                         else
                         {
-                            cout << "No New Price " << src.symbol << ", "
-                                << "volume: " << fake.total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask
-                                << endl;                        
+                            // cout << "No New Price " << src.symbol << ", "
+                            //     << "volume: " << fake.total_volume.get_value() << ", "
+                            //     << "is_ask: " << is_ask
+                            //     << endl;                        
                             depth.mix_exchanges(fake, 0, 1);
                         }
                     }
@@ -575,6 +575,9 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
 SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {        
+    try
+    {
+        // cout << "OrderBookWorker::process " << endl;
     if (ctx.params.hedage_info.find(src.symbol) != ctx.params.hedage_info.end())
     {
         HedgeInfo& hedage_info = ctx.params.hedage_info[src.symbol];
@@ -589,13 +592,15 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter->second.total_volume > ask_amount)
                 {
+                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " amount: " << iter->second.total_volume.get_value() << " minus " << ask_amount << endl;
                     iter->second.total_volume -= ask_amount;
                     break;
                 }
                 else
                 {
-                    iter->second.total_volume = 0;
+                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " is deleted, delete amount: " << iter->second.total_volume.get_value() << endl;                    
                     ask_amount -= iter->second.total_volume.get_value();
+                    iter->second.total_volume = 0;
                     delete_price.push_back(iter->first);
                 }
             }
@@ -616,13 +621,17 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter.second.total_volume > bid_amount)
                 {
+                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " amount: " << iter.second.total_volume.get_value() << " minus " << bid_amount << endl;
+
                     iter.second.total_volume -= bid_amount;
                     break;
                 }
                 else
                 {
-                    iter.second.total_volume = 0;
+                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " is deleted, delete amount: " << iter.second.total_volume.get_value() << endl;                    
+
                     bid_amount -= iter.second.total_volume.get_value();
+                    iter.second.total_volume = 0;
                     delete_price.push_back(iter.first);
                 }
             }
@@ -635,6 +644,13 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
     }
     return src;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+
     /*
     auto orderBookIter = ctx.params.cache_order.find(src->symbol);
     if( orderBookIter != ctx.params.cache_order.end() ) 
@@ -666,7 +682,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             }
         }
     }*/
-    return src;
+    // return src;
 };
 
 SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
@@ -698,7 +714,7 @@ DataCenter::DataCenter() {
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&account_worker_);
-    //pipeline_.add_worker(&orderbook_worker_);
+    pipeline_.add_worker(&orderbook_worker_);
 }
 
 DataCenter::~DataCenter() {
@@ -914,7 +930,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
 
         if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
         {
-            std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+            // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
         }
 
         // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
@@ -935,7 +951,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
 
         if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
         {
-            std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+            // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
         }        
 
         // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
