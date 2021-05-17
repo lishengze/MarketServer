@@ -343,6 +343,8 @@ KlineHubber::KlineHubber()
     min1_cache_.set_resolution(60);
     min60_cache_.set_limit(KLINE_CACHE_MIN60);
     min60_cache_.set_resolution(3600);
+
+    load_db_data();
 }
 
 KlineHubber::~KlineHubber()
@@ -350,7 +352,20 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs)
+void KlineHubber::load_db_data()
+{
+    try
+    {
+        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"\n[E]KlineHubber::load_db_data " << e.what() << '\n';
+    }
+
+}
+
+void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init, vector<KlineData>& outputs, bool is_restart)
 {
     vector<KlineData> output_60mins, nouse;
     // 写入cache
@@ -380,8 +395,13 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
     // }
 
     // 写入db缓存区
-    db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
-    db_interface_->on_kline(exchange, symbol, 3600, output_60mins, is_init);
+
+    if (!is_restart)
+    {
+        db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
+        db_interface_->on_kline(exchange, symbol, 3600, output_60mins, is_init);
+    }
+
 
     // 更新回调
     if( !is_init && outputs.size() > 0 )

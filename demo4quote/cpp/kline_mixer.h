@@ -106,11 +106,14 @@ public:
 
     void set_db_interface(IDataProvider* db_interfacce) { db_interface_ = db_interfacce; }
 
-    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init, vector<KlineData>& outputs);
+    void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init, vector<KlineData>& outputs, bool is_restart=false);
 
     // IDataCacher
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
     void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60);
+
+    // restart from database;
+    void load_db_data();
 
 private:
     set<IKlinePusher*> callbacks_;
