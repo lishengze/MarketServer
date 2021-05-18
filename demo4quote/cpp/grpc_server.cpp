@@ -91,6 +91,9 @@ void ServerEndpoint::on_kline(const TExchange& exchange, const TSymbol& symbol, 
     vassign(tmp.symbol, symbol);
     vassign(tmp.resolution, resolution);
     tmp.klines = klines;
+    
+    // cout << "ServerEndpoint::on_kline add_data " << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;
+
     caller_getlast_->add_data(tmp);
 
     /*

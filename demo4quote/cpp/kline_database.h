@@ -20,6 +20,8 @@ public:
     // resolution: 60 - min1 / 3600 - min60
     // is_init：是否第一次更新
     virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init) = 0;
+
+    virtual void get_all_data(vector<KlineData>& data) { };
 };
 
 #define KLINE_MIN1_TABLENAME     "kline_min1"
@@ -33,6 +35,10 @@ public:
     ~KlineDatabase();
 
     void start();
+
+    virtual void get_all_data(vector<KlineData>& data);
+
+    void get_db_data(SQLite::Statement& stmt, int resolution, vector<KlineData>& result);
 
     // IDataProvider
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);
@@ -60,6 +66,9 @@ private:
     };
     SQLite::Database db_;
     Table table_;
+    SQLite::Statement stmtMin1SelectAllData;
+    SQLite::Statement stmtMin60SelectAllData;
+
     SQLite::Statement stmtMin1SelectDataByExchangeSymbolIndex;
     SQLite::Statement stmtMin1ReplaceDataByExchangeSymbolIndex;
     SQLite::Statement stmtMin1SelectDataByExchangeSymbolIndexRange;

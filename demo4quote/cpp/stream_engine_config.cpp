@@ -66,7 +66,7 @@ string Config::get_config() const
 
 void Config::set_config(const string& config)
 {
-    _log_and_print("set config %s", config);
+    // _log_and_print("set config %s", config);
     std::unique_lock<std::mutex> inner_lock{ mutex_faw_config_ };
     faw_config_ = config;
 }

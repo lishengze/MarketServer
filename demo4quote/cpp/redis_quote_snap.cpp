@@ -68,7 +68,7 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
 {    
     // 请求redis key
     string depth_key = make_redis_depth_key(exchange, symbol);
-    _log_and_print("RedisSnapRequester: get snap %s", depth_key);
+    // _log_and_print("RedisSnapRequester: get snap %s", depth_key);
     string depthData = redis_sync_api_->SyncGet(depth_key);
 
     // 

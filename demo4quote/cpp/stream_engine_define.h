@@ -11,6 +11,7 @@
 #include <cstring>
 #include <chrono>
 #include <fstream>
+#include <sstream>
 using namespace std;
 #include "redis_quote_define.h"
 
@@ -110,6 +111,17 @@ struct SymbolFee
             dst = src;
         }
     }
+
+    string str()
+    {
+        stringstream s_obj;
+
+        s_obj << "fee_type: " << fee_type << " "
+              << "maker_fee: " << maker_fee << " "
+              << "taker_fee: " << taker_fee << " ";
+        
+        return s_obj.str();
+    }
 };
 
 struct SNacosConfigByExchange
@@ -120,6 +132,19 @@ struct SNacosConfigByExchange
     type_uint32 vprecise;   // 成交量精度
     type_uint32 aprecise;   // 成交额精度（暂时没用）
     float frequency;        // 更新频率(每秒frequency次)
+
+    string str() {
+        stringstream s_obj;
+        s_obj << "fee: " << fee.str() << " "
+            << "depth: " << depth << " "
+            << "precise: " << precise << " "
+            << "vprecise: " << vprecise << " "
+            << "aprecise: " << aprecise << " "
+            << "frequency: " << frequency << " ";
+        
+        return s_obj.str();
+    }
+
 };
 
 struct SNacosConfig
@@ -129,7 +154,7 @@ struct SNacosConfig
     type_uint32 precise;    // 价格精度
     type_uint32 vprecise;   // 成交量精度
     type_uint32 aprecise;   // 成交额精度
-    unordered_map<TExchange, SNacosConfigByExchange> exchanges;    
+    unordered_map<TExchange, SNacosConfigByExchange> exchanges;
 
     unordered_set<TExchange> get_exchanges() const {
         unordered_set<TExchange> ret;
@@ -137,5 +162,23 @@ struct SNacosConfig
             ret.insert(v.first);
         }
         return ret;
+    }
+
+    string str()
+    {
+        stringstream s_obj;
+
+        s_obj << "depth: " << depth << " "
+              << "frequency: " << frequency << " "
+              << "precise: " << precise << " "
+              << "vprecise: " << vprecise << " "
+              << "aprecise: " << vprecise << " \n";
+
+        for (auto iter:exchanges)
+        {
+            s_obj << iter.first << " " << iter.second.str() << "\n";
+        }
+
+        return s_obj.str();
     }
 };

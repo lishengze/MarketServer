@@ -65,6 +65,8 @@ void StreamEngine::start()
     config_client_.set_callback(this);
     std::cout << "Nacos Address: " << CONFIG->nacos_addr_ << " name: " << CONFIG->nacos_namespace_ << std::endl;
     config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
+
+    kline_hubber_.recover_from_db();
 }
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
@@ -221,8 +223,7 @@ void StreamEngine::on_config_channged(const Document& src)
         expand_replay_config(src, d);
     }
 
-    std::cout << "\n\n *** StreamEngine::on_config_channged *** \n"
-              << content << std::endl;
+    std::cout << "\n\n *** StreamEngine::on_config_channged ***" <<endl;
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;
@@ -256,6 +257,9 @@ void StreamEngine::on_config_channged(const Document& src)
                 cfg.exchanges[exchange] = exchange_cfg;
             } 
             symbols[symbol] = cfg;
+
+            cout << "symbol: " << symbol << " \n"
+                 << cfg.str() << endl;
         }
     }
     catch(nlohmann::detail::exception& e)

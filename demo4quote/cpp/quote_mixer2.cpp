@@ -290,7 +290,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
 void QuoteMixer2::set_config(const TSymbol& symbol, const SMixerConfig& config)
 {
-    _log_and_print("QuoteMixer2::set_config %s", symbol);
+    // _log_and_print("QuoteMixer2::set_config %s", symbol);
     std::unique_lock<std::mutex> l{ mutex_config_ };
     configs_[symbol] = config;
 }

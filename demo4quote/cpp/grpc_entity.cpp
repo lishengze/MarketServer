@@ -301,6 +301,8 @@ void GetLastEntity::on_init()
 void GetLastEntity::add_data(const WrapperKlineData& data)
 {
     datas_.enqueue(data);
+
+    cout << "GetLastEntity::add_data " << datas_.size_approx() << endl;
 }
 
 void GetLastEntity::register_call()

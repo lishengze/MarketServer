@@ -139,6 +139,8 @@ KlineDatabase::KlineDatabase()
 : thread_run_(true)
 , db_(db_name, SQLite::OPEN_READWRITE|SQLite::OPEN_CREATE)
 , table_(db_)
+, stmtMin1SelectAllData(db_,  "SELECT * FROM " KLINE_MIN1_TABLENAME ";")
+, stmtMin60SelectAllData(db_, "SELECT * FROM " KLINE_MIN60_TABLENAME ";")
 , stmtMin1SelectDataByExchangeSymbolIndex(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and TimeIndex = ?;")
 , stmtMin1ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN1_TABLENAME " VALUES (?,?,?,?,?,?,?);")
 , stmtMin1SelectDataByExchangeSymbolIndexRange(db_, "SELECT * FROM " KLINE_MIN1_TABLENAME " WHERE Exchange = ? and Symbol = ? and (TimeIndex between ? and ?) order by TimeIndex DESC limit 30;")
@@ -146,7 +148,8 @@ KlineDatabase::KlineDatabase()
 , stmtMin60ReplaceDataByExchangeSymbolIndex(db_, "REPLACE INTO " KLINE_MIN60_TABLENAME " VALUES (?,?,?,?,?,?,?);")
 , stmtMin60SelectDataByExchangeSymbolIndexRange(db_, "SELECT * FROM " KLINE_MIN60_TABLENAME " WHERE Exchange = ? and Symbol = ? and (TimeIndex between ? and ?) order by TimeIndex DESC limit 30;")
 {
-
+    vector<KlineData> stored_data;
+    // get_all_data(stored_data);
 }
 
 KlineDatabase::~KlineDatabase()
@@ -163,6 +166,58 @@ KlineDatabase::~KlineDatabase()
 void KlineDatabase::start()
 {
     _flush_thrd = new std::thread(&KlineDatabase::_flush_thread, this);
+
+}
+
+void KlineDatabase::get_all_data(vector<KlineData>& result)
+{
+    try
+    {
+        get_db_data(stmtMin1SelectAllData, 60, result);
+
+        get_db_data(stmtMin60SelectAllData, 3600, result);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"\n[E]KlineDatabase::get_all_data " << e.what() << '\n';
+    }    
+}
+
+void KlineDatabase::get_db_data(SQLite::Statement& stmt, int resolution, vector<KlineData>& result)
+{
+    try
+    {
+        cout << "get_db_data " << resolution << endl;
+
+        while(stmt.executeStep())
+        {
+            vector<KlineData> kline_data_vec;
+            
+            string data = stmt.getColumn("Data").getString();
+
+            decode_dbdata(data, kline_data_vec);
+
+            string exchange = stmt.getColumn("Exchange").getString();
+            string symbol = stmt.getColumn("Symbol").getString();         
+
+            cout << "exchange: " << exchange << ", symbol: " << symbol << ", resolution: " << resolution << ", data_count: " << kline_data_vec.size() << endl;
+              
+            for (auto& kline_data:kline_data_vec)
+            {
+                kline_data.exchange = exchange;
+                kline_data.symbol = symbol;
+                kline_data.resolution = resolution;
+
+                result.emplace_back(kline_data);
+            }
+
+            kline_data_vec.clear();            
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"\n[E] KlineDatabase::get_db_data " << e.what() << '\n';
+    }
 
 }
 

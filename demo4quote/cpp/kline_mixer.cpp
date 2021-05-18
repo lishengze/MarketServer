@@ -41,7 +41,7 @@ void MixCalculator::set_symbol(const TSymbol& symbol, const unordered_set<TExcha
     auto iter = caches_.find(symbol);
     if( iter == caches_.end() ) {
         for( const auto& exchange : exchanges ) {
-            std::cout << "\nMixCalculator::set_symbol" << symbol << " " << exchange << std::endl;
+            // std::cout << "\nMixCalculator::set_symbol " << symbol << " " << exchange << std::endl;
             caches_[symbol][exchange] = new CalcCache();
         }
         return;
@@ -342,9 +342,7 @@ KlineHubber::KlineHubber()
     min1_cache_.set_limit(KLINE_CACHE_MIN1);
     min1_cache_.set_resolution(60);
     min60_cache_.set_limit(KLINE_CACHE_MIN60);
-    min60_cache_.set_resolution(3600);
-
-    load_db_data();
+    min60_cache_.set_resolution(3600);    
 }
 
 KlineHubber::~KlineHubber()
@@ -352,15 +350,32 @@ KlineHubber::~KlineHubber()
 
 }
 
-void KlineHubber::load_db_data()
+void KlineHubber::recover_from_db()
 {
     try
     {
-        
+        vector<KlineData> all_db_data;
+
+        cout << "KlineHubber::recover_from_db " << endl;
+
+        db_interface_->get_all_data(all_db_data);
+
+        cout << "all_db_data.size: " << all_db_data.size() << " "
+             << "callbacks_.size: " << callbacks_.size() << " "
+             << endl;
+
+        for(KlineData& kline_data:all_db_data)
+        {
+            for( const auto& v : callbacks_) {
+                vector<KlineData> tmp_data;
+                tmp_data.emplace_back(kline_data);
+                v->on_kline(kline_data.exchange, kline_data.symbol, kline_data.resolution, tmp_data);
+            }            
+        }
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"\n[E]KlineHubber::load_db_data " << e.what() << '\n';
+        std::cerr <<"\n[E]KlineHubber::recover_from_db " << e.what() << '\n';
     }
 
 }

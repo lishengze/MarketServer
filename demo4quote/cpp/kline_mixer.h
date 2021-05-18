@@ -113,7 +113,7 @@ public:
     void fill_cache(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min1, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& cache_min60);
 
     // restart from database;
-    void load_db_data();
+    void recover_from_db();
 
 private:
     set<IKlinePusher*> callbacks_;

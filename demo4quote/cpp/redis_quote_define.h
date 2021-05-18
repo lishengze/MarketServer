@@ -80,6 +80,10 @@ struct KlineData
     SDecimal px_close;
     SDecimal volume;
 
+    string exchange;
+    string symbol;
+    int    resolution;
+
     KlineData(){
         index = 0;
         volume = 0;
