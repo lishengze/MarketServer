@@ -22,6 +22,8 @@ public:
     virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init) = 0;
 
     virtual void get_all_data(vector<KlineData>& data) { };
+
+    virtual void get_data(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& data, int resolution) { };
 };
 
 #define KLINE_MIN1_TABLENAME     "kline_min1"
@@ -39,6 +41,10 @@ public:
     virtual void get_all_data(vector<KlineData>& data);
 
     void get_db_data(SQLite::Statement& stmt, int resolution, vector<KlineData>& result);
+
+    void get_db_data(SQLite::Statement& stmt, int resolution, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& result);
+
+    virtual void get_data(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& data, int resolution);
 
     // IDataProvider
     bool get_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, type_tick start_time, type_tick end_time, vector<KlineData>& klines);

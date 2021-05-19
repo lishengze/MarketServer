@@ -183,6 +183,65 @@ void KlineDatabase::get_all_data(vector<KlineData>& result)
     }    
 }
 
+void KlineDatabase::get_data(unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& result, int resolution)
+{
+    try
+    {
+        
+
+        if (resolution == 3600)
+        {
+            get_db_data(stmtMin60SelectAllData, resolution, result);
+        }
+
+        if (resolution == 60)
+        {
+            get_db_data(stmtMin1SelectAllData, resolution, result);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "\n[E] " << e.what() << '\n';
+    }
+    
+}
+
+void KlineDatabase::get_db_data(SQLite::Statement& stmt, int resolution, unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>>& result)
+{
+    try
+    {
+        while(stmt.executeStep())
+        {
+            vector<KlineData> kline_data_vec;
+            
+            string data = stmt.getColumn("Data").getString();
+
+            decode_dbdata(data, kline_data_vec);
+
+            string exchange = stmt.getColumn("Exchange").getString();
+            string symbol = stmt.getColumn("Symbol").getString();         
+
+            cout << "exchange: " << exchange << ", symbol: " << symbol << ", resolution: " << resolution << ", data_count: " << kline_data_vec.size() << endl;
+            
+            for (auto& kline_data:kline_data_vec)
+            {
+                kline_data.exchange = exchange;
+                kline_data.symbol = symbol;
+                kline_data.resolution = resolution;
+
+                result[exchange][symbol].emplace_back(kline_data);
+            }
+
+            kline_data_vec.clear();            
+        }           
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+}
+
 void KlineDatabase::get_db_data(SQLite::Statement& stmt, int resolution, vector<KlineData>& result)
 {
     try

@@ -296,6 +296,8 @@ void GetLastEntity::on_init()
             datas_.enqueue(symbol_kline);
         }
     }
+
+    cout << "GetLastEntity::on_init datas_.size:  " << datas_.size_approx() << endl;
 }
 
 void GetLastEntity::add_data(const WrapperKlineData& data)

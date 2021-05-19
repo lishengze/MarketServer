@@ -92,6 +92,8 @@ private:
     void _shorten(vector<KlineData>& datas);
 
     mutable std::mutex mutex_data_;
+
+public:    
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_60min_;
 };

@@ -44,10 +44,10 @@ public:
         type_tick now = get_miliseconds();
         type_tick delay = now - depth.tick1;
         delays_raw_.push_back(delay);
-        if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" && (now/1000 - last_output_time_) >= 1) {
-            _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(depth.tick/1000000000), now/1000 - depth.tick/1000000000);
-            last_output_time_ = now / 1000;
-        }
+        // if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" && (now/1000 - last_output_time_) >= 1) {
+        //     _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(depth.tick/1000000000), now/1000 - depth.tick/1000000000);
+        //     last_output_time_ = now / 1000;
+        // }
         return 0;
     }
 
@@ -57,7 +57,7 @@ public:
         if( stopped_ )
             return 0;
 
-        cout << exchange << " " << symbol << " " << depth.ask_length << " / " <<  depth.bid_length << std::endl;
+        // cout << exchange << " " << symbol << " " << depth.ask_length << " / " <<  depth.bid_length << std::endl;
 
         type_tick now = get_miliseconds();
         type_tick delay = now - depth.tick1;
@@ -184,16 +184,19 @@ public:
 
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
     { 
-        if( string(exchange) == "_bcts_" && string(symbol) == "BTC_USDT" )
-        {
-            for( int i = 0 ; i < klines.size() ; i ++ )
-            {
-                tfm::printfln("[kline %u] %s.%s index=%s(%u) open=%s high=%s low=%s close=%s volume=%s", resolution, exchange, symbol, 
-                    utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].index,
-                    klines[i].px_open.get_str_value(), klines[i].px_high.get_str_value(), klines[i].px_low.get_str_value(),
-                    klines[i].px_close.get_str_value(), klines[i].volume.get_str_value());
-            }
-        }
+
+        cout << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;
+
+        // if( string(exchange) == "_bcts_" && string(symbol) == "BTC_USDT" )
+        // {
+        //     for( int i = 0 ; i < klines.size() ; i ++ )
+        //     {
+        //         tfm::printfln("[kline %u] %s.%s index=%s(%u) open=%s high=%s low=%s close=%s volume=%s", resolution, exchange, symbol, 
+        //             utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S"), klines[i].index,
+        //             klines[i].px_open.get_str_value(), klines[i].px_high.get_str_value(), klines[i].px_low.get_str_value(),
+        //             klines[i].px_close.get_str_value(), klines[i].volume.get_str_value());
+        //     }
+        // }
         /*
         if( klines.size() > 5 )
             return 0;
@@ -262,8 +265,8 @@ void test_get_lasttrades()
 
 int main()
 {
-    //Client client;
-    PressurePerformanceClient client;
+    Client client;
+    // PressurePerformanceClient client;
     HubInterface::set_callback(&client);
     HubInterface::start();
 
