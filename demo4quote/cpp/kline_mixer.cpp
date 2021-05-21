@@ -368,7 +368,7 @@ void KlineHubber::recover_from_db()
         // cout << "KlineHubber::recover_from_db " << endl;
 
         vector<KlineData> output, nouse;
-        cout << "min1_cache_: " << endl;
+        // cout << "min1_cache_: " << endl;
         for (auto iter1:data_1)
         {
             for (auto iter2:iter1.second)
@@ -379,7 +379,7 @@ void KlineHubber::recover_from_db()
             }
         }
 
-        cout << "min60_cache_: " << endl;
+        // cout << "min60_cache_: " << endl;
         for (auto iter1:data_60)
         {
             for (auto iter2:iter1.second)
@@ -387,6 +387,31 @@ void KlineHubber::recover_from_db()
                 min60_cache_.update_kline(iter1.first, iter2.first, iter2.second, output, nouse);
 
                 // cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
+            }
+        }
+
+        cout << "min1_cache_: " << endl;
+        for (auto iter1:min1_cache_.data_)
+        {
+            for (auto iter2:iter1.second)
+            {
+                cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
+            }
+        }
+
+        cout << "min60_cache_: " << endl;
+        for (auto iter1:min60_cache_.data_)
+        {
+            for (auto iter2:iter1.second)
+            {
+                vector<KlineData>& detail_kline_data = iter2.second;
+
+                cout << iter1.first << " " << iter2.first << " " << detail_kline_data.size() << endl;
+
+                for (auto& kline_data:detail_kline_data)
+                {
+                    cout << utrade::pandora::get_sec_time_str(kline_data.index) << endl;
+                }
             }
         }
 
