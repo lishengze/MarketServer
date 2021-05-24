@@ -362,7 +362,7 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
                 if (package)
                 {
                     package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
-                    // front_server_->deliver_request(package);
+                    front_server_->deliver_request(package);
                 }
                 else
                 {

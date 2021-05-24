@@ -62,7 +62,7 @@ void DataProcess::handle_request_message(PackagePtr package)
 {
     try
     {
-        cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
+        // cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
 
         switch (package->Tid())
         {

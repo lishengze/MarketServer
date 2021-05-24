@@ -283,22 +283,24 @@ void KlineProcess::request_kline_package(PackagePtr package)
             }
             else
             {
-                check_websocket_subinfo(pReqKlineData);
 
-                PackagePtr rsp_package = get_kline_package(package);
+                cout << "\n****** Reqeust Kline Last Step " << endl;
+                // check_websocket_subinfo(pReqKlineData);
 
-                if (rsp_package)
-                {
-                    init_update_kline_data(rsp_package, pReqKlineData);
+                // PackagePtr rsp_package = get_kline_package(package);
 
-                    // cout << "deliver_response " << endl;
-                    process_engine_->deliver_response(rsp_package);
-                }
-                else
-                {
-                    cout << "Error!" << endl;
-                    // process_engine_->deliver_request(package);
-                }     
+                // if (rsp_package)
+                // {
+                //     init_update_kline_data(rsp_package, pReqKlineData);
+
+                //     // cout << "deliver_response " << endl;
+                //     process_engine_->deliver_response(rsp_package);
+                // }
+                // else
+                // {
+                //     cout << "Error!" << endl;
+                //     // process_engine_->deliver_request(package);
+                // }     
             }       
         }
         else

@@ -21,7 +21,7 @@ void DepthProces::init_process_engine(DataProcessPtr process_engine)
 
 void DepthProces::request_symbol_list_package(PackagePtr package)
 {
-    cout << "DepthProces::request_symbol_list_package " << endl;
+    // cout << "DepthProces::request_symbol_list_package " << endl;
 
     std::set<string> symbols;
 
