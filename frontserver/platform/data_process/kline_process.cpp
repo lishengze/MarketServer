@@ -296,7 +296,7 @@ void KlineProcess::request_kline_package(PackagePtr package)
                     init_update_kline_data(rsp_package, pReqKlineData);
 
                     // cout << "deliver_response " << endl;
-                    // process_engine_->deliver_response(rsp_package);
+                    process_engine_->deliver_response(rsp_package);
                 }
                 else
                 {
