@@ -284,10 +284,12 @@ void KlineProcess::request_kline_package(PackagePtr package)
             else
             {
 
-                cout << "\n****** Reqeust Kline Last Step " << endl;
-                // check_websocket_subinfo(pReqKlineData);
+                
+                check_websocket_subinfo(pReqKlineData);
 
-                // PackagePtr rsp_package = get_kline_package(package);
+                PackagePtr rsp_package = get_kline_package(package);
+
+                cout << "\n****** Reqeust Kline Last Step " << endl;
 
                 // if (rsp_package)
                 // {
