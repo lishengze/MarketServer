@@ -144,5 +144,16 @@ void HubEntity::on_kline(const SEKlineData& quote)
         SEKlineToKline(kline, _kline);
         klines.push_back(_kline);
     }
+
+    // if (MIX_EXCHANGE_NAME == quote.exchange())
+    // {
+    //     cout <<"HubEntity::on_kline " << quote.exchange().c_str() << " " 
+    //          << quote.symbol().c_str() << " "
+    //          << quote.resolution() << " "
+    //          << klines.size() 
+    //          << endl;
+         
+    // }
+    
     callback_->on_kline(quote.exchange().c_str(), quote.symbol().c_str(), quote.resolution(), klines);
 }

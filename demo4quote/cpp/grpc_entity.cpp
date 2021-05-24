@@ -275,7 +275,29 @@ void GetLastEntity::on_init()
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60;
     cacher_->fill_cache(cache_min1, cache_min60);
-    tfm::printfln("kline get last registered, init min1/%u min60/%u", cache_min1.size(), cache_min60.size());
+    tfm::printfln("\n\nkline get last registered, init min1/%u min60/%u", cache_min1.size(), cache_min60.size());
+
+    // cout << "min1_cache_: " << endl;
+    // for (auto iter1:cache_min1)
+    // {
+    //     for (auto iter2:iter1.second)
+    //     {
+    //         cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
+    //     }
+    // }
+
+    // cout << "min60_cache_: " << endl;
+    // for (auto iter1:cache_min60)
+    // {
+    //     for (auto iter2:iter1.second)
+    //     {
+    //         vector<KlineData>& detail_kline_data = iter2.second;
+
+    //         cout << iter1.first << " " << iter2.first << " " << detail_kline_data.size() << endl;
+    //     }
+    // }
+
+    int data1_count = 0;
     for( const auto& v : cache_min1 ) {
         for( const auto& v2 : v.second ) {
             WrapperKlineData symbol_kline;
@@ -284,8 +306,11 @@ void GetLastEntity::on_init()
             symbol_kline.resolution = 60;
             symbol_kline.klines = v2.second;
             datas_.enqueue(symbol_kline);
+            // data1_count++;
         }
     }
+
+    int data60_count = 0;
     for( const auto& v : cache_min60 ) {
         for( const auto& v2 : v.second ) {
             WrapperKlineData symbol_kline;
@@ -294,10 +319,12 @@ void GetLastEntity::on_init()
             symbol_kline.resolution = 3600;
             symbol_kline.klines = v2.second;
             datas_.enqueue(symbol_kline);
+            // data60_count++;
         }
     }
 
-    cout << "GetLastEntity::on_init datas_.size:  " << datas_.size_approx() << endl;
+    cout << "GetLastEntity::on_init data1_count: " << data1_count << ", data60_count: " 
+         << data60_count << ", datas_.size:  " << datas_.size_approx() << "\n\n" << endl;
 }
 
 void GetLastEntity::add_data(const WrapperKlineData& data)
@@ -331,6 +358,8 @@ bool GetLastEntity::process()
             kline_to_pbkline(v.klines[i], resp->add_klines());
         }
     }
+
+    cout << "GetLastEntity::process reply.size: " << reply.data_size() << endl;
 
     if( reply.data_size() > 0 ) {
         responder_.Write(reply, this);      

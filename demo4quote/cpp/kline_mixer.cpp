@@ -182,7 +182,7 @@ void KlineCache::update_kline(const TExchange& exchange, const TSymbol& symbol, 
         vector<KlineData> patch;
         type_tick fix_index = last.index + this->resolution_;
         while( fix_index < first.index ) {
-            tfm::printfln("%s.%s kline patch index=%u to %u", exchange, symbol, fix_index, first.index);
+            // tfm::printfln("%s.%s kline patch index=%u to %u", exchange, symbol, fix_index, first.index);
             KlineData tmp = last;
             tmp.index = fix_index;
             tmp.volume = 0;
@@ -408,10 +408,10 @@ void KlineHubber::recover_from_db()
 
                 cout << iter1.first << " " << iter2.first << " " << detail_kline_data.size() << endl;
 
-                for (auto& kline_data:detail_kline_data)
-                {
-                    cout << utrade::pandora::get_sec_time_str(kline_data.index) << endl;
-                }
+                // for (auto& kline_data:detail_kline_data)
+                // {
+                //     cout << utrade::pandora::get_sec_time_str(kline_data.index) << endl;
+                // }
             }
         }
 

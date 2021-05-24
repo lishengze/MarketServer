@@ -41,6 +41,8 @@ void DataReceive::launch()
 
     init_grpc_interface();
 
+    init_statistic_thread();
+
     test_main();    
 }
 
@@ -48,6 +50,31 @@ void DataReceive::init_grpc_interface()
 {
     HubInterface::set_callback(this);
     HubInterface::start();
+}
+
+void DataReceive::init_statistic_thread()
+{
+    sp_statistic_thread_ = boost::make_shared<boost::thread>(&DataReceive::statistic_main, this);
+}
+
+void DataReceive::statistic_main()
+{
+    try
+    {
+        while(true)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(statistic_data_.update_secs_));
+
+            cout << statistic_data_.get_str() << endl;
+
+            statistic_data_.clear();
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr <<"\n[E]DataReceive::statistic_main" << e.what() << '\n';
+    }
+    
 }
 
 void DataReceive::test_main()
@@ -369,14 +396,17 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
+    statistic_data_.collect_depth_data(exchange, symbol, depth);
+
     if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
         // 只处理聚合数据;
         return;
     }
 
-    std::stringstream stream_obj;
-    stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
+    
+    // std::stringstream stream_obj;
+    // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     // LOG_INFO(stream_obj.str());
     
 
@@ -391,9 +421,6 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     // {
     //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
     // }    
-
-
-    
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -427,7 +454,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     {
         // LOG_ERROR ("DataReceive::handle_kline_data symbol is null!");
         return;
-    }        
+    }
 
     if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
@@ -435,11 +462,14 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         return;
     }
 
+    statistic_data_.collect_kline_data(exchange, c_symbol, resolution, klines);    
+
     string symbol = string(c_symbol);
 
-    std::stringstream stream_obj;
-    stream_obj  << "[K-Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
-    LOG_INFO(stream_obj.str());
+
+    // std::stringstream stream_obj;
+    // stream_obj  << "[K-Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
+    // LOG_INFO(stream_obj.str());
 
     // if (resolution == 60)
     // {
