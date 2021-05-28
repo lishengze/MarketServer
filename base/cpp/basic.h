@@ -100,7 +100,7 @@ public:
     void finish() {
         type_tick end = get_miliseconds();
         if( (end-begin_) > threshold_ ) {
-            cout << "[TimeCostWatcher] " << desc_ << " cost " << (end-begin_) << endl;
+            // cout << "[TimeCostWatcher] " << desc_ << " cost " << (end-begin_) << endl;
         }
     }
 

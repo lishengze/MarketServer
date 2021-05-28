@@ -1,6 +1,8 @@
 #include "stream_engine_config.h"
 #include "grpc_server.h"
 
+#include <iostream>
+
 void ServerEndpoint::init(const string& grpc_addr)
 {
     std::string server_address(grpc_addr);
@@ -121,7 +123,11 @@ void ServerEndpoint::_handle_rpcs()
 
     while(true) {
         //tfm::printfln("cq->next");
-        GPR_ASSERT(cq_->Next(&tag, &ok));
+        // GPR_ASSERT();
+
+        bool result = cq_->Next(&tag, &ok);
+
+        // std::cout << "result: " << result << ", ok: " << ok << std::endl;
         
         type_tick begin = get_miliseconds();
         BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
@@ -133,7 +139,7 @@ void ServerEndpoint::_handle_rpcs()
         }
 
         type_tick end = get_miliseconds();
-        if( (end - begin) >= 10 )
-            tfm::printfln("grpc-loop[%d] handle %d cost %u", loop_id, cd->call_id_, end - begin);
+        // if( (end - begin) >= 10 )
+            // tfm::printfln("grpc-loop[%d] handle %d cost %u", loop_id, cd->call_id_, end - begin);
     }
 }

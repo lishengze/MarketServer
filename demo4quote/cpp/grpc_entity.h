@@ -177,6 +177,10 @@ public:
 
     void add_data(const WrapperKlineData& data);
 
+    virtual ~GetLastEntity() {
+        cout << "\n Delete GetLastEntity" << endl;
+    }
+
     GetLastEntity* spawn() {
         return new GetLastEntity(service_, cacher_);
     }

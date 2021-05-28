@@ -331,7 +331,7 @@ void GetLastEntity::add_data(const WrapperKlineData& data)
 {
     datas_.enqueue(data);
 
-    cout << "GetLastEntity::add_data " << datas_.size_approx() << endl;
+    // cout << "GetLastEntity::add_data " << datas_.size_approx() << endl;
 }
 
 void GetLastEntity::register_call()
@@ -359,7 +359,7 @@ bool GetLastEntity::process()
         }
     }
 
-    cout << "GetLastEntity::process reply.size: " << reply.data_size() << endl;
+    cout << "**** [kline] reply.size: " << reply.data_size() << endl;
 
     if( reply.data_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -409,7 +409,7 @@ SubscribeQuoteInBinaryEntity::SubscribeQuoteInBinaryEntity(::grpc::Service* serv
 
 void SubscribeQuoteInBinaryEntity::register_call()
 {
-    _log_and_print("%s register SubscribeQuoteInBinaryEntity", get_context()->peer());
+    // _log_and_print("%s register SubscribeQuoteInBinaryEntity", get_context()->peer());
     service_->RequestSubscribeQuoteInBinary(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 
@@ -417,7 +417,7 @@ void SubscribeQuoteInBinaryEntity::on_init()
 {
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
     cacher_->get_lastsnaps(snaps);
-    tfm::printfln("get_lastsnaps %u items", snaps.size());
+    // tfm::printfln("get_lastsnaps %u items", snaps.size());
     
     for( const auto& v : snaps ){
         string tmp;

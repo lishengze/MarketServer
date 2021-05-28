@@ -82,6 +82,9 @@ public:
 private:
 
     void _request(const string& addr, IKlineUpdater* callback) {
+
+        cout << "***** [KlineUpdater] Start Request" << endl;
+
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
         std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
 
@@ -121,6 +124,9 @@ private:
                 callback->on_kline(quote);
             }
         }
+
+        cout << "[KlineUpdater] Request Over!" << endl;
+
         Status status = reader->Finish();
         if (status.ok()) {
             std::cout << "GetLast rpc succeeded." << std::endl;
