@@ -436,10 +436,11 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
         // std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << "/" <<  src.bids.size()<< std::endl;        
     }
     set_snap(src);
+    _calc_watermark();
     
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
-    _calc_watermark();
+    
     if (watermark.get_value() != 0 )
     {
         _filter_by_watermark(src, watermark, ctx);
@@ -448,7 +449,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
     if (src.symbol == "BTC_USDT")
     {
-        // tfm::printfln("WatermarkComputerWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
+        if (src.asks.begin()->first < src.bids.rbegin()->first)
+        {
+            cout << "***[E]  " << src.symbol.c_str() << " ask1: " << src.asks.begin()->first.get_value() << ", bids: " << src.bids.rbegin()->first.get_value() << endl;
+        }
     }
 
     return src;
