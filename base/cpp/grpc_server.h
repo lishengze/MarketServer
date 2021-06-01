@@ -59,11 +59,13 @@ public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
     virtual void on_init() {};
+    virtual string get_entity_name() {return "BaseGrpcEntity"; }
 
     BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1),is_active_(true),is_processing_(false){}
     virtual ~BaseGrpcEntity(){}
 
     void make_active() {
+        cout << "make_active: " << get_entity_name() << endl;
         if( !is_processing_ && !is_active_ ) {
             is_active_ = true;
             gpr_timespec t = gpr_now(gpr_clock_type::GPR_CLOCK_REALTIME);
@@ -164,6 +166,7 @@ public:
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
                 (*iter)->make_active();
+
                 (*iter)->add_data(rest...);
             }
         }

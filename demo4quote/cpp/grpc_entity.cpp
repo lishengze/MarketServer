@@ -331,7 +331,7 @@ void GetLastEntity::add_data(const WrapperKlineData& data)
 {
     datas_.enqueue(data);
 
-    // cout << "GetLastEntity::add_data " << datas_.size_approx() << endl;
+    cout << "GetLastEntity::add_data " << datas_.size_approx() << endl;
 }
 
 void GetLastEntity::register_call()
@@ -415,6 +415,7 @@ void SubscribeQuoteInBinaryEntity::register_call()
 
 void SubscribeQuoteInBinaryEntity::on_init() 
 {
+    cout << "SubscribeQuoteInBinaryEntity::on_init " << endl;
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
     cacher_->get_lastsnaps(snaps);
     // tfm::printfln("get_lastsnaps %u items", snaps.size());
@@ -443,6 +444,8 @@ bool SubscribeQuoteInBinaryEntity::process()
         data_ref.insert(data_ref.end(), ptrs[i].begin(), ptrs[i].end());
     }    
 
+    cout << "[depth] SubscribeQuoteInBinaryEntity reply.size: " << reply_.data().length() << endl;
+
     // 执行发送
     if( reply_.data().length() > 0 ) {
         responder_.Write(reply_, this);      
@@ -459,5 +462,8 @@ void SubscribeQuoteInBinaryEntity::add_data(const TExchange& exchange, const TSy
     if( request_.symbol() != "" && symbol != request_.symbol() )
         return;
         
+    
     datas_.enqueue(data);
+
+    cout << "SubscribeQuoteInBinaryEntity::add_data " << datas_.size_approx() << endl;
 }

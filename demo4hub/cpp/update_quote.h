@@ -44,7 +44,7 @@ public:
     ~QuoteUpdater(){}
 
     void start(const string& addr, IQuoteUpdater* callback) {
-        thread_loop_ = new std::thread(&QuoteUpdater::_run, this, addr, callback);
+        // thread_loop_ = new std::thread(&QuoteUpdater::_run, this, addr, callback);
     }
 
 private:

@@ -1,5 +1,6 @@
 #include "stream_engine_config.h"
 #include "grpc_server.h"
+#include "pandora/util/time_util.h"
 
 #include <iostream>
 
@@ -132,6 +133,9 @@ void ServerEndpoint::_handle_rpcs()
         type_tick begin = get_miliseconds();
         BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
         if( ok ) {
+
+            std::cout << "cq: " << cd->get_entity_name() <<" " << utrade::pandora::NanoTimeStr() << endl;
+
             cd->proceed(loop_id);
         } else {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);

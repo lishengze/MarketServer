@@ -124,6 +124,8 @@ public:
 
     bool process();
 
+    virtual string get_entity_name() {return "BaseGrpcEntity"; }
+
     GetParamsEntity* spawn() {
         return new GetParamsEntity(service_);
     }
@@ -142,6 +144,8 @@ public:
     void register_call();
 
     bool process();
+
+    virtual string get_entity_name() {return "GetKlinesEntity"; }
 
     GetKlinesEntity* spawn() {
         return new GetKlinesEntity(service_, cacher_);
@@ -176,6 +180,8 @@ public:
     bool process();
 
     void add_data(const WrapperKlineData& data);
+
+    virtual std::string get_entity_name() {return "GetLastEntity"; }
 
     virtual ~GetLastEntity() {
         cout << "\n Delete GetLastEntity" << endl;
@@ -243,6 +249,8 @@ public:
 
     bool process();
 
+    virtual string get_entity_name() {return "GetLastTradesEntity"; }
+
     GetLastTradesEntity* spawn() {
         return new GetLastTradesEntity(service_, cacher_);
     }
@@ -270,6 +278,8 @@ public:
     void on_init();
 
     void add_data(const TExchange& exchange, const TSymbol& symbol, const string& data);
+
+    virtual std::string get_entity_name() {return "SubscribeQuoteInBinaryEntity"; }
 
     SubscribeQuoteInBinaryEntity* spawn() {
         return new SubscribeQuoteInBinaryEntity(service_, cacher_);

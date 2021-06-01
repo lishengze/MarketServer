@@ -76,7 +76,7 @@ public:
     ~KlineUpdater(){}
 
     void start(const string& addr, IKlineUpdater* callback) {
-        thread_loop_ = new std::thread(&KlineUpdater::_run, this, addr, callback);
+        // thread_loop_ = new std::thread(&KlineUpdater::_run, this, addr, callback);
     }
 
 private:
