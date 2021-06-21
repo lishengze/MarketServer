@@ -221,7 +221,7 @@ void KlineDatabase::get_db_data(SQLite::Statement& stmt, int resolution, unorder
             string exchange = stmt.getColumn("Exchange").getString();
             string symbol = stmt.getColumn("Symbol").getString();         
 
-            cout << "exchange: " << exchange << ", symbol: " << symbol << ", resolution: " << resolution << ", data_count: " << kline_data_vec.size() << endl;
+            // cout << "exchange: " << exchange << ", symbol: " << symbol << ", resolution: " << resolution << ", data_count: " << kline_data_vec.size() << endl;
             
             for (auto& kline_data:kline_data_vec)
             {

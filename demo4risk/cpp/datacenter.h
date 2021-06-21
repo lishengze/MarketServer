@@ -101,34 +101,38 @@ struct HedgeInfo
         cout << symbol << " ";
         if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
         {
-            if (is_trade)
-            {
-                cout << "Minus ask_amount " << ask_amount << ", " << amount_value << endl;
+            // if (is_trade)
+            // {
+            //     cout << "Minus ask_amount " << ask_amount << ", " << amount_value << endl;
 
-                ask_amount -= amount_value;
+            //     ask_amount -= amount_value;
                 
-            }
-            else
-            {
-                cout << "Add ask_amount " << ask_amount << ", " << amount_value << endl;
+            // }
+            // else
+            // {
+            //     cout << "Add ask_amount " << ask_amount << ", " << amount_value << endl;
 
-                ask_amount += amount_value;
+            //     ask_amount += amount_value;
                 
-            }            
+            // }          
+
+            ask_amount = amount_value;  
         }
         else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
         {
-            if (is_trade)
-            {
-                cout << "Minus bid_amount " << bid_amount << ", " << amount_value << endl;
+            // if (is_trade)
+            // {
+            //     cout << "Minus bid_amount " << bid_amount << ", " << amount_value << endl;
 
-                bid_amount -= amount_value;
-            }
-            else
-            {
-                cout << "Add bid_amount " << bid_amount << ", " << amount_value << endl;
-                bid_amount += amount_value;
-            }
+            //     bid_amount -= amount_value;
+            // }
+            // else
+            // {
+            //     cout << "Add bid_amount " << bid_amount << ", " << amount_value << endl;
+            //     bid_amount += amount_value;
+            // }
+
+            bid_amount = amount_value;
         }
         else
         {

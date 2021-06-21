@@ -53,6 +53,8 @@ void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& sy
     string data = tfm::format("%u;%u;", length, data_type);
     data.insert(data.end(), tmp.begin(), tmp.end());
 
+    // cout << "ServerEndpoint::publish_binary " << exchange << " " << symbol << endl;
+
     caller_subscribe_in_binary_->add_data(exchange, symbol, data);
 }
 /*

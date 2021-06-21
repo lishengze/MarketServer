@@ -55,6 +55,8 @@ public:
 
     bool is_active_;
     bool is_processing_;
+
+    bool is_inner_write_{false};
 public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
@@ -165,6 +167,8 @@ public:
         {
             std::unique_lock<std::mutex> inner_lock{ mutex_clients_ };
             for( auto iter = clients_.begin() ; iter != clients_.end() ; ++iter ) {
+
+                cout << "\n" << (*iter)->get_entity_name() << " out add data" << endl; 
                 (*iter)->make_active();
 
                 (*iter)->add_data(rest...);

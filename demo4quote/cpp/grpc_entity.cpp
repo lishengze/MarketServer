@@ -415,10 +415,11 @@ void SubscribeQuoteInBinaryEntity::register_call()
 
 void SubscribeQuoteInBinaryEntity::on_init() 
 {
-    cout << "SubscribeQuoteInBinaryEntity::on_init " << endl;
+    
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
     cacher_->get_lastsnaps(snaps);
     // tfm::printfln("get_lastsnaps %u items", snaps.size());
+    cout << "\nSubscribeQuoteInBinaryEntity::on_init get_lastsnaps " << snaps.size() << endl;
     
     for( const auto& v : snaps ){
         string tmp;
@@ -429,25 +430,50 @@ void SubscribeQuoteInBinaryEntity::on_init()
         string data = tfm::format("%u;%u;", length, data_type);
         data.insert(data.end(), tmp.begin(), tmp.end());
 
-        add_data(v->exchange(), v->symbol(), data);
+        // add_data(v->exchange(), v->symbol(), data);
     }
 }
 
 bool SubscribeQuoteInBinaryEntity::process()
 {    
+    if (is_inner_write_)
+    {
+        is_inner_write_ = false;
+        return false;
+    }    
+
+    cout << "[depth] Sub Process: ";
+
     string& data_ref = (*reply_.mutable_data());
     data_ref.clear();
 
     string ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     size_t count = datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE);
+
+    // if (is_inner_write_)
+    // {
+    //     is_inner_write_ = false;
+    //     cout << "Sub is_inner_write_ " 
+    //          << ", data.size: " << count
+    //          << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
+    //     return false;
+    // }
+    // else
+    // {
+    //     cout << "data.size: " << count
+    //          << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
+    // }
+
+    cout << "data.size: " << count
+            << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
+
     for( size_t i = 0 ; i < count ; i ++ ) {
         data_ref.insert(data_ref.end(), ptrs[i].begin(), ptrs[i].end());
-    }    
-
-    cout << "[depth] SubscribeQuoteInBinaryEntity reply.size: " << reply_.data().length() << endl;
+    }  
 
     // 执行发送
     if( reply_.data().length() > 0 ) {
+        is_inner_write_ = true;
         responder_.Write(reply_, this);      
         return true;
     } else {
@@ -457,13 +483,22 @@ bool SubscribeQuoteInBinaryEntity::process()
 
 void SubscribeQuoteInBinaryEntity::add_data(const TExchange& exchange, const TSymbol& symbol, const string& data) 
 {
+    std::cout << "Sub::add_data " << "request.ex: " << request_.exchange() << ", ex: " << exchange << " "
+                                  << "reqeust.sy: " << request_.symbol() << ", sy: " << symbol
+                                  << endl;
+
     if( request_.exchange() != "" && exchange != request_.exchange() )
         return;
     if( request_.symbol() != "" && symbol != request_.symbol() )
         return;
-        
+    
+    string ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     
     datas_.enqueue(data);
 
-    cout << "SubscribeQuoteInBinaryEntity::add_data " << datas_.size_approx() << endl;
+    // cout << "Sub::add_data.size:  " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << "\n" << endl;
+
+    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // process();
 }
