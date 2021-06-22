@@ -730,7 +730,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
     {
-        _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
+        // _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
         // for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) 
         // {
 

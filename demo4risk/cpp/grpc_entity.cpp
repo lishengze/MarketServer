@@ -202,7 +202,7 @@ responder_(get_context())
     }
     catch(const std::exception& e)
     {
-        std::cerr << "\n[E] TradeOrderEntity" << e.what() << '\n';
+        std::cerr << "\n[E] TradeOrderEntity Init " << e.what() << '\n';
     }
 }
 
