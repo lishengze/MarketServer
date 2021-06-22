@@ -116,7 +116,10 @@ struct HedgeInfo
                 
             // }          
 
+            
             ask_amount = amount_value;  
+
+            cout << "new ask_amount: " << ask_amount << endl;
         }
         else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
         {
@@ -133,6 +136,8 @@ struct HedgeInfo
             // }
 
             bid_amount = amount_value;
+
+            cout << "new bid_amount: " << bid_amount << endl;
         }
         else
         {

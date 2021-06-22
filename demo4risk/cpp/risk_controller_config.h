@@ -36,7 +36,8 @@ public:
             // read the config file
             std::ifstream in_config(file_name);
             std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
-            // std::cout << contents << std::endl;
+            std::cout << contents << std::endl;
+            
             njson js = njson::parse(contents);
 
             // grpc
