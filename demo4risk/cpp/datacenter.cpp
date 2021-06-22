@@ -602,7 +602,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                 }
                 else
                 {
-                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " is deleted, delete amount: " << iter->second.total_volume.get_value() << endl;                    
+                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " is deleted, delete amount: " << iter->second.total_volume.get_value() << ", ask_amount: " << ask_amount << endl;                    
                     ask_amount -= iter->second.total_volume.get_value();
                     iter->second.total_volume = 0;
                     delete_price.push_back(iter->first);
@@ -632,7 +632,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                 }
                 else
                 {
-                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " is deleted, delete amount: " << iter.second.total_volume.get_value() << endl;                    
+                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " is deleted, delete amount: " << iter.second.total_volume.get_value() << ", ask_amount: " << bid_amount << endl;                    
 
                     bid_amount -= iter.second.total_volume.get_value();
                     iter.second.total_volume = 0;
