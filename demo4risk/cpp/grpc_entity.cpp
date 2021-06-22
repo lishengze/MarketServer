@@ -225,11 +225,16 @@ bool TradeOrderEntity::process()
     try
     {
         responder_.Read(&request_, this);
+
         string symbol = request_.symbol();
-        double price = std::stod(request_.price());
+
+        double price = -1;
+
         double amount = request_.order_amount();
+
         TradedOrderStreamData_Direction direction = request_.direction();
-        bool is_trade = request_.traded();
+
+        bool is_trade = false;
 
         cout << "\nTradeOrderEntity: \n"
              << "symbol: " << symbol << "\n"
@@ -243,7 +248,7 @@ bool TradeOrderEntity::process()
     }
     catch(const std::exception& e)
     {
-        std::cerr << "\n[E] TradeOrderEntity process" << e.what() << '\n';
+        std::cerr << "\n[E] TradeOrderEntity process " << e.what() << '\n';
     }
 }
 
