@@ -229,6 +229,7 @@ void StreamEngine::on_config_channged(const Document& src)
     }
 
     std::cout << "\n\n *** StreamEngine::on_config_channged ***" <<endl;
+    cout << content << endl;
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;

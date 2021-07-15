@@ -4,7 +4,9 @@
 #include "base/cpp/quote.h"
 #include "base/cpp/tinyformat.h"
 #include "base/cpp/concurrentqueue.h"
-
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 struct SDepth {
     SDecimal volume;    // 单量
     unordered_map<TExchange, SDecimal> volume_by_exchanges; // 聚合行情才有用
@@ -33,6 +35,39 @@ struct SDepthQuote {
         server_time = 0;
         price_precise = 0;
         volume_precise = 0;
+    }
+
+    std::string basic_str()
+    {
+        std::stringstream s_obj;
+        s_obj << std::setw(16) << "raw_length: " << std::setw(16) << raw_length << "\n"
+            << std::setw(16) << "exchange: " << std::setw(16) << exchange << "\n"
+            << std::setw(16) << "symbol: " << std::setw(16) << symbol << "\n"
+            << std::setw(16) << "sequence_no: " << std::setw(16) << sequence_no << "\n"
+            << std::setw(16) << "arrive_time: " << std::setw(16) << arrive_time << "\n"
+            << std::setw(16) << "server_time: " << std::setw(16) << server_time << "\n"
+            << std::setw(16) << "price_precise: " << std::setw(16) << price_precise << "\n"
+            << std::setw(16) << "amount_precise: " << std::setw(16) << amount_precise << "\n"
+            << std::setw(16) << "asks.size: " << std::setw(16) << asks.size()  << "\n"
+            << std::setw(16) << "bids.size: " << std::setw(16) << bids.size()  << "\n"
+            << "\n";
+        return s_obj.str();
+    }
+
+    std::string depth_str()
+    {
+        std::stringstream s_obj;
+        s_obj << "asks detail: \n";
+        for (auto iter:asks)
+        {
+            s_obj << std::setw(16) << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+        }
+        s_obj << "bids detail: \n";
+        for (auto iter:bids)
+        {
+            s_obj << std::setw(16) << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+        }        
+        return s_obj.str();
     }
 
     void print() const {
@@ -120,6 +155,17 @@ struct SExchangeConfig
     int vprecise; // 成交量精度
     int aprecise; // 成交额精度
     float frequency; // 原始更新频率
+
+    string str()
+    {
+        stringstream s_obj;
+        s_obj << "enable " << enable << "\n"
+              << "precise " << precise << "\n"
+              << "vprecise " << vprecise << "\n"
+              << "aprecise " << aprecise << "\n"
+              << "frequency " << frequency << "\n";
+        return s_obj.str();
+    }
 
     bool operator==(const SExchangeConfig &rhs) const {
         return precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency;

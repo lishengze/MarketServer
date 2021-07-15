@@ -201,6 +201,6 @@ def test_urllib():
     print("Http Response: \n%s" % (html))    
 
 if __name__ == "__main__":
-    test_websocket()
-    # test_http_restful()
+    # test_websocket()
+    test_http_restful()
 

@@ -231,6 +231,9 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     string channel_type;
     SExchangeConfig config;
 
+    cout << "RedisQuote::on_message: " << channel << "\n"
+         << msg << endl;
+
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
     {
         // _log_and_print("decode channel name fail. [channel=%s]", channel);
@@ -243,19 +246,19 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         channel_type != KLINE_60MIN_HEAD &&
         channel_type != SNAP_HEAD )
     {
-        // _log_and_print("unknown message type.[channel=%s]", channel);
+        _log_and_print("unknown message type.[channel=%s]", channel);
         return;
     }
 
     if( !decode_channelmsg(msg, body) )
     {
-        // _log_and_print("decode json fail %s.[channel=%s]", msg, channel);
+        _log_and_print("decode json fail %s.[channel=%s]", msg, channel);
         return;
     }
     
     if( !_get_config(exchange, symbol, config) ) 
     {
-        //// _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
+        _log_and_print("symbol not exist. [exchange=%s, symbol=%s]", exchange, symbol);
         return;
     }
     if( !config.enable )
@@ -313,6 +316,9 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         }
         quote.raw_length = msg.length();
 
+        cout << quote.basic_str() << quote.depth_str() << endl;
+
+
         // 同步snap和update
         SDepthQuote snap;
         int result = _sync_by_update(exchange, symbol, quote, snap);
@@ -369,7 +375,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 void RedisQuote::OnConnected() 
 {
     connected_ = true;
-    // _log_and_print("Redis RedisQuote::OnConnected");
+    _log_and_print("\n\nRedis RedisQuote::OnConnected");
 
     // 设置交易所配置
     std::unique_lock<std::mutex> l{ mutex_symbol_ };
@@ -672,6 +678,15 @@ bool RedisQuote::_ctrl_update(const TExchange& exchange, const TSymbol& symbol, 
 
 bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 {
+    cout << "RedisQuote::set_config " << symbol  << endl;
+    for (auto iter:config)
+    {
+        cout << iter.first << "\n"
+             << iter.second.str()
+             << "\n";
+    }
+    cout << endl;
+
     // 打印参数
     for( const auto& v : config ) 
     {
