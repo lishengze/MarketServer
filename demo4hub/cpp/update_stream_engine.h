@@ -187,9 +187,14 @@ private:
         }
         */
         while (reader->Read(&dataInBinary)) {
-            const string& data = dataInBinary.data();                
+            const string& data = dataInBinary.data();            
+            // cout << "Origianl Data: " << data << endl;    
             if( !this->_decode_one_package(callback, data) )
+            {
+                cout << "Decode Data Failed" << endl;
                 break;
+            }
+                
         }
 
         Status status = reader->Finish();

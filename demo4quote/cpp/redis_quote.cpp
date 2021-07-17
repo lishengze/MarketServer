@@ -231,7 +231,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     string channel_type;
     SExchangeConfig config;
 
-    cout << "RedisQuote::on_message: " << channel << "\n"
+    cout << "\nRedisQuote::on_message: " << channel << "\n"
          << msg << endl;
 
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
@@ -309,6 +309,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     else if ( channel_type == DEPTH_UPDATE_HEAD )
     {
         SDepthQuote quote;
+        quote.exchange = exchange;
+        quote.symbol = symbol;
         if( !redisquote_to_quote(body, quote, config, false) ) 
         {
             // _log_and_print("redisquote_to_quote failed. [channel=%s, msg=%s]", channel, msg);
@@ -316,7 +318,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         }
         quote.raw_length = msg.length();
 
-        cout << quote.basic_str() << quote.depth_str() << endl;
+        // cout << "\nRedisQuote::on_message: " << quote.str() << endl;
 
 
         // 同步snap和update
@@ -381,6 +383,7 @@ void RedisQuote::OnConnected()
     std::unique_lock<std::mutex> l{ mutex_symbol_ };
     for( const auto& v : symbols_ ) {
         for( const auto& v2 : v.second ) {
+            cout << "subscribe: " << v2.first << ", " << v.first << endl;
             subscribe(v2.first, v.first);
         }
     }
@@ -728,7 +731,11 @@ bool RedisQuote::set_config(const TSymbol& symbol, const SSymbolConfig& config)
     {
         const TExchange& exchange = v.first;
         if( subscribed_exchanges.find(exchange) == subscribed_exchanges.end() )
+        {
+            cout << "subscribe: " << exchange << ", " << symbol << endl;
             subscribe(exchange, symbol);
+        }
+            
     }
     return true;
 }

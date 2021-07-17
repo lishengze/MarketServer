@@ -37,6 +37,17 @@ struct SDepthQuote {
         volume_precise = 0;
     }
 
+    std::string str() const
+    {
+        std::stringstream s_obj;
+        s_obj << "exchange: " << exchange << ","
+                << "symbol: " << symbol << ", "
+                << "asks.size: " << asks.size()  << ","
+                << "bids.size: " << bids.size()  << ""
+            << "\n";
+        return s_obj.str();        
+    }
+
     std::string basic_str()
     {
         std::stringstream s_obj;
@@ -53,6 +64,8 @@ struct SDepthQuote {
             << "\n";
         return s_obj.str();
     }
+
+
 
     std::string depth_str()
     {

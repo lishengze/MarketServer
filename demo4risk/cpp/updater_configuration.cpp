@@ -13,7 +13,7 @@ void ConfigurationClient::_run()
 
 void ConfigurationClient::config_changed(const string& group, const string& dataid, const NacosString &configInfo)
 {
-    _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
+    // _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
     
     if( group == "BCTS" ) {
 

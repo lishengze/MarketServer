@@ -75,6 +75,8 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
     //    tfm::printfln("StreamEngine: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
     //    std::cout << "StreamEngine::on_snap " << exchange << " " << symbol << " " << quote.asks.size() << "/" << quote.bids.size() << std::endl;
     }
+
+    
     quote_cacher_.on_snap(exchange, symbol, quote);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {

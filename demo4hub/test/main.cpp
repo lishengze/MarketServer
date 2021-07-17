@@ -13,52 +13,52 @@ class Client : public HubCallback
 {
 public:   
     // 深度数据（推送）
-    // virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
-    // { 
-    //     tfm::printfln("[raw_depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
-    //     // return -1;
-    //     // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
+    virtual int on_raw_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
+    { 
+        // tfm::printfln("[raw_depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
+        // return -1;
+        // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
 
-    //     for (int i =0; i < 10; ++i)
-    //     {
-    //         // cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
-    //     }
+        // for (int i =0; i < 10; ++i)
+        // {
+        //     cout << depth.asks[i].price.get_value() << ", " << depth.bids[i].price.get_value() << endl;
+        // }
 
-    //     return 0;
-    // } 
+        return 0;
+    } 
 
     // 深度数据（推送）
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
-        tfm::printfln("[depth] %s %s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
+        tfm::printfln("[depth] %s.%s ask_depth=%u bid_depth=%u", exchange, symbol, depth.ask_length, depth.bid_length);
         // return -1;
         // cout << "Test Client on_depth " << depth.ask_length << ", " << depth.bid_length << endl;
 
-        for (int i = 0; i < 10 && i < depth.bid_length; ++i)
-        {
-            cout << symbol << " " << depth.bids[i].price.get_value() << " " << depth.bids[i].volume.get_value() << endl;
-        }
+        // for (int i = 0; i < 10 && i < depth.bid_length; ++i)
+        // {
+        //     cout << symbol << " " << depth.bids[i].price.get_value() << " " << depth.bids[i].volume.get_value() << endl;
+        // }
 
         return 0;
     } 
 
     // K线数据（推送）
-    // virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
-    //     // return -1;
-    //     // cout << "Test Client on_kline: " << klines.size() << endl;
-    //     // for( int i = 0 ; i < klines.size() ; i ++ )
-    //     for (const KlineData& kline:klines)
-    //     {
-    //         // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
+    virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
+        // return -1;
+        cout << "Test Client on_kline: " << exchange << "." << symbol  << ": "<< klines.size() << endl;
+        
+        // for (const KlineData& kline:klines)
+        // {
+        //     cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
 
-    //         // const KlineData& kline = klines[i];
-    //         cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
-    //             << kline.symbol << ", "
-    //             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-    //             << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";    
+        //     const KlineData& kline = klines[i];
+        //     cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
+        //         << kline.symbol << ", "
+        //         << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //         << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";    
 
-    //     }
-    // }
+        // }
+    }
 
     // virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
     // { 

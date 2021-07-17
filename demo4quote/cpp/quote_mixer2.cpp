@@ -101,6 +101,9 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     }
     
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
+
+    cout << "QuoteCacher::on_snap " << quote.str() << endl;
+
     for( const auto& v : callbacks_) 
     {
         v->publish_binary(exchange, symbol, pub_snap);
@@ -120,6 +123,8 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
         update_depth_diff(update.bids, cache.bids);
         snap = cache;
     }
+
+    cout << "QuoteCacher::on_update " << snap.str() << endl;
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_diff;
     pub_diff = depth_to_pbquote2(exchange, symbol, update, publish_depths_*2, false); // 增量的档位应该是2倍
@@ -159,6 +164,7 @@ void QuoteMixer2::_thread_loop()
 {
     unordered_map<TSymbol, type_seqno> sequences;
 
+    cout << "\nQuoteMixer2::_thread_loop Start " << endl;
     while( thread_run_ ) 
     {
         vector<pair<TSymbol, SMixerConfig>> calculate_symbols;
@@ -253,10 +259,18 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         //if( (get_miliseconds() / 1000 % 10) == 0 ) { // 每10秒输出一次
         //    _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
         //}
-        // tfm::printfln("%s %lu", symbol, snap.origin_time);
-        if (symbol == "BTC_USDT")
-            std::cout << MIX_EXCHANGE_NAME << " " << symbol << " " << snap.asks.size() << "/" << snap.bids.size() << std::endl;
+
+        snap.symbol = symbol;
+        snap.exchange = MIX_EXCHANGE_NAME;        
+        // tfm::printfln("QuoteMixer2::_calc_symbol %s ", snap.str().c_str());
+
+        // cout << "QuoteMixer2::_calc_symbol: " << snap.str() << endl;
+
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
+    }
+    else
+    {
+
     }
 
     // 交易
@@ -285,6 +299,7 @@ void QuoteMixer2::on_trade(const TExchange& exchange, const TSymbol& symbol, con
 void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    // cout << "QuoteMixer2::on_snap: " << quote.str() << endl;
     quotes_[symbol][exchange] = quote;
 }
 
@@ -292,6 +307,8 @@ void QuoteMixer2::set_config(const TSymbol& symbol, const SMixerConfig& config)
 {
     // _log_and_print("QuoteMixer2::set_config %s", symbol);
     std::unique_lock<std::mutex> l{ mutex_config_ };
+
+    
     configs_[symbol] = config;
 }
 

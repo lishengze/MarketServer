@@ -806,15 +806,15 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        cout << "DataCenter::change_configuration SymbolConfiguration" << endl;
+        // cout << "DataCenter::change_configuration SymbolConfiguration" << endl;
 
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.symbol_config = config;
 
-        for (auto iter:params_.symbol_config)
-        {
-            cout << iter.second.desc() << endl;
-        }
+        // for (auto iter:params_.symbol_config)
+        // {
+        //     cout << iter.second.desc() << endl;
+        // }
 
     }
     catch(const std::exception& e)
@@ -889,14 +889,16 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     if (!check_quote(newQuote))
     {
+        cout << quote.symbol << " not published!" << endl;
         return;
     }
 
     // std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
+
     //std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    // _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
+    _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
     for( const auto& v : callbacks_) 
     {
         v->publish4Broker(quote.symbol, ptrData, NULL);
@@ -906,10 +908,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    // {
-    //     // _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
-    // }
+    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    {
+        _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
+    }
     
     for( const auto& v : callbacks_) 
     {
@@ -934,7 +936,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
 
         if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
         {
-            // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+            std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
         }
 
         // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
@@ -955,7 +957,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
 
         if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
         {
-            // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+            std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
         }        
 
         // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;

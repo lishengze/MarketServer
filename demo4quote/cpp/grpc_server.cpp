@@ -44,9 +44,19 @@ void ServerEndpoint::init(const string& grpc_addr)
 
 void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap)
 {
+    // cout << "ServerEndpoint::publish_binary Start" << endl;
+
     string tmp;
     if( !snap->SerializeToString(&tmp) )
+    {
+        cout << "[Error] ServerEndpoint::publish_binary SerializeToString Failed" << endl;
         return;
+    }
+    else
+    {
+        cout << "Serialized data: " << exchange << "." << symbol << "  len: " << tmp.length() << endl;
+    }
+        
     
     uint32 length = tmp.size();
     uint32 data_type = QUOTE_TYPE_DEPTH;
@@ -136,7 +146,7 @@ void ServerEndpoint::_handle_rpcs()
         BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
         if( ok ) {
 
-            std::cout << "cq: " << cd->get_entity_name() <<" " << utrade::pandora::NanoTimeStr() << endl;
+            // std::cout << "cq: " << cd->get_entity_name() <<" " << utrade::pandora::NanoTimeStr() << endl;
 
             cd->proceed(loop_id);
         } else {

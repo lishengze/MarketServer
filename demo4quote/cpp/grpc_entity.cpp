@@ -464,15 +464,18 @@ bool SubscribeQuoteInBinaryEntity::process()
     //          << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
     // }
 
-    cout << "data.size: " << count
-            << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
+    // cout << "data.size: " << count
+    //         << ", left_data_size: " << datas_.try_dequeue_bulk(ptrs, ONE_ROUND_MESSAGE_NUMBRE) << endl;
 
     for( size_t i = 0 ; i < count ; i ++ ) {
         data_ref.insert(data_ref.end(), ptrs[i].begin(), ptrs[i].end());
     }  
 
+    cout << "reply.data.len: " << reply_.data().length()  << "\n" << endl;
+
     // 执行发送
     if( reply_.data().length() > 0 ) {
+        
         is_inner_write_ = true;
         responder_.Write(reply_, this);      
         return true;

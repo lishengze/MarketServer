@@ -155,12 +155,16 @@ public:
     virtual int on_depth(const char* exchange, const char* symbol, const SDepthData& depth) 
     { 
         /*
-        type_tick now = get_miliseconds();
-        type_tick delay = now-depth.tick1;
+
         //if( delay > 5000 )
             tfm::printfln("[depth] %s.%s delay=%u ask_depth=%u bid_depth=%u.( se_cost=%u rc_cost=%u)", 
                 exchange, symbol, delay, depth.ask_length, depth.bid_length, depth.tick2 - depth.tick1, depth.tick3 - depth.tick2);        
         */
+        type_tick now = get_miliseconds();
+        type_tick delay = now-depth.tick1;       
+            tfm::printfln("[depth] %s.%s ask_depth=%u bid_depth=%u", 
+                exchange, symbol, depth.ask_length, depth.bid_length);       
+
         return 0;
     } 
 
@@ -185,7 +189,7 @@ public:
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
     { 
 
-        cout << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;
+        // cout << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;
 
         // if( string(exchange) == "_bcts_" && string(symbol) == "BTC_USDT" )
         // {
@@ -226,7 +230,7 @@ public:
     virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
     {
         //if( string(exchange) == MIX_EXCHANGE_NAME )
-        //tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        // tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
         return 0;
     }
 
