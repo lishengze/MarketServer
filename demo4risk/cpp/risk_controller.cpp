@@ -81,7 +81,7 @@ void RiskControllerServer::on_snap(const SEData& quote)
     // QuoteData to SInnerQuote
     SInnerQuote raw;
     quotedata_to_innerquote(quote, raw);
-    std::cout << "RiskControllerServer::on_snap " << quote.exchange() << "." << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
+    std::cout << "\nRiskControllerServer::on_snap " << quote.exchange() << "." << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
     datacenter_.add_quote(raw);
 }
 

@@ -76,7 +76,7 @@ public:
     ~KlineUpdater(){}
 
     void start(const string& addr, IKlineUpdater* callback) {
-        // thread_loop_ = new std::thread(&KlineUpdater::_run, this, addr, callback);
+        thread_loop_ = new std::thread(&KlineUpdater::_run, this, addr, callback);
     }
 
 private:
@@ -117,7 +117,7 @@ private:
         }
         while (reader->Read(&resp)) {
             // split and convert
-            // std::cout << "\n**** [update_kline] get " << resp.data_size() << " items ****" << std::endl;
+            std::cout << "\n**** [update_kline] get " << resp.data_size() << " items ****" << std::endl;
             for( int i = 0 ; i < resp.data_size() ; i ++ )
             {
                 const SEKlineData& quote = resp.data(i);

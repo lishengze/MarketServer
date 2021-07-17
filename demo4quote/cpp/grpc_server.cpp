@@ -54,7 +54,7 @@ void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& sy
     }
     else
     {
-        cout << "Serialized data: " << exchange << "." << symbol << "  len: " << tmp.length() << endl;
+        // cout << "Serialized data: " << exchange << "." << symbol << "  len: " << tmp.length() << endl;
     }
         
     

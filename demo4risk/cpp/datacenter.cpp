@@ -934,10 +934,10 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
-        if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-        {
-            std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
-        }
+        // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
+        // }
 
         // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
 
@@ -955,10 +955,10 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         }
         quote.bids.swap(new_bids);
 
-        if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-        {
-            std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
-        }        
+        // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
+        // {
+        //     std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
+        // }        
 
         // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
     }

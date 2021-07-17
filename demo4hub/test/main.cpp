@@ -45,7 +45,7 @@ public:
     // K线数据（推送）
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
         // return -1;
-        cout << "Test Client on_kline: " << exchange << "." << symbol  << ": "<< klines.size() << endl;
+        cout << "[on_kline]: " << exchange << "." << symbol  << ": "<< klines.size() << endl;
         
         // for (const KlineData& kline:klines)
         // {
@@ -81,11 +81,14 @@ public:
     //     return 0; 
     // }
 
-    // virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
-    // {
-    //     // tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
-    //     return 0;
-    // }
+    virtual int on_trade(const char* exchange, const char* symbol, const Trade& trade) 
+    {
+        if (strcmp(exchange, "_bcts_") != 0)
+        {
+            tfm::printfln("[trade] %s.%s time=%lu price=%s volume=%s", exchange, symbol, trade.time, trade.price.get_str_value(), trade.volume.get_str_value());
+        }
+        return 0;
+    }
 
 private:
     unordered_map<string, unordered_map<string, type_tick>> kline1_cache;
