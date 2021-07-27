@@ -102,7 +102,7 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
 
-    cout << "QuoteCacher::on_snap " << quote.str() << endl;
+    // cout << "QuoteCacher::on_snap " << quote.str() << endl;
 
     for( const auto& v : callbacks_) 
     {

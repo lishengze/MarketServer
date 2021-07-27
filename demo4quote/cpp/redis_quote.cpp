@@ -231,7 +231,16 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     string channel_type;
     SExchangeConfig config;
 
-    cout << "\nRedisQuote::on_message: " << channel << "\n";
+    // cout << "\nRedisQuote::on_message: " << channel << "\n";
+
+    if (_statistic_map.find(channel) == _statistic_map.end())
+    {
+        _statistic_map[channel] = 1;
+    }
+    else
+    {
+        _statistic_map[channel]++;
+    }
 
     // cout << "\nRedisQuote::on_message: " << channel << "\n"
     //      << msg << endl;
@@ -502,11 +511,14 @@ void RedisQuote::_looping()
 {
     last_statistic_time_ = get_miliseconds();
     last_nodata_time_ = get_miliseconds();
+    
 
     while( true ) 
     {
+        last_statistic_time_str_ = utrade::pandora::SecTimeStr();
+
         // 休眠
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        std::this_thread::sleep_for(std::chrono::seconds(_looping_check_secs));
 
         type_tick now = get_miliseconds();
 
@@ -526,12 +538,14 @@ void RedisQuote::_looping()
             last_nodata_time_ = now;
         }
 
-        // 打印统计信息
-        if( (now - last_statistic_time_) > 10*1000 ) 
-        {
-            _looping_print_statistics();
-            last_statistic_time_ = now;
-        }
+        // // 打印统计信息
+        // if( (now - last_statistic_time_) > 10*1000 ) 
+        // {
+        //     _looping_print_statistics();
+        //     last_statistic_time_ = now;
+        // }
+
+        _looping_print_statistics();
     }
 }
 
@@ -628,14 +642,23 @@ void RedisQuote::_looping_print_statistics()
         }
     }
 
-    tfm::printfln("-------------");
-    ExchangeMeta total;
-    for( const auto& v : statistics ) {
-        tfm::printfln("%s\t\t%s", v.first, v.second.get());
-        total.accumlate(v.second);
+    // tfm::printfln("-------------");
+    // ExchangeMeta total;
+    // for( const auto& v : statistics ) {
+    //     tfm::printfln("%s\t\t%s", v.first, v.second.get());
+    //     total.accumlate(v.second);
+    // }
+    // tfm::printfln("total\t\t%s", total.get());
+    // tfm::printfln("-------------");
+
+    cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " redis msg info: " << endl;
+    for (auto iter:_statistic_map)
+    {
+        cout << iter.first << ": " << iter.second << endl;
     }
-    tfm::printfln("total\t\t%s", total.get());
-    tfm::printfln("-------------");
+    cout << endl;
+
+
 
 }
 

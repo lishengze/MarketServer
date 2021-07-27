@@ -147,6 +147,10 @@ private:
     void _looping_check_nodata();
     void _looping_force_to_update();
 
+    string last_statistic_time_str_;
+    int  _looping_check_secs{5};
+    map<string, int>    _statistic_map;
+
 
     // 行情源头下发速度控制    
     struct _SFrequencyMeta
