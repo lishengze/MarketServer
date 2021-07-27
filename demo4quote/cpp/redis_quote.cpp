@@ -231,8 +231,10 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     string channel_type;
     SExchangeConfig config;
 
-    cout << "\nRedisQuote::on_message: " << channel << "\n"
-         << msg << endl;
+    cout << "\nRedisQuote::on_message: " << channel << "\n";
+
+    // cout << "\nRedisQuote::on_message: " << channel << "\n"
+    //      << msg << endl;
 
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
     {
@@ -527,7 +529,7 @@ void RedisQuote::_looping()
         // 打印统计信息
         if( (now - last_statistic_time_) > 10*1000 ) 
         {
-            // _looping_print_statistics();
+            _looping_print_statistics();
             last_statistic_time_ = now;
         }
     }
