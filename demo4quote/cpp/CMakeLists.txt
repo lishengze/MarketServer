@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES("../../protos/cpp")
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
@@ -44,7 +45,7 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_executable(demo4quote ${DIR_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+add_executable(demo4quote ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 if(DEFINED ENV{LOCAL})
     target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
 else()

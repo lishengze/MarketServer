@@ -7,6 +7,9 @@
 #include "base/cpp/rapidjson/stringbuffer.h"
 
 #include "pandora/util/time_util.h"
+
+#include "Log/log.h"
+
 using namespace rapidjson;
 
 // channel_name = [channel_type]|[symbol].[exchange]
@@ -174,6 +177,8 @@ void RedisQuote::init(QuoteSourceCallbackInterface* callback, const RedisParams&
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
     redis_api_->RegisterSpi(this);
     redis_api_->RegisterRedis(params.host, params.port, params.password, utrade::pandora::RM_Subscribe);
+
+    LOG->start();
 }
 
 void RedisQuote::init_replay(QuoteSourceCallbackInterface* callback, int ratio, int replicas)
@@ -233,14 +238,16 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 
     // cout << "\nRedisQuote::on_message: " << channel << "\n";
 
-    if (_statistic_map.find(channel) == _statistic_map.end())
-    {
-        _statistic_map[channel] = 1;
-    }
-    else
-    {
-        _statistic_map[channel]++;
-    }
+    // if (_statistic_map.find(channel) == _statistic_map.end())
+    // {
+    //     _statistic_map[channel] = 1;
+    // }
+    // else
+    // {
+    //     _statistic_map[channel]++;
+    // }
+
+    LOG->record_input_info(channel);
 
     // cout << "\nRedisQuote::on_message: " << channel << "\n"
     //      << msg << endl;
@@ -515,10 +522,12 @@ void RedisQuote::_looping()
 
     while( true ) 
     {
-        last_statistic_time_str_ = utrade::pandora::SecTimeStr();
+        // last_statistic_time_str_ = utrade::pandora::SecTimeStr();
 
         // 休眠
         std::this_thread::sleep_for(std::chrono::seconds(_looping_check_secs));
+
+
 
         type_tick now = get_miliseconds();
 
@@ -651,14 +660,12 @@ void RedisQuote::_looping_print_statistics()
     // tfm::printfln("total\t\t%s", total.get());
     // tfm::printfln("-------------");
 
-    cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " redis msg info: " << endl;
-    for (auto iter:_statistic_map)
-    {
-        cout << iter.first << ": " << iter.second << endl;
-    }
-    cout << endl;
-
-
+    // cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " redis msg info: " << endl;
+    // for (auto iter:_statistic_map)
+    // {
+    //     cout << iter.first << ": " << iter.second << endl;
+    // }
+    // cout << endl;
 
 }
 
