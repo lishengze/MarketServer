@@ -1,6 +1,7 @@
 #include "stream_engine.h"
 #include "stream_engine_config.h"
 #include "redis_quote.h"
+#include "Log/log.h"
 
 #define MODE_REALTIME "realtime"
 #define MODE_REPLAY "replay"
@@ -71,11 +72,14 @@ void StreamEngine::start()
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
-    if( string(exchange) == MIX_EXCHANGE_NAME && string(symbol) == "BTC_USDT" ) {
+    // if( string(exchange) == MIX_EXCHANGE_NAME && string(symbol) == "BTC_USDT" ) {
     //    tfm::printfln("StreamEngine: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
     //    std::cout << "StreamEngine::on_snap " << exchange << " " << symbol << " " << quote.asks.size() << "/" << quote.bids.size() << std::endl;
-    }
+    // }
 
+    // string log_info = string("depth_snap_") + exchange + "_" + symbol;
+    LOG->record_output_info(string("depth_snap_") + exchange + "_" + symbol, quote);
+    
     
     quote_cacher_.on_snap(exchange, symbol, quote);
 
@@ -86,12 +90,15 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 
 void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
+    LOG->record_output_info(string("depth_update_") + exchange + "_" + symbol, quote);
+
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
-    if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
+
+    // if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
     //    _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(quote.origin_time/1000000000), get_miliseconds()/1000 - quote.origin_time/1000000000);
     //    tfm::printfln("update to snap: %s.%s ask/bid %lu/%lu", exchange, symbol, snap.asks.size(), snap.bids.size());
-    }
+    // }
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, snap);
@@ -100,6 +107,8 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
 
 void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
 {
+    LOG->record_output_info(string("trade_") + exchange + "_" + symbol, trade);
+
     quote_cacher_.on_trade(exchange, symbol, trade);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
@@ -109,21 +118,20 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
-    // cout << "[kline] " << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;
-    
-    /**/
-    for( const auto& v : klines ) {     
-        // 
+    LOG->record_output_info(string("kline_") + std::to_string(resolution) + "_" + exchange + "_" + symbol, klines);
 
-        // _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
-        //     v.index,
-        //     v.px_open.get_str_value().c_str(),
-        //     v.px_high.get_str_value().c_str(),
-        //     v.px_low.get_str_value().c_str(),
-        //     v.px_close.get_str_value().c_str(),
-        //     v.volume.get_str_value().c_str()
-        // );
-    }
+    // cout << "[kline] " << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;    
+    /**/
+    // for( const auto& v : klines ) {   
+    //     _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
+    //         v.index,
+    //         v.px_open.get_str_value().c_str(),
+    //         v.px_high.get_str_value().c_str(),
+    //         v.px_low.get_str_value().c_str(),
+    //         v.px_close.get_str_value().c_str(),
+    //         v.volume.get_str_value().c_str()
+    //     );
+    // }
     
     vector<KlineData> outputs; // 
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);

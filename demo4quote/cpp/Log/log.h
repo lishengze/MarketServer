@@ -2,6 +2,9 @@
 
 #include "pandora/util/thread_safe_singleton.hpp"
 
+class SDepthQuote;
+class Trade;
+class KlineData;
 class Log 
 {
 public:
@@ -14,11 +17,21 @@ public:
 
     void record_input_info(const string& channel);
 
+    void record_output_info(const string& channel, const SDepthQuote& quote);
+
+    void record_output_info(const string& channel, const Trade& trade);
+
+    void record_output_info(const string& channel, const vector<KlineData>& klines);
+
     void record_output_info(const string& info);
 
     void statistic_thread_main();
 
     void print_statistic_data();
+
+    void print_input_info();
+
+    void print_output_info();
 
 private:
 

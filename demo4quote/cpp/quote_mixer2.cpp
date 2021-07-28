@@ -124,8 +124,6 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
         snap = cache;
     }
 
-    // cout << "QuoteCacher::on_update " << snap.str() << endl;
-
     std::shared_ptr<MarketStreamDataWithDecimal> pub_diff;
     pub_diff = depth_to_pbquote2(exchange, symbol, update, publish_depths_*2, false); // 增量的档位应该是2倍
     for( const auto& v : callbacks_) 

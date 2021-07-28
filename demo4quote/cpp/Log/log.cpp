@@ -1,5 +1,6 @@
 #include "log.h"
 #include "pandora/util/time_util.h"
+#include "../redis_quote_define.h"
 
 Log::Log()
 {
@@ -53,7 +54,52 @@ void Log::record_output_info(const string& info)
 {
     try
     {
-        /* code */
+        std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
+
+        if (output_statistic_map_.find(info) == output_statistic_map_.end())
+        {
+            output_statistic_map_[info] = 1;
+        }
+        else
+        {
+            output_statistic_map_[info]++;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::record_output_info(const string& info, const SDepthQuote& quote)
+{
+    try
+    {
+        record_output_info(info);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::record_output_info(const string& info, const Trade& trade)
+{
+    try
+    {
+        record_output_info(info);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::record_output_info(const string& info, const vector<KlineData>& klines)
+{
+    try
+    {
+        record_output_info(info);
     }
     catch(const std::exception& e)
     {
@@ -85,8 +131,42 @@ void Log::print_statistic_data()
 {
     try
     {
-        cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " Input Msg: " << endl;
+        print_input_info();
+
+        print_output_info();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::print_input_info()
+{
+    try
+    {
+        cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " INPUT: " << endl;
         for (auto& iter:input_statistic_map_)
+        {
+            cout << iter.first << ": " << iter.second << endl;
+
+            iter.second = 0;
+        }
+        cout << endl;
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::print_output_info()
+{
+    try
+    {
+        cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " OUTPUT: " << endl;
+        for (auto& iter:output_statistic_map_)
         {
             cout << iter.first << ": " << iter.second << endl;
 

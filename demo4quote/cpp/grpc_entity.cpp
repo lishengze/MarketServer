@@ -1,6 +1,7 @@
 #include "stream_engine_config.h"
 #include "grpc_entity.h"
 #include "quote_mixer2.h"
+#include "Log/log.h"
 
 #define ONE_ROUND_MESSAGE_NUMBRE 999
 
@@ -359,9 +360,11 @@ bool GetLastEntity::process()
         }
     }
 
-    cout << "**** [kline] reply.size: " << reply.data_size() << endl;
+    // cout << "**** [kline] reply.size: " << reply.data_size() << endl;
 
     if( reply.data_size() > 0 ) {
+        LOG->record_output_info("grpc_kline");
+
         responder_.Write(reply, this);      
         return true;
     } else {
@@ -419,7 +422,7 @@ void SubscribeQuoteInBinaryEntity::on_init()
     vector<std::shared_ptr<MarketStreamDataWithDecimal>> snaps;
     cacher_->get_lastsnaps(snaps);
     // tfm::printfln("get_lastsnaps %u items", snaps.size());
-    cout << "\nSubscribeQuoteInBinaryEntity::on_init get_lastsnaps " << snaps.size() << endl;
+    // cout << "\nSubscribeQuoteInBinaryEntity::on_init get_lastsnaps " << snaps.size() << endl;
     
     for( const auto& v : snaps ){
         string tmp;
@@ -442,7 +445,7 @@ bool SubscribeQuoteInBinaryEntity::process()
         return false;
     }    
 
-    cout << "[depth] Sub Process: ";
+    // cout << "[depth] Sub Process: ";
 
     string& data_ref = (*reply_.mutable_data());
     data_ref.clear();
@@ -471,12 +474,13 @@ bool SubscribeQuoteInBinaryEntity::process()
         data_ref.insert(data_ref.end(), ptrs[i].begin(), ptrs[i].end());
     }  
 
-    cout << "reply.data.len: " << reply_.data().length()  << "\n" << endl;
+    // cout << "reply.data.len: " << reply_.data().length()  << "\n" << endl;
 
     // 执行发送
     if( reply_.data().length() > 0 ) {
         
         is_inner_write_ = true;
+        LOG->record_output_info("grpc_depth_trade");
         responder_.Write(reply_, this);      
         return true;
     } else {
@@ -491,9 +495,9 @@ void SubscribeQuoteInBinaryEntity::add_data(const TExchange& exchange, const TSy
     if( request_.symbol() != "" && symbol != request_.symbol() )
         return;
 
-    std::cout << "Sub::add_data " << "request.ex: " << request_.exchange() << ", ex: " << exchange << " "
-                                  << "reqeust.sy: " << request_.symbol() << ", sy: " << symbol
-                                  << endl;
+    // std::cout << "Sub::add_data " << "request.ex: " << request_.exchange() << ", ex: " << exchange << " "
+    //                               << "reqeust.sy: " << request_.symbol() << ", sy: " << symbol
+    //                               << endl;
 
     string ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     
