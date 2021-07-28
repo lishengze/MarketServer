@@ -363,7 +363,7 @@ bool GetLastEntity::process()
     // cout << "**** [kline] reply.size: " << reply.data_size() << endl;
 
     if( reply.data_size() > 0 ) {
-        LOG->record_output_info("grpc_kline");
+        LOG->record_output_info("GRPC_kline");
 
         responder_.Write(reply, this);      
         return true;
@@ -480,7 +480,7 @@ bool SubscribeQuoteInBinaryEntity::process()
     if( reply_.data().length() > 0 ) {
         
         is_inner_write_ = true;
-        LOG->record_output_info("grpc_depth_trade");
+        LOG->record_output_info("GRPC_depth_trade");
         responder_.Write(reply_, this);      
         return true;
     } else {
