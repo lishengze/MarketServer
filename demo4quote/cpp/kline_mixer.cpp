@@ -77,11 +77,19 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
     // 寻找对应的cache
     auto iter_symbol_cache = caches_.find(symbol);
     if( iter_symbol_cache == caches_.end() )
+    {
+        cout << "caches can not find " << exchange << "." << symbol << endl;
         return false;
+    }
+        
     unordered_map<TExchange, CalcCache*>& symbol_cache = iter_symbol_cache->second;
     auto iter_exchange_cache = symbol_cache.find(exchange);
     if( iter_exchange_cache == symbol_cache.end() )
+    {
+         cout << "symbol_cache can not find " << exchange << "." << symbol << endl;
         return false;
+    }
+        
     CalcCache* cache = iter_exchange_cache->second;
 
     // 
@@ -304,21 +312,29 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
         {
             min1_kline_calculator_.add_kline(exchange, symbol, kline, output);
 
-            if (symbol == "BTC_USDT")
-            {
-                // std::cout << "KlineMixer::on_kline: " << exchange << " " << symbol << " " << output.size() << std::endl;
-                // for (auto& kline:output)
-                // {
-                //     std::cout << utrade::pandora::get_sec_time_str(kline.index) << " "
-                //             <<"open: " << kline.px_open.get_str_value() << " "
-                //             <<"high: " << kline.px_high.get_str_value() << " "
-                //             <<"low: " << kline.px_low.get_str_value() << " "
-                //             <<"close: " << kline.px_close.get_str_value() << " "
-                //             <<"volume: " << kline.volume.get_str_value() << " "
-                //             << std::endl;
-                // }
+            // if (symbol == "BTC_USDT")
+            // {
+            //     std::cout << "KlineMixer::on_kline: " << exchange << " " << symbol << " " << output.size() << std::endl;
+            //     for (auto& kline:output)
+            //     {
+            //         std::cout << utrade::pandora::get_sec_time_str(kline.index) << " "
+            //                 <<"open: " << kline.px_open.get_str_value() << " "
+            //                 <<"high: " << kline.px_high.get_str_value() << " "
+            //                 <<"low: " << kline.px_low.get_str_value() << " "
+            //                 <<"close: " << kline.px_close.get_str_value() << " "
+            //                 <<"volume: " << kline.volume.get_str_value() << " "
+            //                 << std::endl;
+            //     }
                           
-            }
+            // }
+
+            // if (exchange == MIX_EXCHANGE_NAME )
+            // {
+            //     cout << "\nAfter add_kline " << exchange << "." << symbol << "." << resolution << ": input" << kline.size() << ", output: " << output.size() << endl;
+
+            //     // std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
+            // }
+                        
             break;
         }
         case 3600:
@@ -333,6 +349,8 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
         }
     }
     
+    cout << "\nAfter add_kline input " << exchange << "." << symbol << "." << resolution << ": " << kline.size() 
+         << ", output: " << MIX_EXCHANGE_NAME << ": " << output.size() << endl;
     engine_interface_->on_kline(MIX_EXCHANGE_NAME, symbol, resolution, output, is_init);
 }
 
@@ -390,7 +408,7 @@ void KlineHubber::recover_from_db()
             }
         }
 
-        cout << "min1_cache_: " << endl;
+        cout << "\n********* min1_cache_: **********" << endl;
         for (auto iter1:min1_cache_.data_)
         {
             for (auto iter2:iter1.second)
@@ -399,7 +417,7 @@ void KlineHubber::recover_from_db()
             }
         }
 
-        cout << "min60_cache_: " << endl;
+        cout << "\n********* min60_cache_: **********" << endl;
         for (auto iter1:min60_cache_.data_)
         {
             for (auto iter2:iter1.second)
@@ -460,10 +478,17 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    // if (exchange == MIX_EXCHANGE_NAME)
-    // {
-    //     std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
-    // }
+    if (exchange == MIX_EXCHANGE_NAME)
+    {
+        cout << "\nAfter Update " << exchange << "." << symbol << "." << resolution << ":" << klines.size() << endl;
+        unordered_map<TSymbol, vector<KlineData>> min1_kine_data = min1_cache_.data_[exchange];
+        for (auto iter:min1_kine_data)
+        {
+            cout << exchange << "." << iter.first << "." << 60 << ": " << iter.second.size() << endl;
+        }
+
+        // std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
+    }
 
     // 写入db缓存区
 

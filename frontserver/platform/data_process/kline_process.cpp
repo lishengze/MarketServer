@@ -254,12 +254,12 @@ void KlineProcess::init_config()
         }
     }
 
-    cout << "frequency_aggreration_map_ " << endl;
-    for (auto iter:frequency_aggreration_map_)
-    {
-        cout << iter.first << " " << iter.second << endl;
-    }
-    cout << endl;
+    // cout << "frequency_aggreration_map_ " << endl;
+    // for (auto iter:frequency_aggreration_map_)
+    // {
+    //     cout << iter.first << " " << iter.second << endl;
+    // }
+    // cout << endl;
 }
 
 void KlineProcess::init_process_engine(DataProcessPtr process_engine)
@@ -610,13 +610,14 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
     {  
         ReqKLineDataPtr pReqKlineData = GetField<ReqKLineData>(package);
 
-        stringstream s_obj;
-        s_obj << "\nsymbol_: " << pReqKlineData->symbol_ << ", \n"
-             << "frequency_: " << pReqKlineData->frequency_ << ", \n"
-             << "start_time: " << pReqKlineData->start_time_ << ", \n"
-             << "end_time: " << pReqKlineData->end_time_ << ", \n"
-             << "data_count: " << pReqKlineData->data_count_ << ", \n";
-        LOG_DEBUG(s_obj.str());
+        // stringstream s_obj;
+        // s_obj << "\nreq symbol_: " << pReqKlineData->symbol_ << ", \n"
+        //      << "frequency_: " << pReqKlineData->frequency_ << ", \n"
+        //      << "start_time: " << pReqKlineData->start_time_ << ", \n"
+        //      << "end_time: " << pReqKlineData->end_time_ << ", \n"
+        //      << "data_count: " << pReqKlineData->data_count_ << ", \n";
+
+        // LOG_DEBUG(s_obj.str());
 
         if (kline_data_.find(pReqKlineData->symbol_) != kline_data_.end())
         {

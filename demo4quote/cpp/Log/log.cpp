@@ -131,9 +131,9 @@ void Log::print_statistic_data()
 {
     try
     {
-        print_input_info();
+        // print_input_info();
 
-        print_output_info();
+        // print_output_info();
     }
     catch(const std::exception& e)
     {

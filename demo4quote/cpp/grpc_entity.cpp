@@ -276,7 +276,7 @@ void GetLastEntity::on_init()
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min1;
     unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> cache_min60;
     cacher_->fill_cache(cache_min1, cache_min60);
-    tfm::printfln("\n\nkline get last registered, init min1/%u min60/%u", cache_min1.size(), cache_min60.size());
+    tfm::printfln("\n\n------------ kline get last registered, init min1/%u min60/%u", cache_min1.size(), cache_min60.size());
 
     // cout << "min1_cache_: " << endl;
     // for (auto iter1:cache_min1)
@@ -307,7 +307,7 @@ void GetLastEntity::on_init()
             symbol_kline.resolution = 60;
             symbol_kline.klines = v2.second;
             datas_.enqueue(symbol_kline);
-            // data1_count++;
+            data1_count++;
         }
     }
 
@@ -320,7 +320,7 @@ void GetLastEntity::on_init()
             symbol_kline.resolution = 3600;
             symbol_kline.klines = v2.second;
             datas_.enqueue(symbol_kline);
-            // data60_count++;
+            data60_count++;
         }
     }
 
