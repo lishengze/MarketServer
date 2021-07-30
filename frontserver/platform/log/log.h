@@ -56,6 +56,10 @@ class Log
 
         void record_output_info(const string& channel, const vector<KlineData>& klines);
 
+        void record_output_info(const string& channel, const std::vector<KlineDataPtr>& klines);
+
+        void record_output_info(const string& channel, const string& details);
+
         void record_output_info(const string& info);
 
         void statistic_thread_main();

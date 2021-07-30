@@ -166,6 +166,8 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         // cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << endl;
         // cout << depth_str << endl;
 
+        
+
         if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
         {
             cout << "FrontServer::response_depth_data_package Failed " << pRspRiskCtrledDepthData->socket_id_ << endl;
@@ -184,6 +186,10 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                 stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
                 LOG_ERROR(stream_obj.str());                
             }
+        }
+        else
+        {
+            LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
         }
     }
     catch(const std::exception& e)
@@ -238,9 +244,9 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             //          << "low: " << atom_kline->px_low.get_value() << endl;
             // }
             
-            cout << "[Front Kline]: Frequency: " << p_rsp_kline_data->frequency_ << " "
-                 << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
-                 << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
+            // cout << "[Front Kline]: Frequency: " << p_rsp_kline_data->frequency_ << " "
+            //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
+            //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
 
             // cout << "[Front Kline] socket_id: " << p_rsp_kline_data->socket_id_ << endl;
 
@@ -266,6 +272,12 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                     {
                         LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
                     } 
+                }
+                else
+                {
+                    LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
+                                            + "_fre_" + std::to_string(p_rsp_kline_data->frequency_),
+                                            p_rsp_kline_data->kline_data_vec_);
                 }
             }
         }
@@ -330,6 +342,10 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     {
                         LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
                     } 
+                }
+                else
+                {
+                    LOG->record_output_info("Trade_" + std::to_string(pRspTradeData->socket_id_));                    
                 }
             }
         }

@@ -111,6 +111,19 @@ void Log::record_output_info(const string& info)
     }    
 }
 
+void Log::record_output_info(const string& channel, const string& details)
+{
+    try
+    {
+        record_output_info(channel);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}
+
 void Log::record_output_info(const string& info, const SDepthData& quote)
 {
     try
@@ -139,7 +152,16 @@ void Log::record_output_info(const string& info, const vector<KlineData>& klines
 {
     try
     {
-        record_output_info(info);
+        std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
+
+        if (output_statistic_map_.find(info) == output_statistic_map_.end())
+        {
+            output_statistic_map_[info] = klines.size();
+        }
+        else
+        {
+            output_statistic_map_[info] += klines.size();
+        }
     }
     catch(const std::exception& e)
     {
@@ -147,6 +169,18 @@ void Log::record_output_info(const string& info, const vector<KlineData>& klines
     }    
 }
 
+void Log::record_output_info(const string& channel, const std::vector<KlineDataPtr>& klines)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+
+}
 
 void Log::statistic_thread_main()
 {
