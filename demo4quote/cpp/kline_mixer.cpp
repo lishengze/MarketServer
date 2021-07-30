@@ -86,23 +86,23 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
     auto iter_exchange_cache = symbol_cache.find(exchange);
     if( iter_exchange_cache == symbol_cache.end() )
     {
-         cout << "symbol_cache can not find " << exchange << "." << symbol << endl;
+        cout << "symbol_cache can not find " << exchange << "." << symbol << endl;
         return false;
     }
         
-    CalcCache* cache = iter_exchange_cache->second;
+    CalcCache* cur_symbol_exchange_cache = iter_exchange_cache->second;
 
     // 
-    for( const auto& kline : input ) {
+    for( const auto& input_kline : input ) {
         // 缓存最新K线
-        type_tick last_index = cache->get_last_index();
-        if( last_index == INVALID_INDEX || kline.index > last_index ) {
-            cache->klines.push_back(kline);
-        } else if ( last_index == kline.index ) {
-            cache->klines.back() = kline;
+        type_tick last_index = cur_symbol_exchange_cache->get_last_index();
+        if( last_index == INVALID_INDEX || input_kline.index > last_index ) {
+            cur_symbol_exchange_cache->klines.push_back(input_kline);
+        } else if ( last_index == input_kline.index ) {
+            cur_symbol_exchange_cache->klines.back() = input_kline;
         } else {
             // 倒着走
-            tfm::printfln("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, kline.index);
+            tfm::printfln("%s kline go back. last_index=%lu, new_index=%lu", symbol.c_str(), last_index, input_kline.index);
             return false;
         }
 
@@ -111,39 +111,54 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
         // 2. 如果可以计算，则清除所有市场时间<kline.index的数据
         
         bool can_calculate = true;
-        vector<KlineData> datas;
-        for( const auto& cache : symbol_cache ) 
-        {
-            const TExchange& exchange = cache.first;
-            const CalcCache* c = cache.second;
+        bool found = false;
 
-            bool found = false;
-            for( const auto& v : c->klines ) {
-                if( v.index == kline.index ) {
+        vector<KlineData> datas;
+        for( const auto& symbol_cache_iter : symbol_cache ) 
+        {
+            const TExchange& exchange = symbol_cache_iter.first;
+            const CalcCache* symbol_exchange_cache = symbol_cache_iter.second;
+
+            // bool found = false;
+            for( const auto& cur_exchange_kline : symbol_exchange_cache->klines ) 
+            {
+                if( cur_exchange_kline.index == input_kline.index ) 
+                {
                     found = true;   // QS: 只要有一个交易所的有和当前 k 线时间一致的 数据，就会进行计算；有逻辑错误，应该是所有交易所都有当前k线时间数据；
-                    datas.push_back(v);
+
+                    datas.push_back(cur_exchange_kline);
                 }
             }
-            if( !found ) {
-                // tfm::printfln("\n*** %s wait for exchange %s", symbol.c_str(), exchange.c_str());
-                can_calculate = false;
-                break;
+
+            // if( !found ) {
+            //     tfm::printfln("\n*** %s wait for exchange %s", symbol.c_str(), exchange.c_str());
+            //     can_calculate = false;
+            //     break;
+            // }
+        }
+
+        // if( !can_calculate )
+        // {
+        //     cout << "Cur Input From " << input_kline.exchange << " , " << utrade::pandora::ToSecondStr(input_kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S");
+        //     continue;
+        // }
+
+        // cout << "datas.size(): " << datas.size() << endl;
+
+        if (datas.size() > 0)
+        {
+            // // 开始计算
+            KlineData mixed_kline = calc_mixed_kline(input_kline.index, datas);
+            output.push_back(mixed_kline);
+
+            // 开始清理
+            for( auto& cache : symbol_cache ) 
+            {
+                CalcCache* c = cache.second;
+                c->clear(input_kline.index);
             }
         }
-        if( !can_calculate ){
-            continue;
-        }
 
-        // 开始计算
-        KlineData mixed_kline = calc_mixed_kline(kline.index, datas);
-        output.push_back(mixed_kline);
-
-        // 开始清理
-        for( auto& cache : symbol_cache ) 
-        {
-            CalcCache* c = cache.second;
-            c->clear(kline.index);
-        }
     }
 
     return true;
@@ -349,8 +364,8 @@ void KlineMixer::on_kline(const TExchange& exchange, const TSymbol& symbol, int 
         }
     }
     
-    cout << "\nAfter add_kline input " << exchange << "." << symbol << "." << resolution << ": " << kline.size() 
-         << ", output: " << MIX_EXCHANGE_NAME << ": " << output.size() << endl;
+    // cout << "\nAfter add_kline input " << exchange << "." << symbol << "." << resolution << ": " << kline.size() 
+    //      << ", output: " << MIX_EXCHANGE_NAME << ": " << output.size() << endl;
     engine_interface_->on_kline(MIX_EXCHANGE_NAME, symbol, resolution, output, is_init);
 }
 
@@ -486,8 +501,6 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         {
             cout << exchange << "." << iter.first << "." << 60 << ": " << iter.second.size() << endl;
         }
-
-        // std::cout << MIX_EXCHANGE_NAME << " db.size(): " << resolution << " " << outputs.size() << std::endl;
     }
 
     // 写入db缓存区

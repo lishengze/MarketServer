@@ -19,9 +19,9 @@ void setup_signal_handler_callback()
 
 int main(int argc, char** argv) 
 {
-    test_kline_calculator60();
-    test_kline_calculator3600();
-    test_kline_hubber();
+    // test_kline_calculator60();
+    // test_kline_calculator3600();
+    // test_kline_hubber();
     
     // setup the signal here
     setup_signal_handler_callback();
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     // Report report;
     // report.start();
     
-    utrade::pandora::io_service_pool engine_pool(3);
+    utrade::pandora::io_service_pool engine_pool(1);
     // start pool
     engine_pool.start();
     // launch the engine

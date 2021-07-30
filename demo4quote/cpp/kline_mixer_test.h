@@ -23,6 +23,7 @@ void test_kline_calculator60()
     kline.volume.from("0.153918");
     klines.push_back(kline);
     calculator.add_kline("HUOBI", symbol, klines, output);
+    cout << "output.size: " << output.size() << endl;
     assert( output.size() == 0 );
 
     klines.clear();
