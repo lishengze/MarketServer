@@ -1,0 +1,4 @@
+{
+    "ServerName": "HK_AWS",
+    "ProcessList": ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
+}

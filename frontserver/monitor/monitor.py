@@ -3,11 +3,30 @@ import subprocess
 import datetime
 import threading
 import psutil
+import json
 
 from util import *
 
+g_redis_config_file_name = "config.json"
+
+def get_redis_config():    
+    json_file = open(g_redis_config_file_name,'r')
+    json_dict = json.load(json_file)
+    print("\nredis_config: \n%s" %(str(json_dict)))
+
+    ServerName = "Test"
+    ProcessList = ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
+
+    if "ServerName" in json_dict:
+        ServerName = json_dict["ServerName"]
+
+    if "ProcessList" in json_dict:
+        ProcessList = json_dict["ProcessList"]
+
+    return ServerName, ProcessList
+
 def get_process():
-    return ["front_server", "demo4risk", "demo4quote", "python3", "redis-server"]
+    return ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
 
 class MonitorUtrade(object):
     def __init__(self):
@@ -15,12 +34,16 @@ class MonitorUtrade(object):
         self._program_last_status = {}
         self._program_curr_status = {}
         self._program_pid = {}
+        ServerName, ProcessList = get_redis_config()
 
-        process_list = get_process()
+        print("ServerName: %s, \nProcessList: %s" % (ServerName, str(ProcessList)))
+
+        self._server_name = ServerName
+        self._process_list = ProcessList
 
         self.filesys_list = ["/", "/data"]
 
-        for process_name in process_list:
+        for process_name in self._process_list :
             self._program_last_status[process_name] = -1
             self._program_curr_status[process_name] = -1
             self._program_pid[process_name] = []
@@ -65,7 +88,7 @@ class MonitorUtrade(object):
     def send_dingding_msg(self, msg, ding_type="source"):
         try:
             self.log_info(msg)
-            msg = 'msg ' + msg
+            msg = 'msg AWS' + msg
             if ding_type in self.dingding:                
                 self.dingding[ding_type].send_text(msg, False)        
         except Exception as e:            
@@ -313,8 +336,14 @@ def start_monitor():
         print("Exception start_monitor")
         print(e)
 
+def test_config():
+    ServerName, ProcessList = get_redis_config()
+    print(ServerName)
+    print(ProcessList)
 
 if __name__ == "__main__":    
+    # test_config()
+
     start_monitor()
     # basic_test()
     # test_psutil()
