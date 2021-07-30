@@ -152,7 +152,7 @@ bool MarketStream4ClientEntity::process()
         quote->set_time_produced_by_riskcontrol(now);
     }
 
-    cout << "MarketStream4ClientEntity::process " << reply.quotes_size() << endl;
+    // cout << "MarketStream4ClientEntity::process " << reply.quotes_size() << endl;
     
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
