@@ -3,6 +3,8 @@
 #include "grpc_server.h"
 #include "base/cpp/grpc_client.h"
 #include "updater_configuration.h"
+#include "updater_quote.h"
+#include "Log/log.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -42,6 +44,8 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
 
 RiskControllerServer::RiskControllerServer(std::string config_file_name)
 {
+    LOG->start();
+    
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file_name);
@@ -81,7 +85,10 @@ void RiskControllerServer::on_snap(const SEData& quote)
     // QuoteData to SInnerQuote
     SInnerQuote raw;
     quotedata_to_innerquote(quote, raw);
-    std::cout << "\nRiskControllerServer::on_snap " << quote.exchange() << "." << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
+    // std::cout << "\nRiskControllerServer::on_snap " << quote.exchange() << "." << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
+
+    LOG->record_input_info("depth_" + quote.exchange() + "_" + quote.symbol(), quote);
+
     datacenter_.add_quote(raw);
 }
 

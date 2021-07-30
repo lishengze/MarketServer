@@ -1,4 +1,11 @@
 #include "log.h"
+#include "pandora/util/time_util.h"
+#include "../updater_quote.h"
+
+Log::Log()
+{
+    
+}
 
 Log::~Log()
 {
@@ -43,52 +50,17 @@ void Log::record_input_info(const string& channel)
     
 }
 
-void Log::record_input_info(const string& channel, const SDepthData& quote)
+void Log::record_input_info(const string& info, const SEData& quote)
 {
     try
     {
-        record_input_info(channel);
+        record_input_info(info);
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-    }
-    
+    }    
 }
-
-void Log::record_input_info(const string& channel, const Trade& trade)
-{
-    try
-    {
-        record_input_info(channel);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-}
-
-void Log::record_input_info(const string& channel, const vector<KlineData>& klines)
-{
-    try
-    {
-        std::lock_guard<std::mutex> lk(input_statistic_map_mutex_);
-
-        if (input_statistic_map_.find(channel) == input_statistic_map_.end())
-        {
-            input_statistic_map_[channel] = klines.size();
-        }
-        else
-        {
-            input_statistic_map_[channel] += klines.size();
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-}
-
 
 void Log::record_output_info(const string& info)
 {
@@ -111,76 +83,41 @@ void Log::record_output_info(const string& info)
     }    
 }
 
-void Log::record_output_info(const string& channel, const string& details)
-{
-    try
-    {
-        record_output_info(channel);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-}
 
-void Log::record_output_info(const string& info, const SDepthData& quote)
-{
-    try
-    {
-        record_output_info(info);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }    
-}
 
-void Log::record_output_info(const string& info, const Trade& trade)
-{
-    try
-    {
-        record_output_info(info);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }    
-}
+// void Log::record_output_info(const string& info, const Trade& trade)
+// {
+//     try
+//     {
+//         record_output_info(info);
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << e.what() << '\n';
+//     }    
+// }
 
-void Log::record_output_info(const string& info, const vector<KlineData>& klines)
-{
-    try
-    {
-        std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
+// void Log::record_output_info(const string& info, const vector<KlineData>& klines)
+// {
+//     try
+//     {
+//         std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
 
-        if (output_statistic_map_.find(info) == output_statistic_map_.end())
-        {
-            output_statistic_map_[info] = klines.size();
-        }
-        else
-        {
-            output_statistic_map_[info] += klines.size();
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }    
-}
+//         if (output_statistic_map_.find(info) == output_statistic_map_.end())
+//         {
+//             output_statistic_map_[info] = klines.size();
+//         }
+//         else
+//         {
+//             output_statistic_map_[info] += klines.size();
+//         }
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << e.what() << '\n';
+//     }    
+// }
 
-void Log::record_output_info(const string& channel, const std::vector<KlineDataPtr>& klines)
-{
-    try
-    {
-        /* code */
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-
-}
 
 void Log::statistic_thread_main()
 {

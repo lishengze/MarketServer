@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES("../../protos/cpp")
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
@@ -32,7 +33,7 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
-add_executable(demo4risk ${DIR_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+add_executable(demo4risk ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 target_link_libraries(demo4risk ${Boost_LIBRARIES})
 target_link_libraries(demo4risk pandora)
 target_link_libraries(demo4risk log4cplus)

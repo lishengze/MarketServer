@@ -4,6 +4,9 @@
 #include "converter.h"
 #include "updater_configuration.h"
 
+#include "updater_quote.h"
+#include "Log/log.h"
+
 bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string& buy_currency) {
     // 获取标的币种
     std::string::size_type pos = symbol.find("_");
@@ -728,8 +731,9 @@ DataCenter::~DataCenter() {
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-    {
+
+    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
+    // {
         // _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
         // for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) 
         // {
@@ -754,12 +758,14 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 
         //     std::cout << std::endl;       
         // }
-    }
+    // }
 
 
 
     innerquote_to_msd2(quote, ptrData.get(), false);
-    //std::cout << "publish for broker " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
+
+
+    LOG->record_output_info("Hedge_" + quote.symbol + "_" + quote.exchange);
     for( const auto& v : callbacks_) 
     {
         v->publish4Hedge(quote.symbol, ptrData, NULL);
@@ -889,16 +895,21 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     if (!check_quote(newQuote))
     {
-        cout << quote.symbol << " not published!" << endl;
+        
+        // cout << quote.symbol << " not published!" << endl;
         return;
     }
 
     // std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
+
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
 
-    //std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
+    // std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
+    // _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
+
+    LOG->record_output_info("Broker_" + quote.symbol + "_" + quote.exchange);
+
     for( const auto& v : callbacks_) 
     {
         v->publish4Broker(quote.symbol, ptrData, NULL);
@@ -908,17 +919,17 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    {
-        _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
-    }
-    
+    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
+    // {
+    //     _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
+    // }
+
+    LOG->record_output_info("Client_" + quote.symbol + "_" + quote.exchange);
+
     for( const auto& v : callbacks_) 
     {
         v->publish4Client(quote.symbol, ptrData2, NULL);
-    }
-
-    
+    }    
 }
 
 bool DataCenter::check_quote(SInnerQuote& quote)
@@ -1156,11 +1167,13 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     _log_and_print("[otc_query] %s.%s direction=%s amount=%s turnover=%s", exchange, symbol, direction, amount, turnover);
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
+
     for (auto iter:last_datas_)
     {
         cout << iter.first << endl;
     }
     cout << "last_datas_.size: " << last_datas_.size() << endl;
+
     if( iter == last_datas_.end() )
         return QuoteResponse_Result_WRONG_SYMBOL;
 
