@@ -39,11 +39,13 @@ void DataReceive::launch()
 {
     cout << "DataReceive::launch " << endl;
 
+    LOG->start();
+
     init_grpc_interface();
 
-    init_statistic_thread();
+    // init_statistic_thread();
 
-    test_main();    
+    // test_main();    
 }
 
 void DataReceive::init_grpc_interface()
@@ -348,6 +350,8 @@ void DataReceive::handle_raw_depth(const char* exchange, const char* symbol, con
         // 只处理聚合数据;
         return;
     }
+
+    LOG->record_input_info(string("raw_depth_") + string(exchange) + "_" + string(symbol), depth);
     
     // std::stringstream stream_obj;
     // stream_obj  << "[Depth] handle_raw_depth " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
@@ -404,7 +408,8 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    
+    LOG->record_input_info(string("depth_") + string(exchange) + "_" + string(symbol), depth);
+
     // std::stringstream stream_obj;
     // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
     // LOG_INFO(stream_obj.str());
@@ -461,6 +466,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         // 只处理聚合数据;
         return;
     }
+
+    LOG->record_input_info(string("kline_") + string(exchange) + "_" + string(c_symbol) + "_" + std::to_string(resolution), klines);
 
     statistic_data_.collect_kline_data(exchange, c_symbol, resolution, klines);    
 
@@ -599,6 +606,9 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
             // 只处理聚合数据;
             return;
         }
+
+        LOG->record_input_info(string("trade_") + string(exchange) + "_" + string(symbol), trade);
+
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 

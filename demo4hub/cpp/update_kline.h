@@ -83,7 +83,7 @@ private:
 
     void _request(const string& addr, IKlineUpdater* callback) {
 
-        cout << "***** [KlineUpdater] Start Request" << endl;
+        // cout << "***** [KlineUpdater] Start Request" << endl;
 
         auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
         std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
@@ -117,7 +117,7 @@ private:
         }
         while (reader->Read(&resp)) {
             // split and convert
-            std::cout << "\n**** [update_kline] get " << resp.data_size() << " items ****" << std::endl;
+            // std::cout << "\n**** [update_kline] get " << resp.data_size() << " items ****" << std::endl;
             for( int i = 0 ; i < resp.data_size() ; i ++ )
             {
                 const SEKlineData& quote = resp.data(i);

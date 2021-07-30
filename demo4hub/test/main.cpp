@@ -46,7 +46,7 @@ public:
     virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) { 
         // return -1;
 
-        if (strcmp(exchange, MIX_EXCHANGE_NAME) == 0)
+        if (strcmp(exchange, MIX_EXCHANGE_NAME) == 0 && strcmp(symbol, "BTC_USDT") == 0)
         {
             cout << "[on_kline]: " << exchange << "." << symbol  << "." << resolution << ": "<< klines.size() << endl;
             
@@ -59,11 +59,9 @@ public:
                 cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
                     << kline.symbol << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";    
-
+                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
             }
         }
-
     }
 
     // virtual int on_kline(const char* exchange, const char* symbol, type_resolution resolution, const vector<KlineData>& klines) 
