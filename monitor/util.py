@@ -386,10 +386,15 @@ def exec_restart_program(stop_cmd, start_cmd, program_name, logger=None):
         else:
             msg += "stop %s failed \n" % (program_name)
 
+        if logger == None:
+            print(msg)
+        else:
+            logger.Critical(msg)            
+
         time.sleep(3)
 
         start_val = os.popen(start_cmd)
-        msg += "exec %s result: \n" % (start_cmd)
+        msg = "exec %s result: \n" % (start_cmd)
         for data in start_val.readlines():
             msg += data
         
