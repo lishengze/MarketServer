@@ -91,9 +91,14 @@ class MonitorUtrade(object):
             # print(e)
 
     def send_dingding_msg(self, msg, ding_type=DING_MODE_SOURCE):
-        try:
-            self._logger.Error(msg)
+        try:            
             msg = 'msg AWS' + msg
+
+            if ding_type == DING_MODE_RUN:
+                self._logger.Critical(msg)
+            elif ding_type == DING_MODE_SOURCE:
+                self._logger.Warning(msg)
+
             if ding_type in self.dingding:                
                 self.dingding[ding_type].send_text(msg, False)        
         except Exception as e:            
@@ -290,11 +295,11 @@ class MonitorUtrade(object):
         try:
             for program in self._program_last_status:
                 if self._program_curr_status[program] > self._program_last_status[program]:
-                    msg = get_datetime_str() + " " + str(program) + ' Start \n'
+                    msg = get_datetime_str() + " " + str(program) + ' Start \n'                    
                     self.send_dingding_msg(msg, DING_MODE_RUN)
 
                 if self._program_curr_status[program] < self._program_last_status[program]:
-                    msg = get_datetime_str() + " " + str(program) + ' Crashed! \n'                    
+                    msg = get_datetime_str() + " " + str(program) + ' Crashed! \n'
                     self.send_dingding_msg(msg, DING_MODE_RUN)   
 
                     if program == "front_server":
