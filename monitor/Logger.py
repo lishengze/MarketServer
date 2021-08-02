@@ -17,14 +17,14 @@ class Logger(object):
 
         detail_handler = logging.handlers.RotatingFileHandler(all_file_Name, maxBytes=8*1024*1024*500, backupCount=3)
         
-        detail_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+        detail_handler.setFormatter(logging.Formatter("%(asctime)s-%(levelname)s-%(filename)s[:%(lineno)d]-%(message)s"))
 
         # error_handler = logging.FileHandler('log/error.log')
 
         error_handler = logging.handlers.RotatingFileHandler(error_file_name, maxBytes=8*1024*1024*500, backupCount=3)
 
         error_handler.setLevel(logging.WARNING)
-        error_handler.setFormatter(logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s"))
+        error_handler.setFormatter(logging.Formatter(fmt="%(asctime)s-%(levelname)s-%(filename)s[:%(lineno)d]-%(message)s"))
 
         self._logger.addHandler(detail_handler)
         self._logger.addHandler(error_handler)        

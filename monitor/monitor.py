@@ -66,7 +66,7 @@ class MonitorUtrade(object):
 
     def __del__(self):
         # self._logger.close()
-        print("__del__")
+        self._logger.Info("__del__")
 
     def launch(self):
         self.set_timer()
@@ -185,13 +185,13 @@ class MonitorUtrade(object):
             if mem_info > 30:
                 if program == "demo4risk":
                     self.send_dingding_msg("Restart demo4risk")
-                    restart_demo4risk()
+                    restart_demo4risk(self._logger)
                 elif program == "demo4quote":
                     self.send_dingding_msg("Restart demo4quote")
-                    restart_demo4quote()
+                    restart_demo4quote(self._logger)
                 elif program == "front_server":
                     self.send_dingding_msg("Restart front_server")
-                    restart_frontserver()
+                    restart_frontserver(self._logger)
 
                 self.send_dingding_msg(msg)
 
@@ -346,7 +346,7 @@ if __name__ == "__main__":
 
     start_monitor()
 
-    
+
     # basic_test()
     # test_psutil()
     # get_disk_info()
