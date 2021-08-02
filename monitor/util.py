@@ -378,20 +378,20 @@ def exec_restart_program(stop_cmd, start_cmd, program_name, logger=None):
         stop_val = os.popen(stop_cmd)
         msg = "exec %s result: \n" % (stop_cmd)
         for data in stop_val.readlines():
-            msg += data + "\n"
+            msg += data
         
         program_status = get_process_status(program_name)
         if program_status == 0:
-            msg += "stop %s successfully" % (program_name)
+            msg += "stop %s successfully\n" % (program_name)
         else:
-            msg += "stop %s failed " % (program_name)
+            msg += "stop %s failed \n" % (program_name)
 
         time.sleep(3)
 
         start_val = os.popen(start_cmd)
-        msg = "exec %s result: \n" % (start_cmd)
+        msg += "exec %s result: \n" % (start_cmd)
         for data in start_val.readlines():
-            msg += data + "\n"
+            msg += data
         
         program_status = get_process_status(program_name)
         if program_status == 1:
