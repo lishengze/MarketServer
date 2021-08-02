@@ -298,7 +298,8 @@ class MonitorUtrade(object):
                     msg = get_datetime_str() + " " + str(program) + ' Start \n'                    
                     self.send_dingding_msg(msg, DING_MODE_RUN)
 
-                if self._program_curr_status[program] < self._program_last_status[program]:
+                if self._program_curr_status[program] < self._program_last_status[program] \
+                    or self._program_curr_status[program] == 0:
                     msg = get_datetime_str() + " " + str(program) + ' Crashed! \n'
                     self.send_dingding_msg(msg, DING_MODE_RUN)   
 
