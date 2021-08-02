@@ -174,6 +174,11 @@ class MonitorUtrade(object):
             # process_info = get_process_disk_io_shell()
 
             for program_id in self._program_pid[program]:
+                if not psutil.pid_exists(program_id):
+                    msg = "%s.%d has dead " % (program, program_id)
+                    self._logger.Error(msg)
+                    continue
+
                 process = psutil.Process(program_id)
                 mem_info += process.memory_percent()
                 cpu_info += get_process_cpu_usage(process)
