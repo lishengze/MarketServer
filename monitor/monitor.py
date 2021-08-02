@@ -4,7 +4,9 @@ import datetime
 import threading
 import psutil
 import json
+import traceback
 
+from Logger import *
 from util import *
 
 g_redis_config_file_name = "config.json"
@@ -55,45 +57,45 @@ class MonitorUtrade(object):
         self.dingding["run"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
 
         self._check_secs = 2
-        self._log_file = "log/monitor.log"
-        self._logger = open(self._log_file, 'w')
-        self._logger.close()
+        
+        # self._log_file = "log/monitor.log"
+        # self._logger = open(self._log_file, 'w')
+        # self._logger.close()
+
+        self._logger = Logger()
 
     def __del__(self):
-        self._logger.close()
+        # self._logger.close()
         print("__del__")
 
     def launch(self):
         self.set_timer()
 
-    def log_info(self, msg):
-        print(msg)
-        self._logger = open(self._log_file, 'a')
-        self._logger.write(msg+"\n")
-        self._logger.close()
-
     def output_program_info(self, program):
         try:
             cmd_str = "ps -aux|grep " + program
             result_str = subprocess.getoutput(cmd_str) + "\n"
-            self.log_info(result_str)
             self.send_dingding_msg(result_str)
 
             result_list = result_str.split("\n")
             self.get_opu_pid(result_list, True)            
         except Exception as e:
-            print("Exception output_program_info")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
+
+            # self._logger.Warning(e)
+            # print("Exception output_program_info")
+            # print(e)
 
     def send_dingding_msg(self, msg, ding_type="source"):
         try:
-            self.log_info(msg)
+            self._logger.Error(msg)
             msg = 'msg AWS' + msg
             if ding_type in self.dingding:                
                 self.dingding[ding_type].send_text(msg, False)        
         except Exception as e:            
-            print("Exception send_dingding_msg")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
         
     def get_opu_pid(self, ori_str_list, out=True):
         result = 0
@@ -101,7 +103,6 @@ class MonitorUtrade(object):
             for info_str in ori_str_list:
                 # if out:
                     # self.send_dingding_msg(info_str)
-                    # self.log_info(info_str)
                 if info_str.find("python") != -1 and info_str.find("OPU") != -1:
                     info_list = info_str.split(" ")
                     trans_list = []
@@ -112,11 +113,9 @@ class MonitorUtrade(object):
                     result = int(trans_list[1])  
                     #if out:
                         # self.send_dingding_msg(str(trans_list))
-                        # self.log_info(str(trans_list)+"\n")
-                        # self.log_info(str(result)+"\n")
         except Exception as e:
-            print("Exception get_opu_pid")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
         return result
 
@@ -129,8 +128,8 @@ class MonitorUtrade(object):
             result_list = result_str.split("\n")
             result = self.get_opu_pid(result_list)      
         except Exception as e:
-            print("Exception get_status_manually")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
    
         return result
 
@@ -149,8 +148,8 @@ class MonitorUtrade(object):
                         self._program_pid[program_name].append(proc.pid)
                         result = 1      
         except Exception as e:
-            print("Exception get_status")
-            print(e)              
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)           
 
         return result
 
@@ -197,8 +196,8 @@ class MonitorUtrade(object):
                 self.send_dingding_msg(msg)
 
         except Exception as e:
-            print("Exception get_usage_info")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
         return msg
 
@@ -208,8 +207,8 @@ class MonitorUtrade(object):
             cmd_str = "df -h"
             result_str = get_datetime_str() + "\n" + subprocess.getoutput(cmd_str) + "\n"
         except Exception as e:
-            print("Exception get_disk_info")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
         return result_str
 
@@ -218,11 +217,12 @@ class MonitorUtrade(object):
             for program in self._program_curr_status: 
                 self._program_curr_status[program] = self.get_status(program)
             
-            self.log_info(str(self._program_curr_status))
-            self.log_info(str(self._program_pid)+"\n")            
+            self._logger.Debug(str(self._program_curr_status))
+            self._logger.Debug(str(self._program_pid)+"\n")       
+                
         except Exception as e:
-            print("Exception set_curr_status")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
     def record_usage_info(self):        
         try:
@@ -277,11 +277,11 @@ class MonitorUtrade(object):
             #         or disk_io[5] > max_util:
             #             self.send_dingding_msg(record_msg)
 
-            self.log_info(record_msg)     
+            self._logger.Debug(record_msg)     
                     
         except Exception as e:
-            print("Exception record_usage_info")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
     def check_program_status(self):
         try:
@@ -298,8 +298,8 @@ class MonitorUtrade(object):
 
                 self._program_last_status[program] = self._program_curr_status[program]
         except Exception as e:
-            print("Exception check_program_status")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
          
     def timer_func(self):
         try:
@@ -309,8 +309,8 @@ class MonitorUtrade(object):
 
             self.set_timer()
         except Exception as e:
-            print("Exception timer_func")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
     def set_timer(self):
         try:
@@ -319,8 +319,8 @@ class MonitorUtrade(object):
             # timer = threading.Timer(self._check_secs, self.print_data)
             timer.start()
         except Exception as e:
-            print("Exception set_timer")
-            print(e)
+            exception_str = traceback.format_exc()
+            self._logger.Error (exception_str)
 
     def print_data(self):
     
@@ -345,6 +345,8 @@ if __name__ == "__main__":
     # test_config()
 
     start_monitor()
+
+    
     # basic_test()
     # test_psutil()
     # get_disk_info()

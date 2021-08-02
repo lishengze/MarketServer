@@ -348,6 +348,9 @@ def run_cmd_list(cmd_list):
         for cmd in cmd_list:
             val = os.popen(cmd)
 
+            print("exec %s result: " % (cmd))
+            print(val)
+
             # for atom_data in val.readlines():
             #     print(atom_data)
 
@@ -453,7 +456,9 @@ class Test(object):
         get_process_id(process_str)
 
     def test_restart(self):
-        restart_demo4risk()
+        # restart_demo4risk()
+
+        restart_frontserver()
 
 if __name__ == '__main__':
     test_obj = Test()
