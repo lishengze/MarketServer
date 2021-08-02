@@ -25,10 +25,17 @@ int main(int argc, char** argv)
     
     // setup the signal here
     setup_signal_handler_callback();
-    
+
+    string config_file_name = "config.json";
+    if(argc == 2)
+    {
+        config_file_name = argv[1];
+        cout << "config_file_name: " << config_file_name << endl;
+    }
+
     // init configuration
     utrade::pandora::Singleton<Config>::Instance();
-    CONFIG->parse_config(config_file);
+    CONFIG->parse_config(config_file_name);
 
     StreamEngine streamEngine;
     streamEngine.init();

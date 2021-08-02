@@ -536,7 +536,9 @@ class Test(object):
     def test_restart(self):
         # restart_demo4risk()
 
-        restart_frontserver(self._logger)
+        # restart_frontserver(self._logger)
+
+        restart_demo4quote(self._logger)
 
 if __name__ == '__main__':
     test_obj = Test()
