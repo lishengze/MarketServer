@@ -11,6 +11,9 @@ from util import *
 
 g_redis_config_file_name = "config.json"
 
+DING_MODE_SOURCE = "source"
+DING_MODE_RUN = "run"
+
 def get_redis_config():    
     json_file = open(g_redis_config_file_name,'r')
     json_dict = json.load(json_file)
@@ -52,9 +55,9 @@ class MonitorUtrade(object):
         
         self.dingding = {
         }
-        self.dingding["source"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
+        self.dingding[DING_MODE_SOURCE] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
 
-        self.dingding["run"] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
+        self.dingding[DING_MODE_RUN] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
 
         self._check_secs = 2
         
@@ -87,7 +90,7 @@ class MonitorUtrade(object):
             # print("Exception output_program_info")
             # print(e)
 
-    def send_dingding_msg(self, msg, ding_type="source"):
+    def send_dingding_msg(self, msg, ding_type=DING_MODE_SOURCE):
         try:
             self._logger.Error(msg)
             msg = 'msg AWS' + msg
@@ -146,7 +149,7 @@ class MonitorUtrade(object):
                 for proc in psutil.process_iter():
                     if proc.name() == program_name:
                         self._program_pid[program_name].append(proc.pid)
-                        result = 1      
+                        result += 1      
         except Exception as e:
             exception_str = traceback.format_exc()
             self._logger.Error (exception_str)           
@@ -286,15 +289,22 @@ class MonitorUtrade(object):
     def check_program_status(self):
         try:
             for program in self._program_last_status:
-                if self._program_last_status[program] == 0 and self._program_curr_status[program] == 1:
-                    msg = get_datetime_str() + "  Start: " + str(program) + ' start! \n'
-                    self.send_dingding_msg(msg, "run")
-                    # self.output_program_info(program)
+                if self._program_curr_status[program] > self._program_last_status[program]:
+                    msg = get_datetime_str() + " " + str(program) + ' Start \n'
+                    self.send_dingding_msg(msg, DING_MODE_RUN)
 
-                if self._program_last_status[program] == 1 and self._program_curr_status[program] == 0:
-                    msg = get_datetime_str() + "  Warining: " + str(program) + ' crashed! \n'                    
-                    self.send_dingding_msg(msg, "run")   
-                    #self.output_program_info(program)
+                if self._program_curr_status[program] < self._program_last_status[program]:
+                    msg = get_datetime_str() + " " + str(program) + ' Crashed! \n'                    
+                    self.send_dingding_msg(msg, DING_MODE_RUN)   
+
+                    if program == "front_server":
+                        restart_frontserver(self._logger)
+                    
+                    if program == "demo4risk":
+                        restart_demo4risk(self._logger)
+
+                    if program == "demo4quote":
+                        restart_demo4quote(self._logger)
 
                 self._program_last_status[program] = self._program_curr_status[program]
         except Exception as e:
