@@ -17,11 +17,17 @@ public:
 
     void record_input_info(const string& channel);
 
-    void record_output_info(const string& channel, const SDepthQuote& quote);
+    void record_input_info(const string& info, const SDepthQuote& quote);
 
-    void record_output_info(const string& channel, const Trade& trade);
+    void record_input_info(const string& info, const Trade& trade);
 
-    void record_output_info(const string& channel, const vector<KlineData>& klines);
+    void record_input_info(const string& info, const vector<KlineData>& klines);
+
+    void record_output_info(const string& info, const SDepthQuote& quote);
+
+    void record_output_info(const string& info, const Trade& trade);
+
+    void record_output_info(const string& info, const vector<KlineData>& klines);
 
     void record_output_info(const string& info);
 

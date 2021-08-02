@@ -50,6 +50,51 @@ void Log::record_input_info(const string& channel)
     
 }
 
+void Log::record_input_info(const string& info, const SDepthQuote& quote)
+{
+    try
+    {
+        record_input_info(info);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::record_input_info(const string& info, const Trade& trade)
+{
+    try
+    {
+        record_input_info(info);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::record_input_info(const string& info, const vector<KlineData>& klines)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(input_statistic_map_mutex_);
+
+        if (input_statistic_map_.find(info) == input_statistic_map_.end())
+        {
+            input_statistic_map_[info] = klines.size();
+        }
+        else
+        {
+            input_statistic_map_[info] += klines.size();
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
 void Log::record_output_info(const string& info)
 {
     try

@@ -503,6 +503,8 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
+    
+
     // 写入db缓存区
 
     if (!is_restart)
@@ -510,6 +512,7 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         db_interface_->on_kline(exchange, symbol, resolution, outputs, is_init);
         db_interface_->on_kline(exchange, symbol, 3600, output_60mins, is_init);
     }
+
 
 
     // 更新回调
