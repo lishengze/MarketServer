@@ -5,7 +5,7 @@ import time
 
 
 class Logger(object):
-    def __init__(self):
+    def __init__(self, all_file_Name="log/all.log", error_file_name="log/error.log"):
         LOG_FORMAT = "%(pathname)s-%(lineno)s - %(asctime)s - %(levelname)s - %(message)s"
         DATE_FORMAT = "%Y/%m/%d %H:%M:%S"    
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT)
@@ -15,13 +15,13 @@ class Logger(object):
 
         # detail_handler = logging.handlers.TimedRotatingFileHandler('log/all.log', when='midnight', interval=1, backupCount=7, atTime=datetime.time(0, 0, 0, 0))
 
-        detail_handler = logging.handlers.RotatingFileHandler('log/all.log', maxBytes=8*1024*1024*500, backupCount=3)
+        detail_handler = logging.handlers.RotatingFileHandler(all_file_Name, maxBytes=8*1024*1024*500, backupCount=3)
         
         detail_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
         # error_handler = logging.FileHandler('log/error.log')
 
-        error_handler = logging.handlers.RotatingFileHandler('log/error.log', maxBytes=8*1024*1024*500, backupCount=3)
+        error_handler = logging.handlers.RotatingFileHandler(error_file_name, maxBytes=8*1024*1024*500, backupCount=3)
 
         error_handler.setLevel(logging.WARNING)
         error_handler.setFormatter(logging.Formatter(fmt="%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s"))

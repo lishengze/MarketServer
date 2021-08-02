@@ -8,6 +8,8 @@ import time
 import subprocess
 import os
 
+import Logger
+
 def print_dict(dict_data):
     for index in dict_data:
         if type(dict_data[index]) is dict:
@@ -343,16 +345,20 @@ def get_process_disk_io_shell():
         print("Exception get_process_disk_io_shell")
         print(e)
 
-def run_cmd_list(cmd_list):
+def run_cmd_list(cmd_list, logger=None):
     try:
         for cmd in cmd_list:
             val = os.popen(cmd)
 
-            print("exec %s result: " % (cmd))
-            # print(val)
-
-            for atom_data in val.readlines():
-                print(atom_data)
+            if logger != None:
+                logger.Info("exec %s result: " % (cmd))
+                for atom_data in val.readlines():
+                    logger.Info(atom_data)
+            else:
+                print("exec %s result: " % (cmd))
+                # print(val)
+                for atom_data in val.readlines():
+                    print(atom_data)
 
             time.sleep(5)
     except Exception as e:
@@ -367,42 +373,108 @@ def get_process_status(program_name):
 
     return result
 
-def restart_demo4risk():
+def exec_restart_program(stop_cmd, start_cmd, program_name, logger=None):
     try:
+        stop_val = os.popen(stop_cmd)
+        msg = "exec %s result: \n" % (stop_cmd)
+        for data in stop_val.readlines():
+            msg += data + "\n"
+        
+        program_status = get_process_status(program_name)
+        if program_status == 0:
+            msg += "stop %s successfully" % (program_name)
+        else:
+            msg += "stop %s failed " % (program_name)
+
+        time.sleep(3)
+
+        start_val = os.popen(start_cmd)
+        msg = "exec %s result: \n" % (start_cmd)
+        for data in start_val.readlines():
+            msg += data + "\n"
+        
+        program_status = get_process_status(program_name)
+        if program_status == 1:
+            msg += "start %s successfully" % (program_name)
+        else:
+            msg += "start %s failed " % (program_name)
+
+        if logger == None:
+            print(msg)
+        else:
+            logger.Critical(msg)
+
+        # for cmd in cmd_list:
+        #     val = os.popen(cmd)
+
+        #     if logger != None:
+        #         logger.Info("exec %s result: " % (cmd))
+        #         for atom_data in val.readlines():
+        #             logger.Info(atom_data)
+        #     else:
+        #         print("exec %s result: " % (cmd))
+        #         # print(val)
+        #         for atom_data in val.readlines():
+        #             print(atom_data)
+
+        #     time.sleep(5)
+    except Exception as e:
+        print("Exception run_cmd_list")
+        print(e)
+
+    
+
+
+def restart_demo4risk(logger=None):
+    try:
+        program_name = "demo4risk"
         cmd_list = ["/mnt/bcts_quote/demo4risk/cpp/build/stop.sh", "/mnt/bcts_quote/demo4risk/cpp/build/start.sh"]
         
-        run_cmd_list(cmd_list)
+        exec_restart_program(cmd_list[0], cmd_list[1], program_name, logger)
 
-        program_name = "demo4risk"
+        # run_cmd_list(cmd_list, logger)
 
-        status = get_process_status(program_name)
+        # status = get_process_status(program_name)
 
-        if status == 1:
-            print(" %s restart successfully!" % (program_name))
-        else:
-            print(" %s restart failed!" % (program_name))
+        # if status == 1:
+        #     print(" %s restart successfully!" % (program_name))
+        # else:
+        #     print(" %s restart failed!" % (program_name))
 
     except Exception as e:
         print("Exception restart_demo4risk")
         print(e)
 
 
-def restart_demo4quote():
+def restart_demo4quote(logger=None):
     try:
         cmd_list = ["/mnt/bcts_quote/demo4quote/cpp/build/stop.sh", "/mnt/bcts_quote/demo4quote/cpp/build/start.sh"]
         
-        run_cmd_list(cmd_list)
+        program_name = "demo4quote"
+
+        exec_restart_program(cmd_list[0], cmd_list[1], program_name, logger)
+
+        # run_cmd_list(cmd_list, logger)
+
+        # status = get_process_status(program_name)
+
+        # if status == 1:
+        #     print(" %s restart successfully!" % (program_name))
+        # else:
+        #     print(" %s restart failed!" % (program_name))        
 
     except Exception as e:
         print("Exception restart_demo4quote")
         print(e)
 
 
-def restart_frontserver():
+def restart_frontserver(logger=None):
     try:
+        program_name = "front_server"
+
         cmd_list = ["/mnt/bcts_quote/frontserver/platform/build/stop.sh", "/mnt/bcts_quote/frontserver/platform/build/start.sh"]
         
-        run_cmd_list(cmd_list)
+        exec_restart_program(cmd_list[0], cmd_list[1], program_name, logger)
 
     except Exception as e:
         print("Exception restart_frontserver")
@@ -413,6 +485,7 @@ class Test(object):
     def __init__(self):
         super().__init__()
         self.__name__ = "Test"
+        self._logger = Logger(all_file_Name="test/all.log", error_file_name="test/error.log")
 
         # self.test_get_disk_info()
 
@@ -458,7 +531,7 @@ class Test(object):
     def test_restart(self):
         # restart_demo4risk()
 
-        restart_frontserver()
+        restart_frontserver(self._logger)
 
 if __name__ == '__main__':
     test_obj = Test()
