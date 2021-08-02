@@ -8,7 +8,7 @@ import time
 import subprocess
 import os
 
-import Logger
+from Logger import *
 
 def print_dict(dict_data):
     for index in dict_data:
