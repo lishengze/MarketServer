@@ -951,8 +951,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     if (quote.symbol == "BTC_USDT")
     {
-        cout << "\n Publish For Broker Quote Data" << endl;
-        print_quote(newQuote);        
+        // cout << "\n Publish For Broker Quote Data" << endl;
+        // print_quote(newQuote);        
     }
 
     // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
