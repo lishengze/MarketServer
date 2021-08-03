@@ -486,6 +486,27 @@ def restart_frontserver(logger=None):
         print(e)
                  
 
+import socket
+import fcntl
+import struct
+  
+
+def get_ip_address(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x8915,  # SIOCGIFADDR
+        struct.pack('256s', ifname[:15])
+    )[20:24])
+
+
+def get_host():
+    myname = socket.getfqdn(socket.gethostname())
+    print("myname: %s" % (myname))
+    #获取本机ip
+    myaddr = socket.gethostbyname(myname)    
+    print("myaddr: %s" % (myaddr))
+
 class Test(object):
     def __init__(self):
         super().__init__()
@@ -504,7 +525,16 @@ class Test(object):
 
         # self.test_get_process_pid()
 
-        self.test_restart()
+        # self.test_restart()
+
+        self.test_get_ip_address()
+
+    def test_get_ip_address(self):
+        # print(get_ip_address("eth0"))
+
+        # print(get_ip_address("lo"))
+        
+        get_host()
 
     def test_get_disk_info(self):
         file_sys_path = "/"

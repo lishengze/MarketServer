@@ -1,4 +1,4 @@
 {
-    "ServerName": "HK_AWS",
+    "ServerName": "Dev_Test",
     "ProcessList": ["front_server", "demo4risk", "demo4quote", "python3", "redis-server"]
 }
