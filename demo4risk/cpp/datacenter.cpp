@@ -857,6 +857,36 @@ void DataCenter::_push_to_clients(const TSymbol& symbol)
     }
 }
 
+void print_quote(SInnerQuote& quote)
+{
+    cout << "\n------------- asks info: " << endl;
+    int i = 0;
+    int test_numb = 5;
+    for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }
+    cout << "++++++++++++++++++" << endl;
+    i = 0;
+    for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }    
+
+    cout << "***************** bids info: " << endl;
+    i = 0;
+    for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }
+    cout << "++++++++++++++++++" << endl;
+    i = 0;
+    for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }  
+}
+
 void DataCenter::_publish_quote(const SInnerQuote& quote) 
 {    
     SInnerQuote newQuote;
@@ -918,6 +948,9 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     // send to clients
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
+
+    cout << "\n Publish For Broker Quote Data" << endl;
+    print_quote(newQuote);
 
     // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
     // {
@@ -1196,6 +1229,8 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
     return true;
 }
 
+
+
 QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double amount, double turnover, SDecimal& price)
 {
     _log_and_print("[otc_query] %s.%s direction=%s amount=%s turnover=%s", exchange, symbol, direction, amount, turnover);
@@ -1213,35 +1248,11 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 
     SInnerQuote& quote = iter->second;
 
-    std::cout << "\n*****Config Info: " << symbol << endl;
-    std::cout << params_.cache_config[symbol].desc() << std::endl;
+    // std::cout << "\n*****Config Info: " << symbol << endl;
+    // std::cout << params_.cache_config[symbol].desc() << std::endl;
 
-    cout << "\n------------- asks info: " << endl;
-    int i = 0;
-    int test_numb = 5;
-    for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
-    {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }
-    cout << "++++++++++++++++++" << endl;
-    i = 0;
-    for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
-    {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }    
-
-    cout << "bids info: " << endl;
-    i = 0;
-    for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < test_numb; ++iter, ++i)
-    {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }
-    cout << "++++++++++++++++++" << endl;
-    i = 0;
-    for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < test_numb; ++iter, ++i)
-    {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }  
+    cout << "\n OTC Quote Data" << endl;
+    print_quote(quote);
 
     if( amount > 0 )
     {
