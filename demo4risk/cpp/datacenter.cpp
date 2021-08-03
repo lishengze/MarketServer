@@ -1065,11 +1065,12 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
-            price *= ( 1 - config.OtcOffset); 
-        } else {
             price *= ( 1 + config.OtcOffset); 
+        } else {
+            price *= ( 1 - config.OtcOffset); 
         }
     }
+
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
@@ -1081,6 +1082,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     std::cout << "bias_price: " << price.get_value() 
               << " bias_kind: " << config.OTCOffsetKind 
               << " bias_value: " << config.OtcOffset 
+              << " direction: " << is_ask
               << std::endl;
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
@@ -1147,6 +1149,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
     std::cout << "bias_price: " << price.get_value() 
               << " bias_kind: " << config.OTCOffsetKind 
               << " bias_value: " << config.OtcOffset 
+              << " is_ask: " << is_ask
               << std::endl;
 
     price.scale(precise, is_ask);
