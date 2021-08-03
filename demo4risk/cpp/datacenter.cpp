@@ -1025,7 +1025,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, true);
+            // reset_price(price, config, true);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -1041,7 +1041,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, false);
+            // reset_price(price, config, false);
 
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
 
@@ -1058,7 +1058,11 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     }
 
     if( total_volume < volume )
+    {
+        cout << "_calc_otc_by_amount failed depth_sum_volume is: " << total_volume.get_value() << ", request_volume: " << volume << endl;
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
+    }
+        
 
     price = total_amount.get_value() / total_volume.get_value();
     std::cout << "_calc_otc_by_amount ori_price: " << price.get_value() << " ";
@@ -1091,10 +1095,11 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
-    if( is_ask ) {
+    if( is_ask ) 
+    {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, true);
+            // reset_price(price, config, true);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
 
             SDecimal amounts = iter->second.total_volume * price;
@@ -1107,10 +1112,12 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
                 break;
             }
         }
-    } else {
+    } 
+    else 
+    {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, false);
+            // reset_price(price, config, false);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
             SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
@@ -1124,7 +1131,11 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         }
     }
     if( total_amount < amount )
+    {
+        cout << "_calc_otc_by_amount failed depth_sum_amount is: " << total_amount.get_value() << ", request_amount: " << amount << endl;
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
+    }
+        
 
     price = total_amount.get_value() / total_volume.get_value();
 
