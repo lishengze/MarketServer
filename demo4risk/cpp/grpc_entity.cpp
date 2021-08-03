@@ -48,7 +48,7 @@ bool MarketStream4BrokerEntity::process()
         copy_protobuf_object((MarketStreamData*)ptrs[i].get(), quote);
     }
     
-    cout << "MarketStream4BrokerEntity::process " << reply.quotes_size() << endl;
+    // cout << "MarketStream4BrokerEntity::process " << reply.quotes_size() << endl;
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      
@@ -99,7 +99,7 @@ bool MarketStream4HedgeEntity::process()
         copy_protobuf_object((MarketStreamData*)ptrs[i].get(), quote);
     }    
 
-    cout << "MarketStream4HedgeEntity::process " << reply.quotes_size() << endl;
+    // cout << "MarketStream4HedgeEntity::process " << reply.quotes_size() << endl;
 
     if( reply.quotes_size() > 0 ) {
         responder_.Write(reply, this);      

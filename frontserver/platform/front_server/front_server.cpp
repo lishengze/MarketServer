@@ -223,13 +223,18 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
     {
-        cout << "\nFrontServer::response_kline_data_package " << endl;
+        // cout << "\nFrontServer::response_kline_data_package " << endl;
         
         RspKLineDataPtr p_rsp_kline_data = GetField<RspKLineData>(package);
 
         if (p_rsp_kline_data)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
+
+            if (p_rsp_kline_data->frequency_ == 3600 && p_rsp_kline_data->is_update_ == true)
+            {
+                return;
+            }
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 
@@ -256,7 +261,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             {
                 if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
                 {
-                    cout << "Request Delete KLine Connect" << endl;
+                    // cout << "Request Delete KLine Connect" << endl;
 
                     bool is_cancel_request = true;
                     PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
