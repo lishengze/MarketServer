@@ -1209,19 +1209,23 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 
     if( amount > 0 )
     {
-        cout << "Compute "<< symbol << " Amount " <<  amount << endl;
+        
         if( direction == QuoteRequest_Direction_BUY ) {
+            cout << "Compute "<< symbol << " Amount " <<  amount  << " buy " << endl;
             return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
         } else {
+            cout << "Compute "<< symbol << " Amount " <<  amount  << " sell " << endl;
             return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol], amount, price, quote.precise);   
         }
     } 
     else
     {
-        cout << "Compute "<< symbol << " turnover" <<  turnover << endl;
+        
         if( direction == QuoteRequest_Direction_BUY ) {
+            cout << "Compute "<< symbol << " turnover" <<  turnover << " buy " << endl;
             return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol], turnover, price, quote.precise);
         } else { 
+            cout << "Compute "<< symbol << " turnover" <<  turnover << " sell " << endl;
             return _calc_otc_by_turnover(quote.bids, false, params_.cache_config[symbol], turnover, price, quote.precise);
         }
     }
