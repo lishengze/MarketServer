@@ -1217,12 +1217,18 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     std::cout << params_.cache_config[symbol].desc() << std::endl;
 
     cout << "\n------------- asks info: " << endl;
-    int i=0;
+    int i = 0;
     int test_numb = 5;
     for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
     {
         cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }
+    cout << "++++++++++++++++++" << endl;
+    i = 0;
+    for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }    
 
     cout << "bids info: " << endl;
     i = 0;
@@ -1230,7 +1236,12 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     {
         cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }
-
+    cout << "++++++++++++++++++" << endl;
+    i = 0;
+    for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }  
 
     if( amount > 0 )
     {
