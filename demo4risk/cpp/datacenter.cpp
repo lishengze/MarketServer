@@ -1021,6 +1021,7 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
 QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
+
     if( is_ask ) {
 
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
@@ -1124,10 +1125,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
 
                 cout << "done _calc_otc_by_turnover price: " << price << ", volume" << amount - total_amount.get_value() << " is_ask:" << is_ask << endl;
                 break;
-            }
-
-            
-
+            }        
         }
     } 
     else 
@@ -1217,6 +1215,22 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 
     std::cout << "\n*****Config Info: " << symbol << endl;
     std::cout << params_.cache_config[symbol].desc() << std::endl;
+
+    cout << "\n------------- asks info: " << endl;
+    int i=0;
+    int test_numb = 5;
+    for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }
+
+    cout << "bids info: " << endl;
+    i = 0;
+    for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
+    {
+        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    }
+
 
     if( amount > 0 )
     {
