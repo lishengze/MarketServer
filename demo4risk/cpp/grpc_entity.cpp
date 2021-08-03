@@ -51,6 +51,7 @@ bool MarketStream4BrokerEntity::process()
     // cout << "MarketStream4BrokerEntity::process " << reply.quotes_size() << endl;
 
     if( reply.quotes_size() > 0 ) {
+        cout << "MarketStream4BrokerEntity::process " << reply.quotes_size() << endl;
         responder_.Write(reply, this);      
         return true;
     } else {
