@@ -1034,15 +1034,17 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             } else {
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
+                break;
             }
 
+            cout << "_calc_otc_by_amount price: " << price << ", volume" << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
             // cout << "total_volume: " << total_volume.get_value() << endl;
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
-            // reset_price(price, config, false);
 
+            // reset_price(price, config, false);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -1051,7 +1053,10 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             } else {
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
+                break;
             }
+
+            cout << "_calc_otc_by_amount price: " << price << ", volume" << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
 
             // cout << "total_volume: " << total_volume.get_value() << endl;
         }
@@ -1111,6 +1116,9 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
                 total_amount = amount;
                 break;
             }
+
+            cout << "_calc_otc_by_turnover price: " << price << ", volume" << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
+
         }
     } 
     else 
@@ -1128,6 +1136,9 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
                 total_amount = amount;
                 break;
             }
+
+            cout << "_calc_otc_by_turnover price: " << price << ", volume" << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
+
         }
     }
     if( total_amount < amount )
