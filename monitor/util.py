@@ -507,6 +507,8 @@ def get_host():
     myaddr = socket.gethostbyname(myname)    
     print("myaddr: %s" % (myaddr))
 
+    return myaddr
+
 class Test(object):
     def __init__(self):
         super().__init__()

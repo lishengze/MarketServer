@@ -43,7 +43,7 @@ class MonitorUtrade(object):
 
         print("ServerName: %s, \nProcessList: %s" % (ServerName, str(ProcessList)))
 
-        self._server_name = ServerName
+        self._server_name = get_host()
         self._process_list = ProcessList
 
         self.filesys_list = ["/", "/data"]
