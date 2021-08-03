@@ -530,7 +530,7 @@ class Test(object):
         self.test_get_ip_address()
 
     def test_get_ip_address(self):
-        print(get_ip_address("eth0"))
+        # print(get_ip_address("eth0"))
 
         # print(get_ip_address("lo"))
         
