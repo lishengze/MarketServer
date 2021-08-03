@@ -219,6 +219,8 @@ void Log::print_input_info()
 {
     try
     {
+        std::lock_guard<std::mutex> lk(input_statistic_map_mutex_);
+        
         cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " INPUT: " << endl;
         for (auto& iter:input_statistic_map_)
         {
@@ -239,13 +241,28 @@ void Log::print_output_info()
 {
     try
     {
+        std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
+
         cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " OUTPUT: " << endl;
+        std::list<std::string> clean_list;
         for (auto& iter:output_statistic_map_)
         {
+
             cout << iter.first << ": " << iter.second << endl;
+
+            if (iter.second == 0)            
+            {
+                clean_list.push_back(iter.first);
+            }
 
             iter.second = 0;
         }
+
+        for(string key:clean_list)
+        {
+            output_statistic_map_.erase(key);
+        }
+
         cout << endl;
 
     }

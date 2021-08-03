@@ -275,8 +275,10 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                 }
                 else
                 {
+                    string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
                     LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
-                                            + "_fre_" + std::to_string(p_rsp_kline_data->frequency_),
+                                            + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
+                                            + type,
                                             p_rsp_kline_data->kline_data_vec_);
                 }
             }
