@@ -1036,7 +1036,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume = volume;
             }
 
-            cout << "total_volume: " << total_volume.get_value() << endl;
+            // cout << "total_volume: " << total_volume.get_value() << endl;
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
@@ -1053,7 +1053,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume = volume;
             }
 
-            cout << "total_volume: " << total_volume.get_value() << endl;
+            // cout << "total_volume: " << total_volume.get_value() << endl;
         }
     }
 
@@ -1061,7 +1061,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
 
     price = total_amount.get_value() / total_volume.get_value();
-    std::cout << "ori_price: " << price.get_value() << " ";
+    std::cout << "_calc_otc_by_amount ori_price: " << price.get_value() << " ";
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
@@ -1126,7 +1126,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
 
     price = total_amount.get_value() / total_volume.get_value();
 
-    std::cout << "ori_price: " << price.get_value() << " ";
+    std::cout << "_calc_otc_by_turnover ori_price: " << price.get_value() << " ";
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
