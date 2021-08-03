@@ -492,12 +492,15 @@ void SubscribeQuoteInBinaryEntity::add_data(const TExchange& exchange, const TSy
 {
     if( request_.exchange() != "" && exchange != request_.exchange() )
         return;
-    if( request_.symbol() != "" && symbol != request_.symbol() )
-        return;
+
+    // if( request_.symbol() != "" && symbol != request_.symbol() )
+    //     return;
 
     // std::cout << "Sub::add_data " << "request.ex: " << request_.exchange() << ", ex: " << exchange << " "
     //                               << "reqeust.sy: " << request_.symbol() << ", sy: " << symbol
     //                               << endl;
+
+    // std::cout << "SubQuote: " << exchange << ", " << symbol << ", " << endl;
 
     string ptrs[ONE_ROUND_MESSAGE_NUMBRE];
     
