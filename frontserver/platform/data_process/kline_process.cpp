@@ -1173,10 +1173,11 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
                 cur_kline_data->index = kline_update.last_update_time_;
 
                 cout << "Kline Update old : " << get_sec_time_str(cur_kline_data->index) << " "
+                << "fre: " << cur_kline_data->frequency_ << " "
                 <<"open: " << cur_kline_data->px_open.get_value() << " " 
                 <<"close: " << cur_kline_data->px_close.get_value() << " "
                 <<"high: " << cur_kline_data->px_high.get_value() << " "
-                <<"low: " << cur_kline_data->px_low.get_value() << " "                
+                <<"low: " << cur_kline_data->px_low.get_value() << " "
                 << endl;  
 
                 PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
