@@ -949,8 +949,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    cout << "\n Publish For Broker Quote Data" << endl;
-    print_quote(newQuote);
+    if (quote.symbol == "BTC_USDT")
+    {
+        cout << "\n Publish For Broker Quote Data" << endl;
+        print_quote(newQuote);        
+    }
 
     // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
     // {
