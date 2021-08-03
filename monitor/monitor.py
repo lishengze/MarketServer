@@ -92,7 +92,7 @@ class MonitorUtrade(object):
 
     def send_dingding_msg(self, msg, ding_type=DING_MODE_SOURCE):
         try:            
-            msg = self._server_name + ": " + msg
+            msg ="msg " + self._server_name + ": " + msg
 
             if ding_type == DING_MODE_RUN:
                 self._logger.Critical(msg)
