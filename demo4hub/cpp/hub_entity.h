@@ -15,7 +15,7 @@ public:
     HubEntity();
     ~HubEntity();
 
-    int start();
+    int start(string file_name);
 
     int stop();
 

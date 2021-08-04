@@ -5,7 +5,7 @@
 class HubInterface
 {
 public:
-    static int start();
+    static int start(string file_name);
     static int stop();
     static int set_callback(HubCallback* callback);
 

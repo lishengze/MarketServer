@@ -6,11 +6,11 @@ using std::cout;
 using std::endl;
 
 
-int HubInterface::start() 
+int HubInterface::start(string file_name) 
 {
     cout << "HubInterface Start " << endl;
 
-    return HUB->start();
+    return HUB->start(file_name);
 }
 
 int HubInterface::stop()

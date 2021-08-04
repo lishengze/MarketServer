@@ -7,6 +7,8 @@ void Config::load_config(string file_name)
 {
     try
     {    
+        file_name_ = file_name;
+        
         std::ifstream in_config(file_name);
 
         cout << "Config::load_config " << file_name << endl;

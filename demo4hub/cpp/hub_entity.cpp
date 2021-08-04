@@ -31,7 +31,7 @@ HubEntity::HubEntity()
 {
     // init configuration
     utrade::pandora::Singleton<Config>::Instance();
-    CONFIG->parse_config(config_file);
+    
 }
 
 HubEntity::~HubEntity()
@@ -39,9 +39,15 @@ HubEntity::~HubEntity()
 
 }
 
-int HubEntity::start()
+int HubEntity::start(string file_name)
 {
     cout << "HubEntity::start "<< endl;
+    if (file_name == "")
+    {
+        file_name = "config.json";
+    }
+    
+    CONFIG->parse_config(file_name);
     quote_updater_.start(CONFIG->risk_controller_addr_, this);
     kline_updater_.start(CONFIG->stream_engine_addr_, this);
     //trade_updater_.start(CONFIG->stream_engine_addr_, this);

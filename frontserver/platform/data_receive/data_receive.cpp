@@ -6,6 +6,7 @@
 #include "../util/package_manage.h"
 #include "../log/log.h"
 #include "quote.h"
+#include "config/config.h"
 
 #include <chrono>
 #include <sstream>
@@ -51,7 +52,7 @@ void DataReceive::launch()
 void DataReceive::init_grpc_interface()
 {
     HubInterface::set_callback(this);
-    HubInterface::start();
+    HubInterface::start(CONFIG->get_file_name());
 }
 
 void DataReceive::init_statistic_thread()

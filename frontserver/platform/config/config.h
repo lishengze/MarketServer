@@ -28,8 +28,10 @@ class Config
         int get_frequency_numb() { return frequency_numb_;}
         std::set<int>& get_frequency_base() { return frequency_base_list_;}
         std::set<int>& get_frequency_list() { return frequency_list_;}
+        string get_file_name() { return file_name_;}
 
     private:
+        string                  file_name_;
         string                  hub_address_;
         int                     ws_port_;   
         int                     rest_port_; 

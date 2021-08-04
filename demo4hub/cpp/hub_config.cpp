@@ -11,7 +11,7 @@ void Config::parse_config(const std::string& file_name)
 
     try
     {
-        cout << "Config File Name : " << file_name << endl;
+        cout << "hub_config: Config File Name : " << file_name << endl;
 
         logger_ = utrade::pandora::UTLog::getStrategyLogger("StreamEngine", "StreamEngine");
 
