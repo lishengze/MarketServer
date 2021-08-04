@@ -169,11 +169,20 @@ void Log::record_output_info(const string& info, const vector<KlineData>& klines
     }    
 }
 
-void Log::record_output_info(const string& channel, const std::vector<KlineDataPtr>& klines)
+void Log::record_output_info(const string& info, const std::vector<KlineDataPtr>& klines)
 {
     try
     {
-        /* code */
+        std::lock_guard<std::mutex> lk(output_statistic_map_mutex_);
+
+        if (output_statistic_map_.find(info) == output_statistic_map_.end())
+        {
+            output_statistic_map_[info] = klines.size();
+        }
+        else
+        {
+            output_statistic_map_[info] += klines.size();
+        }
     }
     catch(const std::exception& e)
     {
