@@ -337,6 +337,11 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
             string cur_symbol = string(pkline_data->symbol);
             int src_freq = pkline_data->frequency_;
 
+            // if (cur_symbol == "BTC_USDT")
+            // {
+            //     cout << "[response_src_kline_package] " << cur_symbol << "." << src_freq << " " << get_sec_time_str(pkline_data->index) << endl;
+            // }
+
             KlineDataPtr update_for_trade = boost::make_shared<KlineData>(*pkline_data);
             update_one_day_kline_data(update_for_trade);
 
@@ -1084,15 +1089,20 @@ bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id
 
 void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
 {
+    // cout << "KlineProcess::update_kline_data " << endl;
+
     string symbol = kline_data->symbol;
 
     if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
     {
-        // cout << "KlineProcess::update_kline_data " << symbol << endl;
+        // cout << "KlineProcess::update_kline_data " 
+        //      << get_sec_time_str(kline_data->index)  << " " << kline_data->symbol << "." << kline_data->frequency_ << ", "
+        //     << "open: " << kline_data->px_open.get_value() << ", high: " << kline_data->px_high.get_value() << ", "
+        //     << "low: " << kline_data->px_low.get_value() << ", close: " << kline_data->px_close.get_value() << "\n";
 
         // vector<KlineDataUpdatePtr>& vec = updated_kline_data_map_[symbol];
 
-        // cout << "vec.size: " << vec.size() << endl;
+        // cout << "updated_kline_data_map_[" << symbol << "]: " << updated_kline_data_map_[symbol].size() << endl;
 
         for (auto& kline_update:updated_kline_data_map_[symbol])
         {            
@@ -1102,6 +1112,8 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
 
             // if (frequency_aggreration_map_[cur_fre] != kline_data->frequency_) continue;
 
+            // cout << "kline_data->frequency_ " << kline_data->frequency_ << ", req_fre: " << cur_fre << endl;
+
 
             if (!kline_update.kline_data_)
             {
@@ -1109,6 +1121,8 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
             }
 
             KlineDataPtr& last_kline = kline_update.kline_data_;
+
+            // cout << kline_update.str() << endl;
 
             if (last_kline->is_clear())
             {
@@ -1142,12 +1156,13 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
 
                 KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                // cout << "Kline Update New : " << get_sec_time_str(cur_kline_data->index) << " "
-                // <<"open: " << cur_kline_data->px_open.get_value() << " " 
-                // <<"close: " << cur_kline_data->px_close.get_value() << " "
-                // <<"high: " << cur_kline_data->px_high.get_value() << " "
-                // <<"low: " << cur_kline_data->px_low.get_value() << " "                
-                // << endl;     
+                cout << "Kline Update New : " << get_sec_time_str(cur_kline_data->index) << " " 
+                << "fre: " << cur_kline_data->frequency_ << " "
+                <<"open: " << cur_kline_data->px_open.get_value() << " " 
+                <<"close: " << cur_kline_data->px_close.get_value() << " "
+                <<"high: " << cur_kline_data->px_high.get_value() << " "
+                <<"low: " << cur_kline_data->px_low.get_value() << " "                
+                << endl;     
 
                 cout << endl;           
                 

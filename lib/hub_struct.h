@@ -124,6 +124,8 @@ struct KlineData:virtual public PacakgeBaseData
         assign(px_high, other.px_high);
         assign(px_low, other.px_low);
         assign(volume, other.volume);
+        assign(frequency_, other.frequency_);
+        assign(clear_, other.clear_);
     }
 
     void reset(const KlineData& other)
@@ -136,7 +138,9 @@ struct KlineData:virtual public PacakgeBaseData
         assign(px_high, other.px_high);
         assign(px_low, other.px_low);
         assign(volume, other.volume);
-
+        assign(frequency_, other.frequency_);
+        assign(clear_, other.clear_);
+        
         clear_ = false;     
     }
 

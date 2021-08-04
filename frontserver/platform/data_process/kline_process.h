@@ -2,6 +2,7 @@
 
 #include "../front_server_declare.h"
 #include "../data_structure/comm_data.h"
+#include "../util/tools.h"
 using std::map;
 using std::vector;
 
@@ -32,6 +33,19 @@ class KlineDataUpdate
         {
             cout << "~KlineDataUpdate() " << endl;
         }
+
+        string str()
+        {
+            std::stringstream s_obj;
+            s_obj << "reqkline_data info " << "\n";
+            s_obj << reqkline_data.symbol_ << "." << reqkline_data.frequency_ << ",count: " << reqkline_data.data_count_ << "\n";
+            s_obj << "last kline info " << "\n";
+            s_obj << get_sec_time_str(kline_data_->index)  << " " << kline_data_->symbol << "." << kline_data_->frequency_ << ", "
+                        << "open: " << kline_data_->px_open.get_value() << ", high: " << kline_data_->px_high.get_value() << ", "
+                        << "low: " << kline_data_->px_low.get_value() << ", close: " << kline_data_->px_close.get_value() << "\n";
+            return s_obj.str();
+        }
+
 
     ReqKLineData        reqkline_data;
     type_tick           last_update_time_;

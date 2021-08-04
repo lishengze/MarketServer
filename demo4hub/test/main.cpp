@@ -9,6 +9,12 @@ using std::cout;
 using std::endl;
 using namespace dec;
 
+string get_sec_time_str(unsigned long time)
+{
+    return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
+}
+
+
 class Client : public HubCallback
 {
 public:   
@@ -52,12 +58,17 @@ public:
             
             for (const KlineData& kline:klines)
             {
+                if (resolution == 60 && kline.index % 3600 == 0)
+                {
+                    cout << symbol << "." << resolution << " " << get_sec_time_str(kline.index) << endl;
+                }
+
                 // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
 
                 // const KlineData& kline = klines[i];
 
                 cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
-                    << kline.symbol << ", "
+                    << kline.symbol << "." << resolution << ", "
                     << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                     << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
             }
@@ -133,7 +144,7 @@ int main()
 {
     Client client;
     HubInterface::set_callback(&client);
-    HubInterface::start();
+    HubInterface::start("");
 
     // test_get_kline();
     // test_get_lasttrades();

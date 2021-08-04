@@ -475,6 +475,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     string symbol = string(c_symbol);
 
 
+
+
     // std::stringstream stream_obj;
     // stream_obj  << "[K-Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
     // LOG_INFO(stream_obj.str());
@@ -493,55 +495,16 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
     {
         const KlineData& kline = klines[i];
         
-        std::stringstream stream_obj;
-        stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index) << " "<< exchange << " " << symbol << ", "
-                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-        // LOG_INFO(stream_obj.str());
-
-        // if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
+        // if (symbol == "BTC_USDT")
         // {
-        //     LOG_INFO(stream_obj.str());
+        //     std::stringstream stream_obj;
+        //     stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << " " << symbol << "." << resolution << ", "
+        //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
+        //     cout << stream_obj.str() << endl;
+        //     // LOG_INFO(stream_obj.str());
         // }
 
-        if (strcmp(c_symbol, test_kline_symbol.c_str()) == 0)
-        {
-            if (is_test_maxmin_kline)
-            {
-                if (resolution == 60)
-                {
-                    if (max_min_kline_info_60.px_high < kline.px_high)
-                    {
-                        max_min_kline_info_60.px_high = kline.px_high;
-                        max_min_kline_info_60.high_time = kline.index;
-                    }
-
-                    if (max_min_kline_info_60.px_low > kline.px_low)
-                    {
-                        max_min_kline_info_60.px_low = kline.px_low;
-                        max_min_kline_info_60.low_time = kline.index;
-                    }
-                }
-
-                if (resolution == 3600)
-                {
-                    if (max_min_kline_info_3600.px_high < kline.px_high)
-                    {
-                        max_min_kline_info_3600.px_high = kline.px_high;
-                        max_min_kline_info_3600.high_time = kline.index;
-                    }
-
-                    if (max_min_kline_info_3600.px_low > kline.px_low)
-                    {
-                        max_min_kline_info_3600.px_low = kline.px_low;
-                        max_min_kline_info_3600.low_time = kline.index;
-                    }                    
-                }
-
-            }
-        }
-                
-        
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
 
         if (package)
@@ -551,6 +514,12 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             if (pklineData)
             {
                 pklineData->frequency_ = resolution;
+
+                // if (symbol == "BTC_USDT")
+                // {
+                //     cout << "[Check] " << symbol << "." << resolution << " " << get_sec_time_str(pklineData->index) << endl;
+                // }
+
                 deliver_response(package);
             }
             else
@@ -562,6 +531,52 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         {
             LOG_ERROR("DataReceive::handle_kline_data GetNewKlineDataPackage Failed!");
         }
+
+        // if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
+        // {
+        //     LOG_INFO(stream_obj.str());
+        // }
+
+        // if (strcmp(c_symbol, test_kline_symbol.c_str()) == 0)
+        // {
+        //     if (is_test_maxmin_kline)
+        //     {
+        //         if (resolution == 60)
+        //         {
+        //             if (max_min_kline_info_60.px_high < kline.px_high)
+        //             {
+        //                 max_min_kline_info_60.px_high = kline.px_high;
+        //                 max_min_kline_info_60.high_time = kline.index;
+        //             }
+
+        //             if (max_min_kline_info_60.px_low > kline.px_low)
+        //             {
+        //                 max_min_kline_info_60.px_low = kline.px_low;
+        //                 max_min_kline_info_60.low_time = kline.index;
+        //             }
+        //         }
+
+        //         if (resolution == 3600)
+        //         {
+        //             if (max_min_kline_info_3600.px_high < kline.px_high)
+        //             {
+        //                 max_min_kline_info_3600.px_high = kline.px_high;
+        //                 max_min_kline_info_3600.high_time = kline.index;
+        //             }
+
+        //             if (max_min_kline_info_3600.px_low > kline.px_low)
+        //             {
+        //                 max_min_kline_info_3600.px_low = kline.px_low;
+        //                 max_min_kline_info_3600.low_time = kline.index;
+        //             }                    
+        //         }
+
+        //     }
+        // }
+                
+
+
+
     }   
 
     // if (strcmp(c_symbol, test_kline_symbol.c_str()) == 0)

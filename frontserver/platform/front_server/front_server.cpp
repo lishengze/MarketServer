@@ -247,8 +247,8 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
             // for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
             // {
-            //     cout << get_sec_time_str(atom_kline->index) << ", "
-            //          << p_rsp_kline_data->symbol_ << ", "
+            //     cout << "[S] " << p_rsp_kline_data->socket_id_ << " "<< get_sec_time_str(atom_kline->index) << ", "
+            //          << p_rsp_kline_data->symbol_ << "." << p_rsp_kline_data->frequency_ << ", "
             //          << "open: " << atom_kline->px_open.get_value() << ", "
             //          << "close: " << atom_kline->px_close.get_value() << ", "
             //          << "high: " << atom_kline->px_high.get_value() << ", "

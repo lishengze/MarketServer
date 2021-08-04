@@ -79,7 +79,7 @@ def get_sub_trade_str(symbol="BTC_USDT"):
 
 def get_sub_kline_str(symbl="BTC_USDT"):
     print("get_sub_kline_str")
-    frequency = 60 * 5
+    frequency = 60 
     end_time = int(time.time())
     end_time = end_time - end_time % frequency - frequency
     start_time = end_time - 60 * 30
@@ -126,9 +126,9 @@ def sub_btc_usdt(ws, sub_symbol):
 def on_open(ws):
     print("Connected")
 
-    send_str = get_sub_depth_str()
+    # send_str = get_sub_depth_str()
 
-    # send_str = get_sub_kline_str()
+    send_str = get_sub_kline_str()
 
     # send_str = get_sub_trade_str()
 
@@ -146,9 +146,9 @@ def on_open(ws):
 def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.855.220.139"
-    ip = "ws://118.193.35.160"
+    # ip = "ws://118.193.35.160"
     # ip = "ws://18.162.52.222"
-    # ip = "ws://127.0.0.1"
+    ip = "ws://127.0.0.1"
     port = 8114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
