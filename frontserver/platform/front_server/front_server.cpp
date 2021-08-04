@@ -236,6 +236,12 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                 return;
             }
 
+            string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
+            LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
+                                    + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
+                                    + type,
+                                    p_rsp_kline_data->kline_data_vec_);            
+
             // cout << "kline_data_str: " << kline_data_str << endl;
 
 
@@ -280,11 +286,11 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                 }
                 else
                 {
-                    string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
-                    LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
-                                            + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
-                                            + type,
-                                            p_rsp_kline_data->kline_data_vec_);
+                    // string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
+                    // LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
+                    //                         + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
+                    //                         + type,
+                    //                         p_rsp_kline_data->kline_data_vec_);
                 }
             }
         }

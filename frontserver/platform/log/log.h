@@ -62,6 +62,8 @@ class Log
 
         void record_output_info(const string& info);
 
+        void record_client_info(const string& client_id, const string& info);
+
         void statistic_thread_main();
 
         void print_statistic_data();
@@ -69,6 +71,8 @@ class Log
         void print_input_info();
 
         void print_output_info();
+
+        void print_client_info();
 
     private:
 
@@ -84,6 +88,9 @@ class Log
 
         map<string, int>                output_statistic_map_;
         std::mutex                      output_statistic_map_mutex_;
+
+        std::map<string, std::vector<std::string>> client_info_map_;      
+        std::mutex                      client_info_map_mutex_; 
 
 
     private:

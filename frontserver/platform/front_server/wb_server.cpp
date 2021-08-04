@@ -206,6 +206,8 @@ void WBServer::process_on_open(WebsocketClass * ws)
 
         ID_TYPE socket_id = store_ws(ws);
 
+        LOG->record_client_info(std::to_string(socket_id), " on_open");
+
         PackagePtr package =  GetReqSymbolListDataPackage(socket_id, COMM_TYPE::WEBSOCKET, ID_MANAGER->get_id());
 
         if (package)
@@ -233,11 +235,13 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 {
     try
     {
-        cout << utrade::pandora::NanoTimeStr() << " ws: " << ws << " " << ori_msg << endl;
+        // cout << utrade::pandora::NanoTimeStr() << " ws: " << ws << " " << ori_msg << endl;
 
         ID_TYPE socket_id = check_ws(ws);
         if (socket_id)
         {
+            LOG->record_client_info(std::to_string(socket_id), ori_msg);
+
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
             if (js["type"].is_null())
@@ -273,6 +277,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         }
         else
         {
+            LOG->record_client_info(std::to_string(socket_id), " id is invalid");
+
             cout << "WBServer::process_on_message ws: " << ws << ", socket_id: " << socket_id << " is invalid" << endl;
         }
  
@@ -728,10 +734,12 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
             {
                 wss_con_map_[socket_id]->set_alive(false);
                 wss_con_map_.erase(socket_id);
+                LOG->record_client_info(std::to_string(socket_id), " id cleaned successfully!");
                 cout << "clean_ws Socket: " << ws << " id: " << socket_id << " successfully! " << endl;
             }
             else
             {
+                LOG->record_client_info(std::to_string(socket_id), " id Already Cleaned!");
                 cout << "clean_ws Socket: " << ws << " id: " << socket_id << " Already Cleaned! " << endl;
             }
             return socket_id;
@@ -739,6 +747,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
         }
         else
         {
+            LOG->record_client_info(std::to_string(socket_id), " id was not stored!");
             cout << "clean_ws Socket: " << socket_id << " was not stored!" << endl;
         }
 

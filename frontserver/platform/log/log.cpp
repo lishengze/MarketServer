@@ -182,6 +182,29 @@ void Log::record_output_info(const string& channel, const std::vector<KlineDataP
 
 }
 
+void Log::record_client_info(const string& client_id, const string& info)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(client_info_map_mutex_);
+
+        if (client_info_map_.find(client_id) != client_info_map_.end())
+        {
+            std::vector<std::string> new_info_list ={info};
+            client_info_map_[client_id] = new_info_list;
+        }
+        else
+        {
+            client_info_map_[client_id].push_back(info);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+
 void Log::statistic_thread_main()
 {
     try
@@ -220,7 +243,7 @@ void Log::print_input_info()
     try
     {
         std::lock_guard<std::mutex> lk(input_statistic_map_mutex_);
-        
+
         cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " INPUT: " << endl;
         for (auto& iter:input_statistic_map_)
         {
@@ -270,4 +293,27 @@ void Log::print_output_info()
     {
         std::cerr << e.what() << '\n';
     }    
+}
+
+void Log::print_client_info()
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(client_info_map_mutex_);
+
+        cout << "From: " << last_statistic_time_str_ << " To: " << utrade::pandora::SecTimeStr() << " Client: " << endl;
+        for (auto iter1:client_info_map_)
+        {
+            cout << "client_id: " << iter1.first << endl;
+            for (auto info:iter1.second)
+            {
+                cout << info << endl;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 }
