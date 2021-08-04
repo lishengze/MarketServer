@@ -312,6 +312,8 @@ void Log::print_client_info()
                 cout << info << endl;
             }
         }
+
+        client_info_map_.clear();
     }
     catch(const std::exception& e)
     {
