@@ -2,13 +2,16 @@
 
 #include "../front_server_declare.h"
 #include "pandora/util/thread_safe_singleton.hpp"
-#define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance("./config.json")
+#define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
 
 class Config
 {
     public:
-        Config(string file_name) {
-            load_config(file_name);                      
+        Config(string file_name="") {
+            if (file_name != "")
+            {
+                load_config(file_name); 
+            }                                 
         }
 
         void set_file(string file_name)
