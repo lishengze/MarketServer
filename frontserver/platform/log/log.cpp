@@ -231,6 +231,8 @@ void Log::print_statistic_data()
         print_input_info();
 
         print_output_info();
+
+        print_client_info();
     }
     catch(const std::exception& e)
     {
