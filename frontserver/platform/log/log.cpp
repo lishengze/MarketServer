@@ -224,7 +224,7 @@ void Log::statistic_thread_main()
 
             std::this_thread::sleep_for(std::chrono::seconds(statistic_secs_));
 
-            // print_statistic_data();
+            print_statistic_data();
         }
     }
     catch(const std::exception& e)
