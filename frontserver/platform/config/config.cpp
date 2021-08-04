@@ -9,6 +9,8 @@ void Config::load_config(string file_name)
     {    
         std::ifstream in_config(file_name);
 
+        cout << "Config::load_config " << file_name << endl;
+
         if (!in_config.is_open())
         {
             cout << "Failed to Open: " << file_name << endl;
@@ -16,6 +18,9 @@ void Config::load_config(string file_name)
         else
         {
             string contents((istreambuf_iterator<char>(in_config)), istreambuf_iterator<char>());
+
+            cout << contents << endl;
+
             nlohmann::json js = nlohmann::json::parse(contents);
             
             if (!js["hub"].is_null() && !js["hub"]["risk_controller_addr"].is_null())

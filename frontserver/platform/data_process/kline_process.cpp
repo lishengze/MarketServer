@@ -1098,9 +1098,9 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
         {            
             int cur_fre = kline_update.reqkline_data.frequency_;
 
-            // if (kline_data->frequency_ > cur_fre) continue;
+            if (kline_data->frequency_ > cur_fre) continue;
 
-            if (frequency_aggreration_map_[cur_fre] != kline_data->frequency_) continue;
+            // if (frequency_aggreration_map_[cur_fre] != kline_data->frequency_) continue;
 
 
             if (!kline_update.kline_data_)
