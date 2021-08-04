@@ -511,7 +511,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id)
         if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
             wss_con_map_[socket_id]->set_alive(true);
-            cout << "[S] "  << utrade::pandora::NanoTimeStr() << " "<< socket_id << " is alive" << endl;
+            // cout << "[S] "  << utrade::pandora::NanoTimeStr() << " "<< socket_id << " is alive" << endl;
         }        
         else
         {
@@ -608,7 +608,7 @@ void WBServer::check_heartbeat()
                 }
                 else
                 {
-                    cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
+                    // cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
                 }
             }
                 

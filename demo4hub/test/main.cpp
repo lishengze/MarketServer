@@ -56,22 +56,22 @@ public:
         {
             cout << "[on_kline]: " << exchange << "." << symbol  << "." << resolution << ": "<< klines.size() << endl;
             
-            for (const KlineData& kline:klines)
-            {
-                if (resolution == 60 && kline.index % 3600 == 0)
-                {
-                    cout << symbol << "." << resolution << " " << get_sec_time_str(kline.index) << endl;
-                }
+            // for (const KlineData& kline:klines)
+            // {
+            //     if (resolution == 60 && kline.index % 3600 == 0)
+            //     {
+            //         cout << symbol << "." << resolution << " " << get_sec_time_str(kline.index) << endl;
+            //     }
 
-                // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
+            //     // cout << symbol << " " << utrade::pandora::ToSecondStr(klines[i].index*1000*1000*1000, "%Y-%m-%d %H:%M:%S") << " " << klines[i].px_open.get_str_value() << " " << endl;
 
-                // const KlineData& kline = klines[i];
+            //     // const KlineData& kline = klines[i];
 
-                cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
-                    << kline.symbol << "." << resolution << ", "
-                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-            }
+            //     cout <<"[Kline] " << utrade::pandora::ToSecondStr(kline.index * 1000*1000*1000, "%Y-%m-%d %H:%M:%S") << ", "
+            //         << kline.symbol << "." << resolution << ", "
+            //         << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+            //         << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
+            // }
         }
     }
 
