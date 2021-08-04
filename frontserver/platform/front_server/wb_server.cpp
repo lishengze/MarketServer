@@ -511,7 +511,13 @@ void WBServer::process_heartbeat(ID_TYPE socket_id)
         if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
             wss_con_map_[socket_id]->set_alive(true);
+            cout << "[S] "  << utrade::pandora::NanoTimeStr() << " "<< socket_id << " is alive" << endl;
         }        
+        else
+        {
+            cout << "[E] process_heartbeat socket_id: " << socket_id << " is invalid " << endl;
+        }
+
         // cout << "\nWBServer::process_heartbeat: " << socket_id << " " << wss_con_map_[socket_id] << endl;
     }
     catch(const std::exception& e)
@@ -598,12 +604,17 @@ void WBServer::check_heartbeat()
                 if (!iter.second->is_alive())
                 {
                     ws_vec.push_back(iter.first);
+                    cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat failed!" << endl;
+                }
+                else
+                {
+                    cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
                 }
             }
                 
             for (auto socket_id:ws_vec)
             {
-                cout << "ws: " << wss_con_map_[socket_id] << " , id: " << socket_id << " check heartbeat failed!" << endl;
+                // cout << utrade::pandora::NanoTimeStr() << " ws: " << wss_con_map_[socket_id] << " , id: " << socket_id << " check heartbeat failed!" << endl;
                 WebsocketClass * ws = wss_con_map_[socket_id]->get_ws();
                 WSData* data_ptr = (WSData*)(ws->getUserData());
                 data_ptr->set_id(0);

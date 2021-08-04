@@ -231,10 +231,10 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
 
-            if (p_rsp_kline_data->frequency_ == 3600 && p_rsp_kline_data->is_update_ == true)
-            {
-                return;
-            }
+            // if (p_rsp_kline_data->frequency_ == 3600 && p_rsp_kline_data->is_update_ == true)
+            // {
+            //     return;
+            // }
 
             string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
             LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
