@@ -1,4 +1,6 @@
 #include "log.h"
+#include "../config/config.h"
+
 
 Log::~Log()
 {
@@ -330,3 +332,123 @@ void Log::print_client_info()
     }
     
 }
+
+void Log::log_trace(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_debug(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+void Log::log_info(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_warn(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_error(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_fatal(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_client_request(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_client_response(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_source_input(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+void Log::log_exception(const string& info)
+{
+    try
+    {
+
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+

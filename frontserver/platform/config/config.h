@@ -39,4 +39,6 @@ class Config
         int                     frequency_numb_{100};
         std::set<int>           frequency_base_list_;
 
+        bool                    is_dev_mode_{true};
+
 };

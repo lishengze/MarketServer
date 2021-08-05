@@ -238,11 +238,23 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
             string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
             LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
+                                    + "_" + p_rsp_kline_data->symbol_ + "_"
                                     + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
                                     + type,
                                     p_rsp_kline_data->kline_data_vec_);  
 
-                      
+            // if (p_rsp_kline_data->is_update_)
+            // {
+            //     for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
+            //     {
+            //         cout << utrade::pandora::NanoTimeStr() << " [S] " << p_rsp_kline_data->socket_id_ << " "<< get_sec_time_str(atom_kline->index) << ", "
+            //             << p_rsp_kline_data->symbol_ << "." << p_rsp_kline_data->frequency_ << ", "
+            //             << "open: " << atom_kline->px_open.get_value() << ", "
+            //             << "close: " << atom_kline->px_close.get_value() << ", "
+            //             << "high: " << atom_kline->px_high.get_value() << ", "
+            //             << "low: " << atom_kline->px_low.get_value() << endl;
+            //     }
+            // }          
 
             // cout << "kline_data_str: " << kline_data_str << endl;
 

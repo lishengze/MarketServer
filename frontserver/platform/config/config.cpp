@@ -8,7 +8,7 @@ void Config::load_config(string file_name)
     try
     {    
         file_name_ = file_name;
-        
+
         std::ifstream in_config(file_name);
 
         cout << "Config::load_config " << file_name << endl;
@@ -85,6 +85,12 @@ void Config::load_config(string file_name)
                 }                
             }              
 
+            if (!js["is_dev_mode"].is_null())
+            {
+                is_dev_mode_ = js["is_dev_mode"].get<bool>();
+            }
+
+            cout << "is_dev_mode: " << is_dev_mode_ << endl; 
             cout << "frequency_list_: " << endl;
             for (auto freq:frequency_list_)
             {
