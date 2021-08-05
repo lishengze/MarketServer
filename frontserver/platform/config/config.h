@@ -26,6 +26,9 @@ class Config
         int get_rest_port() { return rest_port_;}
 
         int get_frequency_numb() { return frequency_numb_;}
+
+        bool get_dev_mode() { return is_dev_mode_;}
+
         std::set<int>& get_frequency_base() { return frequency_base_list_;}
         std::set<int>& get_frequency_list() { return frequency_list_;}
         string get_file_name() { return file_name_;}

@@ -55,30 +55,30 @@ void DataReceive::init_grpc_interface()
     HubInterface::start(CONFIG->get_file_name());
 }
 
-void DataReceive::init_statistic_thread()
-{
-    sp_statistic_thread_ = boost::make_shared<boost::thread>(&DataReceive::statistic_main, this);
-}
+// void DataReceive::init_statistic_thread()
+// {
+//     sp_statistic_thread_ = boost::make_shared<boost::thread>(&DataReceive::statistic_main, this);
+// }
 
-void DataReceive::statistic_main()
-{
-    try
-    {
-        while(true)
-        {
-            std::this_thread::sleep_for(std::chrono::seconds(statistic_data_.update_secs_));
+// void DataReceive::statistic_main()
+// {
+//     try
+//     {
+//         while(true)
+//         {
+//             std::this_thread::sleep_for(std::chrono::seconds(statistic_data_.update_secs_));
 
-            cout << statistic_data_.get_str() << endl;
+//             cout << statistic_data_.get_str() << endl;
 
-            statistic_data_.clear();
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr <<"\n[E]DataReceive::statistic_main" << e.what() << '\n';
-    }
+//             statistic_data_.clear();
+//         }
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr <<"\n[E]DataReceive::statistic_main" << e.what() << '\n';
+//     }
     
-}
+// }
 
 void DataReceive::test_main()
 {
@@ -401,8 +401,6 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         return;
     }
 
-    statistic_data_.collect_depth_data(exchange, symbol, depth);
-
     if (strcmp(exchange, MIX_EXCHANGE_NAME) != 0)
     {
         // 只处理聚合数据;
@@ -410,23 +408,6 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
     }
 
     LOG->record_input_info(string("depth_") + string(exchange) + "_" + string(symbol), depth);
-
-    // std::stringstream stream_obj;
-    // stream_obj  << "[Depth] " << exchange<< " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
-    // LOG_INFO(stream_obj.str());
-    
-
-    // cout << "Ask: length: " << depth.ask_length << endl;
-    // for ( int i = 0; i < depth.ask_length; ++i)
-    // {
-    //     cout << depth.asks[i].price.get_value() << ", " << depth.asks[i].volume.get_value() << endl;
-    // }
-
-    // cout << "\nBid, length: " << depth.bid_length << endl;
-    // for ( int i = 0; i < depth.bid_length && i < 5; ++i)
-    // {
-    //     cout << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << endl;
-    // }    
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
@@ -440,7 +421,7 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         }
         else
         {
-            LOG_ERROR("DataReceive::handle_raw_depth GetField Failed!");
+            LOG_ERROR("DataReceive::handle_depth GetField Failed!");
         }
     }
     else
@@ -470,56 +451,19 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
     LOG->record_input_info(string("kline_") + string(exchange) + "_" + string(c_symbol) + "_" + std::to_string(resolution), klines);
 
-    statistic_data_.collect_kline_data(exchange, c_symbol, resolution, klines);    
-
     string symbol = string(c_symbol);
 
-
-
-
-    // std::stringstream stream_obj;
-    // stream_obj  << "[K-Kline] " << exchange<< " "<< c_symbol << " " << resolution << " " << klines.size();
-    // LOG_INFO(stream_obj.str());
-
-    // if (resolution == 60)
-    // {
-    //     std::stringstream stream_obj;
-    //     stream_obj  << "[Kine] " << get_sec_time_str(klines.back().index) << " "<< exchange << " " << symbol << ", "
-    //                 << "open: " << klines.back().px_open.get_value() << ", high: " << klines.back().px_high.get_value() << ", "
-    //                 << "low: " << klines.back().px_low.get_value() << ", close: " << klines.back().px_close.get_value();
-        
-    //     LOG_INFO(stream_obj.str());        
-    // }
-    
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
         const KlineData& kline = klines[i];
-        
-        // if (symbol == "BTC_USDT")
-        // {
-        //     std::stringstream stream_obj;
-        //     stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << " " << symbol << "." << resolution << ", "
-        //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-        //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
-        //     cout << stream_obj.str() << endl;
-        //     // LOG_INFO(stream_obj.str());
-        // }
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
-
         if (package)
         {
             KlineDataPtr pklineData = GetField<KlineData>(package);
-
             if (pklineData)
             {
                 pklineData->frequency_ = resolution;
-
-                // if (symbol == "BTC_USDT")
-                // {
-                //     cout << "[Check] " << symbol << "." << resolution << " " << get_sec_time_str(pklineData->index) << endl;
-                // }
-
                 deliver_response(package);
             }
             else
@@ -628,15 +572,6 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 
-
-
-        // std::stringstream stream_obj;
-        // stream_obj << "[Trade] " 
-        //      << exchange<< " " << symbol << " "
-        //      << trade.price.get_value() << " "
-        //      << trade.volume.get_value() << " ";
-        // LOG_INFO(stream_obj.str());
-
         if (package)
         {
             package->prepare_response(UT_FID_TradeData, ID_MANAGER->get_id());
@@ -658,6 +593,5 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
         std::stringstream stream_obj;
         stream_obj << "[E] DataReceive::handle_trade_data: unkonwn exception! " << "\n";
         LOG_ERROR(stream_obj.str());
-    }
-    
+    }    
 }

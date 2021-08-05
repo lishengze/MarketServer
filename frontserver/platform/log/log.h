@@ -4,12 +4,16 @@
 #include <iostream>
 #include <fstream>
 #include <mutex>
+#include <log4cplus/log4cplus.h>
+
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/util/time_util.h"
 
 #include "hub_interface.h"
 #include "hub_struct.h"
 #include "../data_structure/base_data.h"
+#include "../front_server_declare.h"
+
 
 using std::string;
 using std::cout;
@@ -20,6 +24,8 @@ class Log
     public:
         Log()
         {
+            init_logger();
+
             log_file_.open(file_name_, ios_base::ate | ios_base::out);
         }
 
@@ -39,6 +45,8 @@ class Log
             // log_file_ << flag << ": " << info << "\n";
             // log_file_.close();
         }
+
+        void init_logger();
 
         void start();
 
@@ -111,7 +119,21 @@ class Log
 
     
     private:
+        boost::shared_ptr<log4cplus::Logger>        common_logger_;
 
+        log4cplus::SharedAppenderPtr                trace_appender_;
+        log4cplus::SharedAppenderPtr                debug_appender_;
+        log4cplus::SharedAppenderPtr                info_appender_;
+        log4cplus::SharedAppenderPtr                warn_appender_;
+
+        boost::shared_ptr<log4cplus::Logger>        client_request_logger_;
+        log4cplus::SharedAppenderPtr                client_request_appender_;
+        
+        boost::shared_ptr<log4cplus::Logger>        client_response_logger_;
+        log4cplus::SharedAppenderPtr                client_response_appender_;
+
+        boost::shared_ptr<log4cplus::Logger>        source_input_logger_;
+        log4cplus::SharedAppenderPtr                source_input_appender_;
 };
 
 #define LOG utrade::pandora::ThreadSafeSingleton<Log>::DoubleCheckInstance()
@@ -130,4 +152,3 @@ class Log
 #define LOG_CLIENT_REQUEST(info) LOG->log_client_request(info)
 #define LOG_CLIENT_RESPONSE(info) LOG->log_client_response(info)
 #define LOG_SOURCE_INPUT(info) LOG->log_source_input(info)
-#define LOG_EXCEPTION(info) LOG->log_exception(info)
