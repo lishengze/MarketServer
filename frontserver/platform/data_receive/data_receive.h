@@ -55,8 +55,6 @@ public:
 
     void handle_trade_data(const char* exchange, const char* symbol, const Trade& trade);
 
-
-
     void test_kline_data();
 
     void test_enquiry();
@@ -78,80 +76,5 @@ public:
     MaxMinKlineInfo     max_min_kline_info_3600;
 
 private:
-
-    // struct StatisticData
-    // {
-    //     void clear()
-    //     {
-    //         kline_data_map_.clear();
-    //         depth_data_map_.clear();
-    //     }
-
-    //     string get_str()
-    //     {
-    //         std::lock_guard<std::mutex> lk(mutex_);
-
-    //         std::stringstream   s_obj;
-
-    //         string time_str = utrade::pandora::SecTimeStr();
-
-    //         s_obj << "\n***** " << time_str << " [kline] Statistic Info: *****" << "\n";
-    //         for (auto& iter:kline_data_map_)
-    //         {
-    //             s_obj << iter.first << " " << iter.second << "\n";               
-    //         }
-
-    //         s_obj << "***** " << time_str << " [Depth] Statistic Info: *****" << "\n";
-    //         for (auto& iter:depth_data_map_)
-    //         {
-    //             s_obj << iter.first << " " << iter.second << "\n";
-    //         }            
-
-    //         return s_obj.str();
-    //     }
-
-    //     void collect_kline_data(const char* c_exchange, const char* c_symbol, type_resolution& resolution, const vector<KlineData>& klines)
-    //     {
-    //         std::lock_guard<std::mutex> lk(mutex_);
-
-    //         string key = string(c_exchange) + " " + string(c_symbol) + " " + std::to_string(resolution);
-    //         if (kline_data_map_.find(key) == kline_data_map_.end())
-    //         {
-    //             kline_data_map_[key] = klines.size();
-    //         } 
-    //         else
-    //         {
-    //             kline_data_map_[key] += klines.size();
-    //         }
-    //     }
-
-    //     void collect_depth_data(const char* c_exchange, const char* c_symbol, const SDepthData& depth)
-    //     {
-    //         std::lock_guard<std::mutex> lk(mutex_);
-
-    //         string key = string(c_exchange) + " " + string(c_symbol);
-    //         if (depth_data_map_.find(key) == depth_data_map_.end())
-    //         {
-    //             depth_data_map_[key] = 1;
-    //         } 
-    //         else
-    //         {
-    //             depth_data_map_[key]++;
-    //         }            
-    //     }
-
-    //     map<string, int>    kline_data_map_;
-    //     map<string, int>    depth_data_map_;
-    //     mutex               mutex_;
-    //     int                 update_secs_{10};
-    // };
-
-    // void init_statistic_thread();
-
-    // void statistic_main();
-
-    // boost::shared_ptr<boost::thread>        sp_statistic_thread_;
-    // StatisticData                           statistic_data_;
-
    
 };

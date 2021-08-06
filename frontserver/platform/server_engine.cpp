@@ -1,5 +1,6 @@
 #include "server_engine.h"
 #include "front_server_declare.h"
+#include "log/log.h"
 
 volatile int ServerEngine::signal_sys = -1;
 
@@ -16,6 +17,8 @@ ServerEngine::~ServerEngine()
 
 void ServerEngine::launch()
 {
+    LOG->start();
+
     data_receiver_->launch();
     data_processer_->launch();
     front_server_->launch();

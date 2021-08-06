@@ -22,13 +22,8 @@ using std::endl;
 class Log
 {
     public:
-        Log()
-        {
-            init_logger();
-
-            log_file_.open(file_name_, ios_base::ate | ios_base::out);
-        }
-
+        Log();
+        
         ~Log();
 
         void log(string info, string flag)
@@ -122,9 +117,13 @@ class Log
         boost::shared_ptr<log4cplus::Logger>        common_logger_;
 
         log4cplus::SharedAppenderPtr                trace_appender_;
-        log4cplus::SharedAppenderPtr                debug_appender_;
+        
+
         log4cplus::SharedAppenderPtr                info_appender_;
         log4cplus::SharedAppenderPtr                warn_appender_;
+
+        boost::shared_ptr<log4cplus::Logger>        debug_logger_;      
+        log4cplus::SharedAppenderPtr                debug_appender_;  
 
         boost::shared_ptr<log4cplus::Logger>        client_request_logger_;
         log4cplus::SharedAppenderPtr                client_request_appender_;

@@ -1,7 +1,12 @@
 #include "log.h"
 #include "../config/config.h"
 #include "../util/tools.h"
+#include <stdio.h>
 
+Log::Log()
+{
+    init_logger();
+}
 
 Log::~Log()
 {
@@ -52,11 +57,12 @@ void Log::record_input_info(const string& channel, const SDepthData& depth)
     {
         record_input_info(channel);
 
+        std::stringstream stream_obj;
+        stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
+        log_source_input(stream_obj.str());
+
         if (CONFIG->get_dev_mode())
         {
-            std::stringstream stream_obj;
-            stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
-            
             stream_obj << "--------- Ask ---------\n";
             for ( int i = 0; i < depth.ask_length; ++i)
             {
@@ -67,7 +73,7 @@ void Log::record_input_info(const string& channel, const SDepthData& depth)
             {
                 stream_obj << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << "\n";
             }
-            log_trace(stream_obj.str());    
+            
         }        
     }
     catch(const std::exception& e)
@@ -83,13 +89,14 @@ void Log::record_input_info(const string& channel, const Trade& trade)
     {
         record_input_info(channel);
 
-        if (CONFIG->get_dev_mode())
-        {
-            std::stringstream stream_obj;
-            stream_obj << "[Trade] " << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
-            log_trace(stream_obj.str());
+        std::stringstream stream_obj;
+        stream_obj << "[Trade] " << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
+        log_source_input(stream_obj.str());
 
-        }        
+        // if (CONFIG->get_dev_mode())
+        // {
+        //     log_trace(stream_obj.str());
+        // }        
     }
     catch(const std::exception& e)
     {
@@ -114,12 +121,12 @@ void Log::record_input_info(const string& channel, const vector<KlineData>& klin
             }
         }
 
+        std::stringstream stream_obj;
+        stream_obj << channel << "\n";
+        log_source_input(stream_obj.str());
 
         if (CONFIG->get_dev_mode())
         {
-            std::stringstream stream_obj;
-            stream_obj << channel << "\n";
-
             for(const KlineData& kline:klines)
             {
                 
@@ -127,7 +134,7 @@ void Log::record_input_info(const string& channel, const vector<KlineData>& klin
                             << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
                             << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n";
             }
-            log_trace(stream_obj.str());
+            log_source_input(stream_obj.str());
         }
     }
     catch(const std::exception& e)
@@ -163,12 +170,13 @@ void Log::record_output_info(const string& channel, const string& details)
     try
     {
         record_output_info(channel);
+
+        log_client_response(channel + "_" + details);
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-    }
-    
+    }    
 }
 
 void Log::record_output_info(const string& info, const SDepthData& depth)
@@ -177,11 +185,12 @@ void Log::record_output_info(const string& info, const SDepthData& depth)
     {
         record_output_info(info);
 
+        std::stringstream stream_obj;
+        stream_obj  << "[O_Depth] " << info << "\n" << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
+        log_client_response(stream_obj.str()); 
+
         if (CONFIG->get_dev_mode())
         {
-            std::stringstream stream_obj;
-            stream_obj  << "[O_Depth] " << info << "\n" << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
-            
             stream_obj << "--------- Ask ---------\n";
             for ( int i = 0; i < depth.ask_length; ++i)
             {
@@ -192,7 +201,7 @@ void Log::record_output_info(const string& info, const SDepthData& depth)
             {
                 stream_obj << depth.bids[i].price.get_value() << ", " << depth.bids[i].volume.get_value() << "\n";
             }
-            log_trace(stream_obj.str());    
+            log_client_response(stream_obj.str());   
         }           
     }
     catch(const std::exception& e)
@@ -207,15 +216,15 @@ void Log::record_output_info(const string& info, const Trade& trade)
     {
         record_output_info(info);
 
-        
-        if (CONFIG->get_dev_mode())
-        {
-            std::stringstream stream_obj;
-            stream_obj << "[O_Trade] " << info << "\n" << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
-            log_trace(stream_obj.str());
+        std::stringstream stream_obj;
+        stream_obj << "[O_Trade] " << info << "\n" << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
+                
+        log_client_response(stream_obj.str());
 
-        }                
-        
+        // if (CONFIG->get_dev_mode())
+        // {
+        //     log_trace(stream_obj.str());
+        // }                        
     }
     catch(const std::exception& e)
     {
@@ -261,11 +270,12 @@ void Log::record_output_info(const string& info, const std::vector<KlineDataPtr>
             }
         }
 
+        std::stringstream stream_obj;
+        stream_obj << info << "\n";
+        log_client_response(stream_obj.str());
+
         if (CONFIG->get_dev_mode())
         {
-            std::stringstream stream_obj;
-            stream_obj << info << "\n";
-
             for(const KlineDataPtr& kline:klines)
             {
                 
@@ -273,7 +283,7 @@ void Log::record_output_info(const string& info, const std::vector<KlineDataPtr>
                             << "open: " << kline->px_open.get_value() << ", high: " << kline->px_high.get_value() << ", "
                             << "low: " << kline->px_low.get_value() << ", close: " << kline->px_close.get_value() << "\n";
             }
-            log_trace(stream_obj.str());
+            log_client_response(stream_obj.str());
         }        
     }
     catch(const std::exception& e)
@@ -287,17 +297,25 @@ void Log::record_client_info(const string& client_id, const string& info)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(client_info_map_mutex_);
+        {
+            std::lock_guard<std::mutex> lk(client_info_map_mutex_);
 
-        if (client_info_map_.find(client_id) != client_info_map_.end())
-        {
-            std::vector<std::string> new_info_list ={info};
-            client_info_map_[client_id] = new_info_list;
+            if (client_info_map_.find(client_id) != client_info_map_.end())
+            {
+                std::vector<std::string> new_info_list ={info};
+                client_info_map_[client_id] = new_info_list;
+            }
+            else
+            {
+                client_info_map_[client_id].push_back(info);
+            }
         }
-        else
+
         {
-            client_info_map_[client_id].push_back(info);
+            string detai_info = client_id + ": " + info;            
+            log_client_request(detai_info);
         }
+
     }
     catch(const std::exception& e)
     {
@@ -439,31 +457,34 @@ void Log::init_logger()
         common_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("common")));
         common_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        trace_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("trace_log.log"), 100*1024*1024, 2, true, true);
+        trace_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/trace_log.log"), 100*1024*1024, 2, true, false);
         trace_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         trace_appender_->setThreshold(log4cplus::TRACE_LOG_LEVEL);
 
-        debug_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("debug_log.log"), 100*1024*1024, 2, true, true);
-        debug_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
-        debug_appender_->setThreshold(log4cplus::DEBUG_LOG_LEVEL);
-
-        info_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("info_log.log"), 100*1024*1024, 2, true, true);
+        info_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/info_log.log"), 100*1024*1024, 2, true, true);
         info_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         info_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);
 
-        warn_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("warn_log.log"), 100*1024*1024, 2, true, true);
+        warn_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/warn_log.log"), 100*1024*1024, 2, true, true);
         warn_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         warn_appender_->setThreshold(log4cplus::WARN_LOG_LEVEL);          
 
         common_logger_->addAppender(trace_appender_);
-        common_logger_->addAppender(debug_appender_);      
-        common_logger_->addAppender(info_appender_);      
+        common_logger_->addAppender(info_appender_);     
         common_logger_->addAppender(warn_appender_);      
+
+        debug_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("debug")));
+        debug_logger_->setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
+
+        debug_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/debug_log.log"), 100*1024*1024, 2, true, true);
+        debug_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
+        debug_appender_->setThreshold(log4cplus::DEBUG_LOG_LEVEL);
+        debug_logger_->addAppender(debug_appender_);
 
         client_request_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("client_request")));
         client_request_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        client_request_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("client_request.log"), 100*1024*1024, 2, true, true);
+        client_request_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/client_request.log"), 100*1024*1024, 2, true, true);
         client_request_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         client_request_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);      
         client_request_logger_->addAppender(client_request_appender_);          
@@ -471,7 +492,7 @@ void Log::init_logger()
         client_response_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("client_response")));
         client_response_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        client_response_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("client_response.log"), 100*1024*1024, 2, true, true);
+        client_response_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/client_response.log"), 100*1024*1024, 2, true, true);
         client_response_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         client_response_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);       
         client_response_logger_->addAppender(client_response_appender_);            
@@ -479,7 +500,7 @@ void Log::init_logger()
         source_input_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("source_input")));
         source_input_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        source_input_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("source_input.log"), 100*1024*1024, 2, true, true);
+        source_input_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/source_input.log"), 100*1024*1024, 2, true, true);
         source_input_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         source_input_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);             
         source_input_logger_->addAppender(source_input_appender_);   
@@ -494,10 +515,7 @@ void Log::log_trace(const string& info)
 {
     try
     {
-        if (CONFIG->get_dev_mode())
-        {
-            LOG4CPLUS_TRACE(*common_logger_.get(), info);
-        }
+        LOG4CPLUS_TRACE(*common_logger_.get(), info);
     }
     catch(const std::exception& e)
     {
@@ -548,6 +566,7 @@ void Log::log_error(const string& info)
 {
     try
     {
+        printf(info.c_str());
         LOG4CPLUS_ERROR(*common_logger_.get(), info);
     }
     catch(const std::exception& e)
@@ -560,6 +579,7 @@ void Log::log_fatal(const string& info)
 {
     try
     {
+        printf(info.c_str());
         LOG4CPLUS_FATAL(*common_logger_.get(), info);
     }
     catch(const std::exception& e)
@@ -572,7 +592,6 @@ void Log::log_client_request(const string& info)
 {
     try
     {
-        LOG4CPLUS_INFO(*common_logger_.get(), info);
         LOG4CPLUS_INFO(*client_request_logger_.get(), info);
     }
     catch(const std::exception& e)
@@ -585,7 +604,6 @@ void Log::log_client_response(const string& info)
 {
     try
     {
-        LOG4CPLUS_INFO(*common_logger_.get(), info);
         LOG4CPLUS_INFO(*client_response_logger_.get(), info);
     }
     catch(const std::exception& e)
@@ -598,7 +616,6 @@ void Log::log_source_input(const string& info)
 {
     try
     {
-        LOG4CPLUS_INFO(*common_logger_.get(), info);
         LOG4CPLUS_INFO(*source_input_logger_.get(), info);
     }
     catch(const std::exception& e)
