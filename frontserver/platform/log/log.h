@@ -145,7 +145,7 @@ class Log
 #define LOG_DEBUG(info) LOG->log_debug(info)
 #define LOG_INFO(info) LOG->log_info(info)
 #define LOG_WARN(info) LOG->log_warn(info)
-#define LOG_ERROR(info) LOG->log_trace(info)
+#define LOG_ERROR(info) LOG->log_error(info)
 #define LOG_FATAL(info) LOG->log_fatal(info)
 
 #define LOG_CLIENT_REQUEST(info) LOG->log_client_request(info)

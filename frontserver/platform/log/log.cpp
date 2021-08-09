@@ -24,7 +24,7 @@ void Log::start()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -46,7 +46,7 @@ void Log::record_input_info(const string& channel)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -78,7 +78,7 @@ void Log::record_input_info(const string& channel, const SDepthData& depth)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -100,7 +100,7 @@ void Log::record_input_info(const string& channel, const Trade& trade)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -139,7 +139,7 @@ void Log::record_input_info(const string& channel, const vector<KlineData>& klin
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -161,7 +161,7 @@ void Log::record_output_info(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -175,7 +175,7 @@ void Log::record_output_info(const string& channel, const string& details)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -206,7 +206,7 @@ void Log::record_output_info(const string& info, const SDepthData& depth)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -228,7 +228,7 @@ void Log::record_output_info(const string& info, const Trade& trade)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -249,7 +249,7 @@ void Log::record_output_info(const string& info, const vector<KlineData>& klines
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -288,7 +288,7 @@ void Log::record_output_info(const string& info, const std::vector<KlineDataPtr>
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 
 }
@@ -319,10 +319,9 @@ void Log::record_client_info(const string& client_id, const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
-
 
 void Log::statistic_thread_main()
 {
@@ -339,7 +338,7 @@ void Log::statistic_thread_main()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -355,7 +354,7 @@ void Log::print_statistic_data()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -379,7 +378,7 @@ void Log::print_input_info()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -416,7 +415,7 @@ void Log::print_output_info()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -443,7 +442,7 @@ void Log::print_client_info()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -457,15 +456,17 @@ void Log::init_logger()
         common_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("common")));
         common_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        trace_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/trace_log.log"), 100*1024*1024, 2, true, false);
+        string time_str = utrade::pandora::SecTimeStr();
+
+        trace_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_trace.log"), 100*1024*1024, 2, true, false);
         trace_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         trace_appender_->setThreshold(log4cplus::TRACE_LOG_LEVEL);
 
-        info_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/info_log.log"), 100*1024*1024, 2, true, true);
+        info_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_info.log"), 100*1024*1024, 2, true, true);
         info_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         info_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);
 
-        warn_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/warn_log.log"), 100*1024*1024, 2, true, true);
+        warn_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_warn.log"), 100*1024*1024, 2, true, true);
         warn_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         warn_appender_->setThreshold(log4cplus::WARN_LOG_LEVEL);          
 
@@ -476,7 +477,7 @@ void Log::init_logger()
         debug_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("debug")));
         debug_logger_->setLogLevel(log4cplus::DEBUG_LOG_LEVEL);
 
-        debug_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/debug_log.log"), 100*1024*1024, 2, true, true);
+        debug_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_debug.log"), 100*1024*1024, 2, true, true);
         debug_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         debug_appender_->setThreshold(log4cplus::DEBUG_LOG_LEVEL);
         debug_logger_->addAppender(debug_appender_);
@@ -484,7 +485,7 @@ void Log::init_logger()
         client_request_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("client_request")));
         client_request_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        client_request_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/client_request.log"), 100*1024*1024, 2, true, true);
+        client_request_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_client_request.log"), 100*1024*1024, 2, true, true);
         client_request_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         client_request_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);      
         client_request_logger_->addAppender(client_request_appender_);          
@@ -492,7 +493,7 @@ void Log::init_logger()
         client_response_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("client_response")));
         client_response_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        client_response_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/client_response.log"), 100*1024*1024, 2, true, true);
+        client_response_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_client_response.log"), 100*1024*1024, 2, true, true);
         client_response_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         client_response_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);       
         client_response_logger_->addAppender(client_response_appender_);            
@@ -500,14 +501,14 @@ void Log::init_logger()
         source_input_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("source_input")));
         source_input_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
 
-        source_input_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT("log/source_input.log"), 100*1024*1024, 2, true, true);
+        source_input_appender_ = new log4cplus::RollingFileAppender(LOG4CPLUS_TEXT(string("log/") + time_str + "_source_input.log"), 100*1024*1024, 2, true, true);
         source_input_appender_->setLayout(std::unique_ptr<log4cplus::Layout>(new log4cplus::PatternLayout(file_pattern)));
         source_input_appender_->setThreshold(log4cplus::INFO_LOG_LEVEL);             
         source_input_logger_->addAppender(source_input_appender_);   
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -519,7 +520,7 @@ void Log::log_trace(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -534,7 +535,7 @@ void Log::log_debug(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -546,7 +547,7 @@ void Log::log_info(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -558,7 +559,7 @@ void Log::log_warn(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -571,7 +572,7 @@ void Log::log_error(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -584,7 +585,7 @@ void Log::log_fatal(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -596,7 +597,7 @@ void Log::log_client_request(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -608,7 +609,7 @@ void Log::log_client_response(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -620,7 +621,7 @@ void Log::log_source_input(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -632,7 +633,7 @@ void Log::log_exception(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 

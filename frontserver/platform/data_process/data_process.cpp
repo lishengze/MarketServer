@@ -29,7 +29,8 @@ DataProcess::~DataProcess()
 
 void DataProcess::launch()
 {
-    cout << "DataProcess::launch " << endl;
+    LOG_INFO("DataProcess::launch ");
+
     if (kline_process_)
     {
         kline_process_->init_process_engine(shared_from_this());
@@ -62,7 +63,7 @@ void DataProcess::handle_request_message(PackagePtr package)
 {
     try
     {
-        // cout << "DataProcess::handle_request_message: " << package->Tid() << endl;
+        LOG_DEBUG(string("DataProcess::handle_request_message: ") + get_package_str(package->Tid()));
 
         switch (package->Tid())
         {
@@ -87,12 +88,13 @@ void DataProcess::handle_request_message(PackagePtr package)
                 return;                
 
             default:
+                LOG_WARN("DataProcess::handle_request_message Unknown Package");
                 break;
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -113,7 +115,7 @@ void DataProcess::handle_response_message(PackagePtr package)
             return;            
 
         default:
-            cout << "Unknow Package" << endl;
+            LOG_WARN("DataProcess::handle_response_message Unknown Package");
             break;
     }    
 
@@ -136,7 +138,7 @@ void DataProcess::request_kline_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -156,7 +158,7 @@ void DataProcess::request_depth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -171,7 +173,7 @@ void DataProcess::request_symbol_list_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -186,7 +188,7 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -201,7 +203,7 @@ void DataProcess::response_src_kline_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -216,6 +218,6 @@ void DataProcess::response_src_trade_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }

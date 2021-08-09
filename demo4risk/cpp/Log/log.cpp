@@ -23,7 +23,7 @@ void Log::start()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -45,7 +45,7 @@ void Log::record_input_info(const string& channel)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -58,7 +58,7 @@ void Log::record_input_info(const string& info, const SEData& quote)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -79,7 +79,7 @@ void Log::record_output_info(const string& info)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -93,7 +93,7 @@ void Log::record_output_info(const string& info)
 //     }
 //     catch(const std::exception& e)
 //     {
-//         std::cerr << e.what() << '\n';
+//         std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
 //     }    
 // }
 
@@ -114,7 +114,7 @@ void Log::record_output_info(const string& info)
 //     }
 //     catch(const std::exception& e)
 //     {
-//         std::cerr << e.what() << '\n';
+//         std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
 //     }    
 // }
 
@@ -134,7 +134,7 @@ void Log::statistic_thread_main()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -148,7 +148,7 @@ void Log::print_statistic_data()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -168,7 +168,7 @@ void Log::print_input_info()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -188,6 +188,6 @@ void Log::print_output_info()
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }    
 }

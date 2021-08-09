@@ -68,3 +68,6 @@ inline string get_sec_time_str(unsigned long time)
 {
     return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
 }
+
+
+string get_package_str(unsigned int package_tid);

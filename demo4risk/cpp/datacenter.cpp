@@ -250,7 +250,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
     // tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
@@ -654,7 +654,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 
@@ -825,7 +825,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -1050,7 +1050,7 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -1316,6 +1316,6 @@ void DataCenter::hedge_trade_order(string& symbol, double price, double amount, 
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }

@@ -30,6 +30,12 @@ class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
             is_canacel_request_ =  is_canacel_request;
         }
 
+        string str()
+        {
+            string req_type = is_canacel_request_? "_is_canacel_request_":"";
+            return Socket::str() + req_type;
+        }
+
         bool                is_canacel_request_{false};
 
         static const long Fid = UT_FID_ReqSymbolListData; 
@@ -64,6 +70,11 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
 
         string get_json_str();
 
+        string str()
+        {
+            return Socket::str() + "\n" + get_json_str();
+        }
+
         static const long Fid = UT_FID_RspSymbolListData; 
     private:
         std::set<std::string>     symbols_;
@@ -97,6 +108,13 @@ class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
     symbol_type symbol_;
     bool                is_canacel_request_{false};
 
+    string str()
+    {
+        string type_str = is_canacel_request_ ? "_is_canacel_request" : "";
+        string result = Socket::str() + "_" + string(symbol_) + type_str;
+        return result;
+    }
+
     static const long Fid = UT_FID_ReqRiskCtrledDepthData;
 };
 FORWARD_DECLARE_PTR(ReqRiskCtrledDepthData);
@@ -111,9 +129,7 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
         }
 
         RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other):Socket(other.socket_id_, other.socket_type_)
-        {
-            cout << "RspRiskCtrledDepthData::RspRiskCtrledDepthData " << endl;
-            
+        {            
             depth_data_ = other.depth_data_;
             for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
             {
@@ -135,6 +151,11 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
         }
 
         string get_json_str();
+
+        string str()
+        {
+            return Socket::str() + "\n" + get_json_str();
+        }
 
         SDecimal ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
         SDecimal bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
@@ -299,7 +320,21 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
         socket_id_ = other.socket_id_;
         socket_type_ = other.socket_type_;
     }
-  
+
+    string str()
+    {
+        std::stringstream req_stream;
+        req_stream << "symbol: " <<  symbol_ << "\n"
+                   << "start_time_: " << start_time_ << "\n"
+                   << "end_time_: " << end_time_ << "\n"
+                   << "append_end_time_: " << append_end_time_ << "\n"
+                   << "data_count_: " << data_count_ << "\n"
+                   << "frequency_: " << frequency_ << "\n"
+                   << "is_canacel_request_: " << is_canacel_request_ << "\n";
+
+        return Socket::str() + "\n" + req_stream.str();
+    }
+
     public: 
         symbol_type         symbol_;
         type_tick           start_time_{0};
@@ -411,6 +446,11 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
         static const long Fid = UT_FID_RspKLineData;
 
         string get_json_str();
+
+        string str()
+        {
+            return Socket::str() + "\n" + get_json_str();
+        }        
 };
 FORWARD_DECLARE_PTR(RspKLineData);
 
@@ -437,6 +477,11 @@ class RspErrorMsg:public Socket, virtual public PacakgeBaseData
         }
 
         string get_json_str();
+
+        string str()
+        {
+            return Socket::str() + "\n" + get_json_str();
+        }
 
     static const long Fid = UT_FID_RspErrorMsg;
     
@@ -495,6 +540,11 @@ public:
 
     virtual ~ReqTrade() {}
 
+    string str()
+    {
+        return Socket::str() + "_" +  symbol_ + "_is_cancel_: " + std::to_string(is_cancel_);
+    }
+
     symbol_type symbol_;
     bool        is_cancel_{false};
 };
@@ -504,21 +554,6 @@ const long UT_FID_RspTrade = 100013;
 class RspTrade:public Socket, virtual public PacakgeBaseData
 {
 public:
-    // RspTrade(string symbol, SDecimal price, SDecimal volume, 
-    //          SDecimal change, SDecimal change_rate,
-    //          SDecimal high, SDecimal low, 
-    //          ID_TYPE socket_id, COMM_TYPE socket_type):
-    //          Socket(socket_id, socket_type)
-    // {
-    //     assign(symbol_, symbol);
-    //     assign(price_, price);
-    //     assign(volume_, volume);
-    //     assign(change_, change.get_value());
-    //     assign(change_rate_, change_rate.get_value());
-    //     assign(high_, high);
-    //     assign(low_, low);
-    // }
-
     RspTrade(string symbol, SDecimal price, SDecimal volume, 
              double change, double change_rate,
              SDecimal high, SDecimal low, 
@@ -545,6 +580,11 @@ public:
     double      change_rate_;
     SDecimal    high_;
     SDecimal    low_;
+
+    string str()
+    {
+        return Socket::str() + "\n" + get_json_str();
+    }
 
     static const long Fid = UT_FID_RspTrade;
 };

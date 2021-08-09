@@ -181,7 +181,7 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 

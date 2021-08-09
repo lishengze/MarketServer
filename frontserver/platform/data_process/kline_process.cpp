@@ -73,7 +73,7 @@ void TimeKlineData::init(type_tick end_time)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -464,7 +464,7 @@ void KlineProcess::update_one_day_kline_data(const KlineDataPtr kline_data)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -604,7 +604,7 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -902,7 +902,7 @@ vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -2119,7 +2119,7 @@ std::vector<KlineDataPtr> KlineProcess::get_trade_kline_data(string symbol,  int
 //     }
 //     catch(const std::exception& e)
 //     {
-//         std::cerr << e.what() << '\n';
+//         std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
 //     }
     
 // }

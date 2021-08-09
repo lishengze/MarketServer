@@ -126,7 +126,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
     }
     
     // cout << "FrontServer::process_symbols_package 0" << endl;

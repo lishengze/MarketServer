@@ -363,3 +363,79 @@ string append_zero(string ori_data, int count)
     }
     return result;    
 }
+
+string get_package_str(unsigned int package_tid)
+{
+    try
+    {
+        string result;
+        switch (package_tid)
+        {
+        case UT_FID_ReqSymbolListData:
+            result = "ReqSymbolListData";
+            break;
+
+        case UT_FID_ReqRiskCtrledDepthData:
+            result = "ReqRiskCtrledDepthData";
+            break;
+
+        case UT_FID_ReqKLineData:
+            result = "ReqKLineData";
+            break;
+
+        case UT_FID_ReqEnquiry:
+            result = "ReqEnquiry";
+            break;
+
+        case UT_FID_ReqTrade:
+            result = "ReqTrade";
+            break;
+
+        case UT_FID_RspSymbolListData:
+            result = "RspSymbolListData";
+            break;
+
+        case UT_FID_RspRiskCtrledDepthData:
+            result = "RspRiskCtrledDepthData";
+            break;
+
+        case UT_FID_RspKLineData:
+            result = "RspKLineData";
+            break;
+
+        case UT_FID_RspTrade:
+            result = "RspTrade";
+            break;
+
+        case UT_FID_RspEnquiry:
+            result = "RspEnquiry";
+            break;
+
+        case UT_FID_RspErrorMsg:
+            result = "RspErrorMsg";
+            break;
+
+        case UT_FID_SDepthData:
+            result = "SourceDepthData";
+            break;        
+
+        case UT_FID_KlineData:
+            result = "SourceKlineData";
+            break;      
+
+        case UT_FID_TradeData:
+            result = "SourceTradeData";
+            break;                                                                                                                                                          
+        
+        default:
+            break;
+        }
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+    }
+    
+}

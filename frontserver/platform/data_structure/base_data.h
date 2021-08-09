@@ -15,6 +15,7 @@ enum class COMM_TYPE {
     WEBSECKETS,
 };
 
+string get_comm_type_str(int type);
 class HttpRequestThreadSafe:virtual public PacakgeBaseData
 {
     public:
@@ -204,6 +205,13 @@ struct Socket:virtual public PacakgeBaseData
     Socket(ID_TYPE id, COMM_TYPE type):socket_type_{type}, socket_id_{id}
     {
 
+    }
+
+    string str()
+    {
+        std::stringstream s_obj;
+        s_obj << get_comm_type_str(int(socket_type_)) << "_" << socket_id_;
+        return s_obj.str();
     }
 
     COMM_TYPE                       socket_type_ = COMM_TYPE::HTTP;
