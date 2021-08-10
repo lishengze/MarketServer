@@ -120,7 +120,9 @@ void WBServer::on_close(WebsocketClass * ws)
 {
     try
     {
-        LOG_INFO("WBServer::on_close " + std::to_string(int(ws)));
+        std::stringstream s_s;
+        s_s << "WBServer::on_close "<< ws;
+        LOG_INFO(s_s.str());
 
         clean_ws(ws);
     }
@@ -200,11 +202,15 @@ void WBServer::process_on_open(WebsocketClass * ws)
 {
     try
     {
-        LOG_INFO("WBServer::process_on_open ws: " + std::to_string(int(ws)));
+        std::stringstream s_s;
+        s_s << "WBServer::process_on_open ws: " << ws;
+        LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = store_ws(ws);
 
-        LOG_INFO("WBServer::process_on_open store ws: " + std::to_string(int(ws)) + "_socket_id: " + std::to_string(socket_id));
+        s_s.clear();
+        s_s << "WBServer::process_on_open store ws: "<< ws << "_socket_id: " << socket_id;
+        LOG_INFO(s_s.str());
 
         LOG->record_client_info(std::to_string(socket_id), " on_open");
 
@@ -235,7 +241,9 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
 {
     try
     {
-        LOG_INFO("WBServer::process_on_message " + std::to_string(int(ws)) + " : " + ori_msg);
+        std::stringstream s_s;
+        s_s << "WBServer::process_on_message " << ws << ": " << ori_msg;
+        LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
         if (socket_id)
@@ -275,8 +283,13 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         }
         else
         {
-            LOG->record_client_info("WBServer::process_on_message ws: " + std::to_string(int(ws)) , " id is invalid");
-            LOG_INFO( "WBServer::process_on_message ws: " + std::to_string(int(ws)) + " is invalid");
+            std::stringstream s_s;
+            s_s << "WBServer::process_on_message ws: " << ws << " id is invalid ";
+            LOG_INFO(s_s.str());
+
+            s_s.clear();
+            s_s << "ws: " << ws;
+            LOG->record_client_info(s_s.str() , " process_on_message ws is invalid");
         }
  
     }
@@ -685,7 +698,10 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
             ws_safe->set_alive(true);
             wss_con_map_[socket_id] = ws_safe;
 
-            LOG_INFO("store new ws " + std::to_string(int(ws)) + " socket_id: " + std::to_string(socket_id));
+            std::stringstream s_s;
+            s_s << "store new ws " << ws << " socket_id: " << socket_id;
+            LOG_INFO(s_s.str());
+            LOG_CLIENT_REQUEST(s_s.str());
         }
         return socket_id;
     }
@@ -726,7 +742,10 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
         }
         else
         {
-            LOG_WARN("WBServer ws " + std::to_string(int(ws)) + " is invalid now!");
+            std::stringstream s_s;
+            s_s << "check_ws ws " << ws << " is invalid now!";
+            LOG_WARN(s_s.str());
+            LOG_CLIENT_REQUEST(s_s.str());
         }
 
         return data_ptr->get_id();
@@ -751,10 +770,13 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
     {
         WSData* data_ptr = (WSData*)(ws->getUserData());
         ID_TYPE socket_id = data_ptr->get_id();
+        stringstream s_obj;
 
         if (socket_id)
         {
             data_ptr->set_id(0);
+
+            
 
             std::lock_guard<std::mutex> lk(wss_con_mutex_);
             if (wss_con_map_.find(socket_id) != wss_con_map_.end())
@@ -763,12 +785,15 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
                 wss_con_map_.erase(socket_id);
                 LOG->record_client_info(std::to_string(socket_id), " id cleaned successfully!");
 
-                LOG_INFO("clean_ws Socket: " + std::to_string(int(ws)) + "_id: " + std::to_string(socket_id) + " successfully!");
+                s_obj << "clean_ws Socket: " << ws  << "_id: " << socket_id << " successfully!";
+                LOG_INFO(s_obj.str());
             }
             else
             {
                 LOG->record_client_info(std::to_string(socket_id), " id Already Cleaned!");
-                LOG_INFO("clean_ws Socket: " + std::to_string(int(ws))+ "_id: " + std::to_string(socket_id) + " Already Cleaned!");
+
+                s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " Already Cleaned!";
+                LOG_INFO(s_obj.str());
             }
             return socket_id;
         
@@ -777,7 +802,9 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
         {
             LOG->record_client_info(std::to_string(socket_id), " id was not stored!");
 
-            LOG_WARN("clean_ws Socket: " + std::to_string(int(ws))+ "_id: " + std::to_string(socket_id) + " was not stored!");
+            s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " was not stored!";
+
+            LOG_WARN(s_obj.str());
         }
 
         return 0;
