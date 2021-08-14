@@ -33,7 +33,7 @@ class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
         string str()
         {
             string req_type = is_canacel_request_? "_is_canacel_request_":"";
-            return Socket::str() + req_type;
+            return string("ReqSymbolListData-Info: \n") + Socket::str() + req_type;
         }
 
         bool                is_canacel_request_{false};
@@ -72,7 +72,7 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
 
         string str()
         {
-            return Socket::str() + "\n" + get_json_str();
+            return string("RspSymbolListData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
         static const long Fid = UT_FID_RspSymbolListData; 
@@ -111,7 +111,7 @@ class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
     string str()
     {
         string type_str = is_canacel_request_ ? "_is_canacel_request" : "";
-        string result = Socket::str() + "_" + string(symbol_) + type_str;
+        string result = string("ReqRiskCtrledDepthData-Info: \n") + Socket::str() + "_" + string(symbol_) + type_str;
         return result;
     }
 
@@ -154,7 +154,7 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
 
         string str()
         {
-            return Socket::str() + "\n" + get_json_str();
+            return string("RspRiskCtrledDepthData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
         SDecimal ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
@@ -332,7 +332,7 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
                    << "frequency_: " << frequency_ << "\n"
                    << "is_canacel_request_: " << is_canacel_request_ << "\n";
 
-        return Socket::str() + "\n" + req_stream.str();
+        return string("ReqKLineData-Info: \n") + Socket::str() + "\n" + req_stream.str();
     }
 
     public: 
@@ -449,7 +449,7 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
         string str()
         {
-            return Socket::str() + "\n" + get_json_str();
+            return string("RspKLineData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }        
 };
 FORWARD_DECLARE_PTR(RspKLineData);
@@ -480,7 +480,7 @@ class RspErrorMsg:public Socket, virtual public PacakgeBaseData
 
         string str()
         {
-            return Socket::str() + "\n" + get_json_str();
+            return string("RspErrorMsg-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
     static const long Fid = UT_FID_RspErrorMsg;
@@ -542,7 +542,7 @@ public:
 
     string str()
     {
-        return Socket::str() + "_" +  symbol_ + "_is_cancel_: " + std::to_string(is_cancel_);
+        return string("ReqTrade-Info: \n") + Socket::str() + "_" +  symbol_ + "_is_cancel_: " + std::to_string(is_cancel_);
     }
 
     symbol_type symbol_;
@@ -583,7 +583,7 @@ public:
 
     string str()
     {
-        return Socket::str() + "\n" + get_json_str();
+        return string("RspTrade-Info: \n") +Socket::str() + "\n" + get_json_str();
     }
 
     static const long Fid = UT_FID_RspTrade;

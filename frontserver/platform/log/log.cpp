@@ -158,6 +158,9 @@ void Log::record_output_info(const string& info)
         {
             output_statistic_map_[info]++;
         }
+
+        log_client_response(info);
+
     }
     catch(const std::exception& e)
     {
@@ -311,10 +314,10 @@ void Log::record_client_info(const string& client_id, const string& info)
             }
         }
 
-        {
-            string detai_info = client_id + ": " + info;            
-            log_client_request(detai_info);
-        }
+        // {
+        //     string detai_info = client_id + ": " + info;            
+        //     log_client_request(detai_info);
+        // }
 
     }
     catch(const std::exception& e)
@@ -451,7 +454,9 @@ void Log::init_logger()
 {
     try
     {
-        log4cplus::tstring file_pattern = LOG4CPLUS_TEXT("%D{%Y.%m.%d %H:%M:%S} [%F-%L] %-5p - %m %n");
+        // log4cplus::tstring file_pattern = LOG4CPLUS_TEXT("%D{%Y.%m.%d %H:%M:%S} [%F-%L] %-5p - %m %n");
+
+        log4cplus::tstring file_pattern = LOG4CPLUS_TEXT("%D{%Y.%m.%d %H:%M:%S} %-5p - %m %n");
 
         common_logger_ = boost::make_shared<log4cplus::Logger>(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT ("common")));
         common_logger_->setLogLevel(log4cplus::TRACE_LOG_LEVEL);
@@ -593,7 +598,9 @@ void Log::log_client_request(const string& info)
 {
     try
     {
-        LOG4CPLUS_INFO(*client_request_logger_.get(), info);
+        log_info(info);
+
+        LOG4CPLUS_INFO(*client_request_logger_.get(), info);        
     }
     catch(const std::exception& e)
     {

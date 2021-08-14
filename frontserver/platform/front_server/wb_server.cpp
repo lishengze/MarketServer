@@ -122,7 +122,7 @@ void WBServer::on_close(WebsocketClass * ws)
     {
         std::stringstream s_s;
         s_s << "WBServer::on_close "<< ws;
-        LOG_INFO(s_s.str());
+        LOG_CLIENT_REQUEST(s_s.str());
 
         clean_ws(ws);
     }
@@ -146,7 +146,7 @@ void WBServer::listen()
     {
         uWS::App().ws<WSData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
             if (token) {
-                LOG_INFO("WServer Start Listen: " + std::to_string(server_port_));
+                LOG_CLIENT_REQUEST("WServer Start Listen: " + std::to_string(server_port_));
             }
         }).run();
     }
@@ -204,21 +204,19 @@ void WBServer::process_on_open(WebsocketClass * ws)
     {
         std::stringstream s_s;
         s_s << "WBServer::process_on_open ws: " << ws;
-        LOG_INFO(s_s.str());
+        LOG_CLIENT_REQUEST(s_s.str());
 
         ID_TYPE socket_id = store_ws(ws);
 
         s_s.clear();
         s_s << "WBServer::process_on_open store ws: "<< ws << "_socket_id: " << socket_id;
-        LOG_INFO(s_s.str());
-
-        LOG->record_client_info(std::to_string(socket_id), " on_open");
+        LOG_CLIENT_REQUEST(s_s.str());
 
         PackagePtr package =  GetReqSymbolListDataPackage(socket_id, COMM_TYPE::WEBSOCKET, ID_MANAGER->get_id());
 
         if (package)
         {
-            LOG_INFO("WBServer::process_on_open socket_id: " + std::to_string(socket_id) + " Request SymbolList!");
+            LOG_CLIENT_REQUEST("WBServer::process_on_open socket_id: " + std::to_string(socket_id) + " Request SymbolList!");
             front_server_->deliver_request(package);
         }
     }
@@ -243,13 +241,11 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     {
         std::stringstream s_s;
         s_s << "WBServer::process_on_message " << ws << ": " << ori_msg;
-        LOG_INFO(s_s.str());
+        LOG_CLIENT_REQUEST(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
         if (socket_id)
         {
-            LOG->record_client_info(std::to_string(socket_id), ori_msg);
-
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
             if (js["type"].is_null())
@@ -285,11 +281,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         {
             std::stringstream s_s;
             s_s << "WBServer::process_on_message ws: " << ws << " id is invalid ";
-            LOG_INFO(s_s.str());
-
-            s_s.clear();
-            s_s << "ws: " << ws;
-            LOG->record_client_info(s_s.str() , " process_on_message ws is invalid");
+            LOG_CLIENT_REQUEST(s_s.str());
         }
  
     }
@@ -365,7 +357,6 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
                 << "frequency: " << frequency << " \n"
                 << "data_count: " << data_count << "\n";
 
-        LOG_INFO(info_obj.str());
         LOG_CLIENT_REQUEST(info_obj.str());
 
         { 
@@ -430,7 +421,6 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
             {
                 string cur_symbol = *it;
 
-                LOG_INFO("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
                     
                 PackagePtr request_depth_package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
@@ -487,7 +477,6 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
             for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
             {
                 string symbol = *it;
-                LOG_INFO("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
 
                 PackagePtr package = CreatePackage<ReqTrade>(symbol, false, socket_id,  COMM_TYPE::WEBSOCKET);
@@ -700,7 +689,6 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
 
             std::stringstream s_s;
             s_s << "store new ws " << ws << " socket_id: " << socket_id;
-            LOG_INFO(s_s.str());
             LOG_CLIENT_REQUEST(s_s.str());
         }
         return socket_id;
@@ -745,7 +733,6 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             std::stringstream s_s;
             s_s << "check_ws ws " << ws << " is invalid now!";
             LOG_WARN(s_s.str());
-            LOG_CLIENT_REQUEST(s_s.str());
         }
 
         return data_ptr->get_id();
@@ -783,25 +770,20 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
             {
                 wss_con_map_[socket_id]->set_alive(false);
                 wss_con_map_.erase(socket_id);
-                LOG->record_client_info(std::to_string(socket_id), " id cleaned successfully!");
 
                 s_obj << "clean_ws Socket: " << ws  << "_id: " << socket_id << " successfully!";
-                LOG_INFO(s_obj.str());
+                LOG_CLIENT_REQUEST(s_obj.str());
             }
             else
             {
-                LOG->record_client_info(std::to_string(socket_id), " id Already Cleaned!");
-
                 s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " Already Cleaned!";
-                LOG_INFO(s_obj.str());
+                LOG_CLIENT_REQUEST(s_obj.str());
             }
             return socket_id;
         
         }
         else
         {
-            LOG->record_client_info(std::to_string(socket_id), " id was not stored!");
-
             s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " was not stored!";
 
             LOG_WARN(s_obj.str());

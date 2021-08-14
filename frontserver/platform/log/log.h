@@ -141,7 +141,9 @@ class Log
 // #define LOG_INFO(info) LOG->log(info, "Info ")
 // #define LOG_DEBUG(info) LOG->log(info, "Debug")
 
-#define LOG_TRACE(info) LOG->log_trace(info)
+#define LOG_HEADER string(__FILE__) + ":" + string(__LINE__) + " " 
+
+#define LOG_TRACE(info) LOG->log_trace( info)
 #define LOG_DEBUG(info) LOG->log_debug(info)
 #define LOG_INFO(info) LOG->log_info(info)
 #define LOG_WARN(info) LOG->log_warn(info)
@@ -150,4 +152,4 @@ class Log
 
 #define LOG_CLIENT_REQUEST(info) LOG->log_client_request(info)
 #define LOG_CLIENT_RESPONSE(info) LOG->log_client_response(info)
-#define LOG_SOURCE_INPUT(info) LOG->log_source_input(info)
+#define LOG_SOURCE_INPUT(info) LOG->log_source_input(LOG_HEADER + info)

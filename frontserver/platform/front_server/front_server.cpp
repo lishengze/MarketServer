@@ -22,7 +22,7 @@ FrontServer::~FrontServer()
 
 void FrontServer::launch() 
 {
-    cout << "FrontServer::launch " << endl;
+    LOG_INFO("FrontServer::launch ");
     wb_server_->set_front_server(this);
     rest_server_->set_front_server(this);
     wb_server_->launch();
@@ -62,8 +62,6 @@ void FrontServer::request_all_symbol()
 
 void FrontServer::handle_response_message(PackagePtr package)
 {
-    // cout << "FrontServer::handle_response_message " << endl;
-
     switch (package->Tid())
     {
         case UT_FID_RspSymbolListData:
@@ -89,8 +87,8 @@ void FrontServer::handle_response_message(PackagePtr package)
         case UT_FID_RspErrorMsg:
             response_errmsg_package(package);
             break;
-        default:        
-            cout << "FrontServer::handle_response_message Unknow Package" << endl;
+        default:  
+            LOG_WARN("FrontServer::handle_response_message Unknow Package");
             break;
     }    
 }
@@ -105,11 +103,10 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
         {
             string symbol_list_str = p_symbol_list->get_json_str();
 
-            cout << "symbol_list_str: " << symbol_list_str << endl;
-
+            LOG->record_output_info("SymbolLists_" + std::to_string(p_symbol_list->socket_id_));
+            
             if (!wb_server_->send_data(p_symbol_list->socket_id_, symbol_list_str))
             {
-                cout << "FrontServer::response_symbol_list_package Failed " << p_symbol_list->socket_id_ << endl;
 
                 PackagePtr req_cancel_pacakge = GetReqSymbolListDataPackage(p_symbol_list->socket_id_, p_symbol_list->socket_type_, ID_MANAGER->get_id(), true);
 
@@ -118,41 +115,23 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                     deliver_request(req_cancel_pacakge);
                 }
             }
+            else
+            {
+                LOG_WARN("FrontServer::response_symbol_list_package wb_server_->send_data Failed!");
+            }
+
         }
         else
         {
-            cout << "FrontServer::response_symbol_list_package p_symbol_list empty!" << endl;
+            LOG_WARN("FrontServer::response_symbol_list_package response data null!");
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
-    }
-    
-    // cout << "FrontServer::process_symbols_package 0" << endl;
-
-    // cout << "FrontServer::process_symbols_package 1" << endl;
-
-    // std::set<std::string>& symbols = p_symbol_data->get_symbols();
-
-    // string updated_symbols_str = SymbolsToJsonStr(*p_symbol_data, SYMBOL_UPDATE);
-
-    // // cout << "FrontServer::process_symbols_package 2" << endl;
-
-    // // cout << "FrontServer::process_symbols_package 3" << endl;
-
-    // symbols_.merge(p_symbol_data->get_symbols());
-
-    // // cout << "\nCurrent FrontServer Symbol: " << endl;
-
-    // // for (auto symbol: symbols_)
-    // // {
-    // //     cout << symbol << endl;
-    // // }
-
-    // // cout << "FrontServer::process_symbols_package 4" << endl;
-
-    
+        std::stringstream stream_obj;
+        stream_obj << "[E] FrontServer::response_symbol_list_package: " << e.what() << "\n";
+        LOG_ERROR(stream_obj.str());
+    }    
 }
 
 void FrontServer::response_depth_data_package(PackagePtr package)
@@ -161,35 +140,37 @@ void FrontServer::response_depth_data_package(PackagePtr package)
     {        
         RspRiskCtrledDepthDataPtr  pRspRiskCtrledDepthData = GetField<RspRiskCtrledDepthData>(package);
 
-        string depth_str = pRspRiskCtrledDepthData->get_json_str();
-
-        // cout <<"[Front Depth] socket_id: " << pRspRiskCtrledDepthData->socket_id_ << endl;
-        // cout << depth_str << endl;
-
-        
-
-        if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
+        if(pRspRiskCtrledDepthData)
         {
-            cout << "FrontServer::response_depth_data_package Failed " << pRspRiskCtrledDepthData->socket_id_ << endl;
-
-            string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
-
-            PackagePtr req_cancel_pacakge = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
-
-            if (req_cancel_pacakge)
+            string depth_str = pRspRiskCtrledDepthData->get_json_str();
+            
+            if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
             {
-                deliver_request(req_cancel_pacakge);
+                LOG_WARN("FrontServer::response_depth_data_package wb_server_->send_data Failed! Request Delete Connect!");
+
+                string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
+
+                PackagePtr req_cancel_pacakge = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
+
+                if (req_cancel_pacakge)
+                {
+                    deliver_request(req_cancel_pacakge);
+                }
+                else
+                {
+                    std::stringstream stream_obj;
+                    stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
+                    LOG_ERROR(stream_obj.str());                
+                }
             }
             else
             {
-                std::stringstream stream_obj;
-                stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
-                LOG_ERROR(stream_obj.str());                
+                LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
             }
         }
         else
         {
-            LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
+            LOG_WARN("FrontServer::response_depth_data_package response data null!");
         }
     }
     catch(const std::exception& e)
@@ -222,19 +203,12 @@ string FrontServer::get_heartbeat_str()
 void FrontServer::response_kline_data_package(PackagePtr package)
 {
     try
-    {
-        // cout << "\nFrontServer::response_kline_data_package " << endl;
-        
+    {   
         RspKLineDataPtr p_rsp_kline_data = GetField<RspKLineData>(package);
 
         if (p_rsp_kline_data)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
-
-            // if (p_rsp_kline_data->frequency_ == 3600 && p_rsp_kline_data->is_update_ == true)
-            // {
-            //     return;
-            // }
 
             string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
             LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
@@ -243,45 +217,11 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                                     + type,
                                     p_rsp_kline_data->kline_data_vec_);  
 
-            // if (p_rsp_kline_data->is_update_)
-            // {
-            //     for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
-            //     {
-            //         cout << utrade::pandora::NanoTimeStr() << " [S] " << p_rsp_kline_data->socket_id_ << " "<< get_sec_time_str(atom_kline->index) << ", "
-            //             << p_rsp_kline_data->symbol_ << "." << p_rsp_kline_data->frequency_ << ", "
-            //             << "open: " << atom_kline->px_open.get_value() << ", "
-            //             << "close: " << atom_kline->px_close.get_value() << ", "
-            //             << "high: " << atom_kline->px_high.get_value() << ", "
-            //             << "low: " << atom_kline->px_low.get_value() << endl;
-            //     }
-            // }          
-
-            // cout << "kline_data_str: " << kline_data_str << endl;
-
-
-            // for (KlineDataPtr& atom_kline:p_rsp_kline_data->kline_data_vec_)
-            // {
-            //     cout << "[S] " << p_rsp_kline_data->socket_id_ << " "<< get_sec_time_str(atom_kline->index) << ", "
-            //          << p_rsp_kline_data->symbol_ << "." << p_rsp_kline_data->frequency_ << ", "
-            //          << "open: " << atom_kline->px_open.get_value() << ", "
-            //          << "close: " << atom_kline->px_close.get_value() << ", "
-            //          << "high: " << atom_kline->px_high.get_value() << ", "
-            //          << "low: " << atom_kline->px_low.get_value() << endl;
-            // }
-            
-            // cout << "[Front Kline]: Frequency: " << p_rsp_kline_data->frequency_ << " "
-            //      << "data_size: " << p_rsp_kline_data->kline_data_vec_.size() << " "
-            //      << "socket_id: " << p_rsp_kline_data->socket_id_ << endl;            
-
-            // cout << "[Front Kline] socket_id: " << p_rsp_kline_data->socket_id_ << endl;
-
-            // cout << kline_data_str << endl;
-
             if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
             {
                 if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
                 {
-                    // cout << "Request Delete KLine Connect" << endl;
+                    LOG_WARN("FrontServer::response_kline_data_package wb_server_->send_data Failed! Request Delete Connect!");
 
                     bool is_cancel_request = true;
                     PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
@@ -297,14 +237,6 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                     {
                         LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
                     } 
-                }
-                else
-                {
-                    // string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
-                    // LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
-                    //                         + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
-                    //                         + type,
-                    //                         p_rsp_kline_data->kline_data_vec_);
                 }
             }
         }
@@ -327,34 +259,17 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 {
     try
     {
-        // cout << "\nFrontServer::response_trade_data_package " << endl;
-        
         RspTradePtr pRspTradeData = GetField<RspTrade>(package);
 
         if (pRspTradeData)
         {
             string trade_data_str = pRspTradeData->get_json_str();
 
-            // cout << "[Front Trade] socket_id: " << pRspTradeData->socket_id_ << endl;  
-
-            // cout << "trade_data_strl: "  << trade_data_str << endl;
-
-            // cout << "[Front Trade] symbol: " << pRspTradeData->symbol_ << " "
-            //      << "price: " << pRspTradeData->price_.get_value() << " "
-            //      << "volume: " << pRspTradeData->volume_.get_value() << " "
-            //      << "price: " << pRspTradeData->price_.get_value() << " \n"
-            //      << "change_: " << pRspTradeData->change_ << " "
-            //      << "change_rate_: " << pRspTradeData->change_rate_ << " "
-            //      << "high_: " << pRspTradeData->high_.get_value() << " "  
-            //      << "low_: " << pRspTradeData->low_.get_value() << " "        
-            //      << "socket_id: " <<      pRspTradeData->socket_id_ << ""                     
-            //      << "\n" << endl;
-
             if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
             {
                 if (!wb_server_->send_data(pRspTradeData->socket_id_, trade_data_str))
                 {
-                    cout << "Request Delete Trade Connect" << endl;
+                    LOG_WARN("FrontServer::response_trade_data_package wb_server_->send_data Failed! Request Delete Connect!");
 
                     bool is_cancel_request = true;
                     PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, true,
@@ -367,7 +282,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     }
                     else
                     {
-                        LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
+                        LOG_ERROR("FrontServer::response_trade_data_package CreatePackage<ReqKLineData> Failed!");
                     } 
                 }
                 else
@@ -378,7 +293,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         }
         else
         {
-            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+            LOG_ERROR("FrontServer::response_trade_data_package RspKLineData is NULL!");
         }
         
     }
@@ -401,7 +316,6 @@ void FrontServer::response_enquiry_data_package(PackagePtr package)
 {
     try
     {
-        cout << "FrontServer::response_enquiry_data_package " << endl;
 
         RspEnquiryPtr pRspEnquiry = GetField<RspEnquiry>(package);
 
@@ -428,7 +342,6 @@ void FrontServer::response_errmsg_package(PackagePtr package)
 {
     try
     {
-        cout << "FrontServer::response_enquiry_data_package " << endl;
 
         RspErrorMsgPtr pRspEnquiry = GetField<RspErrorMsg>(package);
 
