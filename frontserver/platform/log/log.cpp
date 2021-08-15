@@ -535,7 +535,8 @@ void Log::log_debug(const string& info)
     {
         if (CONFIG->get_dev_mode())
         {
-            LOG4CPLUS_DEBUG(*common_logger_.get(), info);
+
+            LOG4CPLUS_DEBUG(*debug_logger_.get(), info);
         }        
     }
     catch(const std::exception& e)

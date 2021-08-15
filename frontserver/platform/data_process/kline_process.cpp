@@ -1022,9 +1022,9 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
         {
             for (auto& kline_update:updated_kline_data_map_[symbol])
             {            
-                int cur_fre = kline_update.reqkline_data.frequency_;
+                int req_fre = kline_update.reqkline_data.frequency_;
 
-                if (kline_data->frequency_ > cur_fre) continue;
+                if (kline_data->frequency_ > req_fre) continue;
 
                 if (!kline_update.kline_data_)
                 {
