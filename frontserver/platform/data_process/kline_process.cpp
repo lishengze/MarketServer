@@ -258,9 +258,7 @@ void KlineProcess::request_kline_package(PackagePtr package)
                 delete_kline_request_connect(pReqKlineData->symbol_, pReqKlineData->socket_id_);
             }
             else
-            {
-
-                
+            {                
                 check_websocket_subinfo(pReqKlineData);
 
                 PackagePtr rsp_package = get_kline_package(package);
@@ -380,15 +378,6 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
 
             KlineDataPtr last_kline_data = boost::make_shared<KlineData>(*pkline_data);
             cur_kline_data_[cur_symbol][frequency] = last_kline_data;
-
-            // cout << "set new last_kline: "<< get_sec_time_str(pkline_data->index) << " "
-            //      << ", cur_time: " << " "  << get_sec_time_str(pkline_data->index) << endl;
-
-            // cout << "last info: time: " << get_sec_time_str(last_kline_data->index)
-            //         <<  " open: " << last_kline_data->px_open.get_value() 
-            //         << " high: " << last_kline_data->px_high.get_value() 
-            //         << " low: " << last_kline_data->px_low.get_value()  
-            //         << " close: " << last_kline_data->px_close.get_value() << "\n" << endl;                  
 
             KlineDataPtr last_kline = cur_kline_data_[cur_symbol][frequency];
 
@@ -550,38 +539,44 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                 {
                     data_count *= (pReqKlineData->frequency_ / best_freq_base);
                 }
-                s_obj << "Needed Full SrcData Count: " << data_count << endl;
+                s_obj << "Needed Full SrcData Count: " << data_count << "\n";
                 get_src_kline_data(pReqKlineData->symbol_, src_kline_data, symbol_kline_data, data_count, best_freq_base);
             }            
 
-            s_obj << "Sum Kline Data Size: " << src_kline_data.size() << endl;
-            LOG_DEBUG(s_obj.str());
+            s_obj << "Src Kline Data Size: " << src_kline_data.size() << "\n";
 
             // for (auto kline_data:src_kline_data)
             // {
-            //     cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+            //     s_obj << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
             //         << kline_data->px_open.get_value() << " "
             //         << kline_data->px_close.get_value() << " "
             //         << kline_data->px_high.get_value() << " "
-            //         << kline_data->px_low.get_value() << " "
-            //         << endl;    
+            //         << kline_data->px_low.get_value() << " \n";
             // }
 
             vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
+            s_obj << "Rsp Kline Data Size: " << target_kline_data.size() << "\n";
 
             PackagePtr rsp_package;
 
             if (target_kline_data.size() > 0)
             {
-                // cout << "target_kline_data Data" << endl;
+                // for (auto kline_data:target_kline_data)
+                // {
+                //     s_obj << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
+                //         << kline_data->px_open.get_value() << " "
+                //         << kline_data->px_close.get_value() << " "
+                //         << kline_data->px_high.get_value() << " "
+                //         << kline_data->px_low.get_value() << " \n";
+                // }
 
+                // cout << "target_kline_data Data" << endl;
                 // if (strcmp(pReqKlineData->symbol_, "BTC_USDT") == 0)
                 // {
                 //     MaxMinKlineInfo max_min_kline_info_60;
                 //     max_min_kline_info_60.px_high = MIN_DOUBLE;
                 //     max_min_kline_info_60.px_low = MAX_DOUBLE;
                 //     max_min_kline_info_60.symbol = "BTC_USDT";     
-
                 //     for (auto kline_data:target_kline_data)
                 //     {
                 //         // cout << kline_data->symbol << " " << get_sec_time_str(kline_data->index) << " "
@@ -603,8 +598,6 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                 //             max_min_kline_info_60.low_time = kline_data->index;
                 //         }                                            
                 //     }
-
-
                 //     // cout << "KlineRsp: " << pReqKlineData->symbol_ << " high: " << max_min_kline_info_60.px_high.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.high_time)
                 //     //     << " low: " << max_min_kline_info_60.px_low.get_value() << " time: " << get_sec_time_str(max_min_kline_info_60.low_time)
                 //     //     << endl;
@@ -866,7 +859,7 @@ vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>&
             }
         }
 
-        // 最后末尾时间区间不够一个完整的 frequency；
+        // 最后末尾时间区间不够一个完整的 frequency, 暂时放弃;
         if (cur_data->index % frequency != 0)
         {
             cur_data->index = cur_data->index -  cur_data->index % frequency;
