@@ -1062,7 +1062,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
-            // reset_price(price, config, true);
+            reset_price(price, config, true);
+
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -1082,8 +1083,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
+            reset_price(price, config, false);
 
-            // reset_price(price, config, false);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -1146,7 +1147,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
     {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
-            // reset_price(price, config, true);
+            reset_price(price, config, true);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
 
             SDecimal amounts = iter->second.total_volume * price;
@@ -1168,7 +1169,7 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
     {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
-            // reset_price(price, config, false);
+            reset_price(price, config, false);
             // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
             SDecimal amounts = iter->second.total_volume * price;
             if( (total_amount + amounts) <= amount ) {
@@ -1231,8 +1232,6 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
     }
     return true;
 }
-
-
 
 QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double amount, double turnover, SDecimal& price)
 {

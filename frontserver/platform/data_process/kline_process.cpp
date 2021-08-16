@@ -393,7 +393,6 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
             KlineDataPtr last_kline = cur_kline_data_[cur_symbol][frequency];
 
             return true;
-              
         }
         else
         {
@@ -424,27 +423,9 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
                 if (last_kline->is_clear())
                 {                
                     last_kline->reset(*pkline_data);
-
-                    // cout << "Set New: "<< get_sec_time_str(last_kline->index) 
-                    //      << " open: " << last_kline->px_open.get_value() 
-                    //      << " high: " << last_kline->px_high.get_value() 
-                    //      << " low: " << last_kline->px_low.get_value()  
-                    //      << " close: " << last_kline->px_close.get_value() << endl; 
                 }
                 else
                 {
-                    // cout << "Com old: " << get_sec_time_str(last_kline->index)
-                    //      << " open: " << last_kline->px_open.get_value() 
-                    //      << " high: " << last_kline->px_high.get_value() 
-                    //      << " low: " << last_kline->px_low.get_value()  
-                    //      << " close: " << last_kline->px_close.get_value() << endl; 
-
-                    // cout << "cur inf: " << get_sec_time_str(pkline_data->index)
-                    //      << " open: " << pkline_data->px_open.get_value() 
-                    //      << " high: " << pkline_data->px_high.get_value() 
-                    //      << " low: " << pkline_data->px_low.get_value()  
-                    //      << " close: " << pkline_data->px_close.get_value() << endl;  
-
                     last_kline->px_close = pkline_data->px_close;
                     last_kline->px_low = last_kline->px_low > pkline_data->px_low ? pkline_data->px_low: last_kline->px_low;
                     last_kline->px_high = last_kline->px_high < pkline_data->px_high ? pkline_data->px_high: last_kline->px_high;
@@ -459,10 +440,6 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
 
                     if (kline_data_[cur_symbol][frequency].size() > frequency_cache_numb_ * 2)
                     {
-                        // kline_data_[cur_symbol][frequency].erase(kline_data_[cur_symbol][frequency].begin());
-
-                        // kline_data_[cur_symbol][frequency].erase()
-
                         std::map<type_tick, KlineDataPtr>::iterator erase_end_iter =  kline_data_[cur_symbol][frequency].begin();
 
                         for (int i = 0; i < frequency_cache_numb_; ++i)
