@@ -141,15 +141,20 @@ class Log
 // #define LOG_INFO(info) LOG->log(info, "Info ")
 // #define LOG_DEBUG(info) LOG->log(info, "Debug")
 
-#define LOG_HEADER string(__FILE__) + ":" + string(__LINE__) + " " 
+static inline string get_simple_file_name(string path) {
+    string::size_type i = path.find_last_of("/") + 1;
+    return path.substr(i, path.size()-i);
+}
 
-#define LOG_TRACE(info) LOG->log_trace( info)
-#define LOG_DEBUG(info) LOG->log_debug(info)
-#define LOG_INFO(info) LOG->log_info(info)
-#define LOG_WARN(info) LOG->log_warn(info)
-#define LOG_ERROR(info) LOG->log_error(info)
-#define LOG_FATAL(info) LOG->log_fatal(info)
+#define LOG_HEADER get_simple_file_name(string(__FILE__)) + ":" + string(__FUNCTION__) + "." + std::to_string(__LINE__) + " " 
 
-#define LOG_CLIENT_REQUEST(info) LOG->log_client_request(info)
-#define LOG_CLIENT_RESPONSE(info) LOG->log_client_response(info)
+#define LOG_TRACE(info) LOG->log_trace(LOG_HEADER + info)
+#define LOG_DEBUG(info) LOG->log_debug(LOG_HEADER + info)
+#define LOG_INFO(info) LOG->log_info(LOG_HEADER + info)
+#define LOG_WARN(info) LOG->log_warn(LOG_HEADER + info)
+#define LOG_ERROR(info) LOG->log_error(LOG_HEADER + info)
+#define LOG_FATAL(info) LOG->log_fatal(LOG_HEADER + info)
+
+#define LOG_CLIENT_REQUEST(info) LOG->log_client_request(LOG_HEADER + info)
+#define LOG_CLIENT_RESPONSE(info) LOG->log_client_response(LOG_HEADER + info)
 #define LOG_SOURCE_INPUT(info) LOG->log_source_input(LOG_HEADER + info)
