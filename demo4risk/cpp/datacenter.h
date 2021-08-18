@@ -16,6 +16,8 @@ using namespace std;
 #include "risk_controller_define.h"
 #include "grpc_entity.h"
 
+#include "Log/log.h"
+
 
 // 内部行情结构
 struct SInnerDepth {
@@ -65,28 +67,28 @@ struct HedgeInfo
     HedgeInfo(string symbol_value, double price_value, double amount_value, 
             TradedOrderStreamData_Direction direction_value, bool is_trade):
             symbol{symbol_value}
-            {
-                cout << symbol << " ";
-                if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
-                {
-                    
-                    ask_amount = amount_value;
+    {
+        LOG_INFO("HedgeInfo Init " + symbol);
+        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
+        {
+            
+            ask_amount = amount_value;
 
-                    cout << "set ask_amount: "  << ask_amount << endl;
-                }
-                else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
-                {
-                    
-                    bid_amount = amount_value;
+           LOG_INFO("init ask_amount: " + std::to_string(ask_amount));
+        }
+        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
+        {
+            
+            bid_amount = amount_value;
 
-                    cout << "set bid_amount: "  << bid_amount << endl;
-                }
-                else
-                {
-                    cout << "HedgeInfo Unknow Direction!" << endl;
-                }
+            LOG_INFO("init bid_amount: " + std::to_string(bid_amount));
+        }
+        else
+        {
+            LOG_WARN("HedgeInfo Set Unknow Direction!");
+        }
 
-            }
+    }
     
     HedgeInfo()
     {
@@ -98,50 +100,23 @@ struct HedgeInfo
     {
         symbol = symbol_value;
 
-        cout << symbol << " ";
+        LOG_INFO("HedgeInfo Set " + symbol);
         if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
-        {
-            // if (is_trade)
-            // {
-            //     cout << "Minus ask_amount " << ask_amount << ", " << amount_value << endl;
-
-            //     ask_amount -= amount_value;
-                
-            // }
-            // else
-            // {
-            //     cout << "Add ask_amount " << ask_amount << ", " << amount_value << endl;
-
-            //     ask_amount += amount_value;
-                
-            // }          
-
-            
+        {     
             ask_amount = amount_value;  
 
-            cout << "new ask_amount: " << ask_amount << endl;
+            LOG_INFO("new ask_amount: " + std::to_string(ask_amount));
         }
         else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
         {
-            // if (is_trade)
-            // {
-            //     cout << "Minus bid_amount " << bid_amount << ", " << amount_value << endl;
-
-            //     bid_amount -= amount_value;
-            // }
-            // else
-            // {
-            //     cout << "Add bid_amount " << bid_amount << ", " << amount_value << endl;
-            //     bid_amount += amount_value;
-            // }
 
             bid_amount = amount_value;
 
-            cout << "new bid_amount: " << bid_amount << endl;
+            LOG_INFO("new bid_amount: " + std::to_string(bid_amount));
         }
         else
         {
-            cout << "HedgeInfo Set Unknow Direction!" << endl;
+            LOG_WARN("HedgeInfo Set Unknow Direction!");
         }        
 
 

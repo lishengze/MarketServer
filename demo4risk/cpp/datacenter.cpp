@@ -250,7 +250,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
     
     // tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
@@ -654,7 +654,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
     
 
@@ -825,7 +825,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
     
 }
@@ -859,32 +859,35 @@ void DataCenter::_push_to_clients(const TSymbol& symbol)
 
 void print_quote(SInnerQuote& quote)
 {
-    cout << "\n------------- asks info: " << endl;
+    std::stringstream s_s;
+    s_s << "\n------------- asks info: \n";
     int i = 0;
     int test_numb = 5;
     for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
     {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }
-    cout << "++++++++++++++++++" << endl;
+    s_s << "++++++++++++++++++" << endl;
     i = 0;
     for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
     {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }    
 
-    cout << "***************** bids info: " << endl;
+    s_s << "***************** bids info: " << endl;
     i = 0;
     for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < test_numb; ++iter, ++i)
     {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }
-    cout << "++++++++++++++++++" << endl;
+    s_s << "++++++++++++++++++" << endl;
     i = 0;
     for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < test_numb; ++iter, ++i)
     {
-        cout << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     }  
+
+    LOG_DEBUG(s_s.str());
 }
 
 void DataCenter::_publish_quote(const SInnerQuote& quote) 
@@ -925,8 +928,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     if (!check_quote(newQuote))
     {
-        
-        // cout << quote.symbol << " not published!" << endl;
+        LOG_WARN(quote.symbol + " not published!" );
         return;
     }
 
@@ -949,10 +951,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
 
-    if (quote.symbol == "BTC_USDT")
+    if (quote.symbol == "USDT_USD")
     {
-        // cout << "\n Publish For Broker Quote Data" << endl;
-        // print_quote(newQuote);        
+        LOG_DEBUG("\n Publish For Broker Quote Data " + quote.symbol);
+        print_quote(newQuote);        
     }
 
     // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
@@ -1050,7 +1052,7 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -1253,7 +1255,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     // std::cout << "\n*****Config Info: " << symbol << endl;
     // std::cout << params_.cache_config[symbol].desc() << std::endl;
 
-    cout << "\n OTC Quote Data" << endl;
+    LOG_DEBUG("\n OTC Quote Data");
     print_quote(quote);
 
     if( amount > 0 )
@@ -1315,6 +1317,6 @@ void DataCenter::hedge_trade_order(string& symbol, double price, double amount, 
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }

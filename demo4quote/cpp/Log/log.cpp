@@ -1,13 +1,19 @@
-#include "QuoteLog.h"
+#include "log.h"
 #include "pandora/util/time_util.h"
+#include "pandora/log/base_log.h"
 #include "../redis_quote_define.h"
+
+
 
 QuoteLog::QuoteLog()
 {
     
 }
 
-
+QuoteLog::~QuoteLog()
+{
+    
+}
 
 void QuoteLog::record_input_info(const string& info, const SDepthQuote& quote)
 {
@@ -17,7 +23,7 @@ void QuoteLog::record_input_info(const string& info, const SDepthQuote& quote)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -25,11 +31,11 @@ void QuoteLog::record_input_info(const string& info, const Trade& trade)
 {
     try
     {
-        record_input_info(info);
+        BaseLog::record_input_info(info);
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -50,7 +56,7 @@ void QuoteLog::record_input_info(const string& info, const vector<KlineData>& kl
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -58,11 +64,11 @@ void QuoteLog::record_output_info(const string& info, const SDepthQuote& quote)
 {
     try
     {
-        record_output_info(info);
+        BaseLog::record_output_info(info);
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -70,11 +76,11 @@ void QuoteLog::record_output_info(const string& info, const Trade& trade)
 {
     try
     {
-        record_output_info(info);
+        BaseLog::record_output_info(info);
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -95,6 +101,6 @@ void QuoteLog::record_output_info(const string& info, const vector<KlineData>& k
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }

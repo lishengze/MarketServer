@@ -94,7 +94,7 @@ void DataProcess::handle_request_message(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -138,7 +138,7 @@ void DataProcess::request_kline_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -158,7 +158,7 @@ void DataProcess::request_depth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -173,7 +173,7 @@ void DataProcess::request_symbol_list_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -188,7 +188,7 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -203,7 +203,7 @@ void DataProcess::response_src_kline_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 
@@ -218,6 +218,6 @@ void DataProcess::response_src_trade_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }

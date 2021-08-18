@@ -34,13 +34,7 @@ bool decode_msg(const string& raw, type_tick& ts, string& channel, string& msg)
 
     // msg
     msg = raw.substr(pos2+1);
-
-    /*
-    cout << raw << endl;
-    cout << pos << " " << pos2 << endl;
-    cout << ts << endl;
-    cout << channel << endl;
-    cout << msg << endl;*/
+    
     return true;
 }
 

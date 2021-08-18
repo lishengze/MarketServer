@@ -363,7 +363,7 @@ bool GetLastEntity::process()
     // cout << "**** [kline] reply.size: " << reply.data_size() << endl;
 
     if( reply.data_size() > 0 ) {
-        LOG->record_output_info("GRPC_kline");
+        LOG->record_output_info(string("GRPC_kline"));
 
         responder_.Write(reply, this);      
         return true;
@@ -412,7 +412,7 @@ SubscribeQuoteInBinaryEntity::SubscribeQuoteInBinaryEntity(::grpc::Service* serv
 
 void SubscribeQuoteInBinaryEntity::register_call()
 {
-    // _log_and_print("%s register SubscribeQuoteInBinaryEntity", get_context()->peer());
+    LOG_INFO("SubscribeQuoteInBinaryEntity RequestSubscribeQuoteInBinary");
     service_->RequestSubscribeQuoteInBinary(&ctx_, &request_, &responder_, cq_, cq_, this);
 }
 

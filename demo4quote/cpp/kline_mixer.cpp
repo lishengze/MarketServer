@@ -1,7 +1,7 @@
 #include "stream_engine_config.h"
 #include "kline_mixer.h"
 #include "pandora/util/time_util.h"
-
+#include "Log/log.h"
 
 KlineData calc_mixed_kline(type_tick index, const vector<KlineData>& datas) 
 {
@@ -78,7 +78,8 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
     auto iter_symbol_cache = caches_.find(symbol);
     if( iter_symbol_cache == caches_.end() )
     {
-        cout << "caches can not find " << exchange << "." << symbol << endl;
+        LOG_WARN("caches can not find " + exchange + " " + symbol);
+
         return false;
     }
         
@@ -86,7 +87,8 @@ bool MixCalculator::add_kline(const TExchange& exchange, const TSymbol& symbol, 
     auto iter_exchange_cache = symbol_cache.find(exchange);
     if( iter_exchange_cache == symbol_cache.end() )
     {
-        cout << "symbol_cache can not find " << exchange << "." << symbol << endl;
+        LOG_WARN("symbol_cache can not find " + exchange + " " + symbol);
+
         return false;
     }
         
@@ -389,7 +391,7 @@ void KlineHubber::recover_from_db()
     {
         vector<KlineData> all_db_data;
 
-        cout << "\n******** KlineHubber::recover_from_db *******" << endl;
+        LOG_INFO("\n******** KlineHubber::recover_from_db *******");
 
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_1;
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_60;
@@ -398,73 +400,46 @@ void KlineHubber::recover_from_db()
 
         db_interface_->get_data(data_60, 3600);
 
-        // cout << "KlineHubber::recover_from_db " << endl;
-
         vector<KlineData> output, nouse;
-        // cout << "min1_cache_: " << endl;
         for (auto iter1:data_1)
         {
             for (auto iter2:iter1.second)
             {
                 min1_cache_.update_kline(iter1.first, iter2.first, iter2.second, output, nouse);
-
-                // cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
             }
         }
 
-        // cout << "min60_cache_: " << endl;
         for (auto iter1:data_60)
         {
             for (auto iter2:iter1.second)
             {
                 min60_cache_.update_kline(iter1.first, iter2.first, iter2.second, output, nouse);
-
-                // cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
             }
         }
-
-        cout << "\n********* min1_cache_: **********" << endl;
+        
+        LOG_INFO("\n********* min1_cache_: **********");
         for (auto iter1:min1_cache_.data_)
         {
             for (auto iter2:iter1.second)
             {
-                cout << iter1.first << " " << iter2.first << " " << iter2.second.size() << endl;
+                LOG_INFO(iter1.first + " " + iter2.first + " " + std::to_string(iter2.second.size()));
             }
         }
 
-        cout << "\n********* min60_cache_: **********" << endl;
+        LOG_INFO("\n********* min60_cache_: **********");
         for (auto iter1:min60_cache_.data_)
         {
             for (auto iter2:iter1.second)
             {
                 vector<KlineData>& detail_kline_data = iter2.second;
 
-                cout << iter1.first << " " << iter2.first << " " << detail_kline_data.size() << endl;
-
-                // for (auto& kline_data:detail_kline_data)
-                // {
-                //     cout << utrade::pandora::get_sec_time_str(kline_data.index) << endl;
-                // }
+                LOG_INFO(iter1.first + " " + iter2.first + " " + std::to_string(detail_kline_data.size()));
             }
         }
-
-
-        // cout << "all_db_data.size: " << all_db_data.size() << " "
-        //      << "callbacks_.size: " << callbacks_.size() << " "
-        //      << endl;
-
-        // for(KlineData& kline_data:all_db_data)
-        // {
-        //     // for( const auto& v : callbacks_) {
-        //     //     vector<KlineData> tmp_data;
-        //     //     tmp_data.emplace_back(kline_data);
-        //     //     v->on_kline(kline_data.exchange, kline_data.symbol, kline_data.resolution, tmp_data);
-        //     // }            
-        // }
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"\n[E]KlineHubber::recover_from_db " << e.what() << '\n';
+        LOG_ERROR("KlineHubber::recover_from_db " + e.what());
     }
 
 }
@@ -493,15 +468,15 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
         }
     }
 
-    if (exchange == MIX_EXCHANGE_NAME)
-    {
-        cout << "\nAfter Update " << exchange << "." << symbol << "." << resolution << ":" << klines.size() << endl;
-        unordered_map<TSymbol, vector<KlineData>> min1_kine_data = min1_cache_.data_[exchange];
-        for (auto iter:min1_kine_data)
-        {
-            cout << exchange << "." << iter.first << "." << 60 << ": " << iter.second.size() << endl;
-        }
-    }
+    // if (exchange == MIX_EXCHANGE_NAME)
+    // {
+    //     cout << "\nAfter Update " << exchange << "." << symbol << "." << resolution << ":" << klines.size() << endl;
+    //     unordered_map<TSymbol, vector<KlineData>> min1_kine_data = min1_cache_.data_[exchange];
+    //     for (auto iter:min1_kine_data)
+    //     {
+    //         cout << exchange << "." << iter.first << "." << 60 << ": " << iter.second.size() << endl;
+    //     }
+    // }
 
     
 

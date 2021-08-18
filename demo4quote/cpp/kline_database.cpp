@@ -237,7 +237,7 @@ void KlineDatabase::get_db_data(SQLite::Statement& stmt, int resolution, unorder
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 
 }

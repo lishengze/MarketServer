@@ -124,7 +124,7 @@ void DepthProces::request_depth_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
 }
 
@@ -197,7 +197,7 @@ void DepthProces::response_updated_depth_data(SDepthDataPtr pSDepthData)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }    
 }
 

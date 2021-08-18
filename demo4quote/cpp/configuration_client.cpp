@@ -1,5 +1,6 @@
 #include "configuration_client.h"
 #include "stream_engine_config.h" // for _log_and_print
+#include "Log/log.h"
 
 
 void ConfigurationClient::_run()
@@ -179,11 +180,9 @@ void ConfigurationClient::_parse_config()
             return;
         }
 
-
-        std::cout << "\nhedgeParamsObject: \n " << ToJson(hedgeParamsObject) << "\n"
-                << "\nsymbolParamsObject: \n " << ToJson(symbolParamsObject) << "\n"
-                << "\nriskParamsObject: \n " << ToJson(riskParamsObject) << "\n"
-                << std::endl;
+        LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
+                + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
+                + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
 
         // 合并为内置配置格式
         Document output(rapidjson::Type::kObjectType);

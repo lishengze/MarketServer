@@ -33,8 +33,10 @@ StreamEngine::~StreamEngine()
 
 void StreamEngine::init()
 {
-    _log_and_print("run mode %s", CONFIG->mode_);
-    if( CONFIG->mode_ == MODE_REALTIME ) {
+    LOG_INFO(string("run mode ") + CONFIG->mode_);
+
+    if( CONFIG->mode_ == MODE_REALTIME ) 
+    {
         RedisParams params;
         params.host = CONFIG->quote_redis_host_;
         params.port = CONFIG->quote_redis_port_;
@@ -42,12 +44,16 @@ void StreamEngine::init()
         RedisQuote* ptr = new RedisQuote();
         ptr->init(this, params, CONFIG->logger_, CONFIG->dump_);
         quote_source_ = ptr;
-    } else if( CONFIG->mode_ == MODE_REPLAY ) {
+    } 
+    else if( CONFIG->mode_ == MODE_REPLAY ) 
+    {
         RedisQuote* ptr = new RedisQuote();
         ptr->init_replay(this, CONFIG->replay_ratio_, CONFIG->replay_replicas_);
         quote_source_ = ptr;
-    } else {
-        _log_and_print("unknown mode %s", CONFIG->mode_);
+    } 
+    else 
+    {
+        LOG_WARN(string("unknown mode ") + CONFIG->mode_);
     }
 }
 
@@ -64,7 +70,9 @@ void StreamEngine::start()
 
     // 连接配置服务器
     config_client_.set_callback(this);
-    std::cout << "Nacos Address: " << CONFIG->nacos_addr_ << " name: " << CONFIG->nacos_namespace_ << std::endl;
+
+    LOG_INFO(string("Nacos Address: ") + CONFIG->nacos_addr_ + " namespace: " + CONFIG->nacos_namespace_);
+
     config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
 
     kline_hubber_.recover_from_db();
@@ -78,9 +86,26 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
     // }
 
     // string log_info = string("depth_snap_") + exchange + "_" + symbol;
+
     LOG->record_output_info(string("depth_snap_") + exchange + "_" + symbol, quote);
     
-    
+    if(string(symbol) == "USDT_USD" ) 
+    {
+       std::stringstream s_s;
+       s_s << "\nupdate: " << exchange << "." << symbol << ", ask: " << quote.asks.size() << ", bid: " << quote.bids.size() << "\n"
+           << "ask_info: \n";
+       for(auto& iter:quote.asks)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+       }
+       s_s << "bid_info: \n";
+       for(auto& iter:quote.bids)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+       }      
+       LOG_DEBUG(s_s.str()); 
+    }
+
     quote_cacher_.on_snap(exchange, symbol, quote);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
@@ -95,10 +120,22 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
 
-    // if( string(exchange) == "BINANCE" && string(symbol) == "BTC_USDT" ) {
-    //    _print("update: %s.%s %s bias=%lu", exchange, symbol, FormatISO8601DateTime(quote.origin_time/1000000000), get_miliseconds()/1000 - quote.origin_time/1000000000);
-    //    tfm::printfln("update to snap: %s.%s ask/bid %lu/%lu", exchange, symbol, snap.asks.size(), snap.bids.size());
-    // }
+    if(string(symbol) == "USDT_USD" ) 
+    {
+       std::stringstream s_s;
+       s_s << "update: " << exchange << ", ask: " << snap.asks.size() << ", bid: " << snap.bids.size() << "\n"
+           << "ask_info: \n";
+       for(auto& iter:snap.asks)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+       }
+       s_s << "bid_info: \n";
+       for(auto& iter:snap.bids)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+       }      
+       LOG_DEBUG(s_s.str()); 
+    }
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, snap);
@@ -119,19 +156,6 @@ void StreamEngine::on_trade(const TExchange& exchange, const TSymbol& symbol, co
 void StreamEngine::on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& klines, bool is_init)
 {
     LOG->record_output_info(string("kline_") + std::to_string(resolution) + "_" + exchange + "_" + symbol, klines);
-
-    // cout << "[kline] " << exchange << " " << symbol << " " << resolution << " " << klines.size() << endl;    
-    /**/
-    // for( const auto& v : klines ) {   
-    //     _log_and_print("get %s.%s kline%d index=%lu open=%s high=%s low=%s close=%s volume=%s", exchange.c_str(), symbol.c_str(), resolution, 
-    //         v.index,
-    //         v.px_open.get_str_value().c_str(),
-    //         v.px_high.get_str_value().c_str(),
-    //         v.px_low.get_str_value().c_str(),
-    //         v.px_close.get_str_value().c_str(),
-    //         v.volume.get_str_value().c_str()
-    //     );
-    // }
     
     vector<KlineData> outputs; // 
     kline_hubber_.on_kline(exchange, symbol, resolution, klines, is_init, outputs);
@@ -238,8 +262,8 @@ void StreamEngine::on_config_channged(const Document& src)
         expand_replay_config(src, d);
     }
 
-    std::cout << "\n\n *** StreamEngine::on_config_channged ***" <<endl;
-    // cout << content << endl;
+    LOG_INFO("*** StreamEngine::on_config_channged ***");
+    LOG_INFO(content);
 
     // string -> 结构化数据
     std::unordered_map<TSymbol, SNacosConfig> symbols;
@@ -274,13 +298,14 @@ void StreamEngine::on_config_channged(const Document& src)
             } 
             symbols[symbol] = cfg;
 
-            cout << "symbol: " << symbol << " \n"
-                 << cfg.str() << endl;
+            LOG_INFO("\n" + symbol + ": " + cfg.str());
+
         }
     }
     catch(nlohmann::detail::exception& e)
     {
-        _log_and_print("decode config fail %s", e.what());
+        LOG_WARN("decode config fail " + e.what());
+        
         return;
     }    
     

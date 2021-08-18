@@ -85,9 +85,25 @@ void RiskControllerServer::on_snap(const SEData& quote)
     // QuoteData to SInnerQuote
     SInnerQuote raw;
     quotedata_to_innerquote(quote, raw);
-    // std::cout << "\nRiskControllerServer::on_snap " << quote.exchange() << "." << quote.symbol() << " " << raw.asks.size() << "/" << raw.bids.size() << std::endl;
 
     LOG->record_input_info("depth_" + quote.exchange() + "_" + quote.symbol(), quote);
+
+    if(raw.symbol == "USDT_USD" ) 
+    {
+       std::stringstream s_s;
+       s_s << "\nupdate: " << raw.exchange << "." << raw.symbol << ", ask: " << raw.asks.size() << ", bid: " << raw.bids.size() << "\n"
+           << "ask_info: \n";
+       for(auto& iter:raw.asks)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.total_volume.get_value() << "\n";
+       }
+       s_s << "bid_info: \n";
+       for(auto& iter:raw.bids)
+       {
+           s_s << iter.first.get_value() << ": " << iter.second.total_volume.get_value() << "\n";
+       }      
+       LOG_DEBUG(s_s.str()); 
+    }
 
     datacenter_.add_quote(raw);
 }

@@ -1865,7 +1865,7 @@ std::vector<KlineDataPtr> KlineProcess::get_trade_kline_data(string symbol,  int
 //     }
 //     catch(const std::exception& e)
 //     {
-//         std::cerr << __FILE__ << ":" << __LINE__ << " " <<  e.what() << '\n';
+//         std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
 //     }
     
 // }
