@@ -661,6 +661,15 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
+    if (filter_zero_volume( const_cast<SInnerQuote&>(quote)))
+    {
+        LOG_DEBUG(quote.symbol + " raw quote");
+        print_quote(quote);       
+        LOG_WARN(quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                + ", bid.size: " + std::to_string(quote.bids.size())) ;
+        return;
+    }    
+
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
 
     innerquote_to_msd2(quote, ptrData.get(), false);
@@ -678,11 +687,12 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     //     LOG_DEBUG(quote.symbol + " OriData");
     //     print_quote(quote);
     // }
-
+    
     // 存储原始行情
     datas_[quote.symbol] = quote;    
     // 发布行情
-    _publish_quote(quote);
+    _publish_quote(quote);    
+
 };
 
 void DataCenter::change_account(const AccountInfo& info)
@@ -779,11 +789,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         return;
     }
 
-    if (quote.symbol == "USDT_USD")
+     if (filter_zero_volume(newQuote))
     {
-        LOG_DEBUG("publish " + quote.symbol + " new quote");
-        print_quote(newQuote);
-    }
+        LOG_DEBUG(quote.symbol + " After _publish_quote");
+        print_quote(quote);        
+    }    
 
     
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
