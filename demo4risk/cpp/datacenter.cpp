@@ -391,6 +391,12 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
         }
     }
 
+    if(src.symbol == "USDT_USD" ) 
+    {
+        LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
+        print_quote(src);
+    }
+
     return src;
 }
 
@@ -498,6 +504,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
+    if(src.symbol == "USDT_USD" ) 
+    {
+        LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
+        print_quote(src);
+    }
+
+
     return src;
 }
 
@@ -578,6 +591,13 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
 
     }
+
+    if(src.symbol == "USDT_USD" ) 
+    {
+        LOG_DEBUG(src.symbol + " After OrderBookWorker");
+        print_quote(src);
+    }
+
     return src;
     }
     catch(const std::exception& e)
@@ -636,11 +656,11 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
 
-    if(quote.symbol == "USDT_USD" ) 
-    {
-        LOG_DEBUG(quote.symbol + " OriData");
-        print_quote(quote);
-    }
+    // if(quote.symbol == "USDT_USD" ) 
+    // {
+    //     LOG_DEBUG(quote.symbol + " OriData");
+    //     print_quote(quote);
+    // }
 
     // 存储原始行情
     datas_[quote.symbol] = quote;    
