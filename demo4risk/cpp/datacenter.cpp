@@ -220,7 +220,6 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
         std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
     
-    // tfm::printfln("QuoteBiasWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
 
     return src;
 }
@@ -391,11 +390,17 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
         }
     }
 
-    if(src.symbol == "USDT_USD" ) 
+    if (filter_zero_volume(src))
     {
         LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
-        print_quote(src);
+        print_quote(src);        
     }
+
+    // if(src.symbol == "USDT_USD" ) 
+    // {
+    //     LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
+    //     print_quote(src);
+    // }
 
     return src;
 }
@@ -504,11 +509,17 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    if(src.symbol == "USDT_USD" ) 
+    if (filter_zero_volume(src))
     {
         LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
-        print_quote(src);
+        print_quote(src);        
     }
+
+    // if(src.symbol == "USDT_USD" ) 
+    // {
+    //     LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
+    //     print_quote(src);
+    // }
 
 
     return src;
@@ -592,11 +603,17 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
     }
 
-    if(src.symbol == "USDT_USD" ) 
+    if (filter_zero_volume(src))
     {
         LOG_DEBUG(src.symbol + " After OrderBookWorker");
-        print_quote(src);
-    }
+        print_quote(src);        
+    }    
+
+    // if(src.symbol == "USDT_USD" ) 
+    // {
+    //     LOG_DEBUG(src.symbol + " After OrderBookWorker");
+    //     print_quote(src);
+    // }
 
     return src;
     }
