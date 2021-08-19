@@ -1,15 +1,6 @@
 #pragma once
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <math.h>
-#include <string>
-#include <map>
-#include <unordered_map>
-#include <iostream>
-#include <cstring>
-#include <mutex>
-using namespace std;
+
 #include "updater_configuration.h"
 #include "updater_account.h"
 #include "updater_order.h"
@@ -18,160 +9,7 @@ using namespace std;
 
 #include "Log/log.h"
 
-
-// 内部行情结构
-struct SInnerDepth {
-    SDecimal total_volume; // 总挂单量，用于下发行情
-    map<TExchange, SDecimal> exchanges;
-    //double amount_cost; // 余额消耗量
-
-    SInnerDepth() {
-    }
-
-    void mix_exchanges(const SInnerDepth& src, double bias, uint32 kind=1) 
-    {
-        if (kind == 1 && bias > -100)
-        {
-            for( const auto& v : src.exchanges ) 
-            {                
-                exchanges[v.first] += (v.second * (1 + bias)) > 0 ? (v.second * (1 + bias)) : 0;
-            }
-        }
-        else if (kind == 2)
-        {
-            for( const auto& v : src.exchanges ) 
-            {                
-                exchanges[v.first] += (v.second + bias) > 0 ? (v.second + bias) :0;
-            }
-        }
-
-
-
-        total_volume = 0;
-        for( const auto& v : exchanges ) {
-            total_volume += v.second;
-        }
-    }
-
-    void set_total_volume()
-    {
-        total_volume = 0;
-        for( const auto& v : exchanges ) {
-            total_volume += v.second;
-        }        
-    }
-};
-
-struct HedgeInfo
-{
-    HedgeInfo(string symbol_value, double price_value, double amount_value, 
-            TradedOrderStreamData_Direction direction_value, bool is_trade):
-            symbol{symbol_value}
-    {
-        LOG_INFO("HedgeInfo Init " + symbol);
-        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
-        {
-            
-            ask_amount = amount_value;
-
-           LOG_INFO("init ask_amount: " + std::to_string(ask_amount));
-        }
-        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
-        {
-            
-            bid_amount = amount_value;
-
-            LOG_INFO("init bid_amount: " + std::to_string(bid_amount));
-        }
-        else
-        {
-            LOG_WARN("HedgeInfo Set Unknow Direction!");
-        }
-
-    }
-    
-    HedgeInfo()
-    {
-
-    }
-
-    void set(string symbol_value, double price_value, double amount_value, 
-            TradedOrderStreamData_Direction direction_value, bool is_trade)
-    {
-        symbol = symbol_value;
-
-        LOG_INFO("HedgeInfo Set " + symbol);
-        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
-        {     
-            ask_amount = amount_value;  
-
-            LOG_INFO("new ask_amount: " + std::to_string(ask_amount));
-        }
-        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
-        {
-
-            bid_amount = amount_value;
-
-            LOG_INFO("new bid_amount: " + std::to_string(bid_amount));
-        }
-        else
-        {
-            LOG_WARN("HedgeInfo Set Unknow Direction!");
-        }        
-
-
-    }
-
-    string symbol;
-    double ask_amount{0};
-    double bid_amount{0};
-};
-
-struct SInnerQuote {
-    string exchange;
-    string symbol;
-    type_tick time_origin;      // 交易所原始时间
-    type_tick time_arrive_at_streamengine;   // se收到的时间
-    type_tick time_produced_by_streamengine;    // se处理完发送的时间
-    type_tick time_arrive;  // rc收到的时间
-    type_seqno seq_no;
-    uint32 precise;
-    uint32 vprecise;
-    map<SDecimal, SInnerDepth> asks;
-    map<SDecimal, SInnerDepth> bids;
-
-    SInnerQuote() {
-        seq_no = 0;
-        precise = 0;
-        vprecise = 0;
-        time_origin = time_arrive_at_streamengine = time_produced_by_streamengine = time_arrive = 0;
-    }
-
-    void get_asks(vector<pair<SDecimal, SInnerDepth>>& depths) const {
-        depths.clear();
-        for( auto iter = asks.begin() ; iter != asks.end() ; iter ++ ) {
-            depths.push_back(make_pair(iter->first, iter->second));
-        }
-    }
-
-    void get_bids(vector<pair<SDecimal, SInnerDepth>>& depths) const {
-        depths.clear();
-        for( auto iter = bids.rbegin() ; iter != bids.rend() ; iter ++ ) {
-            depths.push_back(make_pair(iter->first, iter->second));
-        }
-    }
-};
-
-class CallDataServeMarketStream;
-
-
-struct Params {
-    AccountInfo cache_account;
-    map<TSymbol, QuoteConfiguration> cache_config;
-    map<TSymbol, SymbolConfiguration> symbol_config;
-    map<TSymbol, HedgeInfo> hedage_info;
-    unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
-};
+#include "data_struct/data_struct.h"
 
 
 // 流水线模型
@@ -180,6 +18,8 @@ struct PipelineContent
     Params params;
     bool is_sample_;
 };
+
+class CallDataServeMarketStream;
 
 class Worker
 {

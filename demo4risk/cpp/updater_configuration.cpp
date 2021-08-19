@@ -121,7 +121,6 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
 {    
     try
     {
-        std::cout << "combine_config " << std::endl;
 
         // add symbol-config to output first
         if( !risks.IsArray() )
@@ -145,17 +144,46 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
             double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
             
-            if (PriceOffsetKind != 1 && PriceOffsetKind != 2) continue;
-            if (PriceOffset < 0 || PriceOffset >= 1) continue;
+            if (PriceOffsetKind != 1 && PriceOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " PriceOffsetKind should be 1 or 2 ,now is: " + std::to_string(PriceOffsetKind));
+                continue;
+            }
+            if (PriceOffset < 0 || PriceOffset >= 1)
+            {
+                LOG_WARN(symbol + " PriceOffset should in (0, 1),now is: " + std::to_string(PriceOffset));
+                continue;
+            }
 
-            if (AmountOffsetKind != 1 && AmountOffsetKind != 2) continue;
-            if (AmountOffset < 0 || AmountOffset >= 1) continue;
+            if (AmountOffsetKind != 1 && AmountOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " AmountOffsetKind should be 1 or 2 ,now is: " + std::to_string(AmountOffsetKind));
+                continue;
+            }
 
-            if (OTCOffsetKind != 1 && OTCOffsetKind != 2) continue;
-            if (OtcOffset < 0 || OtcOffset >= 1) continue;            
+            if (AmountOffset < 0 || AmountOffset >= 1)
+            {
+                LOG_WARN(symbol + " AmountOffset should in (0, 1),now is: " + std::to_string(AmountOffset));
+                continue;
+            }            
+
+            if (OTCOffsetKind != 1 && OTCOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " OTCOffsetKind should be 1 or 2 ,now is: " + std::to_string(OTCOffsetKind));
+                continue;
+            }
+
+            if (OtcOffset < 0 || OtcOffset >= 1) 
+            {
+                LOG_WARN(symbol + " OtcOffset should in (0, 1) ,now is: " + std::to_string(PriceOffsetKind));
+                continue;
+            }                        
 
             if( symbol == "")
+            {
+                LOG_WARN("symbol is empty");
                 continue;
+            }            
 
             QuoteConfiguration cfg;
 
@@ -174,9 +202,9 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
 
             output[symbol] = cfg;
 
-            std::cout << cfg.desc() << std::endl;
+            LOG_INFO("\nMarketRisk: " + symbol + "\n" + cfg.desc());
 
-            // std::cout << symbol << " PriceOffset: " << price_bias << " AmountOffset: " << volume_bias << std::endl;
+            // std::cout << cfg.desc() << std::endl;
         }
     }
     catch(const std::exception& e)
@@ -196,9 +224,11 @@ void ConfigurationClient::_parse_config()
 
     if(riskParamsObject.HasParseError())
     {
-        _log_and_print("parse RiskParams error %d", riskParamsObject.GetParseError());
+        LOG_ERROR("parse RiskParams error " + std::to_string(riskParamsObject.GetParseError()));
         return;
     }
+
+    LOG_INFO("\nMarketRisk OriInfo: \n" + risk_params_.c_str());
 
     // 合并为内置配置格式
     map<TSymbol, QuoteConfiguration> output;

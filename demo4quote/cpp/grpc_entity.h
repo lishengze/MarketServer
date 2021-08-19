@@ -40,6 +40,7 @@ class IQuoteCacher;
 
 inline void set_decimal(Decimal* dst, const SDecimal& src)
 {
+    
     dst->set_base(src.data_.real_.value_);
     dst->set_prec(src.data_.real_.prec_);
 }

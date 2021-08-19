@@ -5,6 +5,7 @@
 #include "updater_configuration.h"
 #include "updater_quote.h"
 #include "Log/log.h"
+#include "util/tool.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -28,6 +29,8 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
         for( auto v : src_depth.data() ) {
             depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
         }
+        depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
+        
         dst.asks[price] = depth;
     }
     // 买盘
@@ -38,6 +41,8 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
         for( auto v : src_depth.data() ) {
             depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
         }
+        depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
+
         dst.bids[price] = depth;
     }
 }
@@ -88,22 +93,11 @@ void RiskControllerServer::on_snap(const SEData& quote)
 
     LOG->record_input_info("depth_" + quote.exchange() + "_" + quote.symbol(), quote);
 
-    if(raw.symbol == "USDT_USD" ) 
-    {
-       std::stringstream s_s;
-       s_s << "\nupdate: " << raw.exchange << "." << raw.symbol << ", ask: " << raw.asks.size() << ", bid: " << raw.bids.size() << "\n"
-           << "ask_info: \n";
-       for(auto& iter:raw.asks)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.total_volume.get_value() << "\n";
-       }
-       s_s << "bid_info: \n";
-       for(auto& iter:raw.bids)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.total_volume.get_value() << "\n";
-       }      
-       LOG_DEBUG(s_s.str()); 
-    }
+    // if(raw.symbol == "USDT_USD" ) 
+    // {
+    //     LOG_DEBUG(raw.symbol + " OriData");
+    //     print_quote(raw);
+    // }
 
     datacenter_.add_quote(raw);
 }

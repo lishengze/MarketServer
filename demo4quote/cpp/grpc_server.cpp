@@ -2,6 +2,8 @@
 #include "grpc_server.h"
 #include "pandora/util/time_util.h"
 
+#include "Log/log.h"
+
 #include <iostream>
 
 void ServerEndpoint::init(const string& grpc_addr)
@@ -49,12 +51,12 @@ void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& sy
     string tmp;
     if( !snap->SerializeToString(&tmp) )
     {
-        cout << "[Error] ServerEndpoint::publish_binary SerializeToString Failed" << endl;
+        LOG_ERROR("[Error] ServerEndpoint::publish_binary SerializeToString Failed");
         return;
     }
     else
     {
-        // cout << "Serialized data: " << exchange << "." << symbol << "  len: " << tmp.length() << endl;
+
     }
         
     
@@ -62,8 +64,6 @@ void ServerEndpoint::publish_binary(const TExchange& exchange, const TSymbol& sy
     uint32 data_type = QUOTE_TYPE_DEPTH;
     string data = tfm::format("%u;%u;", length, data_type);
     data.insert(data.end(), tmp.begin(), tmp.end());
-
-    // cout << "ServerEndpoint::publish_binary " << exchange << " " << symbol << endl;
 
     caller_subscribe_in_binary_->add_data(exchange, symbol, data);
 }

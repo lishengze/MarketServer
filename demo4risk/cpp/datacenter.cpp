@@ -6,6 +6,7 @@
 
 #include "updater_quote.h"
 #include "Log/log.h"
+#include "util/tool.h"
 
 bool getcurrency_from_symbol(const string& symbol, string& sell_currency, string& buy_currency) {
     // 获取标的币种
@@ -31,18 +32,13 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
 
-            // cout << price.get_str_value() << " " << watermark.get_str_value() << endl;
             if( is_ask ? (price <= watermark) : (price >= watermark) ) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
                     volumes[v2.first] += v2.second;
                 }
                 src_depths.erase(v++);
-                // if (src.symbol == "BTC_USDT")
-                // {
-                //     std::cout << "filed_price: " << price.get_str_value() << " watermark: " << watermark.get_str_value() << endl;
-                // }
-                // cout << "-- delete ask depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
+                LOG_DEBUG("watermark filter ask" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -64,18 +60,15 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                             src_depths[new_price] = fake;
 
-                            // cout << "Add New Price: " << src.symbol << ", "
-                            //     << "new price: " << new_price.get_value() << ", "
-                            //     << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                            //     << "is_ask: " << is_ask
-                            //     << endl;                        
+                            stringstream s_s;
+                            s_s << "Add New Price: " << src.symbol << ", "
+                                << "new price: " << new_price.get_value() << ", "
+                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask << "\n";
+                            LOG_DEBUG(s_s.str());
                         }
                         else
-                        {
-                            // cout << "No New Price " << src.symbol << ", "
-                            //     << "volume: " << fake.total_volume.get_value() << ", "
-                            //     << "is_ask: " << is_ask
-                            //     << endl;                             
+                        {                            
                             depth.mix_exchanges(fake, 0, 1);
                         }
                     }
@@ -84,7 +77,6 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                 } else {
                     break;
                 }
-                // cout << "accumulate to depth " << price.get_str_value() << endl;
                 v++;
             }
         }
@@ -99,14 +91,13 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
-            // cout << price.get_str_value() << " " << watermark.get_str_value() << endl;
             if( is_ask ? (price <= watermark) : (price >= watermark) ) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                // cout << "-- delete bid depth " << src.symbol << ", price: " << price.get_str_value() << ", water: " << watermark.get_value() << endl;
+                LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -128,19 +119,15 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                             src_depths[new_price] = fake;
 
-                            // cout << "Add New Price: " << src.symbol << ", "
-                            //     << "new price: " << new_price.get_value() << ", "
-                            //     << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                            //     << "is_ask: " << is_ask
-                            //     << endl;
-
+                            stringstream s_s;
+                            s_s << "Add New Price: " << src.symbol << ", "
+                                << "new price: " << new_price.get_value() << ", "
+                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                                << "is_ask: " << is_ask << "\n";
+                            LOG_DEBUG(s_s.str());
                         }
                         else
-                        {
-                            // cout << "No New Price " << src.symbol << ", "
-                            //     << "volume: " << fake.total_volume.get_value() << ", "
-                            //     << "is_ask: " << is_ask
-                            //     << endl;                        
+                        {                  
                             depth.mix_exchanges(fake, 0, 1);
                         }
                     }
@@ -150,7 +137,6 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                 } else {
                     break;
                 }
-                // cout << "accumulate to depth " << price.get_str_value() << endl;
                 v++;
             }
         }
@@ -167,12 +153,6 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteCo
 {
     double price_bias = config.PriceOffset;
     double volume_bias = config.AmountOffset;
-
-    // if (config.symbol == "BTC_USDT")
-    // {
-    //     std::cout << config.symbol << " " << config.PriceOffsetKind << " " << config.PriceOffset << " "
-    //             << config.AmountOffsetKind << " " << config.AmountOffset << std::endl;
-    // }
 
     map<SDecimal, SInnerDepth> result;
 
@@ -210,19 +190,6 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteCo
 
         dst[v.first].mix_exchanges(v.second, 0);
         result[scaledPrice].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
-
-        // if (config.symbol == "BTC_USDT")
-        // {
-        //     std::cout << config.symbol << " " << is_ask 
-        //               << " ori_price: " << v.first.get_str_value() 
-        //               << " offset_price: " << scaledPrice.get_str_value()
-        //               << " ori_volume: " << dst[v.first].total_volume.get_str_value() 
-        //               << " offset_volume: " << result[scaledPrice].total_volume.get_str_value()
-        //               << std::endl;
-        // }
-
-
-        // dst[scaledPrice].mix_exchanges(v.second, volume_bias * (-1), config.AmountOffsetKind);
     }
 
     dst.swap(result);
@@ -287,71 +254,35 @@ void WatermarkComputerWorker::query(map<TSymbol, SDecimal>& watermarks) const
 void WatermarkComputerWorker::set_snap(const SInnerQuote& quote) 
 {
     // 提取各交易所的买卖一
+    // LOG_DEBUG("WatermarkComputerWorker::set_snap");
+
     unordered_map<TExchange, SDecimal> first_ask, first_bid;
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << "ask price " << iter->first.get_str_value() << " ";
-        // }
+    
+        // LOG_DEBUG("ask price " + iter->first.get_str_value());
 
         for( const auto& v : iter->second.exchanges ) {
             const TExchange& exchange = v.first;
 
-            // if (quote.symbol == "BTC_USDT")
-            // {
-            //     std::cout << exchange << " volume: " << v.second.get_str_value() << " ";
-            // }
+            //  LOG_DEBUG(exchange + " volume:" + v.second.get_str_value());
 
-            
             if( first_ask.find(exchange) == first_ask.end() ) {
                 first_ask[exchange] = iter->first;
             }
-        }
-
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << std::endl;
-        // }        
+        }    
     }
     for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << "bid price " << iter->first.get_str_value() << " ";
-        // }
-
+        // LOG_DEBUG("bid price " + iter->first.get_str_value());
         for( const auto& v : iter->second.exchanges ) {
 
-            // if (quote.symbol == "BTC_USDT")
-            // {
-            //     std::cout << v.first << " volume: " << v.second.get_str_value() << " ";
-            // }
+            //  LOG_DEBUG(exchange + " volume:" + v.second.get_str_value());
 
             const TExchange& exchange = v.first;
             if( first_bid.find(exchange) == first_bid.end() ) {
                 first_bid[exchange] = iter->first;
             }
-        }
-
-        // if (quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << std::endl;
-        // }           
+        }      
     }
-
-    // if (quote.symbol == "BTC_USDT")
-    // {
-    //     for (auto iter:first_ask)
-    //     {
-    //         std::cout << "first_ask " << iter.first << " " << iter.second.get_str_value() << std::endl;
-    //     }
-
-    //     for (auto iter:first_bid)
-    //     {
-    //         std::cout << "first_bid " << iter.first << " " << iter.second.get_str_value() << std::endl;
-    //     }        
-    // }    
-
-
 
     std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
     auto iter = watermark_.find(quote.symbol);
@@ -383,6 +314,7 @@ void WatermarkComputerWorker::_calc_watermark()
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
         // 计算watermark
+        // LOG_DEBUG("_calc_watermark");
         for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) {
             SymbolWatermark* obj= iter->second;
             vector<SDecimal> asks, bids;
@@ -393,31 +325,35 @@ void WatermarkComputerWorker::_calc_watermark()
 
             // if (iter->first == "BTC_USDT")
             // {
-            // for( const auto& v : asks ) {
-            //     cout << "ask " << v.get_str_value() << endl;
-            // }                
+            //     for( const auto& v : asks ) {
+            //         LOG_DEBUG(iter->first + " ask " + v.get_str_value());
+            //     }                
             // }
 
 
             sort(bids.begin(), bids.end());
-            //for( const auto& v : bids ) {
-                // cout << "bid " << v.get_str_value() << endl;
-            //}
+
+            // if (iter->first == "BTC_USDT")
+            // {
+            //     for( const auto& v : bids ) {
+            //         LOG_DEBUG(iter->first + " bids " + v.get_str_value());
+            //     }                
+            // }
+
             if( asks.size() > 0 && bids.size() > 0 ) {
                 iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
 
                 // if (iter->first == "BTC_USDT")
                 // {
-                //     cout << asks[asks.size()/2].get_str_value() << " " << bids[bids.size()/2].get_str_value() << " " << iter->second->watermark.get_str_value() << endl;
+                //     LOG_DEBUG(iter->first +  asks[asks.size()/2].get_str_value() + " " + bids[bids.size()/2].get_str_value() 
+                //                 + " " + iter->second->watermark.get_str_value());
                 // }
             }
         }
     }
     catch(const std::exception& e)
     {
-        _log_and_print("Exception: %s", e.what());
-
-        // std::cerr << "" << e.what() << '\n';
+        LOG_ERROR("[E] " + e.what());
     }        
 }
 
@@ -434,10 +370,7 @@ void WatermarkComputerWorker::thread_func() {
    
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    if (src.symbol == "BTC_USDT")
-    {
-        // std::cout << "WatermarkComputerWorker::process " << src.symbol << ", " << src.asks.size() << "/" <<  src.bids.size()<< std::endl;        
-    }
+
     set_snap(src);
     _calc_watermark();
     
@@ -449,12 +382,12 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
         _filter_by_watermark(src, watermark, ctx);
     }
     
-    // _log_and_print("worker(watermark)-%s: %s %lu/%lu", src.symbol.c_str(), watermark.get_str_value().c_str(), src.asks.size(), src.bids.size());
-    if (src.symbol == "BTC_USDT")
+    if (src.asks.size() > 0 && src.bids.size() > 0)
     {
         if (src.asks.begin()->first < src.bids.rbegin()->first)
         {
-            cout << "***[E]  " << src.symbol.c_str() << " ask1: " << src.asks.begin()->first.get_value() << ", bids: " << src.bids.rbegin()->first.get_value() << endl;
+            LOG_ERROR(src.symbol + " Depth Error ask.begin: " + src.asks.begin()->first.get_str_value()
+                      + " < bids.end:" +  src.bids.rbegin()->first.get_str_value());
         }
     }
 
@@ -493,11 +426,6 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    // if (src.symbol == "BTC_USDT")
-    // {
-    //     std::cout << "AccountAjdustWorker::process " << src.symbol << ", " << src.asks.size() << ", " <<  src.bids.size()<< std::endl;
-    // }
-
     // 获取配置
     double hedge_percent = 0;
     auto iter = ctx.params.cache_config.find(src.symbol);
@@ -553,14 +481,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = 0;
-                //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << need_amount.get_str_value() << endl;
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += iter2->second;
-                //cout << remain_amount << " " << iter2->second.get_str_value() << " " << iter->first.get_str_value() << " " << depth.total_volume.get_str_value() << endl;
             }
         }
     }
+
     for( auto iter = src.bids.begin() ; iter != src.bids.end() ; ) 
     {
         SInnerDepth& depth = iter->second;
@@ -571,12 +498,6 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    // if (src.symbol == "BTC_USDT")
-    // {
-    //     tfm::printfln("AccountAjdustWorker %s %u/%u", src.symbol, src.asks.size(), src.bids.size());
-    // }
-
-    
     return src;
 }
 
@@ -584,7 +505,6 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {        
     try
     {
-        // cout << "OrderBookWorker::process " << endl;
     if (ctx.params.hedage_info.find(src.symbol) != ctx.params.hedage_info.end())
     {
         HedgeInfo& hedage_info = ctx.params.hedage_info[src.symbol];
@@ -599,13 +519,17 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter->second.total_volume > ask_amount)
                 {
-                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " amount: " << iter->second.total_volume.get_value() << " minus " << ask_amount << endl;
+                    LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                            + ", amount: " + iter->second.total_volume.get_str_value() 
+                            + ", minus " + std::to_string(ask_amount));
                     iter->second.total_volume -= ask_amount;
                     break;
                 }
                 else
                 {
-                    cout << src.symbol << " ask_Mount price " << iter->first.get_value() << " is deleted, delete amount: " << iter->second.total_volume.get_value() << ", ask_amount: " << ask_amount << endl;                    
+                    LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                            + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
+                            + ", ask_amount " + std::to_string(ask_amount));
                     ask_amount -= iter->second.total_volume.get_value();
                     iter->second.total_volume = 0;
                     delete_price.push_back(iter->first);
@@ -628,14 +552,18 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter.second.total_volume > bid_amount)
                 {
-                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " amount: " << iter.second.total_volume.get_value() << " minus " << bid_amount << endl;
+                    LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
+                            + ", amount: " + iter.second.total_volume.get_str_value() 
+                            + ", minus " + std::to_string(bid_amount));
 
                     iter.second.total_volume -= bid_amount;
                     break;
                 }
                 else
                 {
-                    cout << src.symbol << " Bid_Mount price " << iter.first.get_value() << " is deleted, delete amount: " << iter.second.total_volume.get_value() << ", ask_amount: " << bid_amount << endl;                    
+                    LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
+                            + ", is deleted, delete amount: " + iter.second.total_volume.get_str_value() 
+                            + ", bid_amount " + std::to_string(bid_amount));
 
                     bid_amount -= iter.second.total_volume.get_value();
                     iter.second.total_volume = 0;
@@ -656,40 +584,6 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
         std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
-    
-
-    /*
-    auto orderBookIter = ctx.params.cache_order.find(src->symbol);
-    if( orderBookIter != ctx.params.cache_order.end() ) 
-    {
-        // 卖盘
-        for( uint32 i = 0 ; i < src->ask_length ; ) {
-            const vector<SOrderPriceLevel>& levels = orderBookIter->second.first;
-            for( auto iter = levels.begin() ; iter != levels.end() ; ) {
-                if( iter->price < src->asks[i].price ) {
-                    iter ++;
-                } else if( iter->price > src->asks[i].price ) {
-                    i++;
-                } else {
-                    src->asks[i].total_volume -= iter->volume;
-                }
-            }
-        }
-        // 买盘
-        for( uint32 i = 0 ; i < src->bid_length ; ) {
-            const vector<SOrderPriceLevel>& levels = orderBookIter->second.second;
-            for( auto iter = levels.begin() ; iter != levels.end() ; ) {
-                if( iter->price < src->bids[i].price ) {
-                    iter ++;
-                } else if( iter->price > src->bids[i].price ) {
-                    i++;
-                } else {
-                    src->bids[i].total_volume -= iter->volume;
-                }
-            }
-        }
-    }*/
-    // return src;
 };
 
 SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
@@ -732,38 +626,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
 
-    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-    // {
-        // _log_and_print("Receive Raw Data %s.%s %u/%u", quote.exchange, quote.symbol, quote.asks.size(), quote.bids.size());
-        // for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) 
-        // {
-
-        //         std::cout << "ask price " << iter->first.get_str_value() << " ";
-
-        //     for( const auto& v : iter->second.exchanges ) {
-        //         const TExchange& exchange = v.first;
-
-        //         std::cout << exchange << " volume: " << v.second.get_str_value() << " ";
-
-        //     }
-        //     std::cout << std::endl;     
-        // }
-        // for( auto iter = quote.bids.rbegin() ; iter != quote.bids.rend() ; iter ++ ) {
-
-        //     std::cout << "bid price " << iter->first.get_str_value() << " ";
-            
-        //     for( const auto& v : iter->second.exchanges ) {
-        //         std::cout << v.first << " volume: " << v.second.get_str_value() << " ";                
-        //     }
-
-        //     std::cout << std::endl;       
-        // }
-    // }
-
-
-
     innerquote_to_msd2(quote, ptrData.get(), false);
-
 
     LOG->record_output_info("Hedge_" + quote.symbol + "_" + quote.exchange);
     for( const auto& v : callbacks_) 
@@ -772,6 +635,13 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     }
 
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+
+    if(quote.symbol == "USDT_USD" ) 
+    {
+        LOG_DEBUG(quote.symbol + " OriData");
+        print_quote(quote);
+    }
+
     // 存储原始行情
     datas_[quote.symbol] = quote;    
     // 发布行情
@@ -788,23 +658,15 @@ void DataCenter::change_account(const AccountInfo& info)
 }
 
 void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
-{
-    tfm::printfln("change_configuration");
-    
+{   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.cache_config = config;
 
-    for (auto iter:config)
+    LOG_INFO("DataCenter::change QuoteConfiguration");
+    for (auto iter:params_.cache_config)
     {
-        cout << iter.second.desc() << endl;
-    }
-
-    std::cout << "\nDataCenter::change_configuration  " << std::endl;
-
-    // for (auto iter:params_.cache_config)
-    // {
-    //     std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
-    // }    
+        LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
+    }    
     _push_to_clients();
 }
 
@@ -812,15 +674,14 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        // cout << "DataCenter::change_configuration SymbolConfiguration" << endl;
-
         std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
         params_.symbol_config = config;
 
-        // for (auto iter:params_.symbol_config)
-        // {
-        //     cout << iter.second.desc() << endl;
-        // }
+        LOG_INFO("DataCenter::change SymbolConfiguration");
+        for (auto iter:params_.symbol_config)
+        {
+            LOG_INFO("\n" + iter.first + " " + iter.second.desc());
+        }
 
     }
     catch(const std::exception& e)
@@ -857,72 +718,21 @@ void DataCenter::_push_to_clients(const TSymbol& symbol)
     }
 }
 
-void print_quote(SInnerQuote& quote)
-{
-    std::stringstream s_s;
-    s_s << "\n------------- asks info: \n";
-    int i = 0;
-    int test_numb = 5;
-    for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
-    {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }
-    s_s << "++++++++++++++++++" << endl;
-    i = 0;
-    for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
-    {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }    
-
-    s_s << "***************** bids info: " << endl;
-    i = 0;
-    for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < test_numb; ++iter, ++i)
-    {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }
-    s_s << "++++++++++++++++++" << endl;
-    i = 0;
-    for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < test_numb; ++iter, ++i)
-    {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }  
-
-    LOG_DEBUG(s_s.str());
-}
-
 void DataCenter::_publish_quote(const SInnerQuote& quote) 
 {    
     SInnerQuote newQuote;
 
-    // std::cout << "\nparams_.cache_config  " << std::endl;
-
-    // for (auto iter:params_.cache_config)
-    // {
-    //     std::cout << iter.first << "  PriceOffset: " << iter.second.PriceOffset  << ", AmountOffset: " << iter.second.AmountOffset << std::endl;
-    // }
-
     pipeline_.run(quote, params_, newQuote);
-
-    // std::cout << "\nAfter Pipeline:  " << newQuote.symbol << " " << newQuote.asks.size() << " / "<< newQuote.bids.size() << std::endl;
 
     // 检查是否发生变化
     auto iter = last_datas_.find(quote.symbol);
     if( iter != last_datas_.end() ) {
         const SInnerQuote& last_quote = iter->second;
-        if( quote.time_origin <= last_quote.time_origin ) {
-            //tfm::printfln("%s %ul %ul", quote.symbol, quote.time_origin, last_quote.time_origin);
+        if( quote.time_origin < last_quote.time_origin ) {
+            LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(quote.time_origin));
             return;
         }
     }
-
-
-    // if (!(params_.cache_config.find(quote.symbol) != params_.cache_config.end()
-    // && params_.cache_config[quote.symbol].IsPublish))
-    // {
-    //     // _log_and_print(" %s UnPublished", quote.symbol);
-    //     // std::cout << quote.symbol << " UnPublished!" << std::endl;
-    //     return;
-    // }
 
     last_datas_[quote.symbol] = newQuote;
 
@@ -932,13 +742,15 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         return;
     }
 
-    // std::cout << "publish(raw) " << quote.symbol << " " << newQuote.asks.size() << "/"<< newQuote.bids.size() << std::endl;
+    if (quote.symbol == "USDT_USD")
+    {
+        LOG_DEBUG("publish " + quote.symbol + " new quote");
+        print_quote(newQuote);
+    }
 
+    
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
-
-    // std::cout << "publish " << quote.symbol << " " << ptrData->asks_size() << "/"<< ptrData->bids_size() << std::endl;
-    // _log_and_print("Publish4Broker %s.%s %u/%u", quote.exchange, quote.symbol, ptrData->asks_size(), ptrData->bids_size());
 
     LOG->record_output_info("Broker_" + quote.symbol + "_" + quote.exchange);
 
@@ -956,11 +768,6 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         LOG_DEBUG("\n Publish For Broker Quote Data " + quote.symbol);
         print_quote(newQuote);        
     }
-
-    // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0)
-    // {
-    //     _log_and_print("Publish4Client %s.%s %u/%u", quote.exchange, quote.symbol, ptrData2->asks_size(), ptrData2->bids_size());
-    // }
 
     LOG->record_output_info("Client_" + quote.symbol + "_" + quote.exchange);
 
@@ -983,13 +790,6 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
-        // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
-        // }
-
-        // std::cout << quote.symbol << " old_size: " << quote.asks.size() << " / " << quote.bids.size() << " ";
-
         int i = 0;
         for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
         {
@@ -1003,13 +803,6 @@ bool DataCenter::check_quote(SInnerQuote& quote)
             new_bids[iter->first] = iter->second;
         }
         quote.bids.swap(new_bids);
-
-        // if (strcmp(quote.exchange.c_str(), MIX_EXCHANGE_NAME) == 0 && quote.symbol == "BTC_USDT")
-        // {
-        //     std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
-        // }        
-
-        // std::cout << " new_size: " << quote.asks.size() << " / " << quote.bids.size() << endl;
     }
 
     return result;
@@ -1056,7 +849,7 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
     }
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
 
@@ -1066,56 +859,69 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             double price = iter->first.get_value();
             reset_price(price, config, true);
 
-            // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
-
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * price;
-                cout << "_calc_otc_by_amount price: " << price << ", volume " << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
+
+                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
+                        + ", otc_volume: " + std::to_string(volume)
+                        + ", ask;");
+
             } else {
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
-                cout << "done _calc_otc_by_amount price: " << price << ", volume " << volume - total_volume.get_value() << " is_ask:" << is_ask << endl;
+
+                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
+                        + ", otc_volume: " + std::to_string(volume)
+                        + ", ask;");
                 break;
             }
-
-            // cout << "_calc_otc_by_amount price: " << price << ", volume" << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
-            // cout << "total_volume: " << total_volume.get_value() << endl;
         }
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, false);
 
-            // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset << endl;
-
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * price;
-                cout << "_calc_otc_by_amount price: " << price << ", volume " << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
+                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
+                        + ", otc_volume: " + std::to_string(volume)
+                        + ", bid;");
 
             } else {
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
-                cout << "done _calc_otc_by_amount price: " << price << ", volume " << volume - total_volume.get_value() << " is_ask:" << is_ask << endl;
 
+                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
+                        + ", otc_volume: " + std::to_string(volume)
+                        + ", bid;");
                 break;
             }
-
-
-            // cout << "total_volume: " << total_volume.get_value() << endl;
         }
     }
 
     if( total_volume < volume )
     {
-        cout << "_calc_otc_by_amount failed depth_sum_volume is: " << total_volume.get_value() << ", request_volume: " << volume << endl;
+        LOG_WARN("_calc_otc_by_volume failed depth_sum_volume is: " 
+                + total_volume.get_str_value() 
+                + ", request_volume: " + std::to_string(volume));
+        
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
     }
         
 
     price = total_amount.get_value() / total_volume.get_value();
-    std::cout << "_calc_otc_by_amount ori_price: " << price.get_value() << " ";
+    double ori_price = price.get_value();
+
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
@@ -1124,7 +930,6 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             price *= ( 1 - config.OtcOffset); 
         }
     }
-
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
@@ -1133,16 +938,16 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             price += config.OtcOffset;
         }        
     }
-    std::cout << "bias_price: " << price.get_value() 
-              << " bias_kind: " << config.OTCOffsetKind 
-              << " bias_value: " << config.OtcOffset 
-              << " direction: " << is_ask
-              << std::endl;
+
+    LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
+            + ", bias_price: " + price.get_str_value() 
+            + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
+            + ", bias_value: " + std::to_string(config.OtcOffset));
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double amount, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double otc_amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0, total_amount;
     if( is_ask ) 
@@ -1150,19 +955,28 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, true);
-            // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
 
-            SDecimal amounts = iter->second.total_volume * price;
-            if( (total_amount + amounts) <= amount ) {
+            SDecimal cur_amounts = iter->second.total_volume * price;
+            if( (total_amount + cur_amounts) <= otc_amount ) {
                 total_volume += iter->second.total_volume;
-                total_amount += amounts;
+                total_amount += cur_amounts;
 
-                cout << "_calc_otc_by_turnover price: " << price << ", volume " << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
+                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_amount: " + cur_amounts.get_str_value()
+                        + ", total_amount: " + total_amount.get_str_value()
+                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", ask;");
             } else {
-                total_volume += (amount - total_amount.get_value()) / price;
-                total_amount = amount;
+                total_volume += (otc_amount - total_amount.get_value()) / price;
+                total_amount = otc_amount;
 
-                cout << "done _calc_otc_by_turnover price: " << price << ", volume " << amount - total_amount.get_value() << " is_ask:" << is_ask << endl;
+                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_amount: " + cur_amounts.get_str_value()
+                        + ", total_amount: " + total_amount.get_str_value()
+                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", ask;");
                 break;
             }        
         }
@@ -1172,33 +986,42 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, false);
-            // cout << "ori_price: " << iter->first.get_value() << ", trans_price: " << price << " " << config.PriceOffsetKind << " " << config.PriceOffset<< endl;
-            SDecimal amounts = iter->second.total_volume * price;
-            if( (total_amount + amounts) <= amount ) {
+            SDecimal cur_amounts = iter->second.total_volume * price;
+            if( (total_amount + cur_amounts) <= otc_amount ) {
                 total_volume += iter->second.total_volume;
-                total_amount += amounts;
-            cout << "_calc_otc_by_turnover price: " << price << ", volume " << iter->second.total_volume.get_value() << " is_ask:" << is_ask << endl;
-                
+                total_amount += cur_amounts;
+
+                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_amount: " + cur_amounts.get_str_value()
+                        + ", total_amount: " + total_amount.get_str_value()
+                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", bid;");                
             } else {
-                total_volume += (amount - total_amount.get_value()) / price;
-                total_amount = amount;
-
-                cout << "done _calc_otc_by_turnover price: " << price << ", volume " << amount - total_amount.get_value() << " is_ask:" << is_ask << endl;
-
+                total_volume += (otc_amount - total_amount.get_value()) / price;
+                total_amount = otc_amount;
+                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_amount: " + cur_amounts.get_str_value()
+                        + ", total_amount: " + total_amount.get_str_value()
+                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", bid;");
                 break;
             }
         }
     }
-    if( total_amount < amount )
+    if( total_amount < otc_amount )
     {
-        cout << "_calc_otc_by_amount failed depth_sum_amount is: " << total_amount.get_value() << ", request_amount: " << amount << endl;
+        LOG_WARN("_calc_otc_by_amount failed depth_sum_volume is: " 
+                + total_amount.get_str_value() 
+                + ", otc_amount: " + std::to_string(otc_amount));
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
     }
         
 
     price = total_amount.get_value() / total_volume.get_value();
+    double ori_price = price.get_value();
 
-    std::cout << "_calc_otc_by_turnover ori_price: " << price.get_value() << " ";
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
@@ -1216,11 +1039,10 @@ QuoteResponse_Result _calc_otc_by_turnover(const map<SDecimal, SInnerDepth>& dep
         }        
     }
 
-    std::cout << "bias_price: " << price.get_value() 
-              << " bias_kind: " << config.OTCOffsetKind 
-              << " bias_value: " << config.OtcOffset 
-              << " is_ask: " << is_ask
-              << std::endl;
+    LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
+            + ", bias_price: " + price.get_str_value() 
+            + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
+            + ", bias_value: " + std::to_string(config.OtcOffset));
 
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
@@ -1235,49 +1057,45 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
     return true;
 }
 
-QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double amount, double turnover, SDecimal& price)
+QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
 {
-    _log_and_print("[otc_query] %s.%s direction=%s amount=%s turnover=%s", exchange, symbol, direction, amount, turnover);
+
+    string direction_str = direction==QuoteRequest_Direction_BUY?"buy":"sell";
+    LOG_INFO("[otc_query] " + exchange + "." + symbol 
+            + ", direction=" + direction_str
+            + ", volume=" + std::to_string(volume)
+            + ", amount=" + std::to_string(amount));
+
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     auto iter = last_datas_.find(symbol);
 
-    for (auto iter:last_datas_)
+    if(iter == last_datas_.end())
     {
-        cout << iter.first << endl;
-    }
-    cout << "last_datas_.size: " << last_datas_.size() << endl;
-
-    if( iter == last_datas_.end() )
+        LOG_WARN("OTC Request Symbol " + symbol + " has no data");
         return QuoteResponse_Result_WRONG_SYMBOL;
-
+    }
+        
     SInnerQuote& quote = iter->second;
-
-    // std::cout << "\n*****Config Info: " << symbol << endl;
-    // std::cout << params_.cache_config[symbol].desc() << std::endl;
 
     LOG_DEBUG("\n OTC Quote Data");
     print_quote(quote);
 
-    if( amount > 0 )
+    if( volume > 0 )
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            cout << "Compute "<< symbol << " Amount " <<  amount  << " buy " << endl;
-            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
+            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol], volume, price, quote.precise);
         } else {
-            cout << "Compute "<< symbol << " Amount " <<  amount  << " sell " << endl;
-            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol], amount, price, quote.precise);   
+            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol], volume, price, quote.precise);   
         }
     } 
     else
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            cout << "Compute "<< symbol << " turnover" <<  turnover << " buy " << endl;
-            return _calc_otc_by_turnover(quote.asks, true, params_.cache_config[symbol], turnover, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
         } else { 
-            cout << "Compute "<< symbol << " turnover" <<  turnover << " sell " << endl;
-            return _calc_otc_by_turnover(quote.bids, false, params_.cache_config[symbol], turnover, price, quote.precise);
+            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol], amount, price, quote.precise);
         }
     }
 

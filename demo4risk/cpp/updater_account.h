@@ -1,7 +1,8 @@
 #pragma once
 
 #include "base/cpp/grpc_client.h"
-#include "account.grpc.pb.h"
+#include "data_struct/data_struct.h"
+#include "global_declare.h"
 #include "risk_controller_config.h"
 
 using grpc::ClientReader;
@@ -11,57 +12,6 @@ using asset::service::v1::Asset;
 using asset::service::v1::AccountStreamData;
 using asset::service::v1::AccountData;
 
-struct CurrencyInfo {
-    double amount;
-};
-
-struct HedgeAccountInfo
-{
-    unordered_map<TSymbol, CurrencyInfo> currencies;
-
-    HedgeAccountInfo() {
-    }
-};
-
-struct UserAccountInfo
-{
-    unordered_map<TSymbol, CurrencyInfo> currencies;
-
-    UserAccountInfo() {
-    }
-};
-
-struct AccountInfo
-{
-    unordered_map<TExchange, HedgeAccountInfo> hedge_accounts_;
-    UserAccountInfo user_account_;
-
-    double get_user_amount(const string& currency) const {
-        return 0;
-    }
-    
-    double get_hedge_amount(const string& currency) const {
-        double total = 0;
-        for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
-            const HedgeAccountInfo& hedge = iter->second;
-            auto iter2 = hedge.currencies.find(currency);
-            if( iter2 != hedge.currencies.end() ) {
-                total += iter2->second.amount;
-            }
-        }
-        return total;
-    }
-
-    void get_hedge_amounts(const string& currency, double percent, unordered_map<TExchange, double>& amounts) const {
-        for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
-            const HedgeAccountInfo& hedge = iter->second;
-            auto iter2 = hedge.currencies.find(currency);
-            if( iter2 != hedge.currencies.end() ) {
-                amounts[iter->first] = iter2->second.amount * percent / 100;
-            }
-        }
-    }
-};
 
 class IAccountUpdater {
 public:

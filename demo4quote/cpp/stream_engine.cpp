@@ -2,6 +2,7 @@
 #include "stream_engine_config.h"
 #include "redis_quote.h"
 #include "Log/log.h"
+#include "util/tool.h"
 
 #define MODE_REALTIME "realtime"
 #define MODE_REPLAY "replay"
@@ -89,23 +90,6 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 
     LOG->record_output_info(string("depth_snap_") + exchange + "_" + symbol, quote);
     
-    if(string(symbol) == "USDT_USD" ) 
-    {
-       std::stringstream s_s;
-       s_s << "\nupdate: " << exchange << "." << symbol << ", ask: " << quote.asks.size() << ", bid: " << quote.bids.size() << "\n"
-           << "ask_info: \n";
-       for(auto& iter:quote.asks)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
-       }
-       s_s << "bid_info: \n";
-       for(auto& iter:quote.bids)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
-       }      
-       LOG_DEBUG(s_s.str()); 
-    }
-
     quote_cacher_.on_snap(exchange, symbol, quote);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
@@ -119,23 +103,6 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
 
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
-
-    if(string(symbol) == "USDT_USD" ) 
-    {
-       std::stringstream s_s;
-       s_s << "update: " << exchange << ", ask: " << snap.asks.size() << ", bid: " << snap.bids.size() << "\n"
-           << "ask_info: \n";
-       for(auto& iter:snap.asks)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
-       }
-       s_s << "bid_info: \n";
-       for(auto& iter:snap.bids)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
-       }      
-       LOG_DEBUG(s_s.str()); 
-    }
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
         quote_mixer2_.on_snap(exchange, symbol, snap);

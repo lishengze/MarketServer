@@ -3,6 +3,7 @@
 #include "stream_engine_define.h"
 #include "grpc_server.h"
 #include "stream_engine_config.h"
+#include "Log/log.h"
 
 using FuncAddDepth2 = std::function<DepthWithDecimal*()>;
 
@@ -49,7 +50,8 @@ inline std::shared_ptr<MarketStreamDataWithDecimal> mixquote_to_pbquote2(const s
     return msd;
 };
 */
-inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDepth>& depths, FuncAddDepth2 func, uint32 depths_limit, bool is_ask)
+inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol, const map<SDecimal, SDepth>& depths, 
+                                    FuncAddDepth2 func, uint32 depths_limit, bool is_ask)
 {
     if( is_ask ) {
         uint32 count = 0;
@@ -57,6 +59,15 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
             DepthWithDecimal* depth = func();
             set_decimal(depth->mutable_price(), iter->first);
             set_decimal(depth->mutable_volume(), iter->second.volume);
+
+            // if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
+            // {
+            //     LOG_DEBUG(iter->first.get_str_value() 
+            //             + ": base" + std::to_string(iter->second.volume.data_.real_.value_)
+            //             + ". precise: " + std::to_string(iter->second.volume.data_.real_.prec_)
+            //             + ". value: " + iter->second.volume.get_str_value());
+            // }
+                    
             for(const auto &v : iter->second.volume_by_exchanges) {
                 Decimal tmp;
                 set_decimal(&tmp, v.second);
@@ -78,7 +89,8 @@ inline void depth_to_pbquote2_depth(const string& exchange, const string& symbol
     }
 }
 
-inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, const SDepthQuote& src, uint32 depths_limit, bool is_snap)
+inline std::shared_ptr<MarketStreamDataWithDecimal> depth_to_pbquote2(const string& exchange, const string& symbol, 
+                                                                    const SDepthQuote& src, uint32 depths_limit, bool is_snap)
 {
     std::shared_ptr<MarketStreamDataWithDecimal> msd = std::make_shared<MarketStreamDataWithDecimal>();
     msd->set_exchange(exchange);

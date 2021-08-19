@@ -2,6 +2,9 @@
 #include "quote_mixer2.h"
 #include "converter.h"
 
+#include "Log/log.h"
+#include "util/tool.h"
+
 void set_static_variable(const TExchange& exchange, const TSymbol& symbol, const type_tick& origin_time)
 {
     if( string(exchange) == "HUOBI" && string(symbol) == "BTC_USDT" ) {
@@ -100,9 +103,20 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         singles_[symbol][exchange] = quote;
     }
     
+    if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
+    {
+        LOG_DEBUG("QuoteCacher::on_snap");
+        print_quote(quote);
+    }
+
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
 
-    // cout << "QuoteCacher::on_snap " << quote.str() << endl;
+    if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
+    {
+        LOG_DEBUG("MarketStreamDataWithDecimal");
+        print_sedata(*pub_snap.get());
+    }
+
 
     for( const auto& v : callbacks_) 
     {

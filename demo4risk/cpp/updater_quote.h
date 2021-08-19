@@ -1,21 +1,8 @@
 #pragma once
 
 #include "base/cpp/grpc_client.h"
-#include "stream_engine.grpc.pb.h"
-#include "risk_controller_config.h"
-#include "updater_configuration.h"
-
-using grpc::ClientReader;
-using grpc::ClientReaderWriter;
-using grpc::ClientWriter;
-using quote::service::v1::StreamEngine;
-using quote::service::v1::SubscribeQuoteReq;
-using quote::service::v1::SubscribeMixQuoteReq;
-using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
-using SEData = quote::service::v1::MarketStreamDataWithDecimal;
-using SEDepth = quote::service::v1::DepthWithDecimal;
-using SEDecimal = quote::service::v1::Decimal;
-using quote::service::v1::DataInBinary;
+#include "global_declare.h"
+#include "Log/log.h"
 
 
 class IQuoteUpdater {
@@ -49,23 +36,23 @@ private:
         std::unique_ptr<ClientReader<DataInBinary> > reader(stub->SubscribeQuoteInBinary(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                _log_and_print("status is GRPC_CHANNEL_IDLE");
+                LOG_INFO("status is GRPC_CHANNEL_IDLE");
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                _log_and_print("status is GRPC_CHANNEL_CONNECTING");
+                LOG_INFO("status is GRPC_CHANNEL_CONNECTING");
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                _log_and_print("status is GRPC_CHANNEL_READY");
+                LOG_INFO("status is GRPC_CHANNEL_READY");
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                _log_and_print("status is GRPC_CHANNEL_TRANSIENT_FAILURE");
+                LOG_INFO("status is GRPC_CHANNEL_TRANSIENT_FAILURE");
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                _log_and_print("status is GRPC_CHANNEL_SHUTDOWN");
+                LOG_INFO("status is GRPC_CHANNEL_SHUTDOWN");
                 break;
             }
         }
@@ -84,9 +71,9 @@ private:
         }*/
         Status status = reader->Finish();
         if (status.ok()) {
-            _log_and_print("MultiSubscribeQuote rpc succeeded.");
+            LOG_INFO("MultiSubscribeQuote rpc succeeded.");
         } else {
-            _log_and_print("MultiSubscribeQuote rpc failed.");
+            LOG_WARN("MultiSubscribeQuote rpc failed.");
         }
     }
 
@@ -119,7 +106,6 @@ private:
             } else if( datatype == QUOTE_TYPE_TRADE ) {
             }
             startpos = pos2 + 1 + length;
-            //cout << startpos << ", " << data.size() << endl;
         } 
         return true;
     }

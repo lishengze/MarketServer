@@ -1,30 +1,7 @@
 #pragma once
 
 #include "risk_controller_define.h"
-
-struct SOrder {
-    long long order_id; // 系统内的订单唯一ID
-    SDecimal price; // 下单价格
-    double volume;  // 下单量
-    bool is_buy; // 买卖方向
-    long long begin_time; // 对冲开始时间
-    long long end_time; // 对冲完成时间
-
-    SOrder() {
-        volume = 0;
-        begin_time = 0;
-        end_time = 0;
-    }
-};
-
-struct SOrderPriceLevel {
-    SDecimal price;
-    double volume;
-
-    SOrderPriceLevel() {
-        volume = 0;    
-    }
-};
+#include "../data_struct/data_struct.h"
 
 class IOrderUpdater {
 public:

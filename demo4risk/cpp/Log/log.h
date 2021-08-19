@@ -5,12 +5,6 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/log/base_log.h"
 
-#include "../updater_quote.h"
-
-// class SEData;
-// class Trade;
-// class KlineData;
-
 class RiskLog:public BaseLog 
 {
 public:

@@ -81,6 +81,12 @@
         "regex": "cpp",
         "shared_mutex": "cpp",
         "base_data.h": "c",
-        "updater_order.h": "c"
+        "updater_order.h": "c",
+        "log.h": "c",
+        "global_declare.h": "c",
+        "data_struct.h": "c",
+        "strstream": "cpp",
+        "cfenv": "cpp",
+        "risk_controller.pb.h": "c"
     }
 }
