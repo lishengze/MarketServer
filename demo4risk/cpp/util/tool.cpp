@@ -33,17 +33,24 @@ void print_quote(const SInnerQuote& quote)
     //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     // }  
 
-    s_s << "------------- asks info \n";
-    for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+    if (quote.asks.size() > 0)
     {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        s_s << "------------- asks info \n";
+        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        {
+            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        }
     }
 
-    s_s << "************* bids info \n";
-    for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+    if (quote.bids.size() > 0)
     {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-    }    
+        s_s << "************* bids info \n";
+        for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+        {
+            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+        }    
+    }
+
 
     LOG_DEBUG(s_s.str());
 }
