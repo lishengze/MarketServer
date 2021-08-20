@@ -101,7 +101,7 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     {
         LOG_DEBUG(symbol + " Original Data");
         print_quote(quote);   
-        LOG_WARN( "After depth_to_pbquote2" + symbol + ", ask.size: " + std::to_string(quote.asks.size())
+        LOG_WARN( "Original Data " + symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;       
         return;      
     }
@@ -131,10 +131,10 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     {
         LOG_DEBUG(symbol + " Original Data");
         print_quote(quote);   
-                
+
         LOG_DEBUG(symbol + " After depth_to_pbquote2");
         print_sedata(*pub_snap.get());      
-        LOG_WARN( "After depth_to_pbquote2" + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
+        LOG_WARN( "After depth_to_pbquote2 " + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
                 + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
         return;       
     }
