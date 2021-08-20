@@ -94,29 +94,47 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
     }
 }
 
-void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
+void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& ori_quote) 
 {
-    set_static_variable(exchange, symbol, quote.origin_time);
+    SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
+    if (filter_zero_volume(quote))
+    {
+        LOG_DEBUG(symbol + " After depth_to_pbquote2");
+        print_quote(quote);   
+        LOG_WARN( "After depth_to_pbquote2" + symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                + ", bid.size: " + std::to_string(quote.bids.size())) ;       
+        return;      
+    }
 
+    set_static_variable(exchange, symbol, quote.origin_time);
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
         singles_[symbol][exchange] = quote;
     }
     
-    if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
-    {
-        LOG_DEBUG("QuoteCacher::on_snap");
-        print_quote(quote);
-    }
+    // if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
+    // {
+    //     LOG_DEBUG("QuoteCacher::on_snap");
+    //     print_quote(quote);
+    // }
+
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
 
-    if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
-    {
-        LOG_DEBUG("MarketStreamDataWithDecimal");
-        print_sedata(*pub_snap.get());
-    }
+    // if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
+    // {
+    //     LOG_DEBUG("MarketStreamDataWithDecimal");
+    //     print_sedata(*pub_snap.get());
+    // }
 
+    if (filter_zero_volume(*pub_snap.get()))
+    {
+        LOG_DEBUG(symbol + " After depth_to_pbquote2");
+        print_sedata(*pub_snap.get());      
+        LOG_WARN( "After depth_to_pbquote2" + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
+                + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
+        return;       
+    }
 
     for( const auto& v : callbacks_) 
     {

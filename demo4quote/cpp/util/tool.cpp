@@ -1,33 +1,88 @@
 #include "tool.h"
 #include "../Log/log.h"
+#include "pandora/util/float_util.h"
+
+bool filter_zero_volume(SDepthQuote& quote)
+{
+    try
+    {
+        bool result = false;
+        std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
+        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        {
+            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+            {
+                delete_iter_list.push_back(iter);
+            }
+        }
+
+        for (auto& iter:delete_iter_list)
+        {
+            quote.asks.erase(iter);
+        }
+
+        delete_iter_list.clear();
+        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+        {
+            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+            {
+                delete_iter_list.push_back(iter);
+            }    
+        }
+        for (auto& iter:delete_iter_list)
+        {
+            quote.bids.erase(iter);
+        }
+
+        if (quote.asks.size()==0 || quote.bids.size()==0)
+        {
+            result = true;
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
 
 void print_quote(const SDepthQuote& quote)
 {
     try
     {
        std::stringstream s_s;
-       s_s << "\n" << quote.exchange << "." << quote.symbol << ", ask: " << quote.asks.size() << ", bid: " << quote.bids.size() << "\n"
-           << "ask_info: \n";
-       for(auto& iter:quote.asks)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+       s_s << "\n" << quote.exchange << "." << quote.symbol << ", ask: " << quote.asks.size() << ", bid: " << quote.bids.size() << "\n";
 
-            // for (auto iter2:iter.second.volume_by_exchanges)
-            // {
-            //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
-            // }
+       
+        if (quote.asks.size() > 0)
+        {
+             s_s << "------------- asks info \n";
+            for(auto& iter:quote.asks)
+            {
+                s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
 
-       }
-       s_s << "bid_info: \n";
-       for(auto& iter:quote.bids)
-       {
-           s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+                    // for (auto iter2:iter.second.volume_by_exchanges)
+                    // {
+                    //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                    // }
 
-            // for (auto iter2:iter.second.volume_by_exchanges)
-            // {
-            //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
-            // }           
-       }      
+            }
+        }
+
+        if (quote.bids.size() > 0)
+        {
+            s_s << "------------- bid_info: \n";
+            for(auto& iter:quote.bids)
+            {
+                s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+
+                    // for (auto iter2:iter.second.volume_by_exchanges)
+                    // {
+                    //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                    // }           
+            }      
+        }
+
        LOG_DEBUG(s_s.str()); 
     }
     catch(const std::exception& e)
@@ -155,27 +210,34 @@ void print_inner_quote(const SInnerQuote& quote)
 {
     std::stringstream s_s;
     s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
-    s_s << "------------- asks info \n";
-    for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-    {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
 
-        // for (auto iter2:iter->second.exchanges)
-        // {
-        //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
-        // }
-        
+    if (quote.asks.size() > 0)
+    {
+        s_s << "------------- asks info \n";
+        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        {
+            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
+
+            // for (auto iter2:iter->second.exchanges)
+            // {
+            //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+            // }
+            
+        }
     }
 
-    s_s << "************* bids info \n";
-    for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+    if (quote.bids.size() > 0)
     {
-        s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
+        s_s << "************* bids info \n";
+        for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+        {
+            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
 
-        // for (auto iter2:iter->second.exchanges)
-        // {
-        //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
-        // }        
+            // for (auto iter2:iter->second.exchanges)
+            // {
+            //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+            // }        
+        }    
     }    
 
     LOG_DEBUG(s_s.str());
@@ -196,4 +258,51 @@ void print_sedata(const SEData& sedata)
         std::cerr << e.what() << '\n';
     }
 
+}
+
+bool filter_zero_volume(SEData& sedata)
+{
+    try
+    {
+        SInnerQuote quote;
+        quotedata_to_innerquote(sedata, quote);
+
+        bool result = false;
+        std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
+        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        {
+            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+            {
+                delete_iter_list.push_back(iter);
+            }
+        }
+
+        for (auto& iter:delete_iter_list)
+        {
+            quote.asks.erase(iter);
+        }
+
+        delete_iter_list.clear();
+        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+        {
+            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+            {
+                delete_iter_list.push_back(iter);
+            }    
+        }
+        for (auto& iter:delete_iter_list)
+        {
+            quote.bids.erase(iter);
+        }
+
+        if (quote.asks.size()==0 || quote.bids.size()==0)
+        {
+            result = true;
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
 }

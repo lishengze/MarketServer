@@ -96,8 +96,7 @@ bool filter_zero_volume(SInnerQuote& quote)
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-    }
-    
+    }    
 }
 
 string get_work_dir_name(string path)

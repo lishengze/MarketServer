@@ -544,17 +544,17 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter->second.total_volume > ask_amount)
                 {
-                    LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
-                            + ", amount: " + iter->second.total_volume.get_str_value() 
-                            + ", minus " + std::to_string(ask_amount));
+                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                    //         + ", amount: " + iter->second.total_volume.get_str_value() 
+                    //         + ", minus " + std::to_string(ask_amount));
                     iter->second.total_volume -= ask_amount;
                     break;
                 }
                 else
                 {
-                    LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
-                            + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
-                            + ", ask_amount " + std::to_string(ask_amount));
+                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                    //         + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
+                    //         + ", ask_amount " + std::to_string(ask_amount));
                     ask_amount -= iter->second.total_volume.get_value();
                     iter->second.total_volume = 0;
                     delete_price.push_back(iter->first);
@@ -577,18 +577,18 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 if (iter.second.total_volume > bid_amount)
                 {
-                    LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
-                            + ", amount: " + iter.second.total_volume.get_str_value() 
-                            + ", minus " + std::to_string(bid_amount));
+                    // LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
+                    //         + ", amount: " + iter.second.total_volume.get_str_value() 
+                    //         + ", minus " + std::to_string(bid_amount));
 
                     iter.second.total_volume -= bid_amount;
                     break;
                 }
                 else
                 {
-                    LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
-                            + ", is deleted, delete amount: " + iter.second.total_volume.get_str_value() 
-                            + ", bid_amount " + std::to_string(bid_amount));
+                    // LOG_DEBUG(src.symbol + " bid_price: " + iter.first.get_str_value() 
+                    //         + ", is deleted, delete amount: " + iter.second.total_volume.get_str_value() 
+                    //         + ", bid_amount " + std::to_string(bid_amount));
 
                     bid_amount -= iter.second.total_volume.get_value();
                     iter.second.total_volume = 0;
