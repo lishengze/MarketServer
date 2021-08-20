@@ -391,7 +391,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     {
         LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
         print_quote(src);        
-        LOG_WARN("After WatermarkComputerWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
+        LOG_WARN("After WatermarkComputerWorker " + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
                 + ", bid.size: " + std::to_string(src.bids.size())) ;        
     }
 
@@ -608,7 +608,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
         LOG_DEBUG(src.symbol + " After OrderBookWorker");
         print_quote(src);        
-        LOG_WARN( "After OrderBookWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
+        LOG_WARN( "After OrderBookWorker " + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
                 + ", bid.size: " + std::to_string(src.bids.size())) ;             
     }    
 
@@ -794,8 +794,9 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     {
         LOG_DEBUG(quote.symbol + " After _publish_quote");
         print_quote(quote);        
-        LOG_WARN("After _publish_quote" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
-                + ", bid.size: " + std::to_string(quote.bids.size())) ;        
+        LOG_WARN("After _publish_quote " + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                + ", bid.size: " + std::to_string(quote.bids.size())) ;      
+        return;  
     }    
 
     
