@@ -66,7 +66,7 @@ private:
                 std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
                 for( int i = 0 ; i < multiAccount.account_data_size() ; ++ i ) {
                     const AccountData& account = multiAccount.account_data(i);
-                    LOG_INFO("update accout: "+  account.exchange_id() + "." + account.currency() + std::to_string(account.available()));
+                    LOG_INFO("update accout: "+  account.exchange_id() + "." + account.currency() + " " +   std::to_string(account.available()));
                     account_.hedge_accounts_[account.exchange_id()].currencies[account.currency()].amount = account.available();
                 }
             }            
