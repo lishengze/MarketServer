@@ -17,8 +17,6 @@ ServerEngine::~ServerEngine()
 
 void ServerEngine::launch()
 {
-    LOG->start();
-
     data_receiver_->launch();
     data_processer_->launch();
     front_server_->launch();

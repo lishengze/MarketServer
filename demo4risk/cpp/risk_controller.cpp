@@ -48,9 +48,7 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
 }
 
 RiskControllerServer::RiskControllerServer(std::string config_file_name)
-{
-    LOG->start();
-    
+{   
     // load config here...
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file_name);

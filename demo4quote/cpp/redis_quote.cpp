@@ -155,8 +155,6 @@ void RedisQuote::init(QuoteSourceCallbackInterface* callback, const RedisParams&
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{logger}};
     redis_api_->RegisterSpi(this);
     redis_api_->RegisterRedis(params.host, params.port, params.password, utrade::pandora::RM_Subscribe);
-
-    LOG->start();
 }
 
 void RedisQuote::init_replay(QuoteSourceCallbackInterface* callback, int ratio, int replicas)

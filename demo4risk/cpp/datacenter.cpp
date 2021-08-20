@@ -131,9 +131,6 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                             depth.mix_exchanges(fake, 0, 1);
                         }
                     }
-
-
-
                 } else {
                     break;
                 }
@@ -394,6 +391,8 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     {
         LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
         print_quote(src);        
+        LOG_WARN("After WatermarkComputerWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
+                + ", bid.size: " + std::to_string(src.bids.size())) ;        
     }
 
     // if(src.symbol == "USDT_USD" ) 
@@ -513,6 +512,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     {
         LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
         print_quote(src);        
+        LOG_WARN( "After AccountAjdustWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
+                + ", bid.size: " + std::to_string(src.bids.size())) ;            
     }
 
     // if(src.symbol == "USDT_USD" ) 
@@ -607,6 +608,8 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
         LOG_DEBUG(src.symbol + " After OrderBookWorker");
         print_quote(src);        
+        LOG_WARN( "After OrderBookWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
+                + ", bid.size: " + std::to_string(src.bids.size())) ;             
     }    
 
     // if(src.symbol == "USDT_USD" ) 
@@ -665,7 +668,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     {
         LOG_DEBUG(quote.symbol + " raw quote");
         print_quote(quote);       
-        LOG_WARN(quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+        LOG_WARN("ori_data" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;
         return;
     }    
@@ -696,9 +699,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 };
 
 void DataCenter::change_account(const AccountInfo& info)
-{
-    tfm::printfln("change_account");
-    
+{   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.cache_account = info;
     _push_to_clients();
@@ -793,6 +794,8 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     {
         LOG_DEBUG(quote.symbol + " After _publish_quote");
         print_quote(quote);        
+        LOG_WARN("After _publish_quote" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                + ", bid.size: " + std::to_string(quote.bids.size())) ;        
     }    
 
     
@@ -809,12 +812,6 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     // send to clients
     std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
     innerquote_to_msd3(newQuote, ptrData2.get(), true);   
-
-    if (quote.symbol == "USDT_USD")
-    {
-        LOG_DEBUG("\n Publish For Broker Quote Data " + quote.symbol);
-        print_quote(newQuote);        
-    }
 
     LOG->record_output_info("Client_" + quote.symbol + "_" + quote.exchange);
 

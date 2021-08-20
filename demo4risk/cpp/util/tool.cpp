@@ -92,3 +92,46 @@ bool filter_zero_volume(SInnerQuote& quote)
     }
     
 }
+
+string get_work_dir_name(string path)
+{
+    try
+    {
+        string result = "";
+
+        string::size_type i = path.find_last_of("/") + 1;
+
+        if (i != string::npos)
+        {
+            result = path.substr(0, i);
+        }
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+string get_program_name(string path)
+{
+    try
+    {
+        string result = path;
+
+        string::size_type i = path.find_last_of("/") + 1;
+
+        if (i != string::npos)
+        {
+            result = path.substr(i, path.size()-i);
+        }
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}

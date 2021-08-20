@@ -6,3 +6,7 @@
 void print_quote(const SInnerQuote& quote);
 
 bool filter_zero_volume(SInnerQuote& quote);
+
+string get_work_dir_name(string program_full_name);
+
+string get_program_name(string program_full_name);

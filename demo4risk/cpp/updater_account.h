@@ -4,6 +4,7 @@
 #include "data_struct/data_struct.h"
 #include "global_declare.h"
 #include "risk_controller_config.h"
+#include "Log/log.h"
 
 using grpc::ClientReader;
 using grpc::ClientReaderWriter;
@@ -39,34 +40,33 @@ private:
         std::unique_ptr<ClientReader<AccountStreamData> > reader(stub->GetAccountStream(&context, req));
         switch(channel->GetState(true)) {
             case GRPC_CHANNEL_IDLE: {
-                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_IDLE");
+                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_IDLE");
                 break;
             }
             case GRPC_CHANNEL_CONNECTING: {                
-                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_CONNECTING");
+                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_CONNECTING");
                 break;
             }
             case GRPC_CHANNEL_READY: {           
-                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_READY");
+                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_READY");
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE");
+                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE");
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
-                _log_and_print("AccountUpdater: status is GRPC_CHANNEL_SHUTDOWN");
+                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_SHUTDOWN");
                 break;
             }
         }
 
         while (reader->Read(&multiAccount)) {
             {
-                _log_and_print("\nAccountUpdater Read Data ");
                 std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
                 for( int i = 0 ; i < multiAccount.account_data_size() ; ++ i ) {
                     const AccountData& account = multiAccount.account_data(i);
-                    _log_and_print("update account %s.%s: %.03f", account.exchange_id().c_str(), account.currency().c_str(), account.available());
+                    LOG_INFO("update accout: "+  account.exchange_id() + "." + account.currency() + std::to_string(account.available()));
                     account_.hedge_accounts_[account.exchange_id()].currencies[account.currency()].amount = account.available();
                 }
             }            
