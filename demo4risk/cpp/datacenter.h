@@ -10,6 +10,8 @@
 #include "Log/log.h"
 
 #include "data_struct/data_struct.h"
+#include "util/tool.h"
+#include "Log/log.h"
 
 
 // 流水线模型
@@ -31,22 +33,44 @@ public:
         this->next_ = w;
     }
 
+    // SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
+    //     if( next_ ) {
+    //         SInnerQuote& tmp = this->process(src, ctx);
+    //         return next_->run(tmp, ctx);
+    //     } else {
+    //         return this->process(src, ctx);
+    //     }
+    // }
+
+
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
-        if( next_ ) {
-            SInnerQuote& tmp = this->process(src, ctx);
+        SInnerQuote tmp = this->process(src, ctx);
+
+        if (filter_zero_volume(tmp))
+        {
+            LOG_WARN("\n" + tmp.symbol + " After " + worker_name + " \n" + quote_str(tmp));  
+            return tmp;  
+        }            
+
+        if( next_ ) {            
             return next_->run(tmp, ctx);
         } else {
-            return this->process(src, ctx);
+            return tmp;
         }
     }
 
+
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx) = 0;
+
+    string worker_name{""};
 private:
     Worker *next_ = nullptr;
 };
 
 class DefaultWorker : public Worker
 {
+public:
+    DefaultWorker() { worker_name = "DefaultWorker";}
 private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
@@ -81,6 +105,8 @@ public:
         assert( head_ != NULL );
         
         SInnerQuote tmp = quote;
+
+        
         newQuote = head_->run(tmp, ctx);
     }
 private:
@@ -92,6 +118,8 @@ private:
 // worker：处理订单簿风控
 class QuoteBiasWorker : public Worker
 {
+public:
+    QuoteBiasWorker() { worker_name = "QuoteBiasWorker";}
 private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
@@ -130,6 +158,7 @@ private:
 class AccountAjdustWorker: public Worker
 {
 public:
+    AccountAjdustWorker() { worker_name = "AccountAjdustWorker";}
     void set_snap(const SInnerQuote& quote);
 private:
     // cache
@@ -144,6 +173,8 @@ private:
 // worker：处理订单簿风控
 class OrderBookWorker : public Worker
 {
+    public:
+    OrderBookWorker() { worker_name = "OrderBookWorker";}
 private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
