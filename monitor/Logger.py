@@ -3,6 +3,8 @@ import logging.handlers
 import datetime
 import time
 
+def get_datetime_str():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 class Logger(object):
     def __init__(self, all_file_Name="log/all.log", error_file_name="log/error.log"):
@@ -13,24 +15,33 @@ class Logger(object):
         self._logger = logging.getLogger('user_logger')
         self._logger.setLevel(logging.DEBUG)
 
+        all_file_Name = "log/"+get_datetime_str()+"_info.log"
+        error_file_name = "log/"+get_datetime_str()+"_warn.log"
+
         # detail_handler = logging.handlers.TimedRotatingFileHandler('log/all.log', when='midnight', interval=1, backupCount=7, atTime=datetime.time(0, 0, 0, 0))
 
-        detail_handler = logging.handlers.RotatingFileHandler(all_file_Name, maxBytes=8*1024*1024*500, backupCount=3)
+        detail_handler = logging.handlers.TimedRotatingFileHandler(all_file_Name, when='midnight', interval=1, backupCount=5, atTime=datetime.time(0, 0, 0, 0))
         
         detail_handler.setFormatter(logging.Formatter("%(asctime)s-%(levelname)s-%(filename)s[:%(lineno)d]-%(message)s"))
 
-        # error_handler = logging.FileHandler('log/error.log')
-
-        error_handler = logging.handlers.RotatingFileHandler(error_file_name, maxBytes=8*1024*1024*500, backupCount=3)
-
+        error_handler = logging.handlers.TimedRotatingFileHandler(error_file_name, when='midnight', interval=1, backupCount=5, atTime=datetime.time(0, 0, 0, 0))
         error_handler.setLevel(logging.WARNING)
         error_handler.setFormatter(logging.Formatter(fmt="%(asctime)s-%(levelname)s-%(filename)s[:%(lineno)d]-%(message)s"))
 
         self._logger.addHandler(detail_handler)
-        self._logger.addHandler(error_handler)        
+        self._logger.addHandler(error_handler)       
+
+        self._debug_logger = logging.getLogger('debug_logger')
+        self._debug_logger.setLevel(logging.DEBUG)         
+
+        debug_handler = logging.handlers.TimedRotatingFileHandler("log/"+get_datetime_str()+"_debug.log", when='midnight', interval=1, backupCount=5, atTime=datetime.time(0, 0, 0, 0))
+        debug_handler.setLevel(logging.DEBUG)
+        debug_handler.setFormatter(logging.Formatter(fmt="%(asctime)s-%(levelname)s-%(filename)s[:%(lineno)d]-%(message)s"))
+
+        self._debug_logger.addHandler(debug_handler)
 
     def Debug(self, info):
-        self._logger.debug(info)
+        self._debug_logger.debug(info)
 
     def Info(self, info):
         self._logger.info(info)

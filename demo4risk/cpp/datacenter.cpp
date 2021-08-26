@@ -516,13 +516,6 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 + ", bid.size: " + std::to_string(src.bids.size())) ;            
     }
 
-    // if(src.symbol == "USDT_USD" ) 
-    // {
-    //     LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
-    //     print_quote(src);
-    // }
-
-
     return src;
 }
 

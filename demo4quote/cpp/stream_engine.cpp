@@ -81,12 +81,6 @@ void StreamEngine::start()
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
-    // if( string(exchange) == MIX_EXCHANGE_NAME && string(symbol) == "BTC_USDT" ) {
-    //    tfm::printfln("StreamEngine: %s.%s ask/bid %lu/%lu", exchange, symbol, quote.asks.size(), quote.bids.size());
-    //    std::cout << "StreamEngine::on_snap " << exchange << " " << symbol << " " << quote.asks.size() << "/" << quote.bids.size() << std::endl;
-    // }
-
-    // string log_info = string("depth_snap_") + exchange + "_" + symbol;
 
     LOG->record_output_info(string("depth_snap_") + exchange + "_" + symbol, quote);
     
@@ -105,6 +99,13 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
     quote_cacher_.on_update(exchange, symbol, quote, snap);
 
     if( exchange != MIX_EXCHANGE_NAME  ) {
+
+        // if (symbol == "ETH_BTC")
+        // {
+        //     LOG_DEBUG(exchange + "." + symbol + " Original Update Data");
+        //     print_quote(quote);     
+        // }
+                
         quote_mixer2_.on_snap(exchange, symbol, snap);
     }
 };

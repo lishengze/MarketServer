@@ -157,6 +157,13 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
         update_depth_diff(update.asks, cache.asks);        
         update_depth_diff(update.bids, cache.bids);
         snap = cache;
+
+        if (symbol == "ETH_BTC")
+        {
+            LOG_DEBUG(exchange + "." + symbol + " QuoteCacher::on_update To Snap");
+            print_quote(snap);     
+        }    
+
     }
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_diff;
@@ -196,8 +203,7 @@ void QuoteMixer2::start()
 void QuoteMixer2::_thread_loop()
 {
     unordered_map<TSymbol, type_seqno> sequences;
-
-    cout << "\nQuoteMixer2::_thread_loop Start " << endl;
+    LOG_INFO("\nQuoteMixer2::_thread_loop Start ");
     while( thread_run_ ) 
     {
         vector<pair<TSymbol, SMixerConfig>> calculate_symbols;
@@ -278,27 +284,35 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         for( const auto& data : quotes_[symbol] ) 
         {
             const TExchange& exchange = data.first;
-            const SDepthQuote& quote = data.second;
+            const SDepthQuote& ori_quote = data.second;
+            SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
+
+            if (filter_zero_volume(quote))
+            {
+                LOG_WARN( "_calc_symbol " + exchange + "." + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                        + ", bid.size: " + std::to_string(quote.bids.size()));  
+                continue;
+            }
+
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
             mix_quote(snap.asks, quote.asks, exchange, config, true);
             mix_quote(snap.bids, quote.bids, exchange, config, false);
         }
     }
+
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG(MIX_EXCHANGE_NAME + "." + symbol + " _calc_symbol");
+    //     print_quote(snap);           
+    // }
+
     normalize(snap.asks, config);
     normalize(snap.bids, config);
 
     if( snap.origin_time > 0 ) {
-        //if( (get_miliseconds() / 1000 % 10) == 0 ) { // 每10秒输出一次
-        //    _log_and_print("publish %s.%s %u/%u", MIX_EXCHANGE_NAME, symbol, snap.asks.size(), snap.bids.size());
-        //}
-
         snap.symbol = symbol;
         snap.exchange = MIX_EXCHANGE_NAME;        
-        // tfm::printfln("QuoteMixer2::_calc_symbol %s ", snap.str().c_str());
-
-        // cout << "QuoteMixer2::_calc_symbol: " << snap.str() << endl;
-
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
     }
     else
@@ -332,6 +346,13 @@ void QuoteMixer2::on_trade(const TExchange& exchange, const TSymbol& symbol, con
 void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    
+    if (symbol == "ETH_BTC")
+    {
+        LOG_DEBUG(exchange + "." + symbol + " Original Snap Data");
+        print_quote(quote);                 
+    }
+
     // cout << "QuoteMixer2::on_snap: " << quote.str() << endl;
     quotes_[symbol][exchange] = quote;
 }

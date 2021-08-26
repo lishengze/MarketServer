@@ -34,7 +34,7 @@ bool filter_zero_volume(SDepthQuote& quote)
             quote.bids.erase(iter);
         }
 
-        if (quote.asks.size()==0 || quote.bids.size()==0)
+        if (quote.asks.size()==0 && quote.bids.size()==0)
         {
             result = true;
         }
@@ -295,7 +295,7 @@ bool filter_zero_volume(SEData& sedata)
             quote.bids.erase(iter);
         }
 
-        if (quote.asks.size()==0 || quote.bids.size()==0)
+        if (quote.asks.size()==0 && quote.bids.size()==0)
         {
             result = true;
         }

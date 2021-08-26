@@ -87,7 +87,7 @@ bool filter_zero_volume(SInnerQuote& quote)
             quote.bids.erase(iter);
         }
 
-        if (quote.asks.size()==0 || quote.bids.size()==0)
+        if (quote.asks.size()==0 && quote.bids.size()==0)
         {
             result = true;
         }

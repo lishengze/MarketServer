@@ -76,9 +76,9 @@ private:
 
         Status status = reader->Finish();
         if (status.ok()) {
-            _log_and_print("AccountUpdater rpc succeeded.");
+            LOG_INFO("AccountUpdater rpc succeeded.");
         } else {
-            _log_and_print("AccountUpdater rpc failed.");
+            LOG_WARN("AccountUpdater rpc failed.");
         }
     }
 
