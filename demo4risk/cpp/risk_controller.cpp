@@ -91,12 +91,6 @@ void RiskControllerServer::on_snap(const SEData& quote)
 
     LOG->record_input_info("depth_" + quote.exchange() + "_" + quote.symbol(), quote);
 
-    // if(raw.symbol == "USDT_USD" ) 
-    // {
-    //     LOG_DEBUG(raw.symbol + " OriData");
-    //     print_quote(raw);
-    // }
-
     datacenter_.add_quote(raw);
 }
 

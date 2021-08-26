@@ -389,17 +389,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
     if (filter_zero_volume(src))
     {
-        LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
-        print_quote(src);        
+        LOG_DEBUG("\n" + src.symbol + " After WatermarkComputerWorker \n" + quote_str(src));
         LOG_WARN("After WatermarkComputerWorker " + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
                 + ", bid.size: " + std::to_string(src.bids.size())) ;        
     }
-
-    // if(src.symbol == "USDT_USD" ) 
-    // {
-    //     LOG_DEBUG(src.symbol + " After WatermarkComputerWorker");
-    //     print_quote(src);
-    // }
 
     return src;
 }
@@ -510,8 +503,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     if (filter_zero_volume(src))
     {
-        LOG_DEBUG(src.symbol + " After AccountAjdustWorker");
-        print_quote(src);        
+        LOG_DEBUG("\n" + src.symbol + " After AccountAjdustWorker \n" + quote_str(src));
         LOG_WARN( "After AccountAjdustWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
                 + ", bid.size: " + std::to_string(src.bids.size())) ;            
     }
@@ -599,17 +591,10 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
     if (filter_zero_volume(src))
     {
-        LOG_DEBUG(src.symbol + " After OrderBookWorker");
-        print_quote(src);        
+        LOG_DEBUG("\n" + src.symbol + " After OrderBookWorker\n" + quote_str(src));
         LOG_WARN( "After OrderBookWorker " + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
                 + ", bid.size: " + std::to_string(src.bids.size())) ;             
     }    
-
-    // if(src.symbol == "USDT_USD" ) 
-    // {
-    //     LOG_DEBUG(src.symbol + " After OrderBookWorker");
-    //     print_quote(src);
-    // }
 
     return src;
     }
@@ -659,8 +644,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     if (filter_zero_volume( const_cast<SInnerQuote&>(quote)))
     {
-        LOG_DEBUG(quote.symbol + " raw quote");
-        print_quote(quote);       
+        LOG_DEBUG("\n" + quote.symbol + " raw quote\n" + quote_str(quote));     
         LOG_WARN("ori_data" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;
         return;
@@ -677,12 +661,6 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     }
 
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-
-    // if(quote.symbol == "USDT_USD" ) 
-    // {
-    //     LOG_DEBUG(quote.symbol + " OriData");
-    //     print_quote(quote);
-    // }
     
     // 存储原始行情
     datas_[quote.symbol] = quote;    
@@ -785,8 +763,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
      if (filter_zero_volume(newQuote))
     {
-        LOG_DEBUG(quote.symbol + " After _publish_quote");
-        print_quote(quote);        
+        LOG_DEBUG("\n" + quote.symbol + " After _publish_quote \n" + quote_str(quote));
         LOG_WARN("After _publish_quote " + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;      
         return;  
@@ -1115,8 +1092,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         
     SInnerQuote& quote = iter->second;
 
-    LOG_DEBUG("\n OTC Quote Data");
-    print_quote(quote);
+    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(quote));
 
     if( volume > 0 )
     {

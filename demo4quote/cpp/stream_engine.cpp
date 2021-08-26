@@ -102,8 +102,7 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
 
         // if (symbol == "ETH_BTC")
         // {
-        //     LOG_DEBUG(exchange + "." + symbol + " Original Update Data");
-        //     print_quote(quote);     
+        //     LOG_DEBUG("\n" + exchange + "." + symbol + " Original Update Data\n" + quote_str(quote));
         // }
                 
         quote_mixer2_.on_snap(exchange, symbol, snap);

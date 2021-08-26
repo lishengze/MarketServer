@@ -99,8 +99,7 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
     if (filter_zero_volume(quote))
     {
-        LOG_DEBUG(exchange + "." + symbol + " Original Data");
-        print_quote(quote);   
+        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Data \n" + quote_str(quote));
         LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;       
         return;      
@@ -112,28 +111,13 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
         singles_[symbol][exchange] = quote;
     }
     
-    // if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
-    // {
-    //     LOG_DEBUG("QuoteCacher::on_snap");
-    //     print_quote(quote);
-    // }
-
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
 
-    // if(string(symbol) == "USDT_USD" && exchange == MIX_EXCHANGE_NAME) 
-    // {
-    //     LOG_DEBUG("MarketStreamDataWithDecimal");
-    //     print_sedata(*pub_snap.get());
-    // }
-
     if (filter_zero_volume(*pub_snap.get()))
     {
-        LOG_DEBUG(exchange + "." + symbol + " Original Data");
-        print_quote(quote);   
-
-        LOG_DEBUG(exchange + "." + symbol + " After depth_to_pbquote2");
-        print_sedata(*pub_snap.get());      
+        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Data\n" + quote_str(quote));
+        LOG_DEBUG("\n" + exchange + "." + symbol + " After depth_to_pbquote2\n" + sedata_str(*pub_snap.get()));
         LOG_WARN( "After depth_to_pbquote2 " + exchange + "." + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
                 + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
         return;       
@@ -160,8 +144,7 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
 
         if (symbol == "ETH_BTC")
         {
-            LOG_DEBUG(exchange + "." + symbol + " QuoteCacher::on_update To Snap");
-            print_quote(snap);     
+            LOG_DEBUG("\n" + exchange + "." + symbol + " QuoteCacher::on_update To Snap \n" + quote_str(snap));
         }    
 
     }
@@ -303,8 +286,7 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
 
     // if (symbol == "ETH_BTC")
     // {
-    //     LOG_DEBUG(MIX_EXCHANGE_NAME + "." + symbol + " _calc_symbol");
-    //     print_quote(snap);           
+    //     LOG_DEBUG("\n" + MIX_EXCHANGE_NAME + "." + symbol + " _calc_symbol\n" + quote_str(snap));
     // }
 
     normalize(snap.asks, config);
@@ -349,8 +331,7 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     
     if (symbol == "ETH_BTC")
     {
-        LOG_DEBUG(exchange + "." + symbol + " Original Snap Data");
-        print_quote(quote);                 
+        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote));
     }
 
     // cout << "QuoteMixer2::on_snap: " << quote.str() << endl;

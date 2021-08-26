@@ -55,6 +55,39 @@ void print_quote(const SInnerQuote& quote)
     LOG_DEBUG(s_s.str());
 }
 
+string quote_str(const SInnerQuote& quote)
+{
+    try
+    {
+        std::stringstream s_s;
+        s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
+                
+        if (quote.asks.size() > 0)
+        {
+            s_s << "------------- asks info \n";
+            for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            }
+        }
+
+        if (quote.bids.size() > 0)
+        {
+            s_s << "************* bids info \n";
+            for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            }    
+        }
+
+        return s_s.str();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
 bool filter_zero_volume(SInnerQuote& quote)
 {
     try

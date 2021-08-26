@@ -91,6 +91,51 @@ void print_quote(const SDepthQuote& quote)
     }    
 }
 
+string quote_str(const SDepthQuote& quote)
+{
+    try
+    {
+       std::stringstream s_s;
+       s_s << "\n" << quote.exchange << "." << quote.symbol << ", ask: " << quote.asks.size() << ", bid: " << quote.bids.size() << "\n";
+
+       
+        if (quote.asks.size() > 0)
+        {
+             s_s << "------------- asks info \n";
+            for(auto& iter:quote.asks)
+            {
+                s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+
+                    // for (auto iter2:iter.second.volume_by_exchanges)
+                    // {
+                    //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                    // }
+
+            }
+        }
+
+        if (quote.bids.size() > 0)
+        {
+            s_s << "------------- bid_info: \n";
+            for(auto& iter:quote.bids)
+            {
+                s_s << iter.first.get_value() << ": " << iter.second.volume.get_value() << "\n";
+
+                    // for (auto iter2:iter.second.volume_by_exchanges)
+                    // {
+                    //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                    // }           
+            }      
+        }
+
+       return s_s.str();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }       
+}
+
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
     map<TExchange, SDecimal> exchanges;
@@ -243,6 +288,52 @@ void print_inner_quote(const SInnerQuote& quote)
     LOG_DEBUG(s_s.str());
 }
 
+string inner_quote_str(const SInnerQuote& quote)
+{
+    try
+    {
+        std::stringstream s_s;
+        s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
+
+        if (quote.asks.size() > 0)
+        {
+            s_s << "------------- asks info \n";
+            for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
+
+                // for (auto iter2:iter->second.exchanges)
+                // {
+                //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                // }
+                
+            }
+        }
+
+        if (quote.bids.size() > 0)
+        {
+            s_s << "************* bids info \n";
+            for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << " \n" ;
+
+                // for (auto iter2:iter->second.exchanges)
+                // {
+                //     s_s << iter2.first << " " << iter2.second.get_str_value() << " \n";
+                // }        
+            }    
+        }    
+
+        return s_s.str();
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
+
+}
+
 void print_sedata(const SEData& sedata)
 {
     try
@@ -255,9 +346,26 @@ void print_sedata(const SEData& sedata)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
+}
 
+string sedata_str(const SEData& sedata)
+{
+    try
+    {
+        SInnerQuote inner_quote;
+
+        quotedata_to_innerquote(sedata, inner_quote);
+
+        
+
+        return inner_quote_str(inner_quote);
+    }
+    catch(const std::exception& e)
+    {
+       LOG_ERROR(e.what());
+    }    
 }
 
 bool filter_zero_volume(SEData& sedata)
@@ -303,6 +411,6 @@ bool filter_zero_volume(SEData& sedata)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }    
 }
