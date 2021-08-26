@@ -44,7 +44,7 @@ public:
 
 
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
-        SInnerQuote tmp = this->process(src, ctx);
+        SInnerQuote& tmp = this->process(src, ctx);
 
         if (filter_zero_volume(tmp))
         {

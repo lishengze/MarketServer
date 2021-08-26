@@ -12,22 +12,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/component" beforeDir="false" afterPath="$PROJECT_DIR$/component" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4quote/cpp/stream_engine.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/demo4quote/cpp/stream_engine.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/Log/log.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/Log/log.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/demo4risk/cpp/datacenter.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/datacenter.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/global_declare.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/global_declare.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/risk_controller.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/risk_controller.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/risk_controller_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/risk_controller_config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/updater_account.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/updater_account.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/updater_configuration.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/updater_configuration.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/updater_order.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/updater_order.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo4risk/cpp/updater_quote.h" beforeDir="false" afterPath="$PROJECT_DIR$/demo4risk/cpp/updater_quote.h" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/" />
@@ -46,32 +31,9 @@
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1862">
-                  <caret line="98" column="1" selection-start-line="98" selection-start-column="1" selection-end-line="98" selection-end-column="1" />
-                  <folding>
-                    <element signature="e#0#25#0" expanded="true" />
-                    <element signature="e#5017#8294#0" />
-                    <element signature="e#8296#9767#0" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.h">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1729">
-                  <caret line="91" selection-start-line="91" selection-end-line="91" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="416">
+                <state relative-caret-position="2983">
                   <caret line="157" column="9" selection-start-line="157" selection-start-column="9" selection-end-line="157" selection-end-column="9" />
                 </state>
               </provider>
@@ -80,7 +42,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file:///usr/include/c++/9/bits/stl_tree.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="313">
+                <state relative-caret-position="5719">
                   <caret line="301" selection-start-line="301" selection-end-line="301" />
                 </state>
               </provider>
@@ -89,40 +51,17 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="335">
-                  <caret line="723" column="31" selection-start-line="723" selection-start-column="31" selection-end-line="723" selection-end-column="31" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:29:13_warn.log">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="209">
-                  <caret line="101" column="85" lean-forward="true" selection-start-line="101" selection-start-column="85" selection-end-line="101" selection-end-column="85" />
+                <state relative-caret-position="183">
+                  <caret line="666" selection-start-line="666" selection-end-line="666" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_warn.log">
-              <provider selected="true" editor-type-id="text-editor" />
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_info.log">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/data_struct/data_struct.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-116">
-                  <caret line="160" column="10" selection-start-line="160" selection-start-column="10" selection-end-line="160" selection-end-column="10" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/include/c++/9/bits/stl_iterator.h">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="419">
-                  <caret line="193" selection-start-line="193" selection-end-line="193" />
+                <state relative-caret-position="183">
+                  <caret line="311" selection-start-line="311" selection-end-line="311" />
                 </state>
               </provider>
             </entry>
@@ -130,10 +69,39 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="183">
-                  <caret line="83" selection-start-line="83" selection-end-line="83" />
+                <state relative-caret-position="316">
+                  <caret line="52" column="21" selection-start-line="52" selection-start-column="21" selection-end-line="52" selection-end-column="21" />
                 </state>
               </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_info.log">
+              <provider selected="true" editor-type-id="text-editor" />
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_source_input.log">
+              <provider selected="true" editor-type-id="text-editor" />
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_response.log">
+              <provider selected="true" editor-type-id="text-editor" />
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_trace.log">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="171">
+                  <caret line="9" selection-start-line="9" selection-end-line="9" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_request.log">
+              <provider selected="true" editor-type-id="text-editor" />
             </entry>
           </file>
         </leaf>
@@ -178,6 +146,7 @@
         <option value="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h" />
         <option value="$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp" />
+        <option value="$PROJECT_DIR$/demo4risk/cpp/datacenter.h" />
       </list>
     </option>
   </component>
@@ -286,11 +255,12 @@
       <workItem from="1608704708239" duration="258000" />
       <workItem from="1608705033637" duration="3058000" />
       <workItem from="1629358955400" duration="1705000" />
+      <workItem from="1629977345641" duration="779000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12553000" />
+    <option name="totallyTimeSpent" value="13332000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -304,7 +274,7 @@
   <component name="ToolWindowManager">
     <frame x="0" y="-37" width="1920" height="1117" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21771611" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.29082176" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24973205" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -475,6 +445,44 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2983">
+          <caret line="157" column="9" selection-start-line="157" selection-start-column="9" selection-end-line="157" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/bits/stl_tree.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5719">
+          <caret line="301" selection-start-line="301" selection-end-line="301" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_warn.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_info.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3040">
+          <caret line="160" column="10" selection-start-line="160" selection-start-column="10" selection-end-line="160" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/bits/stl_iterator.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3667">
+          <caret line="193" selection-start-line="193" selection-end-line="193" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:29:13_warn.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="101" column="85" selection-start-line="101" selection-start-column="85" selection-end-line="101" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5472">
@@ -489,55 +497,43 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="157" column="9" selection-start-line="157" selection-start-column="9" selection-end-line="157" selection-end-column="9" />
+        <state relative-caret-position="183">
+          <caret line="666" selection-start-line="666" selection-end-line="666" />
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/c++/9/bits/stl_tree.h">
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/data_struct/data_struct.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="313">
-          <caret line="301" selection-start-line="301" selection-end-line="301" />
+        <state relative-caret-position="183">
+          <caret line="311" selection-start-line="311" selection-end-line="311" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="83" selection-start-line="83" selection-end-line="83" />
+        <state relative-caret-position="316">
+          <caret line="52" column="21" selection-start-line="52" selection-start-column="21" selection-end-line="52" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/c++/9/bits/stl_iterator.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="193" selection-start-line="193" selection-end-line="193" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_info.log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-116">
-          <caret line="160" column="10" selection-start-line="160" selection-start-column="10" selection-end-line="160" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:24:09_warn.log">
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_info.log">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="335">
-          <caret line="723" column="31" selection-start-line="723" selection-start-column="31" selection-end-line="723" selection-end-column="31" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_source_input.log">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-19 08:29:13_warn.log">
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_request.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_response.log">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_trace.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="101" column="85" lean-forward="true" selection-start-line="101" selection-start-column="85" selection-end-line="101" selection-end-column="85" />
+        <state relative-caret-position="171">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
         </state>
       </provider>
     </entry>
