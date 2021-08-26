@@ -52,7 +52,7 @@ private:
                 break;
             }
             case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                LOG_INFO("AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE");
+                LOG_WARN("AccountUpdater: status is GRPC_CHANNEL_TRANSIENT_FAILURE");
                 return;
             }
             case GRPC_CHANNEL_SHUTDOWN: {        
