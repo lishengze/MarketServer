@@ -9,7 +9,7 @@ def get_datetime_str():
 class Logger(object):
     def __init__(self, all_file_Name="log/all.log", error_file_name="log/error.log"):
         LOG_FORMAT = "%(pathname)s-%(lineno)s - %(asctime)s - %(levelname)s - %(message)s"
-        DATE_FORMAT = "%Y/%m/%d %H:%M:%S"    
+        DATE_FORMAT = "%Y/%m/%d_%H:%M:%S"    
         logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 
         self._logger = logging.getLogger('user_logger')

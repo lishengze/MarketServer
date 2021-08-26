@@ -60,7 +60,7 @@ string quote_str(const SInnerQuote& quote)
     try
     {
         std::stringstream s_s;
-        s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
+        s_s << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
                 
         if (quote.asks.size() > 0)
         {
