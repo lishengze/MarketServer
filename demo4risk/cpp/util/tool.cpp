@@ -1,6 +1,8 @@
 #include "tool.h"
 #include "pandora/util/float_util.h"
 
+#include "../Log/log.h"
+
 void print_quote(const SInnerQuote& quote)
 {
     std::stringstream s_s;
@@ -122,6 +124,7 @@ bool filter_zero_volume(SInnerQuote& quote)
 
         if (quote.asks.size()==0 && quote.bids.size()==0)
         {
+            LOG_WARN(quote.symbol + " ask.size: " + std::to_string(quote.asks.size()) + " bid.size: " + std::to_string(quote.bids.size()));
             result = true;
         }
         return result;
