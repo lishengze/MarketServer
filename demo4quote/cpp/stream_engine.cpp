@@ -98,13 +98,7 @@ void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, c
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
 
-    if( exchange != MIX_EXCHANGE_NAME  ) {
-
-        // if (symbol == "ETH_BTC")
-        // {
-        //     LOG_DEBUG("\n" + exchange + "." + symbol + " Original Update Data\n" + quote_str(quote));
-        // }
-                
+    if( exchange != MIX_EXCHANGE_NAME  ) {                
         quote_mixer2_.on_snap(exchange, symbol, snap);
     }
 };

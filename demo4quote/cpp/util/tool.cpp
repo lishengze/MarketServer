@@ -1,6 +1,7 @@
 #include "tool.h"
 #include "../Log/log.h"
 #include "pandora/util/float_util.h"
+#include "pandora/util/time_util.h"
 
 bool filter_zero_volume(SDepthQuote& quote)
 {
@@ -135,6 +136,14 @@ string quote_str(const SDepthQuote& quote)
         std::cerr << e.what() << '\n';
     }       
 }
+
+string get_sec_time_str(unsigned long time)
+{
+    return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
+}
+
+
+
 
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
@@ -413,4 +422,88 @@ bool filter_zero_volume(SEData& sedata)
     {
         LOG_ERROR(e.what());
     }    
+}
+
+string klines_str(vector<KlineData>& kline_list)
+{
+    try
+    {
+        std::stringstream stream_obj;
+
+        for(auto& kline:kline_list)
+        {
+            stream_obj << kline_str(kline);    
+        }
+
+        return stream_obj.str();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+string kline_str(KlineData& kline)
+{
+    try
+    {
+        std::stringstream stream_obj;
+
+        stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  
+                    << ", " << kline.exchange << ", "<< kline.symbol << ","
+                    << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+                    << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value() << "\n"; 
+
+        return stream_obj.str();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}
+
+void filter_kline_data(vector<KlineData>& kline_list)
+{
+    try
+    {
+        std::list<vector<KlineData>::iterator> error_kline_list;
+        for(vector<KlineData>::iterator iter = kline_list.begin(); iter != kline_list.end(); ++iter)
+        {
+            if (filter_kline_atom(*iter))
+            {
+                error_kline_list.push_back(iter);
+            }
+        }        
+
+        for (auto err_iter:error_kline_list)
+        {
+            kline_list.erase(err_iter);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+bool filter_kline_atom(KlineData& kline)
+{
+    bool result = false;
+    try
+    {
+        if (kline.px_open <=0 || kline.px_close <= 0
+            || kline.px_high <=0 || kline.px_low <=0)
+        {
+            LOG_WARN(kline_str(kline));
+            result = true;
+        }
+            
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+    return false;
 }

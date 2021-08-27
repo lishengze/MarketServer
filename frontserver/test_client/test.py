@@ -6,6 +6,10 @@ import time
 import _thread
 import time
 
+from Logger import *
+
+logger = Logger();
+
 def process_heartbeat(ws):
     heartbeat_info = {
         "type":"heartbeat"
@@ -78,7 +82,7 @@ def get_sub_trade_str(symbol="BTC_USDT"):
     return sub_info_str    
 
 def get_sub_kline_str(symbl="BTC_USDT"):
-    print("get_sub_kline_str")
+    print("\n----------- get_sub_kline_str ------------")
     frequency = 60 
     end_time = int(time.time())
     end_time = end_time - end_time % frequency - frequency
@@ -124,11 +128,11 @@ def sub_btc_usdt(ws, sub_symbol):
     ws.send(sub_info_str)   
 
 def on_open(ws):
-    print("Connected")
+    print("\n--------- on_open connected! --------")
 
     # send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str()
+    send_str = get_sub_kline_str(symbol = "ETH_BTC")
 
     # send_str = get_sub_trade_str()
 
@@ -147,8 +151,8 @@ def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.855.220.139"
     # ip = "ws://118.193.35.160"
-    # ip = "ws://18.162.52.222"
-    ip = "ws://127.0.0.1"
+    ip = "ws://18.162.52.222"
+    # ip = "ws://127.0.0.1"
     port = 8114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

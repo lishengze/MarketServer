@@ -171,3 +171,4 @@ inline void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal,
         }
     }
 }
+

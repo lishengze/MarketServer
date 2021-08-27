@@ -9,6 +9,7 @@
 #include "pandora/util/time_util.h"
 
 #include "Log/log.h"
+#include "util/tool.h"
 
 using namespace rapidjson;
 
@@ -34,7 +35,6 @@ bool decode_channelmsg(const string& msg, Document& body)
     body.Parse(msg.c_str());
     if(body.HasParseError())
     {
-        // _log_and_print("catch exception %s", body.GetParseError());
         return false;
     }
     return true;
@@ -235,7 +235,16 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         LOG_WARN("decode json fail\nmsg: " + msg + "\nchannel: " + channel);
         return;
     }
-    
+
+    // if (symbol == "ETH_BTC" && channel_type == SNAP_HEAD)
+    // {
+    //     StringBuffer buffer;
+    //     Writer<StringBuffer> writer(buffer);
+    //     body.Accept(writer);
+
+    //     LOG_DEBUG("\nJson Parse Data: \n" + buffer.GetString());
+    // }
+   
     if( !_get_config(exchange, symbol, config) ) 
     {
         LOG_WARN("symbol not exist. exchange=" + exchange +" symbol=" + symbol);        
@@ -265,29 +274,56 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         }
         quote.raw_length = msg.length();
 
+        // if (quote.symbol == "USDT_USD")
+        // {
+        //     LOG_DEBUG("\nOrigianl Snap: " + quote_str(quote));
+        // }
+
         // 同步snap和updates
         list<SDepthQuote> updates_queue; // 跟在snap后面的updates
+
         int result = _sync_by_snap(quote.exchange, quote.symbol, quote, updates_queue);
+
+        // if( result == SYNC_STARTING )
+        // {
+        //     engine_interface_->on_snap(exchange, symbol, quote);
+        //     // 合并更新
+        //     SDepthQuote fake_update = quote;
+        //     fake_update.asks.clear();
+        //     fake_update.bids.clear();
+        //     for( const auto& v: updates_queue ) 
+        //     {
+        //         fake_update.arrive_time = v.arrive_time;
+        //         fake_update.server_time = v.server_time;
+        //         fake_update.sequence_no = v.sequence_no;
+        //         update_depth_diff(v.asks, fake_update.asks);
+        //         update_depth_diff(v.bids, fake_update.bids);
+        //     }
+            // 合并更新
+            // SDepthQuote merged_update = merge_update(updates_queue, quote);
+            // engine_interface_->on_update(exchange, symbol, merged_update);        
+        //     engine_interface_->on_update(exchange, symbol, fake_update);
+        // }
+
         if( result == SYNC_STARTING )
         {
-            engine_interface_->on_snap(exchange, symbol, quote);
-            // 合并更新
-            SDepthQuote fake_update = quote;
-            fake_update.asks.clear();
-            fake_update.bids.clear();
-            for( const auto& v: updates_queue ) 
+            if (filter_zero_volume(quote))
             {
-                fake_update.arrive_time = v.arrive_time;
-                fake_update.server_time = v.server_time;
-                fake_update.sequence_no = v.sequence_no;
-                update_depth_diff(v.asks, fake_update.asks);
-                update_depth_diff(v.bids, fake_update.bids);
+                LOG_WARN("\nSnap Quote: \n" + quote_str(quote));
             }
-            engine_interface_->on_update(exchange, symbol, fake_update);
+            else
+            {
+                // if (quote.symbol == "ETH_BTC")
+                // {
+                //     LOG_DEBUG("\nAfter _sync_by_snap Snap: \n" + quote_str(quote));
+                // }                
+                engine_interface_->on_snap(exchange, symbol, quote);
+            }            
         }
-        else if( result == SYNC_SNAPAGAIN ) 
+        else if( result == SYNC_REQ_SNAP ) 
         {
             retry = true;
+            redis_snap_requester_.async_request_symbol(exchange, symbol);
             return;
         }
     }
@@ -308,20 +344,19 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         int result = _sync_by_update(exchange, symbol, quote, snap);
         if( result == SYNC_SKIP ) 
         {
+            // 继续等待 由于乱序 发生，从而异步请求的 snap 的到来;
         }
-        else if ( result == SYNC_STARTING )
-        {
-            engine_interface_->on_snap(exchange, symbol, snap);
-            engine_interface_->on_update(exchange, symbol, quote);            
-        } 
-        else if( result == SYNC_SNAPAGAIN )
+        // else if ( result == SYNC_STARTING ) // 不会发生；
+        // {
+        //     engine_interface_->on_snap(exchange, symbol, snap);
+        //     engine_interface_->on_update(exchange, symbol, quote);            
+        // } 
+        else if( result == SYNC_REQ_SNAP ) // 发生乱序，请求 snap;
         {
             redis_snap_requester_.async_request_symbol(exchange, symbol);
         }
-        else 
+        else if (result == SYNC_OK)
         {
-            assert( result == SYNC_OK );
-
             // 频率控制
             SDepthQuote tmp;
             if( !_ctrl_update(exchange, symbol, quote, config, tmp) ) 
@@ -329,7 +364,19 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
                 LOG_WARN("skip update." + exchange + "." + symbol);
                 return;
             }
-            engine_interface_->on_update(exchange, symbol, tmp);
+
+            if (filter_zero_volume(tmp))
+            {
+                LOG_WARN("\nUpdate Quote : \n" + quote_str(tmp));
+            }
+            else
+            {
+                engine_interface_->on_update(exchange, symbol, tmp);
+            }            
+        }
+        else
+        {
+            LOG_ERROR("Unknow SYNC_TYPE: " + std::to_string(result));
         }
     }
     else if( channel_type == TRADE_HEAD )
@@ -346,6 +393,14 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     {
         vector<KlineData> klines;
         bool first_package = on_get_message(kline_min1_, body, exchange, symbol, config, klines);
+
+        if (symbol == "USDT_USD")
+        {
+            LOG_DEBUG("\nOrigianl Kline: " + klines_str(klines));
+        }
+
+        filter_kline_data(klines);
+
         engine_interface_->on_kline(exchange, symbol, kline_min1_.resolution_, klines, first_package);
     }
     else if( channel.find(KLINE_60MIN_HEAD) != string::npos )
@@ -377,7 +432,7 @@ void RedisQuote::OnDisconnected(int status) {
     LOG_WARN("Redis RedisQuote::OnDisconnected");
 };
 
-int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& updates_queue)
+int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, SDepthQuote& quote, list<SDepthQuote>& updates_queue)
 {
     std::unique_lock<std::mutex> l{ mutex_metas_ };
 
@@ -406,12 +461,11 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
     }
     else if( quote.sequence_no < (left - 1) ) 
     {
-        return SYNC_SNAPAGAIN;
+        LOG_WARN("Snap.Seq: " + std::to_string(quote.sequence_no) + ", Cached.LeftSeq: " + std::to_string(left));
+        return SYNC_REQ_SNAP;
     }
-    else // left <= quote.sequence_no <= right
+    else if (left <= quote.sequence_no && quote.sequence_no <= right )
     {
-        assert( left <= quote.sequence_no && quote.sequence_no <= right );
-
         for( const auto& v : symbol_meta.caches ) 
         {
             if( v.sequence_no >= (quote.sequence_no + 1 ) ) 
@@ -422,7 +476,23 @@ int RedisQuote::_sync_by_snap(const TExchange& exchange, const TSymbol& symbol, 
         symbol_meta.caches.clear();
         symbol_meta.seq_no = right;
         symbol_meta.publishing = true;
+
+        // 直接合并 Snap 和 CachedQuote;
+        {
+            updates_queue.push_front(quote);
+            quote = merge_quote(updates_queue);
+            quote.exchange = exchange;
+            quote.symbol = symbol;
+        }
+
         return SYNC_STARTING;
+    }
+    else
+    {
+        LOG_ERROR("Snap.Seq Error " + std::to_string(quote.sequence_no) 
+                    + ", Cached.LeftSeq: " + std::to_string(left)
+                    + ", Cached.RightSeq: " + std::to_string(right));
+        return SYNC_REQ_SNAP;
     }
 
     // never reach here
@@ -446,7 +516,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     {
         LOG_WARN(exchange + "." + symbol + " sequence is not continuous, symbol_meta.seq_no=" 
                 + std::to_string(symbol_meta.seq_no) + ", quote.sequence_no: " + std::to_string(quote.sequence_no));
-
+        
         redis_snap_requester_.async_request_symbol(exchange, symbol);
         symbol_meta.caches.clear();
         symbol_meta.caches.push_back(quote);
@@ -455,7 +525,7 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
 
         meta.pkg_skip_count += 1;
 
-        return SYNC_SNAPAGAIN;
+        return SYNC_REQ_SNAP;
     }
 
     symbol_meta.seq_no = quote.sequence_no;
@@ -464,13 +534,16 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     {
         return SYNC_OK; 
     }
-
-    // 尚未启动推送
-    if( quote.sequence_no > symbol_meta.snap.sequence_no )
+    else
     {
-        symbol_meta.caches.push_back(quote);
+        // 行情之前出现的seq 乱序，还在等待异步请求的 snap 到来
+        // 这个比较是用来判断 当前的这个 quote 是否有存储的必要；
+        if( quote.sequence_no > symbol_meta.snap.sequence_no )
+        {
+            symbol_meta.caches.push_back(quote);
+        }
+        return SYNC_SKIP;
     }
-    return SYNC_SKIP;
 };
 
 void RedisQuote::_looping() 
@@ -724,4 +797,54 @@ bool RedisQuote::_get_config(const TExchange& exchange, const TSymbol& symbol, S
         return false;
     config = v2->second;
     return true;
+}
+
+SDepthQuote RedisQuote::merge_update(list<SDepthQuote>& updates_queue, SDepthQuote& snap)
+{
+    try
+    {
+        SDepthQuote merged_update = snap;
+        merged_update.asks.clear();
+        merged_update.bids.clear();
+        for( const auto& v: updates_queue ) 
+        {
+            merged_update.arrive_time = v.arrive_time;
+            merged_update.server_time = v.server_time;
+            merged_update.sequence_no = v.sequence_no;
+            update_depth_diff(v.asks, merged_update.asks);
+            update_depth_diff(v.bids, merged_update.bids);
+        }
+
+        return merged_update;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+SDepthQuote RedisQuote::merge_quote(list<SDepthQuote>& quote_list)
+{
+    try
+    {
+        SDepthQuote result;
+        result.asks.clear();
+        result.bids.clear();
+        for( const auto& v: quote_list ) 
+        {
+            result.arrive_time = v.arrive_time;
+            result.server_time = v.server_time;
+            result.sequence_no = v.sequence_no;
+            result.exchange = v.exchange;
+            result.symbol = v.symbol;
+            update_depth_diff(v.asks, result.asks);
+            update_depth_diff(v.bids, result.bids);
+        }
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }

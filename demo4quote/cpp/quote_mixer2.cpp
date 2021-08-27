@@ -99,7 +99,6 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
     if (filter_zero_volume(quote))
     {
-        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Data \n" + quote_str(quote));
         LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
                 + ", bid.size: " + std::to_string(quote.bids.size())) ;       
         return;      
@@ -116,8 +115,6 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
     if (filter_zero_volume(*pub_snap.get()))
     {
-        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Data\n" + quote_str(quote));
-        LOG_DEBUG("\n" + exchange + "." + symbol + " After depth_to_pbquote2\n" + sedata_str(*pub_snap.get()));
         LOG_WARN( "After depth_to_pbquote2 " + exchange + "." + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
                 + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
         return;       
@@ -141,12 +138,6 @@ void QuoteCacher::on_update(const TExchange& exchange, const TSymbol& symbol, co
         update_depth_diff(update.asks, cache.asks);        
         update_depth_diff(update.bids, cache.bids);
         snap = cache;
-
-        if (symbol == "ETH_BTC")
-        {
-            LOG_DEBUG("\n" + exchange + "." + symbol + " QuoteCacher::on_update To Snap \n" + quote_str(snap));
-        }    
-
     }
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_diff;
@@ -284,11 +275,6 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         }
     }
 
-    // if (symbol == "ETH_BTC")
-    // {
-    //     LOG_DEBUG("\n" + MIX_EXCHANGE_NAME + "." + symbol + " _calc_symbol\n" + quote_str(snap));
-    // }
-
     normalize(snap.asks, config);
     normalize(snap.bids, config);
 
@@ -329,10 +315,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     
-    if (symbol == "ETH_BTC")
-    {
-        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote));
-    }
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote));
+    // }
 
     // cout << "QuoteMixer2::on_snap: " << quote.str() << endl;
     quotes_[symbol][exchange] = quote;

@@ -40,6 +40,7 @@ void RedisSnapRequester::start()
 void RedisSnapRequester::async_request_symbol(const TExchange& exchange, const TSymbol& symbol) 
 {    
     LOG_INFO("RedisSnapRequester: async_request_symbol " + exchange + "." + symbol);
+    LOG_DEBUG("RedisSnapRequester: async_request_symbol " + exchange + "." + symbol);
     
     string combinedSymbol = make_symbolkey(exchange, symbol);
 

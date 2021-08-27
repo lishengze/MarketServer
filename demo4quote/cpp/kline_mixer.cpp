@@ -2,6 +2,7 @@
 #include "kline_mixer.h"
 #include "pandora/util/time_util.h"
 #include "Log/log.h"
+#include "util/tool.h"
 
 KlineData calc_mixed_kline(type_tick index, const vector<KlineData>& datas) 
 {
@@ -478,7 +479,8 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
     //     }
     // }
 
-    
+    filter_kline_data(outputs);
+    filter_kline_data(output_60mins);
 
     // 写入db缓存区
 

@@ -107,6 +107,12 @@ public:
     }
 
     void on_message(const std::string& channel, const std::string& msg, bool& retry);
+
+    SDepthQuote merge_update(list<SDepthQuote>& updates_queue, SDepthQuote& snap);
+
+    SDepthQuote merge_quote(list<SDepthQuote>& quote_list);
+    
+
 private:
     // redis连接参数
     RedisParams params_;
@@ -127,9 +133,9 @@ private:
     int SYNC_OK{0};
     int SYNC_STARTING{1};
     int SYNC_SKIP{2};
-    int SYNC_SNAPAGAIN{3};
+    int SYNC_REQ_SNAP{3};
     int _sync_by_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, SDepthQuote& snap);
-    int _sync_by_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote, list<SDepthQuote>& updates_queue);
+    int _sync_by_snap(const TExchange& exchange, const TSymbol& symbol, SDepthQuote& quote, list<SDepthQuote>& updates_queue);
     
     // callback
     QuoteSourceCallbackInterface *engine_interface_ = nullptr;
