@@ -869,7 +869,9 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     if( is_ask ) {
 
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
+            
             double price = iter->first.get_value();
+            double old_price = price;
             reset_price(price, config, true);
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -877,6 +879,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_amount += iter->second.total_volume * price;
 
                 LOG_DEBUG("cur_p: " + std::to_string(price)
+                        + ", risk_p: " + std::to_string(old_price)
                         + ", cur_v: " + iter->second.total_volume.get_str_value() 
                         + ", total_v: " + total_volume.get_str_value()
                         + ", otc_v: " + std::to_string(volume)
@@ -887,6 +890,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume = volume;
 
                 LOG_DEBUG("done cur_p: " +  std::to_string(price) 
+                        + ", risk_p: " + std::to_string(old_price)
                         + ", cur_v: " + iter->second.total_volume.get_str_value() 
                         + ", total_v: " + total_volume.get_str_value()
                         + ", otc_v: " + std::to_string(volume)
@@ -897,6 +901,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     } else {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
+            double old_price = price;
             reset_price(price, config, false);
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
@@ -905,6 +910,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_amount += trade_amout;
 
                 LOG_DEBUG("cur_p: " + std::to_string(price)
+                        + ", risk_p: " + std::to_string(old_price)
                         + ", cur_v: " + iter->second.total_volume.get_str_value() 
                         + ", total_v: " + total_volume.get_str_value()
                         + ", cur_a: " + std::to_string(trade_amout)
@@ -919,6 +925,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += trade_volume;
 
                 LOG_DEBUG("[done] cur_price: " + std::to_string(price) 
+                        + ", risk_p: " + std::to_string(old_price)
                         + ", cur_v: " + iter->second.total_volume.get_str_value() 
                         + ", trade_v: " + std::to_string(trade_volume)
                         + ", total_v: " + total_volume.get_str_value()
