@@ -863,7 +863,8 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
 
 QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
 {
-    SDecimal total_volume = 0, total_amount;
+    SDecimal total_volume = 0; 
+    SDecimal total_amount = 0;
 
     if( is_ask ) {
 
@@ -904,16 +905,20 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
                         + ", total_volume: " + total_volume.get_str_value()
-                        + ", otc_volume: " + std::to_string(volume)
+                        + ", total_amount: " + total_amount.get_str_value()
+                        + ", otc_volume: " + std::to_string(volume)                        
                         + ", bid;");
 
             } else {
-                total_amount += (volume - total_volume.get_value()) * price;
-                total_volume = volume;
+                double trade_volume = volume - total_volume.get_value();
+                total_amount += trade_volume * price;
+                total_volume += trade_volume;
 
-                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                LOG_DEBUG("[done] cur_price: " + iter->first.get_str_value() 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", trade_volume: " + std::to_string(trade_volume)
                         + ", total_volume: " + total_volume.get_str_value()
+                        + ", total_amount: " + total_amount.get_str_value()
                         + ", otc_volume: " + std::to_string(volume)
                         + ", bid;");
                 break;
@@ -930,7 +935,6 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
     }
         
-
     price = total_amount.get_value() / total_volume.get_value();
     double ori_price = price.get_value();
 
@@ -961,7 +965,8 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
 
 QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double otc_amount, SDecimal& price, uint32 precise)
 {
-    SDecimal total_volume = 0, total_amount;
+    SDecimal total_volume = 0;
+    SDecimal total_amount = 0;
     if( is_ask ) 
     {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
