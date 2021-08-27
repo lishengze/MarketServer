@@ -876,20 +876,20 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume;
                 total_amount += iter->second.total_volume * price;
 
-                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
-                        + ", total_volume: " + total_volume.get_str_value()
-                        + ", otc_volume: " + std::to_string(volume)
+                LOG_DEBUG("cur_p: " + std::to_string(price)
+                        + ", cur_v: " + iter->second.total_volume.get_str_value() 
+                        + ", total_v: " + total_volume.get_str_value()
+                        + ", otc_v: " + std::to_string(volume)
                         + ", ask;");
 
             } else {
                 total_amount += (volume - total_volume.get_value()) * price;
                 total_volume = volume;
 
-                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
-                        + ", total_volume: " + total_volume.get_str_value()
-                        + ", otc_volume: " + std::to_string(volume)
+                LOG_DEBUG("done cur_p: " +  std::to_string(price) 
+                        + ", cur_v: " + iter->second.total_volume.get_str_value() 
+                        + ", total_v: " + total_volume.get_str_value()
+                        + ", otc_v: " + std::to_string(volume)
                         + ", ask;");
                 break;
             }
@@ -901,25 +901,30 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
-                total_amount += iter->second.total_volume * price;
-                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
-                        + ", total_volume: " + total_volume.get_str_value()
-                        + ", total_amount: " + total_amount.get_str_value()
-                        + ", otc_volume: " + std::to_string(volume)                        
+                double trade_amout = iter->second.total_volume.get_value() * price;
+                total_amount += trade_amout;
+
+                LOG_DEBUG("cur_p: " + std::to_string(price)
+                        + ", cur_v: " + iter->second.total_volume.get_str_value() 
+                        + ", total_v: " + total_volume.get_str_value()
+                        + ", cur_a: " + std::to_string(trade_amout)
+                        + ", total_a: " + total_amount.get_str_value()
+                        + ", otc_v: " + std::to_string(volume)                        
                         + ", bid;");
 
             } else {
                 double trade_volume = volume - total_volume.get_value();
-                total_amount += trade_volume * price;
+                double trade_amout = trade_volume * price;
+                total_amount += trade_amout;
                 total_volume += trade_volume;
 
-                LOG_DEBUG("[done] cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
-                        + ", trade_volume: " + std::to_string(trade_volume)
-                        + ", total_volume: " + total_volume.get_str_value()
-                        + ", total_amount: " + total_amount.get_str_value()
-                        + ", otc_volume: " + std::to_string(volume)
+                LOG_DEBUG("[done] cur_price: " + std::to_string(price) 
+                        + ", cur_v: " + iter->second.total_volume.get_str_value() 
+                        + ", trade_v: " + std::to_string(trade_volume)
+                        + ", total_v: " + total_volume.get_str_value()
+                        + ", cur_a: " + std::to_string(trade_amout)
+                        + ", total_a: " + total_amount.get_str_value()
+                        + ", otc_v: " + std::to_string(volume)
                         + ", bid;");
                 break;
             }
