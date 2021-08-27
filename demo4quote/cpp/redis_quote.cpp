@@ -394,10 +394,10 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         vector<KlineData> klines;
         bool first_package = on_get_message(kline_min1_, body, exchange, symbol, config, klines);
 
-        if (symbol == "USDT_USD")
-        {
-            LOG_DEBUG("\nOrigianl Kline: " + klines_str(klines));
-        }
+        // if (symbol == "USDT_USD")
+        // {
+        //     LOG_DEBUG("\nOrigianl Kline: " + klines_str(klines));
+        // }
 
         filter_kline_data(klines);
 
