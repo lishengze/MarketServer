@@ -390,14 +390,14 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         const KlineData& kline = klines[i];
 
         std::stringstream stream_obj;
-        if (symbol == "ETH_BTC" || symbol == "USDT_USD")
-        {
-            stream_obj.clear();
-            stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol << ","
-                        << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                        << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
-            LOG_DEBUG(stream_obj.str());        
-        }
+        // if (symbol == "ETH_BTC" || symbol == "USDT_USD")
+        // {
+        //     stream_obj.clear();
+        //     stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol << ","
+        //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
+        //     LOG_DEBUG(stream_obj.str());        
+        // }
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
         if (package)
