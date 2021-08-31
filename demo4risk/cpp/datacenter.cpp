@@ -38,7 +38,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     volumes[v2.first] += v2.second;
                 }
                 src_depths.erase(v++);
-                LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
+                // LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -65,7 +65,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                                 << "new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
                                 << "is_ask: " << is_ask << "\n";
-                            LOG_DEBUG(s_s.str());
+                            // LOG_DEBUG(s_s.str());
                         }
                         else
                         {                            
@@ -97,7 +97,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
+                // LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -124,7 +124,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                                 << "new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
                                 << "is_ask: " << is_ask << "\n";
-                            LOG_DEBUG(s_s.str());
+                            // LOG_DEBUG(s_s.str());
                         }
                         else
                         {                  
@@ -427,7 +427,9 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    set_snap(src);
+    return src;
+    
+    // set_snap(src);
 
     // 获取配置
     double hedge_percent = 0;
