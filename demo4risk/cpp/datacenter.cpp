@@ -32,13 +32,13 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
 
-            if( is_ask ? (price <= watermark) : (price >= watermark) ) {
+            if( price <= watermark) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
                     volumes[v2.first] += v2.second;
                 }
                 src_depths.erase(v++);
-                // LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
+                LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -65,7 +65,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                                 << "new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
                                 << "is_ask: " << is_ask << "\n";
-                            // LOG_DEBUG(s_s.str());
+                            LOG_DEBUG(s_s.str());
                         }
                         else
                         {                            
@@ -81,7 +81,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
             }
         }
     }
-    else 
+    else // For Bid
     {
         map<SDecimal, SInnerDepth>& src_depths = src.bids;
         bool patched = false;
@@ -91,13 +91,13 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
-            if( is_ask ? (price <= watermark) : (price >= watermark) ) {
+            if( price >= watermark ) {
                 // 过滤价位
                 for( const auto& v2 : depth.exchanges ){
                     volumes[v2.first] += v2.second;
                 }
                 v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                // LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
+                LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
             } else {
                 // 保留价位
                 if( !patched ) {
@@ -124,7 +124,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                                 << "new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
                                 << "is_ask: " << is_ask << "\n";
-                            // LOG_DEBUG(s_s.str());
+                            LOG_DEBUG(s_s.str());
                         }
                         else
                         {                  
@@ -196,15 +196,15 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
-        if( ctx.params.cache_config.find(src.symbol) != ctx.params.cache_config.end() ) 
+        if( ctx.params.quote_config.find(src.symbol) != ctx.params.quote_config.end() ) 
         {
             SInnerQuote tmp;
             vector<pair<SDecimal, SInnerDepth>> depths;
             src.get_asks(depths);
-            _calc_depth_bias(depths, ctx.params.cache_config[src.symbol],  true, tmp.asks);
+            _calc_depth_bias(depths, ctx.params.quote_config[src.symbol],  true, tmp.asks);
             src.asks.swap(tmp.asks);
             src.get_bids(depths);
-            _calc_depth_bias(depths, ctx.params.cache_config[src.symbol],  false, tmp.bids);
+            _calc_depth_bias(depths, ctx.params.quote_config[src.symbol],  false, tmp.bids);
             src.bids.swap(tmp.bids);
         }
         else
@@ -251,7 +251,6 @@ void WatermarkComputerWorker::query(map<TSymbol, SDecimal>& watermarks) const
 void WatermarkComputerWorker::set_snap(const SInnerQuote& quote) 
 {
     // 提取各交易所的买卖一
-    // LOG_DEBUG("WatermarkComputerWorker::set_snap");
 
     unordered_map<TExchange, SDecimal> first_ask, first_bid;
     for( auto iter = quote.asks.begin() ; iter != quote.asks.end() ; iter ++ ) {
@@ -373,12 +372,13 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
-    
+
+     
     if (watermark.get_value() != 0 )
     {
         _filter_by_watermark(src, watermark, ctx);
     }
-    
+
     if (src.asks.size() > 0 && src.bids.size() > 0)
     {
         if (src.asks.begin()->first < src.bids.rbegin()->first)
@@ -386,6 +386,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
             LOG_ERROR(src.symbol + " Depth Error ask.begin: " + src.asks.begin()->first.get_str_value()
                       + " < bids.end:" +  src.bids.rbegin()->first.get_str_value());
         }
+    }
+    else
+    {
+  
     }
 
     return src;
@@ -423,10 +427,12 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
+    set_snap(src);
+
     // 获取配置
     double hedge_percent = 0;
-    auto iter = ctx.params.cache_config.find(src.symbol);
-    if( iter != ctx.params.cache_config.end() ) {
+    auto iter = ctx.params.quote_config.find(src.symbol);
+    if( iter != ctx.params.quote_config.end() ) {
         hedge_percent = iter->second.HedgeFundRatio;
     }
 
@@ -438,8 +444,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     // 动态调整每个品种的资金分配量
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
-    ctx.params.cache_account.get_hedge_amounts(sell_currency, hedge_percent / sell_count, sell_total_amounts);
-    ctx.params.cache_account.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_percent / sell_count, sell_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
 
     // 逐档从总余额中扣除资金消耗
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
@@ -622,6 +628,13 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
+    if (quote.symbol == "ETH_USDT")
+    {
+        LOG_DEBUG("\n Original Quote: " + " " 
+                    + quote.symbol + " " + quote_str(quote, 5));
+    } 
+
+
     if (filter_zero_volume( const_cast<SInnerQuote&>(quote), filter_quote_mutex_))
     {
         LOG_DEBUG("\n" + quote.symbol + " raw quote\n" + quote_str(quote));     
@@ -652,17 +665,17 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 void DataCenter::change_account(const AccountInfo& info)
 {   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    params_.cache_account = info;
+    params_.account_config = info;
     _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
 {   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    params_.cache_config = config;
+    params_.quote_config = config;
 
     LOG_INFO("DataCenter::change QuoteConfiguration");
-    for (auto iter:params_.cache_config)
+    for (auto iter:params_.quote_config)
     {
         LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
     }    
@@ -741,11 +754,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         return;
     }
 
-    //  if (filter_zero_volume(newQuote, filter_quote_mutex_))
-    // {
-    //     LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(quote));
-    //     return;  
-    // }    
+    if (filter_zero_volume(newQuote, filter_quote_mutex_))
+    {
+        LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(newQuote));
+        return;  
+    }    
 
     
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
@@ -773,13 +786,13 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 bool DataCenter::check_quote(SInnerQuote& quote)
 {
     bool result = false;
-    if (params_.cache_config.find(quote.symbol) != params_.cache_config.end())
+    if (params_.quote_config.find(quote.symbol) != params_.quote_config.end())
     {
-        result = params_.cache_config[quote.symbol].IsPublish;
+        result = params_.quote_config[quote.symbol].IsPublish;
 
         if (!result) return result;
 
-        uint32 publis_level = params_.cache_config[quote.symbol].PublishLevel;
+        uint32 publis_level = params_.quote_config[quote.symbol].PublishLevel;
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
@@ -1093,18 +1106,18 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote.asks, true, params_.cache_config[symbol], volume, price, quote.precise);
+            return _calc_otc_by_volume(quote.asks, true, params_.quote_config[symbol], volume, price, quote.precise);
         } else {
-            return _calc_otc_by_volume(quote.bids, false, params_.cache_config[symbol], volume, price, quote.precise);   
+            return _calc_otc_by_volume(quote.bids, false, params_.quote_config[symbol], volume, price, quote.precise);   
         }
     } 
     else
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.asks, true, params_.cache_config[symbol], amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.asks, true, params_.quote_config[symbol], amount, price, quote.precise);
         } else { 
-            return _calc_otc_by_amount(quote.bids, false, params_.cache_config[symbol], amount, price, quote.precise);
+            return _calc_otc_by_amount(quote.bids, false, params_.quote_config[symbol], amount, price, quote.precise);
         }
     }
 
@@ -1116,14 +1129,14 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
     watermark_worker_.query(watermarks);
 
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( const auto&v : params_.cache_account.hedge_accounts_ ) {
+    for( const auto&v : params_.account_config.hedge_accounts_ ) {
         const TExchange& exchange = v.first;
         for( const auto& v2 : v.second.currencies ) {
             const TSymbol& symbol = v2.first;
             accounts[exchange][symbol] = v2.second.amount;
         }
     }
-    for( const auto&v : params_.cache_config ) {
+    for( const auto&v : params_.quote_config ) {
         const TSymbol& symbol = v.first;
         configurations[symbol] = v.second.desc();
     }

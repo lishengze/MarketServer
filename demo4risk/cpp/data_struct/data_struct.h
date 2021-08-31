@@ -345,8 +345,8 @@ struct SInnerQuote {
 };
 
 struct Params {
-    AccountInfo cache_account;
-    map<TSymbol, QuoteConfiguration> cache_config;
+    AccountInfo account_config;
+    map<TSymbol, QuoteConfiguration> quote_config;
     map<TSymbol, SymbolConfiguration> symbol_config;
     map<TSymbol, HedgeInfo> hedage_info;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;

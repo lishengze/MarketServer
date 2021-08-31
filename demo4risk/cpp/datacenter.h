@@ -46,11 +46,11 @@ public:
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
         SInnerQuote& tmp = this->process(src, ctx);
 
-        // if (filter_zero_volume(tmp, filter_quote_mutex_))
-        // {
-        //     LOG_WARN("\n" + tmp.symbol + " After " + worker_name + " \n" + quote_str(tmp));  
-        //     return tmp;  
-        // }            
+        if (filter_zero_volume(tmp, filter_quote_mutex_))
+        {
+            LOG_WARN("\n" + tmp.symbol + " After " + worker_name + " \n" + quote_str(tmp));  
+            return tmp;  
+        }            
 
         if( next_ ) {            
             return next_->run(tmp, ctx);

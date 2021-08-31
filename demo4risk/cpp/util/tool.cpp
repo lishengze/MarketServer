@@ -7,30 +7,30 @@ void print_quote(const SInnerQuote& quote)
 {
     std::stringstream s_s;
     s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
-    // int test_numb = 5;    
-    // s_s << "------------- asks info: first " << test_numb << " data \n";
+    // int count = 5;    
+    // s_s << "------------- asks info: first " << count << " data \n";
     // int i = 0;
 
-    // for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < test_numb; ++iter, ++i)
+    // for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
     // {
     //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     // }
-    // s_s << "+++++++++ last" << test_numb <<  " data +++++++++" << endl;
+    // s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
     // i = 0;
-    // for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < test_numb; ++iter, ++i)
+    // for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
     // {
     //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     // }    
 
-    // s_s << "***************** bids info: first " << test_numb << " data \n";
+    // s_s << "***************** bids info: first " << count << " data \n";
     // i = 0;
-    // for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < test_numb; ++iter, ++i)
+    // for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
     // {
     //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     // }
-    // s_s << "+++++++++last" << test_numb <<  " data+++++++++" << endl;
+    // s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
     // i = 0;
-    // for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < test_numb; ++iter, ++i)
+    // for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
     // {
     //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
     // }  
@@ -54,32 +54,66 @@ void print_quote(const SInnerQuote& quote)
     }
 
 
+
+
     LOG_DEBUG(s_s.str());
 }
 
-string quote_str(const SInnerQuote& quote)
+string quote_str(const SInnerQuote& quote, int count)
 {
     try
     {
         std::stringstream s_s;
         s_s << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
                 
-        if (quote.asks.size() > 0)
+        if (count > 0)
         {
-            s_s << "------------- asks info \n";
-            for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+            s_s << "------------- asks info: first " << count << " data \n";
+            int i = 0;
+
+            for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
             {
                 s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
             }
-        }
-
-        if (quote.bids.size() > 0)
-        {
-            s_s << "************* bids info \n";
-            for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+            s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
+            i = 0;
+            for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
             {
                 s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
             }    
+
+            s_s << "***************** bids info: first " << count << " data \n";
+            i = 0;
+            for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            }
+            s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
+            i = 0;
+            for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
+            {
+                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            }              
+        }
+        else
+        {
+            if (quote.asks.size() > 0)
+            {
+                s_s << "------------- asks info \n";
+                for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }
+            }
+
+            if (quote.bids.size() > 0)
+            {
+                s_s << "************* bids info \n";
+                for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }    
+            }
         }
 
         return s_s.str();

@@ -5,7 +5,7 @@
 
 void print_quote(const SInnerQuote& quote);
 
-string quote_str(const SInnerQuote& quote);
+string quote_str(const SInnerQuote& quote, int count= 0);
 
 bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_);
 
