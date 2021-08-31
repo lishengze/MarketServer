@@ -741,11 +741,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         return;
     }
 
-     if (filter_zero_volume(newQuote, filter_quote_mutex_))
-    {
-        LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(quote));
-        return;  
-    }    
+    //  if (filter_zero_volume(newQuote, filter_quote_mutex_))
+    // {
+    //     LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(quote));
+    //     return;  
+    // }    
 
     
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
