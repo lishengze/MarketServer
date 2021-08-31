@@ -96,7 +96,7 @@ bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_)
     {
         std::lock_guard<std::mutex> lk(mutex_);
 
-        filter_zero_volume(quote);
+        return filter_zero_volume(quote);
     }
     catch(const std::exception& e)
     {
