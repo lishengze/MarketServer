@@ -388,11 +388,6 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
         }
     }
 
-    if (filter_zero_volume(src))
-    {
-        LOG_WARN("\n" + src.symbol + " After WatermarkComputerWorker \n" + quote_str(src));
-    }
-
     return src;
 }
 
@@ -500,13 +495,6 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    // if (filter_zero_volume(src))
-    // {
-    //     LOG_DEBUG("\n" + src.symbol + " After AccountAjdustWorker \n" + quote_str(src));
-    //     LOG_WARN( "After AccountAjdustWorker" + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
-    //             + ", bid.size: " + std::to_string(src.bids.size())) ;            
-    // }
-
     return src;
 }
 
@@ -588,13 +576,6 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
     }
 
-    // if (filter_zero_volume(src))
-    // {
-    //     LOG_DEBUG("\n" + src.symbol + " After OrderBookWorker\n" + quote_str(src));
-    //     LOG_WARN( "After OrderBookWorker " + src.symbol + ", ask.size: " + std::to_string(src.asks.size())
-    //             + ", bid.size: " + std::to_string(src.bids.size())) ;             
-    // }    
-
     return src;
     }
     catch(const std::exception& e)
@@ -641,7 +622,7 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    if (filter_zero_volume( const_cast<SInnerQuote&>(quote)))
+    if (filter_zero_volume( const_cast<SInnerQuote&>(quote), filter_quote_mutex_))
     {
         LOG_DEBUG("\n" + quote.symbol + " raw quote\n" + quote_str(quote));     
         LOG_WARN("ori_data" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
@@ -760,7 +741,7 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         return;
     }
 
-     if (filter_zero_volume(newQuote))
+     if (filter_zero_volume(newQuote, filter_quote_mutex_))
     {
         LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(quote));
         return;  

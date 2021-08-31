@@ -90,6 +90,20 @@ string quote_str(const SInnerQuote& quote)
     }
 }
 
+bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+
+        filter_zero_volume(quote);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 bool filter_zero_volume(SInnerQuote& quote)
 {
     try

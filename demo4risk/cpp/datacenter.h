@@ -46,7 +46,7 @@ public:
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
         SInnerQuote& tmp = this->process(src, ctx);
 
-        if (filter_zero_volume(tmp))
+        if (filter_zero_volume(tmp, filter_quote_mutex_))
         {
             LOG_WARN("\n" + tmp.symbol + " After " + worker_name + " \n" + quote_str(tmp));  
             return tmp;  
@@ -65,6 +65,7 @@ public:
     string worker_name{""};
 private:
     Worker *next_ = nullptr;
+    std::mutex      filter_quote_mutex_;
 };
 
 class DefaultWorker : public Worker
@@ -257,4 +258,6 @@ private:
     WatermarkComputerWorker watermark_worker_;
     AccountAjdustWorker account_worker_;
     OrderBookWorker orderbook_worker_;
+
+    std::mutex      filter_quote_mutex_;
 };
