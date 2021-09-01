@@ -333,10 +333,10 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         }
         quote.raw_length = msg.length();
 
-        if (quote.symbol == "ETH_USDT")
-        {
-            LOG_DEBUG("\nOrigianl Update: " + quote_str(quote));
-        }
+        // if (quote.symbol == "ETH_USDT")
+        // {
+        //     LOG_DEBUG("\nOrigianl Update: " + quote_str(quote));
+        // }
 
 
         // 同步snap和update

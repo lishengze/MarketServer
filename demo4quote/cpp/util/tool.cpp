@@ -137,6 +137,78 @@ string quote_str(const SDepthQuote& quote)
     }       
 }
 
+string quote_str(const SDepthQuote& quote, int count)
+{
+    try
+    {
+        std::stringstream s_s;
+        s_s << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
+                
+        if (count > 0)
+        {
+            int i = 0;
+
+            if (quote.asks.size() > 0)
+            {
+                s_s << "------------- asks info: first " << count << " data \n";
+                
+                for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }
+                s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
+                i = 0;
+                for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }                    
+            }
+
+            if (quote.bids.size() > 0)
+            {
+                s_s << "***************** bids info: first " << count << " data \n";
+                i = 0;
+                for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }
+                s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
+                i = 0;
+                for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }    
+            }          
+        }
+        else
+        {
+            if (quote.asks.size() > 0)
+            {
+                s_s << "------------- asks info \n";
+                for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }
+            }
+
+            if (quote.bids.size() > 0)
+            {
+                s_s << "************* bids info \n";
+                for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
+                }    
+            }
+        }
+
+        return s_s.str();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
 string get_sec_time_str(unsigned long time)
 {
     return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
