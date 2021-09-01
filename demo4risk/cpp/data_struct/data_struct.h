@@ -41,6 +41,11 @@ struct SOrderPriceLevel {
 
 struct CurrencyInfo {
     double amount;
+
+    std::string str()
+    {
+        return std::to_string(amount);
+    }
 };
 
 struct HedgeAccountInfo
@@ -48,6 +53,16 @@ struct HedgeAccountInfo
     unordered_map<TSymbol, CurrencyInfo> currencies;
 
     HedgeAccountInfo() {
+    }
+
+    std::string str()
+    {
+        std::stringstream s_s;
+        for (auto iter:currencies)
+        {
+            s_s << iter.first << ": " << iter.second.str() << "\n";
+        }
+        return s_s.str();
     }
 };
 
@@ -84,11 +99,25 @@ struct AccountInfo
         for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
             const HedgeAccountInfo& hedge = iter->second;
             auto iter2 = hedge.currencies.find(currency);
-            if( iter2 != hedge.currencies.end() ) {
+            if( iter2 != hedge.currencies.end() ) 
+            {
                 amounts[iter->first] = iter2->second.amount * percent / 100;
             }
         }
     }
+
+    string hedage_account_str()
+    {
+        std::stringstream s_s;
+        for (auto iter:hedge_accounts_)
+        {
+            s_s << iter.first << ", " << iter.second.str() << "\n";
+        }
+        return s_s.str();
+    }
+
+
+
 };
 
 struct QuoteConfiguration

@@ -373,11 +373,21 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
 
+    // if (src.symbol == "ETH_USDT")
+    // {
+    //     LOG_DEBUG("\nBefore Water, water: " + watermark.get_str_value() + " Quote: \n" + quote_str(src, 5));
+    // } 
      
     if (watermark.get_value() != 0 )
     {
         _filter_by_watermark(src, watermark, ctx);
     }
+
+    // if (src.symbol == "ETH_USDT")
+    // {
+    //     LOG_DEBUG("\nAfter Water, water: " + watermark.get_str_value() + " Quote: " + " " 
+    //                 + src.symbol + " " + quote_str(src, 5));
+    // } 
 
     if (src.asks.size() > 0 && src.bids.size() > 0)
     {
@@ -427,8 +437,6 @@ bool AccountAjdustWorker::get_currency(const SInnerQuote& quote, string& sell_cu
 
 SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
-    return src;
-    
     // set_snap(src);
 
     // 获取配置
@@ -438,34 +446,66 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         hedge_percent = iter->second.HedgeFundRatio;
     }
 
-    // 获取币种出现次数
+    // // 获取币种出现次数
+    // string sell_currency, buy_currency;
+    // int sell_count, buy_count;
+    // if( !get_currency(src, sell_currency, sell_count, buy_currency, buy_count) )
+    //     return src;
+
+    // // 动态调整每个品种的资金分配量
+    // unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
+    // ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_percent / sell_count, sell_total_amounts);
+    // ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
+
     string sell_currency, buy_currency;
     int sell_count, buy_count;
-    if( !get_currency(src, sell_currency, sell_count, buy_currency, buy_count) )
+    if( !getcurrency_from_symbol(src.symbol, sell_currency,  buy_currency))
+    {
+        LOG_WARN("Get Currency From Symbol: " + src.symbol + " Failed!");
         return src;
+    }
+    
+    // check_exchange_volume(src);
 
     // 动态调整每个品种的资金分配量
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
-    ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_percent / sell_count, sell_total_amounts);
-    ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_percent, sell_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent, buy_total_amounts);
+
+    std::stringstream s_s;
+    s_s << "\nBefore Risk sell_total_amounts " << sell_currency << "\n";
+    for (auto iter:sell_total_amounts)
+    {
+        s_s << iter.first << ": " << iter.second << "\n";
+    }
+
+    s_s << "buy_total_amounts " << buy_currency << "\n";
+    for (auto iter:buy_total_amounts)
+    {
+        s_s << iter.first << ": " << iter.second << "\n";
+    }
 
     // 逐档从总余额中扣除资金消耗
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
+        SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
+            // LOG_DEBUG("Sell, "+ sell_currency +" p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value()  + ", tv: " + ori_total_volume.get_str_value());
             double remain_amount = sell_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = 0;
+                // LOG_DEBUG("Sell, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
             } else {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += iter2->second;
             }
         }
     }
+
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; ) 
     {
         SInnerDepth& depth = iter->second;
@@ -479,15 +519,21 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
+        SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
+        
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
-            double remain_amount = sell_total_amounts[exchange];
+            
+            // LOG_DEBUG("Buy," + buy_currency + " p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value()  + ", tv: " + ori_total_volume.get_str_value());
+
+            double remain_amount = buy_total_amounts[exchange];
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = 0;
+                // LOG_DEBUG("Buy, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
             } else {
-                sell_total_amounts[exchange] -= need_amount.get_value();
+                buy_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += iter2->second;
             }
         }
@@ -502,6 +548,20 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             iter++;
         }
     }
+
+    s_s << "\nAfter Risk sell_total_amounts " << sell_currency << "\n";
+    for (auto iter:sell_total_amounts)
+    {
+        s_s << iter.first << ": " << iter.second << "\n";
+    }
+
+    s_s << "buy_total_amounts " << buy_currency << "\n";
+    for (auto iter:buy_total_amounts)
+    {
+        s_s << iter.first << ": " << iter.second << "\n";
+    }
+    // LOG_DEBUG(s_s.str());
+
 
     return src;
 }
@@ -618,10 +678,10 @@ QuotePipeline::~QuotePipeline(){
 }
 /////////////////////////////////////////////////////////////////////////////////
 DataCenter::DataCenter() {
+    pipeline_.add_worker(&account_worker_);
+    pipeline_.add_worker(&orderbook_worker_);    
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
-    pipeline_.add_worker(&account_worker_);
-    pipeline_.add_worker(&orderbook_worker_);
 }
 
 DataCenter::~DataCenter() {
@@ -630,12 +690,13 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    if (quote.symbol == "ETH_USDT")
-    {
-        LOG_DEBUG("\n Original Quote: " + " " 
-                    + quote.symbol + " " + quote_str(quote, 5));
-    } 
+    // if (quote.symbol == "ETH_USDT")
+    // {
+    //     LOG_DEBUG("\n Original Quote: " + " " 
+    //                 + quote.symbol + " " + quote_str(quote, 5));
+    // } 
 
+    // check_exchange_volume(quote);
 
     if (filter_zero_volume( const_cast<SInnerQuote&>(quote), filter_quote_mutex_))
     {

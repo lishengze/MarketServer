@@ -68,32 +68,39 @@ string quote_str(const SInnerQuote& quote, int count)
                 
         if (count > 0)
         {
-            s_s << "------------- asks info: first " << count << " data \n";
             int i = 0;
 
-            for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
+            if (quote.asks.size() > 0)
             {
-                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                s_s << "------------- asks info: first " << count << " data \n";
+                
+                for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }
+                s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
+                i = 0;
+                for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }                    
             }
-            s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
-            i = 0;
-            for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
-            {
-                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-            }    
 
-            s_s << "***************** bids info: first " << count << " data \n";
-            i = 0;
-            for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
+            if (quote.bids.size() > 0)
             {
-                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-            }
-            s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
-            i = 0;
-            for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
-            {
-                s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
-            }              
+                s_s << "***************** bids info: first " << count << " data \n";
+                i = 0;
+                for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }
+                s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
+                i = 0;
+                for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
+                {
+                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                }    
+            }          
         }
         else
         {
@@ -180,6 +187,47 @@ bool filter_zero_volume(SInnerQuote& quote)
     {
         std::cerr << e.what() << '\n';
     }    
+}
+
+bool check_exchange_volume(const SInnerQuote& quote)
+{
+    try
+    {
+        bool result = false;
+        for (auto iter:quote.asks)
+        {
+            for (auto iter2:iter.second.exchanges)
+            {
+                if (iter.second.total_volume < iter2.second)
+                {
+                    LOG_DEBUG("ask "+  quote.symbol + " tv: " + iter.second.total_volume.get_str_value() 
+                                + ", " + iter2.first + " v: " + iter2.second.get_str_value());
+
+                    result = true;
+                }
+            }
+        }
+
+        for (auto iter:quote.bids)
+        {
+            for (auto iter2:iter.second.exchanges)
+            {
+                if (iter.second.total_volume < iter2.second)
+                {
+                    LOG_DEBUG("bid "+  quote.symbol + " tv: " + iter.second.total_volume.get_str_value() 
+                                + ", " + iter2.first + " v: " + iter2.second.get_str_value());
+
+                    result = true;
+                }
+            }
+        }        
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }        
 }
 
 string get_work_dir_name(string path)
