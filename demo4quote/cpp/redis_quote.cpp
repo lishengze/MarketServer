@@ -300,19 +300,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         // }
 
         if( result == SYNC_STARTING )
-        {
-            if (filter_zero_volume(quote))
-            {
-                LOG_WARN("\nSnap Quote: \n" + quote_str(quote));
-            }
-            else
-            {
-                // if (quote.symbol == "ETH_BTC")
-                // {
-                //     LOG_DEBUG("\nAfter _sync_by_snap Snap: \n" + quote_str(quote));
-                // }                
-                engine_interface_->on_snap(exchange, symbol, quote);
-            }            
+        {             
+            engine_interface_->on_snap(exchange, symbol, quote); 
         }
         else if( result == SYNC_REQ_SNAP ) 
         {
@@ -364,15 +353,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
                 LOG_WARN("skip update." + exchange + "." + symbol);
                 return;
             }
-
-            if (filter_zero_volume(tmp))
-            {
-                LOG_WARN("\nUpdate Quote : \n" + quote_str(tmp));
-            }
-            else
-            {
-                engine_interface_->on_update(exchange, symbol, tmp);
-            }            
+            engine_interface_->on_update(exchange, symbol, tmp);         
         }
         else
         {

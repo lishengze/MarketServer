@@ -97,12 +97,12 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& ori_quote) 
 {
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
-    if (filter_zero_volume(quote))
-    {
-        LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
-                + ", bid.size: " + std::to_string(quote.bids.size())) ;       
-        return;      
-    }
+    // if (filter_zero_volume(quote))
+    // {
+    //     LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
+    //             + ", bid.size: " + std::to_string(quote.bids.size())) ;       
+    //     return;      
+    // }
 
     if (quote.symbol == "ETH_USDT")
     {
@@ -229,7 +229,7 @@ void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, con
         SDecimal scaledPrice;
         fee.compute(iter->first, scaledPrice, is_ask);
         scaledPrice.scale(config.precise, is_ask);
-        dst[scaledPrice].volume_by_exchanges[exchange] += iter->second.volume;
+        dst[scaledPrice].volume_by_exchanges[exchange] = iter->second.volume;
     }
 }
 
@@ -264,14 +264,16 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         {
             const TExchange& exchange = data.first;
             const SDepthQuote& ori_quote = data.second;
+
+
             SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
 
-            if (filter_zero_volume(quote))
-            {
-                LOG_WARN( "_calc_symbol " + exchange + "." + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
-                        + ", bid.size: " + std::to_string(quote.bids.size()));  
-                continue;
-            }
+            // if (filter_zero_volume(quote))
+            // {
+            //     LOG_WARN( "_calc_symbol " + exchange + "." + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
+            //             + ", bid.size: " + std::to_string(quote.bids.size()));  
+            //     continue;
+            // }
 
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
