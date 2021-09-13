@@ -440,10 +440,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // set_snap(src);
 
     // 获取配置
-    double hedge_percent = 0;
+    double buy_hedge_percent = 0;
+    double sell_hedge_percent = 0;
     auto iter = ctx.params.quote_config.find(src.symbol);
     if( iter != ctx.params.quote_config.end() ) {
-        hedge_percent = iter->second.HedgeFundRatio;
+        buy_hedge_percent = iter->second.BuyHedgePercent;
+        sell_hedge_percent = iter->second.SellHedgePercent;
     }
 
     // // 获取币种出现次数
@@ -469,8 +471,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     // 动态调整每个品种的资金分配量
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
-    ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_percent, sell_total_amounts);
-    ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent, buy_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(sell_currency, buy_hedge_percent, sell_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(buy_currency, sell_hedge_percent, buy_total_amounts);
 
     std::stringstream s_s;
     s_s << "\nBefore Risk sell_total_amounts " << sell_currency << "\n";

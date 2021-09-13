@@ -138,6 +138,9 @@ struct QuoteConfiguration
     //double UserPercent;    // 百分比；用户账户可动用比例
     double HedgeFundRatio;   // 百分比；对冲账户可动用比例
 
+    double BuyHedgePercent;
+    double SellHedgePercent;
+
     uint32 OTCOffsetKind;    // 询价偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
 
     double OtcOffset;        // 询价偏移
@@ -155,6 +158,8 @@ struct QuoteConfiguration
               << "AmountOffset: " << AmountOffset << "\n"
               << "DepositFundRatio: " << DepositFundRatio << "\n"
               << "HedgeFundRatio: " << HedgeFundRatio << "\n"
+              << "BuyHedgePercent: " << BuyHedgePercent << "\n"
+              << "SellHedgePercent: " << SellHedgePercent << "\n"
               << "OTCOffsetKind: " << OTCOffsetKind << "\n"
               << "OtcOffset: " << OtcOffset << "\n"
               << "IsPublish: " << IsPublish << "\n";
