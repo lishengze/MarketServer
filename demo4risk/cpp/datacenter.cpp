@@ -702,10 +702,11 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 
     if (filter_zero_volume( const_cast<SInnerQuote&>(quote), filter_quote_mutex_))
     {
-        LOG_DEBUG("\n" + quote.symbol + " raw quote\n" + quote_str(quote));     
-        LOG_WARN("ori_data" + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
-                + ", bid.size: " + std::to_string(quote.bids.size())) ;
-        return;
+        LOG_WARN("\n" + quote.symbol + " raw quote\n" + quote_str(quote));
+        if (quote.asks.size() == 0 && quote.bids.size() == 0)
+        {
+            return;
+        }
     }    
 
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
@@ -821,8 +822,11 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     if (filter_zero_volume(newQuote, filter_quote_mutex_))
     {
-        LOG_WARN("\n" + quote.symbol + " _publish_quote \n" + quote_str(newQuote));
-        return;  
+        LOG_WARN("\n" + newQuote.symbol + " _publish_quote \n" + quote_str(newQuote));
+        if (newQuote.asks.size() == 0 && newQuote.bids.size() == 0)
+        {
+            return;
+        } 
     }    
 
     
