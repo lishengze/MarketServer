@@ -44,17 +44,23 @@ public:
 
 
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
+
+        if (filter_zero_volume(src))
+        {
+            LOG_WARN("\nBefore "+ worker_name + " " + src.symbol + quote_str(src));
+        }  
+
         SInnerQuote& tmp = this->process(src, ctx);
 
-        if (filter_zero_volume(tmp, filter_quote_mutex_))
+        if (tmp.asks.size() == 0 && tmp.bids.size() == 0)
         {
-            LOG_WARN("\n" + tmp.symbol + " After " + worker_name + " \n" + quote_str(tmp));  
+            return tmp;
+        }
 
-            if (tmp.asks.size() == 0 && tmp.bids.size() == 0)
-            {
-                return tmp;
-            }
-        }            
+        if (filter_zero_volume(src))
+        {
+            LOG_WARN("\nAfter "+ worker_name + " " + src.symbol + quote_str(src));
+        }          
 
         if( next_ ) {            
             return next_->run(tmp, ctx);

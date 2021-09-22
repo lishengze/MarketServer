@@ -209,15 +209,14 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
         else
         {
-            /* code */
+            LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
     
-
     return src;
 }
 
@@ -445,7 +444,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     auto iter = ctx.params.quote_config.find(src.symbol);
     if( iter != ctx.params.quote_config.end() ) {
         buy_hedge_percent = iter->second.BuyHedgePercent;
-        sell_hedge_percent = iter->second.SellHedgePercent;
+        sell_hedge_percent = iter->second.SellHedgePercent;        
+    }
+    else
+    {
+        LOG_WARN(src.symbol + " has no quote_config");
+        return src;
     }
 
     // // 获取币种出现次数
@@ -470,11 +474,19 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // check_exchange_volume(src);
 
     // 动态调整每个品种的资金分配量
+
+    std::stringstream s_s;
+
+    s_s << iter->second.desc() << "\n";
+    s_s << ctx.params.account_config.hedage_account_str() << "\n";
+    s_s << "buy_hedge_percent: " << buy_hedge_percent << ", sell_hedge_percent: " << sell_hedge_percent << "\n";
+    
+
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
     ctx.params.account_config.get_hedge_amounts(sell_currency, buy_hedge_percent, sell_total_amounts);
     ctx.params.account_config.get_hedge_amounts(buy_currency, sell_hedge_percent, buy_total_amounts);
 
-    std::stringstream s_s;
+    
     s_s << "\nBefore Risk sell_total_amounts " << sell_currency << "\n";
     for (auto iter:sell_total_amounts)
     {
@@ -496,12 +508,20 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
-            // LOG_DEBUG("Sell, "+ sell_currency +" p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value()  + ", tv: " + ori_total_volume.get_str_value());
             double remain_amount = sell_total_amounts[exchange];
-            if( remain_amount < need_amount.get_value() ) {
+
+            s_s << "Ask " << exchange << " p: " + iter->first.get_str_value() + " " 
+                << " need_amount: " + need_amount.get_str_value()  
+                << ", remain_amount: " + std::to_string(remain_amount) << "\n";
+            
+            if( remain_amount < need_amount.get_value() ) 
+            {
                 iter2->second = 0;
+                break;
                 // LOG_DEBUG("Sell, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
-            } else {
+            } 
+            else 
+            {
                 sell_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += iter2->second;
             }
@@ -527,12 +547,15 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
-            
-            // LOG_DEBUG("Buy," + buy_currency + " p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value()  + ", tv: " + ori_total_volume.get_str_value());
-
             double remain_amount = buy_total_amounts[exchange];
+            
+            s_s << "Bid " << exchange << " p: " + iter->first.get_str_value() + " " 
+                << " need_amount: " + need_amount.get_str_value()  
+                << ", remain_amount: " + std::to_string(remain_amount) << "\n";
+
             if( remain_amount < need_amount.get_value() ) {
                 iter2->second = 0;
+                break;
                 // LOG_DEBUG("Buy, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
             } else {
                 buy_total_amounts[exchange] -= need_amount.get_value();
@@ -562,9 +585,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     {
         s_s << iter.first << ": " << iter.second << "\n";
     }
-    // LOG_DEBUG(s_s.str());
 
-
+    if (src.asks.size() == 0 || src.bids.size() == 0)
+    {
+        LOG_DEBUG(s_s.str());
+    }
+    
     return src;
 }
 
@@ -668,6 +694,7 @@ SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
             v.second.total_volume += v2.second;
         }
     }
+
     return src;
 }
 
@@ -692,11 +719,11 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    if (quote.symbol == "ETH_USDT")
-    {
-        LOG_DEBUG("\nOriginal Quote: " + " " 
-                    + quote.symbol + " " + quote_str(quote, 5));
-    } 
+    // if (quote.symbol == "ETH_USDT")
+    // {
+    //     LOG_DEBUG("\nOriginal Quote: " + " " 
+    //                 + quote.symbol + " " + quote_str(quote, 5));
+    // } 
 
     // check_exchange_volume(quote);
 
