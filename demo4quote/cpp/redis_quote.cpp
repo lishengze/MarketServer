@@ -382,6 +382,12 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 
         filter_kline_data(klines);
 
+        if (klines.size() == 0)
+        {
+            LOG_WARN(exchange + "." + symbol + " is empty!");
+            return;
+        }
+
         engine_interface_->on_kline(exchange, symbol, kline_min1_.resolution_, klines, first_package);
     }
     else if( channel.find(KLINE_60MIN_HEAD) != string::npos )

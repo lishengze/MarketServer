@@ -500,6 +500,11 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
             v->on_kline(exchange, symbol, 3600, output_60mins);
         }
     }
+    else
+    {
+        LOG_WARN(exchange + "." + symbol + "." + std::to_string(resolution) + " is empty! KlineSize: " + std::to_string(klines.size()));
+    }
+
 }
 
 // start_time 为0代表无效
