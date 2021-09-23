@@ -443,8 +443,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     double sell_hedge_percent = 0;
     auto iter = ctx.params.quote_config.find(src.symbol);
     if( iter != ctx.params.quote_config.end() ) {
-        buy_hedge_percent = iter->second.BuyHedgePercent;
-        sell_hedge_percent = iter->second.SellHedgePercent;        
+        buy_hedge_percent = iter->second.BuyFundPercent;
+        sell_hedge_percent = iter->second.SellFundPercent;        
     }
     else
     {

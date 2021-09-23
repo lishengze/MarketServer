@@ -140,8 +140,8 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             double DepositFundRatio = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
 
             double HedgeFundRatio = helper_get_double(*iter, "hedge_fund_ratio", 100);
-            double BuyHedgePercent = helper_get_double(*iter, "buy_hedge_fund_ratio", 100);
-            double SellHedgePercent = helper_get_double(*iter, "sell_hedge_fund_ratio", 100);
+            double BuyFundPercent = helper_get_double(*iter, "buy_fund_ratio", 100);
+            double SellFundPercent = helper_get_double(*iter, "sell_fund_ratio", 100);
 
             uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
             double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
@@ -198,8 +198,8 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             cfg.AmountOffset = AmountOffset;
             cfg.DepositFundRatio = DepositFundRatio;
             cfg.HedgeFundRatio = HedgeFundRatio;
-            cfg.BuyHedgePercent = BuyHedgePercent;
-            cfg.SellHedgePercent = SellHedgePercent;
+            cfg.BuyFundPercent = BuyFundPercent;
+            cfg.SellFundPercent = SellFundPercent;
 
             cfg.OTCOffsetKind = OTCOffsetKind;
             cfg.OtcOffset = OtcOffset;
