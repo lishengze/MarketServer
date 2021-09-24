@@ -229,9 +229,11 @@ public:
     // 触发重新计算，并下发行情给所有client
     void change_account(const AccountInfo& info);
     // 触发重新计算，并下发行情给所有client
-    void change_configuration(const map<TSymbol, QuoteConfiguration>& config);
+    void change_configuration(const map<TSymbol, MarketRiskConfig>& config);
 
     void change_configuration(const map<TSymbol, SymbolConfiguration>& config);
+
+    void change_configuration(const map<TSymbol, map<TExchange, HedgeConfig>>& config);
 
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);

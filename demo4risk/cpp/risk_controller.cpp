@@ -94,7 +94,7 @@ void RiskControllerServer::on_snap(const SEData& quote)
     datacenter_.add_quote(raw);
 }
 
-void RiskControllerServer::on_configuration_update(const map<TSymbol, QuoteConfiguration>& config)
+void RiskControllerServer::on_configuration_update(const map<TSymbol, MarketRiskConfig>& config)
 {
     datacenter_.change_configuration(config);
 }
@@ -102,6 +102,18 @@ void RiskControllerServer::on_configuration_update(const map<TSymbol, QuoteConfi
 void RiskControllerServer::on_configuration_update(const map<TSymbol, SymbolConfiguration>& config)
 {
     datacenter_.change_configuration(config);
+}
+
+void RiskControllerServer::on_configuration_update(const map<TSymbol, map<TExchange, HedgeConfig>>& config)
+{
+    try
+    {
+        datacenter_.change_configuration(config);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 void RiskControllerServer::on_account_update(const AccountInfo& account)

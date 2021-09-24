@@ -12,9 +12,11 @@
 
 class IConfigurationUpdater {
 public:
-    virtual void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config) = 0;
+    virtual void on_configuration_update(const map<TSymbol, MarketRiskConfig>& config) = 0;
 
     virtual void on_configuration_update(const map<TSymbol, SymbolConfiguration>& config) = 0;
+
+    virtual void on_configuration_update(const map<TSymbol, map<TExchange, HedgeConfig>>& config) = 0;
 };
 
 class ConfigurationClient: public NacosClient
@@ -27,9 +29,11 @@ public:
 
     void load_symbol_params(const NacosString &configInfo);
 
+    void load_hedge_params(const NacosString &configInfo);
+
     bool check_symbol(std::string symbol);
 
-    // map<TSymbol, QuoteConfiguration>& get_risk_config() { return risk_config_;}
+    // map<TSymbol, MarketRiskConfig>& get_risk_config() { return risk_config_;}
 
 
 private:
@@ -40,16 +44,19 @@ private:
 
     // NacosListener
     NacosListener risk_watcher_;
+    NacosListener symbol_watcher_;    
+    NacosListener hedger_watcher_;
 
-    NacosListener symbol_watcher_;
-    
     SymbolConfiguration symbol_params_;
+
 
     // 处理配置数据
     void _parse_config();
     NacosString risk_params_; // for 品种更新频率 和 品种更新深度
 
-    // map<TSymbol, QuoteConfiguration> risk_config_;
+    NacosString hedge_params_;
+
+    // map<TSymbol, MarketRiskConfig> risk_config_;
     // std::mutex                       risk_config_mutex_;
 };
 

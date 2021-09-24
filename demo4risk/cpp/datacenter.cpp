@@ -146,7 +146,7 @@ void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark, PipelineC
     _filter_depth_by_watermark(src, watermark, false, ctx);
 }
 
-void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, QuoteConfiguration& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
+void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketRiskConfig& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
 {
     double price_bias = config.PriceOffset;
     double volume_bias = config.AmountOffset;
@@ -441,16 +441,28 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // 获取配置
     double buy_hedge_percent = 0;
     double sell_hedge_percent = 0;
-    auto iter = ctx.params.quote_config.find(src.symbol);
-    if( iter != ctx.params.quote_config.end() ) {
-        buy_hedge_percent = iter->second.BuyFundPercent;
-        sell_hedge_percent = iter->second.SellFundPercent;        
+
+    if(ctx.params.hedge_config.find(src.symbol) != ctx.params.hedge_config.end()) 
+    {
+        if (ctx.params.hedge_config[src.symbol].find(src.exchange) 
+            != ctx.params.hedge_config[src.symbol].end())
+        {
+            buy_hedge_percent = ctx.params.hedge_config[src.symbol][src.exchange].BuyFundPercent;
+            sell_hedge_percent = ctx.params.hedge_config[src.symbol][src.exchange].SellFundPercent;   
+        }    
+        else
+        {
+            LOG_WARN(src.symbol + "." + src.exchange + " has no quote_config");
+            return src;            
+        }
     }
     else
     {
         LOG_WARN(src.symbol + " has no quote_config");
         return src;
     }
+
+    HedgeConfig& hedge_config = ctx.params.hedge_config[src.symbol][src.exchange];
 
     // // 获取币种出现次数
     // string sell_currency, buy_currency;
@@ -477,7 +489,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     std::stringstream s_s;
 
-    s_s << iter->second.desc() << "\n";
+    s_s << hedge_config.str() << "\n";
     s_s << ctx.params.account_config.hedage_account_str() << "\n";
     s_s << "buy_hedge_percent: " << buy_hedge_percent << ", sell_hedge_percent: " << sell_hedge_percent << "\n";
     
@@ -518,7 +530,6 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             {
                 iter2->second = 0;
                 break;
-                // LOG_DEBUG("Sell, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
             } 
             else 
             {
@@ -598,13 +609,13 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {        
     try
     {
-    if (ctx.params.hedage_info.find(src.symbol) != ctx.params.hedage_info.end())
+    if (ctx.params.hedage_order_info.find(src.symbol) != ctx.params.hedage_order_info.end())
     {
-        HedgeInfo& hedage_info = ctx.params.hedage_info[src.symbol];
+        HedgeInfo& hedage_order_info = ctx.params.hedage_order_info[src.symbol];
 
-        if (hedage_info.ask_amount > 0)
+        if (hedage_order_info.ask_amount > 0)
         {
-            double ask_amount = hedage_info.ask_amount;
+            double ask_amount = hedage_order_info.ask_amount;
 
             std::vector<SDecimal> delete_price;
 
@@ -635,9 +646,9 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             }            
         }
 
-        if (hedage_info.bid_amount > 0)
+        if (hedage_order_info.bid_amount > 0)
         {
-            double bid_amount = hedage_info.bid_amount;
+            double bid_amount = hedage_order_info.bid_amount;
 
             std::vector<SDecimal> delete_price;
 
@@ -762,12 +773,12 @@ void DataCenter::change_account(const AccountInfo& info)
     _push_to_clients();
 }
 
-void DataCenter::change_configuration(const map<TSymbol, QuoteConfiguration>& config)
+void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.quote_config = config;
 
-    LOG_INFO("DataCenter::change QuoteConfiguration");
+    LOG_INFO("DataCenter::change MarketRiskConfig");
     for (auto iter:params_.quote_config)
     {
         LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
@@ -787,13 +798,34 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
         {
             LOG_INFO("\n" + iter.first + " " + iter.second.desc());
         }
-
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
     
+}
+
+void DataCenter::change_configuration(const map<TSymbol, map<TExchange, HedgeConfig>>& config)
+{
+    try
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        params_.hedge_config = config;
+
+        LOG_INFO("DataCenter::change HedgeConfig");
+        for (auto iter1:params_.hedge_config)
+        {
+            for (auto iter2:iter1.second)
+            {
+                LOG_INFO(iter2.second.str());
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
 }
 
 void DataCenter::change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
@@ -911,7 +943,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
     
 }
 
-void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
+void reset_price(double& price, MarketRiskConfig& config, bool is_ask)
 {
     try
     {
@@ -951,7 +983,7 @@ void reset_price(double& price, QuoteConfiguration& config, bool is_ask)
     }
 }
 
-QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double volume, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0; 
     SDecimal total_amount = 0;
@@ -1065,7 +1097,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, QuoteConfiguration& config, double otc_amount, SDecimal& price, uint32 precise)
+QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& price, uint32 precise)
 {
     SDecimal total_volume = 0;
     SDecimal total_amount = 0;
@@ -1242,13 +1274,13 @@ void DataCenter::hedge_trade_order(string& symbol, double price, double amount, 
 {
     try
     {
-        if (params_.hedage_info.find(symbol) == params_.hedage_info.end() && !is_trade)
+        if (params_.hedage_order_info.find(symbol) == params_.hedage_order_info.end() && !is_trade)
         {
-            params_.hedage_info[symbol] = HedgeInfo(symbol, price, amount, direction, is_trade);
+            params_.hedage_order_info[symbol] = HedgeInfo(symbol, price, amount, direction, is_trade);
         }
         else
         {
-            params_.hedage_info[symbol].set(symbol, price, amount, direction, is_trade);
+            params_.hedage_order_info[symbol].set(symbol, price, amount, direction, is_trade);
         }
     }
     catch(const std::exception& e)

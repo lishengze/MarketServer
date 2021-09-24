@@ -101,7 +101,7 @@ struct AccountInfo
             auto iter2 = hedge.currencies.find(currency);
             if( iter2 != hedge.currencies.end() ) 
             {
-                amounts[iter->first] = iter2->second.amount * percent / 100;
+                amounts[iter->first] = iter2->second.amount * percent;
             }
         }
     }
@@ -120,11 +120,72 @@ struct AccountInfo
 
 };
 
-struct QuoteConfiguration
+/*
+HedgeParams
+
+    "platform_id":"HUOBI",
+    "instrument":"BTC_USDT",
+    "switch":true,
+    "buy_fund_ratio":0,
+    "sell_fund_ratio":0,
+    "price_precision":2,
+    "amount_precision":4,
+    "sum_precision":2,
+    "min_unit":0.0001,
+    "min_change_price":0.01,
+    "max_margin":1,
+    "max_order":100,
+    "buy_price_limit":10000,
+    "sell_price_limit":5000,
+    "max_match_level":5,
+    "fee_kind":1,
+    "taker_fee":0.0020,
+    "maker_fee":0.0020
+*/
+struct HedgeConfig
 {
     //double MakerFee; // 百分比；maker手续费
     //double TakerFee; // 百分比；taker手续费
     std::string symbol;
+    std::string exchange;
+
+    double BuyFundPercent;
+    double SellFundPercent;
+
+    std::string str() const {
+
+        stringstream s_obj;
+        s_obj << "symbol: " << symbol << "\n"
+              << "exchange: " << exchange << "\n"
+              << "BuyFundPercent: " << BuyFundPercent << "\n"
+              << "SellFundPercent: " << SellFundPercent << "\n";
+        
+        return s_obj.str();
+    }
+};
+/*
+
+
+{
+    "symbol_id":"BTC_USDT",
+    "switch":true,
+    "publish_frequency":1,
+    "publish_level":20,
+    "price_offset_kind":1,
+    "price_offset":0.001,
+    "amount_offset_kind":1,
+    "amount_offset":0.5,
+    "poll_offset_kind":1,
+    "poll_offset":0.001,
+    "user":"admin",
+    time":"2021-07-13 06:25:33"},
+*/
+struct MarketRiskConfig
+{
+    //double MakerFee; // 百分比；maker手续费
+    //double TakerFee; // 百分比；taker手续费
+    std::string symbol;
+
     uint32 PublishFrequency;
     uint32 PublishLevel;
     uint32 PriceOffsetKind;  // 价格偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
@@ -134,12 +195,6 @@ struct QuoteConfiguration
     double AmountOffset;     // 行情数量偏移
 
     double DepositFundRatio; // 充值资金动用比例
-
-    //double UserPercent;    // 百分比；用户账户可动用比例
-    double HedgeFundRatio;   // 百分比；对冲账户可动用比例
-
-    double BuyFundPercent;
-    double SellFundPercent;
 
     uint32 OTCOffsetKind;    // 询价偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
 
@@ -157,9 +212,6 @@ struct QuoteConfiguration
               << "AmountOffsetKind: " << AmountOffsetKind << "\n"
               << "AmountOffset: " << AmountOffset << "\n"
               << "DepositFundRatio: " << DepositFundRatio << "\n"
-              << "HedgeFundRatio: " << HedgeFundRatio << "\n"
-              << "BuyFundPercent: " << BuyFundPercent << "\n"
-              << "SellFundPercent: " << SellFundPercent << "\n"
               << "OTCOffsetKind: " << OTCOffsetKind << "\n"
               << "OtcOffset: " << OtcOffset << "\n"
               << "IsPublish: " << IsPublish << "\n";
@@ -380,8 +432,9 @@ struct SInnerQuote {
 
 struct Params {
     AccountInfo account_config;
-    map<TSymbol, QuoteConfiguration> quote_config;
+    map<TSymbol, MarketRiskConfig> quote_config;
     map<TSymbol, SymbolConfiguration> symbol_config;
-    map<TSymbol, HedgeInfo> hedage_info;
+    map<TSymbol, HedgeInfo> hedage_order_info;
+    map<TSymbol, map<TExchange, HedgeConfig>> hedge_config;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
 };

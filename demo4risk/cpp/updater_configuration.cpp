@@ -5,6 +5,7 @@ void ConfigurationClient::_run()
 {
     add_listener("BCTS", "MarketRisk", risk_watcher_);
     add_listener("BCTS", "SymbolParams", symbol_watcher_);
+    add_listener("BCTS", "HedgeParams", hedger_watcher_);
 
     while( is_running() ) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -14,6 +15,8 @@ void ConfigurationClient::_run()
 void ConfigurationClient::config_changed(const string& group, const string& dataid, const NacosString &configInfo)
 {
     // _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
+
+    LOG_INFO("\n--------------- config changed "+ group + "."+ dataid + ": \n" + configInfo.c_str());
     
     if( group == "BCTS" ) {
 
@@ -21,11 +24,18 @@ void ConfigurationClient::config_changed(const string& group, const string& data
         {
             risk_params_ = configInfo;
 
-            if( risk_params_.length() > 0 ) {
+            if( risk_params_.length() > 0 ) 
+            {
                 this->_parse_config();
             }
-
         }
+
+        if( dataid == "HedgeParams" ) 
+        {
+            hedge_params_ = configInfo;
+
+            load_hedge_params(hedge_params_);          
+        }        
 
         if (dataid == "SymbolParams")
         {
@@ -47,9 +57,12 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
         Document paramsObject;
         paramsObject.Parse(configInfo.c_str());
 
+        LOG_INFO("\n--------------- load_symbol_params: \n" + configInfo.c_str());
+    
+
         if(paramsObject.HasParseError())
         {
-            _log_and_print("ConfigurationClient::load_symbol_params error %d", paramsObject.GetParseError());
+            LOG_WARN("ConfigurationClient::load_symbol_params error " + std::to_string(paramsObject.GetParseError()));
             return;
         }
 
@@ -113,19 +126,74 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
     }
     catch(const std::exception& e)
     {
-        std::cerr << "\n[E] ConfigurationClient::load_symbol_params " << e.what() << '\n';
+        LOG_ERROR(e.what());
     }    
 }
 
-bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& output)
+void ConfigurationClient::load_hedge_params(const NacosString &configInfo)
+{
+    try
+    {
+        Document hedgeParamsObject;    
+        hedgeParamsObject.Parse(hedge_params_.c_str());
+        if(hedgeParamsObject.HasParseError())
+        {
+            LOG_WARN("parse HedgeParams error: " + std::to_string(hedgeParamsObject.GetParseError()));
+            return;
+        }
+        LOG_INFO("\nHedgeRisk OriInfo: \n" + hedge_params_.c_str());
+
+        map<TSymbol, map<TExchange, HedgeConfig>> output;
+
+        for( auto iter = hedgeParamsObject.Begin() ; iter != hedgeParamsObject.End() ; iter++ ) 
+        {
+            HedgeConfig config;
+
+            string symbol = helper_get_string(*iter, "instrument", "");
+            string exchange = helper_get_string(*iter, "platform_id", "");
+
+            double BuyFundPercent = helper_get_double(*iter, "buy_fund_ratio", 1);
+            double SellFundPercent = helper_get_double(*iter, "sell_fund_ratio", 1);
+
+            if (symbol == "")
+            {
+                LOG_WARN("Empty Symbol");
+                continue;
+            }            
+
+            if (exchange == "")
+            {
+                LOG_WARN("Empty Exchange");
+                continue;
+            }
+
+            config.exchange = exchange;
+            config.symbol = symbol;
+            config.BuyFundPercent = BuyFundPercent;
+            config.SellFundPercent = SellFundPercent;
+
+            output[symbol][exchange] = config;
+
+            LOG_INFO(config.str());
+        }        
+
+        callback_->on_configuration_update(output);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+bool combine_config(const Document& risks, map<TSymbol, MarketRiskConfig>& output)
 {    
     try
     {
-
-        // add symbol-config to output first
         if( !risks.IsArray() )
             return false;        
-        for( auto iter = risks.Begin() ; iter != risks.End() ; iter++ ) {
+
+        for( auto iter = risks.Begin() ; iter != risks.End() ; iter++ ) 
+        {
             string symbol = helper_get_string(*iter, "symbol_id", "");
             bool IsPublish = helper_get_bool(*iter, "switch", true);
             uint32 PublishFrequency = helper_get_uint32(*iter, "publish_frequency", 1); // 暂时没用
@@ -138,10 +206,6 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             double AmountOffset = helper_get_double(*iter, "amount_offset", 0);
 
             double DepositFundRatio = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
-
-            double HedgeFundRatio = helper_get_double(*iter, "hedge_fund_ratio", 100);
-            double BuyFundPercent = helper_get_double(*iter, "buy_fund_ratio", 100);
-            double SellFundPercent = helper_get_double(*iter, "sell_fund_ratio", 100);
 
             uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
             double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
@@ -187,7 +251,7 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
                 continue;
             }            
 
-            QuoteConfiguration cfg;
+            MarketRiskConfig cfg;
 
             cfg.symbol = symbol;
             cfg.PublishFrequency = PublishFrequency;
@@ -197,9 +261,6 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             cfg.AmountOffsetKind = AmountOffsetKind;
             cfg.AmountOffset = AmountOffset;
             cfg.DepositFundRatio = DepositFundRatio;
-            cfg.HedgeFundRatio = HedgeFundRatio;
-            cfg.BuyFundPercent = BuyFundPercent;
-            cfg.SellFundPercent = SellFundPercent;
 
             cfg.OTCOffsetKind = OTCOffsetKind;
             cfg.OtcOffset = OtcOffset;
@@ -208,17 +269,13 @@ bool combine_config(const Document& risks, map<TSymbol, QuoteConfiguration>& out
             output[symbol] = cfg;
 
             LOG_INFO("\nMarketRisk: " + symbol + "\n" + cfg.desc());
-
-            // std::cout << cfg.desc() << std::endl;
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
     
-
-
     return true;
 }
 
@@ -226,22 +283,21 @@ void ConfigurationClient::_parse_config()
 {
     Document riskParamsObject;
     riskParamsObject.Parse(risk_params_.c_str());
-
     if(riskParamsObject.HasParseError())
     {
         LOG_ERROR("parse RiskParams error " + std::to_string(riskParamsObject.GetParseError()));
         return;
     }
-
     LOG_INFO("\nMarketRisk OriInfo: \n" + risk_params_.c_str());
 
     // 合并为内置配置格式
-    map<TSymbol, QuoteConfiguration> output;
+    map<TSymbol, MarketRiskConfig> output;
     if( combine_config(riskParamsObject, output) ) {
         
         callback_->on_configuration_update(output);
     }
 }
+
 
 bool ConfigurationClient::check_symbol(string symbol)
 {

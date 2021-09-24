@@ -28,9 +28,11 @@ public:
     void on_snap(const SEData& quote);
 
     // 配置修改回调
-    void on_configuration_update(const map<TSymbol, QuoteConfiguration>& config);
+    void on_configuration_update(const map<TSymbol, MarketRiskConfig>& config);
 
     void on_configuration_update(const map<TSymbol, SymbolConfiguration>& config);
+
+    void on_configuration_update(const map<TSymbol, map<TExchange, HedgeConfig>>& config);
 
 
     // 账户相关回调
