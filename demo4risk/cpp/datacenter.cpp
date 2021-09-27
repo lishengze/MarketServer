@@ -406,15 +406,22 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
 void AccountAjdustWorker::set_snap(const SInnerQuote& quote) 
 {
-    std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
-    // 计算币种出现的次数
-    if( symbols_.find(quote.symbol) == symbols_.end() ) {
-        symbols_.insert(quote.symbol);
-        string sell_currency, buy_currency;
-        if( getcurrency_from_symbol(quote.symbol, sell_currency, buy_currency) ) {
-            currency_count_[sell_currency] += 1;
-            currency_count_[buy_currency] += 1;
+    try
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
+        // 计算币种出现的次数
+        if( symbols_.find(quote.symbol) == symbols_.end() ) {
+            symbols_.insert(quote.symbol);
+            string sell_currency, buy_currency;
+            if( getcurrency_from_symbol(quote.symbol, sell_currency, buy_currency) ) {
+                currency_count_[sell_currency] += 1;
+                currency_count_[buy_currency] += 1;
+            }
         }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -439,30 +446,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // set_snap(src);
 
     // 获取配置
-    double buy_hedge_percent = 0;
-    double sell_hedge_percent = 0;
-
-    if(ctx.params.hedge_config.find(src.symbol) != ctx.params.hedge_config.end()) 
-    {
-        if (ctx.params.hedge_config[src.symbol].find(src.exchange) 
-            != ctx.params.hedge_config[src.symbol].end())
-        {
-            buy_hedge_percent = ctx.params.hedge_config[src.symbol][src.exchange].BuyFundPercent;
-            sell_hedge_percent = ctx.params.hedge_config[src.symbol][src.exchange].SellFundPercent;   
-        }    
-        else
-        {
-            LOG_WARN(src.symbol + "." + src.exchange + " has no quote_config");
-            return src;            
-        }
-    }
-    else
-    {
-        LOG_WARN(src.symbol + " has no quote_config");
-        return src;
-    }
-
-    HedgeConfig& hedge_config = ctx.params.hedge_config[src.symbol][src.exchange];
+    map<TExchange, HedgeConfig>& hedge_config_map = ctx.params.hedge_config[src.symbol];
 
     // // 获取币种出现次数
     // string sell_currency, buy_currency;
@@ -477,26 +461,22 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     string sell_currency, buy_currency;
     int sell_count, buy_count;
-    if( !getcurrency_from_symbol(src.symbol, sell_currency,  buy_currency))
+    if(!getcurrency_from_symbol(src.symbol, sell_currency,  buy_currency))
     {
         LOG_WARN("Get Currency From Symbol: " + src.symbol + " Failed!");
         return src;
     }
     
     // check_exchange_volume(src);
-
     // 动态调整每个品种的资金分配量
 
     std::stringstream s_s;
 
-    s_s << hedge_config.str() << "\n";
     s_s << ctx.params.account_config.hedage_account_str() << "\n";
-    s_s << "buy_hedge_percent: " << buy_hedge_percent << ", sell_hedge_percent: " << sell_hedge_percent << "\n";
     
-
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
-    ctx.params.account_config.get_hedge_amounts(sell_currency, buy_hedge_percent, sell_total_amounts);
-    ctx.params.account_config.get_hedge_amounts(buy_currency, sell_hedge_percent, buy_total_amounts);
+    ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_config_map, sell_total_amounts, false);
+    ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_config_map, buy_total_amounts, true);
 
     
     s_s << "\nBefore Risk sell_total_amounts " << sell_currency << "\n";

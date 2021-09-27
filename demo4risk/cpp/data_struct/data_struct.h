@@ -74,52 +74,6 @@ struct UserAccountInfo
     }
 };
 
-struct AccountInfo
-{
-    unordered_map<TExchange, HedgeAccountInfo> hedge_accounts_;
-    UserAccountInfo user_account_;
-
-    double get_user_amount(const string& currency) const {
-        return 0;
-    }
-    
-    double get_hedge_amount(const string& currency) const {
-        double total = 0;
-        for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
-            const HedgeAccountInfo& hedge = iter->second;
-            auto iter2 = hedge.currencies.find(currency);
-            if( iter2 != hedge.currencies.end() ) {
-                total += iter2->second.amount;
-            }
-        }
-        return total;
-    }
-
-    void get_hedge_amounts(const string& currency, double percent, unordered_map<TExchange, double>& amounts) const {
-        for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
-            const HedgeAccountInfo& hedge = iter->second;
-            auto iter2 = hedge.currencies.find(currency);
-            if( iter2 != hedge.currencies.end() ) 
-            {
-                amounts[iter->first] = iter2->second.amount * percent;
-            }
-        }
-    }
-
-    string hedage_account_str()
-    {
-        std::stringstream s_s;
-        for (auto iter:hedge_accounts_)
-        {
-            s_s << iter.first << ", " << iter.second.str() << "\n";
-        }
-        return s_s.str();
-    }
-
-
-
-};
-
 /*
 HedgeParams
 
@@ -163,6 +117,86 @@ struct HedgeConfig
         return s_obj.str();
     }
 };
+
+struct AccountInfo
+{
+    unordered_map<TExchange, HedgeAccountInfo> hedge_accounts_;
+    UserAccountInfo user_account_;
+
+    double get_user_amount(const string& currency) const {
+        return 0;
+    }
+    
+    double get_hedge_amount(const string& currency) const {
+        double total = 0;
+        for( auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) {
+            const HedgeAccountInfo& hedge = iter->second;
+            auto iter2 = hedge.currencies.find(currency);
+            if( iter2 != hedge.currencies.end() ) {
+                total += iter2->second.amount;
+            }
+        }
+        return total;
+    }
+
+    void get_hedge_amounts(const string& currency, 
+                            map<TExchange, HedgeConfig>& hedge_config, 
+                            unordered_map<TExchange, double>& amounts, 
+                            bool is_buy) const 
+    {
+        try 
+        {
+            for(auto iter = hedge_accounts_.begin() ; iter != hedge_accounts_.end() ; ++iter ) 
+            {
+                TExchange exchange = iter->first;                
+                const HedgeAccountInfo& hedge = iter->second;
+
+                if (hedge.currencies.find(currency) == hedge.currencies.end())
+                {
+                    LOG_WARN("hedge.currencies does not have currency: " + currency);
+                    continue;
+                }
+
+                if (hedge_config.find(exchange) == hedge_config.end())
+                {
+                    LOG_WARN("hedge_config does not have exchange: " + exchange);
+                    continue;
+                }
+
+                const CurrencyInfo& currency_info = hedge.currencies.find(currency)->second;
+
+                if (is_buy)
+                {
+                    amounts[exchange] = currency_info.amount * hedge_config[exchange].BuyFundPercent;
+                }
+                else
+                {
+                    amounts[exchange] = currency_info.amount * hedge_config[exchange].SellFundPercent;
+                }
+            }
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
+
+
+    }
+
+    string hedage_account_str()
+    {
+        std::stringstream s_s;
+        for (auto iter:hedge_accounts_)
+        {
+            s_s << iter.first << ", " << iter.second.str() << "\n";
+        }
+        return s_s.str();
+    }
+
+
+
+};
+
 /*
 
 
