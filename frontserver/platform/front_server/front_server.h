@@ -50,10 +50,17 @@ public:
     string get_symbols_str();
 
     string get_heartbeat_str();
+
+public:
+    void add_sub_kline(ReqKLineDataPtr req_kline_data);
+
 private:
     WBServerPtr         wb_server_;    
 
     RestServerPtr       rest_server_;
 
     std::set<std::string>   symbols_;
+
+private:
+    map<string, map<int, std::vector<ReqKLineDataPtr>>>     sub_kline_map_;
 };

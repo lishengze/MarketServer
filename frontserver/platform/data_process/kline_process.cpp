@@ -283,15 +283,11 @@ void KlineProcess::request_kline_package(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::request_kline_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::request_kline_package Unknow Exceptions! " << "\n";
-        LOG_ERROR(stream_obj.str());        
+        LOG_ERROR("[E] KlineProcess::request_kline_package Unknow Exceptions! ");        
     }
 }
 
@@ -901,17 +897,21 @@ void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPt
                 << get_sec_time_str(kline_update.last_update_time_) << "\n";
             LOG_DEBUG(s_s.str()); 
 
-            updated_kline_data_map_[string(pReqKlineData->symbol_)].emplace_back(kline_update);          
+            updated_kline_data_map_[string(pReqKlineData->symbol_)].emplace_back(kline_update);  
+
+            string symbol = pReqKlineData->symbol_;
+            int freq = pReqKlineData->frequency_;
+            if (sub_updated_data_map_.find(symbol) == sub_updated_data_map_.end()
+            || sub_updated_data_map_[symbol].find(freq) != sub_updated_data_map_[symbol].end())
+            {
+                sub_updated_data_map_[symbol][freq] = *iter;
+            }
         }
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::init_update_kline_data " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
-    
-
 }
 
 bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id)

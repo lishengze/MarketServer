@@ -369,6 +369,16 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
                 if (package)
                 {
                     package->prepare_request(UT_FID_ReqKLineData, package->PackageID());
+
+                    auto req_kline_data = GetField<ReqKLineData>(package);
+
+                    if (!req_kline_data)
+                    {
+                        LOG_ERROR("req_kline_data empty!");
+                        return;
+                    }
+
+                    front_server_->add_sub_kline(req_kline_data);
                     front_server_->deliver_request(package);
                 }
                 else

@@ -205,6 +205,9 @@ private:
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
     map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
+
+    map<string, map<int, KlineDataPtr>>                         sub_updated_data_map_;
+
     map<string, TimeKlineData>                                  one_day_kline_data_;
 
 

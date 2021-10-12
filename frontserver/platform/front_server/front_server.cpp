@@ -216,27 +216,56 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                                     + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
                                     + type,
                                     p_rsp_kline_data->kline_data_vec_);  
-
-            if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
+            
+            if (p_rsp_kline_data->is_update_)
             {
-                if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
+                string symbol = p_rsp_kline_data->symbol_;
+                int frequency = p_rsp_kline_data->frequency_;
+                if (sub_kline_map_.find(symbol) != sub_kline_map_.end() 
+                    && sub_kline_map_[symbol].find(frequency) != sub_kline_map_[symbol].end())
                 {
-                    LOG_WARN("FrontServer::response_kline_data_package wb_server_->send_data Failed! Request Delete Connect!");
+                    std::vector<ReqKLineDataPtr>& sub_kline_vec = sub_kline_map_[symbol][frequency];
 
-                    bool is_cancel_request = true;
-                    PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
-                                                                        p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
-                                                                        p_rsp_kline_data->socket_id_, p_rsp_kline_data->socket_type_, is_cancel_request);
-                    if(package)
-                    {   
-                        package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
+                    std::vector<ReqKLineDataPtr> invalid_req_vec;
 
-                        deliver_request(package);
-                    }
-                    else
+                    for (auto req_kline_data:sub_kline_vec)
                     {
-                        LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
-                    } 
+                        if (!wb_server_->send_data(req_kline_data->socket_id_, kline_data_str))
+                        {
+                            LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
+                            invalid_req_vec.push_back(req_kline_data);
+                        }
+                    }
+
+                    for (auto delete_req_kline:invalid_req_vec)
+                    {
+                        // sub_kline_vec.erase(delete_req_kline);
+                    }
+                }
+            }
+            else 
+            {
+                if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
+                {
+                    if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
+                    {
+                        LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
+
+                        // bool is_cancel_request = true;
+                        // PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
+                        //                                                     p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
+                        //                                                     p_rsp_kline_data->socket_id_, p_rsp_kline_data->socket_type_, is_cancel_request);
+                        // if(package)
+                        // {   
+                        //     package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
+
+                        //     deliver_request(package);
+                        // }
+                        // else
+                        // {
+                        //     LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
+                        // } 
+                    }
                 }
             }
         }
@@ -372,5 +401,25 @@ void FrontServer::response_errmsg_package(PackagePtr package)
         std::stringstream stream_obj;
         stream_obj << "[E] FrontServer::response_errmsg_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
+    }    
+}
+
+void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
+{
+    try
+    {
+        if (sub_kline_map_.find(req_kline_data->symbol_) == sub_kline_map_.end()
+         || sub_kline_map_[req_kline_data->symbol_].find(req_kline_data->frequency_) 
+            == sub_kline_map_[req_kline_data->symbol_].end())
+        {
+            std::vector<ReqKLineDataPtr> empty_req_line_vec;
+            sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_] = empty_req_line_vec;
+        }
+
+        sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_].push_back(req_kline_data);        
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }    
 }

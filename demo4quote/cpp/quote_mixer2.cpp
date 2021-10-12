@@ -104,10 +104,10 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
     //     return;      
     // }
 
-    if (quote.symbol == "ETH_USDT")
-    {
-        LOG_DEBUG("\nOriginal Output Quote: \n" + quote_str(quote, 5));
-    } 
+    // if (quote.symbol == "ETH_USDT")
+    // {
+    //     LOG_DEBUG("\nOriginal Output Quote: \n" + quote_str(quote, 5));
+    // } 
 
     set_static_variable(exchange, symbol, quote.origin_time);
     {
