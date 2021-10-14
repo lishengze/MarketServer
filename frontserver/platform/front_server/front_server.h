@@ -62,5 +62,7 @@ private:
     std::set<std::string>   symbols_;
 
 private:
-    map<string, map<int, std::vector<ReqKLineDataPtr>>>     sub_kline_map_;
+    map<string, map<int, std::map<ID_TYPE, ReqKLineDataPtr>>>     sub_kline_map_;
+
+    std::map<ID_TYPE, ReqKLineDataPtr>                      sub_kline_socket_map_;
 };

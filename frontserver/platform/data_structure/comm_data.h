@@ -335,6 +335,16 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
         return string("ReqKLineData-Info: \n") + Socket::str() + "\n" + req_stream.str();
     }
 
+    string simple_str()
+    {
+        std::stringstream req_stream;
+        req_stream << "symbol: " <<  symbol_ << "\n"
+                   << "socket_id: " << socket_id_ << "\n"
+                   << "frequency_: " << frequency_ << "\n";
+
+        return req_stream.str();
+    }    
+
     public: 
         symbol_type         symbol_;
         type_tick           start_time_{0};
@@ -386,6 +396,18 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             kline_data_vec_.push_back(kline_data);
         }     
+
+
+        RspKLineData(KlineDataPtr& kline_data)
+        {
+            assign(symbol_, kline_data->symbol);
+            assign(frequency_, kline_data->frequency_);
+            assign(data_count_, 1);
+            assign(is_update_, true);
+
+            socket_id_ = -1;
+            kline_data_vec_.push_back(kline_data);
+        }         
 
         void set(string symbol, type_tick start_time, type_tick end_time, frequency_type frequency, 
                  int data_count,  ID_TYPE socket_id, COMM_TYPE socket_type, bool is_update,

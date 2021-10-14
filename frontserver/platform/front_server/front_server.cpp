@@ -224,22 +224,41 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                 if (sub_kline_map_.find(symbol) != sub_kline_map_.end() 
                     && sub_kline_map_[symbol].find(frequency) != sub_kline_map_[symbol].end())
                 {
-                    std::vector<ReqKLineDataPtr>& sub_kline_vec = sub_kline_map_[symbol][frequency];
+                    std::map<ID_TYPE, ReqKLineDataPtr>& sub_kline_map = sub_kline_map_[symbol][frequency];
 
-                    std::vector<ReqKLineDataPtr> invalid_req_vec;
+                    std::vector<ID_TYPE> invalid_req_socket_vec;
 
-                    for (auto req_kline_data:sub_kline_vec)
+                    for (auto iter: sub_kline_map)
                     {
-                        if (!wb_server_->send_data(req_kline_data->socket_id_, kline_data_str))
+                        if (!wb_server_->send_data(iter.first, kline_data_str))
                         {
-                            LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
-                            invalid_req_vec.push_back(req_kline_data);
+                            LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
+                            invalid_req_socket_vec.push_back(iter.first);
                         }
                     }
 
-                    for (auto delete_req_kline:invalid_req_vec)
+                    for (auto socket_id:invalid_req_socket_vec)
                     {
-                        // sub_kline_vec.erase(delete_req_kline);
+                        sub_kline_map.erase(socket_id);
+                    }
+
+                    if (sub_kline_map.size() == 0)
+                    {
+                        bool is_cancel_request = true;
+                        PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, 
+                                                                         p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
+                                                                         p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
+                                                                         p_rsp_kline_data->socket_id_,  p_rsp_kline_data->socket_type_, 
+                                                                         is_cancel_request);
+                        if(package)
+                        {   
+                            package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
+                            deliver_request(package);
+                        }
+                        else
+                        {
+                            LOG_ERROR("CreatePackage<ReqKLineData> Failed!");
+                        }                         
                     }
                 }
             }
@@ -408,15 +427,37 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
 {
     try
     {
-        if (sub_kline_map_.find(req_kline_data->symbol_) == sub_kline_map_.end()
-         || sub_kline_map_[req_kline_data->symbol_].find(req_kline_data->frequency_) 
-            == sub_kline_map_[req_kline_data->symbol_].end())
+        // remove current socket last sub req;
+        if (sub_kline_socket_map_.find(req_kline_data->socket_id_) != sub_kline_socket_map_.end())
         {
-            std::vector<ReqKLineDataPtr> empty_req_line_vec;
-            sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_] = empty_req_line_vec;
+            ReqKLineDataPtr& last_req_kline =  sub_kline_socket_map_[req_kline_data->socket_id_];
+
+            LOG_INFO("Last ReqKlineInfo: " + req_kline_data->str());
+
+            if (sub_kline_map_.find(last_req_kline->symbol_) != sub_kline_map_.end() 
+            && sub_kline_map_[last_req_kline->symbol_].find(last_req_kline->frequency_) != sub_kline_map_[last_req_kline->symbol_].end()
+            && sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].find(last_req_kline->socket_id_) 
+                != sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].end())
+            {
+                LOG_INFO("sub_kline_map_ Erase Last ReqKline " + req_kline_data->simple_str());
+                sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].erase(last_req_kline->socket_id_); 
+            }
+
+            sub_kline_socket_map_.erase(req_kline_data->socket_id_);
         }
 
-        sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_].push_back(req_kline_data);        
+        // add new sub req for current socket;
+        // if (sub_kline_map_.find(req_kline_data->symbol_) == sub_kline_map_.end()
+        //  || sub_kline_map_[req_kline_data->symbol_].find(req_kline_data->frequency_) 
+        //     == sub_kline_map_[req_kline_data->symbol_].end())
+        // {
+        //     std::vector<ReqKLineDataPtr> empty_req_line_vec;
+        //     sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_] = empty_req_line_vec;
+        // }
+
+        LOG_INFO("New ReqKlineInfo: " + req_kline_data->str());
+        sub_kline_socket_map_[req_kline_data->socket_id_] = req_kline_data;
+        sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_][req_kline_data->socket_id_] = req_kline_data;        
     }
     catch(const std::exception& e)
     {

@@ -81,7 +81,7 @@ def get_sub_trade_str(symbol="BTC_USDT"):
     print("sub_info_str: %s" % (sub_info_str))
     return sub_info_str    
 
-def get_sub_kline_str(symbl="BTC_USDT"):
+def get_sub_kline_str(symbol="BTC_USDT"):
     print("\n----------- get_sub_kline_str ------------")
     frequency = 60 
     end_time = int(time.time())
@@ -98,7 +98,7 @@ def get_sub_kline_str(symbl="BTC_USDT"):
 
     sub_info = {
         "type":"kline_update",
-        "symbol":symbl,
+        "symbol":symbol,
         "data_count":str(600),
         "frequency":str(frequency)
     }
@@ -117,11 +117,11 @@ def sub_btc_usdt(ws, sub_symbol):
     # sub_info_str = json.dumps(sub_info)
     # print("sub_info_str: %s" % (sub_info_str))
 
-    # sub_info_str = get_sub_kline_str(sub_symbol)
+    sub_info_str = get_sub_kline_str(sub_symbol)
 
     # sub_info_str = get_sub_depth_str(sub_symbol)
 
-    sub_info_str = get_sub_trade_str(sub_symbol)
+    # sub_info_str = get_sub_trade_str(sub_symbol)
 
     print("\n\n\n****************************** sub_info_str: %s ****************************" % (sub_info_str))
 
@@ -132,27 +132,27 @@ def on_open(ws):
 
     # send_str = get_sub_depth_str()
 
-    send_str = get_sub_kline_str(symbol = "ETH_BTC")
+    send_str = get_sub_kline_str(symbol = "BTC_USDT")
 
     # send_str = get_sub_trade_str()
 
     ws.send(send_str)
 
-    # time.sleep(3)
+    # time.sleep(5)
 
     # send_str = get_sub_kline_str()
 
     # ws.send(send_str)
 
 
-    # _thread.start_new_thread(sub_btc_usdt, (ws, "XRP_USDT", ) )
+    _thread.start_new_thread(sub_btc_usdt, (ws, "ETH_USDT", ) )
 
 def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.855.220.139"
     # ip = "ws://118.193.35.160"
-    ip = "ws://18.162.52.222"
-    # ip = "ws://127.0.0.1"
+    # ip = "ws://18.162.52.222"
+    ip = "ws://127.0.0.1"
     port = 8114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

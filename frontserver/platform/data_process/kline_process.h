@@ -147,6 +147,8 @@ public:
 
     bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
 
+    bool delete_sub_kline(string symbol, int frequency);
+
     bool store_kline_data(int frequency, KlineDataPtr pkline_data, int base_frequency);
 
     void complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency);

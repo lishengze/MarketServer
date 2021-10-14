@@ -390,14 +390,15 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         const KlineData& kline = klines[i];
 
         std::stringstream stream_obj;
-        // if (symbol == "ETH_BTC" || symbol == "USDT_USD")
-        // {
-        //     stream_obj.clear();
-        //     stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol << ","
-        //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-        //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
-        //     LOG_DEBUG(stream_obj.str());        
-        // }
+        if (symbol == "BTC_USDT" && klines.size() < 5)
+        {
+            stream_obj.clear();
+            stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol 
+                        << ",fre: " << resolution << ", "
+                        << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+                        << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
+            LOG_DEBUG(stream_obj.str());        
+        }
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
         if (package)
@@ -410,12 +411,12 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             }
             else
             {
-                LOG_ERROR("DataReceive::handle_kline_data GetField Failed!");
+                LOG_ERROR("GetField Failed!");
             }
         }
         else
         {
-            LOG_ERROR("DataReceive::handle_kline_data GetNewKlineDataPackage Failed!");
+            LOG_ERROR("GetNewKlineDataPackage Failed!");
         }
 
         // if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
