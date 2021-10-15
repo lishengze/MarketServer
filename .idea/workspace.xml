@@ -12,14 +12,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/kline_process.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/kline_process.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/test_client/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/test_client/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/component" beforeDir="false" afterPath="$PROJECT_DIR$/component" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/" />
@@ -113,8 +106,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="570">
-                  <caret line="241" column="24" lean-forward="true" selection-start-line="241" selection-start-column="24" selection-end-line="241" selection-end-column="24" />
+                <state relative-caret-position="646">
+                  <caret line="245" column="21" selection-start-line="245" selection-start-column="21" selection-end-line="245" selection-end-column="21" />
                 </state>
               </provider>
             </entry>
@@ -230,12 +223,12 @@
       <workItem from="1629358955400" duration="1705000" />
       <workItem from="1629977345641" duration="779000" />
       <workItem from="1630650517873" duration="36000" />
-      <workItem from="1634193593426" duration="2122000" />
+      <workItem from="1634193593426" duration="2723000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15490000" />
+    <option name="totallyTimeSpent" value="16091000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -248,7 +241,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13447171" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24973205" />
@@ -516,8 +508,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="570">
-          <caret line="241" column="24" lean-forward="true" selection-start-line="241" selection-start-column="24" selection-end-line="241" selection-end-column="24" />
+        <state relative-caret-position="646">
+          <caret line="245" column="21" selection-start-line="245" selection-start-column="21" selection-end-line="245" selection-end-column="21" />
         </state>
       </provider>
     </entry>

@@ -54,6 +54,10 @@ public:
 public:
     void add_sub_kline(ReqKLineDataPtr req_kline_data);
 
+    void add_sub_trade(ReqTradePtr req_trade_data);
+
+    void add_sub_depth(ReqRiskCtrledDepthDataPtr req_trade_data);
+
 private:
     WBServerPtr         wb_server_;    
 
@@ -62,7 +66,15 @@ private:
     std::set<std::string>   symbols_;
 
 private:
-    map<string, map<int, std::map<ID_TYPE, ReqKLineDataPtr>>>     sub_kline_map_;
+    map<string, map<int, map<ID_TYPE, ReqKLineDataPtr>>>     sub_kline_map_;
+    map<ID_TYPE, ReqKLineDataPtr>                            sub_kline_socket_map_;
+    std::mutex                                               sub_kline_map_update_mutex_;
 
-    std::map<ID_TYPE, ReqKLineDataPtr>                      sub_kline_socket_map_;
+    map<string, map<ID_TYPE, ReqTradePtr>>                   sub_trade_map_;
+    map<ID_TYPE, ReqTradePtr>                                sub_trade_socket_map_;
+    std::mutex                                               sub_trade_map_update_mutex_;
+
+    map<string, map<ID_TYPE, ReqRiskCtrledDepthDataPtr>>     sub_depth_map_;
+    map<ID_TYPE, ReqRiskCtrledDepthDataPtr>                  sub_depth_socket_map_;    
+    std::mutex                                               sub_depth_map_update_mutex_;    
 };

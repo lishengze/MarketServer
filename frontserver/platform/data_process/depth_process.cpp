@@ -21,42 +21,42 @@ void DepthProces::init_process_engine(DataProcessPtr process_engine)
 
 void DepthProces::request_symbol_list_package(PackagePtr package)
 {
-    LOG_DEBUG("DepthProces::request_symbol_list_package");
-
-    std::set<string> symbols;
-
-    ReqSymbolListDataPtr pReqSymbolListData = GetField<ReqSymbolListData>(package);
-
-    if (pReqSymbolListData)
+    try
     {
-        if (pReqSymbolListData->is_canacel_request_)
-        {
-            delete_reqsymbollist_connection(pReqSymbolListData);
-            return;
-        }
+        ReqSymbolListDataPtr pReqSymbolListData = GetField<ReqSymbolListData>(package);
 
-        std::lock_guard<std::mutex> lk(depth_data_mutex_);
-        for (auto iter:depth_data_)
-        {
-            symbols.emplace(iter.first);
-        }
+        std::set<string> symbols;
 
-        PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, pReqSymbolListData->socket_id_, 
-                                                                pReqSymbolListData->socket_type_, ID_MANAGER->get_id());
-
-        if (package_new)
+        if (pReqSymbolListData)
         {
-            process_engine_->deliver_response(package_new);
+            LOG_INFO(pReqSymbolListData->str());
             {
-                std::lock_guard<std::mutex> lk(req_symbol_list_map_mutex_);
-                ReqSymbolListDataPtr req = boost::make_shared<ReqSymbolListData>(*pReqSymbolListData);
-                req_symbol_list_map_[pReqSymbolListData->socket_id_] = req;
-            }            
+                std::lock_guard<std::mutex> lk(depth_data_mutex_);
+                for (auto iter:depth_data_)
+                {
+                    symbols.emplace(iter.first);
+                }
+            }
+
+            is_symbol_list_subed_ = true;
+
+            PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, pReqSymbolListData->socket_id_, 
+                                                                    pReqSymbolListData->socket_type_, 
+                                                                    ID_MANAGER->get_id());
+
+            if (package_new)
+            {
+                process_engine_->deliver_response(package_new);       
+            }
+            else
+            {
+                LOG_ERROR("GetNewRspSymbolListDataPackage Failed!");
+            }
         }
-        else
-        {
-            LOG_ERROR("DepthProces::request_symbol_list_package GetNewRspSymbolListDataPackage Failed!");
-        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -68,44 +68,47 @@ void DepthProces::request_depth_package(PackagePtr package)
 
         if (p_req)
         {
-            LOG_DEBUG("DepthProces::request_depth_package \n" +  p_req->str());
-
+            LOG_INFO("SubDepth: \n" +  p_req->str());
             if (p_req->is_canacel_request_)
             {
-                delete_subdepth_connection(p_req->symbol_, p_req->socket_id_);
+                delete_sub_depth_symbol(p_req->symbol_);
                 return;
             }
+
+            for (auto iter:depth_data_)
+            {
+                LOG_INFO("Depth-Symbol: " + iter.first);
+            }
                         
-            checkout_subdepth_connections(p_req);
-
             string symbol = string(p_req->symbol_);
-
             if (depth_data_.find(symbol) != depth_data_.end())
             {
                 std::lock_guard<std::mutex> lk_d(depth_data_mutex_);
-
                 SDepthDataPtr pSDepthData = depth_data_[symbol];
 
+                std::stringstream stream_obj;
+                stream_obj  << "[SrcDepth] " << pSDepthData->exchange << " " << pSDepthData->symbol << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
+                LOG_INFO(stream_obj.str());
+                
                 PackagePtr RspRiskCtrledDepthDataPackage = GetNewRspRiskCtrledDepthDataPackage(*pSDepthData, p_req->socket_id_, p_req->socket_type_, ID_MANAGER->get_id());           
 
                 if (RspRiskCtrledDepthDataPackage)
                 {
-                    process_engine_->deliver_response(RspRiskCtrledDepthDataPackage);
+                    std::lock_guard<std::mutex> lk_s(sub_depth_mutex_);
+                    sub_depth_set_.emplace(symbol);
 
-                    std::lock_guard<std::mutex> lk_s(subdepth_map_mutex_);
-                    ReqRiskCtrledDepthDataPtr req_ptr = boost::make_shared<ReqRiskCtrledDepthData>(*p_req);
-                    subdepth_map_[string(p_req->symbol_)].push_back(req_ptr);
+                    process_engine_->deliver_response(RspRiskCtrledDepthDataPackage);
                 }     
                 else
                 {
-                    LOG_ERROR("DepthProces::request_depth_package GetNewRspRiskCtrledDepthDataPackage Failed!");
+                    LOG_ERROR("GetNewRspRiskCtrledDepthDataPackage Failed!");
                 }
             }
             else
             {
                 string err_msg = symbol + " does not have depth data";
                 int error_id = -1;
-                LOG_ERROR("DepthProces::request_depth_package " + err_msg);
+                LOG_ERROR("err_msg: " + err_msg);
                 PackagePtr err_package = GetRspErrMsgPackage(err_msg, error_id, p_req->socket_id_, p_req->socket_type_);
                 if (err_package)
                 {
@@ -113,18 +116,18 @@ void DepthProces::request_depth_package(PackagePtr package)
                 }
                 else
                 {
-                    LOG_ERROR("DepthProces::request_depth_package GetRspErrMsgPackage Failed!");
+                    LOG_ERROR("GetRspErrMsgPackage Failed!");
                 }
             }
         }
         else 
         {
-           LOG_DEBUG("DepthProces::request_depth_package req_data is null");
+           LOG_DEBUG("req_data is null");
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
 }
 
@@ -149,24 +152,22 @@ void DepthProces::response_src_sdepth_package(PackagePtr package)
                
                 if (depth_data_.find(cur_symbol) == depth_data_.end())
                 {     
-                    LOG_INFO("DepthProces::response_src_sdepth_package New Symbol: " + cur_symbol);           
-
+                    LOG_INFO("New Symbol: " + cur_symbol);
                     response_new_symbol(cur_symbol);
                 }
 
                 depth_data_[cur_symbol] = pSDepthData;
-
                 response_updated_depth_data(pSDepthData);
             }
         }
         else
         {
-             LOG_DEBUG("DepthProces::response_src_sdepth_package SDepthDataPtr is null");
+            LOG_ERROR("SDepthDataPtr is null");
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"DepthProces::response_src_sdepth_package: " << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
 }
 
@@ -174,51 +175,56 @@ void DepthProces::response_updated_depth_data(SDepthDataPtr pSDepthData)
 {
     try
     {
-       std::lock_guard<std::mutex> lk(subdepth_map_mutex_);
-       string symbol = string(pSDepthData->symbol);
+        string symbol = string(pSDepthData->symbol);
 
-        if (subdepth_map_.find(symbol) != subdepth_map_.end())
+        std::lock_guard<std::mutex> lk_s(sub_depth_mutex_);
+        if (sub_depth_set_.find(symbol) != sub_depth_set_.end())
         {
-            for (ReqRiskCtrledDepthDataPtr& iter:subdepth_map_[symbol])
+            PackagePtr package = CreatePackage<RspRiskCtrledDepthData>(*pSDepthData);
+            if (package)
             {
-                PackagePtr package_new = GetNewRspRiskCtrledDepthDataPackage(*pSDepthData, iter->socket_id_, iter->socket_type_, ID_MANAGER->get_id());
+                std::stringstream stream_obj;
+                stream_obj  << "[Update] " << pSDepthData->exchange << " " << pSDepthData->symbol << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
+                LOG_INFO(stream_obj.str());
 
-                if (package_new)
-                {
-                    process_engine_->deliver_response(package_new);
-                }
-                else
-                {
-                    LOG_ERROR("DepthProces::response_updated_depth_data GetNewRspRiskCtrledDepthDataPackage Failed!");
-                }                
+                package->prepare_response(UT_FID_RspRiskCtrledDepthData, ID_MANAGER->get_id());
+                process_engine_->deliver_response(package);
+            }        
+            else
+            {
+                LOG_ERROR("GetNewRspRiskCtrledDepthDataPackage Failed!");
             }
         }
-
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }    
 }
 
 void DepthProces::response_new_symbol(string symbol)
 {
-    std::set<string> symbols{symbol};
-
-    std::lock_guard<std::mutex> lk(req_symbol_list_map_mutex_);
-
-    for (auto& iter:req_symbol_list_map_)
+    try
     {
-        PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, iter.second->socket_id_, iter.second->socket_type_, ID_MANAGER->get_id());
+        if (is_symbol_list_subed_)
+        {
+            std::set<string> symbols{symbol};
 
-        if (package_new)
-        {
-            process_engine_->deliver_response(package_new);   
+            PackagePtr package_new = CreatePackage<RspSymbolListData>(symbols);
+            if (package_new)
+            {
+                package_new->prepare_response(UT_FID_RspSymbolListData, ID_MANAGER->get_id());
+                process_engine_->deliver_response(package_new);   
+            }   
+            else
+            {
+                LOG_ERROR("GetNewRspSymbolListDataPackage Failed!");
+            }   
         }
-        else
-        {
-            LOG_ERROR("DepthProces::response_new_symbol GetNewRspSymbolListDataPackage Failed!");
-        }             
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -423,61 +429,20 @@ double DepthProces::compute_enquiry_price(SDepthDataPtr depth_data, int type, do
     return price;
 }
 
-void DepthProces::delete_subdepth_connection(string symbol, ID_TYPE socket_id)
+void DepthProces::delete_sub_depth_symbol(string symbol)
 {
-    LOG_INFO("DepthProces::delete_subdepth_connection " + symbol + " " + std::to_string(socket_id));
-
-    std::lock_guard<std::mutex> lk_s(subdepth_map_mutex_);
-    if (subdepth_map_.find(symbol) != subdepth_map_.end())
+    try
     {
-        vector<ReqRiskCtrledDepthDataPtr>::iterator iter = subdepth_map_[symbol].begin();
-        while(iter != subdepth_map_[symbol].end())
-        {
-            if ((*iter)->socket_id_ == socket_id) break;
-            ++iter;
-        }
+        LOG_INFO("delete_sub_depth_symbol " + symbol);
+        std::lock_guard<std::mutex> lk_s(sub_depth_mutex_);
 
-        if (iter != subdepth_map_[symbol].end())
+        if (sub_depth_set_.find(symbol) != sub_depth_set_.end())
         {
-            subdepth_map_[symbol].erase(iter);
-
-            LOG_ERROR("DepthProces::delete_subdepth_connection socket: " + symbol + "_" + std::to_string(socket_id) + " successfully!");
-        }
-        else
-        {
-            LOG_ERROR("DepthProces::delete_subdepth_connection socket: " + std::to_string(socket_id) + " does not exit!");
+            sub_depth_set_.erase(symbol);
         }
     }
-    else
+    catch(const std::exception& e)
     {
-        LOG_ERROR("DepthProces::delete_subdepth_connection, depth data doesn't have " + symbol);
+        LOG_ERROR(e.what());
     }
-}
-
-void DepthProces::delete_reqsymbollist_connection(ReqSymbolListDataPtr pReqSymbolListData)
-{
-    std::lock_guard<std::mutex> lk(req_symbol_list_map_mutex_);
-
-    if (req_symbol_list_map_.find(pReqSymbolListData->socket_id_) != req_symbol_list_map_.end())
-    {
-        req_symbol_list_map_.erase(pReqSymbolListData->socket_id_);
-        
-        LOG_INFO("DepthProces::delete_reqsymbollist_connection delete socket: " + std::to_string(pReqSymbolListData->socket_id_) + " S!");
-        
-    }
-    else
-    {
-        LOG_ERROR("DepthProces::delete_reqsymbollist_connection socket: " + std::to_string(pReqSymbolListData->socket_id_) + " does not exit!");
-    }
-}
-
-void DepthProces::checkout_subdepth_connections(ReqRiskCtrledDepthDataPtr p_req)
-{
-    std::lock_guard<std::mutex> lk(subdepth_con_map_mutex_);
-    if (subdepth_con_map_.find(p_req->socket_id_) != subdepth_con_map_.end())
-    {
-        delete_subdepth_connection(subdepth_con_map_[p_req->socket_id_], p_req->socket_id_);        
-    }
-
-    subdepth_con_map_[p_req->socket_id_] = string(p_req->symbol_);   
 }

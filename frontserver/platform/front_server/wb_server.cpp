@@ -287,9 +287,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_on_message: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }      
     catch(...)
     {
@@ -437,6 +435,8 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
 
                 if (request_depth_package)
                 {
+                    auto p_req_depth = GetField<ReqRiskCtrledDepthData>(request_depth_package);
+                    front_server_->add_sub_depth(p_req_depth);
                     front_server_->deliver_request(request_depth_package);
                 }
                 else
@@ -493,6 +493,9 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
 
                 if (package)
                 {
+                    auto p_req_trade = GetField<ReqTrade>(package);
+                    front_server_->add_sub_trade(p_req_trade);
+
                     package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
                     front_server_->deliver_request(package);
                 }
@@ -577,7 +580,7 @@ bool WBServer::send_data(ID_TYPE socket_id, string msg)
         else
         {
             stringstream s_obj;
-            s_obj << "WBServer::send_data websocket socket_id " << socket_id << " is invalid \n";
+            s_obj << "websocket socket_id " << socket_id << " is invalid \n";
             LOG_ERROR(s_obj.str());
             return false;
         }    

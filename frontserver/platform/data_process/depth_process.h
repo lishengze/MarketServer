@@ -34,21 +34,16 @@ public:
 
     void response_updated_depth_data(SDepthDataPtr p_depth_data);
 
-    void checkout_subdepth_connections(ReqRiskCtrledDepthDataPtr p_req);
-
-    void delete_subdepth_connection(string symbol, ID_TYPE socket_id);
-
-    void delete_reqsymbollist_connection(ReqSymbolListDataPtr pReqSymbolListData);
+    void delete_sub_depth_symbol(string symbol);
 
 private:
     map<string, SDepthDataPtr>                       depth_data_;
     map<string, SDepthDataPtr>                       raw_depth_data_;
 
-    std::map<ID_TYPE, ReqSymbolListDataPtr>          req_symbol_list_map_;
-    std::mutex                                       req_symbol_list_map_mutex_;
+    bool                                             is_symbol_list_subed_{false};
 
-    map<string, vector<ReqRiskCtrledDepthDataPtr>>   subdepth_map_;
-    std::mutex                                       subdepth_map_mutex_;
+    std::set<string>                                 sub_depth_set_;
+    std::mutex                                       sub_depth_mutex_;
 
     std::mutex                                       subdepth_con_map_mutex_;
     std::map<ID_TYPE, string>                        subdepth_con_map_;  

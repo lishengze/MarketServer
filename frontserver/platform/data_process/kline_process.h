@@ -208,12 +208,13 @@ private:
 
     map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
 
-    map<string, map<int, KlineDataPtr>>                         sub_updated_data_map_;
+    map<string, map<int, KlineDataPtr>>                         sub_updated_kline_data_map_;
 
     map<string, TimeKlineData>                                  one_day_kline_data_;
 
 
     map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;
+    map<string, TradeDataUpdatePtr>                             sub_updated_trade_data_map_;
     std::mutex                                                  updated_trade_data_map_mutex_;
 
     map<string, TradeDataPtr>                                   trade_data_map_;

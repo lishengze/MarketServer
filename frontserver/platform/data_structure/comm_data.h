@@ -53,6 +53,11 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
             socket_type_ = socket_type;
         }
 
+        RspSymbolListData(std::set<std::string>& symbols)
+        {
+            assign(symbols_, symbols);
+        }        
+
         void add_symbol(string symbol)
         {
             symbols_.emplace(symbol);
@@ -126,6 +131,21 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
         RspRiskCtrledDepthData(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
         {
             set(depth_data, socket_id, socket_type);
+        }
+
+        RspRiskCtrledDepthData(const SDepthData& depth_data)
+        {
+            memcpy(&depth_data_, &depth_data, sizeof(SDepthData));
+
+            for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
+            {
+                ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume.get_value() : depth_data_.asks[i].volume + ask_accumulated_volume_[i-1];
+            }
+
+            for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
+            {
+                bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
+            }
         }
 
         RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other):Socket(other.socket_id_, other.socket_type_)

@@ -892,10 +892,10 @@ void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPt
             {
                 string symbol = pReqKlineData->symbol_;
                 int freq = pReqKlineData->frequency_;
-                if (sub_updated_data_map_.find(symbol) == sub_updated_data_map_.end()
-                || sub_updated_data_map_[symbol].find(freq) != sub_updated_data_map_[symbol].end())
+                if (sub_updated_kline_data_map_.find(symbol) == sub_updated_kline_data_map_.end()
+                || sub_updated_kline_data_map_[symbol].find(freq) != sub_updated_kline_data_map_[symbol].end())
                 {
-                    sub_updated_data_map_[symbol][freq] = pRspKlineData->kline_data_vec_[pRspKlineData->kline_data_vec_.size()-1];
+                    sub_updated_kline_data_map_[symbol][freq] = pRspKlineData->kline_data_vec_[pRspKlineData->kline_data_vec_.size()-1];
                 }
             }
             else
@@ -996,10 +996,10 @@ bool KlineProcess::delete_sub_kline(string symbol, int freq)
 {
     try
     {
-        if (sub_updated_data_map_.find(symbol) != sub_updated_data_map_.end()
-        && sub_updated_data_map_[symbol].find(freq) != sub_updated_data_map_[symbol].end())
+        if (sub_updated_kline_data_map_.find(symbol) != sub_updated_kline_data_map_.end()
+        && sub_updated_kline_data_map_[symbol].find(freq) != sub_updated_kline_data_map_[symbol].end())
         {
-            sub_updated_data_map_[symbol].erase(freq);
+            sub_updated_kline_data_map_[symbol].erase(freq);
         }
     }
     catch(const std::exception& e)
@@ -1014,9 +1014,9 @@ void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
     {
         string symbol = kline_data->symbol;
 
-        if (sub_updated_data_map_.find(symbol) != sub_updated_data_map_.end())
+        if (sub_updated_kline_data_map_.find(symbol) != sub_updated_kline_data_map_.end())
         {
-            map<int, KlineDataPtr>& cur_symbol_sub_map = sub_updated_data_map_[symbol];
+            map<int, KlineDataPtr>& cur_symbol_sub_map = sub_updated_kline_data_map_[symbol];
 
             for (auto iter:cur_symbol_sub_map)
             {
@@ -1319,15 +1319,13 @@ void KlineProcess::request_trade_package(PackagePtr package)
         }
         else
         {
-            LOG_ERROR("KlineProcess::request_trade_package GetField<ReqTrade> Failed!");
+            LOG_ERROR("GetField<ReqTrade> Failed!");
         }
      
     }
     catch(const std::exception& e)
     {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::request_trade_package " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {

@@ -143,41 +143,83 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         if(pRspRiskCtrledDepthData)
         {
             string depth_str = pRspRiskCtrledDepthData->get_json_str();
-            
-            if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
+            string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
+            std::lock_guard<std::mutex> lk(sub_depth_map_update_mutex_);
+
+            if (sub_depth_map_.find(symbol) != sub_depth_map_.end())
             {
-                LOG_WARN("FrontServer::response_depth_data_package wb_server_->send_data Failed! Request Delete Connect!");
+                map<ID_TYPE, ReqRiskCtrledDepthDataPtr>& cur_sub_depth_map = sub_depth_map_[symbol];
 
-                string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
+                std::vector<ID_TYPE> invalid_req_socket_vec;
 
-                PackagePtr req_cancel_pacakge = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
-
-                if (req_cancel_pacakge)
+                for (auto iter:cur_sub_depth_map)
                 {
-                    deliver_request(req_cancel_pacakge);
+                    if (!wb_server_->send_data(iter.first, depth_str))
+                    {
+                        LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
+                        invalid_req_socket_vec.push_back(iter.first);
+                    }
                 }
-                else
+
+                for (auto socket_id:invalid_req_socket_vec)
                 {
-                    std::stringstream stream_obj;
-                    stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
-                    LOG_ERROR(stream_obj.str());                
+                    cur_sub_depth_map.erase(socket_id);
                 }
-            }
-            else
-            {
-                LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
+
+                // 取消对当前 Symbol 的 depth 订阅;
+                if (cur_sub_depth_map.size() == 0)
+                {
+                    bool is_cancel_request = true;
+                    PackagePtr package = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
+                    if(package)
+                    {
+                        deliver_request(package);
+                    }
+                    else
+                    {
+                        LOG_ERROR("CreatePackage<ReqTrade> Failed!");
+                    }                     
+                }
             }
         }
         else
         {
-            LOG_WARN("FrontServer::response_depth_data_package response data null!");
+            LOG_ERROR("pRspRiskCtrledDepthData is NULL!");
         }
+
+            
+        //     if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
+        //     {
+        //         LOG_WARN("FrontServer::response_depth_data_package wb_server_->send_data Failed! Request Delete Connect!");
+
+        //         string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
+
+        //         PackagePtr req_cancel_pacakge = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
+
+        //         if (req_cancel_pacakge)
+        //         {
+        //             deliver_request(req_cancel_pacakge);
+        //         }
+        //         else
+        //         {
+        //             std::stringstream stream_obj;
+        //             stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
+        //             LOG_ERROR(stream_obj.str());                
+        //         }
+        //     }
+        //     else
+        //     {
+        //         LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
+        //     }
+        // }
+        // else
+        // {
+        //     LOG_WARN("FrontServer::response_depth_data_package response data null!");
+        // }
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_depth_data_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
@@ -221,6 +263,8 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             {
                 string symbol = p_rsp_kline_data->symbol_;
                 int frequency = p_rsp_kline_data->frequency_;
+
+                std::lock_guard<std::mutex> lk(sub_kline_map_update_mutex_);
                 if (sub_kline_map_.find(symbol) != sub_kline_map_.end() 
                     && sub_kline_map_[symbol].find(frequency) != sub_kline_map_[symbol].end())
                 {
@@ -242,6 +286,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                         sub_kline_map.erase(socket_id);
                     }
 
+                    // 取消对当前 Symbol, Frequency 的 kline 订阅;
                     if (sub_kline_map.size() == 0)
                     {
                         bool is_cancel_request = true;
@@ -290,17 +335,14 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         }
         else
         {
-            LOG_ERROR("FrontServer::response_kline_data_package RspKLineData is NULL!");
+            LOG_ERROR("pRspTradeData is NULL!");
         }
         
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_kline_data_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
-    
 }
 
 void FrontServer::response_trade_data_package(PackagePtr package)
@@ -312,16 +354,36 @@ void FrontServer::response_trade_data_package(PackagePtr package)
         if (pRspTradeData)
         {
             string trade_data_str = pRspTradeData->get_json_str();
+            std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
 
-            if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
+            if (sub_trade_map_.find(pRspTradeData->symbol_) != sub_trade_map_.end())
             {
-                if (!wb_server_->send_data(pRspTradeData->socket_id_, trade_data_str))
-                {
-                    LOG_WARN("FrontServer::response_trade_data_package wb_server_->send_data Failed! Request Delete Connect!");
+                map<ID_TYPE, ReqTradePtr>& cur_sub_trade_map = sub_trade_map_[pRspTradeData->symbol_];
 
+                std::vector<ID_TYPE> invalid_req_socket_vec;
+
+                LOG_INFO(trade_data_str);
+
+                for (auto iter:cur_sub_trade_map)
+                {
+                    if (!wb_server_->send_data(iter.first, trade_data_str))
+                    {
+                        LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
+                        invalid_req_socket_vec.push_back(iter.first);
+                    }
+                }
+
+                for (auto socket_id:invalid_req_socket_vec)
+                {
+                    cur_sub_trade_map.erase(socket_id);
+                }
+
+                // 取消对当前 Symbol 的 trade 订阅;
+                if (cur_sub_trade_map.size() == 0)
+                {
                     bool is_cancel_request = true;
-                    PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, true,
-                                                                pRspTradeData->socket_id_, pRspTradeData->socket_type_);
+                    PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, is_cancel_request,
+                                                                 pRspTradeData->socket_id_, pRspTradeData->socket_type_);
                     if(package)
                     {   
                         package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
@@ -330,26 +392,46 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     }
                     else
                     {
-                        LOG_ERROR("FrontServer::response_trade_data_package CreatePackage<ReqKLineData> Failed!");
-                    } 
-                }
-                else
-                {
-                    LOG->record_output_info("Trade_" + std::to_string(pRspTradeData->socket_id_));                    
+                        LOG_ERROR("CreatePackage<ReqTrade> Failed!");
+                    }                     
                 }
             }
+
+            // if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
+            // {
+            //     if (!wb_server_->send_data(pRspTradeData->socket_id_, trade_data_str))
+            //     {
+            //         LOG_WARN("FrontServer::response_trade_data_package wb_server_->send_data Failed! Request Delete Connect!");
+
+            //         bool is_cancel_request = true;
+            //         PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, true,
+            //                                                     pRspTradeData->socket_id_, pRspTradeData->socket_type_);
+            //         if(package)
+            //         {   
+            //             package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
+
+            //             deliver_request(package);
+            //         }
+            //         else
+            //         {
+            //             LOG_ERROR("FrontServer::response_trade_data_package CreatePackage<ReqKLineData> Failed!");
+            //         } 
+            //     }
+            //     else
+            //     {
+            //         LOG->record_output_info("Trade_" + std::to_string(pRspTradeData->socket_id_));                    
+            //     }
+            // }
         }
         else
         {
-            LOG_ERROR("FrontServer::response_trade_data_package RspKLineData is NULL!");
+            LOG_ERROR("pRspTradeData is NULL!");
         }
         
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_trade_data_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
@@ -428,32 +510,24 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
     try
     {
         // remove current socket last sub req;
+        std::lock_guard<std::mutex> lk(sub_kline_map_update_mutex_);
         if (sub_kline_socket_map_.find(req_kline_data->socket_id_) != sub_kline_socket_map_.end())
         {
             ReqKLineDataPtr& last_req_kline =  sub_kline_socket_map_[req_kline_data->socket_id_];
 
-            LOG_INFO("Last ReqKlineInfo: " + req_kline_data->str());
+            LOG_INFO("Last ReqKlineInfo: " + last_req_kline->str());
 
             if (sub_kline_map_.find(last_req_kline->symbol_) != sub_kline_map_.end() 
             && sub_kline_map_[last_req_kline->symbol_].find(last_req_kline->frequency_) != sub_kline_map_[last_req_kline->symbol_].end()
             && sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].find(last_req_kline->socket_id_) 
                 != sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].end())
             {
-                LOG_INFO("sub_kline_map_ Erase Last ReqKline " + req_kline_data->simple_str());
+                LOG_INFO("sub_kline_map_ Erase Last ReqKline " + last_req_kline->simple_str());
                 sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].erase(last_req_kline->socket_id_); 
             }
 
             sub_kline_socket_map_.erase(req_kline_data->socket_id_);
         }
-
-        // add new sub req for current socket;
-        // if (sub_kline_map_.find(req_kline_data->symbol_) == sub_kline_map_.end()
-        //  || sub_kline_map_[req_kline_data->symbol_].find(req_kline_data->frequency_) 
-        //     == sub_kline_map_[req_kline_data->symbol_].end())
-        // {
-        //     std::vector<ReqKLineDataPtr> empty_req_line_vec;
-        //     sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_] = empty_req_line_vec;
-        // }
 
         LOG_INFO("New ReqKlineInfo: " + req_kline_data->str());
         sub_kline_socket_map_[req_kline_data->socket_id_] = req_kline_data;
@@ -463,4 +537,68 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
     {
         LOG_ERROR(e.what());
     }    
+}
+
+void FrontServer::add_sub_trade(ReqTradePtr req_trade_data)
+{
+    try
+    {
+        // remove current socket last sub req;
+        std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
+        if (sub_trade_socket_map_.find(req_trade_data->socket_id_) != sub_trade_socket_map_.end())
+        {
+            ReqTradePtr& last_req_trade =  sub_trade_socket_map_[req_trade_data->socket_id_];
+
+            LOG_INFO("Last ReqTradeInfo: " + last_req_trade->str());
+
+            sub_trade_socket_map_.erase(last_req_trade->socket_id_);
+
+            if (sub_trade_map_.find(last_req_trade->symbol_) != sub_trade_map_.end()
+            && sub_trade_map_[last_req_trade->symbol_].find(last_req_trade->socket_id_) != sub_trade_map_[last_req_trade->symbol_].end())
+            {
+                LOG_INFO("sub_trade_map_ erase last req_trade " + last_req_trade->str());
+                sub_trade_map_[last_req_trade->symbol_].erase(last_req_trade->socket_id_);
+            }
+        }
+
+        LOG_INFO("New ReqTradeInfo: " + req_trade_data->str());
+        sub_trade_socket_map_[req_trade_data->socket_id_] = req_trade_data;
+        sub_trade_map_[req_trade_data->symbol_][req_trade_data->socket_id_] = req_trade_data;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }        
+}
+
+void FrontServer::add_sub_depth(ReqRiskCtrledDepthDataPtr req_depth_data)
+{
+    try
+    {
+        // remove current socket last sub req;
+        std::lock_guard<std::mutex> lk(sub_depth_map_update_mutex_);
+        if (sub_depth_socket_map_.find(req_depth_data->socket_id_) != sub_depth_socket_map_.end())
+        {
+            ReqRiskCtrledDepthDataPtr& last_req_depth =  sub_depth_socket_map_[req_depth_data->socket_id_];
+
+            LOG_INFO("Last ReqDepthInfo: " + last_req_depth->str());
+
+            sub_depth_socket_map_.erase(last_req_depth->socket_id_);
+
+            if (sub_depth_map_.find(last_req_depth->symbol_) != sub_depth_map_.end()
+            && sub_depth_map_[last_req_depth->symbol_].find(last_req_depth->socket_id_) != sub_depth_map_[last_req_depth->symbol_].end())
+            {
+                LOG_INFO("sub_depth_map_ erase last req_depth " + last_req_depth->str());
+                sub_depth_map_[last_req_depth->symbol_].erase(last_req_depth->socket_id_);
+            }
+        }
+
+        LOG_INFO("New ReqDepthInfo: " + req_depth_data->str());
+        sub_depth_socket_map_[req_depth_data->socket_id_] = req_depth_data;
+        sub_depth_map_[req_depth_data->symbol_][req_depth_data->socket_id_] = req_depth_data;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }        
 }
