@@ -39,9 +39,9 @@ public:
 
     void request_enquiry_package(PackagePtr package);
 
-    void response_src_sdepth_package(PackagePtr package);    
+    void response_sdepth_package(PackagePtr package);    
 
-    void response_src_kline_package(PackagePtr package);
+    void response_kline_package(PackagePtr package);
 
     void response_src_trade_package(PackagePtr package);
 

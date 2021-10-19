@@ -26,7 +26,7 @@ public:
 
     void request_enquiry_package(PackagePtr package);
 
-    void response_src_sdepth_package(PackagePtr package);
+    void response_sdepth_package(PackagePtr package);
     
     void response_new_symbol(string symbol);
 

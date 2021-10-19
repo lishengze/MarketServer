@@ -611,6 +611,19 @@ public:
         assign(low_, low);
     }    
 
+    RspTrade(string symbol, SDecimal price, SDecimal volume, 
+             double change, double change_rate,
+             SDecimal high, SDecimal low)
+    {
+        assign(symbol_, symbol);
+        assign(price_, price);
+        assign(volume_, volume);
+        assign(change_, change);
+        assign(change_rate_, change_rate);
+        assign(high_, high);
+        assign(low_, low);
+    }        
+
     virtual ~RspTrade() {}
 
     string get_json_str();

@@ -9,115 +9,6 @@
 #include "hub_interface.h"
 #include "data_process.h"
 
-void TimeKlineData::init(type_tick end_time)
-{
-    try
-    {
-        int end_time;
-        int start_time = end_time - 24 * 60 * 60;
-        start_time = mod_secs(start_time, frequency_);
-
-        std::vector<KlineDataPtr> src_kline_data = kline_process_->get_trade_kline_data(symbol_, frequency_, start_time, end_time);
-
-        if (src_kline_data.size() > 0)
-        {
-            start_price_ = src_kline_data[0]->px_open;
-
-            high_ = src_kline_data[0]->px_high;
-            high_time_ = src_kline_data[0]->index;
-            low_ = src_kline_data[0]->px_low;
-            low_time_ = src_kline_data[0]->index;
-
-            for (auto kline_data:src_kline_data)
-            {
-                if (high_ < kline_data->px_high)
-                {
-                    high_ = kline_data->px_high;
-                    high_time_ = kline_data->index;
-                }
-
-                if (low_ > kline_data->px_low)
-                {
-                    low_ = kline_data->px_low;
-                    low_time_ = kline_data->index;
-                }
-            }
-
-            std::stringstream s_s;
-
-            s_s << "TimeKlineData::init " << symbol_ << " "
-                    << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
-                    << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
-                    << "high_time: " << get_sec_time_str(high_time_) << " high: " << high_.get_value() << "\n"
-                    << "low_time: " << get_sec_time_str(low_time_)   << " low: " << low_.get_value() << "\n"
-                    << "kline_data.size: " << src_kline_data.size() << " \n";
-
-            LOG_DEBUG(s_s.str());
-        }
-        else
-        {
-            std::stringstream s_s;
-
-            s_s << "TimeKlineData::init Get No Kline Source Data \n";
-
-            LOG_DEBUG(s_s.str());
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] TimeKlineData::init " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }
-    
-}
-
-void TimeKlineData::complete(type_tick end_time)
-{
-    try
-    {
-        if (ori_data_.size() == 0)
-        {
-            init(end_time);
-        }
-        else
-        {
-            type_tick first_time = ori_data_.begin()->first;
-            type_tick last_time = ori_data_.rbegin()->first;
-
-            if (last_time - first_time < last_secs_)
-            {
-                type_tick req_start_time = last_time - last_secs_;
-                type_tick req_end_time = first_time - frequency_;;;
-
-                std::vector<KlineDataPtr> src_kline_data = kline_process_->get_trade_kline_data(symbol_, frequency_, req_start_time, req_end_time);
-
-                for (auto kline_data:src_kline_data)
-                {
-                    ori_data_[kline_data->index] = kline_data;
-                }
-
-                refresh_high_low();
-
-                std::stringstream s_s;
-                s_s << "TimeKlineData::complete " << symbol_ << " "
-                        << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
-                        << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
-                        << "high_time: " << get_sec_time_str(high_time_) << " high: " << high_.get_value() << "\n"
-                        << "low_time: " << get_sec_time_str(low_time_)   << " low: " << low_.get_value() << "\n"
-                        << "kline_data.size: " << src_kline_data.size() << " \n";
-                LOG_DEBUG(s_s.str());
-            }            
-        }        
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] TimeKlineData::complete " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }
-    
-}
 
 void TimeKlineData::refresh_high_low()
 {
@@ -195,9 +86,7 @@ void TimeKlineData::update(KlineDataPtr kline_data)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] TimeKlineData::update " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
 }
 
@@ -245,41 +134,34 @@ void KlineProcess::request_kline_package(PackagePtr package)
 {
     try
     {
-
         ReqKLineDataPtr pReqKlineData = GetField<ReqKLineData>(package);
-
         if (pReqKlineData)
         {
-
             LOG_DEBUG(pReqKlineData->str());
 
             if(pReqKlineData -> is_canacel_request_)
             {
                 delete_sub_kline(pReqKlineData->symbol_, pReqKlineData->frequency_);
-
-                // delete_kline_request_connect(pReqKlineData->symbol_, pReqKlineData->socket_id_);
             }
             else
             {                
-                // check_websocket_subinfo(pReqKlineData);
-
-                PackagePtr rsp_package = get_kline_package(package);
+                PackagePtr rsp_package = get_request_kline_package(package);
 
                 if (rsp_package)
                 {
-                    init_update_kline_data(rsp_package, pReqKlineData);
+                    init_subed_update_kline_data(rsp_package, pReqKlineData);
 
                     process_engine_->deliver_response(rsp_package);
                 }
                 else
                 {
-                    LOG_ERROR("KlineProcess::request_kline_package get_kline_package Failed");                    
+                    LOG_ERROR("get_request_kline_package Failed");                    
                 }     
             }       
         }
         else
         {
-            LOG_ERROR("KlineProcess::request_kline_package ReqKLineData NULL!");
+            LOG_ERROR("ReqKLineData NULL!");
         }    
     }
     catch(const std::exception& e)
@@ -288,11 +170,11 @@ void KlineProcess::request_kline_package(PackagePtr package)
     }
     catch(...)
     {
-        LOG_ERROR("[E] KlineProcess::request_kline_package Unknow Exceptions! ");        
+        LOG_ERROR("Unknow Exceptions!");        
     }
 }
 
-void KlineProcess::response_src_kline_package(PackagePtr package)
+void KlineProcess::response_kline_package(PackagePtr package)
 {
     try
     {
@@ -306,55 +188,154 @@ void KlineProcess::response_src_kline_package(PackagePtr package)
             int src_freq = pkline_data->frequency_;
 
             KlineDataPtr update_for_trade = boost::make_shared<KlineData>(*pkline_data);
-            update_one_day_kline_data(update_for_trade);
+            update_oneday_kline_data(update_for_trade);
 
             KlineDataPtr update_for_kline = boost::make_shared<KlineData>(*pkline_data);
-            update_kline_data(update_for_kline);
+            update_subed_kline_data(update_for_kline);
 
             for (int cur_frequency: frequency_cache_set_)
             {
                 if (src_freq == frequency_aggreration_map_[cur_frequency])
                 {
                     bool store_new = store_kline_data(cur_frequency, pkline_data, src_freq);
-
                 }                
             }
         }
         else
         {
-            LOG_ERROR("KlineProcess::response_src_kline_package KlineData ptr is NULL!");
-        }
-        
+            LOG_ERROR("pkline_data is NULL!");
+        }        
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::response_src_kline_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
 }
 
-void KlineProcess::update_one_day_kline_data(const KlineDataPtr kline_data)
+void KlineProcess::update_oneday_kline_data(const KlineDataPtr kline_data)
 {
     try
     {
         string cur_symbol = string(kline_data->symbol);
 
-        if (one_day_kline_data_.find(cur_symbol) == one_day_kline_data_.end())
+        if (oneday_updated_kline_data_.find(cur_symbol) == oneday_updated_kline_data_.end())
         {
-            one_day_kline_data_[cur_symbol] = TimeKlineData(60, 60*60*24, cur_symbol, this);
-        }
-        else
-        {
-            one_day_kline_data_[cur_symbol].update(kline_data);
+            oneday_updated_kline_data_[cur_symbol] = TimeKlineData(60, 60*60*24, cur_symbol, this);
         }
 
+        oneday_updated_kline_data_[cur_symbol].update(kline_data);
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::update_one_day_kline_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
+    }
+}
+
+void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
+{
+    try
+    {
+        string symbol = kline_data->symbol;
+
+        if (sub_updated_kline_map_.find(symbol) != sub_updated_kline_map_.end())
+        {
+            map<int, KlineDataPtr>& cur_symbol_sub_map = sub_updated_kline_map_[symbol];
+
+            for (auto iter:cur_symbol_sub_map)
+            {
+                int cur_fre = iter.first;
+                KlineDataPtr& last_kline = iter.second;
+
+                if (cur_fre < kline_data->frequency_)
+                {
+                    continue;
+                }
+                
+                if (last_kline->is_clear())
+                {
+                    assign(last_kline->px_open, kline_data->px_open);
+                    assign(last_kline->px_close, kline_data->px_close);
+                    assign(last_kline->px_high, kline_data->px_high);
+                    assign(last_kline->px_low, kline_data->px_low);
+                    assign(last_kline->volume, kline_data->volume);
+
+                    last_kline->clear_ = false; 
+                }
+                else
+                {
+                    last_kline->px_close = kline_data->px_close;
+                    last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
+                    last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
+                    assign(last_kline->symbol, kline_data->symbol);                
+                }
+
+
+
+                if (kline_data->index - last_kline->index >= last_kline->frequency_)
+                {
+                    // 推送更新作为下一个 k 线时间数据;
+
+                    last_kline->index = kline_data->index;
+                    KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+
+                    std::stringstream s_log;
+                    s_log << "New : " << cur_kline_data->symbol << " "
+                          << get_sec_time_str(cur_kline_data->index) << " " 
+                          << "fre: " << kline_data->frequency_ << " "
+                          << "open: " << cur_kline_data->px_open.get_value() << " " 
+                          << "close: " << cur_kline_data->px_close.get_value() << " "
+                          << "high: " << cur_kline_data->px_high.get_value() << " "
+                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                    LOG_DEBUG(s_log.str());
+
+                    PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
+                    if (rsp_package)
+                    {
+                        rsp_package->prepare_response(UT_FID_RspKLineData, ID_MANAGER->get_id());
+                        process_engine_->deliver_response(rsp_package);
+                    }  
+                    else
+                    {
+                        LOG_ERROR("Create RspKLineData Package Failed!");
+                    }
+                    last_kline->clear();
+                }
+                else
+                {
+                    // 推送更新作为当前 k 线时间数据;
+                    KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+                    // cur_kline_data->index = kline_update.last_update_time_;
+
+                    std::stringstream s_log;
+                    s_log << "old : " << cur_kline_data->symbol << " "
+                          << get_sec_time_str(cur_kline_data->index) << " "
+                          << "fre: " << kline_data->frequency_ << " "
+                          << "open: " << cur_kline_data->px_open.get_value() << " " 
+                          << "close: " << cur_kline_data->px_close.get_value() << " "
+                          << "high: " << cur_kline_data->px_high.get_value() << " "
+                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                    LOG_DEBUG(s_log.str());
+
+                    PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
+                    if (rsp_package)
+                    {
+                        rsp_package->prepare_response(UT_FID_RspKLineData, ID_MANAGER->get_id());
+
+                        process_engine_->deliver_response(rsp_package);
+                    }  
+                    else
+                    {
+                        LOG_ERROR("CreatePackage<RspKLineData> Failed!");
+                    }
+
+                }
+
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -450,13 +431,13 @@ bool KlineProcess::store_kline_data(int frequency, KlineDataPtr pkline_data, int
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::store_kline_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
+
+    return false;
 }
 
-PackagePtr KlineProcess::get_kline_package(PackagePtr package)
+PackagePtr KlineProcess::get_request_kline_package(PackagePtr package)
 {
     try
     {  
@@ -480,6 +461,22 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
             vector<KlineDataPtr> src_kline_data;
             bool is_need_aggregation{true};
             int best_freq_base = get_best_freq_base(pReqKlineData->frequency_);
+
+            PackagePtr rsp_package = nullptr;
+
+            if (best_freq_base == -1)
+            {
+                stringstream s_obj;
+                s_obj << "No KLine Data For " << pReqKlineData->symbol_ 
+                      << " fre: " << pReqKlineData->frequency_ 
+                      << " data_count: " << pReqKlineData->data_count_;
+                LOG_WARN(s_obj.str());
+
+                string err_msg = s_obj.str();
+                int err_id = 1;
+                rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->socket_id_, pReqKlineData->socket_type_);
+                return rsp_package; 
+            }
                         
             if (kline_data_[pReqKlineData->symbol_].find(pReqKlineData->frequency_) != kline_data_[pReqKlineData->symbol_].end()
             && pReqKlineData->data_count_ <= kline_data_[pReqKlineData->symbol_][pReqKlineData->frequency_].size())
@@ -495,11 +492,11 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
             if (is_need_aggregation)
             {
                 s_obj << "SRC Kline Info: " << pReqKlineData->symbol_ << ", " 
-                    << "fre: " << best_freq_base << ", "
-                    << "start: " << get_sec_time_str(symbol_kline_data.begin()->first) << ", "
-                    << "end: " << get_sec_time_str(symbol_kline_data.rbegin()->first) << ", "
-                    << "count: " << symbol_kline_data.size() << "\n"
-                    << endl;
+                        << "fre: " << best_freq_base << ", "
+                        << "start: " << get_sec_time_str(symbol_kline_data.begin()->first) << ", "
+                        << "end: " << get_sec_time_str(symbol_kline_data.rbegin()->first) << ", "
+                        << "count: " << symbol_kline_data.size() << "\n"
+                        << endl;
             }
             else
             {
@@ -522,7 +519,9 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                 {
                     LOG_ERROR("symbol_kline_data.begin()->first - pReqKlineData->frequency_ > pReqKlineData->start_time_");
                     
-                    HubInterface::get_kline("", pReqKlineData->symbol_, best_freq_base, pReqKlineData->start_time_, symbol_kline_data.begin()->first, append_result);
+                    HubInterface::get_kline("", pReqKlineData->symbol_, 
+                                            best_freq_base, pReqKlineData->start_time_, 
+                                            symbol_kline_data.begin()->first, append_result);
                 }
 
                 append_kline_to_klinePtr(src_kline_data, append_result);
@@ -554,7 +553,7 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
             vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
             s_obj << "Rsp Kline Data Size: " << target_kline_data.size() << "\n";
 
-            PackagePtr rsp_package;
+            
 
             if (target_kline_data.size() > 0)
             {
@@ -608,41 +607,26 @@ PackagePtr KlineProcess::get_kline_package(PackagePtr package)
                 s_obj << "No KLine Data For " << pReqKlineData->symbol_ 
                       << " fre: " << pReqKlineData->frequency_ 
                       << " data_count: " << pReqKlineData->data_count_;
-                LOG_DEBUG(s_obj.str());
+                LOG_WARN(s_obj.str());
 
                 string err_msg = s_obj.str();
                 int err_id = 1;
                 rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->socket_id_, pReqKlineData->socket_type_);
-
-                if (rsp_package)
-                {
-
-                }
-                else
-                {
-                    LOG_ERROR("KlineProcess::get_kline_package GetRspErrMsgPackage Failed!");
-                }
             }
             
             return rsp_package;                       
         }
         else
         {
-            LOG_ERROR(string("Symbol: ") + string(pReqKlineData->symbol_) + string(" does not exit!"));
-            return nullptr;
+            LOG_ERROR(string("Symbol: ") + string(pReqKlineData->symbol_) + string(" does not exit!"));       
         }    
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_kline_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
-}
 
-void KlineProcess::complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency)
-{
-
+    return nullptr;
 }
 
 void KlineProcess::get_src_kline_data(vector<KlineDataPtr>& src_kline_data, std::map<type_tick, KlineDataPtr>& symbol_kline_data, 
@@ -748,18 +732,16 @@ void KlineProcess::get_src_kline_data(string symbol, vector<KlineDataPtr>& resul
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_src_kline_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
 }
 
 vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
 {
+    vector<KlineDataPtr> result;
+
     try
     {
-        vector<KlineDataPtr> result;
-
         KlineDataPtr last_data = get_last_kline_data(src_kline_data, frequency);
 
         result = compute_kline_atom_data(src_kline_data, frequency);
@@ -770,10 +752,10 @@ vector<KlineDataPtr> KlineProcess::compute_target_kline_data(vector<KlineDataPtr
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::compute_target_kline_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
+
+    return result;
 }
 
 KlineDataPtr KlineProcess::get_last_kline_data(vector<KlineDataPtr>& src_kline_data, int frequency)
@@ -807,18 +789,18 @@ KlineDataPtr KlineProcess::get_last_kline_data(vector<KlineDataPtr>& src_kline_d
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_last_kline_data " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
-    
+
+    return nullptr;
 }
 
 vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>& src_kline_data, int frequency)
 {
+    vector<KlineDataPtr> result;
+
     try
-    {
-        vector<KlineDataPtr> result;
+    {        
 
         if (src_kline_data.size() == 0)
         {
@@ -873,13 +855,13 @@ vector<KlineDataPtr> KlineProcess::compute_kline_atom_data(vector<KlineDataPtr>&
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::compute_kline_atom_data " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
+
+    return result;
 }
 
-void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData)
+void KlineProcess::init_subed_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData)
 {
     try
     {
@@ -892,103 +874,21 @@ void KlineProcess::init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPt
             {
                 string symbol = pReqKlineData->symbol_;
                 int freq = pReqKlineData->frequency_;
-                if (sub_updated_kline_data_map_.find(symbol) == sub_updated_kline_data_map_.end()
-                || sub_updated_kline_data_map_[symbol].find(freq) != sub_updated_kline_data_map_[symbol].end())
+                if (sub_updated_kline_map_.find(symbol) == sub_updated_kline_map_.end()
+                || sub_updated_kline_map_[symbol].find(freq) != sub_updated_kline_map_[symbol].end())
                 {
-                    sub_updated_kline_data_map_[symbol][freq] = pRspKlineData->kline_data_vec_[pRspKlineData->kline_data_vec_.size()-1];
+                    sub_updated_kline_map_[symbol][freq] = pRspKlineData->kline_data_vec_[pRspKlineData->kline_data_vec_.size()-1];
                 }
             }
             else
             {
                 LOG_ERROR("pRspKlineData->kline_data_vec_ is Empty!");
             }
-
-            // KlineDataUpdate kline_update(*pReqKlineData);
-            // kline_update.last_update_time_ = (*iter)->index;
-            // kline_update.kline_data_ = (*iter);
-
-            // std::stringstream s_s;
-            // s_s << "\nInit update_kline_data socket_id: " << pReqKlineData->socket_id_ << " " 
-            //     << pReqKlineData->symbol_ << " Last Update Time: " 
-            //     << get_sec_time_str(kline_update.last_update_time_) << "\n";
-            // LOG_DEBUG(s_s.str()); 
-
-            // updated_kline_data_map_[string(pReqKlineData->symbol_)].emplace_back(kline_update);  
-
-
         }
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
-    }
-}
-
-bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id)
-{
-    try
-    {
-        LOG_DEBUG(string("KlineProcess::delete_kline_request_connect ") + symbol + " " + std::to_string(socket_id));
-
-        std::lock_guard<std::mutex> lk(updated_kline_data_map_mutex_);
-        if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
-        {
-            vector<KlineDataUpdate>& kline_updater = updated_kline_data_map_[symbol];
-
-            // int pos = 0;
-            // for (; pos < kline_updater.size(); ++pos)
-            // {
-            //     if (kline_updater[pos].reqkline_data.socket_id_ == socket_id) break;
-            // }
-
-            // if (pos != kline_updater.size())
-            // {
-            //     std::stringstream stream_obj;
-            //     stream_obj << "[Kline Update]: Erase Websocket " 
-            //             << kline_updater[pos].reqkline_data.symbol_ << " " 
-            //             << kline_updater[pos].reqkline_data.frequency_ << " "
-            //             << kline_updater[pos].reqkline_data.socket_id_ << "\n";
-            //     LOG_DEBUG(stream_obj.str());    
-
-            //     while (pos < kline_updater.size()-1)
-            //     {
-            //         kline_updater[pos] = kline_updater[pos+1];
-            //         ++pos;
-                    
-            //     }
-            //     kline_updater.pop_back();
-            // }
-
-            vector<KlineDataUpdate>::iterator iter = kline_updater.begin();
-            for(;iter != kline_updater.end(); ++iter)
-            {
-                if ((*iter).reqkline_data.socket_id_ == socket_id) break;
-            }
-
-            if (iter != kline_updater.end())
-            {
-                std::stringstream stream_obj;
-                stream_obj << "[Kline Update]: Erase Websocket " 
-                        << (*iter).reqkline_data.symbol_ << " " 
-                        << (*iter).reqkline_data.frequency_ << " "
-                        << (*iter).reqkline_data.socket_id_ << "\n";
-                LOG_DEBUG(stream_obj.str());
-                updated_kline_data_map_[symbol].erase(iter);
-            }
-        }
-        return true;
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::delete_kline_request_connect: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    }    
-    catch (...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::delete_kline_request_connect: Unkonw Exceptions " << "\n";
-        LOG_ERROR(stream_obj.str());        
     }
 }
 
@@ -996,235 +896,20 @@ bool KlineProcess::delete_sub_kline(string symbol, int freq)
 {
     try
     {
-        if (sub_updated_kline_data_map_.find(symbol) != sub_updated_kline_data_map_.end()
-        && sub_updated_kline_data_map_[symbol].find(freq) != sub_updated_kline_data_map_[symbol].end())
+        if (sub_updated_kline_map_.find(symbol) != sub_updated_kline_map_.end()
+        && sub_updated_kline_map_[symbol].find(freq) != sub_updated_kline_map_[symbol].end())
         {
-            sub_updated_kline_data_map_[symbol].erase(freq);
+            sub_updated_kline_map_[symbol].erase(freq);
+            return true;
         }
+        return false;
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }    
-}
 
-void KlineProcess::update_kline_data(const KlineDataPtr kline_data)
-{
-    try
-    {
-        string symbol = kline_data->symbol;
-
-        if (sub_updated_kline_data_map_.find(symbol) != sub_updated_kline_data_map_.end())
-        {
-            map<int, KlineDataPtr>& cur_symbol_sub_map = sub_updated_kline_data_map_[symbol];
-
-            for (auto iter:cur_symbol_sub_map)
-            {
-                int cur_fre = iter.first;
-                KlineDataPtr& last_kline = iter.second;
-
-                if (cur_fre < kline_data->frequency_)
-                {
-                    continue;
-                }
-                
-                if (last_kline->is_clear())
-                {
-                    assign(last_kline->px_open, kline_data->px_open);
-                    assign(last_kline->px_close, kline_data->px_close);
-                    assign(last_kline->px_high, kline_data->px_high);
-                    assign(last_kline->px_low, kline_data->px_low);
-                    assign(last_kline->volume, kline_data->volume);
-
-                    last_kline->clear_ = false; 
-                }
-                else
-                {
-                    last_kline->px_close = kline_data->px_close;
-                    last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
-                    last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
-                    assign(last_kline->symbol, kline_data->symbol);                
-                }
-
-
-
-                if (kline_data->index - last_kline->index >= last_kline->frequency_)
-                {
-                    // 推送更新作为下一个 k 线时间数据;
-
-                    last_kline->index = kline_data->index;
-                    KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
-
-                    std::stringstream s_log;
-                    s_log << "New : " << cur_kline_data->symbol << " "
-                          << get_sec_time_str(cur_kline_data->index) << " " 
-                          << "fre: " << kline_data->frequency_ << " "
-                          << "open: " << cur_kline_data->px_open.get_value() << " " 
-                          << "close: " << cur_kline_data->px_close.get_value() << " "
-                          << "high: " << cur_kline_data->px_high.get_value() << " "
-                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    LOG_DEBUG(s_log.str());
-
-                    PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
-                    if (rsp_package)
-                    {
-                        rsp_package->prepare_response(UT_FID_RspKLineData, ID_MANAGER->get_id());
-                        process_engine_->deliver_response(rsp_package);
-                    }  
-                    else
-                    {
-                        LOG_ERROR("Create RspKLineData Package Failed!");
-                    }
-                    last_kline->clear();
-                }
-                else
-                {
-                    // 推送更新作为当前 k 线时间数据;
-                    KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
-                    // cur_kline_data->index = kline_update.last_update_time_;
-
-                    std::stringstream s_log;
-                    s_log << "old : " << cur_kline_data->symbol << " "
-                          << get_sec_time_str(cur_kline_data->index) << " "
-                          << "fre: " << kline_data->frequency_ << " "
-                          << "open: " << cur_kline_data->px_open.get_value() << " " 
-                          << "close: " << cur_kline_data->px_close.get_value() << " "
-                          << "high: " << cur_kline_data->px_high.get_value() << " "
-                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    LOG_DEBUG(s_log.str());
-
-                    PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
-                    if (rsp_package)
-                    {
-                        rsp_package->prepare_response(UT_FID_RspKLineData, ID_MANAGER->get_id());
-
-                        process_engine_->deliver_response(rsp_package);
-                    }  
-                    else
-                    {
-                        LOG_ERROR("KlineProcess::update_kline_data GetNewRspKLineDataPackage Failed!");
-                    }
-
-                }
-
-            }
-        }
-
-        // if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
-        // {
-        //     for (auto& kline_update:updated_kline_data_map_[symbol])
-        //     {            
-        //         int req_fre = kline_update.reqkline_data.frequency_;
-
-        //         if (kline_data->frequency_ > req_fre) continue;
-
-        //         if (!kline_update.kline_data_)
-        //         {
-        //             kline_update.kline_data_ = boost::make_shared<KlineData>(*kline_data);
-        //         }
-
-        //         KlineDataPtr& last_kline = kline_update.kline_data_;
-
-        //         if (last_kline->is_clear())
-        //         {
-        //             assign(last_kline->symbol, kline_data->symbol);
-        //             assign(last_kline->exchange, kline_data->exchange);
-        //             assign(last_kline->px_open, kline_data->px_open);
-        //             assign(last_kline->px_close, kline_data->px_close);
-        //             assign(last_kline->px_high, kline_data->px_high);
-        //             assign(last_kline->px_low, kline_data->px_low);
-        //             assign(last_kline->volume, kline_data->volume);
-
-        //             last_kline->clear_ = false; 
-        //         }
-        //         else
-        //         {
-        //             last_kline->px_close = kline_data->px_close;
-        //             last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
-        //             last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
-        //             assign(last_kline->symbol, kline_data->symbol);                
-        //         }
-
-        //         if (kline_data->index - last_kline->index >= last_kline->frequency_)
-        //         {
-        //             // 推送更新作为下一个 k 线时间数据;
-
-        //             last_kline->index = kline_data->index;
-        //             KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
-
-        //             std::stringstream s_log;
-        //             s_log << "Kline Update New : " << get_sec_time_str(cur_kline_data->index) << " " 
-        //             << "fre: " << cur_kline_data->frequency_ << " "
-        //             <<"open: " << cur_kline_data->px_open.get_value() << " " 
-        //             <<"close: " << cur_kline_data->px_close.get_value() << " "
-        //             <<"high: " << cur_kline_data->px_high.get_value() << " "
-        //             <<"low: " << cur_kline_data->px_low.get_value() << " \n";
-        //             LOG_DEBUG(s_log.str());
-                    
-        //             PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
-
-        //             if (rsp_package)
-        //             {
-        //                 process_engine_->deliver_response(rsp_package);
-        //             }
-        //             else
-        //             {
-        //                 LOG_ERROR("KlineProcess::update_kline_data GetNewRspKLineDataPackage Failed!");
-        //             }
-        //             last_kline->clear();
-        //         }
-        //         else
-        //         {
-        //             // 推送更新作为当前 k 线时间数据;
-        //             KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
-        //             // cur_kline_data->index = kline_update.last_update_time_;
-
-        //             std::stringstream s_log;
-        //             s_log << "Kline Update old : " << get_sec_time_str(cur_kline_data->index) << " "
-        //             << "fre: " << cur_kline_data->frequency_ << " "
-        //             <<"open: " << cur_kline_data->px_open.get_value() << " " 
-        //             <<"close: " << cur_kline_data->px_close.get_value() << " "
-        //             <<"high: " << cur_kline_data->px_high.get_value() << " "
-        //             <<"low: " << cur_kline_data->px_low.get_value() << " \n";
-        //             LOG_DEBUG(s_log.str());
-
-        //             PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
-        //             if (rsp_package)
-        //             {
-        //                 process_engine_->deliver_response(rsp_package);
-        //             }
-        //             else
-        //             {
-        //                 LOG_ERROR("KlineProcess::update_kline_data GetNewRspKLineDataPackage Failed!");
-        //             }
-
-        //         }
-        //     }
-        // }
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-}
-
-void KlineProcess::check_websocket_subinfo(ReqKLineDataPtr pReqKlineData)
-{
-    try
-    {
-        std::lock_guard<std::mutex> lk(wss_con_map_mutex_);
-        if (wss_con_map_.find(pReqKlineData->socket_id_) != wss_con_map_.end())
-        {
-            delete_kline_request_connect(wss_con_map_[pReqKlineData->socket_id_], pReqKlineData->socket_id_);
-        }
-        wss_con_map_[pReqKlineData->socket_id_] = pReqKlineData->symbol_;
-    }
-    catch(const std::exception& e)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::check_websocket_subinfo: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
-    } 
+    return false;
 }
 
 void KlineProcess::update_frequency_aggreration_map(int src_fre)
@@ -1258,7 +943,7 @@ int KlineProcess::get_best_freq_base(int req_frequency)
 {
     try
     {
-        int result;
+        int result = -1;
         for (std::set<int>::reverse_iterator iter = frequency_base_set_.rbegin(); iter != frequency_base_set_.rend(); ++iter)
         {
             if (req_frequency % *iter == 0)
@@ -1271,41 +956,49 @@ int KlineProcess::get_best_freq_base(int req_frequency)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_best_freq_base: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
+    return -1;
 }
+
 
 void KlineProcess::request_trade_package(PackagePtr package)
 {
     try
     {
         ReqTradePtr pReqTradePtr = GetField<ReqTrade>(package);
-
         if (pReqTradePtr)
         {
             if (pReqTradePtr->is_cancel_)
             {
-                delete_trade_wss(pReqTradePtr);
+                delete_sub_trade(pReqTradePtr->symbol_);
             }
             else
             {
-                LOG_DEBUG(pReqTradePtr->str());
-
-                check_websocket_trade_req(pReqTradePtr);
+                LOG_INFO(pReqTradePtr->str());
 
                 if (trade_data_map_.find(string(pReqTradePtr->symbol_)) != trade_data_map_.end())
-                {
-                    
-                    PackagePtr package = get_trade_package(pReqTradePtr, trade_data_map_[string(pReqTradePtr->symbol_)]);
+                {                    
+                    TradeDataPtr& pTradeDataPtr = trade_data_map_[string(pReqTradePtr->symbol_)];
+                    PackagePtr result = CreatePackage<RspTrade>(pReqTradePtr->symbol_, pTradeDataPtr->price_, pTradeDataPtr->total_volume_, 
+                                                                pTradeDataPtr->change_, pTradeDataPtr->change_rate_, 
+                                                                pTradeDataPtr->high_, pTradeDataPtr->low_);
+                    {
+                        std::lock_guard<std::mutex> lk(sub_updated_trade_set_mutex_);
+                        if (sub_updated_trade_set_.find(string(pReqTradePtr->symbol_)) == sub_updated_trade_set_.end())
+                        {
+                            sub_updated_trade_set_.emplace(string(pReqTradePtr->symbol_));
+                        }
+                    }
+
                     if (package)
                     {
+                        package->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
                         process_engine_->deliver_response(package);
                     }
                     else
                     {
-                        LOG_ERROR("KlineProcess::request_trade_package get_trade_package Failed!");
+                        LOG_ERROR("CreatePackage<RspTrade> Failed!");
                     }                    
                 }
                 else
@@ -1319,9 +1012,8 @@ void KlineProcess::request_trade_package(PackagePtr package)
         }
         else
         {
-            LOG_ERROR("GetField<ReqTrade> Failed!");
+            LOG_ERROR("pReqTradePtr is NULL!");
         }
-     
     }
     catch(const std::exception& e)
     {
@@ -1329,9 +1021,7 @@ void KlineProcess::request_trade_package(PackagePtr package)
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::request_trade_package: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unkonwn exception!" );
     }    
 }
 
@@ -1343,6 +1033,43 @@ void KlineProcess::response_src_trade_package(PackagePtr package)
         if (pTradeDataPtr)
         {
             update_trade_data(pTradeDataPtr);
+
+            std::lock_guard<std::mutex> lk(sub_updated_trade_set_mutex_);
+
+            if (sub_updated_trade_set_.find(pTradeDataPtr->symbol_) != sub_updated_trade_set_.end())
+            {
+                PackagePtr package = CreatePackage<RspTrade>(pTradeDataPtr->symbol_, pTradeDataPtr->price_, 
+                                                             pTradeDataPtr->total_volume_, 
+                                                             pTradeDataPtr->change_, pTradeDataPtr->change_rate_, 
+                                                             pTradeDataPtr->high_, pTradeDataPtr->low_);
+
+                // {
+                //     type_tick high_time = oneday_updated_kline_data_[pTradeDataPtr->symbol_].high_time_;
+                //     type_tick low_time = oneday_updated_kline_data_[pTradeDataPtr->symbol_].low_time_;
+
+                //     std::stringstream stream_obj;
+                //     stream_obj << "[TradeUp] " << pTradeDataPtr->symbol_ 
+                //                << ", " << pTradeDataPtr->price_.get_value() 
+                //                << ", " << pTradeDataPtr->total_volume_.get_value()
+                //                << ",ht: " << get_sec_time_str(high_time)
+                //                << ", " << pTradeDataPtr->high_.get_value()
+                //                << ",lt: " << get_sec_time_str(low_time)
+                //                << ", " << pTradeDataPtr->low_.get_value()
+                //                << ", " << pTradeDataPtr->change_
+                //                << ", " << pTradeDataPtr->change_rate_;
+                //     LOG_DEBUG(stream_obj.str());                         
+                // }
+
+                if (package)
+                {
+                    package->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
+                    process_engine_->deliver_response(package);
+                }
+                else
+                {
+                    LOG_ERROR("CreatePackage RspTrade Failed!");
+                }
+            } 
         }
         else 
         {
@@ -1359,520 +1086,718 @@ void KlineProcess::response_src_trade_package(PackagePtr package)
     }    
 }
 
-void KlineProcess::check_websocket_trade_req(ReqTradePtr pReqTrade)
+void KlineProcess::delete_sub_trade(string symbol)
 {
     try
     {
-        string new_symbol = pReqTrade->symbol_;
-        
-        std::lock_guard<std::mutex> lk(trade_wss_con_map_mutex_);
+        std::lock_guard<std::mutex> lk(sub_updated_trade_set_mutex_);
 
-        if (trade_wss_con_map_.find(pReqTrade->socket_id_) != trade_wss_con_map_.end() 
-        && new_symbol != trade_wss_con_map_[pReqTrade->socket_id_])
+        if (sub_updated_trade_set_.find(symbol) != sub_updated_trade_set_.end())
         {
-            string ori_symbol = trade_wss_con_map_[pReqTrade->socket_id_];
-
-            std::lock_guard<std::mutex> lk(updated_trade_data_map_mutex_);
-            if (updated_trade_data_map_.find(ori_symbol) != updated_trade_data_map_.end()
-            && updated_trade_data_map_[ori_symbol].find(pReqTrade->socket_id_) != updated_trade_data_map_[ori_symbol].end())
-            {
-                updated_trade_data_map_[ori_symbol].erase(pReqTrade->socket_id_);
-
-                LOG_DEBUG("ReqTrade updated_trade_data_map_  Erase " + ori_symbol + " socket: " + std::to_string(pReqTrade->socket_id_));
-            }
-        }         
-
-        trade_wss_con_map_[pReqTrade->socket_id_] = new_symbol;
-
-        TradeDataUpdatePtr pTradeDataUpdate = boost::make_shared<TradeDataUpdate>(*pReqTrade);
-
-        std::lock_guard<std::mutex> lg(updated_trade_data_map_mutex_);
-        updated_trade_data_map_[new_symbol][pReqTrade->socket_id_] = pTradeDataUpdate;         
-
-        // cout << "ReqTrade trade_wss_con_map_ add  " << pReqTrade->symbol_ << " socket: " << pReqTrade->socket_id_ << endl;
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::check_websocket_trade_req " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::check_websocket_trade_req: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }       
-}
-
-void KlineProcess::delete_trade_wss(ReqTradePtr pReqTrade)
-{
-    try
-    {
-        std::lock_guard<std::mutex> lk(trade_wss_con_map_mutex_);
-        if (trade_wss_con_map_.find(pReqTrade->socket_id_) != trade_wss_con_map_.end())
-        {
-            string ori_symbol = trade_wss_con_map_[pReqTrade->socket_id_];
-
-            std::lock_guard<std::mutex> lk(updated_trade_data_map_mutex_);
-            if (updated_trade_data_map_.find(ori_symbol) != updated_trade_data_map_.end()
-            && updated_trade_data_map_[ori_symbol].find(pReqTrade->socket_id_) != updated_trade_data_map_[ori_symbol].end())
-            {
-                updated_trade_data_map_[ori_symbol].erase(pReqTrade->socket_id_);
-
-                LOG_DEBUG( "ReqTrade Erase  " + ori_symbol + " socket: " + std::to_string(pReqTrade->socket_id_));
-            }
-
-            trade_wss_con_map_.erase(pReqTrade->socket_id_);
+            sub_updated_trade_set_.erase(symbol);
         }
     }
     catch(const std::exception& e)
     {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::delete_trade_wss " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::delete_trade_wss: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("Unkonwn exception! ");
     }        
 }
 
-void KlineProcess::update_trade_data(TradeDataPtr pTradeDataPtr)
-{
-    try
-    {
-        string symbol = pTradeDataPtr->symbol_;
-        {
-            // std::lock_guard<std::mutex> lk(trade_data_map_mutex_);
-            // TradeDataPtr oldTradeDataPtr;
-
-            // if (trade_data_map_.find(symbol) == trade_data_map_.end())
-            // {
-            //     // cout << "KlineProcess::update_trade_data New Symbol: " << symbol << endl;
-            //     oldTradeDataPtr = nullptr;
-            // }
-            // else
-            // {
-            //     oldTradeDataPtr = trade_data_map_[symbol];
-            //     // cout <<"NewModeTime: " << get_sec_time_str(mod_secs(pTradeDataPtr->time_, trade_data_freq_base_)) 
-            //     //      << " OldModeTime: " << get_sec_time_str(mod_secs(oldTradeDataPtr->time_, trade_data_freq_base_)) 
-            //     //      << endl;
-            // }
-            // compute_trade_data(pTradeDataPtr, oldTradeDataPtr);
-
-            update_new_trade(pTradeDataPtr);
-
-            if (!(pTradeDataPtr->high_ == 0))
-            {
-                trade_data_map_[symbol] = pTradeDataPtr;
-            }            
-        }
-        
-        std::lock_guard<std::mutex> lk(updated_trade_data_map_mutex_);
-        if (updated_trade_data_map_.find(symbol) != updated_trade_data_map_.end())
-        {
-            map<ID_TYPE, TradeDataUpdatePtr>& reqMap = updated_trade_data_map_[symbol];
-            for (auto iter:reqMap)
-            {
-                PackagePtr package = get_trade_package(iter.second->pReqTrade_, trade_data_map_[symbol]);
-
-                if (package)
-                {
-                    process_engine_->deliver_response(package);
-                }
-                else
-                {
-                    LOG_ERROR("KlineProcess::request_trade_package get_trade_package Failed!");
-                }                
-            }
-        }    
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::update_trade_data " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::update_trade_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }    
-}
-
-void KlineProcess::compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr)
-{
-    try
-    {
-        update_new_trade(curTradeDataPtr);       
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::compute_trade_data " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::compute_trade_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }        
-}
-
-bool KlineProcess::need_compute_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr)
-{
-    try
-    {
-        if (oldTradeDataPtr == nullptr 
-        || mod_secs(curTradeDataPtr->time_, trade_data_freq_base_) != mod_secs(oldTradeDataPtr->time_, trade_data_freq_base_))
-        {
-            if (oldTradeDataPtr)
-            {
-            }
-
-            return true;
-        }
-        return false;
-         
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::need_compute_new_trade " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::need_compute_new_trade: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }   
-}
-
-void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
-{
-    try
-    {
-        int end_time = pTradeData->time_;
-        int start_time = end_time - 24 * 60 * 60;
-        start_time = mod_secs(start_time, trade_data_freq_base_);
-
-        std::vector<KlineDataPtr> src_kline_data = get_trade_kline_data(pTradeData->symbol_, trade_data_freq_base_, start_time, end_time);
-
-        if (src_kline_data.size() > 0)
-        {
-            SDecimal start_price = src_kline_data[0]->index > start_time 
-                                    ? src_kline_data[0]->px_open 
-                                    : src_kline_data[0]->px_close;
-
-            type_tick high_time;
-            type_tick low_time;
-            SDecimal high;
-            SDecimal low;
-
-            if (src_kline_data[0]->px_high > pTradeData->price_)
-            {
-                high = src_kline_data[0]->px_high;
-                high_time = src_kline_data[0]->index;
-            }
-            else
-            {
-                high = pTradeData->price_;
-                high_time = pTradeData->time_;
-            }
-
-            if (src_kline_data[0]->px_low < pTradeData->price_)
-            {
-                low = src_kline_data[0]->px_low;
-                low_time = src_kline_data[0]->index;
-            }
-            else
-            {
-                low = pTradeData->price_;
-                low_time = pTradeData->time_;
-            }
-
-            SDecimal price = pTradeData->price_;
-            SDecimal volume = 0;
-            double change = price.get_value() - start_price.get_value();
-            double change_rate = change / start_price.get_value();
-
-           
-            for (KlineDataPtr& kline : src_kline_data)
-            {
-                // high = high < kline->px_high ? kline->px_high : high;
-                // low = low > kline->px_low ? kline->px_low : low;
-                volume += kline->volume;
-
-                if (high < kline->px_high)
-                {
-                    high = kline->px_high;
-                    high_time = kline->index;
-                }
-
-                if (low > kline->px_low)
-                {
-                    low = kline->px_low;
-                    low_time = kline->index;
-                }               
-            }
-
-            pTradeData->start_time_ = src_kline_data[0]->index;
-            pTradeData->start_price_ = start_price;
-            pTradeData->total_volume_ = volume;
-            pTradeData->high_ = high;
-            pTradeData->low_ = low;            
-            pTradeData->change_ = change;
-            pTradeData->change_rate_ = change_rate;
-        }
-        else
-        {
-            LOG_WARN(string("KlineProcess::compute_new_trade Cann't Get Src Data ") + pTradeData->symbol_);
-        }        
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::compute_new_trade " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::compute_new_trade: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }  
-}
-
-void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr)
+void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
 {
     try
     {
         string symbol = curTradeDataPtr->symbol_;
 
-        if (one_day_kline_data_.find(symbol) == one_day_kline_data_.end() || one_day_kline_data_[symbol].is_empty())
+        if (oneday_updated_kline_data_.find(symbol) == oneday_updated_kline_data_.end() 
+        || oneday_updated_kline_data_[symbol].is_empty())
         {
             curTradeDataPtr->high_ = 0;
             curTradeDataPtr->low_ = 0;
         }
         else
         {
-            TimeKlineData& cur_time_data = one_day_kline_data_[string(curTradeDataPtr->symbol_)];
+            TimeKlineData& cur_time_data = oneday_updated_kline_data_[string(curTradeDataPtr->symbol_)];
             curTradeDataPtr->high_ = curTradeDataPtr->price_ > cur_time_data.high_ ? curTradeDataPtr->price_: cur_time_data.high_;
             curTradeDataPtr->low_ = curTradeDataPtr->price_ < cur_time_data.low_ ? curTradeDataPtr->price_ : cur_time_data.low_;
 
-            type_tick high_time = curTradeDataPtr->high_ == curTradeDataPtr->price_? curTradeDataPtr->time_ : cur_time_data.high_time_;
+            type_tick high_time = curTradeDataPtr->high_ == curTradeDataPtr->price_ ? curTradeDataPtr->time_ : cur_time_data.high_time_;
             type_tick low_time = curTradeDataPtr->low_ == curTradeDataPtr->price_ ? curTradeDataPtr->time_ : cur_time_data.low_time_;
 
             curTradeDataPtr->change_ = curTradeDataPtr->price_.get_value() - cur_time_data.start_price_.get_value();
             curTradeDataPtr->change_rate_ = curTradeDataPtr->change_ / cur_time_data.start_price_.get_value();   
-        }
 
+            trade_data_map_[symbol] = curTradeDataPtr;
+        }
     }
     catch(const std::exception& e)
     {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::update_new_trade " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::update_new_trade: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }       
-}
-
-PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade)
-{
-    try
-    {
-        PackagePtr result = nullptr;
-        string symbol = pReqTrade->symbol_;
-        if (trade_data_map_.find(symbol)!= trade_data_map_.end())
-        {
-            TradeDataPtr pTradeData = trade_data_map_[symbol];
-
-            int end_time = pTradeData->time_;
-            int start_time = end_time - 24 * 60 * 60;
-            start_time = mod_secs(start_time, trade_data_freq_base_);
-
-            std::vector<KlineDataPtr> src_kline_data = get_trade_kline_data(symbol, trade_data_freq_base_, start_time, end_time);
-
-            if (src_kline_data.size() > 0)
-            {
-                SDecimal start_price = src_kline_data[0]->index > start_time 
-                                        ? src_kline_data[0]->px_open 
-                                        : src_kline_data[0]->px_close;
-
-                SDecimal high = src_kline_data[0]->px_high > pTradeData->price_ ? src_kline_data[0]->px_high : pTradeData->price_;
-                SDecimal low = src_kline_data[0]->px_low < pTradeData->price_?src_kline_data[0]->px_low : pTradeData->price_;
-                SDecimal price = pTradeData->price_;
-                SDecimal volume = 0;
-                double change = price.get_value() - start_price.get_value();
-                double change_rate = change / start_price.get_value();
-
-                for (KlineDataPtr& kline : src_kline_data)
-                {
-                    high = high < kline->px_high ? kline->px_high : high;
-                    low = low > kline->px_low ? kline->px_low : low;
-                    volume += kline->volume;
-                }
-
-                result = CreatePackage<RspTrade>(pReqTrade->symbol_, price, volume, 
-                                                 change, change_rate, high, low, 
-                                                 pReqTrade->socket_id_, pReqTrade->socket_type_);
-                if (!result)
-                {
-                    LOG_ERROR("KlineProcess::get_trade_package CreatePackage<RspTrade> Failed!");
-                }
-                else
-                {
-                    result->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
-                }
-            }
-            else
-            {
-                cout << "KlineProcess::get_trade_package Cann't Get Src Data " << pReqTrade->symbol_ << endl;
-            }
-        }
-        else
-        {
-            string error_msg =  "No Trade Data For " + string(pReqTrade->symbol_) ;
-            
-            result = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTrade->socket_id_, pReqTrade->socket_type_);
-            result->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
-            LOG_ERROR(error_msg);
-        }
-
-
-        return result;     
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::get_trade_package " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_trade_package: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("Unkonwn exception!");
     }    
 }
 
-PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr pTradeDataPtr)
-{
-    try
-    {
-        PackagePtr result = CreatePackage<RspTrade>(pReqTrade->symbol_, pTradeDataPtr->price_, pTradeDataPtr->total_volume_, 
-                                                    pTradeDataPtr->change_, pTradeDataPtr->change_rate_, 
-                                                    pTradeDataPtr->high_, pTradeDataPtr->low_, 
-                                                    pReqTrade->socket_id_, pReqTrade->socket_type_);
+
+// void init(type_tick end_time);
+
+// void complete(type_tick end_time);
+
+// void TimeKlineData::init(type_tick end_time)
+// {
+//     try
+//     {
+//         int end_time;
+//         int start_time = end_time - 24 * 60 * 60;
+//         start_time = mod_secs(start_time, frequency_);
+
+//         std::vector<KlineDataPtr> src_kline_data = kline_process_->get_trade_kline_data(symbol_, frequency_, start_time, end_time);
+
+//         if (src_kline_data.size() > 0)
+//         {
+//             start_price_ = src_kline_data[0]->px_open;
+
+//             high_ = src_kline_data[0]->px_high;
+//             high_time_ = src_kline_data[0]->index;
+//             low_ = src_kline_data[0]->px_low;
+//             low_time_ = src_kline_data[0]->index;
+
+//             for (auto kline_data:src_kline_data)
+//             {
+//                 if (high_ < kline_data->px_high)
+//                 {
+//                     high_ = kline_data->px_high;
+//                     high_time_ = kline_data->index;
+//                 }
+
+//                 if (low_ > kline_data->px_low)
+//                 {
+//                     low_ = kline_data->px_low;
+//                     low_time_ = kline_data->index;
+//                 }
+//             }
+
+//             std::stringstream s_s;
+
+//             s_s << symbol_ << " "
+//                 << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
+//                 << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
+//                 << "high_time: " << get_sec_time_str(high_time_) << " high: " << high_.get_value() << "\n"
+//                 << "low_time: " << get_sec_time_str(low_time_)   << " low: " << low_.get_value() << "\n"
+//                 << "kline_data.size: " << src_kline_data.size() << " \n";
+
+//             LOG_DEBUG(s_s.str());
+//         }
+//         else
+//         {
+//             LOG_ERROR( "Get No Kline Source Data");
+//         }
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+    
+// }
+
+// void TimeKlineData::complete(type_tick end_time)
+// {
+//     try
+//     {
+//         if (ori_data_.size() == 0)
+//         {
+//             init(end_time);
+//         }
+//         else
+//         {
+//             type_tick first_time = ori_data_.begin()->first;
+//             type_tick last_time = ori_data_.rbegin()->first;
+
+//             if (last_time - first_time < last_secs_)
+//             {
+//                 type_tick req_start_time = last_time - last_secs_;
+//                 type_tick req_end_time = first_time - frequency_;;;
+
+//                 std::vector<KlineDataPtr> src_kline_data = kline_process_->get_trade_kline_data(symbol_, frequency_, req_start_time, req_end_time);
+
+//                 for (auto kline_data:src_kline_data)
+//                 {
+//                     ori_data_[kline_data->index] = kline_data;
+//                 }
+
+//                 refresh_high_low();
+
+//                 std::stringstream s_s;
+//                 s_s << symbol_ << " "
+//                     << "start_time: " << get_sec_time_str(src_kline_data[0]->index) << " \n"
+//                     << "end_time: " << get_sec_time_str(src_kline_data[src_kline_data.size()-1]->index) << "\n"
+//                     << "high_time: " << get_sec_time_str(high_time_) << " high: " << high_.get_value() << "\n"
+//                     << "low_time: " << get_sec_time_str(low_time_)   << " low: " << low_.get_value() << "\n"
+//                     << "kline_data.size: " << src_kline_data.size() << " \n";
+//                 LOG_DEBUG(s_s.str());
+//             }            
+//         }        
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+// }
+
+
+// bool KlineProcess::need_compute_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr)
+// {
+//     try
+//     {
+//         if (oldTradeDataPtr == nullptr 
+//         || mod_secs(curTradeDataPtr->time_, trade_data_freq_base_) != mod_secs(oldTradeDataPtr->time_, trade_data_freq_base_))
+//         {
+//             if (oldTradeDataPtr)
+//             {
+//             }
+
+//             return true;
+//         }
+//         return false;
+         
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("unkonwn exception!");
+//     }   
+// }
+
+// void KlineProcess::compute_new_trade(TradeDataPtr pTradeData)
+// {
+//     try
+//     {
+//         int end_time = pTradeData->time_;
+//         int start_time = end_time - 24 * 60 * 60;
+//         start_time = mod_secs(start_time, trade_data_freq_base_);
+
+//         std::vector<KlineDataPtr> src_kline_data = get_trade_kline_data(pTradeData->symbol_, trade_data_freq_base_, start_time, end_time);
+
+//         if (src_kline_data.size() > 0)
+//         {
+//             SDecimal start_price = src_kline_data[0]->index > start_time 
+//                                     ? src_kline_data[0]->px_open 
+//                                     : src_kline_data[0]->px_close;
+
+//             type_tick high_time;
+//             type_tick low_time;
+//             SDecimal high;
+//             SDecimal low;
+
+//             if (src_kline_data[0]->px_high > pTradeData->price_)
+//             {
+//                 high = src_kline_data[0]->px_high;
+//                 high_time = src_kline_data[0]->index;
+//             }
+//             else
+//             {
+//                 high = pTradeData->price_;
+//                 high_time = pTradeData->time_;
+//             }
+
+//             if (src_kline_data[0]->px_low < pTradeData->price_)
+//             {
+//                 low = src_kline_data[0]->px_low;
+//                 low_time = src_kline_data[0]->index;
+//             }
+//             else
+//             {
+//                 low = pTradeData->price_;
+//                 low_time = pTradeData->time_;
+//             }
+
+//             SDecimal price = pTradeData->price_;
+//             SDecimal volume = 0;
+//             double change = price.get_value() - start_price.get_value();
+//             double change_rate = change / start_price.get_value();
+
+           
+//             for (KlineDataPtr& kline : src_kline_data)
+//             {
+//                 // high = high < kline->px_high ? kline->px_high : high;
+//                 // low = low > kline->px_low ? kline->px_low : low;
+//                 volume += kline->volume;
+
+//                 if (high < kline->px_high)
+//                 {
+//                     high = kline->px_high;
+//                     high_time = kline->index;
+//                 }
+
+//                 if (low > kline->px_low)
+//                 {
+//                     low = kline->px_low;
+//                     low_time = kline->index;
+//                 }               
+//             }
+
+//             pTradeData->start_time_ = src_kline_data[0]->index;
+//             pTradeData->start_price_ = start_price;
+//             pTradeData->total_volume_ = volume;
+//             pTradeData->high_ = high;
+//             pTradeData->low_ = low;            
+//             pTradeData->change_ = change;
+//             pTradeData->change_rate_ = change_rate;
+//         }
+//         else
+//         {
+//             LOG_WARN(string("Cann't Get Src Data ") + pTradeData->symbol_);
+//         }        
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("unkonwn exception!");
+//     }  
+// }
+
+// PackagePtr KlineProcess::get_trade_package(ReqTradePtr pReqTrade)
+// {
+//     try
+//     {
+//         PackagePtr result = nullptr;
+//         string symbol = pReqTrade->symbol_;
+//         if (trade_data_map_.find(symbol)!= trade_data_map_.end())
+//         {
+//             TradeDataPtr pTradeData = trade_data_map_[symbol];
+
+//             int end_time = pTradeData->time_;
+//             int start_time = end_time - 24 * 60 * 60;
+//             start_time = mod_secs(start_time, trade_data_freq_base_);
+
+//             std::vector<KlineDataPtr> src_kline_data = get_trade_kline_data(symbol, trade_data_freq_base_, start_time, end_time);
+
+//             if (src_kline_data.size() > 0)
+//             {
+//                 SDecimal start_price = src_kline_data[0]->index > start_time 
+//                                         ? src_kline_data[0]->px_open 
+//                                         : src_kline_data[0]->px_close;
+
+//                 SDecimal high = src_kline_data[0]->px_high > pTradeData->price_ ? src_kline_data[0]->px_high : pTradeData->price_;
+//                 SDecimal low = src_kline_data[0]->px_low < pTradeData->price_?src_kline_data[0]->px_low : pTradeData->price_;
+//                 SDecimal price = pTradeData->price_;
+//                 SDecimal volume = 0;
+//                 double change = price.get_value() - start_price.get_value();
+//                 double change_rate = change / start_price.get_value();
+
+//                 for (KlineDataPtr& kline : src_kline_data)
+//                 {
+//                     high = high < kline->px_high ? kline->px_high : high;
+//                     low = low > kline->px_low ? kline->px_low : low;
+//                     volume += kline->volume;
+//                 }
+
+//                 result = CreatePackage<RspTrade>(pReqTrade->symbol_, price, volume, 
+//                                                  change, change_rate, high, low, 
+//                                                  pReqTrade->socket_id_, pReqTrade->socket_type_);
+//                 if (!result)
+//                 {
+//                     LOG_ERROR("CreatePackage<RspTrade> Failed!");
+//                 }
+//                 else
+//                 {
+//                     result->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
+//                 }
+//             }
+//             else
+//             {
+//                 LOG_ERROR("Cann't Get Src Data " + pReqTrade->symbol_);
+//             }
+//         }
+//         else
+//         {
+//             string error_msg =  "No Trade Data For " + string(pReqTrade->symbol_) ;
+            
+//             result = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTrade->socket_id_, pReqTrade->socket_type_);
+//             result->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
+//             LOG_ERROR(error_msg);
+//         }
+//         return result;     
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("unkonwn exception!");
+//     }    
+// }
+
+// std::vector<KlineDataPtr> KlineProcess::get_trade_kline_data(string symbol,  int freq_base, int start_time, int end_time)
+// {
+//     try
+//     {
+//          std::vector<KlineDataPtr> result;
+//         bool need_more_data = false;
+//         std::map<type_tick, KlineDataPtr> cur_src_data;
+//         int request_end_time = end_time;
+
+//         if (kline_data_.find(symbol) == kline_data_.end() || 
+//             kline_data_[symbol].find(freq_base) ==  kline_data_[symbol].end())
+//         {
+//             need_more_data = true;      
+//         }
+//         else if (kline_data_[symbol][freq_base].begin()->first > start_time)
+//         {
+//             request_end_time = kline_data_[symbol][freq_base].begin()->first;
+//             need_more_data = true;
+//             cur_src_data = kline_data_[symbol][freq_base];
+//         }
+//         else
+//         {
+//             cur_src_data = kline_data_[symbol][freq_base];
+//         }
+
+//         if (need_more_data)
+//         {
+//             vector<KlineData> append_result;
+//             HubInterface::get_kline("", symbol.c_str(), freq_base, start_time, request_end_time, append_result);
+
+
+//             for (KlineData& kline_data:append_result)
+//             {
+//                 result.emplace_back(boost::make_shared<KlineData>(kline_data));
+//             }
+//         }
+//         else
+//         {
+
+//         }
+
+//         if (cur_src_data.size() > 0)
+//         {
+//             // cout << "\nCached Data: " <<endl;
+//             std::map<type_tick, KlineDataPtr>::iterator iter = cur_src_data.begin();
+//             while (iter != cur_src_data.end() && iter->first < start_time)
+//             {
+//                 ++iter;
+//             }
+
+//             while(iter != cur_src_data.end() && iter->first <= end_time ) 
+//             {
+//                 result.push_back(iter->second);     
+//                 ++iter;
+//             }
+//         }
+//         return result;    
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("Unknonwn Exception!");
+//     }      
+// }
+
+
+// void compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
+// void KlineProcess::compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr)
+// {
+//     try
+//     {
+//         update_trade_data(curTradeDataPtr);
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("unkonwn exception!");
+//     }        
+// }
+
+
+// map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;
+// void update_new_trade(TradeDataPtr curTradeDataPtr);
+// void KlineProcess::update_new_trade(TradeDataPtr curTradeDataPtr)
+// {
+//     try
+//     {
+//         string symbol = curTradeDataPtr->symbol_;
+//         if (oneday_updated_kline_data_.find(symbol) == oneday_updated_kline_data_.end() || oneday_updated_kline_data_[symbol].is_empty())
+//         {
+//             curTradeDataPtr->high_ = 0;
+//             curTradeDataPtr->low_ = 0;
+//         }
+//         else
+//         {
+//             TimeKlineData& cur_time_data = oneday_updated_kline_data_[string(curTradeDataPtr->symbol_)];
+//             curTradeDataPtr->high_ = curTradeDataPtr->price_ > cur_time_data.high_ ? curTradeDataPtr->price_: cur_time_data.high_;
+//             curTradeDataPtr->low_ = curTradeDataPtr->price_ < cur_time_data.low_ ? curTradeDataPtr->price_ : cur_time_data.low_;
+
+//             type_tick high_time = curTradeDataPtr->high_ == curTradeDataPtr->price_ ? curTradeDataPtr->time_ : cur_time_data.high_time_;
+//             type_tick low_time = curTradeDataPtr->low_ == curTradeDataPtr->price_ ? curTradeDataPtr->time_ : cur_time_data.low_time_;
+
+//             curTradeDataPtr->change_ = curTradeDataPtr->price_.get_value() - cur_time_data.start_price_.get_value();
+//             curTradeDataPtr->change_rate_ = curTradeDataPtr->change_ / cur_time_data.start_price_.get_value();   
+//         }
+
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+//     catch(...)
+//     {
+//         LOG_ERROR("unkonwn exception!");
+//     }       
+// }
+
+
+// void check_websocket_trade_req(ReqTradePtr pReqTrade);
+// void KlineProcess::check_websocket_trade_req(ReqTradePtr pReqTrade)
+// {
+//     try
+//     {
+//         string new_symbol = pReqTrade->symbol_;
         
-        if (!result)
-        {
-            LOG_ERROR("KlineProcess::get_trade_package CreatePackage<RspTrade> Failed!");
-        }
-        else
-        {
-            result->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());            
-        }       
+//         std::lock_guard<std::mutex> lk(trade_wss_con_map_mutex_);
 
-        return result; 
+//         if (trade_wss_con_map_.find(pReqTrade->socket_id_) != trade_wss_con_map_.end() 
+//         && new_symbol != trade_wss_con_map_[pReqTrade->socket_id_])
+//         {
+//             string ori_symbol = trade_wss_con_map_[pReqTrade->socket_id_];
 
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "KlineProcess::get_trade_package " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "KlineProcess::get_trade_package: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }  
-}
+//             std::lock_guard<std::mutex> lk(sub_updated_trade_set_mutex_);
+//             if (updated_trade_data_map_.find(ori_symbol) != updated_trade_data_map_.end()
+//             && updated_trade_data_map_[ori_symbol].find(pReqTrade->socket_id_) != updated_trade_data_map_[ori_symbol].end())
+//             {
+//                 updated_trade_data_map_[ori_symbol].erase(pReqTrade->socket_id_);
 
-std::vector<KlineDataPtr> KlineProcess::get_trade_kline_data(string symbol,  int freq_base, int start_time, int end_time)
-{
-    try
-    {
-         std::vector<KlineDataPtr> result;
-        bool need_more_data = false;
-        std::map<type_tick, KlineDataPtr> cur_src_data;
-        int request_end_time = end_time;
+//                 LOG_DEBUG("ReqTrade updated_trade_data_map_  Erase " + ori_symbol + " socket: " + std::to_string(pReqTrade->socket_id_));
+//             }
+//         }         
 
-        if (kline_data_.find(symbol) == kline_data_.end() || 
-            kline_data_[symbol].find(freq_base) ==  kline_data_[symbol].end())
-        {
-            need_more_data = true;      
-        }
-        else if (kline_data_[symbol][freq_base].begin()->first > start_time)
-        {
-            request_end_time = kline_data_[symbol][freq_base].begin()->first;
-            need_more_data = true;
-            cur_src_data = kline_data_[symbol][freq_base];
-        }
-        else
-        {
-            cur_src_data = kline_data_[symbol][freq_base];
-        }
+//         trade_wss_con_map_[pReqTrade->socket_id_] = new_symbol;
 
-        if (need_more_data)
-        {
-            vector<KlineData> append_result;
-            HubInterface::get_kline("", symbol.c_str(), freq_base, start_time, request_end_time, append_result);
+//         TradeDataUpdatePtr pTradeDataUpdate = boost::make_shared<TradeDataUpdate>(*pReqTrade);
+
+//         std::lock_guard<std::mutex> lg(sub_updated_trade_set_mutex_);
+//         updated_trade_data_map_[new_symbol][pReqTrade->socket_id_] = pTradeDataUpdate;         
+
+//         // cout << "ReqTrade trade_wss_con_map_ add  " << pReqTrade->symbol_ << " socket: " << pReqTrade->socket_id_ << endl;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         stringstream stream_msg;
+//         stream_msg << "[E] KlineProcess::check_websocket_trade_req " << e.what() << "\n";
+//         LOG_ERROR(stream_msg.str());
+//     }
+//     catch(...)
+//     {
+//         std::stringstream stream_obj;
+//         stream_obj << "[E] KlineProcess::check_websocket_trade_req: unkonwn exception! " << "\n";
+//         LOG_ERROR(stream_obj.str());
+//     }       
+// }
+
+// void get_append_data(type_tick start_time, type_tick end_time, int data_count, vector<KlineData>& append_result);
+// map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
+// bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
+// void check_websocket_subinfo(ReqKLineDataPtr pReqKlineData);
+
+// if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
+// {
+//     for (auto& kline_update:updated_kline_data_map_[symbol])
+//     {            
+//         int req_fre = kline_update.reqkline_data.frequency_;
+
+//         if (kline_data->frequency_ > req_fre) continue;
+
+//         if (!kline_update.kline_data_)
+//         {
+//             kline_update.kline_data_ = boost::make_shared<KlineData>(*kline_data);
+//         }
+
+//         KlineDataPtr& last_kline = kline_update.kline_data_;
+
+//         if (last_kline->is_clear())
+//         {
+//             assign(last_kline->symbol, kline_data->symbol);
+//             assign(last_kline->exchange, kline_data->exchange);
+//             assign(last_kline->px_open, kline_data->px_open);
+//             assign(last_kline->px_close, kline_data->px_close);
+//             assign(last_kline->px_high, kline_data->px_high);
+//             assign(last_kline->px_low, kline_data->px_low);
+//             assign(last_kline->volume, kline_data->volume);
+
+//             last_kline->clear_ = false; 
+//         }
+//         else
+//         {
+//             last_kline->px_close = kline_data->px_close;
+//             last_kline->px_low = last_kline->px_low > kline_data->px_low ? kline_data->px_low: last_kline->px_low;
+//             last_kline->px_high = last_kline->px_high < kline_data->px_high ? kline_data->px_high: last_kline->px_high;
+//             assign(last_kline->symbol, kline_data->symbol);                
+//         }
+
+//         if (kline_data->index - last_kline->index >= last_kline->frequency_)
+//         {
+//             // 推送更新作为下一个 k 线时间数据;
+
+//             last_kline->index = kline_data->index;
+//             KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+
+//             std::stringstream s_log;
+//             s_log << "Kline Update New : " << get_sec_time_str(cur_kline_data->index) << " " 
+//             << "fre: " << cur_kline_data->frequency_ << " "
+//             <<"open: " << cur_kline_data->px_open.get_value() << " " 
+//             <<"close: " << cur_kline_data->px_close.get_value() << " "
+//             <<"high: " << cur_kline_data->px_high.get_value() << " "
+//             <<"low: " << cur_kline_data->px_low.get_value() << " \n";
+//             LOG_DEBUG(s_log.str());
+            
+//             PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
+
+//             if (rsp_package)
+//             {
+//                 process_engine_->deliver_response(rsp_package);
+//             }
+//             else
+//             {
+//                 LOG_ERROR("KlineProcess::update_subed_kline_data GetNewRspKLineDataPackage Failed!");
+//             }
+//             last_kline->clear();
+//         }
+//         else
+//         {
+//             // 推送更新作为当前 k 线时间数据;
+//             KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
+//             // cur_kline_data->index = kline_update.last_update_time_;
+
+//             std::stringstream s_log;
+//             s_log << "Kline Update old : " << get_sec_time_str(cur_kline_data->index) << " "
+//             << "fre: " << cur_kline_data->frequency_ << " "
+//             <<"open: " << cur_kline_data->px_open.get_value() << " " 
+//             <<"close: " << cur_kline_data->px_close.get_value() << " "
+//             <<"high: " << cur_kline_data->px_high.get_value() << " "
+//             <<"low: " << cur_kline_data->px_low.get_value() << " \n";
+//             LOG_DEBUG(s_log.str());
+
+//             PackagePtr rsp_package = GetNewRspKLineDataPackage(kline_update.reqkline_data, cur_kline_data, ID_MANAGER->get_id());
+//             if (rsp_package)
+//             {
+//                 process_engine_->deliver_response(rsp_package);
+//             }
+//             else
+//             {
+//                 LOG_ERROR("KlineProcess::update_subed_kline_data GetNewRspKLineDataPackage Failed!");
+//             }
+
+//         }
+//     }
+// }
+
+// std::map<ID_TYPE, string>                                   wss_con_map_;  
+// std::mutex                                                  wss_con_map_mutex_;
+// void KlineProcess::check_websocket_subinfo(ReqKLineDataPtr pReqKlineData)
+// {
+//     try
+//     {
+//         std::lock_guard<std::mutex> lk(wss_con_map_mutex_);
+//         if (wss_con_map_.find(pReqKlineData->socket_id_) != wss_con_map_.end())
+//         {
+//             // delete_kline_request_connect(wss_con_map_[pReqKlineData->socket_id_], pReqKlineData->socket_id_);
+//         }
+//         wss_con_map_[pReqKlineData->socket_id_] = pReqKlineData->symbol_;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::stringstream stream_obj;
+//         stream_obj << "[E] KlineProcess::check_websocket_subinfo: " << e.what() << "\n";
+//         LOG_ERROR(stream_obj.str());
+//     } 
+// }
 
 
-            for (KlineData& kline_data:append_result)
-            {
-                result.emplace_back(boost::make_shared<KlineData>(kline_data));
-            }
-        }
-        else
-        {
+// bool KlineProcess::delete_kline_request_connect(string symbol, ID_TYPE socket_id)
+// {
+//     try
+//     {
+//         LOG_DEBUG(string("KlineProcess::delete_kline_request_connect ") + symbol + " " + std::to_string(socket_id));
 
-        }
+//         std::lock_guard<std::mutex> lk(sub_updated_kline_map_mutex_);
+//         if (updated_kline_data_map_.find(symbol) != updated_kline_data_map_.end())
+//         {
+//             vector<KlineDataUpdate>& kline_updater = updated_kline_data_map_[symbol];
 
-        if (cur_src_data.size() > 0)
-        {
-            // cout << "\nCached Data: " <<endl;
-            std::map<type_tick, KlineDataPtr>::iterator iter = cur_src_data.begin();
-            while (iter != cur_src_data.end() && iter->first < start_time)
-            {
-                ++iter;
-            }
+//             // int pos = 0;
+//             // for (; pos < kline_updater.size(); ++pos)
+//             // {
+//             //     if (kline_updater[pos].reqkline_data.socket_id_ == socket_id) break;
+//             // }
 
-            while(iter != cur_src_data.end() && iter->first <= end_time ) 
-            {
-                result.push_back(iter->second);     
-                ++iter;
-            }
-        }
-        return result;    
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "[E] KlineProcess::get_trade_kline_data " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] KlineProcess::get_trade_kline_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }      
-}
+//             // if (pos != kline_updater.size())
+//             // {
+//             //     std::stringstream stream_obj;
+//             //     stream_obj << "[Kline Update]: Erase Websocket " 
+//             //             << kline_updater[pos].reqkline_data.symbol_ << " " 
+//             //             << kline_updater[pos].reqkline_data.frequency_ << " "
+//             //             << kline_updater[pos].reqkline_data.socket_id_ << "\n";
+//             //     LOG_DEBUG(stream_obj.str());    
+
+//             //     while (pos < kline_updater.size()-1)
+//             //     {
+//             //         kline_updater[pos] = kline_updater[pos+1];
+//             //         ++pos;
+                    
+//             //     }
+//             //     kline_updater.pop_back();
+//             // }
+
+//             vector<KlineDataUpdate>::iterator iter = kline_updater.begin();
+//             for(;iter != kline_updater.end(); ++iter)
+//             {
+//                 if ((*iter).reqkline_data.socket_id_ == socket_id) break;
+//             }
+
+//             if (iter != kline_updater.end())
+//             {
+//                 std::stringstream stream_obj;
+//                 stream_obj << "[Kline Update]: Erase Websocket " 
+//                         << (*iter).reqkline_data.symbol_ << " " 
+//                         << (*iter).reqkline_data.frequency_ << " "
+//                         << (*iter).reqkline_data.socket_id_ << "\n";
+//                 LOG_DEBUG(stream_obj.str());
+//                 updated_kline_data_map_[symbol].erase(iter);
+//             }
+//         }
+//         return true;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::stringstream stream_obj;
+//         stream_obj << "[E] KlineProcess::delete_kline_request_connect: " << e.what() << "\n";
+//         LOG_ERROR(stream_obj.str());
+//     }    
+//     catch (...)
+//     {
+//         std::stringstream stream_obj;
+//         stream_obj << "[E] KlineProcess::delete_kline_request_connect: Unkonw Exceptions " << "\n";
+//         LOG_ERROR(stream_obj.str());        
+//     }
+// }
 
 // vector<KlineDataPtr> KlineProcess::compute_target_kline_data_bak(vector<KlineDataPtr>& src_kline_data, int frequency)
 // {

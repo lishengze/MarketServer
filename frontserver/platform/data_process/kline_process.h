@@ -81,10 +81,6 @@ class TimeKlineData
 
         void update(KlineDataPtr kline_data);
 
-        void init(type_tick end_time);
-
-        void complete(type_tick end_time);
-
         bool is_full();
 
         bool is_empty() { return ori_data_.size() == 0;}
@@ -135,7 +131,7 @@ public:
 
     void init_process_engine(DataProcessPtr process_engine);
 
-    void response_src_kline_package(PackagePtr package);
+    void response_kline_package(PackagePtr package);
 
     void response_src_trade_package(PackagePtr package);
 
@@ -143,15 +139,11 @@ public:
 
     void request_trade_package(PackagePtr package);
 
-    PackagePtr get_kline_package(PackagePtr package);
-
-    bool delete_kline_request_connect(string symbol, ID_TYPE socket_id);
+    PackagePtr get_request_kline_package(PackagePtr package);
 
     bool delete_sub_kline(string symbol, int frequency);
 
     bool store_kline_data(int frequency, KlineDataPtr pkline_data, int base_frequency);
-
-    void complete_kline_data(vector<KlineData>& ori_symbol_kline_data, vector<KlineData>& append_result, frequency_type frequency);
 
     void get_src_kline_data(vector<KlineDataPtr>& result, std::map<type_tick, KlineDataPtr>& symbol_kline_data, type_tick start_time, type_tick end_time, int cur_freq_base);
 
@@ -163,13 +155,11 @@ public:
 
     vector<KlineDataPtr> compute_kline_atom_data(vector<KlineDataPtr>& kline_data, int frequency);
 
-    void init_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData);
+    void init_subed_update_kline_data(PackagePtr rsp_package, ReqKLineDataPtr pReqKlineData);
 
-    void update_kline_data(const KlineDataPtr kline_data);
+    void update_subed_kline_data(const KlineDataPtr kline_data);
 
-    void update_one_day_kline_data(const KlineDataPtr kline_data);
-
-    void check_websocket_subinfo(ReqKLineDataPtr pReqKlineData);
+    void update_oneday_kline_data(const KlineDataPtr kline_data);
 
     void update_frequency_aggreration_map(int src_fre);
 
@@ -177,58 +167,41 @@ public:
 
     void init_update_trade_map(ReqTradePtr pReqTrade);
 
-    void check_websocket_trade_req(ReqTradePtr pReqTrade);
+    void delete_sub_trade(string symbol);
 
     void update_trade_data(TradeDataPtr pTradeDataPtr);
 
-    void compute_trade_data(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
 
-    bool need_compute_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
+    // bool need_compute_new_trade(TradeDataPtr curTradeDataPtr, TradeDataPtr oldTradeDataPtr);
 
-    void compute_new_trade(TradeDataPtr curTradeDataPtr);
-
-    void update_new_trade(TradeDataPtr curTradeDataPtr);
-
-    void delete_trade_wss(ReqTradePtr pReqTrade);
-
-    PackagePtr get_trade_package(ReqTradePtr pReqTrade);
-
-    PackagePtr get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr pTradeDataPtr);
+    // void compute_new_trade(TradeDataPtr curTradeDataPtr);
     
-    std::vector<KlineDataPtr> get_trade_kline_data(string symbol, int freq_base, int start_time, int end_time);
+    // PackagePtr get_trade_package(ReqTradePtr pReqTrade);
 
-    // void get_append_data(type_tick start_time, type_tick end_time, int data_count, vector<KlineData>& append_result);
+    // PackagePtr get_trade_package(ReqTradePtr pReqTrade, TradeDataPtr pTradeDataPtr);
+    
+    // std::vector<KlineDataPtr> get_trade_kline_data(string symbol, int freq_base, int start_time, int end_time);
 
 private:
     DataProcessPtr                                              process_engine_;   
 
     std::mutex                                                  kline_data_mutex_;
     map<string, map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
+
+    map<string, TimeKlineData>                                  oneday_updated_kline_data_;
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
-    map<string, vector<KlineDataUpdate>>                        updated_kline_data_map_;
+    map<string, map<int, KlineDataPtr>>                         sub_updated_kline_map_;
+    std::mutex                                                  sub_updated_kline_map_mutex_; 
 
-    map<string, map<int, KlineDataPtr>>                         sub_updated_kline_data_map_;
-
-    map<string, TimeKlineData>                                  one_day_kline_data_;
-
-
-    map<string, map<ID_TYPE, TradeDataUpdatePtr>>               updated_trade_data_map_;
-    map<string, TradeDataUpdatePtr>                             sub_updated_trade_data_map_;
-    std::mutex                                                  updated_trade_data_map_mutex_;
+    
+    set<string>                                                 sub_updated_trade_set_;
+    std::mutex                                                  sub_updated_trade_set_mutex_;
 
     map<string, TradeDataPtr>                                   trade_data_map_;
     std::mutex                                                  trade_data_map_mutex_;
 
     int                                                         trade_data_freq_base_{60};
-
-    std::map<ID_TYPE, string>                                   trade_wss_con_map_;  
-    std::mutex                                                  trade_wss_con_map_mutex_;
-
-    std::map<ID_TYPE, string>                                   wss_con_map_;  
-    std::mutex                                                  wss_con_map_mutex_;
-
-    std::mutex                                                  updated_kline_data_map_mutex_;
 
     bool                                                        test_kline_data_{false};
 

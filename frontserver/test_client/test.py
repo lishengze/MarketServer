@@ -45,6 +45,8 @@ def on_message(ws, message):
     dic = json.loads(message)
     if dic["type"] == "heartbeat":
         process_heartbeat(ws)
+    elif dic["type"] == "symbol_list":
+        print(message)
     elif dic["type"] == "symbol_update":
         print(message)
     elif dic["type"] == "kline_rsp":
@@ -52,8 +54,13 @@ def on_message(ws, message):
         for item in rsp_data:
             print("time: %s, open: %s, high: %s, low: %s, close: %s " % \
                 (get_time(float(item["tick"])), item["open"], item["high"], item["low"], item["close"]))
+    elif dic["type"] == "kline_update":
+        print(message)
     elif dic["type"] == "market_data_update":
         print_depth_data(dic)
+    elif dic["type"] == "trade":
+        print(message)
+
         
 def on_error(ws, error):
     print("Error")

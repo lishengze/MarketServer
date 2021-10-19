@@ -103,11 +103,11 @@ void DataProcess::handle_response_message(PackagePtr package)
     switch (package->Tid())
     {
         case UT_FID_SDepthData:
-            response_src_sdepth_package(package);
+            response_sdepth_package(package);
             return;
 
         case UT_FID_KlineData:
-            response_src_kline_package(package);
+            response_kline_package(package);
             return;
 
         case UT_FID_TradeData:
@@ -177,13 +177,13 @@ void DataProcess::request_symbol_list_package(PackagePtr package)
     }    
 }
 
-void DataProcess::response_src_sdepth_package(PackagePtr package)
+void DataProcess::response_sdepth_package(PackagePtr package)
 {
     try
     {
         if (depth_process_)
         {
-            depth_process_->response_src_sdepth_package(package);
+            depth_process_->response_sdepth_package(package);
         }
     }
     catch(const std::exception& e)
@@ -192,13 +192,13 @@ void DataProcess::response_src_sdepth_package(PackagePtr package)
     }    
 }
 
-void DataProcess::response_src_kline_package(PackagePtr package)
+void DataProcess::response_kline_package(PackagePtr package)
 {
     try
     {
         if (kline_process_)
         {
-            kline_process_->response_src_kline_package(package);
+            kline_process_->response_kline_package(package);
         }
     }
     catch(const std::exception& e)

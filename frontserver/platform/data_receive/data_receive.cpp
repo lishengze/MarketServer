@@ -346,6 +346,13 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     LOG->record_input_info(string("depth_") + string(exchange) + "_" + string(symbol), depth);
 
+    if (strcmp(symbol, "BTC_USDT") == 0)
+    {              
+        std::stringstream stream_obj;
+        stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
+        LOG_DEBUG(stream_obj.str());        
+    }    
+
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 
     if (package)
@@ -358,12 +365,12 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
         }
         else
         {
-            LOG_ERROR("DataReceive::handle_depth GetField Failed!");
+            LOG_ERROR("GetField Failed!");
         }
     }
     else
     {
-        LOG_ERROR("DataReceive::handle_raw_depth GetNewSDepthDataPackage Failed!");
+        LOG_ERROR("GetNewSDepthDataPackage Failed!");
     }
 }
 
@@ -390,15 +397,15 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         const KlineData& kline = klines[i];
 
         std::stringstream stream_obj;
-        if (symbol == "BTC_USDT" && klines.size() < 5)
-        {
-            stream_obj.clear();
-            stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol 
-                        << ",fre: " << resolution << ", "
-                        << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
-                        << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
-            LOG_DEBUG(stream_obj.str());        
-        }
+        // if (symbol == "BTC_USDT" && klines.size() < 5)
+        // {
+        //     stream_obj.clear();
+        //     stream_obj  << "[K-Kine] SRC " << get_sec_time_str(kline.index)  << ", " << kline.symbol 
+        //                 << ",fre: " << resolution << ", "
+        //                 << "open: " << kline.px_open.get_value() << ", high: " << kline.px_high.get_value() << ", "
+        //                 << "low: " << kline.px_low.get_value() << ", close: " << kline.px_close.get_value();    
+        //     LOG_DEBUG(stream_obj.str());        
+        // }
 
         PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
         if (package)
@@ -480,8 +487,15 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
             return;
         }
 
-        LOG->record_input_info(string("trade_") + string(exchange) + "_" + string(symbol), trade);
+        // if (strcmp(symbol, "BTC_USDT") == 0)
+        // {              
+        //     std::stringstream stream_obj;
+        //     stream_obj << "[trade] " << utrade::pandora::ToSecondStr(trade.time) << " " << exchange << " " << symbol << " "
+        //                << trade.price.get_value() << ", " << trade.volume.get_value();
+        //     LOG_DEBUG(stream_obj.str());        
+        // }
 
+        // LOG->record_input_info(string("trade_") + string(exchange) + "_" + string(symbol), trade);
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 
@@ -492,19 +506,15 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
         }
         else
         {
-            LOG_ERROR("DataReceive::handle_trade_data CreatePackage Failed!");
+            LOG_ERROR("CreatePackage<TradeData> Failed!");
         }
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] DataReceive::handle_trade_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] DataReceive::handle_trade_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("Unknown Exception!");
     }    
 }

@@ -59,18 +59,18 @@ public:
     void add_sub_depth(ReqRiskCtrledDepthDataPtr req_trade_data);
 
 private:
-    WBServerPtr         wb_server_;    
+    WBServerPtr             wb_server_;    
 
-    RestServerPtr       rest_server_;
+    RestServerPtr           rest_server_;
 
     std::set<std::string>   symbols_;
 
 private:
-    map<string, map<int, map<ID_TYPE, ReqKLineDataPtr>>>     sub_kline_map_;
+    map<string, map<int, map<ID_TYPE, ReqKLineDataPtr>>>     sub_updated_kline_map_;
     map<ID_TYPE, ReqKLineDataPtr>                            sub_kline_socket_map_;
     std::mutex                                               sub_kline_map_update_mutex_;
 
-    map<string, map<ID_TYPE, ReqTradePtr>>                   sub_trade_map_;
+    map<string, map<ID_TYPE, ReqTradePtr>>                   sub_updated_trade_map_;
     map<ID_TYPE, ReqTradePtr>                                sub_trade_socket_map_;
     std::mutex                                               sub_trade_map_update_mutex_;
 

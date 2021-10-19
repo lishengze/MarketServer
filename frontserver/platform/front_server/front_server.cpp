@@ -107,30 +107,23 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
             
             if (!wb_server_->send_data(p_symbol_list->socket_id_, symbol_list_str))
             {
-
-                PackagePtr req_cancel_pacakge = GetReqSymbolListDataPackage(p_symbol_list->socket_id_, p_symbol_list->socket_type_, ID_MANAGER->get_id(), true);
-
-                if (req_cancel_pacakge)
-                {
-                    deliver_request(req_cancel_pacakge);
-                }
+                LOG_WARN("wb_server_->send_data Failed!");
+                // PackagePtr req_cancel_pacakge = GetReqSymbolListDataPackage(p_symbol_list->socket_id_, p_symbol_list->socket_type_, 
+                //                                                             ID_MANAGER->get_id(), true);
+                // if (req_cancel_pacakge)
+                // {
+                //     deliver_request(req_cancel_pacakge);
+                // }
             }
-            else
-            {
-                LOG_WARN("FrontServer::response_symbol_list_package wb_server_->send_data Failed!");
-            }
-
         }
         else
         {
-            LOG_WARN("FrontServer::response_symbol_list_package response data null!");
+            LOG_WARN("response data null!");
         }
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_symbol_list_package: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
 }
 
@@ -265,10 +258,10 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                 int frequency = p_rsp_kline_data->frequency_;
 
                 std::lock_guard<std::mutex> lk(sub_kline_map_update_mutex_);
-                if (sub_kline_map_.find(symbol) != sub_kline_map_.end() 
-                    && sub_kline_map_[symbol].find(frequency) != sub_kline_map_[symbol].end())
+                if (sub_updated_kline_map_.find(symbol) != sub_updated_kline_map_.end() 
+                    && sub_updated_kline_map_[symbol].find(frequency) != sub_updated_kline_map_[symbol].end())
                 {
-                    std::map<ID_TYPE, ReqKLineDataPtr>& sub_kline_map = sub_kline_map_[symbol][frequency];
+                    std::map<ID_TYPE, ReqKLineDataPtr>& sub_kline_map = sub_updated_kline_map_[symbol][frequency];
 
                     std::vector<ID_TYPE> invalid_req_socket_vec;
 
@@ -356,13 +349,13 @@ void FrontServer::response_trade_data_package(PackagePtr package)
             string trade_data_str = pRspTradeData->get_json_str();
             std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
 
-            if (sub_trade_map_.find(pRspTradeData->symbol_) != sub_trade_map_.end())
+            if (sub_updated_trade_map_.find(pRspTradeData->symbol_) != sub_updated_trade_map_.end())
             {
-                map<ID_TYPE, ReqTradePtr>& cur_sub_trade_map = sub_trade_map_[pRspTradeData->symbol_];
+                map<ID_TYPE, ReqTradePtr>& cur_sub_trade_map = sub_updated_trade_map_[pRspTradeData->symbol_];
 
                 std::vector<ID_TYPE> invalid_req_socket_vec;
 
-                LOG_INFO(trade_data_str);
+                // LOG_INFO(trade_data_str);
 
                 for (auto iter:cur_sub_trade_map)
                 {
@@ -435,11 +428,8 @@ void FrontServer::response_trade_data_package(PackagePtr package)
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::response_trade_data_package: unknown exceptions!\n";
-        LOG_ERROR(stream_obj.str());        
-    }
-    
+        LOG_ERROR("unknown exceptions!");        
+    }    
 }
 
 void FrontServer::response_enquiry_data_package(PackagePtr package)
@@ -517,13 +507,13 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
 
             LOG_INFO("Last ReqKlineInfo: " + last_req_kline->str());
 
-            if (sub_kline_map_.find(last_req_kline->symbol_) != sub_kline_map_.end() 
-            && sub_kline_map_[last_req_kline->symbol_].find(last_req_kline->frequency_) != sub_kline_map_[last_req_kline->symbol_].end()
-            && sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].find(last_req_kline->socket_id_) 
-                != sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].end())
+            if (sub_updated_kline_map_.find(last_req_kline->symbol_) != sub_updated_kline_map_.end() 
+            && sub_updated_kline_map_[last_req_kline->symbol_].find(last_req_kline->frequency_) != sub_updated_kline_map_[last_req_kline->symbol_].end()
+            && sub_updated_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].find(last_req_kline->socket_id_) 
+                != sub_updated_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].end())
             {
-                LOG_INFO("sub_kline_map_ Erase Last ReqKline " + last_req_kline->simple_str());
-                sub_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].erase(last_req_kline->socket_id_); 
+                LOG_INFO("sub_updated_kline_map_ Erase Last ReqKline " + last_req_kline->simple_str());
+                sub_updated_kline_map_[last_req_kline->symbol_][last_req_kline->frequency_].erase(last_req_kline->socket_id_); 
             }
 
             sub_kline_socket_map_.erase(req_kline_data->socket_id_);
@@ -531,7 +521,7 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
 
         LOG_INFO("New ReqKlineInfo: " + req_kline_data->str());
         sub_kline_socket_map_[req_kline_data->socket_id_] = req_kline_data;
-        sub_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_][req_kline_data->socket_id_] = req_kline_data;        
+        sub_updated_kline_map_[req_kline_data->symbol_][req_kline_data->frequency_][req_kline_data->socket_id_] = req_kline_data;        
     }
     catch(const std::exception& e)
     {
@@ -553,17 +543,17 @@ void FrontServer::add_sub_trade(ReqTradePtr req_trade_data)
 
             sub_trade_socket_map_.erase(last_req_trade->socket_id_);
 
-            if (sub_trade_map_.find(last_req_trade->symbol_) != sub_trade_map_.end()
-            && sub_trade_map_[last_req_trade->symbol_].find(last_req_trade->socket_id_) != sub_trade_map_[last_req_trade->symbol_].end())
+            if (sub_updated_trade_map_.find(last_req_trade->symbol_) != sub_updated_trade_map_.end()
+            && sub_updated_trade_map_[last_req_trade->symbol_].find(last_req_trade->socket_id_) != sub_updated_trade_map_[last_req_trade->symbol_].end())
             {
-                LOG_INFO("sub_trade_map_ erase last req_trade " + last_req_trade->str());
-                sub_trade_map_[last_req_trade->symbol_].erase(last_req_trade->socket_id_);
+                LOG_INFO("sub_updated_trade_map_ erase last req_trade " + last_req_trade->str());
+                sub_updated_trade_map_[last_req_trade->symbol_].erase(last_req_trade->socket_id_);
             }
         }
 
         LOG_INFO("New ReqTradeInfo: " + req_trade_data->str());
         sub_trade_socket_map_[req_trade_data->socket_id_] = req_trade_data;
-        sub_trade_map_[req_trade_data->symbol_][req_trade_data->socket_id_] = req_trade_data;
+        sub_updated_trade_map_[req_trade_data->symbol_][req_trade_data->socket_id_] = req_trade_data;
     }
     catch(const std::exception& e)
     {
