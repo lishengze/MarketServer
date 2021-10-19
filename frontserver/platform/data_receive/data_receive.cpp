@@ -346,12 +346,12 @@ void DataReceive::handle_depth_data(const char* exchange, const char* symbol, co
 
     LOG->record_input_info(string("depth_") + string(exchange) + "_" + string(symbol), depth);
 
-    if (strcmp(symbol, "BTC_USDT") == 0)
-    {              
-        std::stringstream stream_obj;
-        stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
-        LOG_DEBUG(stream_obj.str());        
-    }    
+    // if (strcmp(symbol, "BTC_USDT") == 0)
+    // {              
+    //     std::stringstream stream_obj;
+    //     stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
+    //     LOG_DEBUG(stream_obj.str());        
+    // }    
 
     PackagePtr package = GetNewSDepthDataPackage(depth, ID_MANAGER->get_id());
 

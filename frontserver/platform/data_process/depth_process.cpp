@@ -183,9 +183,9 @@ void DepthProces::response_updated_depth_data(SDepthDataPtr pSDepthData)
             PackagePtr package = CreatePackage<RspRiskCtrledDepthData>(*pSDepthData);
             if (package)
             {
-                std::stringstream stream_obj;
-                stream_obj  << "[Update] " << pSDepthData->exchange << " " << pSDepthData->symbol << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
-                LOG_DEBUG(stream_obj.str());
+                // std::stringstream stream_obj;
+                // stream_obj  << "[Update] " << pSDepthData->exchange << " " << pSDepthData->symbol << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
+                // LOG_DEBUG(stream_obj.str());
 
                 package->prepare_response(UT_FID_RspRiskCtrledDepthData, ID_MANAGER->get_id());
                 process_engine_->deliver_response(package);
