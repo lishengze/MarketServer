@@ -553,8 +553,6 @@ PackagePtr KlineProcess::get_request_kline_package(PackagePtr package)
             vector<KlineDataPtr> target_kline_data = compute_target_kline_data(src_kline_data, pReqKlineData->frequency_);
             s_obj << "Rsp Kline Data Size: " << target_kline_data.size() << "\n";
 
-            
-
             if (target_kline_data.size() > 0)
             {
                 // for (auto kline_data:target_kline_data)
@@ -614,7 +612,7 @@ PackagePtr KlineProcess::get_request_kline_package(PackagePtr package)
                 rsp_package = GetRspErrMsgPackage(err_msg, err_id, pReqKlineData->socket_id_, pReqKlineData->socket_type_);
             }
             
-            return rsp_package;                       
+            return rsp_package;
         }
         else
         {
