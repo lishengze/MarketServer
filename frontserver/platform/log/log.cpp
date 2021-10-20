@@ -51,13 +51,13 @@ void FrontServerLog::record_input_info(const string& channel, const Trade& trade
 {
     try
     {
-        record_input_info(channel);
-
         std::stringstream stream_obj;
         stream_obj << "[Trade] " << trade.exchange << " " << trade.symbol << " " 
                    << trade.price.get_value() << " " << trade.volume.get_value();
 
-        log_source_input(stream_obj.str());     
+        log_source_input(stream_obj.str());  
+
+        record_input_info(channel);
     }
     catch(const std::exception& e)
     {

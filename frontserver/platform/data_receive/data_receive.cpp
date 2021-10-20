@@ -388,7 +388,9 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         return;
     }
 
-    LOG->record_input_info(string("kline_") + string(exchange) + "_" + string(c_symbol) + "_" + std::to_string(resolution), klines);
+    LOG->record_input_info(string("kline_") + string(exchange) + "_" + string(c_symbol) + "_" 
+                            + std::to_string(resolution) + "_" + std::to_string(klines.size()), 
+                            klines);
 
     string symbol = string(c_symbol);
 
