@@ -32,10 +32,12 @@ string RspSymbolListData::get_json_str()
 }
 
 
-RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDepthData& other)
+RspRiskCtrledDepthData& RspRiskCtrledDepthData::operator=(const RspRiskCtrledDepthData& other)
 {
     socket_id_ = other.socket_id_;
     socket_type_ = other.socket_type_;
+    http_response_ = other.http_response_;
+    websocket_ = other.websocket_;    
 
     depth_data_ = other.depth_data_;
     for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
@@ -43,6 +45,8 @@ RspRiskCtrledDepthData & RspRiskCtrledDepthData::operator=(const RspRiskCtrledDe
         ask_accumulated_volume_[i] = other.ask_accumulated_volume_[i];
         bid_accumulated_volume_[i] = other.bid_accumulated_volume_[i];
     }
+
+    return *this;
 }
 
 void RspRiskCtrledDepthData::set(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
@@ -68,6 +72,29 @@ void RspRiskCtrledDepthData::set(const SDepthData& depth_data, ID_TYPE socket_id
         bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
     }
 
+}
+
+void RspRiskCtrledDepthData::set_depth(const SDepthData& depth_data)
+{
+    try
+    {
+        memcpy(&depth_data_, &depth_data, sizeof(SDepthData));
+
+        for (int i = 0; i < depth_data_.ask_length && i < DEPCH_LEVEL_COUNT; ++i)
+        {
+            ask_accumulated_volume_[i] = i==0 ? depth_data_.asks[i].volume.get_value() : depth_data_.asks[i].volume + ask_accumulated_volume_[i-1];
+        }
+
+        for (int i = 0; i < depth_data_.bid_length && i < DEPCH_LEVEL_COUNT; ++i)
+        {
+            bid_accumulated_volume_[i] = i==0 ? depth_data_.bids[i].volume.get_value() : depth_data_.bids[i].volume + bid_accumulated_volume_[i-1];
+        }
+
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 string RspRiskCtrledDepthData::get_json_str()
@@ -152,7 +179,7 @@ string RspKLineData::get_json_str()
         stream_obj << "[E] RspKLineData::get_json_str: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }
-    
+    return nullptr;
 }
 
 string RspEnquiry::get_json_str()

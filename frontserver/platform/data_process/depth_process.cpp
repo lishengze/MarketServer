@@ -37,20 +37,20 @@ void DepthProces::request_symbol_list_package(PackagePtr package)
                     symbols.emplace(iter.first);
                 }
             }
-
             is_symbol_list_subed_ = true;
 
-            PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, pReqSymbolListData->socket_id_, 
-                                                                    pReqSymbolListData->socket_type_, 
-                                                                    ID_MANAGER->get_id());
-
-            if (package_new)
+            // PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, pReqSymbolListData->socket_id_, 
+            //                                                         pReqSymbolListData->socket_type_, 
+            //                                                         ID_MANAGER->get_id());
+            PackagePtr package = CreatePackage<RspSymbolListData>(symbols, pReqSymbolListData->websocket_);
+            if (package)
             {
-                process_engine_->deliver_response(package_new);       
+                package->prepare_response(UT_FID_RspSymbolListData, ID_MANAGER->get_id());
+                process_engine_->deliver_response(package);
             }
             else
             {
-                LOG_ERROR("GetNewRspSymbolListDataPackage Failed!");
+                LOG_ERROR("CreatePackage<RspSymbolListData> Failed!");
             }
         }
     }
@@ -87,21 +87,24 @@ void DepthProces::request_depth_package(PackagePtr package)
                 SDepthDataPtr pSDepthData = depth_data_[symbol];
 
                 std::stringstream stream_obj;
-                stream_obj  << "[SrcDepth] " << pSDepthData->exchange << " " << pSDepthData->symbol << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
+                stream_obj << "[SrcDepth] " << pSDepthData->exchange << " " << pSDepthData->symbol 
+                           << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
                 LOG_INFO(stream_obj.str());
                 
-                PackagePtr RspRiskCtrledDepthDataPackage = GetNewRspRiskCtrledDepthDataPackage(*pSDepthData, p_req->socket_id_, p_req->socket_type_, ID_MANAGER->get_id());           
+                // PackagePtr RspRiskCtrledDepthDataPackage = GetNewRspRiskCtrledDepthDataPackage(*pSDepthData, p_req->socket_id_, p_req->socket_type_, ID_MANAGER->get_id());           
 
+                PackagePtr RspRiskCtrledDepthDataPackage = CreatePackage<RspRiskCtrledDepthData>(*pSDepthData, p_req->websocket_);
                 if (RspRiskCtrledDepthDataPackage)
                 {
+                    RspRiskCtrledDepthDataPackage->prepare_response(UT_FID_RspRiskCtrledDepthData, ID_MANAGER->get_id()); 
                     std::lock_guard<std::mutex> lk_s(sub_depth_mutex_);
                     sub_depth_set_.emplace(symbol);
 
-                    process_engine_->deliver_response(RspRiskCtrledDepthDataPackage);
-                }     
+                    process_engine_->deliver_response(RspRiskCtrledDepthDataPackage);                    
+                }    
                 else
                 {
-                    LOG_ERROR("GetNewRspRiskCtrledDepthDataPackage Failed!");
+                    LOG_ERROR("CreatePackage<RspRiskCtrledDepthData> Failed!");
                 }
             }
             else

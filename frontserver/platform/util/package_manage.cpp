@@ -22,9 +22,9 @@ PackagePtr GetReqSymbolListDataPackage(ID_TYPE socket_id, COMM_TYPE socket_type,
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }    
-        
+    return nullptr;
 }
 
 PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, ID_TYPE socket_id,  int package_id, bool is_cancel_request)
@@ -49,8 +49,9 @@ PackagePtr GetReqRiskCtrledDepthDataPackage(string& symbol, ID_TYPE socket_id,  
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"GetReqRiskCtrledDepthDataPackage " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E] " << e.what() << '\n';
     }        
+    return nullptr;
 }
 
 PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
@@ -74,9 +75,9 @@ PackagePtr GetNewSDepthDataPackage(const SDepthData& depth, int package_id)
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"GetNewSDepthDataPackage " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }    
-    
+    return nullptr;
 }
 
 PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_id)
@@ -99,9 +100,9 @@ PackagePtr GetNewKlineDataPackage(const KlineData& ori_kline_data, int package_i
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"GetNewKlineDataPackage " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }    
-    
+    return nullptr;
 }
 
 PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
@@ -125,10 +126,9 @@ PackagePtr GetNewRspRiskCtrledDepthDataPackage(const SDepthData& depth, ID_TYPE 
     }
     catch(const std::exception& e)
     {
-        std::cerr <<"GetNewRspRiskCtrledDepthDataPackage " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E] " << e.what() << '\n';
     }
-    
-        
+    return nullptr;
 }
 
 PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, ID_TYPE socket_id, COMM_TYPE socket_type, int package_id)
@@ -152,8 +152,9 @@ PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, ID_TYPE sock
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }      
+    return nullptr;
 }
 
 PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int type, HttpResponseThreadSafePtr res)
@@ -179,10 +180,9 @@ PackagePtr GetReqEnquiryPackage(string symbol, double volume, double amount, int
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }
-    
-    
+    return nullptr;
 }
 
 PackagePtr GetNewRspKLineDataPackage(ReqKLineData& pReqKlineData, std::vector<KlineDataPtr>& kline_data_vec, int package_id)
@@ -225,8 +225,9 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData& pReqKlineData, std::vector<Kl
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     }     
+    return nullptr;
 }
 
 
@@ -253,8 +254,9 @@ PackagePtr GetNewRspKLineDataPackage(ReqKLineData& pReqKlineData, KlineDataPtr& 
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E]: " << e.what() << '\n';
     } 
+    return nullptr;
 }
 
 // PackagePtr GetNewRspKLineDataPackage(string symbol, type_tick start_time, type_tick end_time, int data_count,
@@ -317,8 +319,10 @@ PackagePtr GetRspEnquiryPackage(string symbol, double price, ID_TYPE socket_id, 
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E] " << e.what() << '\n';
     } 
+
+    return nullptr;
 }
 
 PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,  ID_TYPE socket_id, COMM_TYPE socket_type)
@@ -344,6 +348,7 @@ PackagePtr GetRspErrMsgPackage(string err_msg, int err_id,  ID_TYPE socket_id, C
     }
     catch(const std::exception& e)
     {
-        std::cerr << "GetNewRspSymbolListDataPackage: " << e.what() << '\n';
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " [E] " << e.what() << '\n';
     }
+    return nullptr;
 }                                

@@ -59,13 +59,15 @@ class WBServer
 
     void process_on_message(string ori_msg, WebsocketClass * ws);
     
-    void process_depth_req(string ori_msg, ID_TYPE socket_id);
+    void process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws=nullptr);
 
-    void process_kline_req(string ori_msg, ID_TYPE socket_id);
+    void process_kline_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws=nullptr);
 
-    void process_trade_req(string ori_msg, ID_TYPE socket_id);
+    void process_trade_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws=nullptr);
 
-    void process_heartbeat(ID_TYPE socket_id);
+    void process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr ws=nullptr);
+
+    void request_symbol_list(ID_TYPE socket_id);
 
     ID_TYPE store_ws(WebsocketClass * ws);
 

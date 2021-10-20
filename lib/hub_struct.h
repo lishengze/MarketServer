@@ -148,8 +148,8 @@ struct KlineData:virtual public PacakgeBaseData
 
     bool is_clear() {return clear_;}    
                     
-    symbol_type symbol{NULL};
-    symbol_type exchange{NULL};
+    symbol_type symbol;
+    symbol_type exchange;
     type_tick index;
     SDecimal px_open;
     SDecimal px_high;

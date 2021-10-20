@@ -40,6 +40,8 @@ class HttpResponseThreadSafe:virtual public PacakgeBaseData
         http_response_->end(info);
     }
 
+    HttpResponse* get_hs() { return http_response_;}
+
     HttpResponse*    http_response_{nullptr};
     std::mutex       mutex_;
 };
@@ -198,7 +200,6 @@ public:
 //     HttpResponseThreadSafePtr       http_response_{nullptr};
 //     WebsocketClassThreadSafePtr     websocket_{nullptr};
 // };
-
 struct Socket:virtual public PacakgeBaseData
 {
     Socket() {}
@@ -207,15 +208,55 @@ struct Socket:virtual public PacakgeBaseData
 
     }
 
+    Socket(ID_TYPE id, COMM_TYPE type, HttpResponseThreadSafePtr res, WebsocketClassThreadSafePtr ws)
+            :socket_type_{type}, socket_id_{id}, http_response_{res}, websocket_{ws}
+    {
+
+    }    
+
+    Socket(HttpResponseThreadSafePtr res):http_response_{res}, socket_type_{COMM_TYPE::HTTP}
+    {
+
+    }    
+
+    Socket(WebsocketClassThreadSafePtr ws):websocket_{ws}, socket_type_{COMM_TYPE::WEBSOCKET}
+    {
+
+    }    
+
+    Socket(WebsocketClassThreadSafePtr ws, ID_TYPE socket_id):
+        websocket_{ws}, socket_id_{socket_id}, socket_type_{COMM_TYPE::WEBSOCKET}
+    {
+
+    }    
+
     string str()
     {
         std::stringstream s_obj;
-        s_obj << get_comm_type_str(int(socket_type_)) << "_" << socket_id_;
+        s_obj << get_comm_type_str(int(socket_type_));
+
+        if (socket_id_)
+        {
+            s_obj << "_id_" << socket_id_;
+        }
+
+        if (websocket_)
+        {
+            s_obj << "_ws_" << websocket_->get_ws();
+        }
+
+        if (http_response_)
+        {
+            s_obj << "_hs_" << http_response_->get_hs();
+        }
         return s_obj.str();
     }
 
-    COMM_TYPE                       socket_type_ = COMM_TYPE::HTTP;
-    ID_TYPE                         socket_id_;
+    COMM_TYPE                       socket_type_ = COMM_TYPE::WEBSOCKET;
+    ID_TYPE                         socket_id_{0};
+
+    HttpResponseThreadSafePtr       http_response_{nullptr};
+    WebsocketClassThreadSafePtr     websocket_{nullptr};    
 };
 
 struct AtomKlineData:virtual public PacakgeBaseData

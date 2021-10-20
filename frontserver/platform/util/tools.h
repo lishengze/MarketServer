@@ -19,8 +19,6 @@ string SymbolsToJsonStr(std::set<std::string> symbols, string type=SYMBOL_LIST);
 
 string RspRiskCtrledDepthDataToJsonStr(RspRiskCtrledDepthData& en_data, string type=MARKET_DATA_UPDATE);
 
-string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type=KLINE_UPDATE);
-
 inline type_tick trans_string_to_type_tick(string time_str)
 {
     type_tick result = std::stoul(time_str);
@@ -50,7 +48,6 @@ inline int get_random_double(int max, int min)
     return dis(gen);
 }
 
-// string get_sec_time_str(unsigned long time);
 
 void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src);
 

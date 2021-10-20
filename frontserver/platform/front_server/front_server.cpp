@@ -104,17 +104,20 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
             string symbol_list_str = p_symbol_list->get_json_str();
 
             LOG->record_output_info("SymbolLists_" + std::to_string(p_symbol_list->socket_id_));
-            
-            if (!wb_server_->send_data(p_symbol_list->socket_id_, symbol_list_str))
+
+            if (!p_symbol_list->websocket_)
             {
-                LOG_WARN("wb_server_->send_data Failed!");
-                // PackagePtr req_cancel_pacakge = GetReqSymbolListDataPackage(p_symbol_list->socket_id_, p_symbol_list->socket_type_, 
-                //                                                             ID_MANAGER->get_id(), true);
-                // if (req_cancel_pacakge)
-                // {
-                //     deliver_request(req_cancel_pacakge);
-                // }
+                LOG_ERROR("p_symbol_list->websocket_ is null");
+                return;
             }
+
+            if (!p_symbol_list->websocket_->is_alive())
+            {
+                LOG_ERROR("p_symbol_list->websocket_ is not alive!");
+                return;                
+            }
+
+            p_symbol_list->websocket_->send(symbol_list_str);
         }
         else
         {
@@ -147,11 +150,22 @@ void FrontServer::response_depth_data_package(PackagePtr package)
 
                 for (auto iter:cur_sub_depth_map)
                 {
-                    if (!wb_server_->send_data(iter.first, depth_str))
+                    ReqRiskCtrledDepthDataPtr req_ptr = iter.second;
+                    ID_TYPE socket_id = iter.first;
+
+                    if (!req_ptr->websocket_)
                     {
-                        LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
-                        invalid_req_socket_vec.push_back(iter.first);
+                        LOG_ERROR("socket_id "+ std::to_string(socket_id) + " req_ptr->websocket_ is null");
+                        invalid_req_socket_vec.push_back(socket_id);
+                        continue;
                     }
+                    if (!req_ptr->websocket_->is_alive())
+                    {
+                        LOG_ERROR("socket_id "+ std::to_string(socket_id) + " req_ptr->websocket_ is not alive!");
+                        invalid_req_socket_vec.push_back(socket_id);
+                        continue;                
+                    }
+                    req_ptr->websocket_->send(depth_str);
                 }
 
                 for (auto socket_id:invalid_req_socket_vec)

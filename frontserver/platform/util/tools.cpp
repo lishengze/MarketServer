@@ -129,95 +129,6 @@ string RspRiskCtrledDepthDataToJsonStr(RspRiskCtrledDepthData& en_data, string t
     return result;
 }
 
-std::vector<AtomKlineDataPtr>& compute_target_kline_data(std::vector< KlineData*>& kline_data, int frequency)
-{
-    std::vector<AtomKlineDataPtr> result;
-
-    cout << "kline_data.size: " << kline_data.size() << endl;
-
-    if (kline_data.size() == 0) return result;
-
-    AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*(kline_data[0]));
-    cout << "\ncur_data.tick: " << cur_data->tick_ << endl;
-    // AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>();
-
-    cout << "make over" << endl;
-
-    result.push_back(cur_data); 
-
-    double low = MAX_DOUBLE;
-    double high = MIN_DOUBLE;
-
-    kline_data.erase(kline_data.begin());
-
-    cout << "kline_data.size: " << kline_data.size() << endl;
-
-    for (KlineData* atom : kline_data)
-    {
-        cout << "atom.tick " << atom->index << endl;
-        low = low > atom->px_low.get_value() ? atom->px_low.get_value() : low;
-        high = high < atom->px_high.get_value() ? atom->px_high.get_value():high;
-
-        if (atom->index - (*result.rbegin())->tick_ >= frequency)
-        {            
-            AtomKlineDataPtr cur_data = boost::make_shared<AtomKlineData>(*atom);
-            cur_data->low_ = low;
-            cur_data->high_ = high;
-            result.push_back(cur_data); 
-
-            low = MAX_DOUBLE;
-            high = MIN_DOUBLE;
-        }
-    }
-
-    cout << "compute over" << endl;
-
-    return result;
-}
-
-string RspKlinDataToJsonStr(RspKLineData& rsp_kline_data, string type)
-{
-    // try
-    // {
-    //     string result;
-    //     nlohmann::json json_data;        
-    //     json_data["type"] = type;
-    //     json_data["symbol"] = string(rsp_kline_data.symbol_);
-    //     json_data["start_time"] = rsp_kline_data.start_time_;
-    //     json_data["end_time"] = rsp_kline_data.end_time_;
-    //     json_data["frequency"] = rsp_kline_data.frequency_;
-    //     json_data["data_count"] = rsp_kline_data.data_count_;
-
-    //     int i = 0;
-    //     nlohmann::json detail_data;
-    //     for (AtomKlineDataPtr atom_data:rsp_kline_data.kline_data_vec_)
-    //     {
-    //         nlohmann::json tmp_json;
-    //         tmp_json["open"] = atom_data->open_;
-    //         tmp_json["high"] = atom_data->high_;
-    //         tmp_json["low"] = atom_data->low_;
-    //         tmp_json["close"] = atom_data->close_;
-    //         tmp_json["volume"] = atom_data->volume_;
-    //         tmp_json["tick"] = atom_data->tick_;
-    //         detail_data[i++] = tmp_json;
-    //     }
-    //     json_data["data"] = detail_data;
-    //     return json_data.dump();
-    // }
-    // catch(const std::exception& e)
-    // {
-    //     std::stringstream stream_obj;
-    //     stream_obj << "[E] RspKlinDataToJsonStr: " << e.what() << "\n";
-    //     LOG_ERROR(stream_obj.str());
-    // }
-    
-}
-
-// string get_sec_time_str(unsigned long time)
-// {
-//     return utrade::pandora::ToSecondStr(time * NanoPerSec, "%Y-%m-%d %H:%M:%S");
-// }
-
 void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineData>& src)
 {
     for (KlineData atom: src)
@@ -229,6 +140,7 @@ void append_kline_to_klinePtr(std::vector<KlineDataPtr>& des, std::vector<KlineD
 
 string get_error_send_rsp_string(string err_msg)
 {
+    string result = "";
     try
     {
         nlohmann::json json_obj;
@@ -239,20 +151,20 @@ string get_error_send_rsp_string(string err_msg)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] get_error_send_rsp_string: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] get_error_send_rsp_string: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unkonwn exception!");
     }
+
+    return result;
 }
 
 string get_heartbeat_str()
 {
+    string result = "";
+
     try
     {
         nlohmann::json json_obj;
@@ -262,18 +174,14 @@ string get_heartbeat_str()
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] get_heartbeat_str: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] get_heartbeat_str: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unkonwn exception!");
     }
         
-
+    return result;
 }
 
 vector<string>  split(const string& src,const string& delim) 
@@ -437,5 +345,5 @@ string get_package_str(unsigned int package_tid)
     {
         std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
     }
-    
+    return "";
 }

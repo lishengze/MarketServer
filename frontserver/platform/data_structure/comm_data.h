@@ -8,18 +8,32 @@
 #include "base_data.h"
 #include "hub_struct.h"
 
+
 const long UT_FID_ReqSymbolListData = 10002;
 class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
 {
     public:
         ReqSymbolListData(ID_TYPE socket_id, COMM_TYPE socket_type, bool is_canacel_request=false): 
-            Socket(socket_id, socket_type), is_canacel_request_(is_canacel_request)
+                            Socket(socket_id, socket_type), is_canacel_request_(is_canacel_request)
         {
 
         }
 
-        ReqSymbolListData(const ReqSymbolListData& other): Socket(other.socket_id_, other.socket_type_)
+        ReqSymbolListData(WebsocketClassThreadSafePtr ws, bool is_canacel_request=false): 
+                            Socket(ws), is_canacel_request_(is_canacel_request)
         {
+
+        }
+
+
+        ReqSymbolListData(const ReqSymbolListData& other)
+        {
+            socket_id_ = other.socket_id_;
+            socket_type_ = other.socket_type_;
+            http_response_ = other.http_response_;
+            websocket_ = other.websocket_;
+
+
             assign(is_canacel_request_, other.is_canacel_request_);
         }
 
@@ -30,10 +44,16 @@ class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
             is_canacel_request_ =  is_canacel_request;
         }
 
+        void set(WebsocketClassThreadSafePtr ws, bool is_canacel_request=false)
+        {
+            websocket_ = ws; 
+            is_canacel_request_ =  is_canacel_request;
+        }
+
         string str()
         {
             string req_type = is_canacel_request_? "_is_canacel_request_":"";
-            return string("ReqSymbolListData-Info: \n") + Socket::str() + req_type;
+            return string("\nReqSymbolListData-Info: \n") + Socket::str() + req_type;
         }
 
         bool                is_canacel_request_{false};
@@ -53,6 +73,13 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
             socket_type_ = socket_type;
         }
 
+        RspSymbolListData(std::set<std::string>& symbols, WebsocketClassThreadSafePtr ws)
+        {
+            assign(symbols_, symbols);
+            websocket_ = ws;
+        }
+
+
         RspSymbolListData(std::set<std::string>& symbols)
         {
             assign(symbols_, symbols);
@@ -71,13 +98,20 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
             socket_type_ = socket_type;
         }
 
+        void set(std::set<std::string>& symbols, WebsocketClassThreadSafePtr ws)
+        {
+            assign(symbols_, symbols);
+
+            websocket_ = ws;
+        }        
+
         std::set<std::string>& get_symbols() { return symbols_;}
 
         string get_json_str();
 
         string str()
         {
-            return string("RspSymbolListData-Info: \n") + Socket::str() + "\n" + get_json_str();
+            return string("\nRspSymbolListData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
         static const long Fid = UT_FID_RspSymbolListData; 
@@ -96,7 +130,21 @@ class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
         assign(symbol_, symbol);
     }
 
-    ReqRiskCtrledDepthData(const ReqRiskCtrledDepthData& other):Socket(other.socket_id_, other.socket_type_)
+    ReqRiskCtrledDepthData(string symbol, WebsocketClassThreadSafePtr ws, ID_TYPE socket_id, bool is_canacel_request=false)
+                            :Socket(ws, socket_id), is_canacel_request_(is_canacel_request)
+    {
+        assign(symbol_, symbol);
+    }    
+
+    ReqRiskCtrledDepthData(string symbol, WebsocketClassThreadSafePtr ws, bool is_canacel_request=false)
+                            :Socket(ws), is_canacel_request_(is_canacel_request)
+    {
+        assign(symbol_, symbol);
+    }    
+
+
+    ReqRiskCtrledDepthData(const ReqRiskCtrledDepthData& other):
+        Socket(other.socket_id_, other.socket_type_, other.http_response_, other.websocket_)
     {
         assign(symbol_, other.symbol_);
         assign(is_canacel_request_, other.is_canacel_request_);
@@ -110,13 +158,20 @@ class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
         is_canacel_request_ = is_canacel_request;
     }
 
-    symbol_type symbol_;
+    void set(string symbol, WebsocketClassThreadSafePtr ws, bool is_canacel_request=false)
+    {
+        assign(symbol_, symbol);
+        websocket_ = ws;
+        is_canacel_request_ = is_canacel_request;
+    }    
+
+    symbol_type         symbol_;
     bool                is_canacel_request_{false};
 
     string str()
     {
         string type_str = is_canacel_request_ ? "_is_canacel_request" : "";
-        string result = string("ReqRiskCtrledDepthData-Info: \n") + Socket::str() + "_" + string(symbol_) + type_str;
+        string result = string("\nReqRiskCtrledDepthData-Info: \n") + Socket::str() + "_" + string(symbol_) + type_str;
         return result;
     }
 
@@ -125,13 +180,25 @@ class ReqRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData
 FORWARD_DECLARE_PTR(ReqRiskCtrledDepthData);
 
 const long UT_FID_RspRiskCtrledDepthData = 10005;
-class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, public boost::enable_shared_from_this<RspRiskCtrledDepthData>
+class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, 
+                             public boost::enable_shared_from_this<RspRiskCtrledDepthData>
 {
     public:
         RspRiskCtrledDepthData(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type)
         {
-            set(depth_data, socket_id, socket_type);
+            set_depth(depth_data);
+
+            socket_id_ = socket_id;
+            socket_type_ = socket_type;            
         }
+
+        RspRiskCtrledDepthData(const SDepthData& depth_data, WebsocketClassThreadSafePtr ws)
+        {
+            set_depth(depth_data);
+
+            websocket_ = ws;
+        }
+
 
         RspRiskCtrledDepthData(const SDepthData& depth_data)
         {
@@ -148,7 +215,8 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
             }
         }
 
-        RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other):Socket(other.socket_id_, other.socket_type_)
+        RspRiskCtrledDepthData(const RspRiskCtrledDepthData& other):
+            Socket(other.socket_id_, other.socket_type_, other.http_response_, other.websocket_)
         {            
             depth_data_ = other.depth_data_;
             for (int i = 0; i < DEPCH_LEVEL_COUNT; ++i)
@@ -162,6 +230,8 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
 
         void set(const SDepthData& depth_data, ID_TYPE socket_id, COMM_TYPE socket_type);
 
+        void set_depth(const SDepthData& depth_data);
+
         virtual ~RspRiskCtrledDepthData() {}
 
         boost::shared_ptr<RspRiskCtrledDepthData> get_object() 
@@ -174,7 +244,7 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData, publ
 
         string str()
         {
-            return string("RspRiskCtrledDepthData-Info: \n") + Socket::str() + "\n" + get_json_str();
+            return string("\nRspRiskCtrledDepthData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
         SDecimal ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
@@ -274,7 +344,7 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
 
     virtual ~ReqKLineData()
     {
-        cout << "~ReqKLineData() " << endl;
+        // cout << "~ReqKLineData() " << endl;
     }
 
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
@@ -289,7 +359,20 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
         assign(is_canacel_request_, is_canacel_request);
     }
 
-    ReqKLineData(const ReqKLineData& other):Socket(other.socket_id_, other.socket_type_)
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
+                 WebsocketClassThreadSafePtr ws, ID_TYPE socket_id, bool is_canacel_request=false):
+                 Socket(ws, socket_id)
+    {
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(data_count_, data_count);
+        assign(frequency_, freq);
+        assign(is_canacel_request_, is_canacel_request);
+    }    
+
+    ReqKLineData(const ReqKLineData& other)
+    :Socket(other.socket_id_, other.socket_type_, other.http_response_, other.websocket_)
     {
         assign(symbol_, other.symbol_);
         assign(start_time_, other.start_time_);
@@ -311,6 +394,8 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
 
         socket_id_ = other.socket_id_;
         socket_type_ = other.socket_type_;
+        http_response_ = other.http_response_;
+        websocket_ = other.websocket_; 
         return *this;        
     }
 
@@ -328,6 +413,20 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
         socket_type_ = socket_type;      
     }
 
+    void set(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
+             WebsocketClassThreadSafePtr ws, bool is_canacel_request=false)
+    {
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(data_count_, data_count);
+        assign(frequency_, freq);
+        assign(is_canacel_request_, is_canacel_request);
+
+        websocket_ = ws;
+        socket_type_ = COMM_TYPE::WEBSOCKET;
+    }
+
     void reset(const ReqKLineData& other)
     {
         assign(symbol_, other.symbol_);
@@ -339,6 +438,8 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
  
         socket_id_ = other.socket_id_;
         socket_type_ = other.socket_type_;
+        http_response_ = other.http_response_;
+        websocket_ = other.websocket_; 
     }
 
     string str()
@@ -352,7 +453,7 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
                    << "frequency_: " << frequency_ << "\n"
                    << "is_canacel_request_: " << is_canacel_request_ << "\n";
 
-        return string("ReqKLineData-Info: \n") + Socket::str() + "\n" + req_stream.str();
+        return string("\nReqKLineData-Info: \n") + Socket::str() + "\n" + req_stream.str();
     }
 
     string simple_str()
@@ -397,6 +498,8 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             socket_id_ = pReqKlineData.socket_id_;
             socket_type_ = pReqKlineData.socket_type_;
+            http_response_ = pReqKlineData.http_response_;
+            websocket_ = pReqKlineData.websocket_;
 
             kline_data_vec_.swap(kline_data_vec);
         }   
@@ -413,6 +516,8 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             socket_id_ = pReqKlineData.socket_id_;
             socket_type_ = pReqKlineData.socket_type_;
+            http_response_ = pReqKlineData.http_response_;
+            websocket_ = pReqKlineData.websocket_;
 
             kline_data_vec_.push_back(kline_data);
         }     
@@ -442,6 +547,22 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             kline_data_vec_.swap(kline_data_vec);
         }
+
+        void set(string symbol, type_tick start_time, type_tick end_time, frequency_type frequency, 
+                 int data_count,  WebsocketClassThreadSafePtr ws, bool is_update,
+                 std::vector<KlineDataPtr>& kline_data_vec)
+        {
+            assign(symbol_, symbol);
+            assign(start_time_, start_time);
+            assign(end_time_, end_time);
+            assign(frequency_, frequency);
+            assign(data_count_, data_count);
+            assign(is_update_, is_update);
+
+            websocket_ = ws;
+            socket_type_ = COMM_TYPE::WEBSOCKET;
+            kline_data_vec_.swap(kline_data_vec);
+        }        
    
         void set(ReqKLineData * pReqKlineData,
                  std::vector<KlineDataPtr>& kline_data_vec)
@@ -455,6 +576,9 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             socket_id_ = pReqKlineData->socket_id_;
             socket_type_ = pReqKlineData->socket_type_;
+            http_response_ = pReqKlineData->http_response_;
+            websocket_ = pReqKlineData->websocket_;
+
 
             kline_data_vec_.swap(kline_data_vec);
         }   
@@ -471,6 +595,8 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             socket_id_ = pReqKlineData->socket_id_;
             socket_type_ = pReqKlineData->socket_type_;
+            http_response_ = pReqKlineData->http_response_;
+            websocket_ = pReqKlineData->websocket_;
 
             kline_data_vec_.push_back(kline_data);
         }        
@@ -491,7 +617,7 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
         string str()
         {
-            return string("RspKLineData-Info: \n") + Socket::str() + "\n" + get_json_str();
+            return string("\nRspKLineData-Info: \n") + Socket::str() + "\n" + get_json_str();
         }        
 };
 FORWARD_DECLARE_PTR(RspKLineData);
@@ -508,6 +634,14 @@ class RspErrorMsg:public Socket, virtual public PacakgeBaseData
             assign(err_id_, err_id);
         }
 
+        RspErrorMsg(string err_msg, int err_id, 
+                    WebsocketClassThreadSafePtr  ws):
+        Socket(ws)
+        {
+            assign(err_msg_, err_msg);
+            assign(err_id_, err_id);
+        }        
+
         void set(string err_msg, int err_id,  
                  ID_TYPE socket_id, COMM_TYPE socket_type)
         {
@@ -518,11 +652,21 @@ class RspErrorMsg:public Socket, virtual public PacakgeBaseData
             socket_type_ = socket_type;                                     
         }
 
+        void set(string err_msg, int err_id,  
+                 WebsocketClassThreadSafePtr  ws)
+        {
+            assign(err_msg_, err_msg);
+            assign(err_id_, err_id);
+
+            websocket_ = ws;
+            socket_type_ = COMM_TYPE::WEBSOCKET;                                  
+        }        
+
         string get_json_str();
 
         string str()
         {
-            return string("RspErrorMsg-Info: \n") + Socket::str() + "\n" + get_json_str();
+            return string("\nRspErrorMsg-Info: \n") + Socket::str() + "\n" + get_json_str();
         }
 
     static const long Fid = UT_FID_RspErrorMsg;
@@ -572,7 +716,15 @@ public:
         assign(is_cancel_, is_cancel);
     }
 
-    ReqTrade(const ReqTrade& other):Socket(other.socket_id_, other.socket_type_)
+    ReqTrade(string symbol, bool is_cancel, WebsocketClassThreadSafePtr ws, ID_TYPE socket_id):
+            Socket(ws, socket_id)
+    {
+        assign(symbol_, symbol);
+        assign(is_cancel_, is_cancel);
+    }
+
+    ReqTrade(const ReqTrade& other)
+        :Socket(other.socket_id_, other.socket_type_, other.http_response_, other.websocket_)
     {
         assign(symbol_, other.symbol_);
         assign(is_cancel_, other.is_cancel_);
@@ -584,7 +736,7 @@ public:
 
     string str()
     {
-        return string("ReqTrade-Info: \n") + Socket::str() + "_" +  symbol_ + "_is_cancel_: " + std::to_string(is_cancel_);
+        return string("\nReqTrade-Info: \n") + Socket::str() + "_" +  symbol_ + "_is_cancel_: " + std::to_string(is_cancel_);
     }
 
     symbol_type symbol_;
@@ -609,7 +761,22 @@ public:
         assign(change_rate_, change_rate);
         assign(high_, high);
         assign(low_, low);
-    }    
+    }     
+
+    RspTrade(string symbol, SDecimal price, SDecimal volume, 
+             double change, double change_rate,
+             SDecimal high, SDecimal low, 
+             WebsocketClassThreadSafePtr ws):
+             Socket(ws)
+    {
+        assign(symbol_, symbol);
+        assign(price_, price);
+        assign(volume_, volume);
+        assign(change_, change);
+        assign(change_rate_, change_rate);
+        assign(high_, high);
+        assign(low_, low);
+    }        
 
     RspTrade(string symbol, SDecimal price, SDecimal volume, 
              double change, double change_rate,
@@ -638,7 +805,7 @@ public:
 
     string str()
     {
-        return string("RspTrade-Info: \n") +Socket::str() + "\n" + get_json_str();
+        return string("\nRspTrade-Info: \n") +Socket::str() + "\n" + get_json_str();
     }
 
     static const long Fid = UT_FID_RspTrade;

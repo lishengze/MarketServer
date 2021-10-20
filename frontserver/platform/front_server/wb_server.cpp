@@ -86,22 +86,16 @@ void WBServer::on_message(WebsocketClass * ws, std::string_view msg, uWS::OpCode
 {
     try
     {
-    
         string trans_msg(msg.data(), msg.size());
-
         process_on_message(trans_msg, ws);
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::on_message: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::on_message: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception! ");
     }
 
 }
@@ -123,7 +117,6 @@ void WBServer::on_close(WebsocketClass * ws)
         std::stringstream s_s;
         s_s << "WBServer::on_close "<< ws;
         LOG_CLIENT_REQUEST(s_s.str());
-
         clean_ws(ws);
     }
     catch(const std::exception& e)
@@ -135,7 +128,7 @@ void WBServer::on_close(WebsocketClass * ws)
     catch(...)
     {
         std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::on_close: unkonwn exception! " << "\n";
+        stream_obj << "[E] WBServer::on_close: unknown exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }
 }
@@ -146,21 +139,17 @@ void WBServer::listen()
     {
         uWS::App().ws<WSData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
             if (token) {
-                LOG_CLIENT_REQUEST("WServer Start Listen: " + std::to_string(server_port_));
+                LOG_INFO("WServer Start Listen: " + std::to_string(server_port_));
             }
         }).run();
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::listen(): " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::listen(): unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception! ");
     }
     
 
@@ -168,8 +157,21 @@ void WBServer::listen()
 
 void WBServer::launch()
 {
-    LOG_INFO("WServer launch");
-    listen_thread_ = std::make_shared<std::thread>(&WBServer::listen, this);
+    try
+    {
+        LOG_INFO("WServer launch");
+        listen_thread_ = std::make_shared<std::thread>(&WBServer::listen, this);
+
+        if (!listen_thread_)
+        {
+            LOG_ERROR("Create Listen Thread Failed!");
+            exit(0);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 void WBServer::start_heartbeat()
@@ -178,18 +180,20 @@ void WBServer::start_heartbeat()
     {
         LOG_INFO("WServer Start Heartbeat");
         heartbeat_thread_ = std::make_shared<std::thread>(&WBServer::heartbeat_run, this);
+
+        if (!heartbeat_thread_)
+        {
+            LOG_ERROR("Create Heartbeat Thread Failed!");
+            exit(0);
+        }        
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::start_heartbeat: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::start_heartbeat: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }
 }
 
@@ -208,31 +212,16 @@ void WBServer::process_on_open(WebsocketClass * ws)
 
         ID_TYPE socket_id = store_ws(ws);
 
-        s_s.clear();
-        s_s << "WBServer::process_on_open store ws: "<< ws << "_socket_id: " << socket_id;
-        LOG_CLIENT_REQUEST(s_s.str());
-
-        PackagePtr package =  GetReqSymbolListDataPackage(socket_id, COMM_TYPE::WEBSOCKET, ID_MANAGER->get_id());
-
-        if (package)
-        {
-            LOG_CLIENT_REQUEST("WBServer::process_on_open socket_id: " + std::to_string(socket_id) + " Request SymbolList!");
-            front_server_->deliver_request(package);
-        }
+        request_symbol_list(socket_id);
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_on_opene: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_on_open: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }
-
 }
 
 void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
@@ -241,11 +230,13 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     {
         std::stringstream s_s;
         s_s << "WBServer::process_on_message " << ws << ": " << ori_msg;
-        LOG_CLIENT_REQUEST(s_s.str());
+        // LOG_CLIENT_REQUEST(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
-        if (socket_id)
+        if (socket_id && wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
+            WebsocketClassThreadSafePtr ws_safe = wss_con_map_[socket_id];
+
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
             if (js["type"].is_null())
@@ -256,24 +247,24 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
             {
                 if (js["type"].get<string>() == "sub_symbol")
                 {
-                    process_depth_req(ori_msg, socket_id);
+                    process_depth_req(ori_msg, socket_id, ws_safe);
 
-                    process_trade_req(ori_msg, socket_id);
+                    process_trade_req(ori_msg, socket_id, ws_safe);
                 }
 
                 if (js["type"].get<string>() == HEARTBEAT)
                 {
-                    process_heartbeat(socket_id);
+                    process_heartbeat(socket_id, ws_safe);
                 }
 
                 if (js["type"].get<string>() == KLINE_UPDATE)
                 {
-                    process_kline_req(ori_msg, socket_id);
+                    process_kline_req(ori_msg, socket_id, ws_safe);
                 }     
 
-                if (js["type"].get<string>() == "trade")
+                if (js["type"].get<string>() == TRADE)
                 {
-                    process_trade_req(ori_msg, socket_id);
+                    process_trade_req(ori_msg, socket_id, ws_safe);
                 }   
             }
         }
@@ -291,13 +282,71 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     }      
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_on_message: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }    
 }
 
-void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
+void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws)
+{
+    try
+    {
+        nlohmann::json js = nlohmann::json::parse(ori_msg);
+        if (!js["symbol"].is_null())
+        {
+            nlohmann::json symbol_list = js["symbol"];
+
+            for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
+            {
+                string cur_symbol = *it;
+
+                LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
+                    
+                // PackagePtr request_depth_package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
+
+                PackagePtr request_depth_package = CreatePackage<ReqRiskCtrledDepthData>(cur_symbol, ws, socket_id);
+                if (request_depth_package)
+                {
+                    request_depth_package->prepare_request(UT_FID_ReqRiskCtrledDepthData, ID_MANAGER->get_id());
+
+                    auto p_req_depth = GetField<ReqRiskCtrledDepthData>(request_depth_package);
+                    LOG_CLIENT_REQUEST(p_req_depth->str());
+                    front_server_->add_sub_depth(p_req_depth);
+                    front_server_->deliver_request(request_depth_package);
+                }
+                else
+                {
+                    LOG_ERROR("GetReqRiskCtrledDepthDataPackage Failed");
+                }                
+            }     
+        }
+        else
+        {
+            string err_msg = "ReqSymbolList Json Need Symbol Item";
+            LOG_ERROR(err_msg);
+
+            if (wss_con_map_.find(socket_id) != wss_con_map_.end())
+            {
+                wss_con_map_[socket_id]->send(get_error_send_rsp_string(err_msg));
+            }
+            else
+            {
+                stringstream s_obj;
+                s_obj << "Send error msg websocket socket_id " << socket_id << " is invalid \n";
+                LOG_ERROR(s_obj.str());
+            }            
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    catch(...)
+    {
+        LOG_ERROR("unknown exception!");
+    }    
+}
+
+void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws)
 {
     try
     {
@@ -362,7 +411,7 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
             {
                 COMM_TYPE socket_type = COMM_TYPE::WEBSOCKET;
                 PackagePtr package = CreatePackage<ReqKLineData>(symbol, start_time, end_time, data_count, frequency, 
-                                                                 socket_id, socket_type);
+                                                                 ws, socket_id);
                 
                 if (package)
                 {
@@ -403,80 +452,15 @@ void WBServer::process_kline_req(string ori_msg, ID_TYPE socket_id)
     }
     catch(const std::exception& e)
     {
-        stringstream stream_msg;
-        stream_msg << "[E] WBServer::process_kline_data " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_kline_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }    
 }
 
-void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id)
-{
-    try
-    {
-        cout << "ori_msg: " << ori_msg << endl;
-        nlohmann::json js = nlohmann::json::parse(ori_msg);
-        if (!js["symbol"].is_null())
-        {
-            nlohmann::json symbol_list = js["symbol"];
-
-            for (json::iterator it = symbol_list.begin(); it != symbol_list.end(); ++it)
-            {
-                string cur_symbol = *it;
-
-                LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
-                    
-                PackagePtr request_depth_package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
-
-                if (request_depth_package)
-                {
-                    auto p_req_depth = GetField<ReqRiskCtrledDepthData>(request_depth_package);
-                    front_server_->add_sub_depth(p_req_depth);
-                    front_server_->deliver_request(request_depth_package);
-                }
-                else
-                {
-                    LOG_ERROR("WBServer::process_depth_req GetReqRiskCtrledDepthDataPackage Failed");
-                }                
-            }     
-        }
-        else
-        {
-            string err_msg = "ReqSymbolList Json Need Symbol Item";
-            LOG_ERROR(err_msg);
-
-            if (wss_con_map_.find(socket_id) != wss_con_map_.end())
-            {
-                wss_con_map_[socket_id]->send(get_error_send_rsp_string(err_msg));
-            }
-            else
-            {
-                stringstream s_obj;
-                s_obj << "WBServer::process_depth_req send error msg websocket socket_id " << socket_id << " is invalid \n";
-                LOG_ERROR(s_obj.str());
-            }            
-        }
-    }
-    catch(const std::exception& e)
-    {
-        stringstream stream_msg;
-        stream_msg << "[E] WBServer::process_depth_req " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
-    }
-    catch(...)
-    {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_depth_req: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
-    }    
-}
-
-void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
+void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id, WebsocketClassThreadSafePtr ws)
 {
     try
     {
@@ -489,7 +473,7 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
                 string symbol = *it;
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
 
-                PackagePtr package = CreatePackage<ReqTrade>(symbol, false, socket_id,  COMM_TYPE::WEBSOCKET);
+                PackagePtr package = CreatePackage<ReqTrade>(symbol, false, ws, socket_id);
 
                 if (package)
                 {
@@ -526,20 +510,16 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id)
     }
     catch(const std::exception& e)
     {
-        stringstream stream_msg;
-        stream_msg << "[E] WBServer::process_trade_req " << e.what() << "\n";
-        LOG_ERROR(stream_msg.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::process_trade_req: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }  
     
 }
 
-void WBServer::process_heartbeat(ID_TYPE socket_id)
+void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr ws)
 {
     try
     {
@@ -562,9 +542,53 @@ void WBServer::process_heartbeat(ID_TYPE socket_id)
     catch(...)
     {
         std::stringstream stream_obj;
-        stream_obj << "[E] FrontServer::process_heartbeat: unkonwn exception! " << "\n";
+        stream_obj << "[E] FrontServer::process_heartbeat: unknown exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }    
+}
+
+void WBServer::request_symbol_list(ID_TYPE socket_id)
+{
+    try
+    {
+        if (socket_id && wss_con_map_.find(socket_id) != wss_con_map_.end())
+        {
+            WebsocketClassThreadSafePtr ws_safe = wss_con_map_[socket_id];
+
+            // PackagePtr package =  GetReqSymbolListDataPackage(socket_id, COMM_TYPE::WEBSOCKET, ID_MANAGER->get_id());
+
+            PackagePtr package = CreatePackage<ReqSymbolListData>(ws_safe); 
+            if (package)
+            {
+                ReqSymbolListDataPtr pReqSymbolListData = GetField<ReqSymbolListData>(package);
+
+                if (pReqSymbolListData)
+                {
+                    LOG_CLIENT_REQUEST(pReqSymbolListData->str());
+
+                    package->prepare_request(UT_FID_ReqSymbolListData, ID_MANAGER->get_id());
+                    
+                    front_server_->deliver_request(package);  
+                }              
+            }
+            else
+            {
+                LOG_ERROR("CreatePackage<ReqSymbolListData> Failed!");
+            }
+        }
+        else
+        {
+            LOG_ERROR("SocketID " + std::to_string(socket_id) + " is invalid");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+    catch(...)
+    {
+        LOG_ERROR("unknown exception!");
+    }
 }
 
 bool WBServer::send_data(ID_TYPE socket_id, string msg)
@@ -587,16 +611,14 @@ bool WBServer::send_data(ID_TYPE socket_id, string msg)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::send_data: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::send_data: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }    
+
+    return false;
 }
 
 void WBServer::heartbeat_run()
@@ -619,7 +641,7 @@ void WBServer::heartbeat_run()
     catch(...)
     {
         std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::heartbeat_run: unkonwn exception! " << "\n";
+        stream_obj << "[E] WBServer::heartbeat_run: unknown exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }
 }
@@ -674,7 +696,7 @@ void WBServer::check_heartbeat()
     catch(...)
     {
         std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::check_heartbeat: unkonwn exception! " << "\n";
+        stream_obj << "[E] WBServer::check_heartbeat: unknown exception! " << "\n";
         LOG_ERROR(stream_obj.str());
     }
 
@@ -708,16 +730,14 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::store_ws: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::store_ws: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }
+
+    return 0;
 }
 
 ID_TYPE WBServer::check_ws(WebsocketClass * ws)
@@ -752,16 +772,14 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::check_ws " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::check_ws: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }
+
+    return 0;
 }
 
 ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
@@ -806,21 +824,27 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::clean_ws: " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::clean_ws: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unknown exception!");
     }
 
+    return 0;
 }
 
 ID_TYPE WBServer::get_socket_id(WebsocketClass * ws)
 {
-    WSData* data_ptr = (WSData*)(ws->getUserData());
-    return data_ptr->get_id();
+    try
+    {
+        WSData* data_ptr = (WSData*)(ws->getUserData());
+        return data_ptr->get_id();
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
+    return 0;
 }
