@@ -22,7 +22,7 @@ void FrontServerLog::record_input_info(const string& channel, const SDepthData& 
         record_input_info(channel);
 
         std::stringstream stream_obj;
-        stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length << "\n";
+        stream_obj  << "[Depth] " << depth.exchange << " " << depth.symbol << " " << depth.ask_length << " " << depth.bid_length;
         log_source_input(stream_obj.str());
 
         if (CONFIG->get_dev_mode())
@@ -54,7 +54,9 @@ void FrontServerLog::record_input_info(const string& channel, const Trade& trade
         record_input_info(channel);
 
         std::stringstream stream_obj;
-        stream_obj << "[Trade] " << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
+        stream_obj << "[Trade] " << trade.exchange << " " << trade.symbol << " " 
+                   << trade.price.get_value() << " " << trade.volume.get_value();
+
         log_source_input(stream_obj.str());     
     }
     catch(const std::exception& e)
@@ -81,7 +83,7 @@ void FrontServerLog::record_input_info(const string& channel, const vector<Kline
         }
 
         std::stringstream stream_obj;
-        stream_obj << channel << "\n";
+        stream_obj << channel;
         log_source_input(stream_obj.str());
 
         if (CONFIG->get_dev_mode())
@@ -141,7 +143,8 @@ void FrontServerLog::record_output_info(const string& info, const Trade& trade)
         record_output_info(info);
 
         std::stringstream stream_obj;
-        stream_obj << "[O_Trade] " << info << "\n" << trade.exchange << " " << trade.symbol << " " << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
+        stream_obj << "[O_Trade] " << info << "\n" << trade.exchange << " " << trade.symbol << " " 
+                   << trade.price.get_value() << " " << trade.volume.get_value() << " \n";
                 
         log_client_response(stream_obj.str());                   
     }

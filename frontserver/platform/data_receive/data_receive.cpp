@@ -495,7 +495,7 @@ void DataReceive::handle_trade_data(const char* exchange, const char* symbol, co
         //     LOG_DEBUG(stream_obj.str());        
         // }
 
-        // LOG->record_input_info(string("trade_") + string(exchange) + "_" + string(symbol), trade);
+        LOG->record_input_info(string("trade_") + string(exchange) + "_" + string(symbol), trade);
 
         PackagePtr package = CreatePackage<TradeData>(symbol, trade.exchange, trade.time/1000000000, trade.price, trade.volume);
 
