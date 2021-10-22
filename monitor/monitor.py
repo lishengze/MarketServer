@@ -41,7 +41,9 @@ class MonitorUtrade(object):
         self._program_pid = {}
         ServerNameDic, ProcessList = get_config()
 
-        print("ServerNameDic: %s, \nProcessList: %s" % (str(ServerNameDic), str(ProcessList)))
+        self._logger = Logger(program_name="")
+
+        self._logger._logger.info("ServerNameDic: %s, \nProcessList: %s" % (str(ServerNameDic), str(ProcessList)))
 
         self._server_ip = get_host()
         self._server_name = self._server_ip
@@ -69,7 +71,7 @@ class MonitorUtrade(object):
         # self._logger = open(self._log_file, 'w')
         # self._logger.close()
 
-        self._logger = Logger(program_name="")
+        
 
     def __del__(self):
         # self._logger.close()
