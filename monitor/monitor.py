@@ -9,26 +9,26 @@ import traceback
 from Logger import *
 from util import *
 
-g_redis_config_file_name = "config.json"
+g_config_file_name = "config.json"
 
 DING_MODE_SOURCE = "source"
 DING_MODE_RUN = "run"
 
-def get_redis_config():    
-    json_file = open(g_redis_config_file_name,'r')
+def get_config():    
+    json_file = open(g_config_file_name,'r')
     json_dict = json.load(json_file)
     print("\nredis_config: \n%s" %(str(json_dict)))
 
-    ServerName = "Test"
+    ServerNameDic = "Test"
     ProcessList = ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
 
     if "ServerName" in json_dict:
-        ServerName = json_dict["ServerName"]
+        ServerNameDic = json_dict["ServerName"]
 
     if "ProcessList" in json_dict:
         ProcessList = json_dict["ProcessList"]
 
-    return ServerName, ProcessList
+    return ServerNameDic, ProcessList
 
 def get_process():
     return ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
@@ -39,11 +39,15 @@ class MonitorUtrade(object):
         self._program_last_status = {}
         self._program_curr_status = {}
         self._program_pid = {}
-        ServerName, ProcessList = get_redis_config()
+        ServerNameDic, ProcessList = get_config()
 
-        print("ServerName: %s, \nProcessList: %s" % (ServerName, str(ProcessList)))
+        print("ServerNameDic: %s, \nProcessList: %s" % (str(ServerNameDic), str(ProcessList)))
 
-        self._server_name = get_host()
+        self._server_ip = get_host()
+        self._server_name = self._server_ip
+        if self._server_ip in ServerNameDic:
+            self._server_name = ServerNameDic[self._server_ip]
+
         self._process_list = ProcessList
 
         self.filesys_list = ["/", "/data"]
@@ -65,7 +69,7 @@ class MonitorUtrade(object):
         # self._logger = open(self._log_file, 'w')
         # self._logger.close()
 
-        self._logger = Logger()
+        self._logger = Logger(program_name="")
 
     def __del__(self):
         # self._logger.close()
@@ -84,7 +88,7 @@ class MonitorUtrade(object):
             self.get_opu_pid(result_list, True)            
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
             # self._logger.Warning(e)
             # print("Exception output_program_info")
@@ -100,10 +104,11 @@ class MonitorUtrade(object):
                 self._logger.Warning(msg)
 
             if ding_type in self.dingding:                
-                self.dingding[ding_type].send_text(msg, False)        
+                self.dingding[ding_type].send_text(msg, False)     
+
         except Exception as e:            
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
         
     def get_opu_pid(self, ori_str_list, out=True):
         result = 0
@@ -123,7 +128,7 @@ class MonitorUtrade(object):
                         # self.send_dingding_msg(str(trans_list))
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
         return result
 
@@ -137,7 +142,7 @@ class MonitorUtrade(object):
             result = self.get_opu_pid(result_list)      
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
    
         return result
 
@@ -157,7 +162,7 @@ class MonitorUtrade(object):
                         result += 1      
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)           
+            self._logger._logger.error (exception_str)           
 
         return result
 
@@ -176,7 +181,7 @@ class MonitorUtrade(object):
             for program_id in self._program_pid[program]:
                 if not psutil.pid_exists(program_id):
                     msg = "%s.%d has dead " % (program, program_id)
-                    self._logger.Error(msg)
+                    self._logger._logger.error(msg)
                     continue
 
                 process = psutil.Process(program_id)
@@ -210,7 +215,7 @@ class MonitorUtrade(object):
 
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
         return msg
 
@@ -221,7 +226,7 @@ class MonitorUtrade(object):
             result_str = get_datetime_str() + "\n" + subprocess.getoutput(cmd_str) + "\n"
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
         return result_str
 
@@ -230,12 +235,12 @@ class MonitorUtrade(object):
             for program in self._program_curr_status: 
                 self._program_curr_status[program] = self.get_status(program)
             
-            self._logger.Debug(str(self._program_curr_status))
-            self._logger.Debug(str(self._program_pid)+"\n")       
+            self._logger._logger.info(str(self._program_curr_status))
+            self._logger._logger.info(str(self._program_pid)+"\n")       
                 
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
     def record_usage_info(self):        
         try:
@@ -290,11 +295,11 @@ class MonitorUtrade(object):
             #         or disk_io[5] > max_util:
             #             self.send_dingding_msg(record_msg)
 
-            self._logger.Debug(record_msg)     
+            self._logger._logger.info(record_msg)     
                     
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
     def check_program_status(self):
         try:
@@ -320,7 +325,7 @@ class MonitorUtrade(object):
                 self._program_last_status[program] = self._program_curr_status[program]
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
          
     def timer_func(self):
         try:
@@ -331,7 +336,7 @@ class MonitorUtrade(object):
             self.set_timer()
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
     def set_timer(self):
         try:
@@ -341,7 +346,7 @@ class MonitorUtrade(object):
             timer.start()
         except Exception as e:
             exception_str = traceback.format_exc()
-            self._logger.Error (exception_str)
+            self._logger._logger.error (exception_str)
 
     def print_data(self):
     
@@ -358,7 +363,7 @@ def start_monitor():
         print(e)
 
 def test_config():
-    ServerName, ProcessList = get_redis_config()
+    ServerName, ProcessList = get_config()
     print(ServerName)
     print(ProcessList)
 
