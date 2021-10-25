@@ -25,10 +25,14 @@ def get_config():
     if "ServerName" in json_dict:
         ServerNameDic = json_dict["ServerName"]
 
-    if "ProcessList" in json_dict:
-        ProcessList = json_dict["ProcessList"]
+    if "ProcessDict" in json_dict:
+        ProcessDict = json_dict["ProcessDict"]
+    
+    ProcessList = []
+    for process_name in ProcessDict:
+        ProcessList.append(process_name)
 
-    return ServerNameDic, ProcessList
+    return ServerNameDic, ProcessDict, ProcessList
 
 def get_process():
     return ["front_server", "demo4risk", "demo4quote", "B2C2", "FTX", "XKLine", "redis-server"]
@@ -39,11 +43,11 @@ class MonitorUtrade(object):
         self._program_last_status = {}
         self._program_curr_status = {}
         self._program_pid = {}
-        ServerNameDic, ProcessList = get_config()
+        ServerNameDic, ProcessDict, ProcessList = get_config()
 
         self._logger = Logger(program_name="")
 
-        self._logger._logger.info("ServerNameDic: %s, \nProcessList: %s" % (str(ServerNameDic), str(ProcessList)))
+        self._logger._logger.info("ServerNameDic: %s, \nProcessDict: %s" % (str(ServerNameDic), str(ProcessDict)))
 
         self._server_ip = get_host()
         self._server_name = self._server_ip
@@ -51,6 +55,7 @@ class MonitorUtrade(object):
             self._server_name = ServerNameDic[self._server_ip]
 
         self._process_list = ProcessList
+        self._process_dict = ProcessDict
 
         self.filesys_list = ["/", "/data"]
 
@@ -134,14 +139,35 @@ class MonitorUtrade(object):
 
         return result
 
+    def get_process_pid_manually(self, ori_str_list, program_name):
+        result = 0
+        try:
+            for info_str in ori_str_list:
+                if info_str.find(program_name) != -1 and info_str.find("python") != -1:
+                    info_list = info_str.split(" ")
+                    trans_list = []
+                    for item in info_list:
+                        if item != '':
+                            trans_list.append(item)
+                    result = int(trans_list[1])
+        except Exception as e:
+            exception_str = traceback.format_exc()
+            self._logger._logger.error (exception_str)
+
+        return result        
+
     def get_status_manually(self, program_name):
         result = 0
         try:
             cmd_str = "ps -aux|grep " + program_name
             result_str = subprocess.getoutput(cmd_str)
+            # print("cmd_str: %s, \nresult: %s" % (cmd_str, result_str))
 
             result_list = result_str.split("\n")
-            result = self.get_opu_pid(result_list)      
+            result = self.get_process_pid_manually(result_list, program_name)      
+
+            # print("\n%s pid: %d" %(program_name, result))
+
         except Exception as e:
             exception_str = traceback.format_exc()
             self._logger._logger.error (exception_str)
@@ -152,16 +178,18 @@ class MonitorUtrade(object):
         result = 0      
         try:
             self._program_pid[program_name] = []
-            if program_name.find("OPU") != -1:
+            if self._process_dict[program_name]["type"] == "usr":
                 result = self.get_status_manually(program_name)
                 if result != 0:
                     self._program_pid[program_name].append(result)
                     result = 1
-            else:
+            elif self._process_dict[program_name]["type"] == "sys":
                 for proc in psutil.process_iter():
                     if proc.name() == program_name:
                         self._program_pid[program_name].append(proc.pid)
                         result += 1      
+            else:
+                self._logger._logger.warning ("unknown type process: " + program_name)
         except Exception as e:
             exception_str = traceback.format_exc()
             self._logger._logger.error (exception_str)           
@@ -369,10 +397,16 @@ def test_config():
     print(ServerName)
     print(ProcessList)
 
+def test_get_status_manually():
+    monitor_obj = MonitorUtrade()
+    monitor_obj.get_status_manually("test")
+
 if __name__ == "__main__":    
     # test_config()
 
     start_monitor()
+
+    # test_get_status_manually()
 
 
     # basic_test()

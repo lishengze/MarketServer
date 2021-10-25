@@ -4,5 +4,41 @@
         "10.11.2.193":"prd",
         "10.11.2.150":"stg"
     },
-    "ProcessList": ["front_server", "demo4risk", "demo4quote", "python3"]
+    "ProcessDict": {
+        "front_server":
+        {
+            "type": "sys",
+            "other_info": ""
+        },
+        "demo4risk":
+        {
+            "type": "sys",
+            "other_info": ""
+        },
+        "demo4quote":
+        {
+            "type": "sys",
+            "other_info": ""
+        },
+        "B2C2":
+        {
+            "type": "usr",
+            "other_info": "python3"
+        },
+        "FTX":
+        {
+            "type": "usr",
+            "other_info": "python"
+        },     
+        "XKline":
+        {
+            "type": "usr",
+            "other_info": "python"
+        },
+        "test":
+        {
+            "type": "usr",
+            "other_info": "python"
+        }        
+    }
 }

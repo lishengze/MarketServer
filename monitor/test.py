@@ -230,14 +230,21 @@ def get_disk():
         print(path + ": " + str(info2))
 
     print_info(info2)
-            
+
+def simple_loop():
+    while True:
+        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        time.sleep(5)
+
 if __name__ == '__main__':
     # get_cpu_usage()
     # get_mem_usage()
     # get_net_usage()
-    test_all_info()
+    # test_all_info()
     # get_disk_io()
 
     # get_disk()
     # get_mount_path()
+
+    simple_loop()
 
