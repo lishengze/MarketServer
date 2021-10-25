@@ -64,13 +64,13 @@ class MonitorUtrade(object):
             self._program_curr_status[process_name] = -1
             self._program_pid[process_name] = []
         
-        self.dingding = {
-        }
+        self.dingding = {}
+
         self.dingding[DING_MODE_SOURCE] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=4cf0db490004f0924c0e2a8e785680384117ca2c3d26ec44aa3da1af5b4d496b")
 
         self.dingding[DING_MODE_RUN] = DingtalkChatbot("https://oapi.dingtalk.com/robot/send?access_token=5e11fa896ae8d5b47c8a8a75b86929ebd8df5c1df1cdd59ba66a8b6b1e578b8c")
 
-        self._check_secs = 2
+        self._check_secs = 3
         
         # self._log_file = "log/monitor.log"
         # self._logger = open(self._log_file, 'w')
@@ -79,8 +79,7 @@ class MonitorUtrade(object):
         
 
     def __del__(self):
-        # self._logger.close()
-        self._logger.Info("__del__")
+        self._logger._logger.info("__del__")
 
     def launch(self):
         self.set_timer()
