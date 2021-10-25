@@ -30,15 +30,10 @@
             "type": "usr",
             "other_info": "python"
         },     
-        "XKline":
+        "XKLine":
         {
             "type": "usr",
             "other_info": "python"
-        },
-        "test":
-        {
-            "type": "usr",
-            "other_info": "python"
-        }        
+        }   
     }
 }
