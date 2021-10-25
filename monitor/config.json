@@ -1,8 +1,8 @@
 {
     "ServerName": {
         "127.0.0.1":"qa",
-        "10.11.2.193":"stg",
-        "10.11.2.150":"prd"
+        "10.11.2.193":"prd",
+        "10.11.2.150":"stg"
     },
     "ProcessList": ["front_server", "demo4risk", "demo4quote", "python3"]
 }
