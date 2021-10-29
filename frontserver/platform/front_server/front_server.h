@@ -52,6 +52,9 @@ public:
     string get_heartbeat_str();
 
 public:
+
+    void add_sub_symbol_list(ReqSymbolListDataPtr req_symbol_list);
+
     void add_sub_kline(ReqKLineDataPtr req_kline_data);
 
     void add_sub_trade(ReqTradePtr req_trade_data);
@@ -66,6 +69,10 @@ private:
     std::set<std::string>   symbols_;
 
 private:
+    std::set<ReqSymbolListDataPtr>                           sub_symbol_list_set_;
+    std::mutex                                               sub_symbol_list_set_mutex_;    
+
+
     map<string, map<int, map<ID_TYPE, ReqKLineDataPtr>>>     sub_updated_kline_map_;
     map<ID_TYPE, ReqKLineDataPtr>                            sub_kline_socket_map_;
     std::mutex                                               sub_kline_map_update_mutex_;

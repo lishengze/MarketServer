@@ -105,19 +105,32 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             LOG->record_output_info("SymbolLists_" + std::to_string(p_symbol_list->socket_id_));
 
-            if (!p_symbol_list->websocket_)
+            std::set<ReqSymbolListDataPtr> invalid_sub_set;
+
+            for(ReqSymbolListDataPtr req_symbol_list:sub_symbol_list_set_)
             {
-                LOG_ERROR("p_symbol_list->websocket_ is null");
-                return;
+                if (!req_symbol_list->websocket_)
+                {
+                    LOG_WARN("req_symbol_list->websocket_ is null");
+                    invalid_sub_set.emplace(req_symbol_list);
+                    continue;
+                }
+
+                if (!req_symbol_list->websocket_->is_alive())
+                {
+                    LOG_WARN("req_symbol_list->websocket_ " + req_symbol_list->websocket_->get_ws_str() + " is not alive!");
+                    invalid_sub_set.emplace(req_symbol_list);
+                    continue;                
+                }
+
+                p_symbol_list->websocket_->send(symbol_list_str);
             }
 
-            if (!p_symbol_list->websocket_->is_alive())
+            for(ReqSymbolListDataPtr invalid_req:invalid_sub_set)
             {
-                LOG_ERROR("p_symbol_list->websocket_ is not alive!");
-                return;                
+                sub_symbol_list_set_.erase(invalid_req);
             }
 
-            p_symbol_list->websocket_->send(symbol_list_str);
         }
         else
         {
@@ -155,13 +168,13 @@ void FrontServer::response_depth_data_package(PackagePtr package)
 
                     if (!req_ptr->websocket_)
                     {
-                        LOG_ERROR("socket_id "+ std::to_string(socket_id) + " req_ptr->websocket_ is null");
+                        LOG_ERROR("req_ptr->websocket_ is null");
                         invalid_req_socket_vec.push_back(socket_id);
                         continue;
                     }
                     if (!req_ptr->websocket_->is_alive())
                     {
-                        LOG_ERROR("socket_id "+ std::to_string(socket_id) + " req_ptr->websocket_ is not alive!");
+                        LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
                         invalid_req_socket_vec.push_back(socket_id);
                         continue;                
                     }
@@ -193,36 +206,6 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         {
             LOG_ERROR("pRspRiskCtrledDepthData is NULL!");
         }
-
-            
-        //     if (!wb_server_->send_data(pRspRiskCtrledDepthData->socket_id_, depth_str))
-        //     {
-        //         LOG_WARN("FrontServer::response_depth_data_package wb_server_->send_data Failed! Request Delete Connect!");
-
-        //         string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
-
-        //         PackagePtr req_cancel_pacakge = GetReqRiskCtrledDepthDataPackage(symbol, pRspRiskCtrledDepthData->socket_id_, ID_MANAGER->get_id(), true);
-
-        //         if (req_cancel_pacakge)
-        //         {
-        //             deliver_request(req_cancel_pacakge);
-        //         }
-        //         else
-        //         {
-        //             std::stringstream stream_obj;
-        //             stream_obj << "[E] FrontServer::response_depth_data_package: create cancel package Failed! \n";
-        //             LOG_ERROR(stream_obj.str());                
-        //         }
-        //     }
-        //     else
-        //     {
-        //         LOG->record_output_info("Depth_" + std::to_string(pRspRiskCtrledDepthData->socket_id_));
-        //     }
-        // }
-        // else
-        // {
-        //     LOG_WARN("FrontServer::response_depth_data_package response data null!");
-        // }
     }
     catch(const std::exception& e)
     {
@@ -276,16 +259,26 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                     && sub_updated_kline_map_[symbol].find(frequency) != sub_updated_kline_map_[symbol].end())
                 {
                     std::map<ID_TYPE, ReqKLineDataPtr>& sub_kline_map = sub_updated_kline_map_[symbol][frequency];
-
                     std::vector<ID_TYPE> invalid_req_socket_vec;
 
                     for (auto iter: sub_kline_map)
                     {
-                        if (!wb_server_->send_data(iter.first, kline_data_str))
+                        ReqKLineDataPtr req_ptr = iter.second;
+                        ID_TYPE socket_id = iter.first;
+
+                        if (!req_ptr->websocket_)
                         {
-                            LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
-                            invalid_req_socket_vec.push_back(iter.first);
+                            LOG_ERROR("req_ptr->websocket_ is null");
+                            invalid_req_socket_vec.push_back(socket_id);
+                            continue;
                         }
+                        if (!req_ptr->websocket_->is_alive())
+                        {
+                            LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                            invalid_req_socket_vec.push_back(socket_id);
+                            continue;                
+                        }
+                        req_ptr->websocket_->send(kline_data_str);
                     }
 
                     for (auto socket_id:invalid_req_socket_vec)
@@ -318,33 +311,44 @@ void FrontServer::response_kline_data_package(PackagePtr package)
             {
                 if ((p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSOCKET || p_rsp_kline_data->socket_type_ == COMM_TYPE::WEBSECKETS))
                 {
-                    if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
+                    if (!p_rsp_kline_data->websocket_)
                     {
-                        LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
-
-                        // bool is_cancel_request = true;
-                        // PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
-                        //                                                     p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
-                        //                                                     p_rsp_kline_data->socket_id_, p_rsp_kline_data->socket_type_, is_cancel_request);
-                        // if(package)
-                        // {   
-                        //     package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
-
-                        //     deliver_request(package);
-                        // }
-                        // else
-                        // {
-                        //     LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
-                        // } 
+                        LOG_ERROR(" p_rsp_kline_data->websocket_ is null");
+                        return;
                     }
+                    if (!p_rsp_kline_data->websocket_->is_alive())
+                    {
+                        LOG_ERROR("p_rsp_kline_data->websocket_ "+ p_rsp_kline_data->websocket_->get_ws_str() + " is not alive!");
+                        return;                
+                    }
+                    p_rsp_kline_data->websocket_->send(kline_data_str);
+
+                    // if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
+                    // {
+                    //     LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
+
+                    //     // bool is_cancel_request = true;
+                    //     // PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
+                    //     //                                                     p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
+                    //     //                                                     p_rsp_kline_data->socket_id_, p_rsp_kline_data->socket_type_, is_cancel_request);
+                    //     // if(package)
+                    //     // {   
+                    //     //     package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
+
+                    //     //     deliver_request(package);
+                    //     // }
+                    //     // else
+                    //     // {
+                    //     //     LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
+                    //     // } 
+                    // }
                 }
             }
         }
         else
         {
             LOG_ERROR("pRspTradeData is NULL!");
-        }
-        
+        }        
     }
     catch(const std::exception& e)
     {
@@ -373,11 +377,29 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 
                 for (auto iter:cur_sub_trade_map)
                 {
-                    if (!wb_server_->send_data(iter.first, trade_data_str))
+                    // if (!wb_server_->send_data(iter.first, trade_data_str))
+                    // {
+                    //     LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
+                    //     invalid_req_socket_vec.push_back(iter.first);
+                    // }
+
+                    ReqTradePtr req_ptr = iter.second;
+                    ID_TYPE socket_id = iter.first;
+
+                    if (!req_ptr->websocket_)
                     {
-                        LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
-                        invalid_req_socket_vec.push_back(iter.first);
+                        LOG_ERROR("req_ptr->websocket_ is null");
+                        invalid_req_socket_vec.push_back(socket_id);
+                        continue;
                     }
+                    if (!req_ptr->websocket_->is_alive())
+                    {
+                        LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        invalid_req_socket_vec.push_back(socket_id);
+                        continue;                
+                    }
+                    req_ptr->websocket_->send(trade_data_str);
+
                 }
 
                 for (auto socket_id:invalid_req_socket_vec)
@@ -507,6 +529,25 @@ void FrontServer::response_errmsg_package(PackagePtr package)
         stream_obj << "[E] FrontServer::response_errmsg_package: " << e.what() << "\n";
         LOG_ERROR(stream_obj.str());
     }    
+}
+
+void FrontServer::add_sub_symbol_list(ReqSymbolListDataPtr req_symbol_list)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(sub_symbol_list_set_mutex_);
+
+        if (sub_symbol_list_set_.find(req_symbol_list) == sub_symbol_list_set_.end())
+        {
+            sub_symbol_list_set_.emplace(req_symbol_list);
+        }
+
+        LOG_INFO("New ReqSymbolList: " + req_symbol_list->str());
+    }
+    catch(const std::exception& e)
+    {
+        LOG_WARN(e.what());
+    }
 }
 
 void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)

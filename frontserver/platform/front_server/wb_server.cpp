@@ -301,8 +301,6 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
 
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
                     
-                // PackagePtr request_depth_package = GetReqRiskCtrledDepthDataPackage(cur_symbol, socket_id, ID_MANAGER->get_id());
-
                 PackagePtr request_depth_package = CreatePackage<ReqRiskCtrledDepthData>(cur_symbol, ws, socket_id);
                 if (request_depth_package)
                 {
@@ -567,7 +565,9 @@ void WBServer::request_symbol_list(ID_TYPE socket_id)
                     LOG_CLIENT_REQUEST(pReqSymbolListData->str());
 
                     package->prepare_request(UT_FID_ReqSymbolListData, ID_MANAGER->get_id());
-                    
+
+                    front_server_->add_sub_symbol_list(pReqSymbolListData);
+            
                     front_server_->deliver_request(package);  
                 }              
             }

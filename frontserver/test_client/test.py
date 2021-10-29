@@ -136,7 +136,6 @@ def sub_btc_usdt(ws, sub_symbol):
 
 def on_open(ws):
     print("\n--------- on_open connected! --------")
-
     send_str = get_sub_depth_str(symbol="BTC_USDT")
 
     # send_str = get_sub_kline_str(symbol = "BTC_USDT")

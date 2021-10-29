@@ -7,6 +7,7 @@
 #include "../util/id.hpp"
 #include "hub_struct.h"
 #include "pandora/package/package_simple.h"
+#include <sstream>
 
 enum class COMM_TYPE {
     HTTP = 0,
@@ -115,6 +116,13 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     }
 
     WebsocketClass* get_ws() { return ws_;}
+
+    string get_ws_str()
+    {
+        std::stringstream s_s;
+        s_s << ws_;
+        return s_s.str();
+    }
 
 
     private:

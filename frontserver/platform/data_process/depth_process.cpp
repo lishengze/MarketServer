@@ -77,7 +77,7 @@ void DepthProces::request_depth_package(PackagePtr package)
 
             for (auto iter:depth_data_)
             {
-                LOG_INFO("Depth-Symbol: " + iter.first);
+                LOG_TRACE("SrcDepth-Symbol: " + iter.first);
             }
                         
             string symbol = string(p_req->symbol_);

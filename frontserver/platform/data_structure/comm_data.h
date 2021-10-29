@@ -20,11 +20,16 @@ class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
         }
 
         ReqSymbolListData(WebsocketClassThreadSafePtr ws, bool is_canacel_request=false): 
-                            Socket(ws), is_canacel_request_(is_canacel_request)
+                            Socket(ws, ws->get_id()), is_canacel_request_(is_canacel_request)
         {
 
         }
 
+        ReqSymbolListData(WebsocketClassThreadSafePtr ws, ID_TYPE socket_id,  bool is_canacel_request=false): 
+                            Socket(ws, socket_id), is_canacel_request_(is_canacel_request)
+        {
+
+        }
 
         ReqSymbolListData(const ReqSymbolListData& other)
         {
@@ -77,6 +82,7 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
         {
             assign(symbols_, symbols);
             websocket_ = ws;
+            socket_id_ = ws->get_id();
         }
 
 
@@ -358,6 +364,18 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
         assign(frequency_, freq);
         assign(is_canacel_request_, is_canacel_request);
     }
+
+    ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
+                 WebsocketClassThreadSafePtr ws, bool is_canacel_request=false):
+                 Socket(ws, ws->get_id())
+    {
+        assign(symbol_, symbol);
+        assign(start_time_, start_time);
+        assign(end_time_, end_time);
+        assign(data_count_, data_count);
+        assign(frequency_, freq);
+        assign(is_canacel_request_, is_canacel_request);
+    }   
 
     ReqKLineData(string symbol, type_tick start_time, type_tick end_time, int data_count, int freq, 
                  WebsocketClassThreadSafePtr ws, ID_TYPE socket_id, bool is_canacel_request=false):
@@ -722,6 +740,14 @@ public:
         assign(symbol_, symbol);
         assign(is_cancel_, is_cancel);
     }
+
+    ReqTrade(string symbol, bool is_cancel, WebsocketClassThreadSafePtr ws):
+            Socket(ws, ws->get_id())
+    {
+        assign(symbol_, symbol);
+        assign(is_cancel_, is_cancel);
+    }
+
 
     ReqTrade(const ReqTrade& other)
         :Socket(other.socket_id_, other.socket_type_, other.http_response_, other.websocket_)
