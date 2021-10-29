@@ -136,9 +136,9 @@ def sub_btc_usdt(ws, sub_symbol):
 
 def on_open(ws):
     print("\n--------- on_open connected! --------")
-    send_str = get_sub_depth_str(symbol="BTC_USDT")
+    # send_str = get_sub_depth_str(symbol="BTC_USDT")
 
-    # send_str = get_sub_kline_str(symbol = "BTC_USDT")
+    send_str = get_sub_kline_str(symbol = "BTC_USDT")
     # send_str = get_sub_trade_str()
 
     ws.send(send_str)
@@ -149,7 +149,7 @@ def on_open(ws):
 
     # ws.send(send_str)
 
-    # _thread.start_new_thread(sub_btc_usdt, (ws, "ETH_USDT", ) )
+    _thread.start_new_thread(sub_btc_usdt, (ws, "ETH_USDT", ) )
 
 def test_websocket():
     # websocket.enableTrace(True)

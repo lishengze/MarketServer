@@ -308,8 +308,10 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
 
                     auto p_req_depth = GetField<ReqRiskCtrledDepthData>(request_depth_package);
                     LOG_CLIENT_REQUEST(p_req_depth->str());
-                    front_server_->add_sub_depth(p_req_depth);
+                    
                     front_server_->deliver_request(request_depth_package);
+
+                    front_server_->add_sub_depth(p_req_depth);
                 }
                 else
                 {
@@ -476,6 +478,7 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
                 if (package)
                 {
                     auto p_req_trade = GetField<ReqTrade>(package);
+
                     front_server_->add_sub_trade(p_req_trade);
 
                     package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());

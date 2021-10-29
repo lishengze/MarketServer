@@ -49,11 +49,15 @@ void DataProcess::release()
             
 void DataProcess::request_message(PackagePtr package)
 {
+    // LOG_INFO("PackageInfo: " + get_package_str(package->Tid()));
+
     get_io_service().post(std::bind(&DataProcess::handle_request_message, this, package));
 }
 
 void DataProcess::response_message(PackagePtr package)
 {
+    // LOG_INFO("PackageInfo: " + get_package_str(package->Tid()));
+
     handle_response_message(package);
 
     // get_io_service().post(std::bind(&DataProcess::handle_response_message, this, package));

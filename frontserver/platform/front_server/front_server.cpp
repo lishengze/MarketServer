@@ -43,9 +43,11 @@ void FrontServer::request_message(PackagePtr package)
 
 void FrontServer::response_message(PackagePtr package)
 {
-    get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
+    // LOG_INFO("PackageInfo: " + get_package_str(package->Tid()));
 
-    // handle_response_message(package);
+    // get_io_service().post(std::bind(&FrontServer::handle_response_message, this, package));
+
+    handle_response_message(package);
 }
 
 void FrontServer::handle_request_message(PackagePtr package)
@@ -53,44 +55,44 @@ void FrontServer::handle_request_message(PackagePtr package)
 
 }
 
-void FrontServer::request_all_symbol()
-{
-    PackagePtr package = PackagePtr{new Package{}};
-    package->prepare_request(UT_FID_RspSymbolListData, ID_MANAGER->get_id());
-    deliver_request(package);
-}
-
 void FrontServer::handle_response_message(PackagePtr package)
 {
-    switch (package->Tid())
+    try
     {
-        case UT_FID_RspSymbolListData:
-            response_symbol_list_package(package);            
-            break;
+        switch (package->Tid())
+        {
+            case UT_FID_RspSymbolListData:
+                response_symbol_list_package(package);            
+                break;
 
-        case UT_FID_RspRiskCtrledDepthData:
-            response_depth_data_package(package);            
-            break;          
+            case UT_FID_RspRiskCtrledDepthData:
+                response_depth_data_package(package);            
+                break;          
 
-        case UT_FID_RspKLineData:
-            response_kline_data_package(package);
-            break;
+            case UT_FID_RspKLineData:
+                response_kline_data_package(package);
+                break;
 
-        case UT_FID_RspTrade:
-            response_trade_data_package(package);
-            break;            
+            case UT_FID_RspTrade:
+                response_trade_data_package(package);
+                break;            
 
-        case UT_FID_RspEnquiry:
-            response_enquiry_data_package(package);
-            break;
+            case UT_FID_RspEnquiry:
+                response_enquiry_data_package(package);
+                break;
 
-        case UT_FID_RspErrorMsg:
-            response_errmsg_package(package);
-            break;
-        default:  
-            LOG_WARN("FrontServer::handle_response_message Unknow Package");
-            break;
-    }    
+            case UT_FID_RspErrorMsg:
+                response_errmsg_package(package);
+                break;
+            default:  
+                LOG_WARN("FrontServer::handle_response_message Unknow Package");
+                break;
+        }    
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 void FrontServer::response_symbol_list_package(PackagePtr package)
@@ -153,13 +155,14 @@ void FrontServer::response_depth_data_package(PackagePtr package)
         {
             string depth_str = pRspRiskCtrledDepthData->get_json_str();
             string symbol = pRspRiskCtrledDepthData->depth_data_.symbol;
-            std::lock_guard<std::mutex> lk(sub_depth_map_update_mutex_);
 
+            std::lock_guard<std::mutex> lk(sub_depth_map_update_mutex_);
+            // LOG_INFO(depth_str);
             if (sub_depth_map_.find(symbol) != sub_depth_map_.end())
             {
                 map<ID_TYPE, ReqRiskCtrledDepthDataPtr>& cur_sub_depth_map = sub_depth_map_[symbol];
-
                 std::vector<ID_TYPE> invalid_req_socket_vec;
+                // LOG_INFO("cur_sub_depth_map.size: " + std::to_string(cur_sub_depth_map.size()));
 
                 for (auto iter:cur_sub_depth_map)
                 {
@@ -181,6 +184,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                     req_ptr->websocket_->send(depth_str);
                 }
 
+                // LOG_INFO("invalid_req_socket_vec.size: " + std::to_string(invalid_req_socket_vec.size()));
                 for (auto socket_id:invalid_req_socket_vec)
                 {
                     cur_sub_depth_map.erase(socket_id);
@@ -201,6 +205,10 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                     }                     
                 }
             }
+            else
+            {
+                LOG_WARN("sub_depth_map_ does not sub " + symbol);
+            }
         }
         else
         {
@@ -213,23 +221,9 @@ void FrontServer::response_depth_data_package(PackagePtr package)
     }    
     catch(...)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] WBServer::store_ws: unkonwn exception! " << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR("unkonwn exception! ");
     }
         
-}
-
-string FrontServer::get_symbols_str()
-{
-    return SymbolsToJsonStr(symbols_, SYMBOL_LIST);
-}
-
-string FrontServer::get_heartbeat_str()
-{
-    nlohmann::json json_obj;
-    json_obj["type"] = "heartbeat";
-    return json_obj.dump();
 }
 
 void FrontServer::response_kline_data_package(PackagePtr package)
@@ -306,6 +300,17 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                         }                         
                     }
                 }
+                else
+                {
+                    if (sub_updated_kline_map_.find(symbol) != sub_updated_kline_map_.end())
+                    {
+                        LOG_WARN("sub_updated_kline_map_ does not sub " + symbol);
+                    }
+                    else if (sub_updated_kline_map_[symbol].find(frequency) != sub_updated_kline_map_[symbol].end())
+                    {
+                        LOG_WARN("sub_updated_kline_map " + symbol + " does not sub fre: " + std::to_string(frequency));
+                    }                    
+                }
             }
             else 
             {
@@ -322,26 +327,6 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                         return;                
                     }
                     p_rsp_kline_data->websocket_->send(kline_data_str);
-
-                    // if (!wb_server_->send_data(p_rsp_kline_data->socket_id_, kline_data_str))
-                    // {
-                    //     LOG_WARN("wb_server_->send_data Failed! Request Delete Connect!");
-
-                    //     // bool is_cancel_request = true;
-                    //     // PackagePtr package = CreatePackage<ReqKLineData>(p_rsp_kline_data->symbol_, p_rsp_kline_data->start_time_, p_rsp_kline_data->end_time_, 
-                    //     //                                                     p_rsp_kline_data->data_count_, p_rsp_kline_data->frequency_, 
-                    //     //                                                     p_rsp_kline_data->socket_id_, p_rsp_kline_data->socket_type_, is_cancel_request);
-                    //     // if(package)
-                    //     // {   
-                    //     //     package->prepare_request(UT_FID_ReqKLineData, ID_MANAGER->get_id());
-
-                    //     //     deliver_request(package);
-                    //     // }
-                    //     // else
-                    //     // {
-                    //     //     LOG_ERROR("FrontServer::response_kline_data_package CreatePackage<ReqKLineData> Failed!");
-                    //     // } 
-                    // }
                 }
             }
         }
@@ -369,46 +354,33 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 
             if (sub_updated_trade_map_.find(pRspTradeData->symbol_) != sub_updated_trade_map_.end())
             {
-                map<ID_TYPE, ReqTradePtr>& cur_sub_trade_map = sub_updated_trade_map_[pRspTradeData->symbol_];
+                std::set<ReqTradePtr>& cur_sub_trade_set = sub_updated_trade_map_[pRspTradeData->symbol_];
+                std::vector<ReqTradePtr> invalid_req_socket_vec;
 
-                std::vector<ID_TYPE> invalid_req_socket_vec;
-
-                // LOG_INFO(trade_data_str);
-
-                for (auto iter:cur_sub_trade_map)
+                for (const ReqTradePtr& req_ptr:cur_sub_trade_set)
                 {
-                    // if (!wb_server_->send_data(iter.first, trade_data_str))
-                    // {
-                    //     LOG_WARN(string("wb_server_->send_data Failed! Invalid SocetID: ") + std::to_string(iter.first));
-                    //     invalid_req_socket_vec.push_back(iter.first);
-                    // }
-
-                    ReqTradePtr req_ptr = iter.second;
-                    ID_TYPE socket_id = iter.first;
-
                     if (!req_ptr->websocket_)
                     {
                         LOG_ERROR("req_ptr->websocket_ is null");
-                        invalid_req_socket_vec.push_back(socket_id);
+                        invalid_req_socket_vec.push_back(req_ptr);
                         continue;
                     }
                     if (!req_ptr->websocket_->is_alive())
                     {
                         LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
-                        invalid_req_socket_vec.push_back(socket_id);
+                        invalid_req_socket_vec.push_back(req_ptr);
                         continue;                
                     }
                     req_ptr->websocket_->send(trade_data_str);
-
                 }
 
-                for (auto socket_id:invalid_req_socket_vec)
+                for (auto req_ptr:invalid_req_socket_vec)
                 {
-                    cur_sub_trade_map.erase(socket_id);
-                }
+                    cur_sub_trade_set.erase(req_ptr);
+                }          
 
                 // 取消对当前 Symbol 的 trade 订阅;
-                if (cur_sub_trade_map.size() == 0)
+                if (cur_sub_trade_set.size() == 0)
                 {
                     bool is_cancel_request = true;
                     PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, is_cancel_request,
@@ -423,34 +395,9 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     {
                         LOG_ERROR("CreatePackage<ReqTrade> Failed!");
                     }                     
-                }
+                }                      
+
             }
-
-            // if ((pRspTradeData->socket_type_ == COMM_TYPE::WEBSOCKET || pRspTradeData->socket_type_ == COMM_TYPE::WEBSECKETS))
-            // {
-            //     if (!wb_server_->send_data(pRspTradeData->socket_id_, trade_data_str))
-            //     {
-            //         LOG_WARN("FrontServer::response_trade_data_package wb_server_->send_data Failed! Request Delete Connect!");
-
-            //         bool is_cancel_request = true;
-            //         PackagePtr package = CreatePackage<ReqTrade>(pRspTradeData->symbol_, true,
-            //                                                     pRspTradeData->socket_id_, pRspTradeData->socket_type_);
-            //         if(package)
-            //         {   
-            //             package->prepare_request(UT_FID_ReqTrade, ID_MANAGER->get_id());
-
-            //             deliver_request(package);
-            //         }
-            //         else
-            //         {
-            //             LOG_ERROR("FrontServer::response_trade_data_package CreatePackage<ReqKLineData> Failed!");
-            //         } 
-            //     }
-            //     else
-            //     {
-            //         LOG->record_output_info("Trade_" + std::to_string(pRspTradeData->socket_id_));                    
-            //     }
-            // }
         }
         else
         {
@@ -499,27 +446,27 @@ void FrontServer::response_errmsg_package(PackagePtr package)
     try
     {
 
-        RspErrorMsgPtr pRspEnquiry = GetField<RspErrorMsg>(package);
+        RspErrorMsgPtr pRspError = GetField<RspErrorMsg>(package);
 
-        if (pRspEnquiry)
+        if (pRspError)
         {
-            string json_str = pRspEnquiry->get_json_str();
+            string json_str = pRspError->get_json_str();
 
-            LOG_DEBUG(json_str);
+            LOG_WARN(json_str);
 
-            if (pRspEnquiry->socket_type_ == COMM_TYPE::HTTP || pRspEnquiry->socket_type_ == COMM_TYPE::HTTPS)
-            {
-                // p_rsp_enquiry->http_response_->end(json_str);
-            }
+            // if (pRspEnquiry->socket_type_ == COMM_TYPE::HTTP || pRspEnquiry->socket_type_ == COMM_TYPE::HTTPS)
+            // {
+            //     // p_rsp_enquiry->http_response_->end(json_str);
+            // }
 
-            if (pRspEnquiry->socket_type_ == COMM_TYPE::WEBSOCKET || pRspEnquiry->socket_type_ == COMM_TYPE::WEBSECKETS)
-            {
-                wb_server_->send_data(pRspEnquiry->socket_id_, json_str);
-            }
+            // if (pRspEnquiry->socket_type_ == COMM_TYPE::WEBSOCKET || pRspEnquiry->socket_type_ == COMM_TYPE::WEBSECKETS)
+            // {
+            //     wb_server_->send_data(pRspEnquiry->socket_id_, json_str);
+            // }
         }
         else
         {
-            LOG_ERROR("FrontServer::response_errmsg_package RspKLineData is NULL!");
+            LOG_ERROR("pRspError is NULL!");
         }
         
     }
@@ -558,7 +505,7 @@ void FrontServer::add_sub_kline(ReqKLineDataPtr req_kline_data)
         std::lock_guard<std::mutex> lk(sub_kline_map_update_mutex_);
         if (sub_kline_socket_map_.find(req_kline_data->socket_id_) != sub_kline_socket_map_.end())
         {
-            ReqKLineDataPtr& last_req_kline =  sub_kline_socket_map_[req_kline_data->socket_id_];
+            ReqKLineDataPtr last_req_kline =  sub_kline_socket_map_[req_kline_data->socket_id_];
 
             LOG_INFO("Last ReqKlineInfo: " + last_req_kline->str());
 
@@ -592,23 +539,24 @@ void FrontServer::add_sub_trade(ReqTradePtr req_trade_data)
         std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
         if (sub_trade_socket_map_.find(req_trade_data->socket_id_) != sub_trade_socket_map_.end())
         {
-            ReqTradePtr& last_req_trade =  sub_trade_socket_map_[req_trade_data->socket_id_];
+            ReqTradePtr last_req_trade = sub_trade_socket_map_[req_trade_data->socket_id_];
 
             LOG_INFO("Last ReqTradeInfo: " + last_req_trade->str());
 
             sub_trade_socket_map_.erase(last_req_trade->socket_id_);
 
             if (sub_updated_trade_map_.find(last_req_trade->symbol_) != sub_updated_trade_map_.end()
-            && sub_updated_trade_map_[last_req_trade->symbol_].find(last_req_trade->socket_id_) != sub_updated_trade_map_[last_req_trade->symbol_].end())
+            && sub_updated_trade_map_[last_req_trade->symbol_].find(last_req_trade) != sub_updated_trade_map_[last_req_trade->symbol_].end())
             {
                 LOG_INFO("sub_updated_trade_map_ erase last req_trade " + last_req_trade->str());
-                sub_updated_trade_map_[last_req_trade->symbol_].erase(last_req_trade->socket_id_);
+
+                sub_updated_trade_map_[last_req_trade->symbol_].erase(last_req_trade);
             }
         }
 
         LOG_INFO("New ReqTradeInfo: " + req_trade_data->str());
         sub_trade_socket_map_[req_trade_data->socket_id_] = req_trade_data;
-        sub_updated_trade_map_[req_trade_data->symbol_][req_trade_data->socket_id_] = req_trade_data;
+        sub_updated_trade_map_[req_trade_data->symbol_].emplace(req_trade_data);
     }
     catch(const std::exception& e)
     {
@@ -624,16 +572,17 @@ void FrontServer::add_sub_depth(ReqRiskCtrledDepthDataPtr req_depth_data)
         std::lock_guard<std::mutex> lk(sub_depth_map_update_mutex_);
         if (sub_depth_socket_map_.find(req_depth_data->socket_id_) != sub_depth_socket_map_.end())
         {
-            ReqRiskCtrledDepthDataPtr& last_req_depth =  sub_depth_socket_map_[req_depth_data->socket_id_];
+            ReqRiskCtrledDepthDataPtr last_req_depth =  sub_depth_socket_map_[req_depth_data->socket_id_];
 
             LOG_INFO("Last ReqDepthInfo: " + last_req_depth->str());
-
             sub_depth_socket_map_.erase(last_req_depth->socket_id_);
 
             if (sub_depth_map_.find(last_req_depth->symbol_) != sub_depth_map_.end()
-            && sub_depth_map_[last_req_depth->symbol_].find(last_req_depth->socket_id_) != sub_depth_map_[last_req_depth->symbol_].end())
+             && sub_depth_map_[last_req_depth->symbol_].find(last_req_depth->socket_id_) 
+             != sub_depth_map_[last_req_depth->symbol_].end())
             {
                 LOG_INFO("sub_depth_map_ erase last req_depth " + last_req_depth->str());
+
                 sub_depth_map_[last_req_depth->symbol_].erase(last_req_depth->socket_id_);
             }
         }
@@ -646,4 +595,8 @@ void FrontServer::add_sub_depth(ReqRiskCtrledDepthDataPtr req_depth_data)
     {
         LOG_ERROR(e.what());
     }        
+    catch(...)
+    {
+        LOG_ERROR("unknown exception!");
+    }
 }

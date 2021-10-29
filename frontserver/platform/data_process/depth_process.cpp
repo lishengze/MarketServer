@@ -112,10 +112,13 @@ void DepthProces::request_depth_package(PackagePtr package)
                 string err_msg = symbol + " does not have depth data";
                 int error_id = -1;
                 LOG_ERROR("err_msg: " + err_msg);
-                PackagePtr err_package = GetRspErrMsgPackage(err_msg, error_id, p_req->socket_id_, p_req->socket_type_);
-                if (err_package)
+                // PackagePtr err_package = GetRspErrMsgPackage(err_msg, error_id, p_req->socket_id_, p_req->socket_type_);
+
+                PackagePtr package = CreatePackage<RspErrorMsg>(err_msg, error_id, p_req->websocket_);
+                if (package)
                 {
-                    process_engine_->deliver_response(err_package);
+                    process_engine_->deliver_response(package);
+                    package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());;
                 }
                 else
                 {
