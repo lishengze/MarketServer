@@ -1004,11 +1004,20 @@ void KlineProcess::request_trade_package(PackagePtr package)
                 }
                 else
                 {
-                    string error_msg =  "No Trade Data For " + string(pReqTradePtr->symbol_) ;                    
-                    PackagePtr package = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTradePtr->socket_id_, pReqTradePtr->socket_type_);
-                    package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
+                    string error_msg =  "No Trade Data For " + string(pReqTradePtr->symbol_) ;        
                     LOG_ERROR(error_msg);
-                    process_engine_->deliver_response(package);
+
+                    PackagePtr package = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTradePtr->socket_id_, pReqTradePtr->socket_type_);
+                    if (package)
+                    {
+                        package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
+                        process_engine_->deliver_response(package);
+                    }
+                    else
+                    {
+                        LOG_ERROR("CreatePackage<RspErrorMsg> Failed");
+                    }
+                    
                 }
             }
         }

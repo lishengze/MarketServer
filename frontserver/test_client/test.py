@@ -157,9 +157,9 @@ def on_open(ws):
 def test_websocket():
     # websocket.enableTrace(True)
     # ip = "ws://36.855.220.139"
-    # ip = "ws://118.193.35.160"
+    ip = "ws://118.193.35.160"
     # ip = "ws://18.162.52.222"
-    ip = "ws://127.0.0.1"
+    # ip = "ws://127.0.0.1"
     port = 8114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))
