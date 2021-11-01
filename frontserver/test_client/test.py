@@ -60,6 +60,8 @@ def on_message(ws, message):
         print_depth_data(dic)
     elif dic["type"] == "trade":
         print(message)
+    elif dic["type"] == "error":
+        print(message)
 
         
 def on_error(ws, error):
@@ -124,9 +126,9 @@ def sub_btc_usdt(ws, sub_symbol):
     # sub_info_str = json.dumps(sub_info)
     # print("sub_info_str: %s" % (sub_info_str))
 
-    sub_info_str = get_sub_kline_str(sub_symbol)
+    # sub_info_str = get_sub_kline_str(sub_symbol)
 
-    # sub_info_str = get_sub_depth_str(sub_symbol)
+    sub_info_str = get_sub_depth_str(sub_symbol)
 
     # sub_info_str = get_sub_trade_str(sub_symbol)
 
@@ -136,9 +138,10 @@ def sub_btc_usdt(ws, sub_symbol):
 
 def on_open(ws):
     print("\n--------- on_open connected! --------")
-    # send_str = get_sub_depth_str(symbol="BTC_USDT")
+    send_str = get_sub_depth_str(symbol="BTC_USDT")
 
-    send_str = get_sub_kline_str(symbol = "BTC_USDT")
+    # send_str = get_sub_kline_str(symbol = "BTC_USDT")
+
     # send_str = get_sub_trade_str()
 
     ws.send(send_str)

@@ -119,6 +119,7 @@ void DepthProces::request_depth_package(PackagePtr package)
                 {
                     process_engine_->deliver_response(package);
                     package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());;
+                    process_engine_->deliver_response(package);
                 }
                 else
                 {

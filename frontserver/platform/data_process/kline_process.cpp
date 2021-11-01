@@ -149,13 +149,16 @@ void KlineProcess::request_kline_package(PackagePtr package)
 
                 if (rsp_package)
                 {
-                    init_subed_update_kline_data(rsp_package, pReqKlineData);
+                    if (rsp_package->PackageID() == UT_FID_RspKLineData)
+                    {
+                        init_subed_update_kline_data(rsp_package, pReqKlineData);
+                    }
 
                     process_engine_->deliver_response(rsp_package);
                 }
                 else
                 {
-                    LOG_ERROR("get_request_kline_package Failed");                    
+                    LOG_ERROR("get_request_kline_package failed!");
                 }     
             }       
         }
@@ -1005,6 +1008,7 @@ void KlineProcess::request_trade_package(PackagePtr package)
                     PackagePtr package = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTradePtr->socket_id_, pReqTradePtr->socket_type_);
                     package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
                     LOG_ERROR(error_msg);
+                    process_engine_->deliver_response(package);
                 }
             }
         }
