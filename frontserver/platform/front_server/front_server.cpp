@@ -454,6 +454,18 @@ void FrontServer::response_errmsg_package(PackagePtr package)
 
             LOG_WARN(json_str);
 
+            if (!pRspError->websocket_)
+            {
+                LOG_ERROR(" pRspError->websocket_ is null");
+                return;
+            }
+            if (!pRspError->websocket_->is_alive())
+            {
+                LOG_ERROR("pRspError->websocket_ "+ pRspError->websocket_->get_ws_str() + " is not alive!");
+                return;                
+            }
+            pRspError->websocket_->send(json_str);
+
             // if (pRspEnquiry->socket_type_ == COMM_TYPE::HTTP || pRspEnquiry->socket_type_ == COMM_TYPE::HTTPS)
             // {
             //     // p_rsp_enquiry->http_response_->end(json_str);
