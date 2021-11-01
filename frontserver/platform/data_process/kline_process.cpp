@@ -981,7 +981,7 @@ void KlineProcess::request_trade_package(PackagePtr package)
                 if (trade_data_map_.find(string(pReqTradePtr->symbol_)) != trade_data_map_.end())
                 {                    
                     TradeDataPtr& pTradeDataPtr = trade_data_map_[string(pReqTradePtr->symbol_)];
-                    PackagePtr result = CreatePackage<RspTrade>(pReqTradePtr->symbol_, pTradeDataPtr->price_, pTradeDataPtr->total_volume_, 
+                    PackagePtr rsp_package = CreatePackage<RspTrade>(pReqTradePtr->symbol_, pTradeDataPtr->price_, pTradeDataPtr->total_volume_, 
                                                                 pTradeDataPtr->change_, pTradeDataPtr->change_rate_, 
                                                                 pTradeDataPtr->high_, pTradeDataPtr->low_);
                     {
@@ -992,10 +992,21 @@ void KlineProcess::request_trade_package(PackagePtr package)
                         }
                     }
 
-                    if (package)
+                    if (rsp_package)
                     {
-                        package->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
-                        process_engine_->deliver_response(package);
+                        RspTradePtr pRspTradeData = GetField<RspTrade>(package);
+
+                        if (pRspTradeData)
+                        {
+                            LOG_INFO(pRspTradeData->get_json_str());     
+                        }                 
+                        else
+                        {
+                            LOG_ERROR("GetField<RspTrade>(package) Failed");
+                        }
+                        
+                        rsp_package->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
+                        process_engine_->deliver_response(rsp_package);
                     }
                     else
                     {
@@ -1007,11 +1018,11 @@ void KlineProcess::request_trade_package(PackagePtr package)
                     string error_msg =  "No Trade Data For " + string(pReqTradePtr->symbol_) ;        
                     LOG_ERROR(error_msg);
 
-                    PackagePtr package = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTradePtr->socket_id_, pReqTradePtr->socket_type_);
-                    if (package)
+                    PackagePtr rsp_package = CreatePackage<RspErrorMsg>(error_msg, 1, pReqTradePtr->socket_id_, pReqTradePtr->socket_type_);
+                    if (rsp_package)
                     {
-                        package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
-                        process_engine_->deliver_response(package);
+                        rsp_package->prepare_response(UT_FID_RspErrorMsg, ID_MANAGER->get_id());
+                        process_engine_->deliver_response(rsp_package);
                     }
                     else
                     {
