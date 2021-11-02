@@ -994,16 +994,16 @@ void KlineProcess::request_trade_package(PackagePtr package)
 
                     if (rsp_package)
                     {
-                        RspTradePtr pRspTradeData = GetField<RspTrade>(package);
+                        RspTradePtr pRspTradeData = GetField<RspTrade>(rsp_package);
 
-                        if (pRspTradeData)
-                        {
-                            LOG_INFO(pRspTradeData->get_json_str());     
-                        }                 
-                        else
-                        {
-                            LOG_ERROR("GetField<RspTrade>(package) Failed");
-                        }
+                        // if (pRspTradeData)
+                        // {
+                        //     LOG_INFO(pRspTradeData->get_json_str());     
+                        // }                 
+                        // else
+                        // {
+                        //     LOG_ERROR("GetField<RspTrade>(rsp_package) Failed");
+                        // }
                         
                         rsp_package->prepare_response(UT_FID_RspTrade, ID_MANAGER->get_id());
                         process_engine_->deliver_response(rsp_package);
