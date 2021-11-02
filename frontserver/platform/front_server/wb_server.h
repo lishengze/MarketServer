@@ -75,6 +75,10 @@ class WBServer
 
     ID_TYPE clean_ws(WebsocketClass* ws);
 
+    void close_ws(ID_TYPE socket_id);
+
+    void close_ws(WebsocketClassThreadSafePtr ws);
+
     bool send_data(ID_TYPE socket_id, string msg);
 
     void heartbeat_run();
@@ -106,7 +110,7 @@ class WBServer
 
         std::shared_ptr<std::thread>            heartbeat_thread_{nullptr};    
 
-        int                                     heartbeat_seconds_{5};    
+        // int                                     heartbeat_seconds_{5};    
 
         std::mutex                              heartbeat_mutex_;
 

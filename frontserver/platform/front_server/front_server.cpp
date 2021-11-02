@@ -178,6 +178,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                     if (!req_ptr->websocket_->is_alive())
                     {
                         LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        wb_server_->close_ws(req_ptr->websocket_);
                         invalid_req_socket_vec.push_back(socket_id);
                         continue;                
                     }
@@ -269,6 +270,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                         if (!req_ptr->websocket_->is_alive())
                         {
                             LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                            wb_server_->close_ws(req_ptr->websocket_);
                             invalid_req_socket_vec.push_back(socket_id);
                             continue;                
                         }
@@ -368,6 +370,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     if (!req_ptr->websocket_->is_alive())
                     {
                         LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        wb_server_->close_ws(req_ptr->websocket_);
                         invalid_req_socket_vec.push_back(req_ptr);
                         continue;                
                     }

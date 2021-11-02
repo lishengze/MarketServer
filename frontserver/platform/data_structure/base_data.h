@@ -8,6 +8,7 @@
 #include "hub_struct.h"
 #include "pandora/package/package_simple.h"
 #include <sstream>
+#include "../config/config.h"
 
 enum class COMM_TYPE {
     HTTP = 0,
@@ -100,14 +101,17 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     bool is_alive() {
         std::lock_guard<std::mutex> lk(mutex_);
-        return is_alive_;
+        return fabs(recv_heart_beate_time_ - send_heart_beate_time_) < CONFIG->get_heartbeat_secs() || new_business_request_;
     }
 
-    void set_alive(bool value)
+    void set_new_business_request(bool value)
     {
         std::lock_guard<std::mutex> lk(mutex_);
-        is_alive_ = value;
+        new_business_request_ = value;
     }
+
+    void set_send_heartbeat(unsigned long time) { send_heart_beate_time_ = time;}
+    void set_recv_heartbeat(unsigned long time) { recv_heart_beate_time_ = time;}
 
     ID_TYPE get_id()
     {
@@ -126,10 +130,12 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
 
     private:
-        bool                   is_alive_{false};
+        bool                   new_business_request_{false};
         WebsocketClass*        ws_{nullptr};
         std::mutex             mutex_;
         ID_TYPE                id_;
+        unsigned long          send_heart_beate_time_{0};
+        unsigned long          recv_heart_beate_time_{0};
 };
 
 FORWARD_DECLARE_PTR(WebsocketClassThreadSafe);

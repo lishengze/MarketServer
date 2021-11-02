@@ -233,6 +233,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         // LOG_CLIENT_REQUEST(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
+
         if (socket_id && wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
             WebsocketClassThreadSafePtr ws_safe = wss_con_map_[socket_id];
@@ -527,7 +528,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr 
         std::lock_guard<std::mutex> lk(wss_con_mutex_);
         if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
-            wss_con_map_[socket_id]->set_alive(true);
+            wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
         }        
         else
         {
@@ -630,7 +631,7 @@ void WBServer::heartbeat_run()
     {
         while(true)
         {
-            std::this_thread::sleep_for(std::chrono::seconds(heartbeat_seconds_));
+            std::this_thread::sleep_for(std::chrono::seconds(CONFIG->get_heartbeat_secs()));
 
             check_heartbeat();
         }
@@ -663,7 +664,7 @@ void WBServer::check_heartbeat()
                 {
                     ws_vec.push_back(iter.first);
 
-                    LOG_WARN("check_heartbeat socket_id: " + std::to_string(iter.first) + " lost heartbeat");
+                    LOG_WARN("check_heartbeat socket_id: " + iter.second->get_ws_str() + " lost heartbeat");
                 }
                 else
                 {
@@ -673,22 +674,16 @@ void WBServer::check_heartbeat()
                 
             for (auto socket_id:ws_vec)
             {
-                WebsocketClass * ws = wss_con_map_[socket_id]->get_ws();
-                WSData* data_ptr = (WSData*)(ws->getUserData());
-                data_ptr->set_id(0);
-
-                LOG_WARN("Close: " + wss_con_map_[socket_id]->get_ws_str());
-                ws->close();
-
-                wss_con_map_[socket_id]->set_alive(false);
-                wss_con_map_.erase(socket_id);            
+                close_ws(socket_id);
             }     
         }   
 
         string heartbeat_str = get_heartbeat_str();    
         for (auto iter:wss_con_map_)
         {
-            iter.second->set_alive(false);
+            iter.second->set_new_business_request(false);
+            iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
+
             iter.second->send(heartbeat_str);
         }
     }
@@ -724,7 +719,7 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         if (wss_con_map_.find(socket_id) == wss_con_map_.end())
         {
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
-            ws_safe->set_alive(true);
+            ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 
             std::stringstream s_s;
@@ -756,20 +751,20 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             if (wss_con_map_.find(socket_id) == wss_con_map_.end())
             {
                 stringstream s_obj;
-                s_obj << "check_ws ws " << ws << " id: " << socket_id << " was not stored in wss_con_map_!" << "\n";
+                s_obj << "ws " << ws << " id: " << socket_id << " was not stored in wss_con_map_!" << "\n";
                 LOG_WARN(s_obj.str());
 
                 data_ptr->set_id(0);
             }
             else
             {
-                wss_con_map_[socket_id]->set_alive(true);
+                wss_con_map_[socket_id]->set_new_business_request(true);
             }
         }
         else
         {
             std::stringstream s_s;
-            s_s << "check_ws ws " << ws << " is invalid now!";
+            s_s << "ws " << ws << " is invalid now!";
             LOG_WARN(s_s.str());
         }
 
@@ -798,21 +793,19 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
         if (socket_id)
         {
             data_ptr->set_id(0);
-
-            
-
+        
             std::lock_guard<std::mutex> lk(wss_con_mutex_);
             if (wss_con_map_.find(socket_id) != wss_con_map_.end())
             {
-                wss_con_map_[socket_id]->set_alive(false);
+                wss_con_map_[socket_id]->set_new_business_request(false);
                 wss_con_map_.erase(socket_id);
 
-                s_obj << "clean_ws Socket: " << ws  << "_id: " << socket_id << " successfully!";
+                s_obj << "clean Socket: " << ws  << "_id: " << socket_id << " successfully!";
                 LOG_CLIENT_REQUEST(s_obj.str());
             }
             else
             {
-                s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " Already Cleaned!";
+                s_obj << "clean Socket: " << ws << "_id: " << socket_id << " Already Cleaned!";
                 LOG_CLIENT_REQUEST(s_obj.str());
             }
             return socket_id;
@@ -820,8 +813,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
         }
         else
         {
-            s_obj << "clean_ws Socket: " << ws << "_id: " << socket_id << " was not stored!";
-
+            s_obj << "clean Socket: " << ws << "_id: " << socket_id << " was not stored!";
             LOG_WARN(s_obj.str());
         }
 
@@ -837,6 +829,51 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
     }
 
     return 0;
+}
+
+void WBServer::close_ws(ID_TYPE socket_id)
+{
+    try
+    {
+        if (wss_con_map_.find(socket_id) != wss_con_map_.end())
+        {
+            close_ws(wss_con_map_[socket_id]);
+        }
+        else
+        {
+            LOG_WARN("socket_id: " + std::to_string(socket_id) + " was not storeddddd!");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
+{
+    try
+    {
+        WebsocketClass * ws = ws_safe->get_ws();
+        WSData* data_ptr = (WSData*)(ws->getUserData());
+        data_ptr->set_id(0);
+
+        LOG_WARN("Close: " + ws_safe->get_ws_str());
+        ws->close();
+
+        if (wss_con_map_.find(ws_safe->get_id()) == wss_con_map_.end())
+        {
+            LOG_WARN("socket_id: " + std::to_string(ws_safe->get_id()) + " was not stored!");
+        }
+        else
+        {
+            wss_con_map_.erase(ws_safe->get_id());
+        }              
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 ID_TYPE WBServer::get_socket_id(WebsocketClass * ws)
