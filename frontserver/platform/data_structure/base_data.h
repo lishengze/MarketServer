@@ -10,6 +10,7 @@
 #include <sstream>
 #include "../config/config.h"
 
+
 enum class COMM_TYPE {
     HTTP = 0,
     HTTPS,
@@ -76,6 +77,8 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     {
         ws_ = ws;
     }
+
+    ~WebsocketClassThreadSafe();
 
     void send(const string& msg)
     {
@@ -144,7 +147,8 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
         unsigned long          recv_heart_beate_time_{0};
 };
 
-FORWARD_DECLARE_PTR(WebsocketClassThreadSafe);
+
+DECLARE_PTR(WebsocketClassThreadSafe);
 
 class LessWebsocketClassThreadSafePtr
 {

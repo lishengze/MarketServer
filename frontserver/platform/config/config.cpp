@@ -1,7 +1,7 @@
 #include "config.h"
 #include <fstream>
+#include <iostream>
 #include "pandora/util/json.hpp"
-#include "../log/log.h"
 
 void Config::load_config(string file_name)
 {
@@ -11,17 +11,19 @@ void Config::load_config(string file_name)
 
         std::ifstream in_config(file_name);
 
-        cout << "Config::load_config " << file_name << endl;
+        // LOG_INFO("Config::load_config " + file_name );
 
         if (!in_config.is_open())
         {
-            cout << "Failed to Open: " << file_name << endl;
+            // LOG_WARN("Failed to Open: " + file_name);
         }
         else
         {
             string contents((istreambuf_iterator<char>(in_config)), istreambuf_iterator<char>());
 
-            cout << contents << endl;
+            // s_s << contents << "\n";
+
+            //LOG_INFO(contents);
 
             nlohmann::json js = nlohmann::json::parse(contents);
             
@@ -32,8 +34,8 @@ void Config::load_config(string file_name)
             else
             {
                 string error_msg = file_name + " does not have hub.addr! \n";
-                // cout << error_msg << endl; 
-                LOG_ERROR(error_msg);
+                // s_s << error_msg << "\n"; 
+               // LOG_ERROR(error_msg);
             }
 
             if (!js["ws_server"].is_null() && !js["ws_server"]["port"].is_null())
@@ -43,7 +45,7 @@ void Config::load_config(string file_name)
             else
             {
                 string error_msg = file_name + " does not have ws_server.port! \n";
-                LOG_ERROR(error_msg);                
+                //LOG_ERROR(error_msg);
             }
 
             if (!js["rest_server"].is_null() && !js["rest_server"]["port"].is_null())
@@ -53,7 +55,7 @@ void Config::load_config(string file_name)
             else
             {
                 string error_msg = file_name + " does not have rest_server.port! \n";
-                LOG_ERROR(error_msg); 
+                //LOG_ERROR(error_msg);
             }   
 
             if (!js["market_cache"].is_null())
@@ -89,24 +91,46 @@ void Config::load_config(string file_name)
             {
                 is_dev_mode_ = js["is_dev_mode"].get<bool>();
             }
+          
+            if (!js["heartbeat_seconds"].is_null())
+            {
+                heartbeat_seconds =  js["heartbeat_seconds"].get<int>();  
+            }
 
-            cout << "is_dev_mode: " << is_dev_mode_ << endl; 
-            cout << "frequency_list_: " << endl;
-            for (auto freq:frequency_list_)
-            {
-                cout << freq << endl;
-            }       
-            cout << "frequency_numb_: " << frequency_numb_ << endl;
-            cout << "frequency_base: " << endl;
-            for (auto freq:frequency_base_list_)
-            {
-                cout << freq << endl;
-            }               
+            std::cout << "\nConfig: \n" + str() << std::endl;
+            // LOG_INFO("\nConfig: \n" + str());
+            
         }
     
     }
     catch(const std::exception& e)
     {
-        std::cerr << "Config::load_config: " << e.what() << '\n';
+        //LOG_ERROR(e.what());
     }
+}
+
+string Config::str()
+{
+try
+    {
+        std::stringstream s_s;
+        s_s << "is_dev_mode: " << is_dev_mode_ << "\n"; 
+        s_s << "frequency_list_: " << "\n";
+        for (auto freq:frequency_list_)
+        {
+            s_s << freq << "\n";
+        }       
+        s_s << "frequency_numb_: " << frequency_numb_ << "\n";
+        s_s << "frequency_base: " << "\n";
+        for (auto freq:frequency_base_list_)
+        {
+            s_s << freq << "\n";
+        }  
+        return s_s.str();
+    }
+    catch(const std::exception& e)
+    {
+//        LOG_ERROR(e.what());
+    }
+
 }

@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 {
     try
     {
+        // LOG;
         setup_signal_handler_callback();
         
         utrade::pandora::io_service_pool engine_pool(4);

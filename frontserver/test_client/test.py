@@ -128,9 +128,9 @@ def sub_btc_usdt(ws, sub_symbol):
 
     # sub_info_str = get_sub_kline_str(sub_symbol)
 
-    sub_info_str = get_sub_depth_str(sub_symbol)
+    # sub_info_str = get_sub_depth_str(sub_symbol)
 
-    # sub_info_str = get_sub_trade_str(sub_symbol)
+    sub_info_str = get_sub_trade_str(sub_symbol)
 
     print("\n\n\n****************************** sub_info_str: %s ****************************" % (sub_info_str))
 
@@ -138,13 +138,13 @@ def sub_btc_usdt(ws, sub_symbol):
 
 def on_open(ws):
     print("\n--------- on_open connected! --------")
-    send_str = get_sub_depth_str(symbol="BTC_USDT")
+    # send_str = get_sub_depth_str(symbol="BTC_USDT")
 
     # send_str = get_sub_kline_str(symbol = "BTC_USDT")
 
-    # send_str = get_sub_trade_str()
+    send_str = get_sub_trade_str()
 
-    ws.send(send_str)
+    # ws.send(send_str)
 
     # time.sleep(5)
 

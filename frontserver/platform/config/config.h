@@ -35,6 +35,8 @@ class Config
         std::set<int>& get_frequency_list() { return frequency_list_;}
         string get_file_name() { return file_name_;}
 
+        string str();
+
     private:
         string                  file_name_;
         string                  hub_address_;

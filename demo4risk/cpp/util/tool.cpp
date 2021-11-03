@@ -40,7 +40,7 @@ void print_quote(const SInnerQuote& quote)
         s_s << "------------- asks info \n";
         for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
         {
-            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
         }
     }
 
@@ -49,7 +49,7 @@ void print_quote(const SInnerQuote& quote)
         s_s << "************* bids info \n";
         for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
         {
-            s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+            s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
         }    
     }
 
@@ -76,13 +76,13 @@ string quote_str(const SInnerQuote& quote, int count)
                 
                 for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }
                 s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
                 i = 0;
                 for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }                    
             }
 
@@ -92,13 +92,13 @@ string quote_str(const SInnerQuote& quote, int count)
                 i = 0;
                 for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }
                 s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
                 i = 0;
                 for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }    
             }          
         }
@@ -109,7 +109,7 @@ string quote_str(const SInnerQuote& quote, int count)
                 s_s << "------------- asks info \n";
                 for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }
             }
 
@@ -118,7 +118,7 @@ string quote_str(const SInnerQuote& quote, int count)
                 s_s << "************* bids info \n";
                 for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
                 {
-                    s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
                 }    
             }
         }

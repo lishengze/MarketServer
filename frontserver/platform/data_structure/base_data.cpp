@@ -1,4 +1,13 @@
 #include "base_data.h"
+#include "../log/log.h"
+#include <iostream>
+
+WebsocketClassThreadSafe::~WebsocketClassThreadSafe()
+{
+    std::cout << "delete " + get_ws_str() + ", id: " + std::to_string(id_) << std::endl;
+    // LOG_DEBUG("delete " + get_ws_str() + ", id: " + std::to_string(id_));
+}
+
 
 string get_comm_type_str(int type)
 {

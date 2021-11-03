@@ -474,7 +474,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_percent / buy_count, buy_total_amounts);
 
     string sell_currency, buy_currency;
-    int sell_count, buy_count;
+    // int sell_count, buy_count;
     if(!getcurrency_from_symbol(src.symbol, sell_currency,  buy_currency))
     {
         LOG_WARN("Get Currency From Symbol: " + src.symbol + " Failed!");
@@ -509,7 +509,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        SDecimal ori_total_volume = depth.total_volume;
+        // SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
@@ -546,7 +546,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        SDecimal ori_total_volume = depth.total_volume;
+        // SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
         
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
@@ -593,7 +593,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     if (src.asks.size() == 0 || src.bids.size() == 0)
     {
-        LOG_DEBUG(s_s.str());
+        // LOG_DEBUG(s_s.str());
     }
 
     if (src.symbol == "BTC_USDT")
@@ -680,22 +680,22 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                 src.bids.erase(price);
             }
         }
-
-
-        if (src.symbol == "BTC_USDT")
-        {
-            LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
-                        + src.symbol + " " + quote_str(src, 8));
-        } 
-
     }
+
+    if (src.symbol == "BTC_USDT")
+    {
+        LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
+                    + src.symbol + " " + quote_str(src, 8));
+    }     
 
     return src;
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
+
+    return src;
 };
 
 SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)

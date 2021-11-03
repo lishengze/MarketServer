@@ -109,24 +109,30 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
-            for(ReqSymbolListDataPtr req_symbol_list:sub_symbol_list_set_)
+            for(ReqSymbolListDataPtr req_ptr:sub_symbol_list_set_)
+            // for(std::set<ReqSymbolListDataPtr>::const_iterator iter = sub_symbol_list_set_.begin(); iter != sub_symbol_list_set_.end(); ++iter)
             {
-                if (!req_symbol_list->websocket_)
+                // ReqSymbolListDataPtr req_ptr = *iter;
+
+                if (!req_ptr->websocket_)
                 {
-                    LOG_WARN("req_symbol_list->websocket_ is null");
-                    invalid_sub_set.emplace(req_symbol_list);
+                    LOG_WARN("req_ptr->websocket_ is null");
+                    invalid_sub_set.emplace(req_ptr);
                     continue;
                 }
 
-                if (!req_symbol_list->websocket_->is_alive())
+                // LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + ", re_count: " + std::to_string(req_ptr->websocket_.use_count()));
+
+                if (!req_ptr->websocket_->is_alive())
                 {
-                    LOG_WARN("req_symbol_list->websocket_ " + req_symbol_list->websocket_->get_ws_str() + " is not alive!");
-                    invalid_sub_set.emplace(req_symbol_list);
+                    // LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + ", re_count: " + std::to_string(req_ptr->websocket_.use_count()));
+                    LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
+                    invalid_sub_set.emplace(req_ptr);
                     continue;                
                 }
 
-                LOG->record_output_info("SymbolLists_" + p_symbol_list->websocket_->get_ws_str());
-                p_symbol_list->websocket_->send(symbol_list_str);
+                LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
+                req_ptr->websocket_->send(symbol_list_str);
             }
 
             for(ReqSymbolListDataPtr invalid_req:invalid_sub_set)
@@ -345,10 +351,14 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 {
     try
     {
+        LOG_DEBUG("0");
         RspTradePtr pRspTradeData = GetField<RspTrade>(package);
+        LOG_DEBUG("1");
 
         if (pRspTradeData)
         {
+            LOG_DEBUG("2");
+
             string trade_data_str = pRspTradeData->get_json_str();
             std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
 
@@ -493,18 +503,18 @@ void FrontServer::response_errmsg_package(PackagePtr package)
     }    
 }
 
-void FrontServer::add_sub_symbol_list(ReqSymbolListDataPtr req_symbol_list)
+void FrontServer::add_sub_symbol_list(ReqSymbolListDataPtr req_ptr)
 {
     try
     {
         std::lock_guard<std::mutex> lk(sub_symbol_list_set_mutex_);
 
-        if (sub_symbol_list_set_.find(req_symbol_list) == sub_symbol_list_set_.end())
+        if (sub_symbol_list_set_.find(req_ptr) == sub_symbol_list_set_.end())
         {
-            sub_symbol_list_set_.emplace(req_symbol_list);
+            sub_symbol_list_set_.emplace(req_ptr);
         }
 
-        LOG_INFO("New ReqSymbolList: " + req_symbol_list->str());
+        LOG_INFO("New ReqSymbolList: " + req_ptr->str());
     }
     catch(const std::exception& e)
     {
