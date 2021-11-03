@@ -710,7 +710,7 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    // if (quote.symbol == "ETH_USDT")
+    // if (quote.symbol == "BTC_USDT")
     // {
     //     LOG_DEBUG("\nOriginal Quote: " + " " 
     //                 + quote.symbol + " " + quote_str(quote, 5));

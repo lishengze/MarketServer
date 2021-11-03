@@ -113,6 +113,11 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     void set_send_heartbeat(unsigned long time) { send_heart_beate_time_ = time;}
     void set_recv_heartbeat(unsigned long time) { recv_heart_beate_time_ = time;}
 
+    string get_heartbeat_str()
+    {
+        string result = "send: " + utrade::pandora::ToSecondStr(send_heart_beate_time_) + ", recv: " + utrade::pandora::ToSecondStr(recv_heart_beate_time_);
+    }
+
     ID_TYPE get_id()
     {
         std::lock_guard<std::mutex> lk(mutex_);

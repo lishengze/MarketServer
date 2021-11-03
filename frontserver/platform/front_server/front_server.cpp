@@ -105,7 +105,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
         {
             string symbol_list_str = p_symbol_list->get_json_str();
 
-            LOG->record_output_info("SymbolLists_" + std::to_string(p_symbol_list->socket_id_));
+            
 
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
@@ -125,6 +125,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                     continue;                
                 }
 
+                LOG->record_output_info("SymbolLists_" + p_symbol_list->websocket_->get_ws_str());
                 p_symbol_list->websocket_->send(symbol_list_str);
             }
 
@@ -178,11 +179,13 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                     if (!req_ptr->websocket_->is_alive())
                     {
                         LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
                         wb_server_->close_ws(req_ptr->websocket_);
                         invalid_req_socket_vec.push_back(socket_id);
                         continue;                
                     }
                     req_ptr->websocket_->send(depth_str);
+                    LOG->record_output_info(pRspRiskCtrledDepthData->simple_str() + ", ws: " + req_ptr->websocket_->get_ws_str());
                 }
 
                 // LOG_INFO("invalid_req_socket_vec.size: " + std::to_string(invalid_req_socket_vec.size()));
@@ -236,14 +239,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         if (p_rsp_kline_data)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
-
-            string type = p_rsp_kline_data->is_update_ ? "_update_":"_init_";
-            LOG->record_output_info("Kline_" + std::to_string(p_rsp_kline_data->socket_id_) 
-                                    + "_" + p_rsp_kline_data->symbol_ + "_"
-                                    + "_fre_" + std::to_string(p_rsp_kline_data->frequency_)
-                                    + type,
-                                    p_rsp_kline_data->kline_data_vec_);  
-            
+                          
             if (p_rsp_kline_data->is_update_)
             {
                 string symbol = p_rsp_kline_data->symbol_;
@@ -270,11 +266,13 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                         if (!req_ptr->websocket_->is_alive())
                         {
                             LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                            LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
                             wb_server_->close_ws(req_ptr->websocket_);
                             invalid_req_socket_vec.push_back(socket_id);
                             continue;                
                         }
                         req_ptr->websocket_->send(kline_data_str);
+                        LOG->record_output_info(p_rsp_kline_data->simple_str() + ", ws: " + req_ptr->websocket_->get_ws_str());
                     }
 
                     for (auto socket_id:invalid_req_socket_vec)
@@ -370,11 +368,13 @@ void FrontServer::response_trade_data_package(PackagePtr package)
                     if (!req_ptr->websocket_->is_alive())
                     {
                         LOG_ERROR("req_ptr->websocket_ "+ req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
                         wb_server_->close_ws(req_ptr->websocket_);
                         invalid_req_socket_vec.push_back(req_ptr);
                         continue;                
                     }
                     req_ptr->websocket_->send(trade_data_str);
+                    LOG->record_output_info(pRspTradeData->simple_str() + ", ws: " + req_ptr->websocket_->get_ws_str());
                 }
 
                 for (auto req_ptr:invalid_req_socket_vec)

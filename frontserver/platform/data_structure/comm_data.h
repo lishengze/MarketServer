@@ -253,6 +253,13 @@ class RspRiskCtrledDepthData:public Socket, virtual public PacakgeBaseData,
             return string("\nRspRiskCtrledDepthData-Info: \n") + Socket::str() + "\n" + get_json_str() + "\n";
         }
 
+        string simple_str()
+        {
+            return string(depth_data_.exchange) + "." + string(depth_data_.symbol) 
+                    + ", ask.size: " + std::to_string(depth_data_.ask_length)
+                    + ", bid.size: " + std::to_string(depth_data_.bid_length);
+        }
+
         SDecimal ask_accumulated_volume_[DEPCH_LEVEL_COUNT];
         SDecimal bid_accumulated_volume_[DEPCH_LEVEL_COUNT];
 
@@ -477,7 +484,7 @@ class ReqKLineData:public Socket, virtual public PacakgeBaseData
     string simple_str()
     {
         std::stringstream req_stream;
-        req_stream << "symbol: " <<  symbol_ << "\n"
+        req_stream << "[depth] symbol: " <<  symbol_ << "\n"
                    << "socket_id: " << socket_id_ << "\n"
                    << "frequency_: " << frequency_ << "\n";
 
@@ -618,6 +625,14 @@ class RspKLineData:public Socket, virtual public PacakgeBaseData
 
             kline_data_vec_.push_back(kline_data);
         }        
+
+        string simple_str()
+        {
+            string type = is_update_? " update ":" init ";
+            return string("[kline] ") + symbol_ + ", " + type 
+                    + ", fre: " + std::to_string(frequency_)  
+                    +", data.size: " + std::to_string(kline_data_vec_.size());
+        }
 
         symbol_type                         symbol_;
         type_tick                           start_time_;
@@ -832,6 +847,17 @@ public:
     string str()
     {
         return string("\nRspTrade-Info: \n") +Socket::str() + "\n" + get_json_str() + "\n";
+    }
+
+    string simple_str()
+    {
+        return string("[trade] ") + symbol_ 
+            + ", price: " + price_.get_str_value()
+            + ", volume: " + volume_.get_str_value()
+            + ", change: " + std::to_string(change_)
+            + ", change_rate_: " + std::to_string(change_rate_)
+            + ", high: " + high_.get_str_value()
+            + ", low: " + low_.get_str_value();
     }
 
     static const long Fid = UT_FID_RspTrade;

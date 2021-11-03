@@ -841,7 +841,7 @@ void WBServer::close_ws(ID_TYPE socket_id)
         }
         else
         {
-            LOG_WARN("socket_id: " + std::to_string(socket_id) + " was not storeddddd!");
+            LOG_WARN("Socket: " + wss_con_map_[socket_id]->get_ws_str()  + ", id: " + std::to_string(socket_id) + " has already been closed!");
         }
     }
     catch(const std::exception& e)
@@ -863,7 +863,7 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
 
         if (wss_con_map_.find(ws_safe->get_id()) == wss_con_map_.end())
         {
-            LOG_WARN("socket_id: " + std::to_string(ws_safe->get_id()) + " was not stored!");
+            LOG_WARN("Socket: " + ws_safe->get_ws_str()  + ", id: " + std::to_string(ws_safe->get_id()) + " has already been closed!");
         }
         else
         {
