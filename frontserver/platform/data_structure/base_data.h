@@ -116,6 +116,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     string get_heartbeat_str()
     {
         string result = "send: " + utrade::pandora::ToSecondStr(send_heart_beate_time_) + ", recv: " + utrade::pandora::ToSecondStr(recv_heart_beate_time_);
+        return result;
     }
 
     ID_TYPE get_id()

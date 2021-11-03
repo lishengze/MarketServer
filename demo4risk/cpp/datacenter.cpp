@@ -211,6 +211,13 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
         {
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
+
+        if (src.symbol == "BTC_USDT")
+        {
+            LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
+                        + src.symbol + " " + quote_str(src, 8));
+        } 
+                    
     }
     catch(const std::exception& e)
     {
@@ -401,6 +408,13 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
   
     }
 
+    if (src.symbol == "BTC_USDT")
+    {
+        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " 
+                    + src.symbol + " " + quote_str(src, 8));
+    } 
+                
+
     return src;
 }
 
@@ -581,7 +595,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     {
         LOG_DEBUG(s_s.str());
     }
-    
+
+    if (src.symbol == "BTC_USDT")
+    {
+        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " 
+                    + src.symbol + " " + quote_str(src, 8));
+    } 
+        
     return src;
 }
 
@@ -661,6 +681,13 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             }
         }
 
+
+        if (src.symbol == "BTC_USDT")
+        {
+            LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
+                        + src.symbol + " " + quote_str(src, 8));
+        } 
+
     }
 
     return src;
@@ -710,11 +737,11 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    // if (quote.symbol == "BTC_USDT")
-    // {
-    //     LOG_DEBUG("\nOriginal Quote: " + " " 
-    //                 + quote.symbol + " " + quote_str(quote, 5));
-    // } 
+    if (quote.symbol == "BTC_USDT")
+    {
+        LOG_DEBUG("\nOriginal Quote: " + " " 
+                    + quote.symbol + " " + quote_str(quote, 8));
+    } 
 
     // check_exchange_volume(quote);
 
