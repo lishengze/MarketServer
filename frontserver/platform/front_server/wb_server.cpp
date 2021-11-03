@@ -664,7 +664,7 @@ void WBServer::check_heartbeat()
                 {
                     ws_vec.push_back(iter.first);
 
-                    LOG_WARN("check_heartbeat socket_id: " + iter.second->get_ws_str() + " lost heartbeat");
+                    LOG_WARN("check_heartbeat " + iter.second->get_ws_str() + " lost heartbeat");
                 }
                 else
                 {
@@ -751,7 +751,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             if (wss_con_map_.find(socket_id) == wss_con_map_.end())
             {
                 stringstream s_obj;
-                s_obj << "ws " << ws << " id: " << socket_id << " was not stored in wss_con_map_!" << "\n";
+                s_obj << "ws " << ws << " id: " << socket_id << " has already been closed!" << "\n";
                 LOG_WARN(s_obj.str());
 
                 data_ptr->set_id(0);
@@ -800,12 +800,12 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
                 wss_con_map_[socket_id]->set_new_business_request(false);
                 wss_con_map_.erase(socket_id);
 
-                s_obj << "clean Socket: " << ws  << "_id: " << socket_id << " successfully!";
+                s_obj << "Socket: " << ws  << ", id: " << socket_id << " successfully!";
                 LOG_CLIENT_REQUEST(s_obj.str());
             }
             else
             {
-                s_obj << "clean Socket: " << ws << "_id: " << socket_id << " Already Cleaned!";
+                s_obj << "Socket: " << ws << ", id: " << socket_id << " has already been closed!";
                 LOG_CLIENT_REQUEST(s_obj.str());
             }
             return socket_id;
@@ -813,7 +813,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
         }
         else
         {
-            s_obj << "clean Socket: " << ws << "_id: " << socket_id << " was not stored!";
+            s_obj << "Socket: " << ws << " has already been closed!";
             LOG_WARN(s_obj.str());
         }
 
