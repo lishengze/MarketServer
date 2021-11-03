@@ -798,6 +798,8 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
             if (wss_con_map_.find(socket_id) != wss_con_map_.end())
             {
                 wss_con_map_[socket_id]->set_new_business_request(false);
+                wss_con_map_[socket_id]->set_recv_heartbeat(0);
+
                 wss_con_map_.erase(socket_id);
 
                 s_obj << "Socket: " << ws  << ", id: " << socket_id << " successfully!";
@@ -860,6 +862,9 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
 
         LOG_WARN("Close: " + ws_safe->get_ws_str());
         ws->close();
+
+        ws_safe->set_new_business_request(false);
+        ws_safe->set_recv_heartbeat(0);
 
         if (wss_con_map_.find(ws_safe->get_id()) == wss_con_map_.end())
         {
