@@ -114,7 +114,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                 if (!req_ptr->websocket_)
                 {
                     LOG_WARN("req_ptr->websocket_ is null");
-                    invalid_sub_set.emplace(req_ptr);
+                    invalid_sub_set.insert(req_ptr);
                     continue;
                 }
 
@@ -123,7 +123,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                     LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
                     LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
                     wb_server_->close_ws(req_ptr->websocket_);
-                    invalid_sub_set.emplace(req_ptr);
+                    invalid_sub_set.insert(req_ptr);
                     continue;                
                 }
 
@@ -580,7 +580,7 @@ void FrontServer::add_sub_trade(ReqTradePtr req_trade_data)
 
         LOG_INFO("New ReqTradeInfo: " + req_trade_data->str());
         sub_trade_socket_map_[req_trade_data->socket_id_] = req_trade_data;
-        sub_updated_trade_map_[req_trade_data->symbol_].emplace(req_trade_data);
+        sub_updated_trade_map_[req_trade_data->symbol_].insert(req_trade_data);
     }
     catch(const std::exception& e)
     {
