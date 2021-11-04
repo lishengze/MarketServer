@@ -396,7 +396,7 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
 
     for( int i = 0 ; i < klines.size() ; i ++ )
     {
-        const KlineData& kline = klines[i];
+        KlineData kline(klines[i]);
 
         std::stringstream stream_obj;
         // if (symbol == "BTC_USDT" && klines.size() < 5)
@@ -409,9 +409,10 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
         //     LOG_DEBUG(stream_obj.str());        
         // }
 
-        PackagePtr package = GetNewKlineDataPackage(kline, ID_MANAGER->get_id());
+        PackagePtr package = CreatePackage<KlineData>(kline);
         if (package)
         {
+            package->prepare_response(UT_FID_KlineData, ID_MANAGER->get_id());
             KlineDataPtr pklineData = GetField<KlineData>(package);
             if (pklineData)
             {
@@ -422,11 +423,8 @@ void DataReceive::handle_kline_data(const char* exchange, const char* c_symbol, 
             {
                 LOG_ERROR("GetField Failed!");
             }
-        }
-        else
-        {
-            LOG_ERROR("GetNewKlineDataPackage Failed!");
-        }
+
+        }   
 
         // if (strcmp(c_symbol, "BTC_USDT") == 0 && resolution == 60)
         // {

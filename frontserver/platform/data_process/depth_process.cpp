@@ -89,7 +89,7 @@ void DepthProces::request_depth_package(PackagePtr package)
                 std::stringstream stream_obj;
                 stream_obj << "[SrcDepth] " << pSDepthData->exchange << " " << pSDepthData->symbol 
                            << " " << pSDepthData->ask_length << " " << pSDepthData->bid_length << "\n";                    
-                LOG_INFO(stream_obj.str());
+                LOG_TRACE(stream_obj.str());
                 
                 // PackagePtr RspRiskCtrledDepthDataPackage = GetNewRspRiskCtrledDepthDataPackage(*pSDepthData, p_req->socket_id_, p_req->socket_type_, ID_MANAGER->get_id());           
 

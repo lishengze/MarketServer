@@ -98,32 +98,39 @@ void DataProcess::handle_request_message(PackagePtr package)
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+        LOG_ERROR(e.what());
     }
 }
 
 void DataProcess::handle_response_message(PackagePtr package)
 {
-    switch (package->Tid())
+    try
     {
-        case UT_FID_SDepthData:
-            response_sdepth_package(package);
-            return;
+        switch (package->Tid())
+        {
+            case UT_FID_SDepthData:
+                response_sdepth_package(package);
+                return;
 
-        case UT_FID_KlineData:
-            response_kline_package(package);
-            return;
+            case UT_FID_KlineData:
+               response_kline_package(package);
+                return;
 
-        case UT_FID_TradeData:
-            response_src_trade_package(package);
-            return;            
+            case UT_FID_TradeData:
+                response_src_trade_package(package);
+                return;            
 
-        default:
-            LOG_WARN("DataProcess::handle_response_message Unknown Package");
-            break;
-    }    
+            default:
+                LOG_WARN("DataProcess::handle_response_message Unknown Package");
+                break;
+        }    
 
-    deliver_response(package);
+        deliver_response(package);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 void DataProcess::request_enquiry_package(PackagePtr package)

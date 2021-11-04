@@ -709,6 +709,9 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         WSData* data_ptr = (WSData*)(ws->getUserData());
         ID_TYPE socket_id = data_ptr->get_id();
 
+        
+        LOG_INFO("store socket_id: " + std::to_string(socket_id));
+
         if (!socket_id)
         {
             socket_id = ID_MANAGER->get_id();
@@ -720,13 +723,11 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         {
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
             ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
-            
+
             ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 
-            std::stringstream s_s;
-            s_s << "store new ws " << ws << " socket_id: " << socket_id;
-            LOG_CLIENT_REQUEST(s_s.str());
+            LOG_CLIENT_REQUEST("store new ws: " + ws_safe->get_ws_str());
         }
         return socket_id;
     }
@@ -858,22 +859,21 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
 {
     try
     {
-        WebsocketClass * ws = ws_safe->get_ws();
-        WSData* data_ptr = (WSData*)(ws->getUserData());
-        data_ptr->set_id(0);
-
-        LOG_WARN("Close: " + ws_safe->get_ws_str());
-        ws->close();
-
-        ws_safe->set_new_business_request(false);
-        ws_safe->set_recv_heartbeat(0);
-
         if (wss_con_map_.find(ws_safe->get_id()) == wss_con_map_.end())
         {
             LOG_WARN("Socket: " + ws_safe->get_ws_str()  + ", id: " + std::to_string(ws_safe->get_id()) + " has already been closed!");
         }
         else
         {
+            WebsocketClass * ws = ws_safe->get_ws();
+            WSData* data_ptr = (WSData*)(ws->getUserData());
+            data_ptr->set_id(0);
+
+            LOG_WARN("Close: " + ws_safe->get_ws_str());
+            ws->close();
+
+            ws_safe->set_new_business_request(false);
+            ws_safe->set_recv_heartbeat(0);            
             wss_con_map_.erase(ws_safe->get_id());
         }              
     }

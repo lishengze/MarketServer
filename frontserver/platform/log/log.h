@@ -48,6 +48,8 @@ class FrontServerLog:public BaseLog
 
         virtual void record_client_info(const string& client_id, const string& info);
 
+        virtual void log_client_request(const string& info);
+
         virtual void log_debug(const string& info);
 };
 

@@ -133,7 +133,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             for(ReqSymbolListDataPtr invalid_req:invalid_sub_set)
             {
-                LOG_INFO("\nErase: \n" + invalid_req->str());
+                LOG_INFO("\nErase: " + invalid_req->str());
                 sub_symbol_list_set_.erase(invalid_req);
             }
 
@@ -194,7 +194,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                 // LOG_INFO("invalid_req_socket_vec.size: " + std::to_string(invalid_req_socket_vec.size()));
                 for (auto socket_id:invalid_req_socket_vec)
                 {
-                    LOG_INFO("\nErase: \n" + cur_sub_depth_map[socket_id]->str());
+                    LOG_INFO("\nErase: " + cur_sub_depth_map[socket_id]->str());
                     cur_sub_depth_map.erase(socket_id);
                 }
 
@@ -215,6 +215,17 @@ void FrontServer::response_depth_data_package(PackagePtr package)
             }
             else
             {
+                bool is_cancel_request = true;
+                PackagePtr package = GetReqRiskCtrledDepthDataPackage(symbol, 0, ID_MANAGER->get_id(), true);
+                if(package)
+                {
+                    deliver_request(package);
+                }
+                else
+                {
+                    LOG_ERROR("CreatePackage<ReqTrade> Failed!");
+                }      
+
                 LOG_WARN("sub_depth_map_ does not sub " + symbol);
             }
         }
@@ -281,7 +292,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
                     for (auto socket_id:invalid_req_socket_vec)
                     {
-                        LOG_INFO("\nErase: \n" + sub_kline_map[socket_id]->str());
+                        LOG_INFO("\nErase: " + sub_kline_map[socket_id]->str());
                         sub_kline_map.erase(socket_id);
                     }
 
@@ -388,7 +399,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 
                 for (auto req_ptr:invalid_req_socket_vec)
                 {
-                    LOG_INFO("\nErase: \n" + req_ptr->str());
+                    LOG_INFO("\nErase: " + req_ptr->str());
                     cur_sub_trade_set.erase(req_ptr);
                 }          
 

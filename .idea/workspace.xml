@@ -11,7 +11,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="" />
+    <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontserver/test_client/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/test_client/test.py" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/frontserver/cmake-build-debug/" />
@@ -26,14 +32,14 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.41028783">
+    <splitter split-orientation="horizontal" split-proportion="0.21686748">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="418">
-                  <caret line="28" column="43" lean-forward="true" selection-start-line="28" selection-start-column="43" selection-end-line="28" selection-end-column="43" />
+                <state relative-caret-position="323">
+                  <caret line="23" column="9" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
                 </state>
               </provider>
             </entry>
@@ -68,7 +74,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="342">
+                <state relative-caret-position="1520">
                   <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
                 </state>
               </provider>
@@ -84,27 +90,9 @@
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$USER_HOME$/Software/log4cplus-2.0.0/src/logger.cxx">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="304">
-                  <caret line="237" selection-start-line="237" selection-end-line="237" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/../utrade_simple/console/component/pandora/log/base_log.cpp">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="350" selection-start-line="350" selection-end-line="350" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/config/config.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="331">
+                <state relative-caret-position="2565">
                   <caret line="135" column="5" selection-start-line="135" selection-start-column="5" selection-end-line="135" selection-end-column="5" />
                   <folding>
                     <element signature="e#0#19#0" expanded="true" />
@@ -116,8 +104,8 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="279">
-                  <caret line="204" column="37" lean-forward="true" selection-start-line="204" selection-start-column="28" selection-end-line="204" selection-end-column="50" />
+                <state relative-caret-position="220">
+                  <caret line="120" selection-start-line="120" selection-end-line="120" />
                   <folding>
                     <element signature="e#0#25#0" expanded="true" />
                   </folding>
@@ -125,11 +113,25 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:24:21_info.log">
+              <provider selected="true" editor-type-id="LogFileEditorProvider">
+                <state relative-caret-position="-618" />
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:28:49_info.log">
+              <provider selected="true" editor-type-id="LogFileEditorProvider">
+                <state relative-caret-position="-1644" />
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-1764">
-                  <caret line="179" column="19" selection-start-line="179" selection-start-column="19" selection-end-line="179" selection-end-column="19" />
+                <state relative-caret-position="3667">
+                  <caret line="193" column="55" selection-start-line="193" selection-start-column="55" selection-end-line="193" selection-end-column="55" />
                 </state>
               </provider>
             </entry>
@@ -137,26 +139,17 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="418" selection-start-line="418" selection-end-line="418" />
+                <state relative-caret-position="144">
+                  <caret line="291" selection-start-line="291" selection-end-line="291" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
+            <entry file="file://$PROJECT_DIR$/demo4hub/cpp/hub_entity.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="155">
-                  <caret line="538" selection-start-line="538" selection-end-line="538" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="88" selection-start-line="88" selection-end-line="88" />
+                <state relative-caret-position="19">
+                  <caret line="137" selection-start-line="137" selection-end-line="137" />
                 </state>
               </provider>
             </entry>
@@ -164,17 +157,26 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/demo4hub/cpp/update_kline.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="19">
+                <state relative-caret-position="395">
                   <caret line="123" selection-start-line="123" selection-end-line="123" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/include/c++/9/bits/basic_string.h">
+            <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="155">
-                  <caret line="322" selection-start-line="322" selection-end-line="322" />
+                <state relative-caret-position="134">
+                  <caret line="88" selection-start-line="88" selection-end-line="88" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="172">
+                  <caret line="540" column="58" lean-forward="true" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
                 </state>
               </provider>
             </entry>
@@ -195,13 +197,13 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/frontserver/platform/util/tools.cpp" />
-        <option value="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h" />
         <option value="$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp" />
         <option value="$PROJECT_DIR$/demo4risk/cpp/datacenter.h" />
         <option value="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" />
         <option value="$PROJECT_DIR$/frontserver/platform/config/config.cpp" />
+        <option value="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" />
       </list>
     </option>
   </component>
@@ -227,6 +229,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -243,12 +246,6 @@
               <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
               <item name="frontserver" type="462c0819:PsiDirectoryNode" />
-              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
-              <item name="frontserver" type="462c0819:PsiDirectoryNode" />
               <item name="platform" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -257,6 +254,14 @@
               <item name="frontserver" type="462c0819:PsiDirectoryNode" />
               <item name="platform" type="462c0819:PsiDirectoryNode" />
               <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bcts_quote" type="462c0819:PsiDirectoryNode" />
+              <item name="frontserver" type="462c0819:PsiDirectoryNode" />
+              <item name="platform" type="462c0819:PsiDirectoryNode" />
+              <item name="cmake-build-debug" type="462c0819:PsiDirectoryNode" />
+              <item name="front_server_log" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="FrontServer" type="b2602c69:ProjectViewProjectNode" />
@@ -269,7 +274,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -321,11 +325,13 @@
       <workItem from="1635930408323" duration="765000" />
       <workItem from="1635931268087" duration="133000" />
       <workItem from="1635933189290" duration="5815000" />
+      <workItem from="1636014615519" duration="735000" />
+      <workItem from="1636019612665" duration="2287000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22804000" />
+    <option name="totallyTimeSpent" value="25826000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -337,23 +343,23 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
+    <frame x="0" y="27" width="1920" height="945" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.499187" visible="true" weight="0.21024546" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.499187" visible="true" weight="0.15848452" />
       <window_info id="Structure" order="1" sideWeight="0.500813" side_tool="true" weight="0.13607258" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32963374" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39847162" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39727724" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3286026" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
-      <window_info anchor="bottom" id="Messages" order="8" weight="0.3286026" />
+      <window_info anchor="bottom" id="Messages" order="8" weight="0.3279703" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32962587" />
-      <window_info anchor="bottom" id="Terminal" order="10" weight="0.3286026" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.3279703" />
       <window_info anchor="bottom" id="Version Control" order="11" />
       <window_info anchor="bottom" id="CMake" order="12" weight="0.3286026" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -370,51 +376,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp</url>
-          <line>111</line>
+          <line>113</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/frontserver/include/uWebsockets/HttpParser.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="62" column="35" lean-forward="true" selection-start-line="62" selection-start-column="35" selection-end-line="62" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/rest_server.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4032">
-          <caret line="226" column="46" selection-start-line="226" selection-start-column="46" selection-end-line="226" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/component/pandora/package/package.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3708">
-          <caret line="206" selection-start-line="206" selection-end-line="206" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/9/bits/stl_map.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3672">
-          <caret line="204" column="6" selection-start-line="204" selection-start-column="6" selection-end-line="204" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/9/ostream">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="169" selection-start-line="169" selection-end-line="169" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/c++/9/new">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="169">
@@ -527,41 +495,16 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_info.log">
-      <provider editor-type-id="text-editor">
-        <state relative-caret-position="171">
-          <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
       <provider selected="true" editor-type-id="LogFileEditorProvider">
         <state relative-caret-position="171">
           <caret line="9" selection-start-line="9" selection-end-line="9" />
         </state>
       </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/9/bits/stl_tree.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5719">
-          <caret line="301" selection-start-line="301" selection-end-line="301" />
+      <provider editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="14649">
-          <caret line="771" selection-start-line="771" selection-end-line="771" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/data_struct/data_struct.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8189">
-          <caret line="431" selection-start-line="431" selection-end-line="431" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_request.log">
-      <provider editor-type-id="text-editor" />
-      <provider selected="true" editor-type-id="LogFileEditorProvider" />
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/wb_server.cpp">
       <provider selected="true" editor-type-id="text-editor">
@@ -570,20 +513,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-03_10:00:00_debug.log">
-      <provider selected="true" editor-type-id="LogFileEditorProvider" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-03_10:00:00_debug.log" />
     <entry file="file://$PROJECT_DIR$/frontserver/platform/front_server/front_server.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="463">
           <caret line="59" column="4" selection-start-line="59" selection-start-column="4" selection-end-line="59" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
         </state>
       </provider>
     </entry>
@@ -615,13 +549,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/config.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="399">
-          <caret line="21" column="26" selection-start-line="21" selection-start-column="26" selection-end-line="21" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/c++/9/ext/new_allocator.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="155">
@@ -636,23 +563,62 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="23" column="9" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/bits/stl_tree.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5719">
+          <caret line="301" selection-start-line="301" selection-end-line="301" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="14649">
+          <caret line="771" selection-start-line="771" selection-end-line="771" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/data_struct/data_struct.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8189">
+          <caret line="431" selection-start-line="431" selection-end-line="431" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/datacenter.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1520">
+          <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/log/2021-08-26 11:31:47_demo4risk_client_request.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider" />
+      <provider editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$USER_HOME$/Software/log4cplus-2.0.0/src/logger.cxx">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
+        <state relative-caret-position="4503">
           <caret line="237" selection-start-line="237" selection-end-line="237" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/../utrade_simple/console/component/pandora/log/base_log.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
+        <state relative-caret-position="6650">
           <caret line="350" selection-start-line="350" selection-end-line="350" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/config/config.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
+        <state relative-caret-position="2565">
           <caret line="135" column="5" selection-start-line="135" selection-start-column="5" selection-end-line="135" selection-end-column="5" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
@@ -660,62 +626,105 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/demo4hub/cpp/update_kline.h">
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="123" selection-start-line="123" selection-end-line="123" />
+        <state relative-caret-position="3667">
+          <caret line="193" column="55" selection-start-line="193" selection-start-column="55" selection-end-line="193" selection-end-column="55" />
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_09:57:16_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="-557">
+          <caret line="55" column="24" lean-forward="true" selection-start-line="55" selection-start-column="24" selection-end-line="55" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" column="6" lean-forward="true" selection-start-line="13" selection-start-column="6" selection-end-line="13" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:00:48_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="-442">
+          <caret line="96" lean-forward="true" selection-start-line="96" selection-end-line="96" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:09:30_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="294">
+          <caret line="48" column="94" lean-forward="true" selection-start-line="48" selection-start-column="94" selection-end-line="48" selection-end-column="94" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:13:09_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="-2854" />
       </provider>
     </entry>
     <entry file="file:///usr/include/c++/9/bits/basic_string.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
+        <state relative-caret-position="395">
           <caret line="322" selection-start-line="322" selection-end-line="322" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+    <entry file="file://$PROJECT_DIR$/demo4hub/cpp/update_kline.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="28" column="43" lean-forward="true" selection-start-line="28" selection-start-column="43" selection-end-line="28" selection-end-column="43" />
+        <state relative-caret-position="395">
+          <caret line="123" selection-start-line="123" selection-end-line="123" />
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="88" selection-start-line="88" selection-end-line="88" />
-        </state>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:24:21_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="-618" />
       </provider>
     </entry>
-    <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="155">
-          <caret line="538" selection-start-line="538" selection-end-line="538" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="418" selection-start-line="418" selection-end-line="418" />
-        </state>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/cmake-build-debug/front_server_log/2021-11-04_10:28:49_info.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider">
+        <state relative-caret-position="-1644" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="204" column="37" lean-forward="true" selection-start-line="204" selection-start-column="28" selection-end-line="204" selection-end-column="50" />
+        <state relative-caret-position="220">
+          <caret line="120" selection-start-line="120" selection-end-line="120" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp">
+    <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1764">
-          <caret line="179" column="19" selection-start-line="179" selection-start-column="19" selection-end-line="179" selection-end-column="19" />
+        <state relative-caret-position="134">
+          <caret line="88" selection-start-line="88" selection-end-line="88" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/demo4hub/cpp/hub_entity.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="137" selection-start-line="137" selection-end-line="137" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="291" selection-start-line="291" selection-end-line="291" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="540" column="58" lean-forward="true" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
         </state>
       </provider>
     </entry>

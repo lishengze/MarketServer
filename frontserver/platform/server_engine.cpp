@@ -29,13 +29,51 @@ void ServerEngine::release()
     front_server_->release();
 }
 
+string get_signum_str(int signum)
+{
+    string result ="unknown signum: " + std::to_string(signum);
+
+    switch (signum)
+    {
+        case SIGTERM:
+            result = "SIGTERM";
+            break;
+        case SIGINT:
+            result = "SIGINT";
+            break;
+
+        case SIGHUP:
+            result = "SIGHUP";
+            break;
+
+        case SIGQUIT:
+            result = "SIGQUIT";
+            break;
+
+        case SIGKILL:
+            result = "SIGKILL";
+            break;
+        case SIGABRT:
+            result = "SIGABRT";
+            break;
+        case SIGSEGV:
+            result = "SIGSEGV";
+            break;                                            
+        default:
+            break;
+    }
+    return result;
+}
+
 void ServerEngine::signal_handler(int signum)
 {
 //    UT_LOG_INFO(WORMHOLE_LOGGER, "[ServerEngine], signal_handler " << signum);
-    printf("\n[ServerEngine], signal_handler:%d \n", signum);
+    // printf("\n[ServerEngine], signal_handler:%d \n", signum);
+
+    LOG_ERROR("[ServerEngine], signal_handler: " + get_signum_str(signum));
     signal_sys = signum;
     // 释放资源
     SERVER_EENGINE->release();
     // 退出
-    exit(0);
+    exit(-1);
 }

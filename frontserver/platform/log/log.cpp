@@ -245,6 +245,17 @@ void FrontServerLog::record_client_info(const string& client_id, const string& i
     }    
 }
 
+void FrontServerLog::log_client_request(const string& info)
+{
+    try
+    {
+        LOG4CPLUS_INFO(*client_request_logger_.get(), info);        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+    }    
+}
 
 void FrontServerLog::log_debug(const string& info)
 {

@@ -10,7 +10,6 @@
 #include <sstream>
 #include "../config/config.h"
 
-
 enum class COMM_TYPE {
     HTTP = 0,
     HTTPS,
@@ -114,8 +113,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     }
 
     void set_send_heartbeat(unsigned long time) { send_heart_beate_time_ = time;}
-    void set_recv_heartbeat(unsigned long time) { recv_heart_beate_time_ = time;}
-
+    void set_recv_heartbeat(unsigned long time) ;
     string get_heartbeat_str()
     {
         // string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
@@ -137,7 +135,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     string get_ws_str()
     {
         std::stringstream s_s;
-        s_s << ws_;
+        s_s << ws_ << "_id_" << id_;
         return s_s.str();
     }
 
