@@ -710,7 +710,7 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         ID_TYPE socket_id = data_ptr->get_id();
 
         
-        LOG_INFO("store socket_id: " + std::to_string(socket_id));
+        LOG_INFO("store original socket_id: " + std::to_string(socket_id));
 
         if (!socket_id)
         {
@@ -727,6 +727,7 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
             ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 
+            LOG_INFO("store new ws: " + ws_safe->get_ws_str());
             LOG_CLIENT_REQUEST("store new ws: " + ws_safe->get_ws_str());
         }
         return socket_id;
