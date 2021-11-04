@@ -719,6 +719,8 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
         if (wss_con_map_.find(socket_id) == wss_con_map_.end())
         {
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
+            ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
+            
             ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 

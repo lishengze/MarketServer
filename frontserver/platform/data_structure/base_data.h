@@ -104,7 +104,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     bool is_alive() {
         std::lock_guard<std::mutex> lk(mutex_);
-        return fabs(recv_heart_beate_time_ - send_heart_beate_time_) < CONFIG->get_heartbeat_secs() || new_business_request_;
+        return fabs(utrade::pandora::NanoTime() - send_heart_beate_time_) < CONFIG->get_heartbeat_secs() || new_business_request_;
     }
 
     void set_new_business_request(bool value)
@@ -118,10 +118,11 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     string get_heartbeat_str()
     {
-        string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
+        // string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
+        string send_str = utrade::pandora::NanoTimeStr();
         string recv_str = recv_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(recv_heart_beate_time_) : "0";
 
-        string result = "send: " + send_str + ", recv: " + recv_str;
+        string result = "curr: " + send_str  + ", heartbeat: " + recv_str;
         return result;
     }
 
