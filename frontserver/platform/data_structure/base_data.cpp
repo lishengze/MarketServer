@@ -11,7 +11,7 @@ WebsocketClassThreadSafe::~WebsocketClassThreadSafe()
 void WebsocketClassThreadSafe::set_recv_heartbeat(unsigned long time) 
 {        
     recv_heart_beate_time_ = time;
-    LOG_INFO(get_ws_str() + " set_recv_heartbeat " + std::to_string(recv_heart_beate_time_)); 
+    // LOG_INFO(get_ws_str() + " set_recv_heartbeat " + std::to_string(recv_heart_beate_time_)); 
 }
 
 string get_comm_type_str(int type)
