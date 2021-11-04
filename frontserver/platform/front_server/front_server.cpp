@@ -105,15 +105,10 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
         {
             string symbol_list_str = p_symbol_list->get_json_str();
 
-            
-
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
             for(ReqSymbolListDataPtr req_ptr:sub_symbol_list_set_)
-            // for(std::set<ReqSymbolListDataPtr>::const_iterator iter = sub_symbol_list_set_.begin(); iter != sub_symbol_list_set_.end(); ++iter)
             {
-                // ReqSymbolListDataPtr req_ptr = *iter;
-
                 if (!req_ptr->websocket_)
                 {
                     LOG_WARN("req_ptr->websocket_ is null");
@@ -121,11 +116,8 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                     continue;
                 }
 
-                // LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + ", re_count: " + std::to_string(req_ptr->websocket_.use_count()));
-
                 if (!req_ptr->websocket_->is_alive())
                 {
-                    // LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + ", re_count: " + std::to_string(req_ptr->websocket_.use_count()));
                     LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
                     invalid_sub_set.emplace(req_ptr);
                     continue;                

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include "pandora/util/json.hpp"
+#include "../log/log.h"
 
 void Config::load_config(string file_name)
 {
@@ -11,11 +12,11 @@ void Config::load_config(string file_name)
 
         std::ifstream in_config(file_name);
 
-        // LOG_INFO("Config::load_config " + file_name );
+        LOG_INFO("Config::load_config " + file_name );
 
         if (!in_config.is_open())
         {
-            // LOG_WARN("Failed to Open: " + file_name);
+            LOG_WARN("Failed to Open: " + file_name);
         }
         else
         {
@@ -23,7 +24,7 @@ void Config::load_config(string file_name)
 
             // s_s << contents << "\n";
 
-            //LOG_INFO(contents);
+            LOG_INFO(contents);
 
             nlohmann::json js = nlohmann::json::parse(contents);
             
@@ -35,7 +36,7 @@ void Config::load_config(string file_name)
             {
                 string error_msg = file_name + " does not have hub.addr! \n";
                 // s_s << error_msg << "\n"; 
-               // LOG_ERROR(error_msg);
+               LOG_ERROR(error_msg);
             }
 
             if (!js["ws_server"].is_null() && !js["ws_server"]["port"].is_null())
@@ -45,7 +46,7 @@ void Config::load_config(string file_name)
             else
             {
                 string error_msg = file_name + " does not have ws_server.port! \n";
-                //LOG_ERROR(error_msg);
+                LOG_ERROR(error_msg);
             }
 
             if (!js["rest_server"].is_null() && !js["rest_server"]["port"].is_null())
@@ -55,7 +56,7 @@ void Config::load_config(string file_name)
             else
             {
                 string error_msg = file_name + " does not have rest_server.port! \n";
-                //LOG_ERROR(error_msg);
+                LOG_ERROR(error_msg);
             }   
 
             if (!js["market_cache"].is_null())
@@ -97,15 +98,15 @@ void Config::load_config(string file_name)
                 heartbeat_seconds =  js["heartbeat_seconds"].get<int>();  
             }
 
-            std::cout << "\nConfig: \n" + str() << std::endl;
-            // LOG_INFO("\nConfig: \n" + str());
+            // std::cout << "\nConfig: \n" + str() << std::endl;
+            LOG_INFO("\nConfig: \n" + str());
             
         }
     
     }
     catch(const std::exception& e)
     {
-        //LOG_ERROR(e.what());
+        LOG_ERROR(e.what());
     }
 }
 
@@ -126,11 +127,12 @@ try
         {
             s_s << freq << "\n";
         }  
+        s_s << "heartbeat_seconds: " << heartbeat_seconds <<"\n";
         return s_s.str();
     }
     catch(const std::exception& e)
     {
-//        LOG_ERROR(e.what());
+       LOG_ERROR(e.what());
     }
 
 }

@@ -15,13 +15,32 @@ void setup_signal_handler_callback()
     signal(SIGSEGV, ServerEngine::signal_handler);
 }
 
+
+void init_log(char** argv)
+{
+    string program_full_name = argv[0];
+
+    string work_dir = utrade::pandora::get_work_dir_name (program_full_name);
+    string program_name = utrade::pandora::get_program_name(program_full_name);
+
+    cout << "program_full_name: " << program_full_name << "\n"
+            << "work_dir: " << work_dir << "\n"
+            << "program_name: " << program_name << "\n"
+            << endl;
+
+    LOG->set_work_dir(work_dir);
+    LOG->set_program_name(program_name);
+    LOG->start();   
+}
+
 int main(int argc, char** argv)
 {
     try
     {
-        // LOG;
         setup_signal_handler_callback();
         
+        init_log(argv);
+
         utrade::pandora::io_service_pool engine_pool(4);
 
         string config_file_name = "config.json";
@@ -31,21 +50,7 @@ int main(int argc, char** argv)
             cout << "config_file_name: " << config_file_name << endl;
         }
         CONFIG->load_config(config_file_name);
-
-        string program_full_name = argv[0];
-
-        string work_dir = utrade::pandora::get_work_dir_name (program_full_name);
-        string program_name = utrade::pandora::get_program_name(program_full_name);
-
-        cout << "program_full_name: " << program_full_name << "\n"
-            << "work_dir: " << work_dir << "\n"
-            << "program_name: " << program_name << "\n"
-            << endl;
-
-        LOG->set_work_dir(work_dir);
-        LOG->set_program_name(program_name);
-        LOG->start();        
-
+    
         utrade::pandora::ThreadSafeSingleton<ServerEngine>::DoubleCheckInstance(engine_pool);
 
         // start pool
