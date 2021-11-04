@@ -511,9 +511,8 @@ void FrontServer::add_sub_symbol_list(ReqSymbolListDataPtr req_ptr)
 
         if (sub_symbol_list_set_.find(req_ptr) == sub_symbol_list_set_.end())
         {
-            sub_symbol_list_set_.emplace(req_ptr);
+            sub_symbol_list_set_.insert(req_ptr);
         }
-
         LOG_INFO("New ReqSymbolList: " + req_ptr->str());
     }
     catch(const std::exception& e)

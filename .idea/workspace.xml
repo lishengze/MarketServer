@@ -11,11 +11,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/base_data.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/base_data.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_structure/base_data.h" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_structure/base_data.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/demo4risk/cpp/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/frontserver/cmake-build-debug/" />
@@ -36,8 +32,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="551">
-                  <caret line="35" column="40" selection-start-line="35" selection-start-column="40" selection-end-line="35" selection-end-column="40" />
+                <state relative-caret-position="418">
+                  <caret line="28" column="43" lean-forward="true" selection-start-line="28" selection-start-column="43" selection-end-line="28" selection-end-column="43" />
                 </state>
               </provider>
             </entry>
@@ -117,14 +113,23 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="269">
-                  <caret line="113" column="44" selection-start-line="113" selection-start-column="44" selection-end-line="113" selection-end-column="44" />
+                <state relative-caret-position="279">
+                  <caret line="204" column="37" lean-forward="true" selection-start-line="204" selection-start-column="28" selection-end-line="204" selection-end-column="50" />
                   <folding>
                     <element signature="e#0#25#0" expanded="true" />
                   </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-1764">
+                  <caret line="179" column="19" selection-start-line="179" selection-start-column="19" selection-end-line="179" selection-end-column="19" />
                 </state>
               </provider>
             </entry>
@@ -141,8 +146,17 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
+                <state relative-caret-position="155">
                   <caret line="538" selection-start-line="538" selection-end-line="538" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="165">
+                  <caret line="88" selection-start-line="88" selection-end-line="88" />
                 </state>
               </provider>
             </entry>
@@ -152,24 +166,6 @@
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="19">
                   <caret line="123" selection-start-line="123" selection-end-line="123" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/include/c++/9/ext/new_allocator.h">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="155">
-                  <caret line="88" selection-start-line="88" selection-end-line="88" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file:///usr/include/c++/9/bits/stl_iterator.h">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="165">
-                  <caret line="826" selection-start-line="826" selection-end-line="826" />
                 </state>
               </provider>
             </entry>
@@ -324,12 +320,12 @@
       <workItem from="1634193593426" duration="2723000" />
       <workItem from="1635930408323" duration="765000" />
       <workItem from="1635931268087" duration="133000" />
-      <workItem from="1635933189290" duration="4095000" />
+      <workItem from="1635933189290" duration="5815000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21084000" />
+    <option name="totallyTimeSpent" value="22804000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -671,20 +667,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="418" selection-start-line="418" selection-end-line="418" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="538" selection-start-line="538" selection-end-line="538" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/c++/9/bits/basic_string.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="155">
@@ -692,20 +674,48 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="28" column="43" lean-forward="true" selection-start-line="28" selection-start-column="43" selection-end-line="28" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/boost_1_68/include/boost/smart_ptr/detail/sp_counted_base_std_atomic.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="88" selection-start-line="88" selection-end-line="88" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="155">
+          <caret line="538" selection-start-line="538" selection-end-line="538" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="418" selection-start-line="418" selection-end-line="418" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="269">
-          <caret line="113" column="44" selection-start-line="113" selection-start-column="44" selection-end-line="113" selection-end-column="44" />
+        <state relative-caret-position="279">
+          <caret line="204" column="37" lean-forward="true" selection-start-line="204" selection-start-column="28" selection-end-line="204" selection-end-column="50" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_structure/comm_data.h">
+    <entry file="file://$PROJECT_DIR$/frontserver/platform/data_process/kline_process.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="35" column="40" selection-start-line="35" selection-start-column="40" selection-end-line="35" selection-end-column="40" />
+        <state relative-caret-position="-1764">
+          <caret line="179" column="19" selection-start-line="179" selection-start-column="19" selection-end-line="179" selection-end-column="19" />
         </state>
       </provider>
     </entry>
