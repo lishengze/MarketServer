@@ -218,6 +218,7 @@ void DepthProces::response_new_symbol(string symbol)
             std::set<string> symbols{symbol};
 
             PackagePtr package_new = CreatePackage<RspSymbolListData>(symbols);
+            
             if (package_new)
             {
                 package_new->prepare_response(UT_FID_RspSymbolListData, ID_MANAGER->get_id());

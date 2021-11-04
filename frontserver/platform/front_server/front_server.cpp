@@ -105,6 +105,8 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
         {
             string symbol_list_str = p_symbol_list->get_json_str();
 
+            // LOG_INFO(symbol_list_str);
+
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
             for(ReqSymbolListDataPtr req_ptr:sub_symbol_list_set_)
@@ -131,6 +133,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             for(ReqSymbolListDataPtr invalid_req:invalid_sub_set)
             {
+                LOG_INFO("\nErase: \n" + invalid_req->str());
                 sub_symbol_list_set_.erase(invalid_req);
             }
 
@@ -191,6 +194,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                 // LOG_INFO("invalid_req_socket_vec.size: " + std::to_string(invalid_req_socket_vec.size()));
                 for (auto socket_id:invalid_req_socket_vec)
                 {
+                    LOG_INFO("\nErase: \n" + cur_sub_depth_map[socket_id]->str());
                     cur_sub_depth_map.erase(socket_id);
                 }
 
@@ -277,6 +281,7 @@ void FrontServer::response_kline_data_package(PackagePtr package)
 
                     for (auto socket_id:invalid_req_socket_vec)
                     {
+                        LOG_INFO("\nErase: \n" + sub_kline_map[socket_id]->str());
                         sub_kline_map.erase(socket_id);
                     }
 
@@ -383,6 +388,7 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 
                 for (auto req_ptr:invalid_req_socket_vec)
                 {
+                    LOG_INFO("\nErase: \n" + req_ptr->str());
                     cur_sub_trade_set.erase(req_ptr);
                 }          
 

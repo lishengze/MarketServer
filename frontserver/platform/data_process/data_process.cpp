@@ -67,7 +67,7 @@ void DataProcess::handle_request_message(PackagePtr package)
 {
     try
     {
-        LOG_DEBUG(string("DataProcess::handle_request_message: ") + get_package_str(package->Tid()));
+        // LOG_DEBUG(string("DataProcess::handle_request_message: ") + get_package_str(package->Tid()));
 
         switch (package->Tid())
         {

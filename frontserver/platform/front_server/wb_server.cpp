@@ -802,7 +802,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
 
                 wss_con_map_.erase(socket_id);
 
-                s_obj << "Socket: " << ws  << ", id: " << socket_id << " successfully!";
+                s_obj << "Clean Socket: " << ws  << ", id: " << socket_id << " successfully!";
                 LOG_CLIENT_REQUEST(s_obj.str());
             }
             else
