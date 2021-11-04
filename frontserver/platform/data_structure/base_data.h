@@ -118,7 +118,10 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     string get_heartbeat_str()
     {
-        string result = "send: " + utrade::pandora::ToSecondStr(send_heart_beate_time_) + ", recv: " + utrade::pandora::ToSecondStr(recv_heart_beate_time_);
+        string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
+        string recv_str = recv_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(recv_heart_beate_time_) : "0";
+
+        string result = "send: " + send_str + ", recv: " + recv_str;
         return result;
     }
 

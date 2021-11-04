@@ -4,8 +4,8 @@
 
 WebsocketClassThreadSafe::~WebsocketClassThreadSafe()
 {
-    std::cout << "delete " + get_ws_str() + ", id: " + std::to_string(id_) << std::endl;
-    // LOG_DEBUG("delete " + get_ws_str() + ", id: " + std::to_string(id_));
+    // std::cout << "delete " + get_ws_str() + ", id: " + std::to_string(id_) << std::endl;
+    LOG_DEBUG("delete " + get_ws_str() + ", id: " + std::to_string(id_));
 }
 
 

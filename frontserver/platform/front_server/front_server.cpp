@@ -119,6 +119,8 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                 if (!req_ptr->websocket_->is_alive())
                 {
                     LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
+                    LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
+                    wb_server_->close_ws(req_ptr->websocket_);
                     invalid_sub_set.emplace(req_ptr);
                     continue;                
                 }
@@ -343,13 +345,13 @@ void FrontServer::response_trade_data_package(PackagePtr package)
 {
     try
     {
-        LOG_DEBUG("0");
+        // LOG_DEBUG("0");
         RspTradePtr pRspTradeData = GetField<RspTrade>(package);
-        LOG_DEBUG("1");
+        // LOG_DEBUG("1");
 
         if (pRspTradeData)
         {
-            LOG_DEBUG("2");
+            // LOG_DEBUG("2");
 
             string trade_data_str = pRspTradeData->get_json_str();
             std::lock_guard<std::mutex> lk(sub_trade_map_update_mutex_);
