@@ -631,7 +631,7 @@ void WBServer::heartbeat_run()
     {
         while(true)
         {
-            std::this_thread::sleep_for(std::chrono::seconds(CONFIG->get_heartbeat_secs()));
+            std::this_thread::sleep_for(std::chrono::seconds(CONFIG->get_heartbeat_secs()-2));
 
             check_heartbeat();
         }
@@ -763,6 +763,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             else
             {
                 wss_con_map_[socket_id]->set_new_business_request(true);
+                wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
             }
         }
         else

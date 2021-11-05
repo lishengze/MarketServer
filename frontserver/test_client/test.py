@@ -117,8 +117,7 @@ def get_sub_kline_str(symbol="BTC_USDT"):
     return sub_info_str
 
 def sub_btc_usdt(ws, sub_symbol):
-    time.sleep(5)
-
+    
     # sub_info = {
     #     "type":"sub_symbol",
     #     "symbol":[sub_symbol]
@@ -129,6 +128,24 @@ def sub_btc_usdt(ws, sub_symbol):
     # sub_info_str = get_sub_kline_str(sub_symbol)
 
     sub_info_str = get_sub_depth_str(sub_symbol)
+
+    # sub_info_str = get_sub_trade_str(sub_symbol)
+
+    print("\n\n\n****************************** sub_info_str: %s ****************************" % (sub_info_str))
+
+    ws.send(sub_info_str)   
+
+def sub_kline(ws, sub_symbol):
+    # sub_info = {
+    #     "type":"sub_symbol",
+    #     "symbol":[sub_symbol]
+    # }
+    # sub_info_str = json.dumps(sub_info)
+    # print("sub_info_str: %s" % (sub_info_str))
+
+    sub_info_str = get_sub_kline_str(sub_symbol)
+
+    # sub_info_str = get_sub_depth_str(sub_symbol)
 
     # sub_info_str = get_sub_trade_str(sub_symbol)
 
@@ -156,7 +173,11 @@ def on_open(ws):
 
     # ws.send(send_str)
 
+    time.sleep(3)
     _thread.start_new_thread(sub_btc_usdt, (ws, "ETH_USDT", ) )
+
+    time.sleep(3)
+    _thread.start_new_thread(sub_kline, (ws, "ETH_USDT", ) )
 
 def test_websocket():
     # websocket.enableTrace(True)

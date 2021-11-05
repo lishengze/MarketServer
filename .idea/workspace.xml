@@ -12,10 +12,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2133c5ed-14dd-4aa7-bde4-5c2c2b92e6b8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_process/data_process.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/data_receive/data_receive.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/platform/front_server/front_server.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontserver/test_client/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/frontserver/test_client/test.py" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/frontserver/platform/cmake-build-debug/" />
@@ -176,7 +172,7 @@
             <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="172">
-                  <caret line="540" column="58" lean-forward="true" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
+                  <caret line="540" column="58" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
                 </state>
               </provider>
             </entry>
@@ -326,12 +322,12 @@
       <workItem from="1635931268087" duration="133000" />
       <workItem from="1635933189290" duration="5815000" />
       <workItem from="1636014615519" duration="735000" />
-      <workItem from="1636019612665" duration="2287000" />
+      <workItem from="1636019612665" duration="2884000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="25826000" />
+    <option name="totallyTimeSpent" value="26423000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -343,8 +339,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="27" width="1920" height="945" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="27" width="1920" height="1053" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.499187" visible="true" weight="0.15848452" />
       <window_info id="Structure" order="1" sideWeight="0.500813" side_tool="true" weight="0.13607258" />
@@ -352,7 +347,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32963374" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39727724" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39727724" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3286026" />
@@ -724,7 +719,7 @@
     <entry file="file:///usr/include/c++/9/bits/atomic_base.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="172">
-          <caret line="540" column="58" lean-forward="true" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
+          <caret line="540" column="58" selection-start-line="540" selection-start-column="58" selection-end-line="540" selection-end-column="58" />
         </state>
       </provider>
     </entry>
