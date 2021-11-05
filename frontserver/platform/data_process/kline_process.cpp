@@ -1166,7 +1166,9 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
                 LOG_DEBUG("\ntrade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
                 + ", trade.low: " + curTradeDataPtr->low_.get_str_value() + ", trade.lt: " + get_sec_time_str(low_time)
                 + "\nkline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_)
-                + ", kline.low: " + cur_time_data.low_.get_str_value()+ ", kline.lt: " + get_sec_time_str(cur_time_data.low_time_));
+                + ", kline.low: " + cur_time_data.low_.get_str_value()+ ", kline.lt: " + get_sec_time_str(cur_time_data.low_time_)
+                + "\ncur_price: " + curTradeDataPtr->price_.get_str_value() + ", ct: " + get_sec_time_str(curTradeDataPtr->time_)
+                + ", start_price: " + cur_time_data.start_price_.get_str_value() + ", st: " + get_sec_time_str(cur_time_data.ori_data_.begin()->first));
             }
         }
     }
