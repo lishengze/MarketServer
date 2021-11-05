@@ -128,6 +128,10 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
     }
 
     unsigned long get_recv_heart_beate_time() { return recv_heart_beate_time_;}
+    string get_recv_heart_beate_time_str() 
+    {
+        return utrade::pandora::ToSecondStr(recv_heart_beate_time_);
+    }
 
     ID_TYPE get_id()
     {

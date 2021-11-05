@@ -764,7 +764,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             {
                 wss_con_map_[socket_id]->set_new_business_request(true);
                 wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
-                LOG_INFO("heartbeat_time: " + std::to_string(wss_con_map_[socket_id]->get_recv_heart_beate_time()));
+                LOG_INFO("heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
             }
         }
         else
