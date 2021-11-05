@@ -120,8 +120,10 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
         // string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
         string send_str = utrade::pandora::NanoTimeStr();
         string recv_str = recv_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(recv_heart_beate_time_) : "0";
+        double delta_secs = double(fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_)) / 1000000000.0;
+        string delta_str = recv_heart_beate_time_ > 0 ?  string(", delta_secs: ") + std::to_string(delta_secs) : "";
 
-        string result = "curr: " + send_str  + ", heartbeat: " + recv_str;
+        string result = "curr: " + send_str  + ", heartbeat: " + recv_str +  delta_str;
         return result;
     }
 
