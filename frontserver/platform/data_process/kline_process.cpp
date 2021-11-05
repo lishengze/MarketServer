@@ -64,7 +64,7 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                 {
                     ori_data_[curr_time] = kline_data;
 
-                    if (curr_time - first_time > last_secs_ + frequency_)
+                    if (curr_time - first_time >= last_secs_)
                     {
                         ori_data_.erase(first_time);
                     }
