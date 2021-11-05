@@ -221,7 +221,7 @@ string RspTrade::get_json_str()
     json_data["price"] = price_.get_str_value();
     json_data["volume"] = volume_.get_str_value(); 
     json_data["change"] = simplize_string(std::to_string(change_));
-    json_data["change_rate"] = simplize_string(set_double_string_scale(std::to_string(change_rate_), PERSENT_DOT_NUMB)); 
+    json_data["change_rate"] = std::to_string(change_rate_); 
     json_data["high"] = high_.get_str_value();
     json_data["low"] = low_.get_str_value();
 
