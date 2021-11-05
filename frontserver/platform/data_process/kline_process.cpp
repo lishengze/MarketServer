@@ -82,7 +82,8 @@ void TimeKlineData::update(KlineDataPtr kline_data)
 
                 if ("BTC_USDT" == string(kline_data->symbol))
                 {
-                    LOG_DEBUG("high: " + high_.get_str_value() + ", time: " + get_sec_time_str(high_time_));
+                    LOG_DEBUG("high: " + high_.get_str_value() + ", ht: " + get_sec_time_str(high_time_) 
+                            + ", low: " + low_.get_str_value() + ", lt: " + get_sec_time_str(low_time_));
                 }
             }
 
@@ -1162,8 +1163,10 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
 
             if ("BTC_USDT" == string(symbol))
             {
-                LOG_DEBUG("trade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
-                + ", kline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_));
+                LOG_DEBUG("\ntrade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
+                + ", trade.low: " + curTradeDataPtr->low_.get_str_value() + ", trade.lt: " + get_sec_time_str(low_time)
+                + "\nkline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_)
+                + "kline.low: " + cur_time_data.low_.get_str_value()+ ", kline.lt: " + get_sec_time_str(cur_time_data.low_time_));
             }
         }
     }
