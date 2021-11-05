@@ -79,6 +79,11 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                     high_time_ = high_ == kline_data->px_high ? kline_data->index : high_time_;
                     low_time_ = low_ == kline_data->px_low ? kline_data->index : low_time_;
                 }
+
+                if ("BTC_USDT" == string(kline_data->symbol))
+                {
+                    LOG_DEBUG("high: " + high_.get_str_value() + ", time: " + get_sec_time_str(high_time_));
+                }
             }
 
             start_price_ = ori_data_.begin()->second->px_open;            
@@ -1154,6 +1159,12 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
             curTradeDataPtr->change_rate_ = curTradeDataPtr->change_ / cur_time_data.start_price_.get_value();   
 
             trade_data_map_[symbol] = curTradeDataPtr;
+
+            if ("BTC_USDT" == string(symbol))
+            {
+                LOG_DEBUG("trade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
+                + ", kline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_));
+            }
         }
     }
     catch(const std::exception& e)

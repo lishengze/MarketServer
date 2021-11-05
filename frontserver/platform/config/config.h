@@ -29,6 +29,8 @@ class Config
 
         int get_heartbeat_secs() {return heartbeat_seconds;}
 
+        int get_statistic_secs() {return statistic_secs_;}
+
         bool get_dev_mode() { return is_dev_mode_;}
 
         std::set<int>& get_frequency_base() { return frequency_base_list_;}
@@ -48,5 +50,6 @@ class Config
 
         bool                    is_dev_mode_{true};
         int                     heartbeat_seconds{5};
+        int                     statistic_secs_{10};
 
 };

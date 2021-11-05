@@ -99,9 +99,14 @@ void Config::load_config(string file_name)
                 heartbeat_seconds =  js["heartbeat_seconds"].get<int>() > 2 ? js["heartbeat_seconds"].get<int>():3;  
             }
 
+            if (!js["statistic_secs"].is_null())
+            {
+
+                statistic_secs_ =  js["statistic_secs"].get<int>() > 10 ? js["statistic_secs"].get<int>():10;  
+            }            
+
             // std::cout << "\nConfig: \n" + str() << std::endl;
-            LOG_INFO("\nConfig: \n" + str());
-            
+            LOG_INFO("\nConfig: \n" + str());            
         }
     
     }
