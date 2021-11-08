@@ -60,7 +60,7 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                 type_tick last_time = ori_data_.rbegin()->first;
                 type_tick curr_time = kline_data->index;
 
-                if (curr_time - last_time >= frequency_)
+                if (curr_time - last_time >= frequency_ && ori_data_.find(curr_time) == ori_data_.end())
                 {
                     ori_data_[curr_time] = kline_data;
 
