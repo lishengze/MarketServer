@@ -85,6 +85,8 @@ class TimeKlineData
 
         bool is_empty() { return ori_data_.size() == 0;}
 
+        bool is_time_legal(type_tick time);
+
         std::map<type_tick, KlineDataPtr>   ori_data_;
         int                                 frequency_{0};
         int                                 last_secs_{0};
@@ -101,6 +103,7 @@ class TimeKlineData
         KlineProcess*                       kline_process_;
 
         int                                 wait_times_{0};
+        std::mutex                          update_mutex_;
 
 };
 FORWARD_DECLARE_PTR(TimeKlineData);
@@ -188,7 +191,7 @@ private:
     std::mutex                                                  kline_data_mutex_;
     map<string, map<int, std::map<type_tick, KlineDataPtr>>>    kline_data_;
 
-    map<string, TimeKlineData>                                  oneday_updated_kline_data_;
+    map<string, TimeKlineDataPtr>                               oneday_updated_kline_data_;
     map<string, map<int, KlineDataPtr>>                         cur_kline_data_;
 
     map<string, map<int, KlineDataPtr>>                         sub_updated_kline_map_;

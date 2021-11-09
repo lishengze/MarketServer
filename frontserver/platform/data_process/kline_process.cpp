@@ -10,32 +10,76 @@
 #include "data_process.h"
 
 
+bool TimeKlineData::is_time_legal(type_tick time)
+{
+    bool result = false;
+
+    try
+    {
+        if (ori_data_.size() > 0)
+        {
+            type_tick last_time = ori_data_.rbegin()->first;
+            result = last_time - time >= last_secs_;
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return result;
+}
+
 void TimeKlineData::refresh_high_low()
 {
     try
     {
-        SDecimal high = ori_data_.begin()->second->px_high;
-        SDecimal low = ori_data_.begin()->second->px_low;
+        SDecimal kline_high = ori_data_.begin()->second->px_high;
+        SDecimal kline_low = ori_data_.begin()->second->px_low;
+        type_tick kline_high_time = ori_data_.begin()->second->index;
+        type_tick kline_low_time = ori_data_.begin()->second->index;;
 
         for (auto iter:ori_data_)
         {
-            high = high > iter.second->px_high ? high : iter.second->px_high;
-            low = low < iter.second->px_low ? low : iter.second->px_low;
+            kline_high = kline_high > iter.second->px_high ? kline_high : iter.second->px_high;
+            kline_low = kline_low < iter.second->px_low ? kline_low : iter.second->px_low;
 
-            high_time_ = high_ == iter.second->px_high  ? iter.second->index : high_time_;
-            low_time_ = low_ == iter.second->px_low ? iter.second->index : low_time_;            
+            kline_high_time = kline_high == iter.second->px_high  ? iter.first : kline_high_time;
+            kline_low_time = kline_low == iter.second->px_low ? iter.first: kline_low_time;            
         }
 
-        high_ = high;
-        low_ = low;
+        if (is_time_legal(high_time_))
+        {
+            high_ = high_ > kline_high ? high_ : kline_high;
+            high_time_ = high_ == kline_high ? kline_high_time:high_time_;
+        }
+        else
+        {
+            LOG_DEBUG("trade illegal ht: " + get_sec_time_str(high_time_) + ", high: " + high_.get_str_value());
+            high_ = kline_high;
+            high_time_ = kline_high_time;
+        }
+
+        if (is_time_legal(low_time_))
+        {
+            low_ = low_ < kline_low ? low_ : kline_low;
+            low_time_ = low_ == kline_low ? kline_low_time:low_time_;
+        }
+        else
+        {
+            LOG_DEBUG("trade illegal lt: " + get_sec_time_str(high_time_) + ", low:  " + high_.get_str_value());
+            low_ = kline_low;
+            low_time_ = kline_low_time;
+        }        
+        // high_ = high;
+        // low_ = low;
+        // high_time_ = high_time;
+        // low_time_ = low_time_;
     }
     catch(const std::exception& e)
     {
-        std::stringstream stream_obj;
-        stream_obj << "[E] TimeKlineData::refresh_high_low " << e.what() << "\n";
-        LOG_ERROR(stream_obj.str());
+        LOG_ERROR(e.what());
     }
-    
 }
 
 void TimeKlineData::update(KlineDataPtr kline_data)
@@ -44,6 +88,8 @@ void TimeKlineData::update(KlineDataPtr kline_data)
     {
         if (kline_data->frequency_ == frequency_)
         {
+            std::lock_guard<std::mutex> lk(update_mutex_);
+
             if (ori_data_.size() == 0)
             {
                 ori_data_[kline_data->index] = kline_data;
@@ -229,10 +275,10 @@ void KlineProcess::update_oneday_kline_data(const KlineDataPtr kline_data)
 
         if (oneday_updated_kline_data_.find(cur_symbol) == oneday_updated_kline_data_.end())
         {
-            oneday_updated_kline_data_[cur_symbol] = TimeKlineData(60, 60*60*24, cur_symbol, this);
+            oneday_updated_kline_data_[cur_symbol] = boost::make_shared<TimeKlineData>(60, 60*60*24, cur_symbol, this);
         }
 
-        oneday_updated_kline_data_[cur_symbol].update(kline_data);
+        oneday_updated_kline_data_[cur_symbol]->update(kline_data);
     }
     catch(const std::exception& e)
     {
@@ -1142,14 +1188,16 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
         string symbol = curTradeDataPtr->symbol_;
 
         if (oneday_updated_kline_data_.find(symbol) == oneday_updated_kline_data_.end() 
-        || oneday_updated_kline_data_[symbol].is_empty())
+        || oneday_updated_kline_data_[symbol]->is_empty())
         {
             curTradeDataPtr->high_ = 0;
             curTradeDataPtr->low_ = 0;
         }
         else
         {
-            TimeKlineData& cur_time_data = oneday_updated_kline_data_[string(curTradeDataPtr->symbol_)];
+            TimeKlineData& cur_time_data = *(oneday_updated_kline_data_[string(curTradeDataPtr->symbol_)]);
+            std::lock_guard<std::mutex> lk(cur_time_data.update_mutex_);
+
             curTradeDataPtr->high_ = curTradeDataPtr->price_ > cur_time_data.high_ ? curTradeDataPtr->price_: cur_time_data.high_;
             curTradeDataPtr->low_ = curTradeDataPtr->price_ < cur_time_data.low_ ? curTradeDataPtr->price_ : cur_time_data.low_;
 
@@ -1170,6 +1218,11 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
                 + "\ncur_price: " + curTradeDataPtr->price_.get_str_value() + ", ct: " + get_sec_time_str(curTradeDataPtr->time_)
                 + ", start_price: " + cur_time_data.start_price_.get_str_value() + ", st: " + get_sec_time_str(cur_time_data.ori_data_.begin()->first));
             }
+
+            cur_time_data.high_ = curTradeDataPtr->high_;
+            cur_time_data.low_ = curTradeDataPtr->low_;
+            cur_time_data.high_time_ = high_time;
+            cur_time_data.low_time_ = low_time;            
         }
     }
     catch(const std::exception& e)
