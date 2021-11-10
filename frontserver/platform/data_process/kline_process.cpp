@@ -19,7 +19,7 @@ bool TimeKlineData::is_time_legal(type_tick time)
         if (ori_data_.size() > 0)
         {
             type_tick last_time = ori_data_.rbegin()->first;
-            result = last_time - time >= last_secs_;
+            result = last_time - time < last_secs_;
         }
         return result;
     }
