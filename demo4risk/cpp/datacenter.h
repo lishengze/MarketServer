@@ -86,6 +86,14 @@ private:
     virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
 };
 
+class PrecisionWorker : public Worker
+{
+public:
+    PrecisionWorker() { worker_name = "PrecisionWorker";}
+private:
+    virtual SInnerQuote& process(SInnerQuote& src, PipelineContent& ctx);
+};
+
 class QuotePipeline
 {
 public:
@@ -265,11 +273,13 @@ private:
 
 
     // 处理流水线
-    QuotePipeline pipeline_;
-    QuoteBiasWorker quotebias_worker_;
-    WatermarkComputerWorker watermark_worker_;
-    AccountAjdustWorker account_worker_;
-    OrderBookWorker orderbook_worker_;
+    QuotePipeline           pipeline_;
 
-    std::mutex      filter_quote_mutex_;
+    AccountAjdustWorker     account_worker_;
+    OrderBookWorker         orderbook_worker_;
+    QuoteBiasWorker         quotebias_worker_;
+    WatermarkComputerWorker watermark_worker_;
+    PrecisionWorker         pricesion_worker_;
+
+    std::mutex              filter_quote_mutex_;
 };

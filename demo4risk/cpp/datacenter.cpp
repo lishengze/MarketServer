@@ -192,6 +192,30 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
     dst.swap(result);
 }
 
+void set_depth_presion(map<SDecimal, SInnerDepth>& depth, int price_precision, int amount_precision)
+{
+    try
+    {
+        map<SDecimal, SInnerDepth> new_depth;
+
+        for (map<SDecimal, SInnerDepth>::iterator iter = depth.begin(); iter!=depth.end(); ++iter)
+        {
+            SDecimal new_price = iter->first;
+            SInnerDepth new_atom_depth = iter->second;
+
+            new_price.scale(price_precision);            
+            new_atom_depth.total_volume.scale(amount_precision);
+            new_depth[new_price] = new_atom_depth;
+        }
+
+        depth.swap(new_depth);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
@@ -212,11 +236,11 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
 
-        if (src.symbol == "BTC_USDT")
-        {
-            LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
-                        + src.symbol + " " + quote_str(src, 8));
-        } 
+        // if (src.symbol == "BTC_USDT")
+        // {
+        //     LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
+        //                 + src.symbol + " " + quote_str(src, 8));
+        // } 
                     
     }
     catch(const std::exception& e)
@@ -408,11 +432,11 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
   
     }
 
-    if (src.symbol == "BTC_USDT")
-    {
-        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " 
-                    + src.symbol + " " + quote_str(src, 8));
-    } 
+    // if (src.symbol == "BTC_USDT")
+    // {
+    //     LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " 
+    //                 + src.symbol + " " + quote_str(src, 8));
+    // } 
                 
 
     return src;
@@ -596,11 +620,11 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         // LOG_DEBUG(s_s.str());
     }
 
-    if (src.symbol == "BTC_USDT")
-    {
-        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " 
-                    + src.symbol + " " + quote_str(src, 8));
-    } 
+    // if (src.symbol == "BTC_USDT")
+    // {
+    //     LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " 
+    //                 + src.symbol + " " + quote_str(src, 8));
+    // } 
         
     return src;
 }
@@ -682,11 +706,11 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
     }
 
-    if (src.symbol == "BTC_USDT")
-    {
-        LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
-                    + src.symbol + " " + quote_str(src, 8));
-    }     
+    // if (src.symbol == "BTC_USDT")
+    // {
+    //     LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
+    //                 + src.symbol + " " + quote_str(src, 8));
+    // }     
 
     return src;
     }
@@ -716,6 +740,33 @@ SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
     return src;
 }
 
+SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
+{
+    try
+    {
+        if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
+        {
+            int price_precision = ctx.params.symbol_config[src.symbol].PricePrecision;
+            int amount_precision = ctx.params.symbol_config[src.symbol].AmountPrecision;
+
+            set_depth_presion(src.asks, price_precision, amount_precision);
+            set_depth_presion(src.bids, price_precision, amount_precision);
+
+            if (src.symbol == "BTC_USDT")
+            {
+                LOG_DEBUG("price_precision: " + std::to_string(price_precision) 
+                        + ", amount_precision: " + std::to_string(amount_precision)
+                        + "\n" + quote_str(src));
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return src;
+}
+
 QuotePipeline::QuotePipeline(){
     add_worker(&default_worker_);
 }
@@ -729,6 +780,7 @@ DataCenter::DataCenter() {
     pipeline_.add_worker(&orderbook_worker_);    
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
+    pipeline_.add_worker(&pricesion_worker_);
 }
 
 DataCenter::~DataCenter() {
