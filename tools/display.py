@@ -428,10 +428,8 @@ class DisplayWidget(QWidget):
     RAW_FREQUENCY = 1
     #STREAMENGINE_ADDR = "172.25.3.207:9000"
     #RISKCONTROL_ADDR = "172.25.3.207:9900"
-    STREAMENGINE_ADDR = "36.255.220.139:9110"
-    RISKCONTROL_ADDR = "36.255.220.139:9111"
     
-    def __init__(self):
+    def __init__(self, env_name=""):
         super().__init__()
 
         #ret = CallGetStreamEngineParams(self.STREAMENGINE_ADDR)
@@ -453,6 +451,20 @@ class DisplayWidget(QWidget):
         logging.basicConfig(level=logging.INFO)
         self.logger_riskcontrol = init_logger('riskcontrol.log')
         self.logger_streamengine = init_logger('streamengine.log')
+
+        #default qa
+        STREAMENGINE_ADDR = "118.193.35.160:8110"
+        RISKCONTROL_ADDR = "118.193.35.160:8111"
+
+        #prd
+        if env_name == "-prd":        
+            STREAMENGINE_ADDR = "16.162.143.211:9110"
+            RISKCONTROL_ADDR = "16.162.143.211:9111"
+
+        #stg
+        if env_name == "-stg":
+            STREAMENGINE_ADDR = "18.162.52.222:8110"
+            RISKCONTROL_ADDR = "18.162.52.222:8111"
 
         # 初始化ui
         self.initUI()
@@ -755,6 +767,12 @@ class DisplayWidget(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = DisplayWidget()
+    env_type = "-qa"
+
+    if len(sys.argv) == 2:
+        env_type = sys.argv[1]
+
+    print("env_type: %s " % env_type)
+    ex = DisplayWidget(env_name=env_type)
 
     sys.exit(app.exec_())
