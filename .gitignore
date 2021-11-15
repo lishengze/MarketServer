@@ -19,7 +19,7 @@ cmake-build-release/
 
 # grpc生成的代码
 protos/cpp/*
-protos/python/*
+# protos/python/*
 *.pb.*
 *.so
 *.log
