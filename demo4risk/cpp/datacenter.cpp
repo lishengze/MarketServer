@@ -756,7 +756,7 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             {
                 LOG_DEBUG("price_precision: " + std::to_string(price_precision) 
                         + ", amount_precision: " + std::to_string(amount_precision)
-                        + "\n" + quote_str(src));
+                        + "\n" + quote_str(src, 5));
             }
         }
     }
@@ -837,10 +837,10 @@ void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& conf
     std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
     params_.quote_config = config;
 
-    LOG_INFO("DataCenter::change MarketRiskConfig");
+    LOG_TRACE("DataCenter::change MarketRiskConfig");
     for (auto iter:params_.quote_config)
     {
-        LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
+        LOG_TRACE("\n" + iter.first + "\n" + iter.second.desc());
     }    
     _push_to_clients();
 }
