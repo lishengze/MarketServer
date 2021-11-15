@@ -453,18 +453,18 @@ class DisplayWidget(QWidget):
         self.logger_streamengine = init_logger('streamengine.log')
 
         #default qa
-        STREAMENGINE_ADDR = "118.193.35.160:8110"
-        RISKCONTROL_ADDR = "118.193.35.160:8111"
+        self.STREAMENGINE_ADDR = "118.193.35.160:8110"
+        self.RISKCONTROL_ADDR = "118.193.35.160:8111"
 
         #prd
         if env_name == "-prd":        
-            STREAMENGINE_ADDR = "16.162.143.211:9110"
-            RISKCONTROL_ADDR = "16.162.143.211:9111"
+            self.STREAMENGINE_ADDR = "16.162.143.211:9110"
+            self.RISKCONTROL_ADDR = "16.162.143.211:9111"
 
         #stg
         if env_name == "-stg":
-            STREAMENGINE_ADDR = "18.162.52.222:8110"
-            RISKCONTROL_ADDR = "18.162.52.222:8111"
+            self.STREAMENGINE_ADDR = "18.162.52.222:8110"
+            self.RISKCONTROL_ADDR = "18.162.52.222:8111"
 
         # 初始化ui
         self.initUI()
