@@ -127,6 +127,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
                     continue;                
                 }
 
+                LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive!");
                 LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
                 req_ptr->websocket_->send(symbol_list_str);
             }

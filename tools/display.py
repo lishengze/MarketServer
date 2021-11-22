@@ -665,6 +665,7 @@ class DisplayWidget(QWidget):
         bid_data = _make_data(msg['bid'], False)
         if msg['exchange'] == MIX_EXCHANGE_NAME:
             self.streamengine_widget.bind_data(ask_data, bid_data)
+            self.log_streamengine(msg.symbol, ask_data, bid_data)
         else:
             #print(msg)
             self.raw_widget.bind_data(ask_data, bid_data)
