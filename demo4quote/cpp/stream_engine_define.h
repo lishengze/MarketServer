@@ -13,7 +13,7 @@
 #include <fstream>
 #include <sstream>
 using namespace std;
-#include "redis_quote_define.h"
+#include "quote_define.h"
 
 
 // 内部行情结构

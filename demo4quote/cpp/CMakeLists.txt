@@ -4,6 +4,7 @@ PROJECT(demo4quote)
 if(DEFINED ENV{LOCAL})
     MESSAGE(STATUS "defined env.LOCAL")
 endif()
+set(CMAKE_CXX_STANDARD 11)
 
 ###############################################################################################
 if(DEFINED ENV{LOCAL})
@@ -59,5 +60,8 @@ target_link_libraries(demo4quote grpc++_reflection grpc++ gpr ssl crypto)
 target_link_libraries(demo4quote nacos-cli)
 target_link_libraries(demo4quote reporter)
 target_link_libraries(demo4quote SQLiteCpp sqlite3 dl)
+
+TARGET_LINK_LIBRARIES(demo4quote ssl crypto)
+TARGET_LINK_LIBRARIES(demo4quote rdkafka rdkafka++)
 
 ###############################################################################################

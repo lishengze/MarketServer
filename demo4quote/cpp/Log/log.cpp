@@ -1,7 +1,7 @@
 #include "log.h"
 #include "pandora/util/time_util.h"
 #include "pandora/log/base_log.h"
-#include "../redis_quote_define.h"
+#include "../quote_define.h"
 
 
 

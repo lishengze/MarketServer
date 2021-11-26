@@ -2,7 +2,7 @@
 
 #include "pandora/messager/ut_log.h"
 #include "pandora/redis/redis_api.h"
-#include "redis_quote_define.h"
+#include "quote_define.h"
 
 #include <boost/thread/thread.hpp>
 #include <boost/asio.hpp>

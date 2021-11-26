@@ -1,6 +1,6 @@
 #pragma once
 
-#include "redis_quote_define.h"
+#include "quote_define.h"
 #include "kline_database.h"
 
 // K线往下游推送接口
