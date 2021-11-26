@@ -1,5 +1,5 @@
 #pragma once
-#include "quote_define.h"
+#include "struct_define.h"
 #include "quote_mixer2.h"
 #include "grpc_server.h"
 #include "kline_mixer.h"
