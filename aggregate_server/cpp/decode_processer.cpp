@@ -94,7 +94,22 @@ void DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
 {
     try
     {
-        /* code */
+        string symbol = json_data["Symbol"].GetString();
+        string exchange = json_data["Exchange"].GetString();
+        string type = json_data["Type"].GetString();
+        bool is_snap = type=="snap" ? true:false;
+
+        if (symbol_config_.find(symbol) == symbol_config_.end())
+        {
+            return ;
+        }
+        if (symbol_config_[symbol].find(exchange) != symbol_config_[symbol].end())
+        {
+            return ;
+        }        
+
+        SExchangeConfig& config = symbol_config_[symbol][exchange];
+        redisquote_to_quote(json_data, depth_quote, config, is_snap);
     }
     catch(const std::exception& e)
     {
@@ -105,11 +120,20 @@ void DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
 
 bool redisquote_to_kline(const Value& data, KlineData& kline) 
 {
-    SExchangeConfig config;
+    
     kline.symbol = data[7].GetString();
     kline.exchange = data[8].GetString();
 
     if (symbol_config_.find(kline.symbol) == symbol_config_.end())
+    {
+        return false;
+    }
+    if (symbol_config_[kline.symbol].find(kline.exchange) != symbol_config_[kline.symbol].end())
+    {
+        return false;
+    }
+
+    SExchangeConfig& config = symbol_config_[kline.symbol][kline.exchange];
 
     kline.index = int(data[0].GetDouble());
     kline.px_open.from(data[1].GetDouble(), config.precise);
