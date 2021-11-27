@@ -1,41 +1,118 @@
 #include "decode_processer.h"
 #include "../Log/log.h"
 
-void redisquote_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
+void DecodeProcesser::_json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
-    for (auto iter = data.MemberBegin() ; iter != data.MemberEnd() ; ++iter )
+    try
     {
-        const string& price = iter->name.GetString();
-        const double& volume = iter->value.GetDouble();
-        SDecimal dPrice = SDecimal::parse(price, config.precise);
-        SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
-        depths[dPrice].volume = dVolume;
+        for (auto iter = data.MemberBegin() ; iter != data.MemberEnd() ; ++iter )
+        {
+            const string& price = iter->name.GetString();
+            const double& volume = iter->value.GetDouble();
+            SDecimal dPrice = SDecimal::parse(price, config.precise);
+            SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
+            depths[dPrice].volume = dVolume;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
+
+}
+
+bool DecodeProcesser::_json_to_quote(const Document& snap_json, SDepthQuote& quote, const SExchangeConfig& config, bool isSnap) 
+{
+    try
+    {
+        quote.asks.clear();
+        quote.bids.clear();
+        
+        // 使用channel里面的交易所和代码，不使用json中的
+        //string symbol = snap_json["Symbol"].get<std::string>();
+        //string exchange = snap_json["Exchange"].get<std::string>();
+        string timeArrive = snap_json["TimeArrive"].GetString();
+        type_seqno sequence_no = snap_json["Msg_seq_symbol"].GetUint64(); 
+        
+        quote.price_precise = config.precise;
+        quote.volume_precise = config.vprecise;
+        quote.amount_precise = config.aprecise;
+        vassign(quote.sequence_no, sequence_no);
+        vassign(quote.origin_time, parse_nano(timeArrive));
+        quote.arrive_time = get_miliseconds();
+        quote.server_time = 0; // 这个时间应该在发送前赋值
+        
+        string askDepth = isSnap ? "AskDepth" : "AskUpdate";
+        _json_to_quote_depth(snap_json[askDepth.c_str()], config, quote.asks);
+        string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
+        _json_to_quote_depth(snap_json[bidDepth.c_str()], config, quote.bids);
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        return false;
     }
 }
 
-bool redisquote_to_quote(const Document& snap_json, SDepthQuote& quote, const SExchangeConfig& config, bool isSnap) {
-    quote.asks.clear();
-    quote.bids.clear();
-    
-    // 使用channel里面的交易所和代码，不使用json中的
-    //string symbol = snap_json["Symbol"].get<std::string>();
-    //string exchange = snap_json["Exchange"].get<std::string>();
-    string timeArrive = snap_json["TimeArrive"].GetString();
-    type_seqno sequence_no = snap_json["Msg_seq_symbol"].GetUint64(); 
-    
-    quote.price_precise = config.precise;
-    quote.volume_precise = config.vprecise;
-    quote.amount_precise = config.aprecise;
-    vassign(quote.sequence_no, sequence_no);
-    vassign(quote.origin_time, parse_nano(timeArrive));
-    quote.arrive_time = get_miliseconds();
-    quote.server_time = 0; // 这个时间应该在发送前赋值
-    
-    string askDepth = isSnap ? "AskDepth" : "AskUpdate";
-    redisquote_to_quote_depth(snap_json[askDepth.c_str()], config, quote.asks);
-    string bidDepth = isSnap ? "BidDepth" : "BidUpdate";
-    redisquote_to_quote_depth(snap_json[bidDepth.c_str()], config, quote.bids);
-    return true;
+bool DecodeProcesser::_json_to_kline(const Value& data,  SExchangeConfig& config, KlineData& kline) 
+{
+    try
+    {
+        kline.symbol = data[7].GetString();
+        kline.exchange = data[8].GetString();
+        kline.index = int(data[0].GetDouble());
+        kline.px_open.from(data[1].GetDouble(), config.precise);
+        kline.px_high.from(data[2].GetDouble(), config.precise);
+        kline.px_low.from(data[3].GetDouble(), config.precise);
+        kline.px_close.from(data[4].GetDouble(), config.precise);
+        kline.volume.from(data[5].GetDouble(), config.vprecise);
+
+        kline.resolution = data[9].GetInt64();
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        return false;
+    }
+}
+
+bool DecodeProcesser::_is_kline_valid(const KlineData& kline) 
+{
+    try
+    {
+        return !(kline.index < 1000000000 || kline.index > 1900000000);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+bool DecodeProcesser::_get_config(string symbole, string exchange, SExchangeConfig& config)
+{
+    try
+    {
+        if (symbol_config_.find(kline.symbol) == symbol_config_.end())
+        {
+            return false;
+        }
+        if (symbol_config_[kline.symbol].find(kline.exchange) != symbol_config_[kline.symbol].end())
+        {
+            return false;
+        }
+
+        config = symbol_config_[kline.symbol][kline.exchange];        
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        return false;
+    }
 }
 
 void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
@@ -44,31 +121,25 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
     {
         for (auto src_data:src_data_vec)
         {
-            string topic;
-            string data_body;
+            MetaData meta_data;
+            if (!pre_process(src_data, meta_data)) continue;
 
-            pre_process(src_data, topic, data_body);
+            SExchangeConfig config;
+            if (!_get_config(meta_data.symbol, meta_data.exchange, config)) continue;
 
-            Document json_body;
-            json_body.Parse(data_body.c_str());
-            if(json_body.HasParseError())
-            {
-                LOG_WARN("Document Parse " + data_body + " Failed");
-                continue;
-            }
-
-            if (topic == "depth")
+            if (meta_data.type == "depth")
             {
                 SDepthQuote depth_quote;
-
+                decode_depth(meta_data.data_body, config, depth_quote);
             }
-            else if (topic == "kline")
+            else if (meta_data.type == "kline")
             {
-                
+                vector<KlineData>& klines;
+                decode_kline(meta_data.data_body, config, klines);
             }            
             else 
             {
-                LOG_WARN("Unknown Topic: " + topic);
+                LOG_WARN("Unknown Topic: " + (meta_data.type);
             }
         }
     }
@@ -78,19 +149,55 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
     }
 }
 
-void DecodeProcesser::pre_process(const string& src_data, string& topic, string& data_body)
+bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
 {
     try
     {
-        /* code */
+        string::size_type topic_end_pos = src_data.find(TOPIC_SEPARATOR);
+        if (topic_end_pos == std::string::npos)
+        {
+            LOG_WARN("Cann't Locate TOPIC_SEPARATOR " + TOPIC_SEPARATOR + ", SrCData: " + src_data);
+            return false;
+        }
+        string topic = src_data.substr(0, topic_end_pos);
+        
+        std::string::size_type type_end_pos = topic.find(TYPE_SEPARATOR);
+        if( type_end_pos == std::string::npos )
+        {
+            LOG_WARN("Cann't Locate TYPE_SEPARATOR " + TYPE_SEPARATOR + ", topic: " + topic);
+            return false;            
+        }
+        meta_data.type = topic.substr(0, type_end_pos);
+
+        string symbol_exchange = topic.substr(type_end_pos+1);
+
+        std::string::size_type symbol_end_pos = symbol_exchange.find(SYMBOL_EXCHANGE_SEPARATOR);
+        if( symbol_end_pos == std::string::npos)
+        {
+            LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
+            return false;
+        }
+            
+        meta_data.symbol = symbol_exchange.substr(0, symbol_end_pos);
+        meta_data.exchange = symbol_exchange.substr(symbol_end_pos + 1);
+                
+        string data_body_str = src_data.substr(topic_end_pos+1);                
+        meta_data.data_body.Parse(data_body_str.c_str());
+        if(meta_data.data_body.HasParseError())
+        {
+            LOG_WARN("Document Parse " + data_body_str+ " Failed");
+            return false;
+        }
+        return true;
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
+    return false;
 }
 
-void DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote)
+void DecodeProcesser::decode_depth(Document& json_data, SExchangeConfig& config, SDepthQuote& depth_quote)
 {
     try
     {
@@ -99,17 +206,7 @@ void DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
         string type = json_data["Type"].GetString();
         bool is_snap = type=="snap" ? true:false;
 
-        if (symbol_config_.find(symbol) == symbol_config_.end())
-        {
-            return ;
-        }
-        if (symbol_config_[symbol].find(exchange) != symbol_config_[symbol].end())
-        {
-            return ;
-        }        
-
-        SExchangeConfig& config = symbol_config_[symbol][exchange];
-        redisquote_to_quote(json_data, depth_quote, config, is_snap);
+        _json_to_quote(json_data, depth_quote, config, is_snap);
     }
     catch(const std::exception& e)
     {
@@ -118,48 +215,15 @@ void DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
     
 }
 
-bool redisquote_to_kline(const Value& data, KlineData& kline) 
-{
-    
-    kline.symbol = data[7].GetString();
-    kline.exchange = data[8].GetString();
-
-    if (symbol_config_.find(kline.symbol) == symbol_config_.end())
-    {
-        return false;
-    }
-    if (symbol_config_[kline.symbol].find(kline.exchange) != symbol_config_[kline.symbol].end())
-    {
-        return false;
-    }
-
-    SExchangeConfig& config = symbol_config_[kline.symbol][kline.exchange];
-
-    kline.index = int(data[0].GetDouble());
-    kline.px_open.from(data[1].GetDouble(), config.precise);
-    kline.px_high.from(data[2].GetDouble(), config.precise);
-    kline.px_low.from(data[3].GetDouble(), config.precise);
-    kline.px_close.from(data[4].GetDouble(), config.precise);
-    kline.volume.from(data[5].GetDouble(), config.vprecise);
-
-
-    kline.resolution = data[9].GetInt64();
-    return true;
-}
-
-bool valida_kline(const KlineData& kline) {
-    return !(kline.index < 1000000000 || kline.index > 1900000000);
-}
-
-void DecodeProcesser::decode_kline(Document& json_data, vector<KlineData>& klines)
+void DecodeProcesser::decode_kline(Document& json_data, SExchangeConfig& config, vector<KlineData>& klines)
 {
     try
     {
         for (auto iter = json_data.Begin(); iter != json_data.End(); ++iter) 
         {
             KlineData kline;
-            redisquote_to_kline(*iter, kline);
-            if( !valida_kline(kline) ) 
+            _json_to_kline(*iter, kline);
+            if( !_is_kline_valid(kline) ) 
             {
                 LOG_WARN("[kline min] get abnormal kline data " + std::to_string(kline.resolution));
                 continue;

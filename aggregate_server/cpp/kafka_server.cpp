@@ -3,7 +3,7 @@
 #include "stream_engine_config.h"
 
 
-KafkaQuote::KafkaQuote(string bootstrap_servers):
+KafkaServer::KafkaServer(string bootstrap_servers):
      bootstrap_servers_{bootstrap_servers}
 {
     init_user();
@@ -11,7 +11,7 @@ KafkaQuote::KafkaQuote(string bootstrap_servers):
     init_topic_list();
 }
 
-KafkaQuote::KafkaQuote()
+KafkaServer::KafkaServer()
 {
     this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
 
@@ -20,7 +20,7 @@ KafkaQuote::KafkaQuote()
     init_topic_list();
 }
 
-KafkaQuote::~KafkaQuote()
+KafkaServer::~KafkaServer()
 {
     if (listen_thread_.joinable())
     {
@@ -28,18 +28,26 @@ KafkaQuote::~KafkaQuote()
     }
 }
 
-void KafkaQuote::init_user()
+void KafkaServer::init_user()
 {
     try
     {
-        kafka::Properties props ({
+        kafka::Properties consumer_props ({
             {"bootstrap.servers",  bootstrap_servers_},
             {"enable.auto.commit", "true"}
         });
+        consumer_sptr_ = boost::make_shared<KConsumer>(consumer_props);
 
-        consumer_sptr_ = boost::make_shared<KConsumer>(props);
+        kafka::Properties producer_props ({
+            {"bootstrap.servers",  bootstrap_servers_},
+            {"enable.idempotence", "true"}
+        });
+        producer_sptr_ = boost::make_shared<KProducer>(producer_props);
 
-        producer_sptr_ = boost::make_shared<KProducer>(props);
+        kafka::Properties adclient_props ({
+            {"bootstrap.servers",  bootstrap_servers_}
+        });                
+        adclient_sptr_ = boost::make_shared<KAdmin>(adclient_props);
     }
     catch(const std::exception& e)
     {
@@ -48,7 +56,7 @@ void KafkaQuote::init_user()
     
 }
 
-void KafkaQuote::init_topic_list()
+void KafkaServer::init_topic_list()
 {
     try
     {
@@ -62,7 +70,7 @@ void KafkaQuote::init_topic_list()
     
 }
 
-void KafkaQuote::launch()
+void KafkaServer::launch()
 {
     try
     {
@@ -77,31 +85,90 @@ void KafkaQuote::launch()
     
 }
 
-void KafkaQuote::sub_topics()
+kafka::Topics KafkaServer::_get_subed_topics()
 {
     try
     {
-        kafka::Topics topics;
-        for (auto topic:topic_list_)
+        if (consumer_sptr_)
         {
-            topics.emplace(topic);
+            return consumer_sptr_->subscription();
         }
-
-        consumer_sptr_->subscribe(topics);
+        else
+        {
+            LOG_ERROR("consumer_sptr_ nullptr");
+        }
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
+    
 }
 
-void KafkaQuote::start_listen_data()
+kafka::Topics KafkaServer::_get_created_topics()
 {
     try
     {
-        sub_topics();
+        if (adclient_sptr_)
+        {
+            auto listResult = adclient_sptr_->listTopics();
 
-        listen_thread_ = std::thread(&KafkaQuote::listen_data_main, this);
+            if (listResult.error)
+            {
+                LOG_ERROR(listResult.error.message());
+            }
+            else
+            {
+                return listResult.topics;
+            }
+        }
+        else
+        {
+            LOG_ERROR("adclient_sptr_ nullptr");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }   
+}
+
+bool KafkaServer::create_topic(kafka::Topic topic)
+{
+    try
+    {
+        if (adclient_sptr_)
+        {
+            kafka::Properties topic_props ({
+                {"max.message.bytes",  "1048588"}
+            });
+
+            auto createResult = adclient_sptr_->createTopics({topic}, 3, 3, topic_props);
+            if (createResult.error)
+            {
+                LOG_ERROR("Create Topic Error: " + createResult.error.message());
+                return false;
+            }
+            return true;
+        }
+        else
+        {
+            LOG_ERROR("adclient_sptr_ nullptr");
+        }
+        return false;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+        return false;
+    }
+}
+
+void KafkaServer::start_listen_data()
+{
+    try
+    {
+        listen_thread_ = std::thread(&KafkaServer::listen_data_main, this);
     }
     catch(const std::exception& e)
     {
@@ -109,7 +176,7 @@ void KafkaQuote::start_listen_data()
     }
 }
 
-void KafkaQuote::listen_data_main()
+void KafkaServer::listen_data_main()
 {
     try
     {
@@ -126,7 +193,7 @@ void KafkaQuote::listen_data_main()
                 {
                     string ori_data = record.value().toString();
                     string topic = record.topic();      
-                    ori_data = topic + "|" + ori_data;
+                    ori_data = topic + TOPIC_SEPARATOR + ori_data;
 
                     LOG_INFO(ori_data);
                     
@@ -150,11 +217,11 @@ void KafkaQuote::listen_data_main()
     }
 }
 
-void KafkaQuote::start_process_data()
+void KafkaServer::start_process_data()
 {
     try
     {
-        process_thread_ = std::thread(&KafkaQuote::process_data, this);
+        process_thread_ = std::thread(&KafkaServer::process_data, this);
     }
     catch(const std::exception& e)
     {
@@ -162,8 +229,7 @@ void KafkaQuote::start_process_data()
     }
 }
 
-
-void KafkaQuote::process_data() 
+void KafkaServer::process_data() 
 {
     try
     {
@@ -179,6 +245,151 @@ void KafkaQuote::process_data()
 
             src_data_vec_.clear();
         }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+string KafkaServer::_get_kline_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(KLINE_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+string KafkaServer::_get_depth_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(DEPTH_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+void KafkaServer::sub_topic(const string& topic)
+{
+    try
+    {
+        kafka::Topics subed_topics = _get_subed_topics();
+        kafka::Topics created_topics = _get_created_topics();
+
+        if (subed_topics.find(topic) != subed_topics.end())
+        {
+            LOG_WARN("topic " + topic + " has subed");
+            return;
+        }
+
+        if (created_topics.find(topic) == created_topics.end())
+        {
+            LOG_ERROR("topic " + topic + " was not created");
+            return;    
+        }
+
+        consumer_sptr_->subscribe({topic});
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void KafkaServer::unsub_topic(const string& topic)
+{
+    try
+    {
+        kafka::Topics subed_topics = _get_subed_topics();
+        kafka::Topics created_topics = _get_created_topics();
+
+        if (subed_topics.find(topic) == subed_topics.end())
+        {
+            LOG_INFO("topic " + topic + " was not subed");
+            return;
+        }
+
+        if (created_topics.find(topic) == created_topics.end())
+        {
+            LOG_ERROR("topic " + topic + " was not created");
+            return;    
+        }
+
+        consumer_sptr_->unsubscribe();
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+
+void KafkaServer::subscribe_topics(std::set<string> topics)
+{
+    try
+    {
+        kafka::Topics created_topics = _get_created_topics();
+
+        for(auto topic:topics)
+        {
+            if (created_topics.find(topic) == created_topics.end())
+            {
+                LOG_INFO("topic " + topic + " was not created");
+            }
+        }
+
+        if (consumer_sptr_)
+        {
+            consumer_sptr_->unsubscribe();
+            consumer_sptr_->subscribe(topics);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
+bool KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
+{
+    try
+    {
+        LOG_INFO("Set Config " + symbol + ":\n");
+
+        symbol_config_[symbol] = config;
+
+        bool new_topic;
+
+        std::set<string> new_topics;
+        for (auto iter1:symbol_config_)
+        {
+            for (auto iter2:iter1.second)
+            {
+                string symbol = iter1.first;
+                string exchange = iter2.first;
+                string kline_topic = _get_kline_topic(exchange, symbol);
+                string depth_topic = _get_depth_topic(exchange, symbol);
+
+                new_topics.emplace(std::move(kline_topic));
+                new_topics.emplace(std::move(depth_topic));                
+            }
+        }
+
+        if (topic_set_ != new_topics)
+        {
+            topic_set_.swap(new_topics);
+
+            subscribe_topics(topic_set_);
+        }
+
+        return true;
     }
     catch(const std::exception& e)
     {

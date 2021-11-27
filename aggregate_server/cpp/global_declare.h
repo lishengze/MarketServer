@@ -39,19 +39,7 @@
 #include "base/cpp/rapidjson/writer.h"
 #include "base/cpp/rapidjson/stringbuffer.h"
 
-using grpc::ClientReader;
-using grpc::ClientReaderWriter;
-using grpc::ClientWriter;
-using quote::service::v1::SubscribeQuoteReq;
-using quote::service::v1::SubscribeMixQuoteReq;
-using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
-using SEData = quote::service::v1::MarketStreamDataWithDecimal;
-using SEDepth = quote::service::v1::DepthWithDecimal;
-using SEDecimal = quote::service::v1::Decimal;
-using quote::service::v1::DataInBinary;
-
-using quote::service::v1::TradedOrderStreamData_Direction;
-
+#include "type_define.h"
 
 using namespace std;
 

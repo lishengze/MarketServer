@@ -4,33 +4,36 @@
 
 #include "kafka/KafkaConsumer.h"
 #include "kafka/KafkaProducer.h"
+#include "kafka/AdminClient.h"
 
 #include "decode_processer.h"
+#include "struct_define.h"
 
-class KafkaQuote
+class KafkaServer
 {
 public:
 
     typedef kafka::clients::KafkaConsumer KConsumer;
     typedef kafka::clients::KafkaProducer KProducer;
+    typedef kafka::clients::AdminClient   KAdmin;
 
-    KafkaQuote(string server_address);
+    KafkaServer(string server_address);
 
-    KafkaQuote(DecodeProcesser* decode_processer):
+    KafkaServer(DecodeProcesser* decode_processer):
         decode_processer_{decode_processer}
     {
 
     }
 
-    KafkaQuote();
+    KafkaServer();
 
-    ~KafkaQuote();
+    ~KafkaServer();
 
     void init_user();
 
     void init_topic_list();
 
-    void sub_topics();
+    
 
     void init_decode_processer(DecodeProcesser* decode_processer) {
         decode_processer_ = decode_processer;
@@ -38,21 +41,41 @@ public:
 
     void launch();
 
+public:
+    void sub_topic(const string& topic);
+    void unsub_topic(const string& topic);
+    void subscribe_topics(std::set<string> topics);
+
+
+    kafka::Topics _get_subed_topics();
+    kafka::Topics _get_created_topics();
+
+    //auto createResult = adminClient.createTopics({args->topic}, 
+    // args->partitions, args->replicationFactor, args->topicProps);
+    bool create_topic(kafka::Topic topic);
+
+    string _get_kline_topic(string exchange, string symbol);
+    string _get_depth_topic(string exchange, string symbol);
+
+public:
     void start_listen_data();
     void listen_data_main();
 
     void start_process_data();
     void process_data();
 
+    bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
+
 private:
     QuoteSourceCallbackInterface*      engine_interface_{nullptr};    
 
     boost::shared_ptr<KConsumer>       consumer_sptr_{nullptr};
     boost::shared_ptr<KProducer>       producer_sptr_{nullptr};
+    boost::shared_ptr<KAdmin>          adclient_sptr_{nullptr};
 
     std::string                        bootstrap_servers_;
 
-    std::list<string>                  topic_list_;
+    std::set<string>                   topic_set_;
 
     std::thread                        listen_thread_;
     
@@ -62,4 +85,7 @@ private:
     std::vector<std::string>           src_data_vec_;
 
     DecodeProcesser*                   decode_processer_;
+
+    std::mutex                         mutex_symbol_config_;
+    unordered_map<TSymbol, SSymbolConfig>   symbol_config_;
 };
