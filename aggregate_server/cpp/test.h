@@ -18,7 +18,7 @@ class TestEngine
         void start();
 
     private:
-        KafkaQuote*                         p_kafka_{nullptr};
+        KafkaServer*                        p_kafka_{nullptr};
         DecodeProcesser*                    p_decode_processer_{nullptr}; 
         utrade::pandora::io_service_pool&   engine_pool_;
 };

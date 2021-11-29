@@ -1,5 +1,5 @@
 #include "decode_processer.h"
-#include "../Log/log.h"
+#include "Log/log.h"
 
 void DecodeProcesser::_json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
@@ -92,20 +92,20 @@ bool DecodeProcesser::_is_kline_valid(const KlineData& kline)
     return false;
 }
 
-bool DecodeProcesser::_get_config(string symbole, string exchange, SExchangeConfig& config)
+bool DecodeProcesser::_get_config(string symbol, string exchange, SExchangeConfig& config)
 {
     try
     {
-        if (symbol_config_.find(kline.symbol) == symbol_config_.end())
+        if (symbol_config_.find(symbol) == symbol_config_.end())
         {
             return false;
         }
-        if (symbol_config_[kline.symbol].find(kline.exchange) != symbol_config_[kline.symbol].end())
+        if (symbol_config_[symbol].find(exchange) != symbol_config_[symbol].end())
         {
             return false;
         }
 
-        config = symbol_config_[kline.symbol][kline.exchange];        
+        config = symbol_config_[symbol][exchange];        
         return true;
     }
     catch(const std::exception& e)
@@ -134,12 +134,12 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
             }
             else if (meta_data.type == "kline")
             {
-                vector<KlineData>& klines;
+                vector<KlineData> klines;
                 decode_kline(meta_data.data_body, config, klines);
             }            
             else 
             {
-                LOG_WARN("Unknown Topic: " + (meta_data.type);
+                LOG_WARN("Unknown Topic: " + (meta_data.type));
             }
         }
     }
@@ -222,7 +222,7 @@ void DecodeProcesser::decode_kline(Document& json_data, SExchangeConfig& config,
         for (auto iter = json_data.Begin(); iter != json_data.End(); ++iter) 
         {
             KlineData kline;
-            _json_to_kline(*iter, kline);
+            _json_to_kline(*iter, config, kline);
             if( !_is_kline_valid(kline) ) 
             {
                 LOG_WARN("[kline min] get abnormal kline data " + std::to_string(kline.resolution));
@@ -253,7 +253,6 @@ bool DecodeProcesser::set_config(const TSymbol& symbol, const SSymbolConfig& con
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
-
 }

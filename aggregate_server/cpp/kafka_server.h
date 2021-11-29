@@ -33,8 +33,6 @@ public:
 
     void init_topic_list();
 
-    
-
     void init_decode_processer(DecodeProcesser* decode_processer) {
         decode_processer_ = decode_processer;
     }

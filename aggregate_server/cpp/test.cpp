@@ -10,7 +10,7 @@ void TestEngine::init()
     {
         p_decode_processer_ = new DecodeProcesser(engine_pool_);
 
-        p_kafka_ = new KafkaQuote(p_decode_processer_);
+        p_kafka_ = new KafkaServer(p_decode_processer_);
         
     }
     catch(const std::exception& e)

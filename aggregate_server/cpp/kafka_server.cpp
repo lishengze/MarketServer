@@ -1,5 +1,5 @@
 #include "kafka_server.h"
-#include "../Log/log.h"
+#include "Log/log.h"
 #include "stream_engine_config.h"
 
 
@@ -7,8 +7,6 @@ KafkaServer::KafkaServer(string bootstrap_servers):
      bootstrap_servers_{bootstrap_servers}
 {
     init_user();
-
-    init_topic_list();
 }
 
 KafkaServer::KafkaServer()
@@ -16,8 +14,6 @@ KafkaServer::KafkaServer()
     this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
 
     init_user();
-
-    init_topic_list();
 }
 
 KafkaServer::~KafkaServer()
@@ -45,23 +41,10 @@ void KafkaServer::init_user()
         producer_sptr_ = boost::make_shared<KProducer>(producer_props);
 
         kafka::Properties adclient_props ({
-            {"bootstrap.servers",  bootstrap_servers_}
+            {"bootstrap.servers",  bootstrap_servers_},
+            {"client.id", "bcts"}            
         });                
         adclient_sptr_ = boost::make_shared<KAdmin>(adclient_props);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-}
-
-void KafkaServer::init_topic_list()
-{
-    try
-    {
-        topic_list_.push_back("trade");
-        topic_list_.push_back("depth");
     }
     catch(const std::exception& e)
     {
@@ -139,9 +122,11 @@ bool KafkaServer::create_topic(kafka::Topic topic)
     {
         if (adclient_sptr_)
         {
-            kafka::Properties topic_props ({
-                {"max.message.bytes",  "1048588"}
-            });
+            // kafka::Properties topic_props ({
+            //     {"max.message.bytes",  "1048588"}
+            // });
+
+            kafka::Properties topic_props;            
 
             auto createResult = adclient_sptr_->createTopics({topic}, 3, 3, topic_props);
             if (createResult.error)

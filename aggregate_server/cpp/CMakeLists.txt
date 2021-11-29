@@ -4,13 +4,13 @@ PROJECT(demo4quote)
 if(DEFINED ENV{LOCAL})
     MESSAGE(STATUS "defined env.LOCAL")
 endif()
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 ###############################################################################################
 if(DEFINED ENV{LOCAL})
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pg -g3 -Wall -pthread")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pg -g3 -Wall -pthread")
 else()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
 endif()
 set(BOOST_ROOT /usr/local/boost_1_68)
 
