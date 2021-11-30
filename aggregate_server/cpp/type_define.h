@@ -1,7 +1,7 @@
 #pragma once
 
-#define TOPIC_SEPARATOR "-"
-#define TYPE_SEPARATOR "|"
+#define TOPIC_SEPARATOR "|"
+#define TYPE_SEPARATOR "-"
 #define SYMBOL_EXCHANGE_SEPARATOR "."
 
 
