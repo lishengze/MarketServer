@@ -61,8 +61,6 @@ bool DecodeProcesser::_json_to_kline(const Value& data,  SExchangeConfig& config
 {
     try
     {
-        LOG_INFO(data.GetString());
-
         kline.symbol = data[7].GetString();
         kline.exchange = data[8].GetString();
         kline.index = int(data[0].GetDouble());
