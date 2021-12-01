@@ -35,6 +35,7 @@ public:
 
     bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
+    void set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config);
 
 public:
     void _json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths);

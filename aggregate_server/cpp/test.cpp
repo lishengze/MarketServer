@@ -164,6 +164,7 @@ void TestEngine::on_config_channged(const Document& src)
         if (is_config_changed)
         {
             p_kafka_->set_new_config(trans_config_);
+            p_decode_processer_->set_new_config(trans_config_);
         }
 
         // 启动数据接收

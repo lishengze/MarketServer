@@ -124,11 +124,12 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
         {
             MetaData meta_data;
             if (!pre_process(src_data, meta_data)) continue;
+            LOG_INFO(meta_data.simple_str());
 
             SExchangeConfig config;
             if (!_get_config(meta_data.symbol, meta_data.exchange, config)) continue;
 
-            LOG_INFO(meta_data.simple_str());
+            
 
             if (meta_data.type == DEPTH_TYPE)
             {
@@ -254,6 +255,18 @@ bool DecodeProcesser::set_config(const TSymbol& symbol, const SSymbolConfig& con
 
         symbol_config_[symbol] = config;
         return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DecodeProcesser::set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config)
+{
+    try
+    {
+        symbol_config_ = new_config;
     }
     catch(const std::exception& e)
     {
