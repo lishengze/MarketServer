@@ -14,7 +14,9 @@ void TestEngine::init()
 
         config_client_.set_callback(this);
 
+        LOG_INFO(string("Nacos Address: ") + CONFIG->nacos_addr_ + " namespace: " + CONFIG->nacos_namespace_);
 
+        config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
         
     }
     catch(const std::exception& e)
@@ -27,10 +29,7 @@ void TestEngine::start()
 {
     try
     {
-        LOG_INFO(string("Nacos Address: ") + CONFIG->nacos_addr_ + " namespace: " + CONFIG->nacos_namespace_);
-
-        config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
-        // p_kafka_->launch();
+        p_kafka_->launch();
     }
     catch(const std::exception& e)
     {

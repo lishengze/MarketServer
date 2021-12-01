@@ -129,6 +129,8 @@ kafka::Topics KafkaServer::_get_created_topics()
     {
         LOG_ERROR(e.what());
     }   
+
+    return kafka::Topics();
 }
 
 bool KafkaServer::create_topic(kafka::Topic topic)
@@ -217,6 +219,7 @@ void KafkaServer::listen_data_main()
 
             if (src_data_vec_.size() > 0)
             {
+                LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
                 src_data_cv_.notify_all();   
             }                             
         }        
@@ -251,8 +254,9 @@ void KafkaServer::process_data()
                 return !(src_data_vec_.size()==0);
             });            
 
-            decode_processer_->process_data(src_data_vec_);
+            LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
+            // decode_processer_->process_data(src_data_vec_);
             src_data_vec_.clear();
         }
     }
