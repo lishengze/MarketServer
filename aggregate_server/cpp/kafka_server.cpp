@@ -14,7 +14,7 @@ KafkaServer::KafkaServer(string bootstrap_servers):
 KafkaServer::KafkaServer(DecodeProcesser* decode_processer):
     decode_processer_{decode_processer}
 {
-    this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
+    bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
 
     LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
 
@@ -24,7 +24,7 @@ KafkaServer::KafkaServer(DecodeProcesser* decode_processer):
 
 KafkaServer::KafkaServer()
 {
-    this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
+    bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
 
     LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
 
@@ -72,9 +72,9 @@ void KafkaServer::launch()
 {
     try
     {
-        start_listen_data();
+        // start_listen_data();
 
-        start_process_data();
+        // start_process_data();
     }
     catch(const std::exception& e)
     {
@@ -188,7 +188,7 @@ void KafkaServer::listen_data_main()
                 LOG_ERROR("consumer_sptr_ is empty");
                 return;
             }
-            
+
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
             LOG_INFO("records.size: " + std::to_string(records.size()));
 
