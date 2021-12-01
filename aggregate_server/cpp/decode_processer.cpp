@@ -61,6 +61,8 @@ bool DecodeProcesser::_json_to_kline(const Value& data,  SExchangeConfig& config
 {
     try
     {
+        LOG_INFO(data.GetString());
+
         kline.symbol = data[7].GetString();
         kline.exchange = data[8].GetString();
         kline.index = int(data[0].GetDouble());
@@ -70,7 +72,7 @@ bool DecodeProcesser::_json_to_kline(const Value& data,  SExchangeConfig& config
         kline.px_close.from(data[4].GetDouble(), config.precise);
         kline.volume.from(data[5].GetDouble(), config.vprecise);
 
-        kline.resolution = data[9].GetInt64();
+        // kline.resolution = data[9].GetInt64();
         return true;
     }
     catch(const std::exception& e)
@@ -138,6 +140,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
             else if (meta_data.type == KLINE_TYPE)
             {
                 vector<KlineData> klines;
+                // LOG_INFO(src_data);
                 decode_kline(meta_data.data_body, config, klines);
 
                 LOG_INFO(klines_str(klines));
