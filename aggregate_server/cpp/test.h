@@ -26,7 +26,8 @@ class TestEngine:public INacosCallback
         utrade::pandora::io_service_pool&           engine_pool_;
         ConfigurationClient                         config_client_;
 
-        std::unordered_map<TSymbol, SNacosConfig>   symbols_;
+        std::unordered_map<TSymbol, SNacosConfig>    nacos_config_;
+        std::unordered_map<TSymbol, SSymbolConfig>   trans_config_;
 };
 
 

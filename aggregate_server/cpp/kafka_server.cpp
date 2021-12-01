@@ -72,9 +72,11 @@ void KafkaServer::launch()
 {
     try
     {
-        // start_listen_data();
+        LOG_INFO("launch");
 
-        // start_process_data();
+        start_listen_data();
+
+        start_process_data();
     }
     catch(const std::exception& e)
     {
@@ -420,6 +422,36 @@ bool KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
         }
 
         return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void KafkaServer::set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config)
+{
+    try
+    {
+        symbol_config_ = new_config;
+
+        std::set<string> new_topics;
+        for (auto iter1:symbol_config_)
+        {
+            for (auto iter2:iter1.second)
+            {
+                string symbol = iter1.first;
+                string exchange = iter2.first;
+                string kline_topic = _get_kline_topic(exchange, symbol);
+                string depth_topic = _get_depth_topic(exchange, symbol);
+
+                new_topics.emplace(std::move(kline_topic));
+                new_topics.emplace(std::move(depth_topic));                
+            }
+        }
+
+        topic_set_ = new_topics;
+        subscribe_topics(new_topics);
     }
     catch(const std::exception& e)
     {

@@ -62,7 +62,7 @@ void TestEngine::on_config_channged(const Document& src)
         LOG_INFO(content);
 
         // string -> 结构化数据
-        std::unordered_map<TSymbol, SNacosConfig> symbols;
+        std::unordered_map<TSymbol, SNacosConfig> curr_config;
         try
         {
             for (auto iter = d.MemberBegin() ; iter != d.MemberEnd() ; ++iter )
@@ -92,7 +92,7 @@ void TestEngine::on_config_channged(const Document& src)
                     exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].GetDouble();
                     cfg.exchanges[exchange] = exchange_cfg;
                 } 
-                symbols[symbol] = cfg;
+                curr_config[symbol] = cfg;
 
                 LOG_INFO("\n" + symbol + ": " + cfg.str());
 
@@ -104,45 +104,67 @@ void TestEngine::on_config_channged(const Document& src)
             
             return;
         }    
+
+        bool is_config_changed = false;
         
-        for( const auto& v : symbols )
+        std::map<string, SSymbolConfig> updated_symbol_map;
+        for( const auto& v : curr_config )
         {
             const TSymbol& symbol = v.first;
             const SNacosConfig& config = v.second;
             SSymbolConfig symbol_config = to_redis_config(config.exchanges);
 
             // 新增品种
-            if( symbols_.find(symbol) == symbols_.end() ) 
+            if( nacos_config_.find(symbol) == nacos_config_.end() ) 
             {
-                p_kafka_->set_config(symbol, symbol_config);
-                p_decode_processer_->set_config(symbol, symbol_config);
+                trans_config_[symbol] = symbol_config;
+
+                is_config_changed = true;
+                // p_kafka_->set_config(symbol, symbol_config);
+                // p_decode_processer_->set_config(symbol, symbol_config);
             }
             // 已有的品种
             else 
             { 
-                const SNacosConfig& last_config = symbols_[symbol];
+                const SNacosConfig& last_config = nacos_config_[symbol];
                 // 源头配置变更
                 if( to_redis_config(last_config.exchanges) != to_redis_config(config.exchanges) ) 
                 {
-                    p_kafka_->set_config(symbol, symbol_config);
-                    p_decode_processer_->set_config(symbol, symbol_config);
+                    is_config_changed = true;
+                    trans_config_[symbol] = symbol_config;
+
+                    // p_kafka_->set_config(symbol, symbol_config);
+                    // p_decode_processer_->set_config(symbol, symbol_config);
                 }
             }
+
+            
         }
 
 
         // 删除品种
-        for( const auto& v : symbols_ ) 
+        for( const auto& v : nacos_config_ ) 
         {
-            if( symbols.find(v.first) == symbols.end() ) 
+            if( curr_config.find(v.first) == curr_config.end() ) 
             {
-                p_kafka_->set_config(v.first, SSymbolConfig());
-                p_decode_processer_->set_config(v.first, SSymbolConfig());
+                is_config_changed = true;
+                if (trans_config_.find(v.first) != trans_config_.end())
+                {
+                    trans_config_.erase(v.first);
+                }
+
+                // p_kafka_->set_config(v.first, SSymbolConfig());
+                // p_decode_processer_->set_config(v.first, SSymbolConfig());
             }
         }
 
         // 保存
-        symbols_ = symbols;
+        nacos_config_ = curr_config;
+
+        if (is_config_changed)
+        {
+            p_kafka_->set_new_config(trans_config_);
+        }
 
         // 启动数据接收
         // p_kafka_->launch();

@@ -60,6 +60,8 @@ public:
 
     bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
+    void set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config);
+
 private:
     QuoteSourceCallbackInterface*      engine_interface_{nullptr};    
 
@@ -80,6 +82,6 @@ private:
 
     DecodeProcesser*                   decode_processer_;
 
-    std::mutex                         mutex_symbol_config_;
-    unordered_map<TSymbol, SSymbolConfig>   symbol_config_;
+    std::mutex                                        mutex_symbol_config_;
+    std::unordered_map<TSymbol, SSymbolConfig>        symbol_config_;
 };
