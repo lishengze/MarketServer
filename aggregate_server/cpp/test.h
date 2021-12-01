@@ -10,7 +10,7 @@ class TestEngine
         TestEngine(utrade::pandora::io_service_pool& engine_pool):
         engine_pool_{engine_pool}
         {
-
+            init();
         }
 
         void init();
