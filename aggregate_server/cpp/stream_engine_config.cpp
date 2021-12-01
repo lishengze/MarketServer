@@ -1,4 +1,5 @@
 #include "stream_engine_config.h"
+#include "Log/log.h"
 // #include "stream_engine.h"
 
 void Config::parse_config(const std::string& file_name)
@@ -12,15 +13,16 @@ void Config::parse_config(const std::string& file_name)
         //string WorkFolder = utrade::pandora::get_module_path();
         // append the prefix
         //string intact_file_name = WorkFolder + file_name;
-        UT_LOG_INFO(logger_, "System Parse Config File " << file_name);
 
-        std::cout << "\n***** Config FileName:  " << file_name << std::endl;
+        LOG_INFO("***** Config FileName:  " + file_name);
 
         // read the config file
         std::ifstream in_config(file_name);
         std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
-        std::cout << contents << std::endl;
+        
         njson js = njson::parse(contents);
+
+        LOG_INFO(contents);
 
         // grpc
         grpc_publish_addr_ = js["grpc"]["publish_addr"].get<string>();
@@ -45,8 +47,11 @@ void Config::parse_config(const std::string& file_name)
         // nacos
         nacos_addr_ = js["nacos"]["addr"].get<string>();
         nacos_namespace_ = js["nacos"]["namespace"].get<string>();
-        
-        UT_LOG_INFO(logger_, "Parse Config finish.");
+
+        if (!js["kafka"].is_null() && !js["kafka"]["bootstrap_servers"].is_null())
+        {
+            kafka_config_.bootstrap_servers = js["kafka"]["bootstrap_servers"].get<string>();
+        }
     }
     catch (std::exception& e)
     {

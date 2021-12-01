@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
 
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
-# set(BOOST_ROOT /usr/local/boost_1_68)
+set(BOOST_ROOT /usr/local/boost_1_68)
 
 FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time system filesystem thread 
                                      serialization math_tr1 chrono regex 
@@ -45,6 +45,7 @@ LINK_DIRECTORIES("../../lib")
 
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 LINK_DIRECTORIES("/usr/local/lib")
+LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 

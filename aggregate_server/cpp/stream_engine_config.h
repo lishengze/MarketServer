@@ -23,7 +23,6 @@ using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 struct KafkaConfig
 {
     string                  bootstrap_servers;
-    std::list<string>       sub_topic_list;
 };
 
 class Config

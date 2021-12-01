@@ -13,6 +13,8 @@ KafkaServer::KafkaServer()
 {
     this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
 
+    LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
+
     init_user();
 }
 
@@ -324,17 +326,18 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
 
         for(auto topic:topics)
         {
+            LOG_INFO("Sub Topic: " + topic);
             if (created_topics.find(topic) == created_topics.end())
             {
                 LOG_INFO("topic " + topic + " was not created");
             }
         }
 
-        if (consumer_sptr_)
-        {
-            consumer_sptr_->unsubscribe();
-            consumer_sptr_->subscribe(topics);
-        }
+        // if (consumer_sptr_)
+        // {
+        //     consumer_sptr_->unsubscribe();
+        //     consumer_sptr_->subscribe(topics);
+        // }
     }
     catch(const std::exception& e)
     {
