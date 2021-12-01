@@ -124,28 +124,28 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
         {
             MetaData meta_data;
             if (!pre_process(src_data, meta_data)) continue;
-            LOG_INFO(meta_data.simple_str());
+            // LOG_INFO(meta_data.simple_str());
 
             SExchangeConfig config;
             if (!_get_config(meta_data.symbol, meta_data.exchange, config)) continue;
-
             
-
             if (meta_data.type == DEPTH_TYPE)
             {
                 SDepthQuote depth_quote;
                 decode_depth(meta_data.data_body, config, depth_quote);
-                LOG_INFO(quote_str(depth_quote));
+                // LOG_INFO(quote_str(depth_quote));
             }
-            // else if (meta_data.type == KLINE_TYPE)
-            // {
-            //     vector<KlineData> klines;
-            //     decode_kline(meta_data.data_body, config, klines);
-            // }            
-            // else 
-            // {
-            //     LOG_WARN("Unknown Topic: " + (meta_data.type));
-            // }
+            else if (meta_data.type == KLINE_TYPE)
+            {
+                vector<KlineData> klines;
+                decode_kline(meta_data.data_body, config, klines);
+
+                LOG_INFO(klines_str(klines));
+            }            
+            else 
+            {
+                LOG_WARN("Unknown Topic: " + (meta_data.type));
+            }
         }
     }
     catch(const std::exception& e)
