@@ -348,20 +348,26 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
             LOG_INFO("created topic: " + topic);
         }
 
+        kafka::Topics valid_topics;
         for(auto topic:topics)
         {
-            LOG_INFO("Sub Topic: " + topic);
+            
             if (created_topics.find(topic) == created_topics.end())
             {
                 LOG_INFO("topic " + topic + " was not created");
             }
+            else
+            {
+                valid_topics.emplace(topic);
+                LOG_INFO("Sub Topic: " + topic);
+            }
         }
 
-        // if (consumer_sptr_)
-        // {
-        //     consumer_sptr_->unsubscribe();
-        //     consumer_sptr_->subscribe(topics);
-        // }
+        if (consumer_sptr_)
+        {
+            consumer_sptr_->unsubscribe();
+            consumer_sptr_->subscribe(valid_topics);
+        }
     }
     catch(const std::exception& e)
     {
