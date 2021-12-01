@@ -15,7 +15,7 @@ if(DEFINED ENV{LOCAL})
 else()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
 endif()
-# set(BOOST_ROOT /usr/local/boost_1_68)
+set(BOOST_ROOT /usr/local/boost_1_68)
 
 FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time system filesystem thread 
                                      serialization math_tr1 chrono regex 
@@ -58,6 +58,7 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 add_executable(${BIN_NAME} ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 
 target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} boost_system)
 target_link_libraries(${BIN_NAME} pandora)
 target_link_libraries(${BIN_NAME} log4cplus)
 target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)

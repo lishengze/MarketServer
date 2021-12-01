@@ -45,6 +45,7 @@ bool filter_zero_volume(SDepthQuote& quote)
     {
         std::cerr << e.what() << '\n';
     }    
+    return false;
 }
 
 void print_quote(const SDepthQuote& quote)
@@ -135,6 +136,7 @@ string quote_str(const SDepthQuote& quote)
     {
         std::cerr << e.what() << '\n';
     }       
+    return "";
 }
 
 string quote_str(const SDepthQuote& quote, int count)
@@ -207,6 +209,7 @@ string quote_str(const SDepthQuote& quote, int count)
     {
         std::cerr << e.what() << '\n';
     }    
+    return "";
 }
 
 string get_sec_time_str(unsigned long time)
@@ -411,8 +414,7 @@ string inner_quote_str(const SInnerQuote& quote)
     {
         LOG_ERROR(e.what());
     }
-    
-
+    return "";
 }
 
 void print_sedata(const SEData& sedata)
@@ -513,6 +515,7 @@ string klines_str(vector<KlineData>& kline_list)
     {
         std::cerr << e.what() << '\n';
     }    
+    return "";
 }
 
 string kline_str(KlineData& kline)
@@ -532,7 +535,7 @@ string kline_str(KlineData& kline)
     {
         std::cerr << e.what() << '\n';
     }
-    
+    return "";
 }
 
 void filter_kline_data(vector<KlineData>& kline_list)
