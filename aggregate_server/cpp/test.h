@@ -21,12 +21,12 @@ class TestEngine:public INacosCallback
         virtual void on_config_channged(const Document& symbols);
 
     private:
-        KafkaServer*                        p_kafka_{nullptr};
-        DecodeProcesser*                    p_decode_processer_{nullptr}; 
-        utrade::pandora::io_service_pool&   engine_pool_;
-        ConfigurationClient                 config_client_;
+        KafkaServer*                                p_kafka_{nullptr};
+        DecodeProcesser*                            p_decode_processer_{nullptr}; 
+        utrade::pandora::io_service_pool&           engine_pool_;
+        ConfigurationClient                         config_client_;
 
-        std::unordered_map<TSymbol, SNacosConfig> symbols_;
+        std::unordered_map<TSymbol, SNacosConfig>   symbols_;
 };
 
 

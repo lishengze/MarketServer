@@ -57,7 +57,7 @@ void KafkaServer::init_user()
 
         kafka::Properties adclient_props ({
             {"bootstrap.servers",  bootstrap_servers_},
-            {"client.id", "bcts"}            
+            {"client.id", "test_bcts"}            
         });                
         adclient_sptr_ = boost::make_shared<KAdmin>(adclient_props);
     }
@@ -342,6 +342,11 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
     try
     {
         kafka::Topics created_topics = _get_created_topics();
+
+        for (auto topic:created_topics)
+        {
+            LOG_INFO("created topic: " + topic);
+        }
 
         for(auto topic:topics)
         {
