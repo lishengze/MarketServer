@@ -18,6 +18,11 @@ public:
         Document    data_body;
         string      symbol;
         string      exchange;
+
+        string simple_str()
+        {
+            return string("type: ") + type + ", symbol: " + symbol + ", exchange: " + exchange;
+        }
     };
 
     void process_data(const std::vector<string>& src_data);

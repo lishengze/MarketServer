@@ -195,10 +195,10 @@ void KafkaServer::listen_data_main()
 
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
 
-            if (records.size()>0)
-            {
-                LOG_INFO("records.size: " + std::to_string(records.size()));
-            }
+            // if (records.size()>0)
+            // {
+            //     LOG_INFO("records.size: " + std::to_string(records.size()));
+            // }
             
             std::unique_lock<std::mutex> lk(src_data_mutex_);
             for (const auto& record: records) 
@@ -209,7 +209,7 @@ void KafkaServer::listen_data_main()
                     string topic = record.topic();      
                     ori_data = topic + TOPIC_SEPARATOR + ori_data;
 
-                    LOG_INFO(ori_data);
+                    // LOG_INFO(ori_data);
                     
                     src_data_vec_.emplace_back(std::move(ori_data));
                 } 
@@ -258,7 +258,7 @@ void KafkaServer::process_data()
 
             LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
-            // decode_processer_->process_data(src_data_vec_);
+            decode_processer_->process_data(src_data_vec_);
             src_data_vec_.clear();
         }
     }

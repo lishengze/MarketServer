@@ -1,5 +1,6 @@
 #include "decode_processer.h"
 #include "Log/log.h"
+#include "util/tool.h"
 
 void DecodeProcesser::_json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
@@ -127,20 +128,23 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
             SExchangeConfig config;
             if (!_get_config(meta_data.symbol, meta_data.exchange, config)) continue;
 
-            if (meta_data.type == "depth")
+            LOG_INFO(meta_data.simple_str());
+
+            if (meta_data.type == DEPTH_TYPE)
             {
                 SDepthQuote depth_quote;
                 decode_depth(meta_data.data_body, config, depth_quote);
+                LOG_INFO(quote_str(depth_quote));
             }
-            else if (meta_data.type == "kline")
-            {
-                vector<KlineData> klines;
-                decode_kline(meta_data.data_body, config, klines);
-            }            
-            else 
-            {
-                LOG_WARN("Unknown Topic: " + (meta_data.type));
-            }
+            // else if (meta_data.type == KLINE_TYPE)
+            // {
+            //     vector<KlineData> klines;
+            //     decode_kline(meta_data.data_body, config, klines);
+            // }            
+            // else 
+            // {
+            //     LOG_WARN("Unknown Topic: " + (meta_data.type));
+            // }
         }
     }
     catch(const std::exception& e)
