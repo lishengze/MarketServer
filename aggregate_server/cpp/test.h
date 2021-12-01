@@ -2,9 +2,10 @@
 #include "kafka_server.h"
 #include "decode_processer.h"
 #include "pandora/util/io_service_pool.h"
+#include "configuration_client.h"
+#include "stream_engine_define.h"
 
-
-class TestEngine
+class TestEngine:public INacosCallback
 {
     public:
         TestEngine(utrade::pandora::io_service_pool& engine_pool):
@@ -17,10 +18,15 @@ class TestEngine
 
         void start();
 
+        virtual void on_config_channged(const Document& symbols);
+
     private:
         KafkaServer*                        p_kafka_{nullptr};
         DecodeProcesser*                    p_decode_processer_{nullptr}; 
         utrade::pandora::io_service_pool&   engine_pool_;
+        ConfigurationClient                 config_client_;
+
+        std::unordered_map<TSymbol, SNacosConfig> symbols_;
 };
 
 
