@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(demo4quote)
+
+SET("BIN_NAME" aggregate_server)
+
+PROJECT(${BIN_NAME})
 
 if(DEFINED ENV{LOCAL})
     MESSAGE(STATUS "defined env.LOCAL")
@@ -14,7 +17,11 @@ else()
 endif()
 set(BOOST_ROOT /usr/local/boost_1_68)
 
-FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
+FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time system filesystem thread 
+                                     serialization math_tr1 chrono regex 
+                                     program_options unit_test_framework 
+                                     locale REQUIRED)
+                                     
 INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 
 ###############################################################################################
@@ -48,21 +55,18 @@ LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_executable(demo4quote ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
-if(DEFINED ENV{LOCAL})
-    target_link_libraries(demo4quote asan ${Boost_LIBRARIES})
-else()
-    target_link_libraries(demo4quote ${Boost_LIBRARIES})
-endif()
-target_link_libraries(demo4quote pandora)
-target_link_libraries(demo4quote log4cplus)
-target_link_libraries(demo4quote protobuf protoc protobuf-lite)
-target_link_libraries(demo4quote grpc++_reflection grpc++ gpr ssl crypto)
-target_link_libraries(demo4quote nacos-cli)
-target_link_libraries(demo4quote reporter)
-target_link_libraries(demo4quote SQLiteCpp sqlite3 dl)
+add_executable(${BIN_NAME} ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 
-TARGET_LINK_LIBRARIES(demo4quote ssl crypto)
-TARGET_LINK_LIBRARIES(demo4quote rdkafka rdkafka++)
+target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} pandora)
+target_link_libraries(${BIN_NAME} log4cplus)
+target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
+target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
+target_link_libraries(${BIN_NAME} nacos-cli)
+target_link_libraries(${BIN_NAME} reporter)
+target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
+
+TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
 
 ###############################################################################################
