@@ -58,7 +58,7 @@ public:
     void start_process_data();
     void process_data();
 
-    bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
+    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
 
     void set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config);
 

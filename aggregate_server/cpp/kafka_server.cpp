@@ -102,7 +102,7 @@ kafka::Topics KafkaServer::_get_subed_topics()
     {
         LOG_ERROR(e.what());
     }
-    
+    return kafka::Topics();
 }
 
 kafka::Topics KafkaServer::_get_created_topics()
@@ -278,6 +278,7 @@ string KafkaServer::_get_kline_topic(string exchange, string symbol)
     {
         LOG_ERROR(e.what());
     }
+    return "";
 }
 
 string KafkaServer::_get_depth_topic(string exchange, string symbol)
@@ -290,6 +291,7 @@ string KafkaServer::_get_depth_topic(string exchange, string symbol)
     {
         LOG_ERROR(e.what());
     }    
+    return "";
 }
 
 void KafkaServer::sub_topic(const string& topic)
@@ -389,15 +391,13 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
     }    
 }
 
-bool KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
+void KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 {
     try
     {
         LOG_INFO("Set Config " + symbol + ":\n");
 
         symbol_config_[symbol] = config;
-
-        bool new_topic;
 
         std::set<string> new_topics;
         for (auto iter1:symbol_config_)
@@ -420,8 +420,6 @@ bool KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
 
             subscribe_topics(topic_set_);
         }
-
-        return true;
     }
     catch(const std::exception& e)
     {
