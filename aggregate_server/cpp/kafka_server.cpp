@@ -183,6 +183,12 @@ void KafkaServer::listen_data_main()
         LOG_INFO("listen_data_main");
         while (true) 
         {            
+            if (!consumer_sptr_)
+            {
+                LOG_ERROR("consumer_sptr_ is empty");
+                return;
+            }
+            
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
             LOG_INFO("records.size: " + std::to_string(records.size()));
 
