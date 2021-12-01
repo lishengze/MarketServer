@@ -190,8 +190,12 @@ void KafkaServer::listen_data_main()
             }
 
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
-            LOG_INFO("records.size: " + std::to_string(records.size()));
 
+            if (records.size()>0)
+            {
+                LOG_INFO("records.size: " + std::to_string(records.size()));
+            }
+            
             std::unique_lock<std::mutex> lk(src_data_mutex_);
             for (const auto& record: records) 
             {                
@@ -359,8 +363,12 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
             else
             {
                 valid_topics.emplace(topic);
-                LOG_INFO("Sub Topic: " + topic);
             }
+        }
+
+        for(auto topic:valid_topics)
+        {
+            LOG_INFO("Sub Topic: " + topic);
         }
 
         if (consumer_sptr_)
