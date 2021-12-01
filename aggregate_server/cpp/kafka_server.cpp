@@ -6,8 +6,21 @@
 KafkaServer::KafkaServer(string bootstrap_servers):
      bootstrap_servers_{bootstrap_servers}
 {
+    LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
+
     init_user();
 }
+
+KafkaServer::KafkaServer(DecodeProcesser* decode_processer):
+    decode_processer_{decode_processer}
+{
+    this->bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
+
+    LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
+
+    init_user();
+}
+
 
 KafkaServer::KafkaServer()
 {

@@ -19,11 +19,7 @@ public:
 
     KafkaServer(string server_address);
 
-    KafkaServer(DecodeProcesser* decode_processer):
-        decode_processer_{decode_processer}
-    {
-
-    }
+    KafkaServer(DecodeProcesser* decode_processer);
 
     KafkaServer();
 
