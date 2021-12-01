@@ -101,7 +101,7 @@ bool DecodeProcesser::_get_config(string symbol, string exchange, SExchangeConfi
         {
             return false;
         }
-        if (symbol_config_[symbol].find(exchange) != symbol_config_[symbol].end())
+        if (symbol_config_[symbol].find(exchange) == symbol_config_[symbol].end())
         {
             return false;
         }
