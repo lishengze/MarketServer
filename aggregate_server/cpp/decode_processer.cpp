@@ -43,6 +43,7 @@ bool DecodeProcesser::_json_to_quote(const Document& snap_json, SDepthQuote& quo
         vassign(quote.origin_time, parse_nano(timeArrive));
         quote.arrive_time = get_miliseconds();
         quote.server_time = 0; // 这个时间应该在发送前赋值
+        quote.is_snap = isSnap;
         
         string askDepth = isSnap ? "AskDepth" : "AskUpdate";
         _json_to_quote_depth(snap_json[askDepth.c_str()], config, quote.asks);

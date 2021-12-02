@@ -14,6 +14,8 @@ class TestEngine:public INacosCallback
             init();
         }
 
+        ~TestEngine();
+
         void init();
 
         void start();

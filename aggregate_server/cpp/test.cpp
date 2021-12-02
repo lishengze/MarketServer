@@ -4,6 +4,21 @@
 #include "pandora/util/io_service_pool.h"
 #include "stream_engine_config.h"
 
+TestEngine::~TestEngine()
+{
+    if (p_kafka_)
+    {
+        delete p_kafka_;
+        p_kafka_ = nullptr;
+    }
+
+    if (p_decode_processer_)
+    {
+        delete p_decode_processer_;
+        p_decode_processer_ = nullptr;
+    }
+}
+
 void TestEngine::init()
 {
     try

@@ -25,6 +25,7 @@ struct SDepthQuote {
     uint32 amount_precise;  // 成交额精度（来自配置中心）
     map<SDecimal, SDepth> asks; // 买盘
     map<SDecimal, SDepth> bids; // 卖盘
+    bool is_snap{false};
 
     SDepthQuote() {
         raw_length = 0;
