@@ -90,7 +90,7 @@ bool DepthProcessor::store_first_quote(const SDepthQuote& src)
         {
             if (src.is_snap)
             {
-                latest_depth_quote_[src.symbol][src.exchange] = src;
+                latest_depth_quote_[src.symbol][src.exchange] = src; // ??
             }
             else
             {

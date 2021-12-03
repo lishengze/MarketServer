@@ -38,6 +38,24 @@ struct SDepthQuote {
         volume_precise = 0;
     }
 
+    SDepthQuote(const SDepthQuote&& src):
+        raw_length{std::move(src.raw_length)},
+        exchange{std::move(src.exchange)},
+        symbol{std::move(src.symbol)},
+        sequence_no{std::move(src.sequence_no)},
+        origin_time{std::move(src.origin_time)},
+        arrive_time{std::move(src.arrive_time)},
+        server_time{std::move(src.server_time)},
+        price_precise{std::move(src.price_precise)},
+        volume_precise{std::move(src.volume_precise)},
+        amount_precise{std::move(src.amount_precise)},
+        asks{std::move(src.asks)},
+        bids{std::move(src.bids)},
+        is_snap{std::move(src.is_snap)}
+    {
+
+    }
+
     std::string str() const
     {
         std::stringstream s_obj;
@@ -190,6 +208,41 @@ struct SExchangeConfig
     }
 };
 using SSymbolConfig = unordered_map<TExchange, SExchangeConfig>;
+
+struct SMixerConfig
+{
+    type_uint32 depth;
+    type_uint32 precise;
+    type_uint32 vprecise;
+    type_uint32 aprecise;
+    float frequency;
+    unordered_map<TExchange, SymbolFee> fees;
+
+    SMixerConfig() {
+
+    }
+
+    SMixerConfig(type_uint32 _depth, type_uint32 _precise, type_uint32 _vprecise, float _frequency, 
+                            const unordered_map<TExchange, SNacosConfigByExchange>& _exchanges)
+    {
+        depth = _depth;
+        precise = _precise;
+        vprecise = _vprecise;
+        frequency = _frequency;
+        for( const auto& v : _exchanges ) 
+        {
+            fees[v.first] = v.second.fee;
+        }        
+    }
+
+    bool operator==(const SMixerConfig &rhs) const {
+        return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
+    }
+    bool operator!=(const SMixerConfig &rhs) const {
+        return !(*this == rhs);
+    }
+};
+
 class QuoteSourceInterface
 {
 public:
@@ -197,6 +250,7 @@ public:
     virtual bool stop() = 0;
     virtual bool set_config(const TSymbol& symbol, const SSymbolConfig& config) { return true; };
 };
+
 
 class QuoteSourceCallbackInterface
 {

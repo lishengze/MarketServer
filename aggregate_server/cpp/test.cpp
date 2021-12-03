@@ -65,6 +65,21 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
     return ret;
 }
 
+SMixerConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, 
+                            const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
+{    
+    SMixerConfig config;
+    config.depth = depth;
+    config.precise = precise;
+    config.vprecise = vprecise;
+    config.frequency = frequency;
+    for( const auto& v : exchanges ) 
+    {
+        config.fees[v.first] = v.second.fee;
+    }
+    return config;
+}
+
 void TestEngine::on_config_channged(const Document& src)
 {
     try
@@ -127,7 +142,9 @@ void TestEngine::on_config_channged(const Document& src)
         {
             const TSymbol& symbol = v.first;
             const SNacosConfig& config = v.second;
+
             SSymbolConfig symbol_config = to_redis_config(config.exchanges);
+            SMixerConfig mixer_config = to_mixer_config(config.depth, config.precise, config.vprecise, config.frequency, config.exchanges);
 
             // 新增品种
             if( nacos_config_.find(symbol) == nacos_config_.end() ) 

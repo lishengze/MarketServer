@@ -36,6 +36,11 @@ struct SDecimal {
         data_.value_ = 0;
     }
 
+    SDecimal(const SDecimal&& src):data_{std::move(src.data_)}
+    {
+
+    }
+
     SDecimal(const string& v) {
         from(v);
     }
