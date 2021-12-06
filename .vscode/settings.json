@@ -89,6 +89,7 @@
         "cfenv": "cpp",
         "risk_controller.pb.h": "c",
         "risk_controller_define.h": "c",
-        "stream_engine_define.h": "c"
+        "stream_engine_define.h": "c",
+        "struct_define.h": "c"
     }
 }

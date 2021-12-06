@@ -2,6 +2,8 @@
 #include "global_declare.h"
 #include "pandora/util/io_service_pool.h"
 #include "struct_define.h"
+#include "depth_processor.h"
+#include "kline_processor.h"
 
 class DecodeProcesser
 {
@@ -9,6 +11,14 @@ public:
     DecodeProcesser(utrade::pandora::io_service_pool& process_pool):
         process_pool_{process_pool}
     {}
+
+    DecodeProcesser(DepthProcessor* depth_processor, 
+                    KlineProcessor* kline_processor, 
+                    utrade::pandora::io_service_pool& process_pool):
+        p_depth_processor_{depth_processor}, 
+        p_kline_processor_{kline_processor},
+        process_pool_{process_pool}
+    {}    
 
     virtual ~DecodeProcesser() { }
 
@@ -50,6 +60,10 @@ public:
 
 
 private:
+    DepthProcessor*                         p_depth_processor_{nullptr};
+    
+    KlineProcessor*                         p_kline_processor_{nullptr};
+
     utrade::pandora::io_service_pool&       process_pool_;
 
     mutable std::mutex                      mutex_symbol_;

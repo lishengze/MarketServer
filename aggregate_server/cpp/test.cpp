@@ -23,7 +23,13 @@ void TestEngine::init()
 {
     try
     {
-        p_decode_processer_ = new DecodeProcesser(engine_pool_);
+        p_depth_aggregater_ = new DepthAggregater();
+
+        p_depth_processor_  = new DepthProcessor(p_depth_aggregater_);
+
+        p_kline_processor_ = new KlineProcessor();
+
+        p_decode_processer_ = new DecodeProcesser(p_depth_processor_, p_kline_processor_, engine_pool_);
 
         p_kafka_ = new KafkaServer(p_decode_processer_);
 

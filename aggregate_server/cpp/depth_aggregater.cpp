@@ -2,8 +2,6 @@
 
 #include "stream_engine_config.h"
 
-#include "converter.h"
-
 #include "depth_aggregater.h"
 
 #include "Log/log.h"
@@ -68,11 +66,11 @@ void DepthAggregater::_thread_loop()
         }
         
         // 休眠
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(CONFIG->depth_compute_millsecs));
     }
 }
 
-void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, const TExchange& exchange, const DepthAggregater::SMixerConfig& config, bool is_ask)
+void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, const TExchange& exchange, const SMixerConfig& config, bool is_ask)
 {    
     SymbolFee fee;
     auto iter = config.fees.find(exchange);
@@ -89,7 +87,7 @@ void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, con
     }
 }
 
-void normalize(map<SDecimal, SDepth>& src, const DepthAggregater::SMixerConfig& config)
+void normalize(map<SDecimal, SDepth>& src, const SMixerConfig& config)
 {
     SDecimal volume = 0;
     for( auto iter = src.begin() ; iter != src.end() ; iter++ ) 
@@ -106,7 +104,6 @@ void normalize(map<SDecimal, SDepth>& src, const DepthAggregater::SMixerConfig& 
 void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config, type_seqno seqno)
 {
     // 行情
-    //cout << "calulate " << symbol << endl;
     SDepthQuote snap;
     snap.sequence_no = seqno;
     snap.origin_time = 0;
@@ -144,46 +141,14 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
         snap.exchange = MIX_EXCHANGE_NAME;        
-        engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
+        engine_->on_snap(snap);
     }
-    else
-    {
-
-    }
-
-    // 交易
-    Trade trade;
-    {        
-        std::unique_lock<std::mutex> l{ mutex_quotes_ };
-        for( const auto& data : trades_[symbol] ) 
-        {
-            if( data.second.time > trade.time )
-                trade = data.second;
-        }
-    }
-    trade.price.scale(config.precise);
-    trade.volume.scale(config.vprecise);
-    if( trade.time > 0 ) {
-        engine_interface_->on_trade(MIX_EXCHANGE_NAME, symbol, trade);
-    }
-}
-
-void DepthAggregater::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
-{
-    std::unique_lock<std::mutex> l{ mutex_quotes_ };
-    trades_[symbol][exchange] = trade;
 }
 
 void DepthAggregater::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
-    
-    // if (symbol == "ETH_BTC")
-    // {
-    //     LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote));
-    // }
 
-    // cout << "DepthAggregater::on_snap: " << quote.str() << endl;
     quotes_[symbol][exchange] = quote;
 }
 

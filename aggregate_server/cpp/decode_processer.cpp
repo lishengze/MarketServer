@@ -143,7 +143,11 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 decode_kline(meta_data.data_body, config, klines);
 
                 LOG_INFO(klines_str(klines));
-            }            
+            }         
+            else if (meta_data.type == TRADE_TYPE)
+            {
+
+            }                  
             else 
             {
                 LOG_WARN("Unknown Topic: " + (meta_data.type));
@@ -262,6 +266,7 @@ bool DecodeProcesser::set_config(const TSymbol& symbol, const SSymbolConfig& con
     {
         LOG_ERROR(e.what());
     }
+    return false;
 }
 
 void DecodeProcesser::set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config)

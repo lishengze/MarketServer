@@ -1,17 +1,17 @@
 #include "kline_processor.h"
 #include "Log/log.h"
 
-KlilneProcessor::KlilneProcessor()
+KlineProcessor::KlineProcessor()
 {
 
 }
 
-KlilneProcessor::~KlilneProcessor()
+KlineProcessor::~KlineProcessor()
 {
 
 }
 
-void KlilneProcessor::process(vector<KlineData>& src)
+void KlineProcessor::process(vector<KlineData>& src)
 {
     try
     {

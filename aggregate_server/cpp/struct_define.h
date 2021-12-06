@@ -7,6 +7,194 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+
+inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) 
+{
+    return symbol + "." + exchange;
+};
+
+inline bool extract_symbolkey(const string& combined, TExchange& exchange, TSymbol& symbol) 
+{
+    std::string::size_type pos = combined.find(".");
+    if( pos == std::string::npos) 
+        return false;
+    symbol = combined.substr(0, pos);
+    exchange = combined.substr(pos+1);
+    return true;
+};
+
+inline string make_redis_depth_key(const TExchange& exchange, const TSymbol& symbol) 
+{
+    return "DEPTHx|" + symbol + "." + exchange;
+};
+
+// 内部行情结构
+struct SMixDepthPrice {
+    SDecimal price;
+    unordered_map<TExchange, SDecimal> volume;
+    SMixDepthPrice* next;
+
+    SMixDepthPrice() {
+        next = NULL;
+    }
+};
+
+struct SMixQuote {
+    SMixDepthPrice* asks; // 卖盘
+    SMixDepthPrice* bids; // 买盘
+    SDecimal watermark;
+    long long sequence_no;
+    type_tick server_time;
+    uint32 price_precise;
+    uint32 volume_precise;
+
+    SMixQuote() {
+        asks = NULL;
+        bids = NULL;
+        price_precise = 0;
+        volume_precise = 0;
+    }
+
+    unsigned int ask_length() const {
+        return _get_length(asks);
+    }
+
+    unsigned int bid_length() const {
+        return _get_length(bids);
+    }
+
+    unsigned int _get_length(const SMixDepthPrice* ptr) const {
+        unsigned int ret = 0;
+        while( ptr != NULL ) {
+            ptr = ptr->next;
+            ret ++;
+        }
+        return ret;
+    }
+
+    void release() {
+        _release(asks);
+        _release(bids);
+        asks = NULL;
+        bids = NULL;
+    }
+
+    void _release(SMixDepthPrice* ptr) {            
+        SMixDepthPrice *tmp = ptr;
+        while( tmp != NULL ) {
+            // 删除             
+            SMixDepthPrice* waitToDel = tmp;
+            tmp = tmp->next;
+            delete waitToDel;
+        }
+    }
+};
+
+struct SymbolFee
+{
+    int fee_type;       // 0表示fee不需要处理（默认），1表示fee值为比例，2表示fee值为绝对值
+    double maker_fee;
+    double taker_fee;
+
+    SymbolFee() {
+        fee_type = 0;
+        maker_fee = taker_fee = 0.2;
+    }
+
+    bool operator==(const SymbolFee &rhs) const {
+        return fee_type == rhs.fee_type && maker_fee == rhs.maker_fee && taker_fee == rhs.taker_fee;
+    }
+
+    void compute(const SDecimal& src, SDecimal& dst, bool is_ask) const
+    {
+        if( fee_type == 2 ) {
+            if( is_ask ) {
+                dst = src.add(maker_fee, true);
+            } else {
+                dst = src.add(taker_fee * (-1), false);
+            }
+        } else if( fee_type == 1 ) {
+            if( is_ask ) {
+                dst = src.multiple((100 + maker_fee) / 100.0, true);
+            } else {
+                dst = src.multiple((100 - taker_fee) / 100.0, false);
+            }
+        } else {
+            dst = src;
+        }
+    }
+
+    string str()
+    {
+        stringstream s_obj;
+
+        s_obj << "fee_type: " << fee_type << " "
+              << "maker_fee: " << maker_fee << " "
+              << "taker_fee: " << taker_fee << " ";
+        
+        return s_obj.str();
+    }
+};
+
+struct SNacosConfigByExchange
+{
+    SymbolFee fee;          // 手续费参数
+    type_uint32 depth;      // 行情深度（暂时没用）
+    type_uint32 precise;    // 价格精度
+    type_uint32 vprecise;   // 成交量精度
+    type_uint32 aprecise;   // 成交额精度（暂时没用）
+    float frequency;        // 更新频率(每秒frequency次)
+
+    string str() {
+        stringstream s_obj;
+        s_obj << "fee: " << fee.str() << " "
+            << "depth: " << depth << " "
+            << "precise: " << precise << " "
+            << "vprecise: " << vprecise << " "
+            << "aprecise: " << aprecise << " "
+            << "frequency: " << frequency << " ";
+        
+        return s_obj.str();
+    }
+
+};
+
+struct SNacosConfig
+{
+    type_uint32 depth;      // 【聚合】发布深度
+    float frequency;        // 【聚合】更新频率（每秒frequency次）
+    type_uint32 precise;    // 价格精度
+    type_uint32 vprecise;   // 成交量精度
+    type_uint32 aprecise;   // 成交额精度
+    unordered_map<TExchange, SNacosConfigByExchange> exchanges;
+
+    unordered_set<TExchange> get_exchanges() const {
+        unordered_set<TExchange> ret;
+        for( const auto& v : exchanges ) {
+            ret.insert(v.first);
+        }
+        return ret;
+    }
+
+    string str()
+    {
+        stringstream s_obj;
+
+        s_obj << "depth: " << depth << " "
+              << "frequency: " << frequency << " "
+              << "precise: " << precise << " "
+              << "vprecise: " << vprecise << " "
+              << "aprecise: " << vprecise << " \n";
+
+        for (auto iter:exchanges)
+        {
+            s_obj << iter.first << " " << iter.second.str() << "\n";
+        }
+
+        return s_obj.str();
+    }
+};
+
 struct SDepth {
     SDecimal volume;    // 单量
     unordered_map<TExchange, SDecimal> volume_by_exchanges; // 聚合行情才有用
@@ -55,6 +243,45 @@ struct SDepthQuote {
     {
 
     }
+
+    SDepthQuote(const SDepthQuote& src):
+        raw_length{src.raw_length},
+        exchange{src.exchange},
+        symbol{src.symbol},
+        sequence_no{src.sequence_no},
+        origin_time{src.origin_time},
+        arrive_time{src.arrive_time},
+        server_time{src.server_time},
+        price_precise{src.price_precise},
+        volume_precise{src.volume_precise},
+        amount_precise{src.amount_precise},
+        asks{src.asks},
+        bids{src.bids},
+        is_snap{src.is_snap}
+    {
+
+    }
+
+    SDepthQuote& operator = (const SDepthQuote& src)
+    {
+        if (this == &src) return *this;
+
+        raw_length = src.raw_length;
+        exchange = src.exchange;
+        symbol = src.symbol;
+        sequence_no = src.sequence_no;
+        origin_time = src.origin_time;
+        arrive_time = src.arrive_time;
+        server_time = src.server_time;
+        price_precise = src.price_precise;
+        volume_precise = src.volume_precise;
+        amount_precise = src.amount_precise;
+        asks = src.asks;
+        bids = src.bids;
+        is_snap = src.is_snap;
+        return *this;
+    }
+
 
     std::string str() const
     {
@@ -113,29 +340,6 @@ struct SDepthQuote {
 };
 
 using TMarketQuote = unordered_map<TSymbol, SDepthQuote>;
-#define TRADE_HEAD "TRADEx"
-#define DEPTH_UPDATE_HEAD "UPDATEx"
-#define GET_DEPTH_HEAD "DEPTHx"
-#define KLINE_1MIN_HEAD "KLINEx"
-#define KLINE_60MIN_HEAD "SLOW_KLINEx"
-#define SNAP_HEAD "__SNAPx" // 为了统一接口，自定义的消息头
-
-inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) {
-    return symbol + "." + exchange;
-};
-
-inline bool extract_symbolkey(const string& combined, TExchange& exchange, TSymbol& symbol) {
-    std::string::size_type pos = combined.find(".");
-    if( pos == std::string::npos) 
-        return false;
-    symbol = combined.substr(0, pos);
-    exchange = combined.substr(pos+1);
-    return true;
-};
-
-inline string make_redis_depth_key(const TExchange& exchange, const TSymbol& symbol) {
-    return "DEPTHx|" + symbol + "." + exchange;
-};
 
 #pragma pack(1)
 struct KlineData
@@ -162,13 +366,15 @@ struct KlineData
     }
 };
 
-struct Trade
+struct TradeData
 {
-    type_tick time;
-    SDecimal price;
-    SDecimal volume;
+    type_tick   time;
+    SDecimal    price;
+    SDecimal    volume;
+    TSymbol     symbol;
+    TExchange   exchange;
 
-    Trade() {
+    TradeData() {
         time = 0;
     }
 };
@@ -207,6 +413,7 @@ struct SExchangeConfig
         return tfm::format("precise=%s vprecise=%s frequency=%s", ToString(precise), ToString(vprecise), ToString(frequency));
     }
 };
+
 using SSymbolConfig = unordered_map<TExchange, SExchangeConfig>;
 
 struct SMixerConfig
@@ -241,30 +448,4 @@ struct SMixerConfig
     bool operator!=(const SMixerConfig &rhs) const {
         return !(*this == rhs);
     }
-};
-
-class QuoteSourceInterface
-{
-public:
-    virtual bool start() = 0;
-    virtual bool stop() = 0;
-    virtual bool set_config(const TSymbol& symbol, const SSymbolConfig& config) { return true; };
-};
-
-
-class QuoteSourceCallbackInterface
-{
-public:
-    // 行情接口
-    virtual void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-    virtual void on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) = 0;
-
-    // K线接口
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
-
-    // 交易接口
-    virtual void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade) = 0;
-
-    // 交易所异常无数据
-    virtual void on_nodata_exchange(const TExchange& exchange){};
 };

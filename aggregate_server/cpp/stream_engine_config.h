@@ -5,12 +5,8 @@
 #include "pandora/util/json.hpp"
 #include "pandora/messager/ut_log.h"
 using njson = nlohmann::json;
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <set>
-using namespace std;
-#include "stream_engine_define.h"
+
+#include "struct_define.h"
 
 #define PROG_VERSION "1.0.0.1"
 
@@ -69,6 +65,8 @@ public:
     UTLogPtr logger_;
 
     KafkaConfig         kafka_config_;
+
+    unsigned int        depth_compute_millsecs{100};
 
     type_tick GLOBAL_HUOBI_BTC;
     type_tick GLOBAL_BINANCE_BTC;

@@ -16,7 +16,7 @@ void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth
 }
 
 
-DepthProcessor::DepthProcessor()
+DepthProcessor::DepthProcessor(DepthAggregater* aggregater_):p_aggregater_{aggregater_}
 {
 
 }
@@ -47,7 +47,8 @@ void DepthProcessor::process(const SDepthQuote& src)
 
         if (update_rst)
         {
-
+            SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
+            p_aggregater_->on_snap(latest_quote.exchange, latest_quote.symbol ,latest_quote);
         }
 
     }
@@ -155,17 +156,4 @@ void DepthProcessor::merge_update(SDepthQuote& snap, const SDepthQuote& update)
     {
         LOG_ERROR(e.what());
     }
-}
-
-void DepthProcessor::aggregate_quote(const SDepthQuote& snap)
-{
-    try
-    {
-        /* code */
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-    
 }

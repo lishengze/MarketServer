@@ -4,13 +4,13 @@
 
 #include "struct_define.h"
 
-class KlilneProcessor
+class KlineProcessor
 {
 public:
 
-    KlilneProcessor();
+    KlineProcessor();
 
-    ~KlilneProcessor();
+    ~KlineProcessor();
 
     void process(vector<KlineData>& src);
 };

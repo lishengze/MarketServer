@@ -40,6 +40,7 @@
 #include "base/cpp/rapidjson/stringbuffer.h"
 
 #include "type_define.h"
+#include "Log/log.h"
 
 using namespace std;
 

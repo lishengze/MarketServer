@@ -41,6 +41,17 @@ struct SDecimal {
 
     }
 
+    SDecimal(const SDecimal& src):data_{src.data_}
+    {
+
+    }    
+
+    SDecimal& operator= (const SDecimal& src)
+    {
+        data_ = src.data_;
+        return *this;
+    }   
+
     SDecimal(const string& v) {
         from(v);
     }

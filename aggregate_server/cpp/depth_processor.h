@@ -4,11 +4,13 @@
 
 #include "struct_define.h"
 
+#include "depth_aggregater.h"
+
 class DepthProcessor
 {
 public:
 
-    DepthProcessor();
+    DepthProcessor(DepthAggregater* );
 
     ~DepthProcessor();
 
@@ -23,9 +25,8 @@ public:
     bool process_update_quote(const SDepthQuote& src);
 
     void merge_update(SDepthQuote& snap, const SDepthQuote& update);
-
-    void aggregate_quote(const SDepthQuote& snap);
-
 private:
-    map<string, map<string, SDepthQuote>>   latest_depth_quote_;
+
+    DepthAggregater*                            p_aggregater_{nullptr};
+    map<TSymbol, map<TExchange, SDepthQuote>>   latest_depth_quote_;
 };
