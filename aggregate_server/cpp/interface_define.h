@@ -21,7 +21,7 @@ public:
     virtual void on_update(const SDepthQuote& quote) = 0;
 
     // K线接口
-    virtual void on_kline(const TExchange& exchange, const TSymbol& symbol, int resolution, const vector<KlineData>& kline, bool is_init) = 0;
+    virtual void on_kline(const vector<KlineData>& kline, bool is_init) = 0;
 
     // 交易接口
     virtual void on_trade(const TradeData& trade) = 0;

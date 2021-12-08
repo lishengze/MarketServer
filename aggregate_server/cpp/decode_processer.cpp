@@ -2,6 +2,47 @@
 #include "Log/log.h"
 #include "util/tool.h"
 
+#include "depth_processor.h"
+#include "trade_processor.h"
+#include "kline_processor.h"
+
+void EncodeProcesser::process_kline(const SDepthQuote& depth)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+void EncodeProcesser::process_depth(const KlineData& kline)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+void EncodeProcesser::process_trade(const TradeData& trade)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+
 void DecodeProcesser::_json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths)
 {
     try
@@ -72,26 +113,13 @@ bool DecodeProcesser::_json_to_kline(const Value& data,  SExchangeConfig& config
         kline.volume.from(data[5].GetDouble(), config.vprecise);
 
         // kline.resolution = data[9].GetInt64();
-        return true;
+        return _is_kline_valid(kline);
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
         return false;
     }
-}
-
-bool DecodeProcesser::_is_kline_valid(const KlineData& kline) 
-{
-    try
-    {
-        return !(kline.index < 1000000000 || kline.index > 1900000000);
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-    return false;
 }
 
 bool DecodeProcesser::_get_config(string symbol, string exchange, SExchangeConfig& config)
@@ -133,20 +161,39 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
             if (meta_data.type == DEPTH_TYPE)
             {
                 SDepthQuote depth_quote;
-                decode_depth(meta_data.data_body, config, depth_quote);
-                // LOG_INFO(quote_str(depth_quote));
+                if (decode_depth(meta_data.data_body, config, depth_quote))
+                {
+                    p_depth_processor_->process(depth_quote);
+                    // LOG_INFO(quote_str(depth_quote));
+                }
+                else
+                {
+                    LOG_WARN("decode depth faild, ori_msg: " + src_data);
+                }                
             }
             else if (meta_data.type == KLINE_TYPE)
             {
-                vector<KlineData> klines;
-                // LOG_INFO(src_data);
-                decode_kline(meta_data.data_body, config, klines);
-
-                LOG_INFO(klines_str(klines));
+                KlineData kline;
+                if (decode_kline(meta_data.data_body, config, kline))
+                {
+                    p_kline_processor_->process(kline);
+                }
+                else
+                {
+                    LOG_WARN("decode kline faild, ori_msg: " + src_data);
+                }
             }         
             else if (meta_data.type == TRADE_TYPE)
             {
-
+                TradeData trade_data;
+                if (decode_trade(meta_data.data_body, config, trade_data))
+                {
+                    p_trade_processor_->process(trade_data);
+                }
+                else
+                {
+                    LOG_WARN("decode trade faild, ori_msg: " + src_data);
+                }
             }                  
             else 
             {
@@ -208,7 +255,7 @@ bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
     return false;
 }
 
-void DecodeProcesser::decode_depth(Document& json_data, SExchangeConfig& config, SDepthQuote& depth_quote)
+bool DecodeProcesser::decode_depth(Document& json_data, SExchangeConfig& config, SDepthQuote& depth_quote)
 {
     try
     {
@@ -217,13 +264,13 @@ void DecodeProcesser::decode_depth(Document& json_data, SExchangeConfig& config,
         string type = json_data["Type"].GetString();
         bool is_snap = type=="snap" ? true:false;
 
-        _json_to_quote(json_data, depth_quote, config, is_snap);
+        return _json_to_quote(json_data, depth_quote, config, is_snap);
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
-    
+    return false;
 }
 
 void DecodeProcesser::decode_kline(Document& json_data, SExchangeConfig& config, vector<KlineData>& klines)
@@ -247,6 +294,31 @@ void DecodeProcesser::decode_kline(Document& json_data, SExchangeConfig& config,
     {
         LOG_ERROR(e.what());
     }    
+}
+
+bool DecodeProcesser::decode_kline(Document& json_data, SExchangeConfig& config, KlineData& kline)
+{
+    try
+    {
+        return _json_to_kline(json_data, config, kline);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+bool DecodeProcesser::decode_trade(Document& json_data, SExchangeConfig& config, TradeData& trade_data)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 bool DecodeProcesser::set_config(const TSymbol& symbol, const SSymbolConfig& config)

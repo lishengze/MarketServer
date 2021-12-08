@@ -368,7 +368,7 @@ struct KlineData
 
 struct TradeData
 {
-    type_tick   time;
+    type_tick   time{0};
     SDecimal    price;
     SDecimal    volume;
     TSymbol     symbol;

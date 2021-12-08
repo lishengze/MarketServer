@@ -121,7 +121,7 @@ bool combine_config(const Document& hedges, const Document& symbols, const Docum
     {
         _log_and_print("[Exception] %s ", e.what());
     }
-    
+    return false;
 
 }
 

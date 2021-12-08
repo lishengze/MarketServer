@@ -582,3 +582,16 @@ bool filter_kline_atom(KlineData& kline)
     
     return false;
 }
+
+bool is_kline_valid(const KlineData& kline) 
+{
+    try
+    {
+        return !(kline.index < 1000000000 || kline.index > 1900000000);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}

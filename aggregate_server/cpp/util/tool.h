@@ -27,3 +27,5 @@ inline string get_sec_time_str(unsigned long time);
 void  filter_kline_data(vector<KlineData>& kline_list);
 
 bool filter_kline_atom(KlineData& kline);
+
+bool is_kline_valid(const KlineData& kline);
