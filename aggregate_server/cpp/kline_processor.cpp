@@ -71,13 +71,77 @@ void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExcha
 {
     try
     {
-        /* code */
+        std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+
+        std::unordered_map<TSymbol, std::set<TExchange>> added_meta;
+        std::unordered_map<TSymbol, std::set<TExchange>> removed_meta;
+
+        get_delata_meta(meta_map, added_meta, removed_meta);
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
 }
+
+void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
+                    std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
+                    std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
+{
+    try
+    {
+        std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
+
+        for (auto iter:new_meta_map)
+        {
+            const string& symbol = iter.first;
+            const std::set<TExchange>& exchange_set = iter.second;
+
+            if (caches_.find(symbol) == caches_.end())
+            {
+                added_meta[symbol] = exchange_set;
+            }
+            else
+            {
+                for (auto exchange:exchange_set)
+                {
+                    if (caches_[symbol].find(exchange) == caches_[symbol].end())
+                    {
+                        added_meta[symbol].emplace(exchange);
+                    }
+                }                
+            }
+        }
+
+        for (auto iter:caches_)
+        {
+            const string& symbol = iter.first;
+            const unordered_map<TExchange, CalcCache*>& exchange_map = iter.second;            
+
+            if (new_meta_map.find(symbol) == new_meta_map.end())
+            {
+                for (auto iter2:exchange_map)
+                {
+                    removed_meta[symbol].emplace(iter2.first);
+                }
+            }
+            else
+            {
+                for (auto iter2:exchange_map)
+                {
+                    if (new_meta_map[symbol].find(iter2.first) == new_meta_map[symbol].end())
+                    {
+                        removed_meta[symbol].emplace(iter2.first);
+                    }                    
+                }                
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}                    
 
 bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
 {

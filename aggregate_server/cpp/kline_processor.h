@@ -51,6 +51,10 @@ public:
 
     void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
 
+    void get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
+                        std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
+                        std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
+
     bool add_kline(const KlineData& input, KlineData& output);
 
     void set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config)
