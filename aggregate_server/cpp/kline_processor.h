@@ -47,13 +47,21 @@ public:
     KlineAggregater();
     ~KlineAggregater();
 
-    void set_config(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+    void set_meta(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+
+    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
 
     bool add_kline(const KlineData& input, KlineData& output);
+
+    void set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config)
+    {
+        symbol_config_ = symbol_config;
+    }
 
 private:
     mutable std::mutex                                              mutex_cache_;
     unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>>    caches_;
+    unordered_map<TSymbol, SMixerConfig>                            symbol_config_;
 };
 
 
@@ -62,18 +70,22 @@ class KlineProcessor
 {
 public:
 
-    KlineProcessor();
+    KlineProcessor(QuoteSourceCallbackInterface * engine):engine_{engine} {}
 
     ~KlineProcessor();
 
     void process(KlineData& src);
 
-    void set_config(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
+    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
+
+    void config_process(KlineData& src);
+
+    void set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config);
 
 private:
-    KlineAggregater min1_kline_aggregator_;
+    KlineAggregater                     min1_kline_aggregator_;
 
-    KlineAggregater min60_kline_aggregator_;
+    KlineAggregater                     min60_kline_aggregator_;
 
-    QuoteSourceCallbackInterface *                                  engine_{nullptr};
+    QuoteSourceCallbackInterface *      engine_{nullptr};
 };

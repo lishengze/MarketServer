@@ -29,3 +29,5 @@ void  filter_kline_data(vector<KlineData>& kline_list);
 bool filter_kline_atom(KlineData& kline);
 
 bool is_kline_valid(const KlineData& kline);
+
+bool is_trade_valid(const TradeData& trade);

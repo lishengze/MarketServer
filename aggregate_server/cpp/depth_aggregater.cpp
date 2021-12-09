@@ -8,8 +8,8 @@
 #include "util/tool.h"
 
 /////////////////////////////////////////////////////////////////////
-DepthAggregater::DepthAggregater()
-: thread_run_(true)
+DepthAggregater::DepthAggregater(QuoteSourceCallbackInterface* engine)
+: engine_{engine}, thread_run_(true)
 {
 
 }
@@ -152,11 +152,10 @@ void DepthAggregater::on_snap(const TExchange& exchange, const TSymbol& symbol, 
     quotes_[symbol][exchange] = quote;
 }
 
-void DepthAggregater::set_config(const TSymbol& symbol, const SMixerConfig& config)
+void DepthAggregater::set_config(unordered_map<TSymbol, SMixerConfig> & new_config)
 {
-
     std::unique_lock<std::mutex> l{ mutex_config_ };
     
-    configs_[symbol] = config;
+    configs_ = new_config;
 }
 

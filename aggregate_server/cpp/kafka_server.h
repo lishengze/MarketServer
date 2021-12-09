@@ -50,6 +50,7 @@ public:
 
     string _get_kline_topic(string exchange, string symbol);
     string _get_depth_topic(string exchange, string symbol);
+    string _get_trade_topic(string exchange, string symbol);
 
 public:
     void start_listen_data();
@@ -58,9 +59,7 @@ public:
     void start_process_data();
     void process_data();
 
-    void set_config(const TSymbol& symbol, const SSymbolConfig& config);
-
-    void set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config);
+    void set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new_sub_info);
 
 private:
     QuoteSourceCallbackInterface*      engine_interface_{nullptr};    
@@ -81,7 +80,4 @@ private:
     std::vector<std::string>           src_data_vec_;
 
     DecodeProcesser*                   decode_processer_;
-
-    std::mutex                                        mutex_symbol_config_;
-    std::unordered_map<TSymbol, SSymbolConfig>        symbol_config_;
 };

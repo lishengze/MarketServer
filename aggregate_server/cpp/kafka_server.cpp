@@ -294,6 +294,19 @@ string KafkaServer::_get_depth_topic(string exchange, string symbol)
     return "";
 }
 
+string KafkaServer::_get_trade_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(TRADE_TYPE) + TYPE_SEPARATOR + symbol+ SYMBOL_EXCHANGE_SEPARATOR  + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}
+
 void KafkaServer::sub_topic(const string& topic)
 {
     try
@@ -391,68 +404,31 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
     }    
 }
 
-void KafkaServer::set_config(const TSymbol& symbol, const SSymbolConfig& config)
+void KafkaServer::set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new_sub_info)
 {
     try
     {
-        LOG_INFO("Set Config " + symbol + ":\n");
-
-        symbol_config_[symbol] = config;
-
         std::set<string> new_topics;
-        for (auto iter1:symbol_config_)
+        for (auto iter:new_sub_info)
         {
-            for (auto iter2:iter1.second)
+            for (auto exchange:iter.second)
             {
-                string symbol = iter1.first;
-                string exchange = iter2.first;
+                string symbol = iter.first;
                 string kline_topic = _get_kline_topic(exchange, symbol);
                 string depth_topic = _get_depth_topic(exchange, symbol);
+                string trade_topic = _get_depth_topic(exchange, symbol);
 
                 new_topics.emplace(std::move(kline_topic));
-                new_topics.emplace(std::move(depth_topic));                
+                new_topics.emplace(std::move(depth_topic));      
+                new_topics.emplace(std::move(trade_topic)); 
             }
+                 
         }
-
-        if (topic_set_ != new_topics)
-        {
-            topic_set_.swap(new_topics);
-
-            subscribe_topics(topic_set_);
-        }
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-}
-
-void KafkaServer::set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config)
-{
-    try
-    {
-        symbol_config_ = new_config;
-
-        std::set<string> new_topics;
-        for (auto iter1:symbol_config_)
-        {
-            for (auto iter2:iter1.second)
-            {
-                string symbol = iter1.first;
-                string exchange = iter2.first;
-                string kline_topic = _get_kline_topic(exchange, symbol);
-                string depth_topic = _get_depth_topic(exchange, symbol);
-
-                new_topics.emplace(std::move(kline_topic));
-                new_topics.emplace(std::move(depth_topic));                
-            }
-        }
-
-        topic_set_ = new_topics;
         subscribe_topics(new_topics);
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        std::cerr << e.what() << '\n';
     }
+    
 }

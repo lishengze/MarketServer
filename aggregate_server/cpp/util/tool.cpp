@@ -595,3 +595,16 @@ bool is_kline_valid(const KlineData& kline)
     }
     return false;
 }
+
+bool is_trade_valid(const TradeData& trade)
+{
+    try
+    {
+        return trade.time > 1000000000 && trade.time < 1900000000;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}

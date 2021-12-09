@@ -2,6 +2,7 @@
 #include "global_declare.h"
 #include "pandora/util/io_service_pool.h"
 #include "struct_define.h"
+#include "interface_define.h"
 
 
 
@@ -10,15 +11,17 @@ class KlineProcessor;
 class TradeProcessor;
 
 
-class EncodeProcesser
+class EncodeProcesser:public QuoteSourceCallbackInterface
 {
 public:
 
-    void process_kline(const SDepthQuote& depth);
+    virtual void on_snap(const SDepthQuote& quote);
 
-    void process_depth(const KlineData& kline);
+    // K线接口
+    virtual void on_kline(const KlineData& kline);
 
-    void process_trade(const TradeData& trade);
+    // 交易接口
+    virtual void on_trade(const TradeData& trade);
 
 private:
 
@@ -56,31 +59,26 @@ public:
         }
     };
 
+    bool is_data_subed(const string symbol, const string exchange);
+
     void process_data(const std::vector<string>& src_data);
 
     bool pre_process(const string& src_data, MetaData& meta_data);
 
-    bool decode_trade(Document& json_data, SExchangeConfig& config, TradeData& trade_data);
+    bool decode_trade(Document& json_data, TradeData& trade_data);
 
-    bool decode_depth(Document& json_data, SExchangeConfig& config, SDepthQuote& depth_quote);
+    bool decode_depth(Document& json_data,  SDepthQuote& depth_quote);
 
-    void decode_kline(Document& json_data, SExchangeConfig& config, vector<KlineData>& klines);
+    bool decode_kline(Document& json_data, KlineData& klines);
 
-    bool decode_kline(Document& json_data, SExchangeConfig& config, KlineData& klines);
-
-    bool set_config(const TSymbol& symbol, const SSymbolConfig& config);
-
-    void set_new_config(std::unordered_map<TSymbol, SSymbolConfig>& new_config);
+    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& sub_info_map);
 
 public:
-    void _json_to_quote_depth(const Value& data, const SExchangeConfig& config, map<SDecimal, SDepth>& depths);
+    void _json_to_quote_depth(const Value& data, map<SDecimal, SDepth>& depths);
 
-    bool _json_to_quote(const Document& snap_json, SDepthQuote& quote, const SExchangeConfig& config, bool isSnap);
+    bool _json_to_quote(const Document& snap_json, SDepthQuote& quote, bool isSnap);
 
-    bool _json_to_kline(const Value& data,  SExchangeConfig& config, KlineData& kline);
-
-    bool _get_config(string symbole, string exchange, SExchangeConfig& config);
-
+    bool _json_to_kline(const Value& data, KlineData& kline);
 
 private:
     DepthProcessor*                         p_depth_processor_{nullptr};
@@ -92,5 +90,6 @@ private:
     utrade::pandora::io_service_pool&       process_pool_;
 
     mutable std::mutex                      mutex_symbol_;
-    unordered_map<TSymbol, SSymbolConfig>   symbol_config_;
+
+    std::unordered_map<TSymbol, std::set<TExchange>> sub_info_map_;
 };

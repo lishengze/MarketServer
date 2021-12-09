@@ -1,14 +1,14 @@
 #include "trade_processor.h"
 #include "global_declare.h"
 
-void TradeProcessor::process(const TradeData& ori_trade)
+void TradeProcessor::process(TradeData& ori_trade)
 {
     try
     {
-        if (config_map_.find(ori_trade.symbol) == config_map_.end()
+        if (symbol_config_.find(ori_trade.symbol) == symbol_config_.end()
         || ori_trade.time == 0) return;
 
-        const SMixerConfig& cur_config = config_map_[ori_trade.symbol];
+        const SMixerConfig& cur_config = symbol_config_[ori_trade.symbol];
 
         TradeData trade{std::move(ori_trade)};
         trade.exchange = MIX_EXCHANGE_NAME;
@@ -18,7 +18,7 @@ void TradeProcessor::process(const TradeData& ori_trade)
             trade.price.scale(cur_config.precise);
             trade.volume.scale(cur_config.vprecise);
 
-            last_trade_map_.emplace(std::move(trade));
+            last_trade_map_.emplace(std::make_pair(trade.symbol, trade));
         }
         else
         {
@@ -36,3 +36,4 @@ void TradeProcessor::process(const TradeData& ori_trade)
         LOG_ERROR(e.what());
     }
 }
+

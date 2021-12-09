@@ -33,7 +33,7 @@ KlineAggregater::~KlineAggregater()
 
 }
 
-void KlineAggregater::set_config(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+void KlineAggregater::set_meta(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
 {
     std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
 
@@ -64,6 +64,18 @@ void KlineAggregater::set_config(const TSymbol& symbol, const unordered_set<TExc
         } else {
             iter3++;
         }
+    }
+}
+
+void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -151,23 +163,19 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
     }    
     return false;
 }
-KlineProcessor::KlineProcessor()
-{
-
-}
 
 KlineProcessor::~KlineProcessor()
 {
 
 }
 
-void KlineProcessor::set_config(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
+void KlineProcessor::set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>&meta_map)
 {
     try
     {
-        min1_kline_aggregator_.set_config(symbol, exchanges);
+        // min1_kline_aggregator_.set_meta(symbol, exchanges);
 
-        // min60_kline_aggregator_.set_config(symbol, exchanges);
+        // min60_kline_aggregator_.set_meta(symbol, exchanges);
     }
     catch(const std::exception& e)
     {
@@ -182,11 +190,11 @@ void KlineProcessor::process(KlineData& src)
         KlineData output;
         if (min1_kline_aggregator_.add_kline(src, output))
         {
-
+            engine_->on_kline(output);
         }
         else
         {
-            
+
         }
     }
     catch(const std::exception& e)
@@ -194,4 +202,18 @@ void KlineProcessor::process(KlineData& src)
         std::cerr << e.what() << '\n';
     }
     
+}
+
+void KlineProcessor::set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config)
+{
+    try
+    {
+       min1_kline_aggregator_.set_config(symbol_config);
+
+    //    min60_kline_aggregator_.set_config(symbol_config);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }

@@ -8,7 +8,7 @@ class DepthAggregater
 {
 public:
 
-    DepthAggregater();
+    DepthAggregater(QuoteSourceCallbackInterface* engine);
     ~DepthAggregater();
 
     void start();
@@ -17,7 +17,7 @@ public:
 
     void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
-    void set_config(const TSymbol& symbol, const SMixerConfig& config);
+    void set_config(unordered_map<TSymbol, SMixerConfig>& new_config);
 
 private:
 

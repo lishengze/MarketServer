@@ -7,7 +7,15 @@ class TradeProcessor
 {
 public:
 
-    void process(const TradeData&);
+    TradeProcessor(QuoteSourceCallbackInterface* engine):engine_{engine}
+    { }
+
+    void process(TradeData& src);
+
+    void set_config(unordered_map<TSymbol, SMixerConfig>& new_config)
+    {
+        symbol_config_ = new_config;
+    }
 
 private:
     // callback
@@ -15,5 +23,5 @@ private:
 
     unordered_map<TSymbol, TradeData>         last_trade_map_;
 
-    unordered_map<TSymbol, SMixerConfig>      config_map_;
+    unordered_map<TSymbol, SMixerConfig>      symbol_config_;
 };

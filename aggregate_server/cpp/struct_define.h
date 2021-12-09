@@ -377,6 +377,41 @@ struct TradeData
     TradeData() {
         time = 0;
     }
+
+    TradeData(const TradeData&& other):
+    time{std::move(other.time)},
+    price{std::move(other.price)},
+    volume{std::move(other.volume)},
+    symbol{std::move(other.symbol)},
+    exchange{std::move(other.exchange)}
+    {
+
+    }
+
+    TradeData(const TradeData& other):
+    time{other.time},
+    price{other.price},
+    volume{other.volume},
+    symbol{other.symbol},
+    exchange{other.exchange}
+    {
+
+    }    
+
+    TradeData& operator = (const TradeData& other)
+    {
+        if (this == &other) return *this;
+
+        time = other.time;
+        price= other.price;
+        volume = other.volume;
+        symbol = other.symbol;
+        exchange = other.exchange;
+
+        return *this;
+    }
+
+
 };
 #pragma pack()
 

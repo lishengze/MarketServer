@@ -23,13 +23,14 @@ void TestEngine::init()
 {
     try
     {
-        p_depth_aggregater_ = new DepthAggregater();
+        p_encode_processer_ = new EncodeProcesser();
 
-        p_depth_processor_  = new DepthProcessor(p_depth_aggregater_);
-
-        p_kline_processor_ = new KlineProcessor();
-
-        p_decode_processer_ = new DecodeProcesser(p_depth_processor_, p_kline_processor_, engine_pool_);
+        p_depth_processor_ = new DepthProcessor(p_encode_processer_);
+        p_kline_processor_ = new KlineProcessor(p_encode_processer_);
+        p_trade_processor_ = new TradeProcessor(p_encode_processer_);
+        
+        p_decode_processer_ = new DecodeProcesser(p_depth_processor_, p_kline_processor_, 
+                                                  p_trade_processor_, engine_pool_);
 
         p_kafka_ = new KafkaServer(p_decode_processer_);
 
@@ -71,22 +72,39 @@ SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExcha
     return ret;
 }
 
-SMixerConfig to_mixer_config(type_uint32 depth, type_uint32 precise, type_uint32 vprecise, float frequency, 
-                            const unordered_map<TExchange, SNacosConfigByExchange>& exchanges) 
+SMixerConfig to_mixer_config(const SNacosConfig& nano_config) 
 {    
     SMixerConfig config;
-    config.depth = depth;
-    config.precise = precise;
-    config.vprecise = vprecise;
-    config.frequency = frequency;
-    for( const auto& v : exchanges ) 
+    config.depth = nano_config.depth;
+    config.precise = nano_config.precise;
+    config.vprecise = nano_config.vprecise;
+    config.frequency = nano_config.frequency;
+    for( const auto& v : nano_config.exchanges ) 
     {
         config.fees[v.first] = v.second.fee;
     }
     return config;
 }
 
-void TestEngine::on_config_channged(const Document& src)
+std::set<TExchange> get_exchange_set(const SNacosConfig& config)
+{
+    try
+    {
+        std::set<TExchange> result;
+
+        for (auto iter:config.exchanges)
+        {
+            result.emplace(iter.first);
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+bool TestEngine::parse_config(const Document& src, std::unordered_map<TSymbol, SNacosConfig>& curr_config)
 {
     try
     {
@@ -94,91 +112,76 @@ void TestEngine::on_config_channged(const Document& src)
         string content = ToJson(src);
         d.Parse(content.c_str());
 
-        LOG_INFO("*** TestEngine::on_config_channged ***");
-        LOG_INFO(content);
-
-        // string -> 结构化数据
-        std::unordered_map<TSymbol, SNacosConfig> curr_config;
-        try
+        for (auto iter = d.MemberBegin() ; iter != d.MemberEnd() ; ++iter )
         {
-            for (auto iter = d.MemberBegin() ; iter != d.MemberEnd() ; ++iter )
+            const TSymbol& symbol = iter->name.GetString();
+            const Value& symbol_cfgs = iter->value;
+            bool enable = symbol_cfgs["enable"].GetBool();
+            if( !enable )
+                continue;
+            SNacosConfig cfg;
+            cfg.precise = symbol_cfgs["precise"].GetUint();
+            cfg.vprecise = symbol_cfgs["vprecise"].GetUint();
+            cfg.aprecise = symbol_cfgs["aprecise"].GetUint();
+            cfg.depth = symbol_cfgs["depth"].GetUint();
+            cfg.frequency = symbol_cfgs["frequency"].GetFloat();
+            for( auto iter2 = symbol_cfgs["exchanges"].MemberBegin() ; iter2 != symbol_cfgs["exchanges"].MemberEnd() ; ++iter2 )
             {
-                const TSymbol& symbol = iter->name.GetString();
-                const Value& symbol_cfgs = iter->value;
-                bool enable = symbol_cfgs["enable"].GetBool();
-                if( !enable )
-                    continue;
-                SNacosConfig cfg;
-                cfg.precise = symbol_cfgs["precise"].GetUint();
-                cfg.vprecise = symbol_cfgs["vprecise"].GetUint();
-                cfg.aprecise = symbol_cfgs["aprecise"].GetUint();
-                cfg.depth = symbol_cfgs["depth"].GetUint();
-                cfg.frequency = symbol_cfgs["frequency"].GetFloat();
-                for( auto iter2 = symbol_cfgs["exchanges"].MemberBegin() ; iter2 != symbol_cfgs["exchanges"].MemberEnd() ; ++iter2 )
-                {
-                    const TExchange& exchange = iter2->name.GetString();
-                    const Value& exchange_cfgs = iter2->value;
-                    SNacosConfigByExchange exchange_cfg;
-                    exchange_cfg.precise = exchange_cfgs["precise"].GetUint();
-                    exchange_cfg.vprecise = exchange_cfgs["vprecise"].GetUint();
-                    //exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
-                    exchange_cfg.frequency = exchange_cfgs["frequency"].GetFloat();
-                    exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].GetUint();
-                    exchange_cfg.fee.maker_fee = exchange_cfgs["fee_maker"].GetDouble();
-                    exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].GetDouble();
-                    cfg.exchanges[exchange] = exchange_cfg;
-                } 
-                curr_config[symbol] = cfg;
-
-                LOG_INFO("\n" + symbol + ": " + cfg.str());
-
-            }
+                const TExchange& exchange = iter2->name.GetString();
+                const Value& exchange_cfgs = iter2->value;
+                SNacosConfigByExchange exchange_cfg;
+                exchange_cfg.precise = exchange_cfgs["precise"].GetUint();
+                exchange_cfg.vprecise = exchange_cfgs["vprecise"].GetUint();
+                //exchange_cfg.depth = exchange_cfgs["depth"].get<int>();
+                exchange_cfg.frequency = exchange_cfgs["frequency"].GetFloat();
+                exchange_cfg.fee.fee_type = exchange_cfgs["fee_type"].GetUint();
+                exchange_cfg.fee.maker_fee = exchange_cfgs["fee_maker"].GetDouble();
+                exchange_cfg.fee.taker_fee = exchange_cfgs["fee_taker"].GetDouble();
+                cfg.exchanges[exchange] = exchange_cfg;
+            } 
+            curr_config[symbol] = cfg;
+            LOG_INFO("\n" + symbol + ": " + cfg.str());
         }
-        catch(nlohmann::detail::exception& e)
-        {
-            LOG_WARN("decode config fail " + e.what());
-            
-            return;
-        }    
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 
-        bool is_config_changed = false;
-        
-        std::map<string, SSymbolConfig> updated_symbol_map;
+    return false;
+}
+
+void TestEngine::update_config(const std::unordered_map<TSymbol, SNacosConfig>& curr_config, bool& is_config_changed, bool& is_meta_changed)
+{
+    try
+    {
         for( const auto& v : curr_config )
         {
             const TSymbol& symbol = v.first;
             const SNacosConfig& config = v.second;
 
-            SSymbolConfig symbol_config = to_redis_config(config.exchanges);
-            SMixerConfig mixer_config = to_mixer_config(config.depth, config.precise, config.vprecise, config.frequency, config.exchanges);
+            SMixerConfig mixer_config = to_mixer_config(config);
+            std::set<TExchange> exchange_set = get_exchange_set(config);
 
             // 新增品种
             if( nacos_config_.find(symbol) == nacos_config_.end() ) 
             {
-                trans_config_[symbol] = symbol_config;
+                meta_map_[symbol] = exchange_set;
+                mixer_config_[symbol] = mixer_config;
 
                 is_config_changed = true;
-                // p_kafka_->set_config(symbol, symbol_config);
-                // p_decode_processer_->set_config(symbol, symbol_config);
+                is_meta_changed = true;
             }
             // 已有的品种
             else 
             { 
-                const SNacosConfig& last_config = nacos_config_[symbol];
-                // 源头配置变更
-                if( to_redis_config(last_config.exchanges) != to_redis_config(config.exchanges) ) 
+                if (mixer_config != to_mixer_config(nacos_config_[symbol]))
                 {
                     is_config_changed = true;
-                    trans_config_[symbol] = symbol_config;
-
-                    // p_kafka_->set_config(symbol, symbol_config);
-                    // p_decode_processer_->set_config(symbol, symbol_config);
+                    mixer_config_[symbol] = mixer_config;
                 }
-            }
-
-            
+            }            
         }
-
 
         // 删除品种
         for( const auto& v : nacos_config_ ) 
@@ -186,27 +189,75 @@ void TestEngine::on_config_channged(const Document& src)
             if( curr_config.find(v.first) == curr_config.end() ) 
             {
                 is_config_changed = true;
-                if (trans_config_.find(v.first) != trans_config_.end())
+                if (mixer_config_.find(v.first) != mixer_config_.end())
                 {
-                    trans_config_.erase(v.first);
+                    mixer_config_.erase(v.first);
                 }
 
-                // p_kafka_->set_config(v.first, SSymbolConfig());
-                // p_decode_processer_->set_config(v.first, SSymbolConfig());
+                is_meta_changed = true;
+                if (meta_map_.find(v.first) != meta_map_.end())
+                {
+                    meta_map_.erase(v.first);
+                }
             }
         }
 
-        // 保存
         nacos_config_ = curr_config;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
 
-        if (is_config_changed)
-        {
-            p_kafka_->set_new_config(trans_config_);
-            p_decode_processer_->set_new_config(trans_config_);
-        }
+void TestEngine::on_config_channged(const Document& src)
+{
+    try
+    {
+        LOG_INFO("*** TestEngine::on_config_channged ***");
 
-        // 启动数据接收
-        // p_kafka_->launch();
+        std::unordered_map<TSymbol, SNacosConfig> curr_config;
+
+        if (!parse_config(src, curr_config)) return;
+
+        bool is_config_changed = false;
+        bool is_meta_changed = false;
+
+        update_config(curr_config, is_config_changed, is_meta_changed);
+
+        if (is_config_changed) notify_config_change();
+
+        if (is_meta_changed) notify_meta_change();
+
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+
+void TestEngine::notify_config_change()
+{
+    try
+    {
+        p_depth_processor_->set_config(mixer_config_);
+        p_kline_processor_->set_config(mixer_config_);
+        p_trade_processor_->set_config(mixer_config_);        
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void TestEngine::notify_meta_change()
+{
+    try
+    {
+        p_kafka_->set_meta(meta_map_);
+        p_decode_processer_->set_meta(meta_map_);
+        p_kline_processor_->set_meta(meta_map_);
     }
     catch(const std::exception& e)
     {

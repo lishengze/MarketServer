@@ -16,9 +16,10 @@ void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth
 }
 
 
-DepthProcessor::DepthProcessor(DepthAggregater* aggregater_):p_aggregater_{aggregater_}
+DepthProcessor::DepthProcessor(QuoteSourceCallbackInterface* engine):
+                            engine_{engine}
 {
-
+    p_aggregater_ = new DepthAggregater(engine_);
 }
 
 DepthProcessor::~DepthProcessor()
@@ -26,7 +27,7 @@ DepthProcessor::~DepthProcessor()
 
 }
 
-void DepthProcessor::process(const SDepthQuote& src)
+void DepthProcessor::process(SDepthQuote& src)
 {
     try
     {
@@ -151,6 +152,21 @@ void DepthProcessor::merge_update(SDepthQuote& snap, const SDepthQuote& update)
         snap.symbol = update.symbol;
         update_depth_diff(update.asks, snap.asks);
         update_depth_diff(update.bids, snap.bids);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DepthProcessor::set_config(unordered_map<TSymbol, SMixerConfig> & new_config)
+{
+    try
+    {
+        if (p_aggregater_)
+        {
+            p_aggregater_->set_config(new_config);
+        }
     }
     catch(const std::exception& e)
     {
