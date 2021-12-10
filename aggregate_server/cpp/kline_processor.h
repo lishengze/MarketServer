@@ -47,9 +47,10 @@ public:
     KlineAggregater();
     ~KlineAggregater();
 
-    void set_meta(const TSymbol& symbol, const unordered_set<TExchange>& exchanges);
-
     void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
+
+    void update_cache_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
+                           const std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
 
     void get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
                         std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,

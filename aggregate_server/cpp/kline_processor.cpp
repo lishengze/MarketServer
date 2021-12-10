@@ -33,40 +33,6 @@ KlineAggregater::~KlineAggregater()
 
 }
 
-void KlineAggregater::set_meta(const TSymbol& symbol, const unordered_set<TExchange>& exchanges)
-{
-    std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
-
-    auto iter = caches_.find(symbol);
-    if( iter == caches_.end() ) {
-        for( const auto& exchange : exchanges ) {
-            // std::cout << "\nMixCalculator::set_symbol " << symbol << " " << exchange << std::endl;
-            caches_[symbol][exchange] = new CalcCache();
-        }
-        return;
-    }
-
-    unordered_map<TExchange, CalcCache*>& symbol_cache = iter->second;
-    for( const auto& exchange : exchanges ) 
-    {
-        auto iter2 = symbol_cache.find(exchange);
-        if( iter2 == symbol_cache.end() ) {
-            caches_[symbol][exchange] = new CalcCache();
-        }
-    }
-
-    for(auto iter3 = symbol_cache.begin() ; iter3 != symbol_cache.end() ;)
-    {
-        const TExchange& exchange = iter3->first;
-        auto iter2 = exchanges.find(exchange);
-        if( iter2 == exchanges.end() ) {
-            symbol_cache.erase(iter3++);
-        } else {
-            iter3++;
-        }
-    }
-}
-
 void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map)
 {
     try
@@ -84,14 +50,28 @@ void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExcha
     }
 }
 
+void KlineAggregater::update_cache_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
+                                        const std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}                        
+
 void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
-                    std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                    std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
+                                        std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
+                                        std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
 {
     try
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
 
+        // check added meta-symbol,exchange;
         for (auto iter:new_meta_map)
         {
             const string& symbol = iter.first;
@@ -113,12 +93,14 @@ void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set
             }
         }
 
+        // check deleted meta-symbol, exchange;
         for (auto iter:caches_)
         {
             const string& symbol = iter.first;
-            const unordered_map<TExchange, CalcCache*>& exchange_map = iter.second;            
+            const unordered_map<TExchange, CalcCache*>& exchange_map = iter.second;    
+            auto meta_iter = new_meta_map.find(symbol);       
 
-            if (new_meta_map.find(symbol) == new_meta_map.end())
+            if (meta_iter == new_meta_map.end())
             {
                 for (auto iter2:exchange_map)
                 {
@@ -129,7 +111,7 @@ void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set
             {
                 for (auto iter2:exchange_map)
                 {
-                    if (new_meta_map[symbol].find(iter2.first) == new_meta_map[symbol].end())
+                    if (meta_iter->second.find(iter2.first) == meta_iter->second.end())
                     {
                         removed_meta[symbol].emplace(iter2.first);
                     }                    
@@ -184,21 +166,20 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
         // 1. 检查是否可以计算，计算条件：所有市场时间>=kline.index
         // 2. 如果可以计算，则清除所有市场时间<kline.index的数据
         
-        bool can_calculate = true;
-        bool found = false;
+        // bool can_calculate = true;
+        // bool found = false;
 
         vector<KlineData> datas;
         for( const auto& symbol_cache_iter : symbol_cache ) 
         {
-            const TExchange& exchange = symbol_cache_iter.first;
+            // const TExchange& exchange = symbol_cache_iter.first;
             const CalcCache* symbol_exchange_cache = symbol_cache_iter.second;
 
-            // bool found = false;
             for( const auto& cur_exchange_kline : symbol_exchange_cache->klines ) 
             {
                 if( cur_exchange_kline.index == input.index ) 
                 {
-                    found = true;   // QS: 只要有一个交易所的有和当前 k 线时间一致的 数据，就会进行计算；有逻辑错误，应该是所有交易所都有当前k线时间数据；
+                    // found = true;   // QS: 只要有一个交易所的有和当前 k 线时间一致的 数据，就会进行计算；有逻辑错误，应该是所有交易所都有当前k线时间数据；
                     datas.push_back(cur_exchange_kline);
                 }
             }
