@@ -542,7 +542,7 @@ void filter_kline_data(vector<KlineData>& kline_list)
         std::list<vector<KlineData>::iterator> error_kline_list;
         for(vector<KlineData>::iterator iter = kline_list.begin(); iter != kline_list.end(); ++iter)
         {
-            if (filter_kline_atom(*iter))
+            if (is_kline_valid(*iter))
             {
                 error_kline_list.push_back(iter);
                 LOG_WARN("zero kline: " + kline_str(*iter));
@@ -560,7 +560,7 @@ void filter_kline_data(vector<KlineData>& kline_list)
     }
 }
 
-bool filter_kline_atom(KlineData& kline)
+bool is_kline_valid(KlineData& kline)
 {
     bool result = false;
     try

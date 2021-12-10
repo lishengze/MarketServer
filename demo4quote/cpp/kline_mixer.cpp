@@ -424,6 +424,17 @@ void KlineHubber::recover_from_db()
 
                 if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
                 {
+                    LOG_INFO(kline_str(input[0]));
+
+                    if (is_kline_valid(input[0]))
+                    {
+                        LOG_INFO(kline_str(input[0]) + " is invalid");
+                    }
+                    else
+                    {
+                        LOG_INFO(kline_str(input[0]) + " is valid");
+                    }
+
                     LOG_DEBUG(klines_str(input));
                 }
 
