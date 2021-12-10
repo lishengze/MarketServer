@@ -435,6 +435,11 @@ void KlineHubber::recover_from_db()
                 vector<KlineData>& detail_kline_data = iter2.second;
 
                 LOG_INFO(iter1.first + " " + iter2.first + " " + std::to_string(detail_kline_data.size()));
+
+                if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
+                {
+                    LOG_DEBUG(klines_str(detail_kline_data));
+                }
             }
         }
     }
