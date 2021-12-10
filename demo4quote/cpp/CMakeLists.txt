@@ -62,6 +62,5 @@ target_link_libraries(demo4quote reporter)
 target_link_libraries(demo4quote SQLiteCpp sqlite3 dl)
 
 TARGET_LINK_LIBRARIES(demo4quote ssl crypto)
-TARGET_LINK_LIBRARIES(demo4quote rdkafka rdkafka++)
 
 ###############################################################################################
