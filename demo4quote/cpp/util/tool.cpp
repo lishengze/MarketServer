@@ -540,12 +540,17 @@ void filter_kline_data(vector<KlineData>& kline_list)
     try
     {
         std::list<vector<KlineData>::iterator> error_kline_list;
+
+        vector<KlineData> valid_kline_list;
         for(vector<KlineData>::iterator iter = kline_list.begin(); iter != kline_list.end(); ++iter)
         {
             if (is_kline_valid(*iter))
             {
                 error_kline_list.push_back(iter);
-                // LOG_WARN("zero kline: " + kline_str(*iter));
+            }
+            else
+            {
+                valid_kline_list.push_back(std::move(*iter));
             }
         }        
 
@@ -554,10 +559,12 @@ void filter_kline_data(vector<KlineData>& kline_list)
             LOG_WARN(kline_list[0].symbol + "." + kline_list[0].exchange + " erase " + std::to_string(error_kline_list.size()) + " invalid data");
         }
 
-        for (auto err_iter:error_kline_list)
-        {
-            kline_list.erase(err_iter);
-        }
+        kline_list.swap(valid_kline_list);
+
+        // for (auto err_iter:error_kline_list)
+        // {
+        //     kline_list.erase(err_iter);
+        // }
     }
     catch(const std::exception& e)
     {
