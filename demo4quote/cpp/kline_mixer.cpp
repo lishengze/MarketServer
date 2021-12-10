@@ -420,13 +420,12 @@ void KlineHubber::recover_from_db()
             for (auto iter2:iter1.second)
             {
                 vector<KlineData>& input = iter2.second;
+                filter_kline_data(input);   
 
                 if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
                 {
                     LOG_DEBUG(klines_str(input));
                 }
-
-                filter_kline_data(input);                
 
                 LOG_INFO("3600 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
                 min60_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
