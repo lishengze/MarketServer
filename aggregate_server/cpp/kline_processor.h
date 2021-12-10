@@ -56,6 +56,9 @@ public:
                         std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
                         std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
 
+
+    bool is_exchange_added_to_aggregate(const KlineData& exchange, const KlineData& input);
+
     bool add_kline(const KlineData& input, KlineData& output);
 
     void set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config)

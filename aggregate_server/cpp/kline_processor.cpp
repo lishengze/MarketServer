@@ -41,8 +41,9 @@ void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExcha
 
         std::unordered_map<TSymbol, std::set<TExchange>> added_meta;
         std::unordered_map<TSymbol, std::set<TExchange>> removed_meta;
-
         get_delata_meta(meta_map, added_meta, removed_meta);
+
+        update_cache_meta(added_meta, removed_meta);
     }
     catch(const std::exception& e)
     {
@@ -55,7 +56,35 @@ void KlineAggregater::update_cache_meta(const std::unordered_map<TSymbol, std::s
 {
     try
     {
-        /* code */
+
+        for (auto iter1:added_meta)
+        {
+            for (auto exchange:iter1.second)
+            {
+                const string& symbol = iter1.first;
+                if (caches_.find(symbol) == caches_.end() || 
+                    caches_[symbol].find(exchange) == caches_[symbol].end())
+                {
+                    LOG_INFO("Add Cache: " + symbol + "_" + exchange);
+                    caches_[symbol][exchange] = new CalcCache();
+                }
+            }
+        }
+
+        for (auto iter1:removed_meta)
+        {
+            for (auto exchange:iter1.second)
+            {
+                const string& symbol = iter1.first;
+                if (caches_.find(symbol) != caches_.end() &&
+                    caches_[symbol].find(exchange) != caches_[symbol].end())
+                {
+                    LOG_INFO("Erase Cache: " + symbol + "_" + exchange);
+                    caches_[symbol].erase(exchange);
+                }
+                if (caches_[symbol].size() == 0) caches_.erase(symbol);
+            }
+        }        
     }
     catch(const std::exception& e)
     {
@@ -123,7 +152,20 @@ void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set
     {
         LOG_ERROR(e.what());
     }    
-}                    
+}     
+
+bool KlineAggregater::is_exchange_added_to_aggregate(const KlineData& exchange, const KlineData& input)
+{
+    try
+    {
+        return exchange.index == input.index;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}              
 
 bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
 {
@@ -177,9 +219,8 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
 
             for( const auto& cur_exchange_kline : symbol_exchange_cache->klines ) 
             {
-                if( cur_exchange_kline.index == input.index ) 
+                if(is_exchange_added_to_aggregate(cur_exchange_kline, input)) 
                 {
-                    // found = true;   // QS: 只要有一个交易所的有和当前 k 线时间一致的 数据，就会进行计算；有逻辑错误，应该是所有交易所都有当前k线时间数据；
                     datas.push_back(cur_exchange_kline);
                 }
             }
