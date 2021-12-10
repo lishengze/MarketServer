@@ -545,9 +545,14 @@ void filter_kline_data(vector<KlineData>& kline_list)
             if (is_kline_valid(*iter))
             {
                 error_kline_list.push_back(iter);
-                LOG_WARN("zero kline: " + kline_str(*iter));
+                // LOG_WARN("zero kline: " + kline_str(*iter));
             }
         }        
+
+        if (error_kline_list.size() > 0)
+        {
+            LOG_WARN(kline_list[0].symbol + "." + kline_list[0].exchange + " erase " + std::to_string(error_kline_list.size()) + " invalid data");
+        }
 
         for (auto err_iter:error_kline_list)
         {
