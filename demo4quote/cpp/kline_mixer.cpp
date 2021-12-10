@@ -408,6 +408,9 @@ void KlineHubber::recover_from_db()
             {
                 vector<KlineData>& input = iter2.second;
                 filter_kline_data(input);
+
+                LOG_INFO("60 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
+
                 min1_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
             }
         }
@@ -417,33 +420,16 @@ void KlineHubber::recover_from_db()
             for (auto iter2:iter1.second)
             {
                 vector<KlineData>& input = iter2.second;
-                filter_kline_data(input);                
-                min60_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
-            }
-        }
-        
-        LOG_INFO("\n********* min1_cache_: **********");
-        for (auto iter1:min1_cache_.data_)
-        {
-            for (auto iter2:iter1.second)
-            {
-                LOG_INFO(iter1.first + " " + iter2.first + " " + std::to_string(iter2.second.size()));
-            }
-        }
-
-        LOG_INFO("\n********* min60_cache_: **********");
-        for (auto iter1:min60_cache_.data_)
-        {
-            for (auto iter2:iter1.second)
-            {
-                vector<KlineData>& detail_kline_data = iter2.second;
-
-                LOG_INFO(iter1.first + " " + iter2.first + " " + std::to_string(detail_kline_data.size()));
 
                 if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
                 {
-                    LOG_DEBUG(klines_str(detail_kline_data));
+                    LOG_DEBUG(klines_str(input));
                 }
+
+                filter_kline_data(input);                
+
+                LOG_INFO("3600 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
+                min60_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
             }
         }
     }
