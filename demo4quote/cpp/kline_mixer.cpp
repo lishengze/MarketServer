@@ -406,7 +406,9 @@ void KlineHubber::recover_from_db()
         {
             for (auto iter2:iter1.second)
             {
-                min1_cache_.update_kline(iter1.first, iter2.first, iter2.second, output, nouse);
+                vector<KlineData>& input = iter2.second;
+                filter_kline_data(input);
+                min1_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
             }
         }
 
@@ -414,7 +416,9 @@ void KlineHubber::recover_from_db()
         {
             for (auto iter2:iter1.second)
             {
-                min60_cache_.update_kline(iter1.first, iter2.first, iter2.second, output, nouse);
+                vector<KlineData>& input = iter2.second;
+                filter_kline_data(input);                
+                min60_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
             }
         }
         

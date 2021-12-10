@@ -545,6 +545,7 @@ void filter_kline_data(vector<KlineData>& kline_list)
             if (filter_kline_atom(*iter))
             {
                 error_kline_list.push_back(iter);
+                LOG_WARN("zero kline: " + kline_str(*iter));
             }
         }        
 
@@ -555,7 +556,7 @@ void filter_kline_data(vector<KlineData>& kline_list)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
 }
 
@@ -574,7 +575,7 @@ bool filter_kline_atom(KlineData& kline)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
     
     return false;
