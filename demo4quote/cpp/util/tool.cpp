@@ -570,6 +570,7 @@ bool is_kline_valid(KlineData& kline)
         {
             result = true;
         }
+        return result;
     }
     catch(const std::exception& e)
     {
