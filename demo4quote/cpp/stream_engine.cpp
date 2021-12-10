@@ -83,6 +83,8 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 {
 
     LOG->record_output_info(string("depth_snap_") + exchange + "_" + symbol, quote);
+
+    LOG_TRACE(string("snap_") + exchange + "_" + symbol);
     
     quote_cacher_.on_snap(exchange, symbol, quote);
 
@@ -94,6 +96,8 @@ void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, con
 void StreamEngine::on_update(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)
 {
     LOG->record_output_info(string("depth_update_") + exchange + "_" + symbol, quote);
+
+    LOG_TRACE(string("update_") + exchange + "_" + symbol);
 
     SDepthQuote snap; // snap为增量更新后得到的快照
     quote_cacher_.on_update(exchange, symbol, quote, snap);
