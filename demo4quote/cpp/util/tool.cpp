@@ -539,27 +539,41 @@ void filter_kline_data(vector<KlineData>& kline_list)
 {
     try
     {
+        if (kline_list.size() == 0) return;
+
         std::list<vector<KlineData>::iterator> error_kline_list;
+
+        string symbol = kline_list[0].symbol;
+        string exchange = kline_list[0].exchange;
+
+
+        vector<KlineData> valid_kline_list;
         for(vector<KlineData>::iterator iter = kline_list.begin(); iter != kline_list.end(); ++iter)
         {
-            if (filter_kline_atom(*iter))
+            if (is_kline_valid(*iter))
             {
                 error_kline_list.push_back(iter);
             }
+            else
+            {
+                valid_kline_list.push_back(std::move(*iter));
+            }
         }        
 
-        for (auto err_iter:error_kline_list)
+        if (error_kline_list.size() > 0)
         {
-            kline_list.erase(err_iter);
+            LOG_WARN(symbol+ "." + exchange + " erase " + std::to_string(error_kline_list.size()) + " invalid data");
         }
+
+        kline_list.swap(valid_kline_list);
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
 }
 
-bool filter_kline_atom(KlineData& kline)
+bool is_kline_valid(KlineData& kline)
 {
     bool result = false;
     try
@@ -567,14 +581,13 @@ bool filter_kline_atom(KlineData& kline)
         if (kline.px_open <=0 || kline.px_close <= 0
             || kline.px_high <=0 || kline.px_low <=0)
         {
-            // LOG_WARN(kline_str(kline));
             result = true;
         }
-            
+        return result;
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
     
     return false;

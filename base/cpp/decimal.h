@@ -2,6 +2,8 @@
 
 #include "basic.h"
 
+const double G_PRECISION = 0.000000001;
+
 #define CALC_BASE(x) (uint64(pow(10, (x))))
 
 template<typename T>
@@ -234,6 +236,16 @@ struct SDecimal {
             return data_.real_.value_ * CALC_BASE(d.data_.real_.prec_-data_.real_.prec_) <= d.data_.real_.value_;
         }
     }
+
+    bool operator < (const double& d) const {
+        return get_value() < d;
+    }
+
+    bool operator <=(const double& d) const {
+        double d_value = get_value();
+        return d_value < d || fabs(d_value-d) < G_PRECISION; 
+    }
+
     bool operator >=(const SDecimal& d) const {
         if( data_.real_.prec_ > d.data_.real_.prec_ ) {
             return data_.real_.value_ >= d.data_.real_.value_ * CALC_BASE(data_.real_.prec_-d.data_.real_.prec_);
