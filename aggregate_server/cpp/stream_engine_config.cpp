@@ -48,6 +48,8 @@ void Config::parse_config(const std::string& file_name)
         nacos_addr_ = js["nacos"]["addr"].get<string>();
         nacos_namespace_ = js["nacos"]["namespace"].get<string>();
 
+        depth_compute_millsecs = js["depth_compute_millsecs"].get<int>();
+
         if (!js["kafka"].is_null() && !js["kafka"]["bootstrap_servers"].is_null())
         {
             kafka_config_.bootstrap_servers = js["kafka"]["bootstrap_servers"].get<string>();

@@ -216,10 +216,6 @@ string get_sec_time_str(unsigned long time)
 {
     return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
 }
-
-
-
-
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
     map<TExchange, SDecimal> exchanges;
@@ -259,8 +255,6 @@ struct SInnerDepth {
         }        
     }
 };
-
-
 struct SInnerQuote {
     string exchange;
     string symbol;
@@ -542,52 +536,46 @@ void filter_kline_data(vector<KlineData>& kline_list)
 {
     try
     {
+        if (kline_list.size() == 0) return;
+
         std::list<vector<KlineData>::iterator> error_kline_list;
+
+        string symbol = kline_list[0].symbol;
+        string exchange = kline_list[0].exchange;
+
+
+        vector<KlineData> valid_kline_list;
         for(vector<KlineData>::iterator iter = kline_list.begin(); iter != kline_list.end(); ++iter)
         {
-            if (filter_kline_atom(*iter))
+            if (is_kline_valid(*iter))
             {
                 error_kline_list.push_back(iter);
             }
+            else
+            {
+                valid_kline_list.push_back(std::move(*iter));
+            }
         }        
 
-        for (auto err_iter:error_kline_list)
+        if (error_kline_list.size() > 0)
         {
-            kline_list.erase(err_iter);
+            LOG_WARN(symbol+ "." + exchange + " erase " + std::to_string(error_kline_list.size()) + " invalid data");
         }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-}
 
-bool filter_kline_atom(KlineData& kline)
-{
-    bool result = false;
-    try
-    {
-        if (kline.px_open <=0 || kline.px_close <= 0
-            || kline.px_high <=0 || kline.px_low <=0)
-        {
-            // LOG_WARN(kline_str(kline));
-            result = true;
-        }
-            
+        kline_list.swap(valid_kline_list);
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
-    
-    return false;
 }
 
 bool is_kline_valid(const KlineData& kline) 
 {
     try
     {
-        return !(kline.index < 1000000000 || kline.index > 1900000000);
+        return !(kline.index < 1000000000 || kline.index > 1900000000 ||
+                 kline.px_open<=0 || kline.px_close<=0 || kline.px_high<=0 || kline.px_low<=0);
     }
     catch(const std::exception& e)
     {
@@ -607,4 +595,43 @@ bool is_trade_valid(const TradeData& trade)
         LOG_ERROR(e.what());
     }
     return false;    
+}
+
+string get_kline_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(KLINE_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return "";
+}
+
+
+string get_depth_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(DEPTH_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+    return "";
+}
+
+string get_trade_topic(string exchange, string symbol)
+{
+    try
+    {
+        return string(TRADE_TYPE) + TYPE_SEPARATOR + symbol+ SYMBOL_EXCHANGE_SEPARATOR  + exchange;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
 }

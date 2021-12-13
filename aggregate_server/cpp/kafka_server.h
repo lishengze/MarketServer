@@ -40,17 +40,13 @@ public:
     void unsub_topic(const string& topic);
     void subscribe_topics(std::set<string> topics);
 
+    void publish_msg(const string& topic, const string& data);
+
 
     kafka::Topics _get_subed_topics();
     kafka::Topics _get_created_topics();
 
-    //auto createResult = adminClient.createTopics({args->topic}, 
-    // args->partitions, args->replicationFactor, args->topicProps);
     bool create_topic(kafka::Topic topic);
-
-    string _get_kline_topic(string exchange, string symbol);
-    string _get_depth_topic(string exchange, string symbol);
-    string _get_trade_topic(string exchange, string symbol);
 
 public:
     void start_listen_data();

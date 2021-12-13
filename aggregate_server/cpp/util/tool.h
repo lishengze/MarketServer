@@ -7,7 +7,6 @@ void print_quote(const SDepthQuote& quote);
 
 // string quote_str(const SDepthQuote& quote);
 
-
 string quote_str(const SDepthQuote& quote, int count=0);
 
 bool filter_zero_volume(SDepthQuote& quote);
@@ -31,3 +30,7 @@ bool filter_kline_atom(KlineData& kline);
 bool is_kline_valid(const KlineData& kline);
 
 bool is_trade_valid(const TradeData& trade);
+
+string get_kline_topic(string exchange, string symbol);
+string get_depth_topic(string exchange, string symbol);
+string get_trade_topic(string exchange, string symbol);

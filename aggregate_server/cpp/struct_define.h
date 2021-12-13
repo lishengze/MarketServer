@@ -8,6 +8,9 @@
 #include <sstream>
 #include <iomanip>
 
+#include "pandora/util/json.hpp"
+#include "Log/log.h"
+
 inline string make_symbolkey(const TExchange& exchange, const TSymbol& symbol) 
 {
     return symbol + "." + exchange;
@@ -312,6 +315,50 @@ struct SDepthQuote {
     }
 
 
+    void set_depth_json(nlohmann::json& ask_json, const map<SDecimal, SDepth>& depth)
+    {
+        try
+        {
+            for (auto iter:depth)
+            {
+                ask_json[iter.first.get_str_value()] = iter.second.volume.get_value();
+            }
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }        
+    }
+
+    string get_json_str()
+    {
+        try
+        {
+            nlohmann::json json_data;            
+
+            json_data["Symbol"] = symbol;
+            json_data["Exchange"] = exchange;
+            json_data["Type"] = "snap";
+            json_data["TimeArrive"] = origin_time;
+            json_data["Msg_seq_symbol"] = sequence_no;
+
+            nlohmann::json ask_json;
+            nlohmann::json bid_json;
+
+            set_depth_json(ask_json, asks);
+            set_depth_json(bid_json, bids);
+
+            json_data["AskDepth"] = ask_json;
+            json_data["BidDepth"] = bid_json;
+
+            return json_data.dump();
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
+        return "";
+    }    
 
     std::string depth_str()
     {
@@ -364,6 +411,32 @@ struct KlineData
         tfm::printf("index=%lu, open=%s, high=%s, low=%s, close=%s, vol=%s", index, px_open.get_str_value(), px_high.get_str_value(), px_low.get_str_value(), 
         px_close.get_str_value(), volume.get_str_value());
     }
+
+    string get_json_str()
+    {
+        try
+        {
+            nlohmann::json json_data;            
+
+            json_data[0] = index;
+            json_data[1] = px_open.get_value();
+            json_data[2] = px_high.get_value();
+            json_data[3] = px_low.get_value();
+            json_data[4] = px_close.get_value();
+            json_data[5] = volume.get_value();
+            
+            json_data[6] = symbol;
+            json_data[7] = exchange;
+            json_data[8] = resolution;
+
+            return json_data.dump();
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
+        return "";
+    }    
 };
 
 struct TradeData
@@ -379,21 +452,21 @@ struct TradeData
     }
 
     TradeData(const TradeData&& other):
-    time{std::move(other.time)},
-    price{std::move(other.price)},
-    volume{std::move(other.volume)},
-    symbol{std::move(other.symbol)},
-    exchange{std::move(other.exchange)}
+                time{std::move(other.time)},
+                price{std::move(other.price)},
+                volume{std::move(other.volume)},
+                symbol{std::move(other.symbol)},
+                exchange{std::move(other.exchange)}
     {
 
     }
 
     TradeData(const TradeData& other):
-    time{other.time},
-    price{other.price},
-    volume{other.volume},
-    symbol{other.symbol},
-    exchange{other.exchange}
+                time{other.time},
+                price{other.price},
+                volume{other.volume},
+                symbol{other.symbol},
+                exchange{other.exchange}
     {
 
     }    
@@ -411,7 +484,26 @@ struct TradeData
         return *this;
     }
 
+    string get_json_str()
+    {
+        try
+        {
+            nlohmann::json json_data;            
 
+            json_data["Time"] = time;
+            json_data["LastPx"] = price.get_value();
+            json_data["Qty"] = volume.get_value();
+            json_data["Exchange"] = exchange;
+            json_data["Symbol"] = symbol;
+
+            return json_data.dump();
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
+        return "";
+    }    
 };
 #pragma pack()
 

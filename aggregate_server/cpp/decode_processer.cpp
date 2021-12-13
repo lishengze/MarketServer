@@ -1,16 +1,41 @@
 #include "decode_processer.h"
 #include "Log/log.h"
 #include "util/tool.h"
+#include "kafka_server.h"
 
 #include "depth_processor.h"
 #include "trade_processor.h"
 #include "kline_processor.h"
 
-void EncodeProcesser::on_snap(const SDepthQuote& depth)
+void EncodeProcesser::on_snap( SDepthQuote& depth)
 {
     try
     {
-        /* code */
+        string json_str = depth.get_json_str();
+        string topic = get_depth_topic(depth.symbol, depth.exchange);
+
+        if (kafka_server_)
+        {
+            kafka_server_->publish_msg(topic, json_str);
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void EncodeProcesser::on_kline( KlineData& kline)
+{
+    try
+    {
+        string json_str = kline.get_json_str();
+        string topic = get_depth_topic(kline.symbol, kline.exchange);
+
+        if (kafka_server_)
+        {
+            kafka_server_->publish_msg(topic, json_str);
+        }
     }
     catch(const std::exception& e)
     {
@@ -18,23 +43,17 @@ void EncodeProcesser::on_snap(const SDepthQuote& depth)
     }    
 }
 
-void EncodeProcesser::on_kline(const KlineData& kline)
+void EncodeProcesser::on_trade( TradeData& trade)
 {
     try
     {
-        /* code */
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }    
-}
+        string json_str = trade.get_json_str();
+        string topic = get_depth_topic(trade.symbol, trade.exchange);
 
-void EncodeProcesser::on_trade(const TradeData& trade)
-{
-    try
-    {
-        /* code */
+        if (kafka_server_)
+        {
+            kafka_server_->publish_msg(topic, json_str);
+        }
     }
     catch(const std::exception& e)
     {
@@ -97,8 +116,7 @@ bool DecodeProcesser::_json_to_kline(const Value& data, KlineData& kline)
 {
     try
     {
-        kline.symbol = data[7].GetString();
-        kline.exchange = data[8].GetString();
+
         kline.index = int(data[0].GetDouble());
         kline.px_open.from(data[1].GetDouble());
         kline.px_high.from(data[2].GetDouble());
@@ -106,7 +124,9 @@ bool DecodeProcesser::_json_to_kline(const Value& data, KlineData& kline)
         kline.px_close.from(data[4].GetDouble());
         kline.volume.from(data[5].GetDouble());
 
-        // kline.resolution = data[9].GetInt64();
+        kline.symbol = data[7].GetString();
+        kline.exchange = data[8].GetString();
+        kline.resolution = data[9].GetInt64();
         return is_kline_valid(kline);
     }
     catch(const std::exception& e)
@@ -133,6 +153,7 @@ bool DecodeProcesser::is_data_subed(const string symbol, const string exchange)
     }
     return false;
 }
+
 void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
 {
     try

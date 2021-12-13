@@ -16,13 +16,13 @@ class QuoteSourceCallbackInterface
 {
 public:
     // 行情接口
-    virtual void on_snap(const SDepthQuote& quote) = 0;
+    virtual void on_snap( SDepthQuote& quote) = 0;
 
     // K线接口
-    virtual void on_kline(const KlineData& kline) = 0;
+    virtual void on_kline( KlineData& kline) = 0;
 
     // 交易接口
-    virtual void on_trade(const TradeData& trade) = 0;
+    virtual void on_trade( TradeData& trade) = 0;
 
     // 交易所异常无数据
     virtual void on_nodata_exchange(const TExchange& exchange){};

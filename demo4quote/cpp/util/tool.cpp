@@ -214,9 +214,6 @@ string get_sec_time_str(unsigned long time)
     return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
 }
 
-
-
-
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
     map<TExchange, SDecimal> exchanges;
@@ -256,7 +253,6 @@ struct SInnerDepth {
         }        
     }
 };
-
 
 struct SInnerQuote {
     string exchange;
@@ -578,8 +574,7 @@ bool is_kline_valid(KlineData& kline)
     bool result = false;
     try
     {
-        if (kline.px_open <=0 || kline.px_close <= 0
-            || kline.px_high <=0 || kline.px_low <=0)
+        if (kline.px_open<=0 || kline.px_close<=0 || kline.px_high<=0 || kline.px_low<=0 )
         {
             result = true;
         }

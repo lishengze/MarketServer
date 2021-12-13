@@ -5,9 +5,6 @@
 
 void print_quote(const SDepthQuote& quote);
 
-// string quote_str(const SDepthQuote& quote);
-
-
 string quote_str(const SDepthQuote& quote, int count=0);
 
 bool filter_zero_volume(SDepthQuote& quote);

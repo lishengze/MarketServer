@@ -9,22 +9,27 @@
 class DepthProcessor;
 class KlineProcessor;
 class TradeProcessor;
+class KafkaServer;
 
 
 class EncodeProcesser:public QuoteSourceCallbackInterface
 {
 public:
 
-    virtual void on_snap(const SDepthQuote& quote);
+    virtual void on_snap( SDepthQuote& quote);
 
     // K线接口
-    virtual void on_kline(const KlineData& kline);
+    virtual void on_kline( KlineData& kline);
 
     // 交易接口
-    virtual void on_trade(const TradeData& trade);
+    virtual void on_trade( TradeData& trade);
+
+    void set_kafka_server(KafkaServer* kafka_server) {
+        kafka_server_ = kafka_server;
+    }
 
 private:
-
+    KafkaServer*    kafka_server_{nullptr};
 };
 
 class DecodeProcesser

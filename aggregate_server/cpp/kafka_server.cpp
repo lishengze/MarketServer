@@ -1,7 +1,13 @@
 #include "kafka_server.h"
+
+#include "kafka/KafkaConsumer.h"
+#include "kafka/KafkaProducer.h"
+#include "kafka/AdminClient.h"
+
 #include "Log/log.h"
 #include "stream_engine_config.h"
 
+#include "util/tool.h"
 
 KafkaServer::KafkaServer(string bootstrap_servers):
      bootstrap_servers_{bootstrap_servers}
@@ -20,7 +26,6 @@ KafkaServer::KafkaServer(DecodeProcesser* decode_processer):
 
     init_user();
 }
-
 
 KafkaServer::KafkaServer()
 {
@@ -168,6 +173,40 @@ bool KafkaServer::create_topic(kafka::Topic topic)
     }
 }
 
+void KafkaServer::publish_msg(const string& topic, const string& data)
+{
+    try
+    {
+        if (producer_sptr_)
+        {
+            auto record = kafka::clients::producer::ProducerRecord(topic,
+                                                   kafka::NullKey,
+                                                   kafka::Value(data.c_str(), data.size()));
+
+            producer_sptr_->send(record,                         
+                            [](const kafka::clients::producer::RecordMetadata& metadata, 
+                                const kafka::Error& error) 
+                            {
+                              if (!error) {
+                                //   std::cout << "% Message delivered: " << metadata.toString() << "\n" << std::endl;
+                              } else {
+                                  LOG_ERROR( error.message() + " Message delivery failed");
+                              }
+                          },
+
+                          KProducer::SendOption::NoCopyRecordValue);
+        }
+        else
+        {
+            LOG_ERROR("producer_sptr_ is empty");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 void KafkaServer::start_listen_data()
 {
     try
@@ -268,45 +307,6 @@ void KafkaServer::process_data()
     }
 }
 
-string KafkaServer::_get_kline_topic(string exchange, string symbol)
-{
-    try
-    {
-        return string(KLINE_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-    return "";
-}
-
-string KafkaServer::_get_depth_topic(string exchange, string symbol)
-{
-    try
-    {
-        return string(DEPTH_TYPE) + TYPE_SEPARATOR + symbol + SYMBOL_EXCHANGE_SEPARATOR + exchange;
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }    
-    return "";
-}
-
-string KafkaServer::_get_trade_topic(string exchange, string symbol)
-{
-    try
-    {
-        return string(TRADE_TYPE) + TYPE_SEPARATOR + symbol+ SYMBOL_EXCHANGE_SEPARATOR  + exchange;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-}
-
 void KafkaServer::sub_topic(const string& topic)
 {
     try
@@ -361,7 +361,6 @@ void KafkaServer::unsub_topic(const string& topic)
     }
 }
 
-
 void KafkaServer::subscribe_topics(std::set<string> topics)
 {
     try
@@ -414,9 +413,9 @@ void KafkaServer::set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new
             for (auto exchange:iter.second)
             {
                 string symbol = iter.first;
-                string kline_topic = _get_kline_topic(exchange, symbol);
-                string depth_topic = _get_depth_topic(exchange, symbol);
-                string trade_topic = _get_depth_topic(exchange, symbol);
+                string kline_topic = get_kline_topic(exchange, symbol);
+                string depth_topic = get_depth_topic(exchange, symbol);
+                string trade_topic = get_trade_topic(exchange, symbol);
 
                 new_topics.emplace(std::move(kline_topic));
                 new_topics.emplace(std::move(depth_topic));      

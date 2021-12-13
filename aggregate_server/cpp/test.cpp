@@ -33,6 +33,7 @@ void TestEngine::init()
                                                   p_trade_processor_, engine_pool_);
 
         p_kafka_ = new KafkaServer(p_decode_processer_);
+        p_encode_processer_->set_kafka_server(p_kafka_);
 
         config_client_.set_callback(this);
 
