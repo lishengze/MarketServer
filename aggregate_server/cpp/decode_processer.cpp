@@ -164,7 +164,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
         {
             MetaData meta_data;
             if (!pre_process(src_data, meta_data)) continue;
-            // LOG_INFO(meta_data.simple_str());
+            LOG_INFO(meta_data.simple_str());
 
             if (!is_data_subed(meta_data.symbol, meta_data.exchange)) 
             {
