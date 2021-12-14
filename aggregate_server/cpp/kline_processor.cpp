@@ -98,8 +98,6 @@ void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
-
         // check added meta-symbol,exchange;
         for (auto iter:new_meta_map)
         {
