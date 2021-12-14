@@ -105,7 +105,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 {
     // 行情
 
-    LOG_INFO("_calc_symbol: " +  symbol);
+    // LOG_INFO("_calc_symbol: " +  symbol);
 
     SDepthQuote snap;
     snap.sequence_no = seqno;
@@ -131,10 +131,10 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
             //     continue;
             // }
 
-            if (quote.symbol == "BTC_USDT")
-            {
-                LOG_INFO(quote.str());
-            }
+            // if (quote.symbol == "BTC_USDT")
+            // {
+            //     LOG_INFO(quote.str());
+            // }
 
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
