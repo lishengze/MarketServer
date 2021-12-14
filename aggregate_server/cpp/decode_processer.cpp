@@ -14,7 +14,12 @@ void EncodeProcesser::on_snap( SDepthQuote& depth)
         string json_str = depth.get_json_str();
         string topic = get_depth_topic(depth.exchange, depth.symbol);
 
-        // LOG_INFO("")
+        if (depth.symbol == "BTC_USDT")
+        {
+            LOG_INFO(depth.str());
+        }
+
+        
 
         if (kafka_server_)
         {

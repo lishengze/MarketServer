@@ -291,6 +291,7 @@ struct SDepthQuote {
         std::stringstream s_obj;
         s_obj << "exchange: " << exchange << ","
                 << "symbol: " << symbol << ", "
+                << "seno " << sequence_no << ","
                 << "asks.size: " << asks.size()  << ","
                 << "bids.size: " << bids.size()  << ""
             << "\n";

@@ -187,7 +187,7 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
                                                    kafka::NullKey,
                                                    kafka::Value(data.c_str(), data.size()));
 
-            LOG_INFO(record.topic() + ": " + record.value().toString());
+            // LOG_INFO(record.topic() + ": " + record.value().toString());
 
             producer_sptr_->send(record,                         
                             [](const kafka::clients::producer::RecordMetadata& metadata, 
