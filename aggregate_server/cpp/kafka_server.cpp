@@ -177,6 +177,8 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
 {
     try
     {
+        check_topic(topic);
+        
         if (producer_sptr_)
         {
             auto record = kafka::clients::producer::ProducerRecord(topic,
