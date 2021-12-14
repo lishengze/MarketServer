@@ -46,18 +46,23 @@ void DepthProcessor::process(SDepthQuote& src)
             update_rst = process_update_quote(src);
         }
 
-        if (update_rst)
+        if (!update_rst)
         {
-            SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
+            if (src.is_snap) LOG_WARN(src.symbol + "." + src.exchange + " process_snap_quote failed!");
+            else LOG_WARN(src.symbol + "." + src.exchange + " process_update_quote failed!");
+            return;
+        }        
 
-            if (latest_quote.symbol == "BCT_USDT")
-            {
-                LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
-                        + std::to_string(latest_quote.sequence_no));
-            }
 
-            p_aggregater_->on_snap(latest_quote.exchange, latest_quote.symbol ,latest_quote);
+        SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
+
+        if (latest_quote.symbol == "BTC_USDT")
+        {
+            LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
+                    + std::to_string(latest_quote.sequence_no));
         }
+
+        p_aggregater_->on_snap(latest_quote.exchange, latest_quote.symbol ,latest_quote);
 
     }
     catch(const std::exception& e)
