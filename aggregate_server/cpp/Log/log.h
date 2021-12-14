@@ -18,6 +18,8 @@ public:
     using BaseLog::record_input_info;
     using BaseLog::record_output_info;
 
+    virtual void log_info_(const string& info);
+
     void record_input_info(const string& info, const SDepthQuote& quote);
 
     void record_input_info(const string& info, const Trade& trade);
