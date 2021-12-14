@@ -203,6 +203,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 TradeData trade_data;
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
+                    LOG_INFO(trade_data.get_json_str());
                     p_trade_processor_->process(trade_data);
                 }
                 else
