@@ -203,7 +203,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 TradeData trade_data;
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
-                    // p_trade_processor_->process(trade_data);
+                    p_trade_processor_->process(trade_data);
                 }
                 else
                 {

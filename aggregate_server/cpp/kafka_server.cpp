@@ -195,7 +195,7 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
                             {
                                 if (!error) 
                                 {
-                                    LOG_INFO(metadata.toString() + " Message delivered ");
+                                    // LOG_INFO(metadata.toString() + " Message delivered ");
                                 } 
                                 else 
                                 {
