@@ -307,6 +307,73 @@ void KafkaServer::process_data()
     }
 }
 
+void KafkaServer::check_topic(kafka::Topic topic)
+{
+    try
+    {
+        if (created_topics_.size() == 0)
+        {
+            created_topics_ = _get_created_topics();
+        }
+
+        if (created_topics_.find(topic) == created_topics_.end())
+        {
+            LOG_INFO("topic " + topic + " was not created");
+        }
+        else
+        {
+            create_topic(topic);
+            created_topics_ = _get_created_topics();
+
+            LOG_INFO("After Create: " + topic);
+            for (auto topic:created_topics_)
+            {
+                LOG_INFO(topic);
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+void KafkaServer::filter_topic(std::set<string>& topics)
+{
+    try
+    {
+        if (created_topics_.size() == 0)
+        {
+            created_topics_ = _get_created_topics();
+        }        
+
+        for (auto topic:created_topics_)
+        {
+            LOG_INFO("created topic: " + topic);
+        }
+
+        kafka::Topics valid_topics;
+        for(auto topic:topics)
+        {
+            
+            if (created_topics_.find(topic) == created_topics_.end())
+            {
+                LOG_INFO("topic " + topic + " was not created");
+            }
+            else
+            {
+                valid_topics.emplace(topic);
+            }
+        }
+
+        topics.swap(valid_topics);        
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 void KafkaServer::sub_topic(const string& topic)
 {
     try
@@ -365,28 +432,8 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
 {
     try
     {
-        kafka::Topics created_topics = _get_created_topics();
-
-        for (auto topic:created_topics)
-        {
-            LOG_INFO("created topic: " + topic);
-        }
-
-        kafka::Topics valid_topics;
+        filter_topic(topics);
         for(auto topic:topics)
-        {
-            
-            if (created_topics.find(topic) == created_topics.end())
-            {
-                LOG_INFO("topic " + topic + " was not created");
-            }
-            else
-            {
-                valid_topics.emplace(topic);
-            }
-        }
-
-        for(auto topic:valid_topics)
         {
             LOG_INFO("Sub Topic: " + topic);
         }
@@ -394,7 +441,7 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
         if (consumer_sptr_)
         {
             consumer_sptr_->unsubscribe();
-            consumer_sptr_->subscribe(valid_topics);
+            consumer_sptr_->subscribe(topics);
         }
     }
     catch(const std::exception& e)

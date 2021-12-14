@@ -48,6 +48,10 @@ public:
 
     bool create_topic(kafka::Topic topic);
 
+    void check_topic(kafka::Topic topic);
+
+    void filter_topic(std::set<string>& topics);
+
 public:
     void start_listen_data();
     void listen_data_main();
@@ -66,7 +70,7 @@ private:
 
     std::string                        bootstrap_servers_;
 
-    std::set<string>                   topic_set_;
+    std::set<string>                   created_topics_;
 
     std::thread                        listen_thread_;
     
