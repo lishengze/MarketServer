@@ -228,7 +228,7 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
         if (datas.size() > 0)
         {
             output = calc_mixed_kline(input.index, datas);
-            output.exchange = AGGREGATE_EXCHANGE;
+            output.exchange = MIX_EXCHANGE_NAME;
             output.symbol = input.symbol;
             output.resolution = input.resolution;
 

@@ -38,4 +38,3 @@ inline void vassign(char * r, unsigned int len, const std::string &v)
 
 #define MIX_EXCHANGE_NAME "_bcts_"
 
-#define AGGREGATE_EXCHANGE "BCTS"

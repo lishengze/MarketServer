@@ -140,7 +140,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
-        snap.exchange = AGGREGATE_EXCHANGE;        
+        snap.exchange = MIX_EXCHANGE_NAME;        
         engine_->on_snap(snap);
     }
 }
