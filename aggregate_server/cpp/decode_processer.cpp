@@ -205,7 +205,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 TradeData trade_data;
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
-                    LOG_INFO(trade_data.get_json_str());
+                    // LOG_INFO(trade_data.get_json_str());
                     p_trade_processor_->process(trade_data);
                 }
                 else
@@ -315,9 +315,7 @@ bool DecodeProcesser::decode_trade(Document& json_data,TradeData& trade_data)
         trade_data.exchange = json_data["Exchange"].GetString();
         trade_data.symbol = json_data["Symbol"].GetString();
 
-        // return is_trade_valid(trade_data);
-
-        return true;
+        return is_trade_valid(trade_data);
     }
     catch(const std::exception& e)
     {
