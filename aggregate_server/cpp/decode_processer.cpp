@@ -14,6 +14,8 @@ void EncodeProcesser::on_snap( SDepthQuote& depth)
         string json_str = depth.get_json_str();
         string topic = get_depth_topic(depth.exchange, depth.symbol);
 
+        // LOG_INFO("")
+
         if (kafka_server_)
         {
             kafka_server_->publish_msg(topic, json_str);
@@ -177,8 +179,12 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 SDepthQuote depth_quote;
                 if (decode_depth(meta_data.data_body, depth_quote))
                 {
-                    // p_depth_processor_->process(depth_quote);
-                    // LOG_INFO(quote_str(depth_quote));
+                    if (depth_quote.symbol == "BTC_USDT")
+                    {
+                        LOG_INFO(quote_str(depth_quote, 5));
+                    }                    
+                    p_depth_processor_->process(depth_quote);
+                    
                 }
                 else
                 {
@@ -190,7 +196,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 KlineData kline;
                 if (decode_kline(meta_data.data_body, kline))
                 {
-                    p_kline_processor_->process(kline);
+                    // p_kline_processor_->process(kline);
                     // LOG_INFO(kline.get_json_str());
                 }
                 else
@@ -206,7 +212,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
                     // LOG_INFO(trade_data.get_json_str());
-                    p_trade_processor_->process(trade_data);
+                    // p_trade_processor_->process(trade_data);
                 }
                 else
                 {
