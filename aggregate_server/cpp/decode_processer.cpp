@@ -179,10 +179,10 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 SDepthQuote depth_quote;
                 if (decode_depth(meta_data.data_body, depth_quote))
                 {
-                    if (depth_quote.symbol == "BTC_USDT")
-                    {
-                        LOG_INFO(quote_str(depth_quote, 5));
-                    }                    
+                    // if (depth_quote.symbol == "BTC_USDT")
+                    // {
+                    //     LOG_INFO(quote_str(depth_quote, 5));
+                    // }                    
                     p_depth_processor_->process(depth_quote);
                     
                 }

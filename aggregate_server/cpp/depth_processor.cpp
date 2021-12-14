@@ -65,6 +65,10 @@ bool DepthProcessor::is_sequenced_quote(const SDepthQuote& src)
     {
         if (latest_depth_quote_[src.symbol][src.exchange].sequence_no < src.sequence_no)
         {
+            LOG_INFO(string("src ") + src.symbol + "." + src.exchange 
+                    + ", seq_no: " + std::to_string(latest_depth_quote_[src.symbol][src.exchange].sequence_no)
+                    + ", updated seq_no: " + std::to_string(src.sequence_no));
+
             return true;
         }
         else

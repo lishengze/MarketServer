@@ -128,6 +128,8 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
             //     continue;
             // }
 
+            LOG_INFO(quote_str(quote));
+
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
             mix_quote(snap.asks, quote.asks, exchange, config, true);
