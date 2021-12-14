@@ -175,7 +175,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 SDepthQuote depth_quote;
                 if (decode_depth(meta_data.data_body, depth_quote))
                 {
-                    p_depth_processor_->process(depth_quote);
+                    // p_depth_processor_->process(depth_quote);
                     // LOG_INFO(quote_str(depth_quote));
                 }
                 else
@@ -188,7 +188,8 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 KlineData kline;
                 if (decode_kline(meta_data.data_body, kline))
                 {
-                    p_kline_processor_->process(kline);
+                    // p_kline_processor_->process(kline);
+                    LOG_INFO(kline.get_json_str());
                 }
                 else
                 {
@@ -200,7 +201,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 TradeData trade_data;
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
-                    p_trade_processor_->process(trade_data);
+                    // p_trade_processor_->process(trade_data);
                 }
                 else
                 {

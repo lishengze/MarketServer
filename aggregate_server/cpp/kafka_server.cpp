@@ -260,7 +260,7 @@ void KafkaServer::listen_data_main()
 
             if (src_data_vec_.size() > 0)
             {
-                LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
+                // LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
                 src_data_cv_.notify_all();   
             }                             
         }        
@@ -295,9 +295,9 @@ void KafkaServer::process_data()
                 return !(src_data_vec_.size()==0);
             });            
 
-            LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
+            // LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
-            // decode_processer_->process_data(src_data_vec_);
+            decode_processer_->process_data(src_data_vec_);
             src_data_vec_.clear();
         }
     }
