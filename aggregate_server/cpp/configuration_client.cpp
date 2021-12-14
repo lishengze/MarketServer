@@ -180,9 +180,9 @@ void ConfigurationClient::_parse_config()
             return;
         }
 
-        LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
-                + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
-                + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
+        // LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
+        //         + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
+        //         + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
 
         // 合并为内置配置格式
         Document output(rapidjson::Type::kObjectType);

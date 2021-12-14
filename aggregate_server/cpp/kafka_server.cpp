@@ -297,7 +297,7 @@ void KafkaServer::process_data()
 
             LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
-            decode_processer_->process_data(src_data_vec_);
+            // decode_processer_->process_data(src_data_vec_);
             src_data_vec_.clear();
         }
     }

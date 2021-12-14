@@ -141,8 +141,10 @@ bool TestEngine::parse_config(const Document& src, std::unordered_map<TSymbol, S
                 cfg.exchanges[exchange] = exchange_cfg;
             } 
             curr_config[symbol] = cfg;
-            LOG_INFO("\n" + symbol + ": " + cfg.str());
+            // LOG_INFO("\n" + symbol + ": " + cfg.str());
         }
+
+        return true;
     }
     catch(const std::exception& e)
     {
@@ -242,6 +244,12 @@ void TestEngine::notify_config_change()
 {
     try
     {
+        LOG_INFO("mixer_config: ");
+        for (auto iter:mixer_config_)
+        {
+            LOG_INFO(iter.first + " " + iter.second.simple_str());
+        }
+
         p_depth_processor_->set_config(mixer_config_);
         p_kline_processor_->set_config(mixer_config_);
         p_trade_processor_->set_config(mixer_config_);        
@@ -256,6 +264,15 @@ void TestEngine::notify_meta_change()
 {
     try
     {
+        LOG_INFO("meta_map: ");
+        for (auto iter:meta_map_)
+        {
+            for (auto exchange:iter.second)
+            {
+                LOG_INFO(iter.first + "."+ exchange);
+            }
+        }
+
         p_kafka_->set_meta(meta_map_);
         p_decode_processer_->set_meta(meta_map_);
         p_kline_processor_->set_meta(meta_map_);
