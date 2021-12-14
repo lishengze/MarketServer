@@ -88,7 +88,7 @@ void KlineAggregater::update_cache_meta(const std::unordered_map<TSymbol, std::s
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }    
 }                        
 
@@ -259,7 +259,7 @@ void KlineProcessor::set_meta(const std::unordered_map<TSymbol, std::set<TExchan
 {
     try
     {
-        // min1_kline_aggregator_.set_meta(symbol, exchanges);
+        min1_kline_aggregator_.set_meta(meta_map);
 
         // min60_kline_aggregator_.set_meta(symbol, exchanges);
     }

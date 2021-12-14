@@ -188,7 +188,7 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 KlineData kline;
                 if (decode_kline(meta_data.data_body, kline))
                 {
-                    // p_kline_processor_->process(kline);
+                    p_kline_processor_->process(kline);
                     LOG_INFO(kline.get_json_str());
                 }
                 else

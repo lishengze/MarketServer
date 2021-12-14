@@ -572,9 +572,9 @@ struct SMixerConfig
     string simple_str()
     {
         string result = "depth: " + std::to_string(depth) 
-                        + ", precise" + std::to_string(precise)
-                        + ", vprecise" + std::to_string(vprecise)
-                        + ", aprecise" + std::to_string(aprecise);
+                        + ", precise: " + std::to_string(precise)
+                        + ", vprecise: " + std::to_string(vprecise)
+                        + ", aprecise: " + std::to_string(aprecise);
         return result;
     }
 
