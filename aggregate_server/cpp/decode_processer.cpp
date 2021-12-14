@@ -317,7 +317,7 @@ bool DecodeProcesser::decode_trade(Document& json_data,TradeData& trade_data)
 
         // return is_trade_valid(trade_data);
 
-        return trade_data;
+        return true;
     }
     catch(const std::exception& e)
     {
