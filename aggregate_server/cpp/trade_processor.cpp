@@ -11,7 +11,7 @@ void TradeProcessor::process(TradeData& ori_trade)
         const SMixerConfig& cur_config = symbol_config_[ori_trade.symbol];
 
         TradeData trade{std::move(ori_trade)};
-        trade.exchange = MIX_EXCHANGE_NAME;
+        trade.exchange = AGGREGATE_EXCHANGE;
 
         if (last_trade_map_.find(ori_trade.symbol) == last_trade_map_.end())
         {

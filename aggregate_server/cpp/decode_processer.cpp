@@ -32,7 +32,7 @@ void EncodeProcesser::on_kline( KlineData& kline)
         string json_str = kline.get_json_str();
         string topic = get_kline_topic(kline.exchange, kline.symbol);
 
-        LOG_INFO(topic + ": " + json_str);
+        // LOG_INFO(topic + ": " + json_str);
 
         if (kafka_server_)
         {
