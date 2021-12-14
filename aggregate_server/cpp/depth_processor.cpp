@@ -20,6 +20,8 @@ DepthProcessor::DepthProcessor(QuoteSourceCallbackInterface* engine):
                             engine_{engine}
 {
     p_aggregater_ = new DepthAggregater(engine_);
+
+    p_aggregater_->start();
 }
 
 DepthProcessor::~DepthProcessor()
@@ -56,11 +58,11 @@ void DepthProcessor::process(SDepthQuote& src)
 
         SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
 
-        if (latest_quote.symbol == "BTC_USDT")
-        {
-            LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
-                    + std::to_string(latest_quote.sequence_no));
-        }
+        // if (latest_quote.symbol == "BTC_USDT")
+        // {
+        //     LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
+        //             + std::to_string(latest_quote.sequence_no));
+        // }
 
         p_aggregater_->on_snap(latest_quote.exchange, latest_quote.symbol ,latest_quote);
 
