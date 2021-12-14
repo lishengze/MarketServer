@@ -177,6 +177,8 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
 {
     try
     {
+        std::lock_guard<std::mutex> lk(public_mutex_);
+
         check_topic(topic);
 
         if (producer_sptr_)
@@ -191,14 +193,17 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
                             [](const kafka::clients::producer::RecordMetadata& metadata, 
                                 const kafka::Error& error) 
                             {
-                              if (!error) {
-                                //   std::cout << "% Message delivered: " << metadata.toString() << "\n" << std::endl;
-                              } else {
-                                  LOG_ERROR( error.message() + " Message delivery failed");
-                              }
+                                if (!error) 
+                                {
+                                    LOG_INFO(metadata.toString() + " Message delivered ");
+                                } 
+                                else 
+                                {
+                                    LOG_ERROR(error.message() + " Message delivery failed");
+                                }
                           },
 
-                          KProducer::SendOption::NoCopyRecordValue);
+                          KProducer::SendOption::ToCopyRecordValue);
         }
         else
         {

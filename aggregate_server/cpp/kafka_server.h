@@ -80,4 +80,6 @@ private:
     std::vector<std::string>           src_data_vec_;
 
     DecodeProcesser*                   decode_processer_;
+
+    std::mutex                         public_mutex_;
 };
