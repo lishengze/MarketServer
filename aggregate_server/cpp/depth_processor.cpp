@@ -49,6 +49,13 @@ void DepthProcessor::process(SDepthQuote& src)
         if (update_rst)
         {
             SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
+
+            if (latest_quote.symbol == "BCT_USDT")
+            {
+                LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
+                        + std::to_string(latest_quote.sequence_no));
+            }
+
             p_aggregater_->on_snap(latest_quote.exchange, latest_quote.symbol ,latest_quote);
         }
 
@@ -65,9 +72,9 @@ bool DepthProcessor::is_sequenced_quote(const SDepthQuote& src)
     {
         if (latest_depth_quote_[src.symbol][src.exchange].sequence_no < src.sequence_no)
         {
-            LOG_INFO(string("src ") + src.symbol + "." + src.exchange 
-                    + ", seq_no: " + std::to_string(latest_depth_quote_[src.symbol][src.exchange].sequence_no)
-                    + ", updated seq_no: " + std::to_string(src.sequence_no));
+            // LOG_INFO(string("src ") + src.symbol + "." + src.exchange 
+            //         + ", seq_no: " + std::to_string(latest_depth_quote_[src.symbol][src.exchange].sequence_no)
+            //         + ", updated seq_no: " + std::to_string(src.sequence_no));
 
             return true;
         }
