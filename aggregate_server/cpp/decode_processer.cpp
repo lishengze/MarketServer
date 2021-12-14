@@ -288,6 +288,10 @@ bool DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
         string type = json_data["Type"].GetString();
         bool is_snap = type=="snap" ? true:false;
 
+        depth_quote.symbol = symbol;
+        depth_quote.exchange = exchange;
+        depth_quote.is_snap = is_snap;
+
         return _json_to_quote(json_data, depth_quote, is_snap);
     }
     catch(const std::exception& e)
