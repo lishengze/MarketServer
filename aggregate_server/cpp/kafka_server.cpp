@@ -178,7 +178,7 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
     try
     {
         check_topic(topic);
-        
+
         if (producer_sptr_)
         {
             auto record = kafka::clients::producer::ProducerRecord(topic,
@@ -321,9 +321,7 @@ void KafkaServer::check_topic(kafka::Topic topic)
         if (created_topics_.find(topic) == created_topics_.end())
         {
             LOG_INFO("topic " + topic + " was not created");
-        }
-        else
-        {
+
             create_topic(topic);
             created_topics_ = _get_created_topics();
 
@@ -331,7 +329,7 @@ void KafkaServer::check_topic(kafka::Topic topic)
             for (auto topic:created_topics_)
             {
                 LOG_INFO(topic);
-            }
+            }            
         }
     }
     catch(const std::exception& e)

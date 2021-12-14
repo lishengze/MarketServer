@@ -30,7 +30,7 @@ void EncodeProcesser::on_kline( KlineData& kline)
     try
     {
         string json_str = kline.get_json_str();
-        string topic = get_depth_topic(kline.symbol, kline.exchange);
+        string topic = get_kline_topic(kline.symbol, kline.exchange);
 
         LOG_INFO(topic + ": " + json_str);
 
@@ -50,7 +50,7 @@ void EncodeProcesser::on_trade( TradeData& trade)
     try
     {
         string json_str = trade.get_json_str();
-        string topic = get_depth_topic(trade.symbol, trade.exchange);
+        string topic = get_trade_topic(trade.symbol, trade.exchange);
 
         if (kafka_server_)
         {
