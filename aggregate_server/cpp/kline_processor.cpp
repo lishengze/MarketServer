@@ -274,6 +274,8 @@ void KlineProcessor::process(KlineData& src)
         KlineData output;
         if (min1_kline_aggregator_.add_kline(src, output))
         {
+            // LOG_INFO(output.get_json_str());
+
             engine_->on_kline(output);
         }
         else
