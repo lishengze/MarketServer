@@ -90,6 +90,9 @@
         "risk_controller.pb.h": "c",
         "risk_controller_define.h": "c",
         "stream_engine_define.h": "c",
-        "struct_define.h": "c"
+        "struct_define.h": "c",
+        "interface_define.h": "c",
+        "basic.h": "c",
+        "kafka_server.h": "c"
     }
 }

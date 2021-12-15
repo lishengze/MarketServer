@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <string>
 #include <map>
+#include <set>
 #include <vector>
 #include <queue>
 #include <unordered_map>
@@ -39,7 +40,13 @@ using type_tick = unsigned long;
 using type_resolution = int;
 using type_length = unsigned short;
 using type_uint32 = unsigned int;
+#define TSymbol string
+#define TExchange string
 #endif
+
+
+#define DECLARE_PTR(X) typedef boost::shared_ptr<X> X##Ptr     /** < define smart ptr > */
+#define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)         /** < forward defile smart ptr > */
 
 inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();
