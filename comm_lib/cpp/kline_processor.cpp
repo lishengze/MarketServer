@@ -1,6 +1,8 @@
 #include "kline_processor.h"
 #include "base/cpp/util.h"
 
+COMM_NAMESPACE_START
+
 KlineProcessor::~KlineProcessor()
 {
 
@@ -19,7 +21,7 @@ bool KlineProcessor::check_kline(const KlineData& kline)
         }
         else if (kline.index < last_kline_map_[kline.symbol][kline.exchange].index)
         {
-            return;
+            return false;
         }
         else
         {
@@ -40,10 +42,9 @@ void KlineProcessor::on_kline(KlineData& kline)
 {
     try
     {
-        if (check_kline(kline))
-        {
-            engine_->on_kline(kline);
-        }                
+        if (!engine_ || !check_kline(kline)) return;
+
+        engine_->on_kline(kline);             
     }
     catch(const std::exception& e)
     {
@@ -52,3 +53,4 @@ void KlineProcessor::on_kline(KlineData& kline)
     
 }
 
+COMM_NAMESPACE_END

@@ -1,20 +1,18 @@
 #pragma once
 
-#include "global_declare.h"
-
 #include "kafka/KafkaConsumer.h"
 #include "kafka/KafkaProducer.h"
 #include "kafka/AdminClient.h"
 
-#include "decode_processer.h"
 #include "base/cpp/base_data_stuct.h"
 #include "base/cpp/basic.h"
 
 #include "comm_type_def.h"
+#include "interface_define.h"
 
 COMM_NAMESPACE_START
 
-class KafkaServer
+class KafkaServer:public NetServer
 {
 public:
 
@@ -22,12 +20,7 @@ public:
     typedef kafka::clients::KafkaProducer KProducer;
     typedef kafka::clients::AdminClient   KAdmin;
 
-    KafkaServer(string server_address);
-
-    KafkaServer(string server_address, 
-                QuoteSourceCallbackInterface* depth_engine = nullptr,
-                QuoteSourceCallbackInterface* kline_engine = nullptr,
-                QuoteSourceCallbackInterface* trade_engine = nullptr);
+    KafkaServer(string server_address, Serializer* depth_engine);
 
     KafkaServer();
 
@@ -35,20 +28,17 @@ public:
 
     void init_user();
 
-    void init_topic_list();
-
-    void init_decode_processer(DecodeProcesser* decode_processer) {
-        decode_processer_ = decode_processer;
-    }
-
     void launch();
 
 public:
-        void set_meta(const MetaType kline_meta, const MetaType depth_meta, const MetaType trade_meta);
+        virtual void set_meta(const MetaType meta);
+        virtual void set_meta(const MetaType depth_meta, 
+                              const MetaType kline_meta, 
+                              const MetaType trade_meta);
 
-        void set_kline_meta(const MetaType meta);
-        void set_depth_meta(const MetaType meta);
-        void set_trade_meta(const MetaType meta);
+        virtual void set_kline_meta(const MetaType meta);
+        virtual void set_depth_meta(const MetaType meta);
+        virtual void set_trade_meta(const MetaType meta);
 
 public:
     void sub_topic(const string& topic);
@@ -65,16 +55,40 @@ public:
 
     void check_topic(kafka::Topic topic);
 
-    void filter_topic(std::set<string>& topics);
+    bool filter_topic(std::set<string>& topics);
 
 public:
     void start_listen_data();
     void listen_data_main();
 
     void start_process_data();
+    void process_main();
     void process_data();
 
-    void set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new_sub_info);
+    struct MetaData
+    {
+        string      type;
+        string      body;
+        string      symbol;
+        string      exchange;
+
+        string simple_str()
+        {
+            return string("type: ") + type + ", symbol: " + symbol 
+                    + ", exchange: " + exchange;
+        }
+    };
+
+    bool pre_process(const string& src_data, MetaData& meta_data);
+
+    bool is_data_subed(const TDataType& data_type, 
+                       const TSymbol& symbol, 
+                       const TExchange& exchange);
+
+public:
+    virtual void publish_depth(const SDepthQuote& quote);
+    virtual void publish_kline(const KlineData& kline);
+    virtual void publish_trade(const TradeData& trade);     
 
 private: 
 
@@ -93,9 +107,9 @@ private:
     std::condition_variable            src_data_cv_;
     std::vector<std::string>           src_data_vec_;
 
-    DecodeProcesserPtr                 decode_processer_{nullptr};
-
     std::mutex                         public_mutex_;
+
+    std::map<TDataType, MetaType>      meta_map_;
 };
 
 DECLARE_PTR(KafkaServer);

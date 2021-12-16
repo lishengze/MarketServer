@@ -1,12 +1,13 @@
 #pragma once
 
-#include "global_declare.h"
+#include "base/cpp/basic.h"
+#include "base/cpp/base_data_stuct.h"
 
-#include "struct_define.h"
-
-#include "depth_aggregater.h"
+#include "comm_type_def.h"
 
 #include "interface_define.h"
+
+COMM_NAMESPACE_START
 
 class DepthProcessor:public QuoteSourceCallbackInterface
 {
@@ -15,6 +16,8 @@ public:
     DepthProcessor(QuoteSourceCallbackInterface* engine);
 
     ~DepthProcessor();
+
+    bool check(SDepthQuote& src);
 
     virtual void on_snap(SDepthQuote& src);
 
@@ -33,3 +36,7 @@ private:
 
     map<TSymbol, map<TExchange, SDepthQuote>>   latest_depth_quote_;
 };
+
+DECLARE_PTR(DepthProcessor);
+
+COMM_NAMESPACE_END

@@ -1,5 +1,8 @@
 #include "depth_processor.h"
-#include "Log/log.h"
+#include "comm_log.h"
+
+COMM_NAMESPACE_START
+
 
 void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth>& dst)
 {
@@ -19,9 +22,7 @@ void update_depth_diff(const map<SDecimal, SDepth>& update, map<SDecimal, SDepth
 DepthProcessor::DepthProcessor(QuoteSourceCallbackInterface* engine):
                             engine_{engine}
 {
-    p_aggregater_ = new DepthAggregater(engine_);
-
-    p_aggregater_->start();
+    
 }
 
 DepthProcessor::~DepthProcessor()
@@ -29,13 +30,13 @@ DepthProcessor::~DepthProcessor()
 
 }
 
-void DepthProcessor::on_snap(SDepthQuote& src)
+bool DepthProcessor::check(SDepthQuote& src)
 {
     try
     {
-        if (store_first_quote(src)) return;
+        if (store_first_quote(src)) return false;
 
-        if (!is_sequenced_quote(src)) return;
+        if (!is_sequenced_quote(src)) return false;
 
         bool update_rst = false;
 
@@ -50,17 +51,31 @@ void DepthProcessor::on_snap(SDepthQuote& src)
 
         if (!update_rst)
         {
-            if (src.is_snap) LOG_WARN(src.symbol + "." + src.exchange + " process_snap_quote failed!");
-            else LOG_WARN(src.symbol + "." + src.exchange + " process_update_quote failed!");
-            return;
+            if (src.is_snap) COMM_LOG_WARN(src.symbol + "." + src.exchange + " process_snap_quote failed!");
+            else COMM_LOG_WARN(src.symbol + "." + src.exchange + " process_update_quote failed!");
+            return false;
         }        
 
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+void DepthProcessor::on_snap(SDepthQuote& src)
+{
+    try
+    {
+        if (!engine_ || !check(src)) return;
 
         SDepthQuote& latest_quote = latest_depth_quote_[src.symbol][src.exchange];
 
         // if (latest_quote.symbol == "BTC_USDT")
         // {
-        //     LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
+        //     COMM_LOG_INFO(latest_quote.symbol + "." + latest_quote.exchange + ", " 
         //             + std::to_string(latest_quote.sequence_no));
         // }
 
@@ -69,7 +84,7 @@ void DepthProcessor::on_snap(SDepthQuote& src)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }   
 }
 
@@ -79,7 +94,7 @@ bool DepthProcessor::is_sequenced_quote(const SDepthQuote& src)
     {
         if (latest_depth_quote_[src.symbol][src.exchange].sequence_no < src.sequence_no)
         {
-            // LOG_INFO(string("src ") + src.symbol + "." + src.exchange 
+            // COMM_LOG_INFO(string("src ") + src.symbol + "." + src.exchange 
             //         + ", seq_no: " + std::to_string(latest_depth_quote_[src.symbol][src.exchange].sequence_no)
             //         + ", updated seq_no: " + std::to_string(src.sequence_no));
 
@@ -87,7 +102,7 @@ bool DepthProcessor::is_sequenced_quote(const SDepthQuote& src)
         }
         else
         {
-            LOG_WARN(string("src ") + src.symbol + "." + src.exchange 
+            COMM_LOG_WARN(string("src ") + src.symbol + "." + src.exchange 
                     + ", seq_no: " + std::to_string(latest_depth_quote_[src.symbol][src.exchange].sequence_no)
                     + ", updated seq_no: " + std::to_string(src.sequence_no));
         }
@@ -95,7 +110,7 @@ bool DepthProcessor::is_sequenced_quote(const SDepthQuote& src)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -114,7 +129,7 @@ bool DepthProcessor::store_first_quote(const SDepthQuote& src)
             }
             else
             {
-                LOG_WARN(src.symbol + "." + src.exchange + " is waiting for the first snap");
+                COMM_LOG_WARN(src.symbol + "." + src.exchange + " is waiting for the first snap");
             }
             return true;
         }
@@ -122,7 +137,7 @@ bool DepthProcessor::store_first_quote(const SDepthQuote& src)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
     return true;
 }
@@ -137,7 +152,7 @@ bool DepthProcessor::process_snap_quote(const SDepthQuote& src)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
 
     return false;
@@ -153,7 +168,7 @@ bool DepthProcessor::process_update_quote(const SDepthQuote& src)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
 
     return false;
@@ -173,7 +188,9 @@ void DepthProcessor::merge_update(SDepthQuote& snap, const SDepthQuote& update)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
 }
+
+COMM_NAMESPACE_END
 

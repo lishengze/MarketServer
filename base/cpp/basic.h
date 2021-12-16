@@ -19,6 +19,8 @@
 #include <sys/time.h>
 #include <thread>
 #include <atomic>
+#include <iomanip>
+
 using namespace std;
 #include "tinyformat.h"
 
@@ -40,10 +42,12 @@ using type_tick = unsigned long;
 using type_resolution = int;
 using type_length = unsigned short;
 using type_uint32 = unsigned int;
-#define TSymbol string
-#define TExchange string
 #endif
 
+#define TDataType string
+#define TSymbol string
+#define TExchange string
+#define TExchangeSymbol string
 
 #define DECLARE_PTR(X) typedef boost::shared_ptr<X> X##Ptr     /** < define smart ptr > */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)         /** < forward defile smart ptr > */

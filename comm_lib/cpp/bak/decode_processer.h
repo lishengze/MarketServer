@@ -7,11 +7,13 @@
 #include "interface_define.h"
 #include "comm_log.h"
 
-class DepthProcessor;
-class KlineProcessor;
-class TradeProcessor;
+#include "depth_processor.h"
+#include "kline_processor.h"
+#include "trade_processor.h"
+
 class KafkaServer;
 
+COMM_NAMESPACE_START
 
 class EncodeProcesser:public QuoteSourceCallbackInterface
 {
@@ -37,13 +39,22 @@ class DecodeProcesser
 {
 public:
 
-    DecodeProcesser(QuoteSourceCallbackInterface* depth_processor, 
-                    QuoteSourceCallbackInterface* kline_processor, 
-                    QuoteSourceCallbackInterface* trade_processor):
-        p_depth_processor_{depth_processor}, 
-        p_kline_processor_{kline_processor},
-        p_trade_processor_{trade_processor}
-    {}    
+    DecodeProcesser(QuoteSourceCallbackInterface* depth_engine, 
+                    QuoteSourceCallbackInterface* kline_engine, 
+                    QuoteSourceCallbackInterface* trade_engine)
+    {
+        p_depth_processor_ = boost::make_shared<DepthProcessor>(depth_engine);
+        p_kline_processor_ = boost::make_shared<KlineProcessor>(kline_engine);
+        p_trade_processor_ = boost::make_shared<TradeProcessor>(trade_engine);
+    }    
+
+    DecodeProcesser(QuoteSourceCallbackInterface* engine_center)
+    {
+        p_depth_processor_ = boost::make_shared<DepthProcessor>(engine_center);
+        p_kline_processor_ = boost::make_shared<KlineProcessor>(engine_center);
+        p_trade_processor_ = boost::make_shared<TradeProcessor>(engine_center);        
+    }    
+
 
     virtual ~DecodeProcesser() { }
 
@@ -82,11 +93,11 @@ public:
     bool _json_to_kline(const Value& data, KlineData& kline);
 
 private:
-    QuoteSourceCallbackInterface*                         p_depth_processor_{nullptr};
+    DepthProcessorPtr                         p_depth_processor_{nullptr};
     
-    QuoteSourceCallbackInterface*                         p_kline_processor_{nullptr};
+    KlineProcessorPtr                         p_kline_processor_{nullptr};
 
-    QuoteSourceCallbackInterface*                         p_trade_processor_{nullptr};
+    TradeProcessorPtr                         p_trade_processor_{nullptr};
 
     mutable std::mutex                                    mutex_symbol_;
 
@@ -94,3 +105,5 @@ private:
 };
 
 DECLARE_PTR(DecodeProcesser);
+
+COMM_NAMESPACE_END

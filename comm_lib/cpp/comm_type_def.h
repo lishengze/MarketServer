@@ -25,5 +25,20 @@ using MetaType = std::map<TSymbol, std::set<TExchange>>;
 #define DEPTH_TYPE GET_DEPTH_HEAD
 #define TRADE_TYPE TRADE_HEAD
 
+enum NET_TYPE
+{
+    KAFKA,
+    REDIS,
+    GRPC,
+    ZMQ
+};
+
+enum SERIALIZE_TYPE
+{
+    JSON,
+    PROTOBUF,
+    FLATBUF
+};
+
 
 COMM_NAMESPACE_END

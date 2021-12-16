@@ -5,6 +5,8 @@
 
 #include "comm_log.h"
 
+COMM_NAMESPACE_START
+
 class KlineProcessor:public QuoteSourceCallbackInterface
 {
 public:
@@ -22,3 +24,7 @@ private:
 
     unordered_map<TSymbol, unordered_map<TExchange, KlineData>>         last_kline_map_;
 };
+
+DECLARE_PTR(KlineProcessor);
+
+COMM_NAMESPACE_END

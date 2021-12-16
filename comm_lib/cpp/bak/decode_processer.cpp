@@ -21,7 +21,7 @@ void EncodeProcesser::on_snap( SDepthQuote& depth)
 
         // if (depth.symbol == "BTC_USDT")
         // {
-        //     LOG_INFO(depth.str());
+        //     COMM_LOG_INFO(depth.str());
         // }
         
         if (kafka_server_)
@@ -31,7 +31,7 @@ void EncodeProcesser::on_snap( SDepthQuote& depth)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
 }
 
@@ -42,7 +42,7 @@ void EncodeProcesser::on_kline( KlineData& kline)
         string json_str = kline.get_json_str();
         string topic = get_kline_topic(kline.exchange, kline.symbol);
 
-        // LOG_INFO(topic + ": " + json_str);
+        // COMM_LOG_INFO(topic + ": " + json_str);
 
         if (kafka_server_)
         {
@@ -51,7 +51,7 @@ void EncodeProcesser::on_kline( KlineData& kline)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
 }
 
@@ -69,7 +69,7 @@ void EncodeProcesser::on_trade( TradeData& trade)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
 }
 
@@ -88,7 +88,7 @@ void DecodeProcesser::_json_to_quote_depth(const Value& data, map<SDecimal, SDep
     }
     catch(const std::exception& e)
     {
-       LOG_ERROR(e.what());
+       COMM_LOG_ERROR(e.what());
     }    
 }
 
@@ -119,7 +119,7 @@ bool DecodeProcesser::_json_to_quote(const Document& snap_json, SDepthQuote& quo
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -143,7 +143,7 @@ bool DecodeProcesser::_json_to_kline(const Value& data, KlineData& kline)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
 
     return false;
@@ -174,11 +174,11 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
         {
             MetaData meta_data;
             if (!pre_process(src_data, meta_data)) continue;
-            // LOG_INFO(meta_data.simple_str());
+            // COMM_LOG_INFO(meta_data.simple_str());
 
             if (!is_data_subed(meta_data.symbol, meta_data.exchange)) 
             {
-                LOG_WARN("data is not subed, symbol: " + meta_data.symbol + ", exchange: " + meta_data.exchange);
+                COMM_LOG_WARN("data is not subed, symbol: " + meta_data.symbol + ", exchange: " + meta_data.exchange);
                 continue;
             }
             
@@ -189,14 +189,14 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 {
                     // if (depth_quote.symbol == "BTC_USDT")
                     // {
-                    //     LOG_INFO(quote_str(depth_quote, 5));
+                    //     COMM_LOG_INFO(quote_str(depth_quote, 5));
                     // }                    
                     p_depth_processor_->on_snap(depth_quote);
                     
                 }
                 else
                 {
-                    LOG_WARN("decode depth faild, ori_msg: " + src_data);
+                    COMM_LOG_WARN("decode depth faild, ori_msg: " + src_data);
                 }                
             }
             else if (meta_data.type == KLINE_TYPE)
@@ -205,37 +205,37 @@ void DecodeProcesser::process_data(const std::vector<string>& src_data_vec)
                 if (decode_kline(meta_data.data_body, kline))
                 {
                     p_kline_processor_->on_kline(kline);
-                    // LOG_INFO(kline.get_json_str());
+                    // COMM_LOG_INFO(kline.get_json_str());
                 }
                 else
                 {
-                    LOG_WARN("decode kline faild, ori_msg: " + src_data);
+                    COMM_LOG_WARN("decode kline faild, ori_msg: " + src_data);
                 }
             }         
             else if (meta_data.type == TRADE_TYPE)
             {
-                // LOG_INFO(meta_data.simple_str());
+                // COMM_LOG_INFO(meta_data.simple_str());
 
                 TradeData trade_data;
                 if (decode_trade(meta_data.data_body, trade_data))
                 {
-                    // LOG_INFO(trade_data.get_json_str());
+                    // COMM_LOG_INFO(trade_data.get_json_str());
                     p_trade_processor_->on_trade(trade_data);
                 }
                 else
                 {
-                    LOG_WARN("decode trade faild, ori_msg: " + src_data);
+                    COMM_LOG_WARN("decode trade faild, ori_msg: " + src_data);
                 }
             }                  
             else 
             {
-                LOG_WARN("Unknown Topic: " + (meta_data.type));
+                COMM_LOG_WARN("Unknown Topic: " + (meta_data.type));
             }
         }
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
 }
 
@@ -246,7 +246,7 @@ bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
         string::size_type topic_end_pos = src_data.find(TOPIC_SEPARATOR);
         if (topic_end_pos == std::string::npos)
         {
-            LOG_WARN("Cann't Locate TOPIC_SEPARATOR " + TOPIC_SEPARATOR + ", SrCData: " + src_data);
+            COMM_LOG_WARN("Cann't Locate TOPIC_SEPARATOR " + TOPIC_SEPARATOR + ", SrCData: " + src_data);
             return false;
         }
         string topic = src_data.substr(0, topic_end_pos);
@@ -254,7 +254,7 @@ bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
         std::string::size_type type_end_pos = topic.find(TYPE_SEPARATOR);
         if( type_end_pos == std::string::npos )
         {
-            LOG_WARN("Cann't Locate TYPE_SEPARATOR " + TYPE_SEPARATOR + ", topic: " + topic);
+            COMM_LOG_WARN("Cann't Locate TYPE_SEPARATOR " + TYPE_SEPARATOR + ", topic: " + topic);
             return false;            
         }
         meta_data.type = topic.substr(0, type_end_pos);
@@ -264,7 +264,7 @@ bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
         std::string::size_type symbol_end_pos = symbol_exchange.find(SYMBOL_EXCHANGE_SEPARATOR);
         if( symbol_end_pos == std::string::npos)
         {
-            LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
+            COMM_LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
             return false;
         }
             
@@ -275,14 +275,14 @@ bool DecodeProcesser::pre_process(const string& src_data, MetaData& meta_data)
         meta_data.data_body.Parse(data_body_str.c_str());
         if(meta_data.data_body.HasParseError())
         {
-            LOG_WARN("Document Parse " + data_body_str+ " Failed");
+            COMM_LOG_WARN("Document Parse " + data_body_str+ " Failed");
             return false;
         }
         return true;
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -304,7 +304,7 @@ bool DecodeProcesser::decode_depth(Document& json_data, SDepthQuote& depth_quote
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -317,7 +317,7 @@ bool DecodeProcesser::decode_kline(Document& json_data, KlineData& kline)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -337,7 +337,7 @@ bool DecodeProcesser::decode_trade(Document& json_data,TradeData& trade_data)
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }
     return false;
 }
@@ -350,7 +350,7 @@ void DecodeProcesser::set_meta(const std::unordered_map<TSymbol, std::set<TExcha
     }
     catch(const std::exception& e)
     {
-        LOG_ERROR(e.what());
+        COMM_LOG_ERROR(e.what());
     }    
 }
 

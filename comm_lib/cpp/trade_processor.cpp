@@ -1,6 +1,8 @@
 #include "trade_processor.h"
 #include "base/cpp/util.h"
 
+COMM_NAMESPACE_START
+
 bool TradeProcessor::check(const TradeData& trade)
 {
     try
@@ -33,7 +35,9 @@ void TradeProcessor::on_trade(TradeData& trade)
 {
     try
     {
-        engine_->on_trade(trade);
+        if (!engine_ || !check(trade)) return;
+
+        engine_->on_trade(trade);        
     }
     catch(const std::exception& e)
     {
@@ -41,3 +45,4 @@ void TradeProcessor::on_trade(TradeData& trade)
     }
 }
 
+COMM_NAMESPACE_END

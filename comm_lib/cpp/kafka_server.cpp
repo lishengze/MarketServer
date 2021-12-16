@@ -7,41 +7,21 @@
 #include "comm_type_def.h"
 #include "util.h"
 #include "comm_log.h"
+#include "interface_define.h"
 
 COMM_NAMESPACE_START
 
 
-KafkaServer::KafkaServer(string bootstrap_servers):
-     bootstrap_servers_{bootstrap_servers}
+
+KafkaServer::KafkaServer(string server_address, Serializer* serializer):
+                        NetServer{serializer},
+                        bootstrap_servers_{server_address}
+
 {
-    COMM_LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
-
-    init_user();
-}
-
-KafkaServer::KafkaServer(string server_address, 
-            QuoteSourceCallbackInterface* depth_engine ,
-            QuoteSourceCallbackInterface* kline_engine ,
-            QuoteSourceCallbackInterface* trade_engine )
-{
-    bootstrap_servers_ = server_address;
-
-    decode_processer_ = boost::make_shared<DecodeProcesser>(depth_engine, kline_engine, trade_engine);
-
     COMM_LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
 
     init_user();
 }            
-
-
-KafkaServer::KafkaServer()
-{
-    bootstrap_servers_ = KAFKA_CONFIG.bootstrap_servers;
-
-    COMM_LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
-
-    init_user();
-}
 
 KafkaServer::~KafkaServer()
 {
@@ -93,8 +73,7 @@ void KafkaServer::launch()
     catch(const std::exception& e)
     {
         COMM_LOG_ERROR(e.what());
-    }
-    
+    }    
 }
 
 kafka::Topics KafkaServer::_get_subed_topics()
@@ -291,7 +270,7 @@ void KafkaServer::start_process_data()
 {
     try
     {
-        process_thread_ = std::thread(&KafkaServer::process_data, this);
+        process_thread_ = std::thread(&KafkaServer::process_main, this);
     }
     catch(const std::exception& e)
     {
@@ -299,11 +278,11 @@ void KafkaServer::start_process_data()
     }
 }
 
-void KafkaServer::process_data() 
+void KafkaServer::process_main() 
 {
     try
     {
-        COMM_LOG_INFO("process_data");
+        COMM_LOG_INFO("process_main");
         while(true)
         {
             std::unique_lock<std::mutex> lk(src_data_mutex_);
@@ -313,7 +292,8 @@ void KafkaServer::process_data()
 
             // COMM_LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
-            decode_processer_->process_data(src_data_vec_);
+            if (serializer_) process_data();
+
             src_data_vec_.clear();
         }
     }
@@ -322,6 +302,149 @@ void KafkaServer::process_data()
         COMM_LOG_ERROR(e.what());
     }
 }
+
+void KafkaServer::process_data()
+{
+    try
+    {
+        for (auto src_data:src_data_vec_)
+        {
+            MetaData meta_data;
+            if (!pre_process(src_data, meta_data)) continue;
+
+            if (!is_data_subed(meta_data.type, meta_data.symbol, meta_data.exchange)) continue;
+
+            if (meta_data.type == DEPTH_TYPE)
+            {
+                serializer_->on_snap(meta_data.body);
+            }
+            else if (meta_data.type == KLINE_TYPE)
+            {
+                serializer_->on_kline(meta_data.body);
+            }         
+            else if (meta_data.type == TRADE_TYPE)
+            {
+                serializer_->on_trade(meta_data.body);
+            }                  
+            else 
+            {
+                COMM_LOG_WARN("Unknown Topic: " + (meta_data.type));
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }
+}
+
+bool KafkaServer::pre_process(const string& src_data, MetaData& meta_data)
+{
+    try
+    {
+        string::size_type topic_end_pos = src_data.find(TOPIC_SEPARATOR);
+        if (topic_end_pos == std::string::npos)
+        {
+            COMM_LOG_WARN("Cann't Locate TOPIC_SEPARATOR " + TOPIC_SEPARATOR + ", SrCData: " + src_data);
+            return false;
+        }
+        string topic = src_data.substr(0, topic_end_pos);
+        
+        std::string::size_type type_end_pos = topic.find(TYPE_SEPARATOR);
+        if( type_end_pos == std::string::npos )
+        {
+            COMM_LOG_WARN("Cann't Locate TYPE_SEPARATOR " + TYPE_SEPARATOR + ", topic: " + topic);
+            return false;            
+        }
+        meta_data.type = topic.substr(0, type_end_pos);
+
+        string symbol_exchange = topic.substr(type_end_pos+1);
+
+        std::string::size_type symbol_end_pos = symbol_exchange.find(SYMBOL_EXCHANGE_SEPARATOR);
+        if( symbol_end_pos == std::string::npos)
+        {
+            COMM_LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
+            return false;
+        }
+            
+        meta_data.symbol = symbol_exchange.substr(0, symbol_end_pos);
+        meta_data.exchange = symbol_exchange.substr(symbol_end_pos + 1);                
+        meta_data.body = src_data.substr(topic_end_pos+1);
+
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+bool KafkaServer::is_data_subed(const TDataType& data_type, 
+                                const TSymbol& symbol, 
+                                const TExchange& exchange)
+{
+    try
+    {
+        if (meta_map_.find(data_type) == meta_map_.end()
+        || meta_map_[data_type].find(symbol) == meta_map_[data_type].end()
+        || meta_map_[data_type][symbol].find(exchange) == meta_map_[data_type][symbol].end())
+            return false;
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }    
+
+    return false;
+}                                
+
+void KafkaServer::publish_depth(const SDepthQuote& depth)
+{
+    try
+    {
+        string serializer_data{std::move(serializer_->on_snap(depth))};
+        string topic = get_depth_topic(depth.exchange, depth.symbol);
+
+        publish_msg(topic, serializer_data);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }    
+}
+
+void KafkaServer::publish_kline(const KlineData& kline)
+{
+    try
+    {
+        string serializer_data{std::move(serializer_->on_kline(kline))};
+        string topic = get_kline_topic(kline.exchange, kline.symbol);
+
+        publish_msg(topic, serializer_data);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }   
+}
+
+void KafkaServer::publish_trade(const TradeData& trade)
+{
+    try
+    {
+        string serializer_data{std::move(serializer_->on_trade(trade))};
+        string topic = get_trade_topic(trade.exchange, trade.symbol);
+
+        publish_msg(topic, serializer_data);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }       
+} 
+
 
 void KafkaServer::check_topic(kafka::Topic topic)
 {
@@ -352,7 +475,7 @@ void KafkaServer::check_topic(kafka::Topic topic)
     }    
 }
 
-void KafkaServer::filter_topic(std::set<string>& topics)
+bool KafkaServer::filter_topic(std::set<string>& topics)
 {
     try
     {
@@ -380,12 +503,25 @@ void KafkaServer::filter_topic(std::set<string>& topics)
             }
         }
 
-        topics.swap(valid_topics);        
+        topics.swap(valid_topics);      
+
+
+        std::set<string> subed_topics = _get_subed_topics();
+
+        for (auto topic:topics)
+        {
+            if (subed_topics.find(topic) == subed_topics.end()) return true;
+        }
+
+        return false;
+
     }
     catch(const std::exception& e)
     {
         COMM_LOG_ERROR(e.what());
     }
+
+    return false;
 }
 
 void KafkaServer::sub_topic(const string& topic)
@@ -446,7 +582,8 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
 {
     try
     {
-        filter_topic(topics);
+        if (!filter_topic(topics)) return;
+
         for(auto topic:topics)
         {
             COMM_LOG_INFO("Sub Topic: " + topic);
@@ -464,12 +601,12 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
     }    
 }
 
-void KafkaServer::set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new_sub_info)
+void KafkaServer::set_meta(const MetaType meta)
 {
     try
     {
         std::set<string> new_topics;
-        for (auto iter:new_sub_info)
+        for (auto iter:meta)
         {
             for (auto exchange:iter.second)
             {
@@ -480,19 +617,24 @@ void KafkaServer::set_meta(std::unordered_map<TSymbol, std::set<TExchange>>& new
 
                 new_topics.emplace(std::move(kline_topic));
                 new_topics.emplace(std::move(depth_topic));      
-                new_topics.emplace(std::move(trade_topic)); 
-            }
-                 
+                new_topics.emplace(std::move(trade_topic));                 
+            }                 
         }
+
+        meta_map_[DEPTH_TYPE] = meta;
+        meta_map_[KLINE_TYPE] = meta;
+        meta_map_[TRADE_TYPE] = meta;
+
         subscribe_topics(new_topics);
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
-    }    
+        COMM_LOG_ERROR(e.what());
+    }
+    
 }
 
-void KafkaServer::set_meta(const MetaType kline_meta, const MetaType depth_meta, const MetaType trade_meta)
+void KafkaServer::set_meta(const MetaType depth_meta, const MetaType kline_meta,const MetaType trade_meta)
 {
     try
     {
@@ -533,6 +675,10 @@ void KafkaServer::set_meta(const MetaType kline_meta, const MetaType depth_meta,
                  
         }      
 
+        meta_map_[DEPTH_TYPE] = depth_meta;
+        meta_map_[KLINE_TYPE] = kline_meta;
+        meta_map_[TRADE_TYPE] = trade_meta;
+
         subscribe_topics(new_topics);  
     }
     catch(const std::exception& e)
@@ -557,6 +703,7 @@ void KafkaServer::set_kline_meta(const MetaType meta)
             }
                  
         }
+        meta_map_[KLINE_TYPE] = meta;
         subscribe_topics(new_topics);
     }
     catch(const std::exception& e)
@@ -581,6 +728,7 @@ void KafkaServer::set_depth_meta(const MetaType meta)
             }
                  
         }
+        meta_map_[DEPTH_TYPE] = meta;
         subscribe_topics(new_topics);
     }
     catch(const std::exception& e)
@@ -605,6 +753,7 @@ void KafkaServer::set_trade_meta(const MetaType meta)
             }
                  
         }
+        meta_map_[TRADE_TYPE] = meta;
         subscribe_topics(new_topics);
     }
     catch(const std::exception& e)

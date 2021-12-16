@@ -1,8 +1,13 @@
 #pragma once
+
+#include "base/cpp/basic.h"
 #include "base/cpp/base_data_stuct.h"
+#include "comm_declare.h"
 #include "interface_define.h"
 
 #include "comm_log.h"
+
+COMM_NAMESPACE_START
 
 class TradeProcessor:public QuoteSourceCallbackInterface
 {
@@ -13,7 +18,7 @@ public:
 
     bool check(const TradeData& trade);
 
-    virtual void on_trade( TradeData& trade) { };
+    virtual void on_trade( TradeData& trade);
 
 private:
     // callback
@@ -21,3 +26,7 @@ private:
 
     unordered_map<TSymbol, unordered_map<TExchange, TradeData>>         last_trade_map_;
 };
+
+DECLARE_PTR(TradeProcessor);
+
+COMM_NAMESPACE_END

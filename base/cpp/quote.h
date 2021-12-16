@@ -2,10 +2,6 @@
 
 #include "basic.h"
 
-#define TSymbol string
-#define TExchange string
-#define TExchangeSymbol string
-
 template<class T,class S>
 inline void vassign(T &r, S v)
 {
