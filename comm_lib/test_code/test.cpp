@@ -44,6 +44,11 @@ void test_code()
     comm.set_depth_meta(test_meta);
 
     comm.launch();
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
 }
 
 void TestMain()

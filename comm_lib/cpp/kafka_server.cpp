@@ -290,7 +290,7 @@ void KafkaServer::process_main()
                 return !(src_data_vec_.size()==0);
             });            
 
-            // COMM_LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
+            COMM_LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
             if (serializer_) process_data();
 
