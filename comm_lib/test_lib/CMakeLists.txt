@@ -1,8 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
-SET("SO_NAME" bcts_comm)
+SET("BIN_NAME" test_lib)
 
-PROJECT(${SO_NAME})
+PROJECT(${BIN_NAME})
 
 set(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
@@ -21,16 +21,11 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 # for general include
 INCLUDE_DIRECTORIES("../..")
 INCLUDE_DIRECTORIES("../../base/include")
-# for protos
-INCLUDE_DIRECTORIES("../../protos/cpp")
+
 # for include pandora
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
-AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
-AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # INCLUDE_DIRECTORIES("/root/.local/include")
@@ -46,22 +41,25 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 LINK_DIRECTORIES("/usr/local/lib")
 LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
+LINK_DIRECTORIES("../include")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_library(${SO_NAME} SHARED ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+add_executable(${BIN_NAME}  ${DIR_SRCS})
 
-target_link_libraries(${SO_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${SO_NAME} boost_system)
-target_link_libraries(${SO_NAME} pandora)
-target_link_libraries(${SO_NAME} log4cplus)
-target_link_libraries(${SO_NAME} protobuf protoc protobuf-lite)
-target_link_libraries(${SO_NAME} grpc++_reflection grpc++ gpr ssl crypto)
-target_link_libraries(${SO_NAME} nacos-cli)
-target_link_libraries(${SO_NAME} SQLiteCpp sqlite3 dl)
+target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} boost_system)
+target_link_libraries(${BIN_NAME} pandora)
+target_link_libraries(${BIN_NAME} log4cplus)
+target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
+target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
+target_link_libraries(${BIN_NAME} nacos-cli)
+target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-TARGET_LINK_LIBRARIES(${SO_NAME} ssl crypto)
-TARGET_LINK_LIBRARIES(${SO_NAME} rdkafka rdkafka++)
+TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
+
+TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
 
 ###############################################################################################
