@@ -9,8 +9,9 @@ class CommLog: public BaseLog
 public:
     virtual void log_info_(const string& info)
     {
+        LOG4CPLUS_INFO(*common_logger_.get(), info);
+
         cout << info << endl;
-        log_info_(info);
     }
 };
 
