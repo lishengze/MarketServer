@@ -2,9 +2,20 @@
 
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/log/base_log.h"
+#include "base/cpp/basic.h"
+
+class CommLog: public BaseLog 
+{
+public:
+    virtual void log_info_(const string& info)
+    {
+        cout << info << endl;
+        log_info_(info);
+    }
+};
 
 
-#define COMM_LOG utrade::pandora::ThreadSafeSingleton<BaseLog>::DoubleCheckInstance()
+#define COMM_LOG utrade::pandora::ThreadSafeSingleton<CommLog>::DoubleCheckInstance()
 
 #define COMM_LOG_TRACE(info) COMM_LOG->log_trace_(LOG_HEADER + info)
 #define COMM_LOG_DEBUG(info) COMM_LOG->log_debug_(LOG_HEADER + info)

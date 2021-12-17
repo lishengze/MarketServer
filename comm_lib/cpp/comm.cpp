@@ -6,13 +6,22 @@
 
 COMM_NAMESPACE_START
 
-Comm::Comm(string server_address,
-            NET_TYPE net_type,
-            SERIALIZE_TYPE serialize_type,
-            QuoteSourceCallbackInterface* depth_engine,
-            QuoteSourceCallbackInterface* kline_engine ,
-            QuoteSourceCallbackInterface* trade_engine)
+void init_log(string program_name="comm", string work_dir="")
 {
+    COMM_LOG->set_work_dir(work_dir);
+    COMM_LOG->set_program_name(program_name);
+    COMM_LOG->start();
+}
+
+Comm::Comm(string server_address,
+            QuoteSourceCallbackInterface* depth_engine,
+            QuoteSourceCallbackInterface* kline_engine,
+            QuoteSourceCallbackInterface* trade_engine,
+            NET_TYPE net_type,
+            SERIALIZE_TYPE serialize_type)
+{
+    init_log();
+
     if (serialize_type == SERIALIZE_TYPE::JSON)
     {
         serializer_ = new JsonSerializer(depth_engine, kline_engine, trade_engine);
@@ -29,6 +38,8 @@ Comm::Comm(string server_address,
             SERIALIZE_TYPE serialize_type,
             QuoteSourceCallbackInterface* engine_center )
 {
+    init_log();
+    
     if (serialize_type == SERIALIZE_TYPE::JSON)
     {
         serializer_ = new JsonSerializer(engine_center);

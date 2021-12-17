@@ -14,11 +14,12 @@ class Comm
 {
     public:
         Comm(string server_address, 
+            QuoteSourceCallbackInterface* depth_engine,
+            QuoteSourceCallbackInterface* kline_engine,
+            QuoteSourceCallbackInterface* trade_engine,        
             NET_TYPE net_type = NET_TYPE::KAFKA,
-            SERIALIZE_TYPE serialize_type = SERIALIZE_TYPE::JSON,
-            QuoteSourceCallbackInterface* depth_engine = nullptr,
-            QuoteSourceCallbackInterface* kline_engine = nullptr,
-            QuoteSourceCallbackInterface* trade_engine = nullptr);
+            SERIALIZE_TYPE serialize_type = SERIALIZE_TYPE::JSON)
+;
 
         Comm(string server_address,
             NET_TYPE net_type = NET_TYPE::KAFKA,

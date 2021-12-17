@@ -3,6 +3,13 @@
 #include "basic.h"
 #include "decimal.h"
 #include "pandora/util/json.hpp"
+#include "pandora/util/float_util.h"
+#include "pandora/util/time_util.h"
+
+inline string get_sec_time_str(unsigned long time)
+{
+    return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
+}
 
 struct SDepth {
     SDecimal volume;    // 单量
@@ -216,6 +223,28 @@ struct KlineData
         px_close.get_str_value(), volume.get_str_value());
     }
 
+
+    string str()
+    {
+        try
+        {
+            std::stringstream stream_obj;
+
+            stream_obj  << "[K-Kine] SRC " << get_sec_time_str(index)  
+                        << ", " << exchange << ", "<< symbol << ","
+                        << "open: " << px_open.get_value() << ", high: " << px_high.get_value() << ", "
+                        << "low: " << px_low.get_value() << ", close: " << px_close.get_value() << "\n"; 
+
+            return stream_obj.str();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        return "";
+    }
+
+
     string get_json_str()
     {
         try
@@ -308,4 +337,9 @@ struct TradeData
         }
         return "";
     }    
+
+    string str()
+    {
+        return get_json_str();
+    }
 };

@@ -18,7 +18,7 @@ KafkaServer::KafkaServer(string server_address, Serializer* serializer):
                         bootstrap_servers_{server_address}
 
 {
-    COMM_LOG_INFO("bootstrap_servers_: " + bootstrap_servers_);
+    COMM_LOG_INFO("Using KafkaServer bootstrap_servers_: " + bootstrap_servers_);
 
     init_user();
 }            
