@@ -340,6 +340,23 @@ struct TradeData
 
     string str()
     {
-        return get_json_str();
+        try
+        {
+            std::stringstream stream_obj;
+
+            stream_obj  << "Symbol: " << symbol
+                        << ", Exchange: " << exchange                         
+                        << ", Time " << get_sec_time_str(time)  
+                        << ", LastPx" << price.get_value() 
+                        << ", Qty: "<< volume.get_value() 
+                        << "\n"; 
+
+            return stream_obj.str();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        return "";
     }
 };

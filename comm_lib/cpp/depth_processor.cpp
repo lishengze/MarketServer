@@ -34,6 +34,8 @@ bool DepthProcessor::check(SDepthQuote& src)
 {
     try
     {
+        COMM_LOG_INFO(src.str());
+        
         if (store_first_quote(src)) return false;
 
         if (!is_sequenced_quote(src)) return false;

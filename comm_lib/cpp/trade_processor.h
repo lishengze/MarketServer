@@ -16,7 +16,7 @@ public:
     TradeProcessor(QuoteSourceCallbackInterface* engine):engine_{engine}
     { }
 
-    bool check(const TradeData& trade);
+    bool check(TradeData& trade);
 
     virtual void on_trade( TradeData& trade);
 

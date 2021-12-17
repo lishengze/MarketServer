@@ -15,7 +15,7 @@ public:
 
     ~KlineProcessor();
 
-    bool check_kline(const KlineData& kline);
+    bool check_kline(KlineData& kline);
 
     virtual void on_kline(KlineData& src);
 

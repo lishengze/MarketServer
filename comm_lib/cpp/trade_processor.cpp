@@ -1,12 +1,15 @@
 #include "trade_processor.h"
 #include "base/cpp/util.h"
+#include "comm_log.h"
 
 COMM_NAMESPACE_START
 
-bool TradeProcessor::check(const TradeData& trade)
+bool TradeProcessor::check(TradeData& trade)
 {
     try
     {
+        COMM_LOG_INFO(trade.str());
+        
         if (!is_trade_valid(trade)) return false;
 
         if (last_trade_map_.find(trade.symbol) == last_trade_map_.end()

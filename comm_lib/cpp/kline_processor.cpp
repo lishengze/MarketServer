@@ -1,6 +1,8 @@
 #include "kline_processor.h"
 #include "base/cpp/util.h"
 
+#include "comm_log.h"
+
 COMM_NAMESPACE_START
 
 KlineProcessor::~KlineProcessor()
@@ -8,10 +10,12 @@ KlineProcessor::~KlineProcessor()
 
 }
 
-bool KlineProcessor::check_kline(const KlineData& kline)
+bool KlineProcessor::check_kline(KlineData& kline)
 {
     try
     {
+        COMM_LOG_INFO(kline.str());
+
         if (!is_kline_valid(kline)) return false;
 
         if (last_kline_map_.find(kline.symbol) == last_kline_map_.end()
