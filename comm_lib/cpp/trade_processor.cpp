@@ -40,6 +40,7 @@ void TradeProcessor::on_trade(TradeData& trade)
     {
         if (!engine_ || !check(trade)) return;
 
+        COMM_LOG_INFO(trade.str());
         engine_->on_trade(trade);        
     }
     catch(const std::exception& e)

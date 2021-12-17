@@ -35,7 +35,7 @@ bool DepthProcessor::check(SDepthQuote& src)
     try
     {
         COMM_LOG_INFO(src.str());
-        
+
         if (store_first_quote(src)) return false;
 
         if (!is_sequenced_quote(src)) return false;
@@ -81,6 +81,7 @@ void DepthProcessor::on_snap(SDepthQuote& src)
         //             + std::to_string(latest_quote.sequence_no));
         // }
 
+        COMM_LOG_INFO(latest_quote.str());
         engine_->on_snap(latest_quote);
 
     }
