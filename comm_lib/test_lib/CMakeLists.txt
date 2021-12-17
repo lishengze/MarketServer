@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES("../../base/include")
 
 # for include pandora
 INCLUDE_DIRECTORIES("../../component")
+INCLUDE_DIRECTORIES("../include")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 
@@ -48,17 +49,17 @@ LINK_DIRECTORIES("../include")
 ###############################################################################################
 add_executable(${BIN_NAME}  ${DIR_SRCS})
 
-target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${BIN_NAME} boost_system)
-target_link_libraries(${BIN_NAME} pandora)
-target_link_libraries(${BIN_NAME} log4cplus)
-target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
-target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
-target_link_libraries(${BIN_NAME} nacos-cli)
-target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
+# target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+# target_link_libraries(${BIN_NAME} boost_system)
+# target_link_libraries(${BIN_NAME} pandora)
+# target_link_libraries(${BIN_NAME} log4cplus)
+# target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
+# target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
+# target_link_libraries(${BIN_NAME} nacos-cli)
+# target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
-TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
+# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+# TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
 
 TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
 

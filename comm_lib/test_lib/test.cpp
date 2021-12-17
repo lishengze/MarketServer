@@ -1,8 +1,8 @@
 #include "base/cpp/basic.h"
 #include "test.h"
 
-#include "../cpp/comm.h"
-#include "../cpp/interface_define.h"
+#include "comm.h"
+#include "interface_define.h"
 
 USING_COMM_NAMESPACE
 
