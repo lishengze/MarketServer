@@ -59,6 +59,8 @@ void TestEngine::start()
     try
     {
         p_comm_server_->launch();
+
+        p_depth_aggregater_->start();
     }
     catch(const std::exception& e)
     {
