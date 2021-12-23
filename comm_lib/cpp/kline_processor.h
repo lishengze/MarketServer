@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base/cpp/base_data_stuct.h"
-#include "interface_define.h"
+#include "comm_interface_define.h"
 
 #include "comm_log.h"
 

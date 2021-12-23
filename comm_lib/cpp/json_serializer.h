@@ -5,7 +5,7 @@
 
 #include "pandora/util/io_service_pool.h"
 #include "comm_type_def.h"
-#include "interface_define.h"
+#include "comm_interface_define.h"
 #include "comm_log.h"
 
 #include "depth_processor.h"

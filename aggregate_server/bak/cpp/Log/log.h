@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/cpp/basic.h"
+#include "../global_declare.h"
 
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/log/base_log.h"

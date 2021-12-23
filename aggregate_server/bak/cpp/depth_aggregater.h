@@ -1,26 +1,23 @@
 #pragma once
 
-#include "base/cpp/basic.h"
-#include "base/cpp/base_data_stuct.h"
-
-#include "comm_interface_define.h"
-#include "comm.h"
 #include "struct_define.h"
+#include "interface_define.h"
+#include "global_declare.h"
 
-class DepthAggregater:public bcts::comm::QuoteSourceCallbackInterface
+class DepthAggregater
 {
 public:
 
-    DepthAggregater();
+    DepthAggregater(QuoteSourceCallbackInterface* engine);
     ~DepthAggregater();
 
     void start();
 
-    void set_comm(bcts::comm::Comm*  comm){ p_comm_ = comm;}
+    void set_engine(QuoteSourceCallbackInterface* ptr) { engine_ = ptr; }
+
+    void on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote);
 
     void set_config(unordered_map<TSymbol, SMixerConfig>& new_config);
-
-    virtual void on_snap( SDepthQuote& quote);
 
 private:
 
@@ -30,8 +27,8 @@ private:
     void _thread_loop();
 
 private:
-
-    bcts::comm::Comm*                                               p_comm_{nullptr};
+    // callback
+    QuoteSourceCallbackInterface *                                  engine_{nullptr};
 
     // 计算线程
     std::thread*                                                    thread_loop_{nullptr};

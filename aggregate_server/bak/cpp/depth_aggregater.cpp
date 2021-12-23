@@ -8,7 +8,8 @@
 #include "util/tool.h"
 
 /////////////////////////////////////////////////////////////////////
-DepthAggregater::DepthAggregater():thread_run_(true)
+DepthAggregater::DepthAggregater(QuoteSourceCallbackInterface* engine)
+: engine_{engine}, thread_run_(true)
 {
 
 }
@@ -147,27 +148,16 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
-        snap.exchange = MIX_EXCHANGE_NAME;      
-
-        LOG_INFO("Output " + snap.str());
-        p_comm_->publish_depth(snap);
+        snap.exchange = MIX_EXCHANGE_NAME;        
+        engine_->on_snap(snap);
     }
 }
 
-void DepthAggregater::on_snap( SDepthQuote& quote)
+void DepthAggregater::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
 {
-    try
-    {
-        std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    std::unique_lock<std::mutex> l{ mutex_quotes_ };
 
-        LOG_INFO("Input " + quote.str());
-
-        quotes_[quote.symbol][quote.exchange] = quote;
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }    
+    quotes_[symbol][exchange] = quote;
 }
 
 void DepthAggregater::set_config(unordered_map<TSymbol, SMixerConfig> & new_config)

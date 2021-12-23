@@ -21,7 +21,6 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 # for general include
 INCLUDE_DIRECTORIES("../..")
 INCLUDE_DIRECTORIES("../../base/include")
-INCLUDE_DIRECTORIES("../../lib/comm")
 # for protos
 INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
@@ -31,7 +30,7 @@ AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
 AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
-# AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # INCLUDE_DIRECTORIES("/root/.local/include")
@@ -39,7 +38,6 @@ AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 # INCLUDE_DIRECTORIES("/home/mk/go/src")
 # for search lib pandora
 LINK_DIRECTORIES("../../lib")
-LINK_DIRECTORIES("../../lib/comm")
 # for search lib grpc
 # LINK_DIRECTORIES("/root/.local/lib")
 
@@ -58,14 +56,13 @@ target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${BIN_NAME} boost_system)
 target_link_libraries(${BIN_NAME} pandora)
 target_link_libraries(${BIN_NAME} log4cplus)
-# target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
-# target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
+target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
+target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
 target_link_libraries(${BIN_NAME} nacos-cli)
-# target_link_libraries(${BIN_NAME} reporter)
-# target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
+target_link_libraries(${BIN_NAME} reporter)
+target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
-# TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

@@ -94,6 +94,7 @@
         "interface_define.h": "c",
         "basic.h": "c",
         "kafka_server.h": "c",
-        "base_data_stuct.h": "c"
+        "base_data_stuct.h": "c",
+        "comm_declare.h": "c"
     }
 }

@@ -8,7 +8,7 @@
 #include "base/cpp/basic.h"
 
 #include "comm_type_def.h"
-#include "interface_define.h"
+#include "comm_interface_define.h"
 
 COMM_NAMESPACE_START
 
@@ -39,7 +39,7 @@ public:
         virtual void set_kline_meta(const MetaType meta);
         virtual void set_depth_meta(const MetaType meta);
         virtual void set_trade_meta(const MetaType meta);
-
+           
 public:
     void sub_topic(const string& topic);
     void unsub_topic(const string& topic);

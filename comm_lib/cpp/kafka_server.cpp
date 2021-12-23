@@ -7,7 +7,7 @@
 #include "comm_type_def.h"
 #include "util.h"
 #include "comm_log.h"
-#include "interface_define.h"
+#include "comm_interface_define.h"
 
 COMM_NAMESPACE_START
 

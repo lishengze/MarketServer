@@ -127,7 +127,41 @@ void Comm::set_trade_meta(const MetaType meta)
     }
 }
 
+void Comm::publish_depth(const SDepthQuote& quote)
+{
+    try
+    {
+        net_server_->publish_depth(quote);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }  
+}
 
+void Comm::publish_kline(const KlineData& kline)
+{
+    try
+    {
+        net_server_->publish_kline(kline);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }  
+}
+
+void Comm::publish_trade(const TradeData& trade)
+{
+    try
+    {
+       net_server_->publish_trade(trade);
+    }
+    catch(const std::exception& e)
+    {
+        COMM_LOG_ERROR(e.what());
+    }    
+}
 
 
 COMM_NAMESPACE_END

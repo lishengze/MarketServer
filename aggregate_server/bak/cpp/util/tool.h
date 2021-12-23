@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/cpp/base_data_stuct.h"
+#include "../global_declare.h"
 #include "../struct_define.h"
 
 void print_quote(const SDepthQuote& quote);
@@ -9,13 +9,13 @@ void print_quote(const SDepthQuote& quote);
 
 string quote_str(const SDepthQuote& quote, int count=0);
 
-// bool filter_zero_volume(SDepthQuote& quote);
+bool filter_zero_volume(SDepthQuote& quote);
 
-// bool filter_zero_volume(SEData& sedata);
+bool filter_zero_volume(SEData& sedata);
 
-// void print_sedata(const SEData& sedata);
+void print_sedata(const SEData& sedata);
 
-// string sedata_str(const SEData& sedata);
+string sedata_str(const SEData& sedata);
 
 string klines_str(vector<KlineData>& kline_list);
 

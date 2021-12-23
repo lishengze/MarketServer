@@ -1,52 +1,46 @@
 #include "test.h"
+#include "global_declare.h"
 #include "Log/log.h"
-
-#include "depth_aggregater.h"
-#include "kline_aggregater.h"
-#include "trade_aggregater.h"
-
+#include "pandora/util/io_service_pool.h"
 #include "stream_engine_config.h"
 
 TestEngine::~TestEngine()
 {
-    if (p_depth_aggregater_)
+    if (p_kafka_)
     {
-        delete p_depth_aggregater_;
-        p_depth_aggregater_ = nullptr;
+        delete p_kafka_;
+        p_kafka_ = nullptr;
     }
 
-    if (p_kline_aggregater_)
+    if (p_decode_processer_)
     {
-        delete p_kline_aggregater_;
-        p_kline_aggregater_ = nullptr;
+        delete p_decode_processer_;
+        p_decode_processer_ = nullptr;
     }
-
-    if (p_trade_aggregater_)
-    {
-        delete p_trade_aggregater_;
-        p_trade_aggregater_ = nullptr;
-    }    
 }
 
 void TestEngine::init()
 {
     try
     {
-        p_depth_aggregater_ = new DepthAggregater();
-        p_kline_aggregater_ = new KlineAggregater();
-        p_trade_aggregater_ = new TradeAggregater();
+        p_encode_processer_ = new EncodeProcesser();
 
-        p_comm_server_ = new bcts::comm::Comm(server_address_, p_depth_aggregater_, p_kline_aggregater_, p_trade_aggregater_);
+        p_depth_processor_ = new DepthProcessor(p_encode_processer_);
+        p_kline_processor_ = new KlineProcessor(p_encode_processer_);
+        p_trade_processor_ = new TradeProcessor(p_encode_processer_);
         
-        p_depth_aggregater_->set_comm(p_comm_server_);
-        p_kline_aggregater_->set_comm(p_comm_server_);
-        p_trade_aggregater_->set_comm(p_comm_server_);
+        p_decode_processer_ = new DecodeProcesser(p_depth_processor_, p_kline_processor_, 
+                                                  p_trade_processor_, engine_pool_);
+
+        p_kafka_ = new KafkaServer(p_decode_processer_);
+        p_encode_processer_->set_kafka_server(p_kafka_);
 
         config_client_.set_callback(this);
 
         LOG_INFO(string("Nacos Address: ") + CONFIG->nacos_addr_ + " namespace: " + CONFIG->nacos_namespace_);
 
-        config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);        
+        config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
+        
     }
     catch(const std::exception& e)
     {
@@ -58,7 +52,7 @@ void TestEngine::start()
 {
     try
     {
-        p_comm_server_->launch();
+        p_kafka_->launch();
     }
     catch(const std::exception& e)
     {
@@ -66,7 +60,7 @@ void TestEngine::start()
     }    
 }
 
-SSymbolConfig to_redis_config(const map<TExchange, SNacosConfigByExchange>& configs)
+SSymbolConfig to_redis_config(const unordered_map<TExchange, SNacosConfigByExchange>& configs)
 {
     SSymbolConfig ret;
     for( const auto& v : configs ) {
@@ -111,7 +105,7 @@ std::set<TExchange> get_exchange_set(const SNacosConfig& config)
     }    
 }
 
-bool TestEngine::parse_config(const Document& src, std::map<TSymbol, SNacosConfig>& curr_config)
+bool TestEngine::parse_config(const Document& src, std::unordered_map<TSymbol, SNacosConfig>& curr_config)
 {
     try
     {
@@ -160,7 +154,7 @@ bool TestEngine::parse_config(const Document& src, std::map<TSymbol, SNacosConfi
     return false;
 }
 
-void TestEngine::update_config(const std::map<TSymbol, SNacosConfig>& curr_config, bool& is_config_changed, bool& is_meta_changed)
+void TestEngine::update_config(const std::unordered_map<TSymbol, SNacosConfig>& curr_config, bool& is_config_changed, bool& is_meta_changed)
 {
     try
     {
@@ -225,7 +219,7 @@ void TestEngine::on_config_channged(const Document& src)
     {
         LOG_INFO("*** TestEngine::on_config_channged ***");
 
-        std::map<TSymbol, SNacosConfig> curr_config;
+        std::unordered_map<TSymbol, SNacosConfig> curr_config;
 
         if (!parse_config(src, curr_config)) return;
 
@@ -256,9 +250,9 @@ void TestEngine::notify_config_change()
             LOG_INFO(iter.first + " " + iter.second.simple_str());
         }
 
-        p_depth_aggregater_->set_config(mixer_config_);
-        p_kline_aggregater_->set_config(mixer_config_);
-        p_trade_aggregater_->set_config(mixer_config_);        
+        p_depth_processor_->set_config(mixer_config_);
+        p_kline_processor_->set_config(mixer_config_);
+        p_trade_processor_->set_config(mixer_config_);        
     }
     catch(const std::exception& e)
     {
@@ -279,9 +273,9 @@ void TestEngine::notify_meta_change()
             }
         }
 
-        p_comm_server_->set_depth_meta(meta_map_);
-        // p_comm_server_->set_kline_meta(meta_map_);
-        // p_comm_server_->set_trade_meta(meta_map_);
+        p_kafka_->set_meta(meta_map_);
+        p_decode_processer_->set_meta(meta_map_);
+        p_kline_processor_->set_meta(meta_map_);
     }
     catch(const std::exception& e)
     {
@@ -296,14 +290,13 @@ void test_engine()
     utrade::pandora::Singleton<Config>::Instance();
     CONFIG->parse_config(config_file_name);
 
-    string server_address = "127.0.0.1:9117";
-    TestEngine test_obj(server_address);
+    utrade::pandora::io_service_pool engine_pool{3};
+
+    TestEngine test_obj(engine_pool);
     test_obj.start();
 
-    while(true)
-    {
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-    }
+    engine_pool.start();
+    engine_pool.block();
 }
 
 void TestMain()

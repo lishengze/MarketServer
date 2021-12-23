@@ -3,7 +3,7 @@
 #include "base/cpp/basic.h"
 #include "base/cpp/base_data_stuct.h"
 #include "comm_declare.h"
-#include "interface_define.h"
+#include "comm_interface_define.h"
 
 #include "comm_log.h"
 
