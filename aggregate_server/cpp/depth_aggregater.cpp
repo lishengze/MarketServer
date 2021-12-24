@@ -40,7 +40,6 @@ void DepthAggregater::_thread_loop()
     {
         vector<pair<TSymbol, SMixerConfig>> calculate_symbols;
         {
-            type_tick now = get_miliseconds();
             std::unique_lock<std::mutex> l{ mutex_config_ };
             for( const auto& cfg : configs_ )
             {   
