@@ -20,6 +20,8 @@ public:
 
     void set_config(unordered_map<TSymbol, SMixerConfig>& new_config);
 
+    bool is_data_too_fast_or_init(TSymbol symbol, int standard_fre);
+
     virtual void on_snap( SDepthQuote& quote);
 
 private:
