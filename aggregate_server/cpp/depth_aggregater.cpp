@@ -128,7 +128,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 {
     // 行情
 
-    // LOG_INFO("_calc_symbol: " +  symbol);
+    LOG_INFO("_calc_symbol: " +  symbol);
 
     SDepthQuote snap;
     snap.sequence_no = seqno;
@@ -173,7 +173,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
         snap.symbol = symbol;
         snap.exchange = MIX_EXCHANGE_NAME;      
 
-        LOG_INFO("Output " + snap.str());
+        if (snap.symbol == "BTC_USDT") LOG_INFO("Output " + snap.str());
         p_comm_->publish_depth(snap);
     }
 }
@@ -184,7 +184,7 @@ void DepthAggregater::on_snap( SDepthQuote& quote)
     {
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
 
-        LOG_INFO("Input " + quote.str());
+        if (quote.symbol == "BTC_USDT") LOG_INFO("Input " + quote.str());
 
         quotes_[quote.symbol][quote.exchange] = quote;
     }

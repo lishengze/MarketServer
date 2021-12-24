@@ -271,7 +271,8 @@ struct SMixerConfig
         string result = "depth: " + std::to_string(depth) 
                         + ", precise: " + std::to_string(precise)
                         + ", vprecise: " + std::to_string(vprecise)
-                        + ", aprecise: " + std::to_string(aprecise);
+                        + ", aprecise: " + std::to_string(aprecise)
+                        + ", fre: " + std::to_string(frequency);
         return result;
     }
 
