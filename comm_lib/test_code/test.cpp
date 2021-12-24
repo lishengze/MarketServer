@@ -2,7 +2,7 @@
 #include "test.h"
 
 #include "../cpp/comm.h"
-#include "../cpp/interface_define.h"
+#include "../cpp/comm_interface_define.h"
 
 USING_COMM_NAMESPACE
 
