@@ -172,6 +172,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
         snap.symbol = symbol;
         snap.exchange = MIX_EXCHANGE_NAME;      
 
+        // LOG->record_output_info(snap.meta_str(),snap);
         // if (snap.symbol == "BTC_USDT") LOG_INFO("Output " + snap.str());
         p_comm_->publish_depth(snap);
     }
@@ -184,6 +185,8 @@ void DepthAggregater::on_snap( SDepthQuote& quote)
         std::unique_lock<std::mutex> l{ mutex_quotes_ };
 
         // if (quote.symbol == "BTC_USDT") LOG_INFO("Input " + quote.str());
+
+        // LOG->record_input_info(quote.meta_str(),quote);
 
         quotes_[quote.symbol][quote.exchange] = quote;
     }

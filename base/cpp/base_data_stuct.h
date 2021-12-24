@@ -98,6 +98,24 @@ struct SDepthQuote {
         return *this;
     }
 
+    string meta_str() const
+    {
+        try
+        {
+            std::stringstream stream_obj;
+
+            stream_obj  << "depth_" 
+                        << "Symbol_" << symbol
+                        << "_Exchange_" << exchange;
+
+            return stream_obj.str();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        return "";
+    }
 
     std::string str() const
     {
@@ -223,6 +241,24 @@ struct KlineData
         px_close.get_str_value(), volume.get_str_value());
     }
 
+    string meta_str() const
+    {
+        try
+        {
+            std::stringstream stream_obj;
+
+            stream_obj  << "kline_" 
+                        << "Symbol_" << symbol
+                        << "_Exchange_" << exchange;
+
+            return stream_obj.str();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        return "";
+    }
 
     string str()
     {
@@ -315,6 +351,25 @@ struct TradeData
         exchange = other.exchange;
 
         return *this;
+    }
+
+    string meta_str() const
+    {
+        try
+        {
+            std::stringstream stream_obj;
+
+            stream_obj  << "trade_" 
+                        << "Symbol_" << symbol
+                        << "_Exchange_" << exchange;
+
+            return stream_obj.str();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        return "";
     }
 
     string get_json_str()

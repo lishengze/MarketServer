@@ -49,6 +49,9 @@ void KlineProcessor::on_kline(KlineData& kline)
         if (!engine_ || !check_kline(kline)) return;
 
         // COMM_LOG_INFO(kline.str());
+
+        COMM_LOG_INPUT_KLINE(kline.meta_str(), kline);
+
         engine_->on_kline(kline);             
     }
     catch(const std::exception& e)

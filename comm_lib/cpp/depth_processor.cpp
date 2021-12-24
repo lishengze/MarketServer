@@ -83,6 +83,8 @@ void DepthProcessor::on_snap(SDepthQuote& src)
 
         // COMM_LOG_INFO(latest_quote.str());
         
+        COMM_LOG_INPUT_DEPTH(src.meta_str(), src);
+
         engine_->on_snap(latest_quote);
 
     }

@@ -39,7 +39,8 @@ void TradeProcessor::on_trade(TradeData& trade)
     try
     {
         if (!engine_ || !check(trade)) return;
-
+        
+        COMM_LOG_INPUT_TRADE(trade.meta_str(), trade);
         // COMM_LOG_INFO(trade.str());
         engine_->on_trade(trade);        
     }

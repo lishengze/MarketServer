@@ -408,7 +408,9 @@ void KafkaServer::publish_depth(const SDepthQuote& depth)
         
         string topic = get_depth_topic(depth.exchange, depth.symbol);
 
-        COMM_LOG_INFO(topic + ": " + serializer_data);
+        // COMM_LOG_INFO(topic + ": " + serializer_data);
+
+         COMM_LOG_OUTPUT_DEPTH(depth.meta_str(), depth);
 
         publish_msg(topic, serializer_data);
     }
@@ -425,6 +427,8 @@ void KafkaServer::publish_kline(const KlineData& kline)
         string serializer_data{std::move(serializer_->on_kline(kline))};
         string topic = get_kline_topic(kline.exchange, kline.symbol);
 
+        COMM_LOG_OUTPUT_KLINE(kline.meta_str(), kline);
+
         publish_msg(topic, serializer_data);
     }
     catch(const std::exception& e)
@@ -439,6 +443,8 @@ void KafkaServer::publish_trade(const TradeData& trade)
     {
         string serializer_data{std::move(serializer_->on_trade(trade))};
         string topic = get_trade_topic(trade.exchange, trade.symbol);
+
+        COMM_LOG_OUTPUT_TRADE(trade.meta_str(), trade);
 
         publish_msg(topic, serializer_data);
     }
