@@ -10,17 +10,17 @@ class TestEngine:public bcts::comm::QuoteSourceCallbackInterface
 {
     // 行情接口
     virtual void on_snap( SDepthQuote& quote) {
-        cout << quote.basic_str() << endl;
+        // cout << quote.basic_str() << endl;
     };
 
     // K线接口
     virtual void on_kline( KlineData& kline) {
-        cout << kline.str() << endl;
+        // cout << kline.str() << endl;
     };
 
     // 交易接口
     virtual void on_trade( TradeData& trade) {
-        cout << trade.str() << endl;
+        // cout << trade.str() << endl;
     };
 };
 
