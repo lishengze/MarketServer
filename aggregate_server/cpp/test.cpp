@@ -281,12 +281,12 @@ void TestEngine::notify_meta_change()
             }
         }
 
-        p_comm_server_->set_depth_meta(meta_map_);
+        // p_comm_server_->set_depth_meta(meta_map_);
+        // p_comm_server_->set_kline_meta(meta_map_);
+        // p_comm_server_->set_trade_meta(meta_map_);
 
         p_kline_aggregater_->set_meta(meta_map_);
-        p_comm_server_->set_kline_meta(meta_map_);
-
-        p_comm_server_->set_trade_meta(meta_map_);
+        p_comm_server_->set_meta(meta_map_, meta_map_, meta_map_);
     }
     catch(const std::exception& e)
     {
