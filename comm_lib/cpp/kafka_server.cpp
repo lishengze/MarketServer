@@ -405,7 +405,10 @@ void KafkaServer::publish_depth(const SDepthQuote& depth)
     try
     {
         string serializer_data{std::move(serializer_->on_snap(depth))};
+        
         string topic = get_depth_topic(depth.exchange, depth.symbol);
+
+        COMM_LOG_INFO(topic + ": " + serializer_data);
 
         publish_msg(topic, serializer_data);
     }

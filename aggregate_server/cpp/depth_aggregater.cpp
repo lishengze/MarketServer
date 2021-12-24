@@ -45,7 +45,7 @@ void DepthAggregater::_thread_loop()
             {   
                 if (is_data_too_fast_or_init(cfg.first, cfg.second.frequency)) 
                 {
-                    LOG_INFO(cfg.first + " too fast, " + std::to_string(cfg.second.frequency));
+                    // LOG_INFO(cfg.first + " too fast, " + std::to_string(cfg.second.frequency));
                     continue;
                 }
                 calculate_symbols.push_back(make_pair(cfg.first, cfg.second));                
@@ -127,7 +127,7 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 {
     // 行情
 
-    LOG_INFO("_calc_symbol: " +  symbol);
+    // LOG_INFO("_calc_symbol: " +  symbol);
 
     SDepthQuote snap;
     snap.sequence_no = seqno;

@@ -253,13 +253,13 @@ void KlineAggregater::on_kline( KlineData& input)
 {
     try
     {
-        LOG_INFO(input.str());
+        if(input.symbol == "BTC_USDT") LOG_INFO("Input " + input.str());
 
         KlineData output;
 
         if (add_kline(input, output))
         {
-            LOG_INFO(output.str());
+            if(input.symbol == "BTC_USDT") LOG_INFO("Output " + output.str());
             p_comm_->publish_kline(output);
         }
     }
