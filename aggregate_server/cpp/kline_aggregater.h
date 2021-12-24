@@ -47,19 +47,19 @@ public:
             return KlineData();
         }
     };
-    
+
 
     KlineAggregater();
     virtual ~KlineAggregater();
 
-    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
+    void set_meta(const std::map<TSymbol, std::set<TExchange>>& meta_map);
 
-    void update_cache_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                           const std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
+    void update_cache_meta(const std::map<TSymbol, std::set<TExchange>>& added_meta,
+                           const std::map<TSymbol, std::set<TExchange>>& removed_meta);
 
-    void get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
-                        std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                        std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
+    void get_delata_meta(const std::map<TSymbol, std::set<TExchange>>& new_meta_map,
+                        std::map<TSymbol, std::set<TExchange>>& added_meta,
+                        std::map<TSymbol, std::set<TExchange>>& removed_meta);
 
 
     bool is_exchange_added_to_aggregate(const KlineData& exchange, const KlineData& input);
@@ -76,6 +76,6 @@ private:
     bcts::comm::Comm*                                               p_comm_{nullptr};
 
     mutable std::mutex                                              mutex_cache_;
-    unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>>    caches_;
-    unordered_map<TSymbol, SMixerConfig>                            symbol_config_;
+    map<TSymbol, map<TExchange, CalcCache*>>                        caches_;
+    unordered_map<TSymbol, SMixerConfig>                                      symbol_config_;
 };
