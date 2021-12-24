@@ -46,7 +46,9 @@ void test_code()
 
     // comm.set_kline_meta(test_meta);
 
-    comm.set_trade_meta(test_meta);
+    // comm.set_trade_meta(test_meta);
+
+    comm.set_meta(test_meta, test_meta, test_meta);
 
     comm.launch();
 
