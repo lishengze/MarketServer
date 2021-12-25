@@ -7,6 +7,7 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 
 #include "data_struct/data_struct.h"
+#include "risk_interface_define.h"
 
 class NacosConfig: public NacosClient
 {

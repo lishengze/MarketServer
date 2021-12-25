@@ -32,5 +32,4 @@ inline void vassign(char * r, unsigned int len, const std::string &v)
 #define QUOTE_TYPE_TRADE 2
 #define QUOTE_TYPE_KLINE 3
 
-#define MIX_EXCHANGE_NAME "_bcts_"
 

@@ -1,10 +1,6 @@
 #include "test.h"
 #include "Log/log.h"
 
-#include "depth_aggregater.h"
-#include "kline_aggregater.h"
-#include "trade_aggregater.h"
-
 #include "native_config.h"
 
 TestEngine::~TestEngine()
@@ -72,10 +68,39 @@ bool TestEngine::is_symbol_updated(const map<TSymbol, SymbolConfiguration>& conf
 {
     try
     {
+        bool result = false;
         for (auto iter:config)
         {
-            // if (meta_map_.find(iter.first) == meta_map_.end())
+            if (meta_map_.find(iter.first) == meta_map_.end()) 
+            {
+                result = true;
+                break;
+            }
         }
+
+        for (auto iter:meta_map_)
+        {
+            if (config.find(iter.first) == config.end()) 
+            {
+                result = true;
+                break;
+            }            
+        }
+
+        if (result)
+        {
+            std::map<TSymbol, std::set<TExchange>> new_meta;
+
+            std::set<TExchange> exchange_set{MIX_EXCHANGE_NAME};
+
+            for (auto iter:config)
+            {
+                new_meta[iter.first] = exchange_set;
+            }
+            meta_map_.swap(new_meta);
+        }
+
+        return result;
     }
     catch(const std::exception& e)
     {
@@ -115,7 +140,6 @@ void TestEngine::on_hedge_config_update(const map<TSymbol, map<TExchange, HedgeC
 void test_engine()
 {
     string config_file_name = "config.json";
-    utrade::pandora::Singleton<Config>::Instance();
     NATIVE_CONFIG->parse_config(config_file_name);
 
     string server_address = "127.0.0.1:9117";

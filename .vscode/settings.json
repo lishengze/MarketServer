@@ -95,6 +95,11 @@
         "basic.h": "c",
         "kafka_server.h": "c",
         "base_data_stuct.h": "c",
-        "comm_declare.h": "c"
+        "comm_declare.h": "c",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     }
 }

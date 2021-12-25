@@ -125,13 +125,13 @@ void NacosConfig::load_hedge_config(const NacosString &configInfo)
     try
     {
         Document hedgeParamsObject;    
-        hedgeParamsObject.Parse(hedge_params_.c_str());
+        hedgeParamsObject.Parse(configInfo.c_str());
         if(hedgeParamsObject.HasParseError())
         {
             LOG_WARN("parse HedgeParams error: " + std::to_string(hedgeParamsObject.GetParseError()));
             return;
         }
-        LOG_INFO("\nHedgeRisk OriInfo: \n" + hedge_params_.c_str());
+        LOG_INFO("\nHedgeRisk OriInfo: \n" + configInfo.c_str());
 
         map<TSymbol, map<TExchange, HedgeConfig>> output;
 

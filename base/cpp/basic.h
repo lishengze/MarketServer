@@ -52,6 +52,8 @@ using type_uint32 = unsigned int;
 #define DECLARE_PTR(X) typedef boost::shared_ptr<X> X##Ptr     /** < define smart ptr > */
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)         /** < forward defile smart ptr > */
 
+#define MIX_EXCHANGE_NAME "_bcts_"
+
 inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();
 	auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());

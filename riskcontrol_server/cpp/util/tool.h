@@ -3,15 +3,15 @@
 #include "base/cpp/basic.h"
 #include "../data_struct/data_struct.h"
 
-void print_quote(const SInnerQuote& quote);
+void print_quote(const SDepthQuote& quote);
 
-string quote_str(const SInnerQuote& quote, int count= 0);
+string quote_str(const SDepthQuote& quote, int count= 0);
 
-bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_);
+bool filter_zero_volume(SDepthQuote& quote, std::mutex& mutex_);
 
-bool filter_zero_volume(SInnerQuote& quote);
+bool filter_zero_volume(SDepthQuote& quote);
 
-bool check_exchange_volume(const SInnerQuote& quote);
+bool check_exchange_volume(const SDepthQuote& quote);
 
 string get_work_dir_name(string program_full_name);
 

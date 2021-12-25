@@ -2,6 +2,7 @@
 
 #include "base/cpp/basic.h"
 #include "base/cpp/base_data_stuct.h"
+#include "../global_declare.h"
 
 #include "../Log/log.h"
 

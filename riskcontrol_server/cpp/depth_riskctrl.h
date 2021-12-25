@@ -5,8 +5,12 @@
 
 #include "comm_interface_define.h"
 #include "comm.h"
-#include "struct_define.h"
 #include "risk_interface_define.h"
+#include "native_config.h"
+#include "riskcontrol_worker.h"
+
+#include "util/tool.h"
+#include "global_declare.h"
 
 class DepthRiskCtrl:public bcts::comm::QuoteSourceCallbackInterface, 
                     public IConfigurationUpdater,
@@ -39,24 +43,40 @@ public:
                             const vector<SOrderPriceLevel>& asks, 
                             const vector<SOrderPriceLevel>& bids);
 
+public:
+    bool get_snaps(vector<SDepthQuote>& snaps);
+
+    void get_params(map<TSymbol, SDecimal>& watermarks, 
+                    map<TExchange, map<TSymbol, double>>& accounts, 
+                    map<TSymbol, string>& configurations);
+
+    bool check_quote(SDepthQuote& quote);
+
+    virtual void hedge_trade_order(string& symbol, double price, double amount, 
+                                    TradedOrderStreamData_Direction direction, 
+                                    bool is_trade);
+
 private:
 
+    void _publish_quote(const SDepthQuote& quote);
 
+    void _push_to_clients(const string& symbol = "");
+
+    mutable std::mutex                      mutex_datas_;
+    unordered_map<TSymbol, SDepthQuote>     datas_;
+    unordered_map<TSymbol, SDepthQuote>     last_datas_;
+    Params                                  params_;
+
+    // 处理流水线
+    QuotePipeline                           pipeline_;
+
+    AccountAjdustWorker                     account_worker_;
+    OrderBookWorker                         orderbook_worker_;
+    QuoteBiasWorker                         quotebias_worker_;
+    WatermarkComputerWorker                 watermark_worker_;
+    PrecisionWorker                         pricesion_worker_;
+
+    std::mutex                              filter_quote_mutex_;
 private:
-
-    bcts::comm::Comm*                                               p_comm_{nullptr};
-
-    // 计算线程
-    std::thread*                                                    thread_loop_{nullptr};
-    std::atomic<bool>                                               thread_run_;
-
-    // 配置信息
-    mutable std::mutex                                              mutex_config_;
-    unordered_map<TSymbol, SMixerConfig>                            configs_; 
-
-    // 控制频率    
-    unordered_map<TSymbol, type_tick>                               last_clocks_;
-
-    mutable std::mutex                                              mutex_quotes_;
-    unordered_map<TSymbol, unordered_map<TExchange, SDepthQuote>>   quotes_;
+    bcts::comm::Comm*                       p_comm_{nullptr};
 };

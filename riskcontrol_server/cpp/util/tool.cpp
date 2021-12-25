@@ -3,7 +3,7 @@
 
 #include "../Log/log.h"
 
-void print_quote(const SInnerQuote& quote)
+void print_quote(const SDepthQuote& quote)
 {
     std::stringstream s_s;
     s_s << "\n" << quote.exchange << "." << quote.symbol <<" ask.size: " << quote.asks.size() << ", bid.size: " << quote.bids.size() << "\n";
@@ -13,26 +13,26 @@ void print_quote(const SInnerQuote& quote)
 
     // for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
     // {
-    //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    //     s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
     // }
     // s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
     // i = 0;
     // for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
     // {
-    //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    //     s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
     // }    
 
     // s_s << "***************** bids info: first " << count << " data \n";
     // i = 0;
     // for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
     // {
-    //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    //     s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
     // }
     // s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
     // i = 0;
     // for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
     // {
-    //     s_s << iter->first.get_value() << ": " << iter->second.total_volume.get_value() << endl;
+    //     s_s << iter->first.get_value() << ": " << iter->second.volume.get_value() << endl;
     // }  
 
     if (quote.asks.size() > 0)
@@ -40,7 +40,7 @@ void print_quote(const SInnerQuote& quote)
         s_s << "------------- asks info \n";
         for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
         {
-            s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+            s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
         }
     }
 
@@ -49,7 +49,7 @@ void print_quote(const SInnerQuote& quote)
         s_s << "************* bids info \n";
         for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
         {
-            s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+            s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
         }    
     }
 
@@ -59,7 +59,7 @@ void print_quote(const SInnerQuote& quote)
     LOG_DEBUG(s_s.str());
 }
 
-string quote_str(const SInnerQuote& quote, int count)
+string quote_str(const SDepthQuote& quote, int count)
 {
     try
     {
@@ -76,13 +76,13 @@ string quote_str(const SInnerQuote& quote, int count)
                 
                 for (auto iter = quote.asks.begin();iter != quote.asks.end() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }
                 s_s << "+++++++++ last" << count <<  " data +++++++++" << endl;
                 i = 0;
                 for (auto iter = quote.asks.rbegin();iter != quote.asks.rend() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }                    
             }
 
@@ -92,13 +92,13 @@ string quote_str(const SInnerQuote& quote, int count)
                 i = 0;
                 for (auto iter = quote.bids.rbegin();iter != quote.bids.rend() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }
                 s_s << "+++++++++last" << count <<  " data+++++++++" << endl;
                 i = 0;
                 for (auto iter = quote.bids.begin();iter != quote.bids.end() && i < count; ++iter, ++i)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }    
             }          
         }
@@ -109,7 +109,7 @@ string quote_str(const SInnerQuote& quote, int count)
                 s_s << "------------- asks info \n";
                 for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }
             }
 
@@ -118,7 +118,7 @@ string quote_str(const SInnerQuote& quote, int count)
                 s_s << "************* bids info \n";
                 for (auto iter = quote.bids.rbegin();iter != quote.bids.rend(); ++iter)
                 {
-                    s_s << iter->first.get_str_value() << ": " << iter->second.total_volume.get_str_value() << endl;
+                    s_s << iter->first.get_str_value() << ": " << iter->second.volume.get_str_value() << endl;
                 }    
             }
         }
@@ -131,7 +131,7 @@ string quote_str(const SInnerQuote& quote, int count)
     }
 }
 
-bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_)
+bool filter_zero_volume(SDepthQuote& quote, std::mutex& mutex_)
 {
     try
     {
@@ -145,15 +145,15 @@ bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_)
     }
 }
 
-bool filter_zero_volume(SInnerQuote& quote)
+bool filter_zero_volume(SDepthQuote& quote)
 {
     try
     {
         bool result = false;
-        std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
+        std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
         for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
         {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
             {
                 delete_iter_list.push_back(iter);
             }
@@ -167,7 +167,7 @@ bool filter_zero_volume(SInnerQuote& quote)
         delete_iter_list.clear();
         for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
         {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
             {
                 delete_iter_list.push_back(iter);
             }    
@@ -189,18 +189,18 @@ bool filter_zero_volume(SInnerQuote& quote)
     }    
 }
 
-bool check_exchange_volume(const SInnerQuote& quote)
+bool check_exchange_volume(const SDepthQuote& quote)
 {
     try
     {
         bool result = false;
         for (auto iter:quote.asks)
         {
-            for (auto iter2:iter.second.exchanges)
+            for (auto iter2:iter.second.volume_by_exchanges)
             {
-                if (iter.second.total_volume < iter2.second)
+                if (iter.second.volume < iter2.second)
                 {
-                    LOG_DEBUG("ask "+  quote.symbol + " tv: " + iter.second.total_volume.get_str_value() 
+                    LOG_DEBUG("ask "+  quote.symbol + " tv: " + iter.second.volume.get_str_value() 
                                 + ", " + iter2.first + " v: " + iter2.second.get_str_value());
 
                     result = true;
@@ -210,11 +210,11 @@ bool check_exchange_volume(const SInnerQuote& quote)
 
         for (auto iter:quote.bids)
         {
-            for (auto iter2:iter.second.exchanges)
+            for (auto iter2:iter.second.volume_by_exchanges)
             {
-                if (iter.second.total_volume < iter2.second)
+                if (iter.second.volume < iter2.second)
                 {
-                    LOG_DEBUG("bid "+  quote.symbol + " tv: " + iter.second.total_volume.get_str_value() 
+                    LOG_DEBUG("bid "+  quote.symbol + " tv: " + iter.second.volume.get_str_value() 
                                 + ", " + iter2.first + " v: " + iter2.second.get_str_value());
 
                     result = true;

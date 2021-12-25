@@ -14,6 +14,39 @@ inline string get_sec_time_str(unsigned long time)
 struct SDepth {
     SDecimal volume;    // 单量
     unordered_map<TExchange, SDecimal> volume_by_exchanges; // 聚合行情才有用
+
+    void mix_exchanges(const SDepth& src, double bias, uint32 kind=1) 
+    {
+        if (kind == 1 && bias > -100)
+        {
+            for( const auto& v : src.volume_by_exchanges ) 
+            {                
+                volume_by_exchanges[v.first] += (v.second * (1 + bias)) > 0 ? (v.second * (1 + bias)) : 0;
+            }
+        }
+        else if (kind == 2)
+        {
+            for( const auto& v : src.volume_by_exchanges ) 
+            {                
+                volume_by_exchanges[v.first] += (v.second + bias) > 0 ? (v.second + bias) :0;
+            }
+        }
+
+
+
+        volume = 0;
+        for( const auto& v : volume_by_exchanges ) {
+            volume += v.second;
+        }
+    }
+
+    void set_total_volume()
+    {
+        volume = 0;
+        for( const auto& v : volume_by_exchanges ) {
+            volume += v.second;
+        }        
+    }    
 };
 
 struct SDepthQuote {
@@ -98,6 +131,20 @@ struct SDepthQuote {
         return *this;
     }
 
+    void get_asks(vector<pair<SDecimal, SDepth>>& depths) const {
+        depths.clear();
+        for( auto iter = asks.begin() ; iter != asks.end() ; iter ++ ) {
+            depths.push_back(make_pair(iter->first, iter->second));
+        }
+    }
+
+    void get_bids(vector<pair<SDecimal, SDepth>>& depths) const {
+        depths.clear();
+        for( auto iter = bids.rbegin() ; iter != bids.rend() ; iter ++ ) {
+            depths.push_back(make_pair(iter->first, iter->second));
+        }
+    }
+    
     string meta_str() const
     {
         try
