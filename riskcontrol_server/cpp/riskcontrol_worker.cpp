@@ -717,18 +717,18 @@ SDepthQuote& OrderBookWorker::process(SDepthQuote& src, PipelineContent& ctx)
 
 SDepthQuote& DefaultWorker::process(SDepthQuote& src, PipelineContent& ctx)
 {
-    for( auto& v : src.asks ) {
-        v.second.volume = 0;
-        for( const auto& v2 : v.second.volume_by_exchanges ) {
-            v.second.volume += v2.second;
-        }
-    }
-    for( auto& v : src.bids ) {
-        v.second.volume = 0;
-        for( const auto& v2 : v.second.volume_by_exchanges ) {
-            v.second.volume += v2.second;
-        }
-    }
+    // for( auto& v : src.asks ) {
+    //     v.second.volume = 0;
+    //     for( const auto& v2 : v.second.volume_by_exchanges ) {
+    //         v.second.volume += v2.second;
+    //     }
+    // }
+    // for( auto& v : src.bids ) {
+    //     v.second.volume = 0;
+    //     for( const auto& v2 : v.second.volume_by_exchanges ) {
+    //         v.second.volume += v2.second;
+    //     }
+    // }
 
     return src;
 }
