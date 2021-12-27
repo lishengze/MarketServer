@@ -62,7 +62,9 @@ void set_depth_json(nlohmann::json& ask_json, const map<SDecimal, SDepth>& depth
                     volume_by_exchanges_json[iter2.first] = iter2.second.get_value();
                 }
 
-                ask_json["volume_by_exchanges"] = depth_json;
+                depth_json["volume_by_exchanges"] = volume_by_exchanges_json;
+
+                ask_json[iter.first.get_str_value()] = depth_json;
             }
         }
     }
