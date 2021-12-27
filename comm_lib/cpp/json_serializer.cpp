@@ -71,10 +71,31 @@ void JsonSerializer::_json_to_quote_depth(const Value& data, map<SDecimal, SDept
         for (auto iter = data.MemberBegin() ; iter != data.MemberEnd() ; ++iter )
         {
             const string& price = iter->name.GetString();
-            const double& volume = iter->value.GetDouble();
-            SDecimal dPrice = SDecimal::parse(price);
-            SDecimal dVolume = SDecimal::parse(volume);
-            depths[dPrice].volume = dVolume;
+            SDecimal dPrice = SDecimal::parse(price);            
+
+            if (iter->value.IsDouble())
+            {
+                const double& volume = iter->value.GetDouble();
+                SDecimal dVolume = SDecimal::parse(volume);
+
+                depths[dPrice].volume = dVolume;
+            }
+            else
+            {
+                const Value& depth_json = iter->value.GetObject();
+
+                const double& volume = depth_json["volume"].GetDouble();
+                SDecimal dVolume = SDecimal::parse(volume);
+
+                depths[dPrice].volume = dVolume;
+
+                const Value& volume_by_exchange = depth_json["volume_by_exchanges"].GetObject();
+
+                for (auto iter2 = volume_by_exchange.MemberBegin(); iter2 != volume_by_exchange.MemberEnd(); ++iter2)
+                {
+                    depths[dPrice].volume_by_exchanges[iter2->name.GetString()] = iter2->value.GetDouble();
+                }
+            }                                    
         }
     }
     catch(const std::exception& e)

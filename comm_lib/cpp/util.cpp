@@ -48,7 +48,22 @@ void set_depth_json(nlohmann::json& ask_json, const map<SDecimal, SDepth>& depth
     {
         for (auto iter:depth)
         {
-            ask_json[iter.first.get_str_value()] = iter.second.volume.get_value();
+            if (iter.second.volume_by_exchanges.empty())
+            {
+                ask_json[iter.first.get_str_value()] = iter.second.volume.get_value();
+            }
+            else
+            {
+                nlohmann::json depth_json;
+                nlohmann::json volume_by_exchanges_json;
+                depth_json["volume"] = iter.second.volume.get_value();
+                for (auto iter2:iter.second.volume_by_exchanges)
+                {
+                    volume_by_exchanges_json[iter2.first] = iter2.second.get_value();
+                }
+
+                ask_json["volume_by_exchanges"] = depth_json;
+            }
         }
     }
     catch(const std::exception& e)
