@@ -34,10 +34,10 @@ DepthRiskCtrl::~DepthRiskCtrl() {
 
 void DepthRiskCtrl::on_snap(SDepthQuote& quote)
 {    
-    if (quote.symbol == "BTC_USDT")
-    {
-        LOG_INFO(quote.str());
-    } 
+    // if (quote.symbol == "BTC_USDT")
+    // {
+    //     LOG_INFO(quote.str());
+    // } 
 
     // check_exchange_volume(quote);
 
@@ -152,7 +152,7 @@ void DepthRiskCtrl::_push_to_clients(const TSymbol& symbol)
 void DepthRiskCtrl::_publish_quote(const SDepthQuote& quote) 
 {    
     SDepthQuote newQuote;
-
+    newQuote.origin_time = utrade::pandora::NanoTime();
     pipeline_.run(quote, params_, newQuote);
 
     // 检查是否发生变化
