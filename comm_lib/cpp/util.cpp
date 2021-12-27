@@ -67,7 +67,7 @@ string get_depth_jsonstr(const SDepthQuote& depth)
         json_data["Symbol"] = depth.symbol;
         json_data["Exchange"] = depth.exchange;
         json_data["Type"] = "snap";
-        json_data["TimeArrive"] = depth.origin_time;
+        json_data["TimeArrive"] = std::to_string(depth.origin_time);
         json_data["Msg_seq_symbol"] = depth.sequence_no;
 
         nlohmann::json ask_json;
