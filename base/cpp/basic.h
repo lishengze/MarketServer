@@ -53,6 +53,7 @@ using type_uint32 = unsigned int;
 #define FORWARD_DECLARE_PTR(X) class X; DECLARE_PTR(X)         /** < forward defile smart ptr > */
 
 #define MIX_EXCHANGE_NAME "_bcts_"
+#define RISKCTRL_MIX_EXCHANGE_NAME "_bcts_riskctrl_"
 
 inline type_tick get_miliseconds() {
     auto time_now = chrono::system_clock::now();

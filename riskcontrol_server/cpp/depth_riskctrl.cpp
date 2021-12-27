@@ -3,7 +3,7 @@
 
 #include "Log/log.h"
 #include "util/tool.h"
-
+#include "native_config.h"
 
 void DepthRiskCtrl::start()
 {
@@ -11,9 +11,18 @@ void DepthRiskCtrl::start()
 }
 
                      
-DepthRiskCtrl::DepthRiskCtrl() {
-    pipeline_.add_worker(&account_worker_);
-    pipeline_.add_worker(&orderbook_worker_);    
+DepthRiskCtrl::DepthRiskCtrl() 
+{
+    if (ACCOUNT_RISKCTRL_OPEN)
+    {
+        pipeline_.add_worker(&account_worker_);
+    }
+
+    if (ORDER_RISKCTRL_OPEN)
+    {
+        pipeline_.add_worker(&orderbook_worker_);
+    }
+
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&pricesion_worker_);
@@ -27,8 +36,7 @@ void DepthRiskCtrl::on_snap(SDepthQuote& quote)
 {    
     if (quote.symbol == "BTC_USDT")
     {
-        LOG_DEBUG("\nOriginal Quote: " + " " 
-                    + quote.symbol + " " + quote_str(quote, 8));
+        LOG_INFO(quote.str());
     } 
 
     // check_exchange_volume(quote);
@@ -173,7 +181,9 @@ void DepthRiskCtrl::_publish_quote(const SDepthQuote& quote)
         {
             return;
         } 
-    }        
+    }     
+
+    newQuote.exchange = RISKCTRL_MIX_EXCHANGE_NAME;   
 
     p_comm_->publish_depth(newQuote);
 }

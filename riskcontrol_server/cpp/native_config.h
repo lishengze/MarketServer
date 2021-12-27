@@ -49,6 +49,10 @@ public:
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
             dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
+
+            // risk item
+            account_risk_ctrl_open_ = js["account_risk_ctrl_open"].get<bool>();
+            order_risk_ctrl_open_ = js["order_risk_ctrl_open"].get<bool>();
         }
         catch (std::exception& e)
         {
@@ -73,6 +77,11 @@ public:
     // [for debug] output to screen
     bool output_to_screen_;
 
+    bool account_risk_ctrl_open_{false};
+    bool order_risk_ctrl_open_{false};
 };
 
 #define NATIVE_CONFIG utrade::pandora::ThreadSafeSingleton<NativeConfig>::DoubleCheckInstance()
+
+#define ACCOUNT_RISKCTRL_OPEN NATIVE_CONFIG->account_risk_ctrl_open_
+#define ORDER_RISKCTRL_OPEN NATIVE_CONFIG->order_risk_ctrl_open_

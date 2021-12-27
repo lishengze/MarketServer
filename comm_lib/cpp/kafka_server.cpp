@@ -169,8 +169,9 @@ void KafkaServer::publish_msg(const string& topic, const string& data)
 
         if (producer_sptr_)
         {
+            kafka::Key key{topic.c_str()};
             auto record = kafka::clients::producer::ProducerRecord(topic,
-                                                   kafka::NullKey,
+                                                   key,
                                                    kafka::Value(data.c_str(), data.size()));
 
             // COMM_LOG_INFO(record.topic() + ": " + record.value().toString());
