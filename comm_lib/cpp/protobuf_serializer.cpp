@@ -19,6 +19,14 @@ using PDepthQuote = Proto3::MarketData::DepthQuote;
 using PKlineData = Proto3::MarketData::KlineData;
 using PTradeData = Proto3::MarketData::TradeData;
 using PRepeatedDepth = google::protobuf::RepeatedPtrField<PDepth>;
+using PDepthMap = google::protobuf::Map<std::string, Proto3::MarketData::Decimal>;
+
+
+inline void set_decimal(PDecimal* dst, SDecimal& src)
+{
+    dst->set_precise(src.prec());
+    dst->set_value(src.value());
+}
 
 void set_depth(PRepeatedDepth* depth_list,  map<SDecimal, SDepth>& src)
 {
@@ -27,13 +35,18 @@ void set_depth(PRepeatedDepth* depth_list,  map<SDecimal, SDepth>& src)
         PDepth depth;
         for (auto iter:src)
         {
-            depth.mutable_price()->set_value(iter.first.value());
-            depth.mutable_price()->set_precise(iter.first.prec());
+            SDecimal price = iter.first;
 
-            depth.mutable_volume()->set_value(iter.second.volume.value());
-            depth.mutable_volume()->set_precise(iter.second.volume.prec());
+            set_decimal(depth.mutable_price(), price);
+            set_decimal(depth.mutable_volume(), iter.second.volume);
+            
+            PDepthMap* volume_by_exchanges = depth.mutable_volume_by_exchanges();
 
-            depth_list->Add(std::move(depth));
+            for (auto iter2:iter.second.volume_by_exchanges)
+            {
+                // set_decimal(volume_by_exchangesiter2.first], iter2.second);
+            }
+
             depth.Clear();
         }
     }
