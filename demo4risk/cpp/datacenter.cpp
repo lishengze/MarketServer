@@ -776,8 +776,15 @@ QuotePipeline::~QuotePipeline(){
 }
 /////////////////////////////////////////////////////////////////////////////////
 DataCenter::DataCenter() {
-    pipeline_.add_worker(&account_worker_);
-    pipeline_.add_worker(&orderbook_worker_);    
+    if (ACCOUNT_RISKCTRL_OPEN)
+    {
+        pipeline_.add_worker(&account_worker_);
+    }
+
+    if (ORDER_RISKCTRL_OPEN)
+    {
+        pipeline_.add_worker(&orderbook_worker_);
+    }
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&pricesion_worker_);

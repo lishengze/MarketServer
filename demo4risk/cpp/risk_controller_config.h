@@ -51,7 +51,10 @@ public:
             sample_symbol_ = js["debug"]["sample_symbol"].get<string>();
             dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
-            
+
+            account_risk_ctrl_open_ = js["account_risk_ctrl_open"].get<bool>();
+            order_risk_ctrl_open_ = js["order_risk_ctrl_open"].get<bool>();
+
             UT_LOG_INFO(logger_, "Parse Config finish.");
         }
         catch (std::exception& e)
@@ -81,10 +84,15 @@ public:
     // [for debug] output to screen
     bool output_to_screen_;
 
+    bool account_risk_ctrl_open_{false};
+    bool order_risk_ctrl_open_{false};
+
     // logger
     UTLogPtr logger_;
 };
 
+#define ACCOUNT_RISKCTRL_OPEN CONFIG->account_risk_ctrl_open_
+#define ORDER_RISKCTRL_OPEN CONFIG->order_risk_ctrl_open_
 
 #define _log_and_print(fmt, ...)                                     \
     do {                                                             \
