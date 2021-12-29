@@ -66,6 +66,9 @@ struct SDecimal {
         from(s, precise, ceiling);
     }
 
+    uint64 value() {return data_.real_.value_;}
+    uint64 prec() {return data_.real_.prec_;}
+
     static SDecimal parse(const string& s, int precise = -1, bool ceiling = false) {
         SDecimal ret;
         ret.from(s, precise, ceiling);
