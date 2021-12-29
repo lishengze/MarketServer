@@ -10,7 +10,7 @@
 
 using njson = nlohmann::json;
 
-#define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
+
 
 using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 class Config
@@ -91,6 +91,8 @@ public:
     UTLogPtr logger_;
 };
 
+
+#define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
 #define ACCOUNT_RISKCTRL_OPEN CONFIG->account_risk_ctrl_open_
 #define ORDER_RISKCTRL_OPEN CONFIG->order_risk_ctrl_open_
 

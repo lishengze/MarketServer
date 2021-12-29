@@ -4,6 +4,7 @@
 #include "global_declare.h"
 // #include "util/tool.h"
 
+#include "risk_controller_config.h"
 #include "pandora/util/path_util.h"
 
 // exit handler function
@@ -52,6 +53,8 @@ int main(int argc, char** argv) {
     LOG->set_work_dir(work_dir);
     LOG->set_program_name(program_name);
     LOG->start();
+
+    CONFIG->parse_config(config_file_name);
 
     RiskControllerServer riskControllerServer(config_file_name);
     riskControllerServer.start();
