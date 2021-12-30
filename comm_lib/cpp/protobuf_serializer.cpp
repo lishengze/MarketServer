@@ -9,26 +9,20 @@
 #include "util.h"
 #include "base/cpp/quote.h"
 
-#include "market_data.pb.h"
+
+// google::protobuf::Map<std::string, PDecimal>
 
 COMM_NAMESPACE_START
 
-using PDecimal = Proto3::MarketData::Decimal;
-using PDepth = Proto3::MarketData::Depth;
-using PDepthQuote = Proto3::MarketData::DepthQuote;
-using PKlineData = Proto3::MarketData::KlineData;
-using PTradeData = Proto3::MarketData::TradeData;
-using PRepeatedDepth = google::protobuf::RepeatedPtrField<PDepth>;
-using PDepthMap = google::protobuf::Map<std::string, Proto3::MarketData::Decimal>;
 
 
-inline void set_decimal(PDecimal* dst, SDecimal& src)
+inline void set_decimal(PDecimal* dst, const SDecimal& src)
 {
     dst->set_precise(src.prec());
     dst->set_value(src.value());
 }
 
-void set_depth(PRepeatedDepth* depth_list,  map<SDecimal, SDepth>& src)
+void set_depth(PRepeatedDepth* depth_list,  const map<SDecimal, SDepth>& src)
 {
     try
     {
@@ -44,6 +38,13 @@ void set_depth(PRepeatedDepth* depth_list,  map<SDecimal, SDepth>& src)
 
             for (auto iter2:iter.second.volume_by_exchanges)
             {
+                string symbol = iter2.first;
+                PDecimal pvolume;
+                set_decimal(&pvolume, iter2.second);
+
+                (*volume_by_exchanges)[symbol] = pvolume;
+
+                // volume_by_exchanges->insert(symbol, pvolume);
                 // set_decimal(volume_by_exchangesiter2.first], iter2.second);
             }
 
@@ -73,9 +74,8 @@ string ProtobufSerializer::on_snap(const SDepthQuote& depth)
         quote.set_amount_precise(depth.amount_precise);
         quote.set_is_snap(depth.is_snap);
 
-        google::protobuf::RepeatedPtrField<PDepth >* asks = quote.mutable_asks();
-        google::protobuf::RepeatedPtrField<PDepth >* bids = quote.mutable_bids();
-
+        set_depth(quote.mutable_asks(), depth.asks);
+        set_depth(quote.mutable_bids(), depth.bids);
 
         return quote.SerializeAsString();
     }
@@ -91,11 +91,20 @@ string ProtobufSerializer::on_kline(const KlineData& kline)
 {
     try
     {
-        string json_str = get_kline_jsonstr(kline);
+        PKlineData proto_kline;
+        proto_kline.set_time(kline.index);
+        proto_kline.set_exchange(kline.exchange);
+        proto_kline.set_symbol(kline.symbol);
 
-        // COMM_LOG_INFO(topic + ": " + json_str);
+        set_decimal(proto_kline.mutable_px_open(), kline.px_open);
+        set_decimal(proto_kline.mutable_px_high(), kline.px_high);
+        set_decimal(proto_kline.mutable_px_low(), kline.px_low);
+        set_decimal(proto_kline.mutable_px_close(), kline.px_close);
+        set_decimal(proto_kline.mutable_volume(), kline.volume);
 
-        return json_str;
+        proto_kline.set_resolution(kline.resolution);
+
+        return proto_kline.SerializeAsString();
     }
     catch(const std::exception& e)
     {
@@ -108,9 +117,15 @@ string ProtobufSerializer::on_trade(const TradeData& trade)
 {
     try
     {
-        string json_str = get_trade_jsonstr(trade);
+        PTradeData proto_trade;
+        proto_trade.set_time(trade.time);
+        set_decimal(proto_trade.mutable_price(), trade.price);
+        set_decimal(proto_trade.mutable_volume(), trade.volume);
 
-        return json_str;
+        proto_trade.set_symbol(trade.symbol);
+        proto_trade.set_exchange(trade.exchange);
+
+        return proto_trade.SerializeAsString();
     }
     catch(const std::exception& e)
     {
@@ -221,17 +236,16 @@ void ProtobufSerializer::on_snap(const string& src)
 {
     try
     {
-        SDepthQuote depth_quote;
-        if (decode_depth(src, depth_quote))
+        PDepthQuote proto_quote;
+        if (proto_quote.ParseFromString(src))
         {
-            // if (depth_quote.symbol == "BTC_USDT")
-            // {
-            //     COMM_LOG_INFO(quote_str(depth_quote, 5));
-            // }                    
+            SDepthQuote depth_quote;
+
+
+
             p_depth_processor_->on_snap(depth_quote);
-            
         }
-        else
+       else
         {
             COMM_LOG_WARN("decode depth faild, ori_msg: " + src);
         }
@@ -247,9 +261,10 @@ void ProtobufSerializer::on_kline(const string& src)
 {
     try
     {
-        KlineData kline;
-        if (decode_kline(src, kline))
+        PKlineData proto_kline;
+        if (proto_kline.ParseFromString(src))
         {
+            KlineData kline;
             p_kline_processor_->on_kline(kline);
             // COMM_LOG_INFO(kline.get_json_str());
         }
@@ -269,9 +284,10 @@ void ProtobufSerializer::on_trade(const string& src)
 {
     try
     {
-        TradeData trade_data;
-        if (decode_trade(src, trade_data))
+        PTradeData proto_trade;
+        if (proto_trade.ParseFromString(src))
         {
+            TradeData trade_data;
             // COMM_LOG_INFO(trade_data.get_json_str());
             p_trade_processor_->on_trade(trade_data);
         }
@@ -286,28 +302,54 @@ void ProtobufSerializer::on_trade(const string& src)
     }
 }
 
-bool ProtobufSerializer::decode_depth(const string& src, SDepthQuote& depth_quote)
+void decode_depth_map(const PRepeatedDepth& src, map<SDecimal, SDepth>& dst)
 {
     try
     {
-        Document json_data;
-        json_data.Parse(src.c_str());
-        if (json_data.HasParseError()) 
+        for (auto iter: src)
         {
-            COMM_LOG_WARN("Document Parse " + src + " Failed");
-            return false;            
+            SDecimal price(iter.price().value(), iter.price().precise());
+
+            SDecimal volume(iter.volume().value(), iter.volume().precise());
+
+            const PDepthMap& volume_by_exchanges = iter.volume_by_exchanges();
+
+            SDepth new_depth;
+            new_depth.volume = volume;
+
+            for (auto iter2:volume_by_exchanges)
+            {
+                SDecimal exchange_volume(iter2.second.value(), iter2.second.precise());
+                new_depth.volume_by_exchanges[iter2.first] = exchange_volume;
+            }
+
+            dst[price] = new_depth;
         }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}
 
-        string symbol = json_data["Symbol"].GetString();
-        string exchange = json_data["Exchange"].GetString();
-        string type = json_data["Type"].GetString();
-        bool is_snap = type=="snap" ? true:false;
+bool ProtobufSerializer::decode_depth(PDepthQuote& src, SDepthQuote& depth_quote)
+{
+    try
+    {
+        depth_quote.exchange = src.exchange();
+        depth_quote.symbol = src.symbol();
+        depth_quote.sequence_no = src.sequence_no();
+        depth_quote.origin_time = src.origin_time();
+        depth_quote.server_time = src.server_time();
+        depth_quote.price_precise = src.price_precise();
+        depth_quote.amount_precise = src.amount_precise();
+        depth_quote.is_snap = src.is_snap();
 
-        depth_quote.symbol = symbol;
-        depth_quote.exchange = exchange;
-        depth_quote.is_snap = is_snap;
+        decode_depth_map(src.asks(), depth_quote.asks);
+        decode_depth_map(src.bids(), depth_quote.bids);
 
-        return _json_to_quote(json_data, depth_quote, is_snap);
+        return true;
     }
     catch(const std::exception& e)
     {
@@ -316,19 +358,23 @@ bool ProtobufSerializer::decode_depth(const string& src, SDepthQuote& depth_quot
     return false;
 }
 
-bool ProtobufSerializer::decode_kline(const string& src, KlineData& kline)
+bool ProtobufSerializer::decode_kline(PKlineData& src, KlineData& kline)
 {
     try
     {
-        Document json_data;
-        json_data.Parse(src.c_str());
-        if (json_data.HasParseError()) 
-        {
-            COMM_LOG_WARN("Document Parse " + src + " Failed");
-            return false;            
-        }
+        kline.index = src.time();
+        kline.exchange = src.exchange();
+        kline.symbol = src.symbol();
+        
+        kline.resolution = src.resolution();
 
-        return _json_to_kline(json_data, kline);
+        kline.volume.parse_by_raw(src.volume().value(), src.volume().precise());
+        kline.px_open.parse_by_raw(src.px_open().value(), src.px_open().precise());
+        kline.px_high.parse_by_raw(src.px_high().value(), src.px_high().precise());
+        kline.px_low.parse_by_raw(src.px_low().value(), src.px_low().precise());
+        kline.px_close.parse_by_raw(src.px_close().value(), src.px_close().precise());        
+
+        return true;
     }
     catch(const std::exception& e)
     {
@@ -337,26 +383,18 @@ bool ProtobufSerializer::decode_kline(const string& src, KlineData& kline)
     return false;
 }
 
-bool ProtobufSerializer::decode_trade(const string& src,TradeData& trade_data)
+bool ProtobufSerializer::decode_trade(PTradeData& src,TradeData& trade_data)
 {
     try
     {
-        Document json_data;
-        json_data.Parse(src.c_str());
-        if (json_data.HasParseError()) 
-        {
-            COMM_LOG_WARN("Document Parse " + src + " Failed");
-            return false;            
-        }
+        trade_data.time = src.time();
+        trade_data.symbol = src.symbol();
+        trade_data.exchange = src.exchange();
 
-        trade_data.time = parse_nano(json_data["Time"].GetString());  // 2020-12-27 12:48:41.578000
-        trade_data.price.from(json_data["LastPx"].GetDouble());
-        trade_data.volume.from(json_data["Qty"].GetDouble());
+        trade_data.price.parse_by_raw(src.price().value(), src.price().precise());
+        trade_data.volume.parse_by_raw(src.volume().value(), src.volume().precise());
 
-        trade_data.exchange = json_data["Exchange"].GetString();
-        trade_data.symbol = json_data["Symbol"].GetString();
-
-        return is_trade_valid(trade_data);
+        return true;
     }
     catch(const std::exception& e)
     {

@@ -48,12 +48,19 @@ struct SDecimal {
 
     }    
 
+
+
     SDecimal& operator= (const SDecimal& src)
     {
         data_ = src.data_;
         return *this;
     }   
 
+    SDecimal (uint64 base, uint64 prec) {
+        data_.real_.value_ = base;
+        data_.real_.prec_ = prec;
+    }
+    
     SDecimal(const string& v) {
         from(v);
     }
@@ -66,8 +73,8 @@ struct SDecimal {
         from(s, precise, ceiling);
     }
 
-    uint64 value() {return data_.real_.value_;}
-    uint64 prec() {return data_.real_.prec_;}
+    uint64 value() const {return data_.real_.value_;}
+    uint64 prec() const {return data_.real_.prec_;}
 
     static SDecimal parse(const string& s, int precise = -1, bool ceiling = false) {
         SDecimal ret;

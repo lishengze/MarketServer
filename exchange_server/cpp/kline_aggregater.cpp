@@ -1,4 +1,4 @@
-#include "kline_processor.h"
+#include "kline_aggregater.h"
 #include "Log/log.h"
 #include "util/tool.h"
 
@@ -33,14 +33,14 @@ KlineAggregater::~KlineAggregater()
 
 }
 
-void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map)
+void KlineAggregater::set_meta(const std::map<TSymbol, std::set<TExchange>>& meta_map)
 {
     try
     {
         std::unique_lock<std::mutex> inner_lock{ mutex_cache_ };
 
-        std::unordered_map<TSymbol, std::set<TExchange>> added_meta;
-        std::unordered_map<TSymbol, std::set<TExchange>> removed_meta;
+        std::map<TSymbol, std::set<TExchange>> added_meta;
+        std::map<TSymbol, std::set<TExchange>> removed_meta;
         get_delata_meta(meta_map, added_meta, removed_meta);
 
         update_cache_meta(added_meta, removed_meta);
@@ -51,8 +51,8 @@ void KlineAggregater::set_meta(const std::unordered_map<TSymbol, std::set<TExcha
     }
 }
 
-void KlineAggregater::update_cache_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                                        const std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
+void KlineAggregater::update_cache_meta(const std::map<TSymbol, std::set<TExchange>>& added_meta,
+                                        const std::map<TSymbol, std::set<TExchange>>& removed_meta)
 {
     try
     {
@@ -92,9 +92,9 @@ void KlineAggregater::update_cache_meta(const std::unordered_map<TSymbol, std::s
     }    
 }                        
 
-void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
-                                        std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                                        std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta)
+void KlineAggregater::get_delata_meta(const std::map<TSymbol, std::set<TExchange>>& new_meta_map,
+                                        std::map<TSymbol, std::set<TExchange>>& added_meta,
+                                        std::map<TSymbol, std::set<TExchange>>& removed_meta)
 {
     try
     {
@@ -124,7 +124,7 @@ void KlineAggregater::get_delata_meta(const std::unordered_map<TSymbol, std::set
         for (auto iter:caches_)
         {
             const string& symbol = iter.first;
-            const unordered_map<TExchange, CalcCache*>& exchange_map = iter.second;    
+            const map<TExchange, CalcCache*>& exchange_map = iter.second;    
             auto meta_iter = new_meta_map.find(symbol);       
 
             if (meta_iter == new_meta_map.end())
@@ -180,7 +180,7 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
             return false;
         }
             
-        unordered_map<TExchange, CalcCache*>& symbol_cache = iter_symbol_cache->second;
+        map<TExchange, CalcCache*>& symbol_cache = iter_symbol_cache->second;
         auto iter_exchange_cache = symbol_cache.find(input.exchange);
         if( iter_exchange_cache == symbol_cache.end() )
         {
@@ -249,55 +249,22 @@ bool KlineAggregater::add_kline(const KlineData& input, KlineData& output)
     return false;
 }
 
-KlineProcessor::~KlineProcessor()
-{
-
-}
-
-void KlineProcessor::set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>&meta_map)
+void KlineAggregater::on_kline( KlineData& input)
 {
     try
     {
-        min1_kline_aggregator_.set_meta(meta_map);
+        // if(input.symbol == "BTC_USDT") LOG_INFO("Input " + input.str());
+        // LOG->record_input_info(input.meta_str(), input);
 
-        // min60_kline_aggregator_.set_meta(symbol, exchanges);
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }    
-}
-
-void KlineProcessor::process(KlineData& src)
-{
-    try
-    {
         KlineData output;
-        if (min1_kline_aggregator_.add_kline(src, output))
+
+        if (add_kline(input, output))
         {
-            // LOG_INFO(output.get_json_str());
+            // if(input.symbol == "BTC_USDT") LOG_INFO("Output " + output.str());
+            // LOG->record_input_info(output.meta_str(), output);
 
-            engine_->on_kline(output);
+            p_comm_->publish_kline(output);
         }
-        else
-        {
-
-        }
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-}
-
-void KlineProcessor::set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config)
-{
-    try
-    {
-       min1_kline_aggregator_.set_config(symbol_config);
-
-    //    min60_kline_aggregator_.set_config(symbol_config);
     }
     catch(const std::exception& e)
     {

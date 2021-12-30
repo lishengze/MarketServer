@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../global_declare.h"
+#include "base/cpp/basic.h"
+#include "base/cpp/base_data_stuct.h"
 
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/log/base_log.h"
 
-class SDepthQuote;
-class Trade;
-class KlineData;
+
 class QuoteLog: public BaseLog 
 {
 public:
@@ -22,15 +21,15 @@ public:
 
     void record_input_info(const string& info, const SDepthQuote& quote);
 
-    void record_input_info(const string& info, const Trade& trade);
+    void record_input_info(const string& info, const TradeData& trade);
 
-    void record_input_info(const string& info, const vector<KlineData>& klines);
+    void record_input_info(const string& info, const KlineData& kline);
 
     void record_output_info(const string& info, const SDepthQuote& quote);
 
-    void record_output_info(const string& info, const Trade& trade);
+    void record_output_info(const string& info, const TradeData& trade);
 
-    void record_output_info(const string& info, const vector<KlineData>& klines);
+    void record_output_info(const string& info, const KlineData& kline);
 };
 
 #define LOG utrade::pandora::ThreadSafeSingleton<QuoteLog>::DoubleCheckInstance()

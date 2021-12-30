@@ -1,16 +1,20 @@
 #pragma once
 
-#include "global_declare.h"
+#include "base/cpp/basic.h"
+#include "base/cpp/base_data_stuct.h"
+
+#include "comm_interface_define.h"
+#include "comm.h"
 
 #include "struct_define.h"
 
-#include "interface_define.h"
-
 #define INVALID_INDEX ((type_tick)(-1))
 
-class KlineAggregater
+class KlineAggregater:public bcts::comm::QuoteSourceCallbackInterface
 {
 public:
+    void set_comm(bcts::comm::Comm*  comm){ p_comm_ = comm;}
+
     struct CalcCache{
         list<KlineData> klines;
 
@@ -44,17 +48,18 @@ public:
         }
     };
 
+
     KlineAggregater();
-    ~KlineAggregater();
+    virtual ~KlineAggregater();
 
-    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
+    void set_meta(const std::map<TSymbol, std::set<TExchange>>& meta_map);
 
-    void update_cache_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                           const std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
+    void update_cache_meta(const std::map<TSymbol, std::set<TExchange>>& added_meta,
+                           const std::map<TSymbol, std::set<TExchange>>& removed_meta);
 
-    void get_delata_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& new_meta_map,
-                        std::unordered_map<TSymbol, std::set<TExchange>>& added_meta,
-                        std::unordered_map<TSymbol, std::set<TExchange>>& removed_meta);
+    void get_delata_meta(const std::map<TSymbol, std::set<TExchange>>& new_meta_map,
+                        std::map<TSymbol, std::set<TExchange>>& added_meta,
+                        std::map<TSymbol, std::set<TExchange>>& removed_meta);
 
 
     bool is_exchange_added_to_aggregate(const KlineData& exchange, const KlineData& input);
@@ -66,34 +71,11 @@ public:
         symbol_config_ = symbol_config;
     }
 
+    virtual void on_kline( KlineData& kline);
 private:
+    bcts::comm::Comm*                                               p_comm_{nullptr};
+
     mutable std::mutex                                              mutex_cache_;
-    unordered_map<TSymbol, unordered_map<TExchange, CalcCache*>>    caches_;
-    unordered_map<TSymbol, SMixerConfig>                            symbol_config_;
-};
-
-
-
-class KlineProcessor
-{
-public:
-
-    KlineProcessor(QuoteSourceCallbackInterface * engine):engine_{engine} {}
-
-    ~KlineProcessor();
-
-    void process(KlineData& src);
-
-    void set_meta(const std::unordered_map<TSymbol, std::set<TExchange>>& meta_map);
-
-    void config_process(KlineData& src);
-
-    void set_config(unordered_map<TSymbol, SMixerConfig>& symbol_config);
-
-private:
-    KlineAggregater                     min1_kline_aggregator_;
-
-    KlineAggregater                     min60_kline_aggregator_;
-
-    QuoteSourceCallbackInterface *      engine_{nullptr};
+    map<TSymbol, map<TExchange, CalcCache*>>                        caches_;
+    unordered_map<TSymbol, SMixerConfig>                                      symbol_config_;
 };

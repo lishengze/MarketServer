@@ -43,7 +43,7 @@ void QuoteLog::record_input_info(const string& info, const SDepthQuote& quote)
     }    
 }
 
-void QuoteLog::record_input_info(const string& info, const Trade& trade)
+void QuoteLog::record_input_info(const string& info, const TradeData& trade)
 {
     try
     {
@@ -55,7 +55,7 @@ void QuoteLog::record_input_info(const string& info, const Trade& trade)
     }    
 }
 
-void QuoteLog::record_input_info(const string& info, const vector<KlineData>& klines)
+void QuoteLog::record_input_info(const string& info, const KlineData& kline)
 {
     try
     {
@@ -63,11 +63,11 @@ void QuoteLog::record_input_info(const string& info, const vector<KlineData>& kl
 
         if (input_statistic_map_.find(info) == input_statistic_map_.end())
         {
-            input_statistic_map_[info] = klines.size();
+            input_statistic_map_[info] = 1;
         }
         else
         {
-            input_statistic_map_[info] += klines.size();
+            input_statistic_map_[info] += 1;
         }
     }
     catch(const std::exception& e)
@@ -88,7 +88,7 @@ void QuoteLog::record_output_info(const string& info, const SDepthQuote& quote)
     }    
 }
 
-void QuoteLog::record_output_info(const string& info, const Trade& trade)
+void QuoteLog::record_output_info(const string& info, const TradeData& trade)
 {
     try
     {
@@ -100,7 +100,7 @@ void QuoteLog::record_output_info(const string& info, const Trade& trade)
     }    
 }
 
-void QuoteLog::record_output_info(const string& info, const vector<KlineData>& klines)
+void QuoteLog::record_output_info(const string& info, const KlineData& kline)
 {
     try
     {
@@ -108,11 +108,11 @@ void QuoteLog::record_output_info(const string& info, const vector<KlineData>& k
 
         if (output_statistic_map_.find(info) == output_statistic_map_.end())
         {
-            output_statistic_map_[info] = klines.size();
+            output_statistic_map_[info] = 1;
         }
         else
         {
-            output_statistic_map_[info] += klines.size();
+            output_statistic_map_[info] += 1;
         }
     }
     catch(const std::exception& e)

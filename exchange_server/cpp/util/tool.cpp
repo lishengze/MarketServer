@@ -1,52 +1,53 @@
 #include "tool.h"
 #include "../Log/log.h"
+#include "../type_define.h"
 #include "pandora/util/float_util.h"
 #include "pandora/util/time_util.h"
 
-bool filter_zero_volume(SDepthQuote& quote)
-{
-    try
-    {
-        bool result = false;
-        std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
-        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }
-        }
+// bool filter_zero_volume(SDepthQuote& quote)
+// {
+//     try
+//     {
+//         bool result = false;
+//         std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
+//         for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+//         {
+//             if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+//             {
+//                 delete_iter_list.push_back(iter);
+//             }
+//         }
 
-        for (auto& iter:delete_iter_list)
-        {
-            quote.asks.erase(iter);
-        }
+//         for (auto& iter:delete_iter_list)
+//         {
+//             quote.asks.erase(iter);
+//         }
 
-        delete_iter_list.clear();
-        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }    
-        }
-        for (auto& iter:delete_iter_list)
-        {
-            quote.bids.erase(iter);
-        }
+//         delete_iter_list.clear();
+//         for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+//         {
+//             if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+//             {
+//                 delete_iter_list.push_back(iter);
+//             }    
+//         }
+//         for (auto& iter:delete_iter_list)
+//         {
+//             quote.bids.erase(iter);
+//         }
 
-        if (quote.asks.size()==0 && quote.bids.size()==0)
-        {
-            result = true;
-        }
-        return result;
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }    
-    return false;
-}
+//         if (quote.asks.size()==0 && quote.bids.size()==0)
+//         {
+//             result = true;
+//         }
+//         return result;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << e.what() << '\n';
+//     }    
+//     return false;
+// }
 
 void print_quote(const SDepthQuote& quote)
 {
@@ -212,10 +213,6 @@ string quote_str(const SDepthQuote& quote, int count)
     return "";
 }
 
-string get_sec_time_str(unsigned long time)
-{
-    return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
-}
 struct SInnerDepth {
     SDecimal total_volume; // 总挂单量，用于下发行情
     map<TExchange, SDecimal> exchanges;
@@ -290,44 +287,44 @@ struct SInnerQuote {
     }
 };
 
-void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
-    dst.exchange = src.exchange();
-    dst.symbol = src.symbol();
-    dst.precise = src.price_precise();
-    dst.vprecise = src.volume_precise();
-    dst.time_origin = src.time();
-    dst.time_arrive_at_streamengine = src.time_arrive();
-    dst.time_produced_by_streamengine = src.time_produced_by_streamengine();
-    dst.time_arrive = get_miliseconds();
+// void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
+//     dst.exchange = src.exchange();
+//     dst.symbol = src.symbol();
+//     dst.precise = src.price_precise();
+//     dst.vprecise = src.volume_precise();
+//     dst.time_origin = src.time();
+//     dst.time_arrive_at_streamengine = src.time_arrive();
+//     dst.time_produced_by_streamengine = src.time_produced_by_streamengine();
+//     dst.time_arrive = get_miliseconds();
     
-    //vassign(dst.seq_no, src.msg_seq());
-    // 卖盘
-    for( int i = 0 ; i < src.asks_size() ; ++i ) {
-        const SEDepth& src_depth = src.asks(i);
-        SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
-        SInnerDepth depth;
-        for( auto v : src_depth.data() ) {
-            depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
-        }
-        depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
-        dst.asks[price] = depth;
+//     //vassign(dst.seq_no, src.msg_seq());
+//     // 卖盘
+//     for( int i = 0 ; i < src.asks_size() ; ++i ) {
+//         const SEDepth& src_depth = src.asks(i);
+//         SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
+//         SInnerDepth depth;
+//         for( auto v : src_depth.data() ) {
+//             depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
+//         }
+//         depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
+//         dst.asks[price] = depth;
 
-        // dst.asks[price].set_total_volume();
-    }
-    // 买盘
-    for( int i = 0 ; i < src.bids_size() ; ++i ) {
-        const SEDepth& src_depth = src.bids(i);
-        SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
-        SInnerDepth depth;
-        for( auto v : src_depth.data() ) {
-            depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
-        }
-        depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
-        dst.bids[price] = depth;
+//         // dst.asks[price].set_total_volume();
+//     }
+//     // 买盘
+//     for( int i = 0 ; i < src.bids_size() ; ++i ) {
+//         const SEDepth& src_depth = src.bids(i);
+//         SDecimal price = SDecimal::parse_by_raw(src_depth.price().base(), src_depth.price().prec());
+//         SInnerDepth depth;
+//         for( auto v : src_depth.data() ) {
+//             depth.exchanges[v.first] = SDecimal::parse_by_raw(v.second.base(), v.second.prec());
+//         }
+//         depth.total_volume = SDecimal::parse_by_raw(src_depth.volume().base(), src_depth.volume().prec());
+//         dst.bids[price] = depth;
 
-        // dst.asks[price].set_total_volume();
-    }
-}
+//         // dst.asks[price].set_total_volume();
+//     }
+// }
 
 void print_inner_quote(const SInnerQuote& quote)
 {
@@ -411,86 +408,86 @@ string inner_quote_str(const SInnerQuote& quote)
     return "";
 }
 
-void print_sedata(const SEData& sedata)
-{
-    try
-    {
-        SInnerQuote inner_quote;
+// void print_sedata(const SEData& sedata)
+// {
+//     try
+//     {
+//         SInnerQuote inner_quote;
 
-        quotedata_to_innerquote(sedata, inner_quote);
+//         quotedata_to_innerquote(sedata, inner_quote);
 
-        print_inner_quote(inner_quote);
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }
-}
+//         print_inner_quote(inner_quote);
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }
+// }
 
-string sedata_str(const SEData& sedata)
-{
-    try
-    {
-        SInnerQuote inner_quote;
+// string sedata_str(const SEData& sedata)
+// {
+//     try
+//     {
+//         SInnerQuote inner_quote;
 
-        quotedata_to_innerquote(sedata, inner_quote);
+//         quotedata_to_innerquote(sedata, inner_quote);
 
         
 
-        return inner_quote_str(inner_quote);
-    }
-    catch(const std::exception& e)
-    {
-       LOG_ERROR(e.what());
-    }    
-}
+//         return inner_quote_str(inner_quote);
+//     }
+//     catch(const std::exception& e)
+//     {
+//        LOG_ERROR(e.what());
+//     }    
+// }
 
-bool filter_zero_volume(SEData& sedata)
-{
-    try
-    {
-        SInnerQuote quote;
-        quotedata_to_innerquote(sedata, quote);
+// bool filter_zero_volume(SEData& sedata)
+// {
+//     try
+//     {
+//         SInnerQuote quote;
+//         quotedata_to_innerquote(sedata, quote);
 
-        bool result = false;
-        std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
-        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }
-        }
+//         bool result = false;
+//         std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
+//         for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+//         {
+//             if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+//             {
+//                 delete_iter_list.push_back(iter);
+//             }
+//         }
 
-        for (auto& iter:delete_iter_list)
-        {
-            quote.asks.erase(iter);
-        }
+//         for (auto& iter:delete_iter_list)
+//         {
+//             quote.asks.erase(iter);
+//         }
 
-        delete_iter_list.clear();
-        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }    
-        }
-        for (auto& iter:delete_iter_list)
-        {
-            quote.bids.erase(iter);
-        }
+//         delete_iter_list.clear();
+//         for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+//         {
+//             if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+//             {
+//                 delete_iter_list.push_back(iter);
+//             }    
+//         }
+//         for (auto& iter:delete_iter_list)
+//         {
+//             quote.bids.erase(iter);
+//         }
 
-        if (quote.asks.size()==0 && quote.bids.size()==0)
-        {
-            result = true;
-        }
-        return result;
-    }
-    catch(const std::exception& e)
-    {
-        LOG_ERROR(e.what());
-    }    
-}
+//         if (quote.asks.size()==0 && quote.bids.size()==0)
+//         {
+//             result = true;
+//         }
+//         return result;
+//     }
+//     catch(const std::exception& e)
+//     {
+//         LOG_ERROR(e.what());
+//     }    
+// }
 
 string klines_str(vector<KlineData>& kline_list)
 {

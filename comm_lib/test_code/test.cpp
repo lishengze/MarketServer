@@ -58,7 +58,14 @@ void test_code()
     }
 }
 
+void test_time()
+{
+    cout << utrade::pandora::NanoTime() << endl;
+}
+
 void TestMain()
 {
-    test_code();
+    // test_code();
+
+    test_time();
 }

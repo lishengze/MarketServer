@@ -12,6 +12,16 @@
 #include "kline_processor.h"
 #include "trade_processor.h"
 
+#include "market_data.pb.h"
+
+using PDecimal = Proto3::MarketData::Decimal;
+using PDepth = Proto3::MarketData::Depth;
+using PDepthQuote = Proto3::MarketData::DepthQuote;
+using PKlineData = Proto3::MarketData::KlineData;
+using PTradeData = Proto3::MarketData::TradeData;
+using PRepeatedDepth = google::protobuf::RepeatedPtrField<PDepth>;
+using PDepthMap = google::protobuf::Map<std::string, Proto3::MarketData::Decimal>;
+
 COMM_NAMESPACE_START
 
 class ProtobufSerializer:public Serializer
@@ -47,9 +57,9 @@ public:
     virtual string on_kline(const KlineData& kline);
     virtual string on_trade(const TradeData& trade);
 
-    bool decode_trade(const string& src, TradeData& trade_data);
-    bool decode_depth(const string& src, SDepthQuote& depth_quote);
-    bool decode_kline(const string& src, KlineData& klines);
+    bool decode_depth(PDepthQuote& src, SDepthQuote& depth_quote);
+    bool decode_kline(PKlineData& src, KlineData& klines);    
+    bool decode_trade(PTradeData& src, TradeData& trade_data);
 
 public:
     void _json_to_quote_depth(const Value& data, map<SDecimal, SDepth>& depths);

@@ -8,8 +8,7 @@
 #include "util/tool.h"
 
 /////////////////////////////////////////////////////////////////////
-DepthAggregater::DepthAggregater(QuoteSourceCallbackInterface* engine)
-: engine_{engine}, thread_run_(true)
+DepthAggregater::DepthAggregater():thread_run_(true)
 {
 
 }
@@ -41,21 +40,15 @@ void DepthAggregater::_thread_loop()
     {
         vector<pair<TSymbol, SMixerConfig>> calculate_symbols;
         {
-            type_tick now = get_miliseconds();
             std::unique_lock<std::mutex> l{ mutex_config_ };
             for( const auto& cfg : configs_ )
-            {      
-                const TSymbol& symbol = cfg.first;    
-                float frequency = cfg.second.frequency;
-                if( frequency == 0 )
-                    frequency = 1;
-                auto iter = last_clocks_.find(symbol);                
-                if( iter != last_clocks_.end() && (now - iter->second) < (1000/frequency) )
+            {   
+                if (is_data_too_fast_or_init(cfg.first, cfg.second.frequency)) 
                 {
+                    // LOG_INFO(cfg.first + " too fast, " + std::to_string(cfg.second.frequency));
                     continue;
                 }
-                calculate_symbols.push_back(make_pair(symbol, cfg.second));
-                last_clocks_[symbol] = now;
+                calculate_symbols.push_back(make_pair(cfg.first, cfg.second));                
             }
         }
         
@@ -68,6 +61,35 @@ void DepthAggregater::_thread_loop()
         // 休眠
         std::this_thread::sleep_for(std::chrono::milliseconds(CONFIG->depth_compute_millsecs));
     }
+}
+
+bool DepthAggregater::is_data_too_fast_or_init(TSymbol symbol, int standard_fre)
+{
+    try
+    {
+        type_tick now = get_miliseconds();
+        if( standard_fre == 0 ) standard_fre = 1;
+        auto iter = last_clocks_.find(symbol);         
+
+        if (iter == last_clocks_.end())
+        {
+            last_clocks_[symbol] = now;
+            return true;
+        }   
+
+        if( (now - iter->second) < (1000/standard_fre) )
+        {
+            return true;
+        }
+
+        last_clocks_[symbol] = now;
+        return false;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return true;
 }
 
 void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, const TExchange& exchange, const SMixerConfig& config, bool is_ask)
@@ -148,16 +170,30 @@ void DepthAggregater::_calc_symbol(const TSymbol& symbol, const SMixerConfig& co
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
-        snap.exchange = MIX_EXCHANGE_NAME;        
-        engine_->on_snap(snap);
+        snap.exchange = MIX_EXCHANGE_NAME;      
+
+        // LOG->record_output_info(snap.meta_str(),snap);
+        // if (snap.symbol == "BTC_USDT") LOG_INFO("Output " + snap.str());
+        p_comm_->publish_depth(snap);
     }
 }
 
-void DepthAggregater::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
+void DepthAggregater::on_snap( SDepthQuote& quote)
 {
-    std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    try
+    {
+        std::unique_lock<std::mutex> l{ mutex_quotes_ };
 
-    quotes_[symbol][exchange] = quote;
+        // if (quote.symbol == "BTC_USDT") LOG_INFO("Input " + quote.str());
+
+        // LOG->record_input_info(quote.meta_str(),quote);
+
+        quotes_[quote.symbol][quote.exchange] = quote;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
 }
 
 void DepthAggregater::set_config(unordered_map<TSymbol, SMixerConfig> & new_config)

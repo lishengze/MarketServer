@@ -1,5 +1,5 @@
 #include "Log/log.h"
-#include "global_declare.h"
+#include "base/cpp/base_data_stuct.h"
 #include "pandora/util/path_util.h"
 #include "test.h"
 
