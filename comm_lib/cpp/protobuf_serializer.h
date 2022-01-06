@@ -61,13 +61,6 @@ public:
     bool decode_kline(PKlineData& src, KlineData& klines);    
     bool decode_trade(PTradeData& src, TradeData& trade_data);
 
-public:
-    void _json_to_quote_depth(const Value& data, map<SDecimal, SDepth>& depths);
-
-    bool _json_to_quote(const Document& snap_json, SDepthQuote& quote, bool isSnap);
-
-    bool _json_to_kline(const Value& data, KlineData& kline);
-
 private:
     DepthProcessorPtr                         p_depth_processor_{nullptr};
     
