@@ -139,6 +139,7 @@ void StreamEngine::erase_dead_exchange_symbol_depth(const TExchange& exchange, c
     try
     {
         quote_mixer2_.erase_dead_exchange_symbol_depth(exchange, symbol);
+        quote_cacher_.erase_dead_exchange_symbol_depth(exchange, symbol);
     }
     catch(const std::exception& e)
     {

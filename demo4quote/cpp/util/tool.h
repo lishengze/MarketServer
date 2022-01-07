@@ -7,6 +7,10 @@ void print_quote(const SDepthQuote& quote);
 
 string quote_str(const SDepthQuote& quote, int count=0);
 
+bool check_abnormal_quote(SDepthQuote& quote);
+
+bool check_abnormal_quote(SEData& quote);
+
 bool filter_zero_volume(SDepthQuote& quote);
 
 bool filter_zero_volume(SEData& sedata);

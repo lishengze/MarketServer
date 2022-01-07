@@ -45,7 +45,7 @@ public:
 
     SInnerQuote& run(SInnerQuote& src, PipelineContent& ctx) {
 
-        if (filter_zero_volume(src))
+        if (check_abnormal_quote(src))
         {
             LOG_WARN("\nBefore "+ worker_name + " " + src.symbol + quote_str(src));
         }  
@@ -57,7 +57,7 @@ public:
             return tmp;
         }
 
-        if (filter_zero_volume(src))
+        if (check_abnormal_quote(src))
         {
             LOG_WARN("\nAfter "+ worker_name + " " + src.symbol + quote_str(src));
         }          

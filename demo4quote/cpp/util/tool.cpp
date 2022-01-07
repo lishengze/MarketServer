@@ -3,42 +3,62 @@
 #include "pandora/util/float_util.h"
 #include "pandora/util/time_util.h"
 
-bool filter_zero_volume(SDepthQuote& quote)
+bool check_abnormal_quote(SDepthQuote& quote)
 {
     try
     {
         bool result = false;
-        std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
-        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }
-        }
-
-        for (auto& iter:delete_iter_list)
-        {
-            quote.asks.erase(iter);
-        }
-
-        delete_iter_list.clear();
-        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }    
-        }
-        for (auto& iter:delete_iter_list)
-        {
-            quote.bids.erase(iter);
-        }
 
         if (quote.asks.size()==0 && quote.bids.size()==0)
         {
             result = true;
         }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+    return false;
+}
+
+
+bool filter_zero_volume(SDepthQuote& quote)
+{
+    try
+    {
+        bool result = false;
+        // std::list<map<SDecimal, SDepth>::iterator> delete_iter_list;
+        // for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }
+        // }
+
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.asks.erase(iter);
+        // }
+
+        // delete_iter_list.clear();
+        // for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }    
+        // }
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.bids.erase(iter);
+        // }
+
+        // if (quote.asks.size()==0 && quote.bids.size()==0)
+        // {
+        //     result = true;
+        // }
         return result;
     }
     catch(const std::exception& e)
@@ -453,32 +473,32 @@ bool filter_zero_volume(SEData& sedata)
         quotedata_to_innerquote(sedata, quote);
 
         bool result = false;
-        std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
-        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }
-        }
+        // std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
+        // for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }
+        // }
 
-        for (auto& iter:delete_iter_list)
-        {
-            quote.asks.erase(iter);
-        }
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.asks.erase(iter);
+        // }
 
-        delete_iter_list.clear();
-        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }    
-        }
-        for (auto& iter:delete_iter_list)
-        {
-            quote.bids.erase(iter);
-        }
+        // delete_iter_list.clear();
+        // for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }    
+        // }
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.bids.erase(iter);
+        // }
 
         if (quote.asks.size()==0 && quote.bids.size()==0)
         {
@@ -585,5 +605,28 @@ bool is_kline_valid(KlineData& kline)
         LOG_ERROR(e.what());
     }
     
+    return false;
+}
+
+bool check_abnormal_quote(SEData& sedata)
+{
+    try
+    {
+        SInnerQuote quote;
+        quotedata_to_innerquote(sedata, quote);
+
+        bool result = false;
+
+        if (quote.asks.size()==0 && quote.bids.size()==0)
+        {
+            result = true;
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }  
+
     return false;
 }

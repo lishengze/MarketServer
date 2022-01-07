@@ -19,6 +19,7 @@ void set_static_variable(const TExchange& exchange, const TSymbol& symbol, const
 
     }
 }
+
 bool QuoteCacher::get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
@@ -94,15 +95,43 @@ void QuoteCacher::clear_exchange(const TExchange& exchange)
     }
 }
 
+void QuoteCacher::erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol)
+{
+    try
+    {       
+
+        LOG_WARN("Cacher Erase Dead " + exchange + "." + symbol);
+
+        SDepthQuote empty;
+        empty.exchange = exchange;
+        empty.symbol = symbol;        
+        {
+            std::unique_lock<std::mutex> l{ mutex_quotes_ };
+
+            singles_[symbol][exchange] = empty;
+        }
+
+        for( const auto& v : callbacks_) 
+        {
+            std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, empty, publish_depths_, true);
+            v->publish_binary(exchange, symbol, pub_snap);
+        }            
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& ori_quote) 
 {
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
-    // if (filter_zero_volume(quote))
-    // {
-    //     LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
-    //             + ", bid.size: " + std::to_string(quote.bids.size())) ;       
-    //     return;      
-    // }
+    if (check_abnormal_quote(quote))
+    {
+        LOG_WARN( "Original Data " + exchange + "." + symbol + ", ask.size: " + std::to_string(quote.asks.size())
+                + ", bid.size: " + std::to_string(quote.bids.size())) ;       
+        // return;      
+    }
 
     // if (quote.symbol == "ETH_USDT")
     // {
@@ -118,12 +147,12 @@ void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 
     std::shared_ptr<MarketStreamDataWithDecimal> pub_snap = depth_to_pbquote2(exchange, symbol, quote, publish_depths_, true);
 
-    if (filter_zero_volume(*pub_snap.get()))
-    {
-        LOG_WARN( "After depth_to_pbquote2 " + exchange + "." + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
-                + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
-        return;       
-    }
+    // if (check_abnormal_quote(*pub_snap.get()))
+    // {
+    //     LOG_WARN( "After depth_to_pbquote2 " + exchange + "." + symbol + ", ask.size: " + std::to_string(pub_snap->asks().size())
+    //             + ", bid.size: " + std::to_string(pub_snap->bids().size()));      
+    //     return;       
+    // }
 
     for( const auto& v : callbacks_) 
     {
@@ -185,6 +214,7 @@ void QuoteMixer2::_thread_loop()
     LOG_INFO("\nQuoteMixer2::_thread_loop Start ");
     while( thread_run_ ) 
     {
+        // LOG_DEBUG("Compute Mix Depth");
         vector<pair<TSymbol, SMixerConfig>> calculate_symbols;
         {
             type_tick now = get_miliseconds();
@@ -195,16 +225,18 @@ void QuoteMixer2::_thread_loop()
                 float frequency = cfg.second.frequency;
                 if( frequency == 0 )
                     frequency = 1;
-                auto iter = last_clocks_.find(symbol);                
-                if( iter != last_clocks_.end() && (now - iter->second) < (1000/frequency) )
-                {
-                    continue;
-                }
+                // auto iter = last_clocks_.find(symbol);                
+                // if( iter != last_clocks_.end() && (now - iter->second) < (1000/frequency) )
+                // {
+                //     continue;
+                // }
                 calculate_symbols.push_back(make_pair(symbol, cfg.second));
                 last_clocks_[symbol] = now;
             }
         }
         
+        // LOG_DEBUG("calculate_symbols.size: " +std::to_string(calculate_symbols.size()));
+
         // 逐个计算
         for( const auto& symbol : calculate_symbols ) {
             sequences[symbol.first] ++;
@@ -212,7 +244,7 @@ void QuoteMixer2::_thread_loop()
         }
         
         // 休眠
-        std::this_thread::sleep_for(std::chrono::microseconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(3));
     }
 }
 
@@ -250,7 +282,7 @@ void normalize(map<SDecimal, SDepth>& src, const QuoteMixer2::SMixerConfig& conf
 void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config, type_seqno seqno)
 {
     // 行情
-    //cout << "calulate " << symbol << endl;
+    // cout << "calulate " << symbol << endl;
     SDepthQuote snap;
     snap.sequence_no = seqno;
     snap.origin_time = 0;
@@ -265,15 +297,7 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
             const TExchange& exchange = data.first;
             const SDepthQuote& ori_quote = data.second;
 
-
             SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
-
-            // if (filter_zero_volume(quote))
-            // {
-            //     LOG_WARN( "_calc_symbol " + exchange + "." + quote.symbol + ", ask.size: " + std::to_string(quote.asks.size())
-            //             + ", bid.size: " + std::to_string(quote.bids.size()));  
-            //     continue;
-            // }
 
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
@@ -284,6 +308,11 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
 
     normalize(snap.asks, config);
     normalize(snap.bids, config);
+
+    if (symbol == "BTC_USDT")
+    {
+        LOG_DEBUG(quote_str(snap));
+    }
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
@@ -344,7 +373,14 @@ void QuoteMixer2::erase_dead_exchange_symbol_depth(const TExchange& exchange, co
 {
     try
     {
-        /* code */
+        if (quotes_.find(symbol) != quotes_.end() && quotes_[symbol].find(exchange) != quotes_[symbol].end())
+        {
+            SDepthQuote& quote = quotes_[symbol][exchange];
+
+            quotes_[symbol].erase(exchange);
+
+            LOG_WARN("Mixer Erase Dead " + exchange + "." + symbol);
+        }
     }
     catch(const std::exception& e)
     {

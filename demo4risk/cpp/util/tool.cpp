@@ -145,37 +145,54 @@ bool filter_zero_volume(SInnerQuote& quote, std::mutex& mutex_)
     }
 }
 
+bool check_abnormal_quote(SInnerQuote& quote)
+{
+    try
+    {
+        bool result = false;
+        if (quote.asks.size()==0 || quote.bids.size()==0)
+        {
+            result = true;
+        }
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
 bool filter_zero_volume(SInnerQuote& quote)
 {
     try
     {
         bool result = false;
-        std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
-        for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }
-        }
+        // std::list<map<SDecimal, SInnerDepth>::iterator> delete_iter_list;
+        // for (auto iter = quote.asks.begin();iter != quote.asks.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }
+        // }
 
-        for (auto& iter:delete_iter_list)
-        {
-            quote.asks.erase(iter);
-        }
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.asks.erase(iter);
+        // }
 
-        delete_iter_list.clear();
-        for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
-        {
-            if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
-            {
-                delete_iter_list.push_back(iter);
-            }    
-        }
-        for (auto& iter:delete_iter_list)
-        {
-            quote.bids.erase(iter);
-        }
+        // delete_iter_list.clear();
+        // for (auto iter = quote.bids.begin();iter != quote.bids.end(); ++iter)
+        // {
+        //     if (utrade::pandora::equal(iter->second.total_volume.get_value(), 0))
+        //     {
+        //         delete_iter_list.push_back(iter);
+        //     }    
+        // }
+        // for (auto& iter:delete_iter_list)
+        // {
+        //     quote.bids.erase(iter);
+        // }
 
         if (quote.asks.size()==0 || quote.bids.size()==0)
         {

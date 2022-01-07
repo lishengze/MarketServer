@@ -39,7 +39,7 @@ void RedisSnapRequester::start()
 
 void RedisSnapRequester::async_request_symbol(const TExchange& exchange, const TSymbol& symbol) 
 {    
-    LOG_INFO("RedisSnapRequester: async_request_symbol " + exchange + "." + symbol);
+    // LOG_INFO("RedisSnapRequester: async_request_symbol " + exchange + "." + symbol);
     
     string combinedSymbol = make_symbolkey(exchange, symbol);
 
@@ -62,7 +62,7 @@ void RedisSnapRequester::_add_event(const TExchange& exchange, const TSymbol& sy
     evt.symbol = symbol;
     evt.event_time = delay_seconds * 1000 + get_miliseconds();
 
-    LOG_INFO("RedisSnapRequester: _add_event " + exchange + "." + symbol);
+    // LOG_INFO("RedisSnapRequester: _add_event " + exchange + "." + symbol);
 
     events_.enqueue(evt);
 }
@@ -71,7 +71,7 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
 {    
     // 请求redis key
     string depth_key = make_redis_depth_key(exchange, symbol);
-    LOG_INFO("RedisSnapRequester: get snap " + depth_key);
+    // LOG_INFO("RedisSnapRequester: get snap " + depth_key);
     string depthData = redis_sync_api_->SyncGet(depth_key);
 
     // 
@@ -95,7 +95,7 @@ void RedisSnapRequester::_thread_loop()
     {
         EventData evt;
         while( events_.try_dequeue(evt) ) {
-            LOG_INFO("RedisSnapRequester: get event " + evt.exchange + "." + evt.symbol);
+            // LOG_INFO("RedisSnapRequester: get event " + evt.exchange + "." + evt.symbol);
             
 
             while( true ) {                

@@ -211,6 +211,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     string channel_type;
     SExchangeConfig config;
 
+    // LOG_DEBUG(channel);
+
     // LOG_TRACE(channel);
     LOG->record_input_info(channel);
 
@@ -261,6 +263,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
     
     if( channel_type == SNAP_HEAD )
     {
+        set_exchange_symbol_depth_alive_map(exchange, symbol);
+
         // 设置默认不重试
         retry = false;
 
@@ -317,6 +321,7 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         quote.exchange = exchange;
         quote.symbol = symbol;
 
+        set_exchange_symbol_depth_alive_map(exchange, symbol);
 
 
         if( !redisquote_to_quote(body, quote, config, false) ) 
@@ -542,6 +547,7 @@ void RedisQuote::_looping()
     last_statistic_time_ = get_miliseconds();
     last_nodata_time_ = get_miliseconds();
     
+    LOG_INFO("-------------------------- Start Looping---------------------------\n");
 
     while(true) 
     {
@@ -587,7 +593,10 @@ void RedisQuote::set_exchange_symbol_depth_alive_map(const TExchange& exchange, 
     {
         std::lock_guard<std::mutex> lk(mutex_check_);
 
+        
         exchange_symbol_depth_alive_map_[exchange][symbol] = 1;
+
+        // LOG_DEBUG("set " + exchange + "." + symbol + ": " +std::to_string(1));
         /* code */
     }
     catch(const std::exception& e)
@@ -602,14 +611,18 @@ void RedisQuote::check_exchange_symbol_depth_alive()
     {
         std::lock_guard<std::mutex> lk(mutex_check_);
 
-        for (auto iter1:exchange_symbol_depth_alive_map_)
+        for (auto& iter1:exchange_symbol_depth_alive_map_)
         {
-            for (auto iter2:iter1.second)
+            for (auto& iter2:iter1.second)
             {
+                const TExchange& exchange = iter1.first;
+                const TSymbol& symbol = iter2.first;
+
+                LOG_DEBUG(exchange + "." + symbol + ": " +std::to_string(iter2.second));
+
                 if (iter2.second == 0)
                 {
-                    const TExchange& exchange = iter1.first;
-                    const TSymbol& symbol = iter2.first;
+ 
                     LOG_WARN(exchange + "." + symbol + " is dead");
 
                     erase_dead_exchange_symbol_depth(exchange, symbol);
@@ -618,7 +631,11 @@ void RedisQuote::check_exchange_symbol_depth_alive()
                 }
                 else if (iter2.second == 1)
                 {
+
+                    
                     iter2.second = 0;
+
+                    // LOG_DEBUG("reset " + exchange + "." + symbol + ": " +std::to_string(iter2.second));
                 }
             }
         }
@@ -697,7 +714,7 @@ void RedisQuote::_loopng_check_heartbeat()
     last_time_ = get_miliseconds();
     last_redis_time_ = get_miliseconds();
 
-    LOG_WARN("reconnect redis ok.");
+    LOG_WARN("reconnect redis over.");
 }
 
 void RedisQuote::_looping_check_nodata()
