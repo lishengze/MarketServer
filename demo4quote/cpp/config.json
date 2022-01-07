@@ -23,5 +23,6 @@
         "port": 6379,
         "password": "tradingtest",
         "snap_interval": 10
-    }
+    },
+    "check_secs": 5
 }

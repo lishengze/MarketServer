@@ -46,6 +46,8 @@ public:
 
     void set_config(const TSymbol& symbol, const SMixerConfig& config);
 
+    void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol);
+
     //void register_callback(IMixerQuotePusher* callback) { callbacks_.insert(callback); }
 
     //bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps);
@@ -120,6 +122,9 @@ public:
     bool get_latetrades(vector<std::shared_ptr<TradeWithDecimal>>& trades);
 
     bool get_lastsnaps(vector<std::shared_ptr<MarketStreamDataWithDecimal>>& snaps, const TExchange* fix_exchange = NULL);
+
+    void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol);
+
 private:
     uint32 publish_depths_ = 1000; // 仅向下游发布有限的档位
     

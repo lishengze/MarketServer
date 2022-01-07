@@ -212,4 +212,6 @@ public:
 
     // 交易所异常无数据
     virtual void on_nodata_exchange(const TExchange& exchange){};
+
+    virtual void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol) { }
 };

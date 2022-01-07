@@ -340,3 +340,14 @@ void QuoteMixer2::set_config(const TSymbol& symbol, const SMixerConfig& config)
     configs_[symbol] = config;
 }
 
+void QuoteMixer2::erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+       LOG_ERROR(e.what());
+    }    
+}

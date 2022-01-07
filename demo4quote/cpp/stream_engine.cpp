@@ -134,6 +134,18 @@ void StreamEngine::on_nodata_exchange(const TExchange& exchange)
     quote_cacher_.clear_exchange(exchange);
 }
 
+void StreamEngine::erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol)
+{
+    try
+    {
+        quote_mixer2_.erase_dead_exchange_symbol_depth(exchange, symbol);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 void StreamEngine::signal_handler(int signum)
 {
     UT_LOG_INFO(CONFIG->logger_, "StreamEngine::signal_handler " << signum);

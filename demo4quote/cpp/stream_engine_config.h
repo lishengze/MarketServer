@@ -75,6 +75,8 @@ public:
     type_tick GLOBAL_BINANCE_BTC;
     type_tick GLOBAL_OKEX_BTC;
     type_tick GLOBAL_BCTS_BTC;
+
+    int     check_secs{5};
 };
 
 

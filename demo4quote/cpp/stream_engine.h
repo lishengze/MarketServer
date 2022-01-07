@@ -22,6 +22,8 @@ public:
     void on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade);
     void on_nodata_exchange(const TSymbol& symbol);
 
+    void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol);
+
     // from INacosCallback
     void on_config_channged(const Document& d);
 

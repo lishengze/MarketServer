@@ -316,6 +316,9 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         SDepthQuote quote;
         quote.exchange = exchange;
         quote.symbol = symbol;
+
+
+
         if( !redisquote_to_quote(body, quote, config, false) ) 
         {
             LOG_WARN("redisquote_to_quote failed. channel=" + channel + ", msg=" + msg);       
@@ -540,14 +543,12 @@ void RedisQuote::_looping()
     last_nodata_time_ = get_miliseconds();
     
 
-    while( true ) 
+    while(true) 
     {
         // last_statistic_time_str_ = utrade::pandora::SecTimeStr();
 
         // 休眠
-        std::this_thread::sleep_for(std::chrono::seconds(_looping_check_secs));
-
-
+        std::this_thread::sleep_for(std::chrono::seconds(CONFIG->check_secs));
 
         type_tick now = get_miliseconds();
 
@@ -567,6 +568,8 @@ void RedisQuote::_looping()
             last_nodata_time_ = now;
         }
 
+        check_exchange_symbol_depth_alive();
+
         // // 打印统计信息
         // if( (now - last_statistic_time_) > 10*1000 ) 
         // {
@@ -575,6 +578,66 @@ void RedisQuote::_looping()
         // }
 
         _looping_print_statistics();
+    }
+}
+
+void RedisQuote::set_exchange_symbol_depth_alive_map(const TExchange& exchange, const TSymbol& symbol)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_check_);
+
+        exchange_symbol_depth_alive_map_[exchange][symbol] = 1;
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void RedisQuote::check_exchange_symbol_depth_alive()
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_check_);
+
+        for (auto iter1:exchange_symbol_depth_alive_map_)
+        {
+            for (auto iter2:iter1.second)
+            {
+                if (iter2.second == 0)
+                {
+                    const TExchange& exchange = iter1.first;
+                    const TSymbol& symbol = iter2.first;
+                    LOG_WARN(exchange + "." + symbol + " is dead");
+
+                    erase_dead_exchange_symbol_depth(exchange, symbol);
+
+                    iter2.second = -1;
+                }
+                else if (iter2.second == 1)
+                {
+                    iter2.second = 0;
+                }
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void RedisQuote::erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol)
+{
+    try
+    {
+        engine_interface_->erase_dead_exchange_symbol_depth(exchange, symbol);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -643,7 +706,9 @@ void RedisQuote::_looping_check_nodata()
     {
         std::unique_lock<std::mutex> l{ mutex_metas_ };
         for( const auto& v : metas_ ) {
-            if( v.second.pkg_count == 0 ) {
+
+            const RedisQuote::ExchangeMeta& exchange_meta = v.second;
+            if( exchange_meta.pkg_count == 0 ) {
                 nodata_exchanges.insert(v.first);
                 LOG_WARN(v.first + string(" no data"));
             }

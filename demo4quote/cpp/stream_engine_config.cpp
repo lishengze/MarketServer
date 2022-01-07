@@ -46,6 +46,8 @@ void Config::parse_config(const std::string& file_name)
         nacos_addr_ = js["nacos"]["addr"].get<string>();
         nacos_namespace_ = js["nacos"]["namespace"].get<string>();
         
+        check_secs = js["check_secs"].get<int>();
+        
         UT_LOG_INFO(logger_, "Parse Config finish.");
     }
     catch (std::exception& e)

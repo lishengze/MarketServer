@@ -1054,8 +1054,8 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     SDecimal total_volume = 0; 
     SDecimal total_amount = 0;
 
-    if( is_ask ) {
-
+    if( is_ask ) 
+    {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             
             double price = iter->first.get_value();

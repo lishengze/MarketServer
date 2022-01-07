@@ -2,6 +2,7 @@
 
 #include "redis_quote_snap.h"
 #include "redis_quote_dumper.h"
+#include "base/cpp/basic.h"
 
 bool decode_channelname(const string& channel_name, string& channel_type, TSymbol& symbol, TExchange& exchange);
 
@@ -112,7 +113,13 @@ public:
 
     SDepthQuote merge_quote(list<SDepthQuote>& quote_list);
     
+private:
+    std::map<TExchange, std::map<TSymbol, int>> exchange_symbol_depth_alive_map_;
+    void check_exchange_symbol_depth_alive();
+    void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol);
+    void set_exchange_symbol_depth_alive_map(const TExchange& exchange, const TSymbol& symbol);
 
+    std::mutex mutex_check_;
 private:
     // redis连接参数
     RedisParams params_;
