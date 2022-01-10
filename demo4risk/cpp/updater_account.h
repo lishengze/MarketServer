@@ -61,17 +61,17 @@ private:
             }
         }
 
-        LOG_DEBUG("\n AccountUpdater Begin Read Data  ");
+        // LOG_DEBUG("\n AccountUpdater Begin Read Data  ");
 
         while (reader->Read(&multiAccount)) {
             {
-                LOG_DEBUG("\n AccountUpdater Read Data: account_data.size: " + std::to_string(multiAccount.account_data_size()));
+                // LOG_DEBUG("\n AccountUpdater Read Data: account_data.size: " + std::to_string(multiAccount.account_data_size()));
 
                 std::unique_lock<std::mutex> inner_lock{ mutex_account_ };
                 for( int i = 0 ; i < multiAccount.account_data_size() ; ++ i ) {
                     const AccountData& account = multiAccount.account_data(i);
                     LOG_INFO("update accout: "+  account.exchange_id() + "." + account.currency() + " " +   std::to_string(account.available()));
-                    LOG_DEBUG("update accout: "+  account.exchange_id() + "." + account.currency() + " " +   std::to_string(account.available()));
+                    // LOG_DEBUG("update accout: "+  account.exchange_id() + "." + account.currency() + " " +   std::to_string(account.available()));
                     account_.hedge_accounts_[account.exchange_id()].currencies[account.currency()].amount = account.available();
                 }
             }            
