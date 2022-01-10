@@ -124,7 +124,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
         double delta_secs = double(fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_)) / 1000000000.0;
         string delta_str = recv_heart_beate_time_ > 0 ?  string(", delta_secs: ") + std::to_string(delta_secs) : "";
 
-        string result = "curr: " + send_str  + ", heartbeat: " + recv_str +  delta_str;
+        string result = "curr: " + send_str  + ", heartbeat: " + recv_str +  delta_str + ", offical: " + std::to_string(CONFIG->get_heartbeat_secs());
         return result;
     }
 
