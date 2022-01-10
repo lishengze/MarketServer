@@ -109,7 +109,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
-            for(auto iter:sub_symbol_list_map_)
+            for(auto& iter:sub_symbol_list_map_)
             {
                 ReqSymbolListDataPtr req_ptr = iter.first;
 
@@ -135,7 +135,7 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
                     LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive! is_init: " + std::to_string(iter.second)
                                 + ", is_update: " + std::to_string(p_symbol_list->is_update()));
-                                
+
                     LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
                     req_ptr->websocket_->send(symbol_list_str);
                 }
