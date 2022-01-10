@@ -530,6 +530,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr 
         std::lock_guard<std::mutex> lk(wss_con_mutex_);
         if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
+            LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " recv heartbeat");
             wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
         }        
         else
@@ -687,7 +688,7 @@ void WBServer::check_heartbeat()
         {
             // iter.second->set_new_business_request(false);
             // iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
-
+            LOG_TRACE("send heartbeat: " + iter.second->get_ws_str());
             iter.second->send(heartbeat_str);
         }
     }
