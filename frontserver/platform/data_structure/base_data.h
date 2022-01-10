@@ -103,7 +103,7 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     bool is_alive() {
         std::lock_guard<std::mutex> lk(mutex_);
-        return fabs(utrade::pandora::NanoTime() - send_heart_beate_time_) < CONFIG->get_heartbeat_secs()*1000000000 || new_business_request_;
+        return fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_) < CONFIG->get_heartbeat_secs()*1000000000 || new_business_request_;
     }
 
     void set_new_business_request(bool value)

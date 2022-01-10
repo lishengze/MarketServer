@@ -684,7 +684,7 @@ void WBServer::check_heartbeat()
         for (auto iter:wss_con_map_)
         {
             iter.second->set_new_business_request(false);
-            iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
+            // iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
 
             iter.second->send(heartbeat_str);
         }
