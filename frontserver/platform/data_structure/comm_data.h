@@ -68,26 +68,29 @@ class ReqSymbolListData:public Socket, virtual public PacakgeBaseData
 FORWARD_DECLARE_PTR(ReqSymbolListData);
 
 const long UT_FID_RspSymbolListData = 10003;
-class RspSymbolListData:public Socket, virtual public PacakgeBaseData
+class RspSymbolListData:virtual public PacakgeBaseData
 {
     public:
-        RspSymbolListData(std::set<std::string>& symbols, ID_TYPE socket_id, COMM_TYPE socket_type)
-        {
-            assign(symbols_, symbols);
-            socket_id_ = socket_id;
-            socket_type_ = socket_type;
-        }
+        // RspSymbolListData(std::set<std::string>& symbols, bool is_update, ID_TYPE socket_id, COMM_TYPE socket_type)
+        // {
+        //     assign(symbols_, symbols);
+        //     is_update_ = is_update;
+        //     socket_id_ = socket_id;
+        //     socket_type_ = socket_type;
+        // }
 
-        RspSymbolListData(std::set<std::string>& symbols, WebsocketClassThreadSafePtr ws)
-        {
-            assign(symbols_, symbols);
-            websocket_ = ws;
-            socket_id_ = ws->get_id();
-        }
+        // RspSymbolListData(std::set<std::string>& symbols, bool is_update, WebsocketClassThreadSafePtr ws)
+        // {
+        //     assign(symbols_, symbols);
+        //     is_update_ = is_update;
+        //     websocket_ = ws;
+        //     socket_id_ = ws->get_id();
+        // }
 
 
-        RspSymbolListData(std::set<std::string>& symbols)
+        RspSymbolListData(std::set<std::string>& symbols, bool is_update=false)
         {
+            is_update_ = is_update;
             assign(symbols_, symbols);
         }        
 
@@ -96,20 +99,26 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
             symbols_.emplace(symbol);
         }
 
-        void set(std::set<std::string>& symbols, ID_TYPE socket_id, COMM_TYPE socket_type)
+        void set(std::set<std::string>& symbols,bool is_update, ID_TYPE socket_id, COMM_TYPE socket_type)
         {
+            is_update_ = is_update;
+            
             assign(symbols_, symbols);
 
-            socket_id_ = socket_id;
-            socket_type_ = socket_type;
+            // socket_id_ = socket_id;
+            // socket_type_ = socket_type;
         }
 
-        void set(std::set<std::string>& symbols, WebsocketClassThreadSafePtr ws)
+        void set(std::set<std::string>& symbols, bool is_update, WebsocketClassThreadSafePtr ws)
         {
+            is_update_ = is_update;
+
             assign(symbols_, symbols);
 
-            websocket_ = ws;
+            // websocket_ = ws;
         }        
+
+        bool is_update() {return is_update_;}
 
         std::set<std::string>& get_symbols() { return symbols_;}
 
@@ -117,12 +126,13 @@ class RspSymbolListData:public Socket, virtual public PacakgeBaseData
 
         string str()
         {
-            return string("\nRspSymbolListData-Info: \n") + Socket::str() + "\n" + get_json_str() + "\n";
+            return string("\nRspSymbolListData-Info: \n") + get_json_str() + "\n";
         }
 
         static const long Fid = UT_FID_RspSymbolListData; 
     private:
         std::set<std::string>     symbols_;
+        bool                      is_update_{false};
 };
 FORWARD_DECLARE_PTR(RspSymbolListData);
 

@@ -135,7 +135,7 @@ PackagePtr GetNewRspSymbolListDataPackage(std::set<string> symbols, ID_TYPE sock
 {  
     try
     {    
-        PackagePtr package = CreatePackage<RspSymbolListData>(symbols, socket_id, socket_type);
+        PackagePtr package = CreatePackage<RspSymbolListData>(symbols);
         if (package)
         {
             package->prepare_response(UT_FID_RspSymbolListData, package_id);

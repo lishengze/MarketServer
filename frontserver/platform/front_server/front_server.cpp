@@ -109,33 +109,40 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
             std::set<ReqSymbolListDataPtr> invalid_sub_set;
 
-            for(ReqSymbolListDataPtr req_ptr:sub_symbol_list_set_)
+            for(auto iter:sub_symbol_list_map_)
             {
-                if (!req_ptr->websocket_)
-                {
-                    LOG_WARN("req_ptr->websocket_ is null");
-                    invalid_sub_set.insert(req_ptr);
-                    continue;
-                }
+                ReqSymbolListDataPtr req_ptr = iter.first;
 
-                if (!req_ptr->websocket_->is_alive())
+                if (iter.second == false || p_symbol_list->is_update())
                 {
-                    LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
-                    LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
-                    wb_server_->close_ws(req_ptr->websocket_);
-                    invalid_sub_set.insert(req_ptr);
-                    continue;                
-                }
+                    if (!req_ptr->websocket_)
+                    {
+                        LOG_WARN("req_ptr->websocket_ is null");
+                        invalid_sub_set.insert(req_ptr);
+                        continue;
+                    }
 
-                LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive!");
-                LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
-                req_ptr->websocket_->send(symbol_list_str);
+                    if (!req_ptr->websocket_->is_alive())
+                    {
+                        LOG_WARN("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is not alive!");
+                        LOG_ERROR("heartbeat_time: " + req_ptr->websocket_->get_heartbeat_str());
+                        wb_server_->close_ws(req_ptr->websocket_);
+                        invalid_sub_set.insert(req_ptr);
+                        continue;                
+                    }
+
+                    iter.second = true;
+
+                    LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive!");
+                    LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
+                    req_ptr->websocket_->send(symbol_list_str);
+                }
             }
 
             for(ReqSymbolListDataPtr invalid_req:invalid_sub_set)
             {
                 LOG_INFO("\nErase: " + invalid_req->str());
-                sub_symbol_list_set_.erase(invalid_req);
+                sub_symbol_list_map_.erase(invalid_req);
             }
 
         }
@@ -519,11 +526,11 @@ void FrontServer::add_sub_symbol_list(ReqSymbolListDataPtr req_ptr)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(sub_symbol_list_set_mutex_);
+        std::lock_guard<std::mutex> lk(sub_symbol_list_map_mutex_);
 
-        if (sub_symbol_list_set_.find(req_ptr) == sub_symbol_list_set_.end())
+        if (sub_symbol_list_map_.find(req_ptr) == sub_symbol_list_map_.end())
         {
-            sub_symbol_list_set_.insert(req_ptr);
+            sub_symbol_list_map_[req_ptr] = false;
         }
         LOG_INFO("New ReqSymbolList: " + req_ptr->str());
     }

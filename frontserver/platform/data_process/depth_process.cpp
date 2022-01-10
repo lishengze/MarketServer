@@ -42,7 +42,10 @@ void DepthProces::request_symbol_list_package(PackagePtr package)
             // PackagePtr package_new = GetNewRspSymbolListDataPackage(symbols, pReqSymbolListData->socket_id_, 
             //                                                         pReqSymbolListData->socket_type_, 
             //                                                         ID_MANAGER->get_id());
-            PackagePtr package = CreatePackage<RspSymbolListData>(symbols, pReqSymbolListData->websocket_);
+
+
+            bool is_update = false;
+            PackagePtr package = CreatePackage<RspSymbolListData>(symbols, false);
             if (package)
             {
                 package->prepare_response(UT_FID_RspSymbolListData, ID_MANAGER->get_id());
@@ -216,8 +219,8 @@ void DepthProces::response_new_symbol(string symbol)
         if (is_symbol_list_subed_)
         {
             std::set<string> symbols{symbol};
-
-            PackagePtr package_new = CreatePackage<RspSymbolListData>(symbols);
+            bool is_update = true;
+            PackagePtr package_new = CreatePackage<RspSymbolListData>(symbols, true);
             
             if (package_new)
             {

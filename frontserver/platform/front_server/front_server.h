@@ -57,8 +57,8 @@ private:
     RestServerPtr           rest_server_;
 
 private:
-    std::set<ReqSymbolListDataPtr>                           sub_symbol_list_set_;
-    std::mutex                                               sub_symbol_list_set_mutex_;    
+    std::map<ReqSymbolListDataPtr, bool>                     sub_symbol_list_map_;
+    std::mutex                                               sub_symbol_list_map_mutex_;    
 
 
     map<string, map<int, map<ID_TYPE, ReqKLineDataPtr>>>     sub_updated_kline_map_;
