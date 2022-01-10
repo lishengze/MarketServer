@@ -309,10 +309,10 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     normalize(snap.asks, config);
     normalize(snap.bids, config);
 
-    if (symbol == "BTC_USDT")
-    {
-        LOG_DEBUG(quote_str(snap));
-    }
+    // if (symbol == "BTC_USDT")
+    // {
+    //     LOG_DEBUG(quote_str(snap));
+    // }
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
