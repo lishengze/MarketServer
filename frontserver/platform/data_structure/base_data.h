@@ -2,7 +2,7 @@
 
 #include <mutex>
 #include <boost/shared_ptr.hpp>
-
+#include "base/cpp/basic.h"
 #include "../front_server_declare.h"
 #include "../util/id.hpp"
 #include "hub_struct.h"
@@ -103,7 +103,8 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
 
     bool is_alive() {
         std::lock_guard<std::mutex> lk(mutex_);
-        return fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_) < CONFIG->get_heartbeat_secs()*1000000000 || new_business_request_;
+
+        return fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_) / 1000000000 < CONFIG->get_heartbeat_secs() || new_business_request_;
     }
 
     void set_new_business_request(bool value)
@@ -126,6 +127,18 @@ class WebsocketClassThreadSafe:virtual public PacakgeBaseData
         string result = "curr: " + send_str  + ", heartbeat: " + recv_str +  delta_str;
         return result;
     }
+
+    string get_heartbeat_str_simple()
+    {
+        // string send_str = send_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(send_heart_beate_time_) : "0";
+        string send_str = utrade::pandora::NanoTimeStr();
+        string recv_str = recv_heart_beate_time_ > 0 ? utrade::pandora::ToSecondStr(recv_heart_beate_time_) : "0";
+        double delta_secs = double(fabs(utrade::pandora::NanoTime() - recv_heart_beate_time_)) / 1000000000.0;
+        string delta_str = recv_heart_beate_time_ > 0 ?  string(", delta_secs: ") + std::to_string(delta_secs) : "";
+
+        string result = "curr: " + send_str  + ", heartbeat: " + recv_str +  delta_str + ", offical: " + std::to_string(CONFIG->get_heartbeat_secs());
+        return result;
+    }    
 
     unsigned long get_recv_heart_beate_time() { return recv_heart_beate_time_;}
     string get_recv_heart_beate_time_str() 
