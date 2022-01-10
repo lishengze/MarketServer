@@ -1286,7 +1286,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         
     SInnerQuote& quote = iter->second;
 
-    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(quote));
+    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(quote, 10));
 
     if( volume > 0 )
     {
