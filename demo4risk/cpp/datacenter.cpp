@@ -752,12 +752,12 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             set_depth_presion(src.asks, price_precision, amount_precision);
             set_depth_presion(src.bids, price_precision, amount_precision);
 
-            if (src.symbol == "BTC_USDT")
-            {
-                LOG_DEBUG("price_precision: " + std::to_string(price_precision) 
-                        + ", amount_precision: " + std::to_string(amount_precision)
-                        + "\n" + quote_str(src, 5));
-            }
+            // if (src.symbol == "BTC_USDT")
+            // {
+            //     LOG_DEBUG("price_precision: " + std::to_string(price_precision) 
+            //             + ", amount_precision: " + std::to_string(amount_precision)
+            //             + "\n" + quote_str(src, 5));
+            // }
         }
     }
     catch(const std::exception& e)
