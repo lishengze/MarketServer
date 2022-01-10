@@ -633,7 +633,7 @@ void WBServer::heartbeat_run()
     {
         while(true)
         {
-            std::this_thread::sleep_for(std::chrono::seconds(CONFIG->get_heartbeat_secs()-2));
+            std::this_thread::sleep_for(std::chrono::seconds(5));
 
             check_heartbeat();
         }
