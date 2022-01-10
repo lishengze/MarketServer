@@ -117,6 +117,7 @@ void WBServer::on_close(WebsocketClass * ws)
         std::stringstream s_s;
         s_s << "WBServer::on_close "<< ws;
         LOG_CLIENT_REQUEST(s_s.str());
+        LOG_INFO(s_s.str());
         clean_ws(ws);
     }
     catch(const std::exception& e)
@@ -209,6 +210,7 @@ void WBServer::process_on_open(WebsocketClass * ws)
         std::stringstream s_s;
         s_s << "WBServer::process_on_open ws: " << ws;
         LOG_CLIENT_REQUEST(s_s.str());
+        LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = store_ws(ws);
 
@@ -229,16 +231,15 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     try
     {
         std::stringstream s_s;
-        s_s << "WBServer::process_on_message " << ws << ": " << ori_msg;
+        s_s << "ori_msg: " << ws << ": " << ori_msg;
         // LOG_CLIENT_REQUEST(s_s.str());
+        LOG_TRACE(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
 
         if (socket_id && wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
             WebsocketClassThreadSafePtr ws_safe = wss_con_map_[socket_id];
-
-            ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
 
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
@@ -276,6 +277,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
             std::stringstream s_s;
             s_s << "WBServer::process_on_message ws: " << ws << " id is invalid ";
             LOG_CLIENT_REQUEST(s_s.str());
+            LOG_INFO(s_s.str());
         }
  
     }
@@ -303,6 +305,8 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
                 string cur_symbol = *it;
 
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
+
+                LOG_INFO("socket_id: " + std::to_string(socket_id) + " req_depth: " + cur_symbol);
                     
                 PackagePtr request_depth_package = CreatePackage<ReqRiskCtrledDepthData>(cur_symbol, ws, socket_id);
                 if (request_depth_package)
@@ -311,6 +315,8 @@ void WBServer::process_depth_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
 
                     auto p_req_depth = GetField<ReqRiskCtrledDepthData>(request_depth_package);
                     LOG_CLIENT_REQUEST(p_req_depth->str());
+
+                    LOG_INFO(p_req_depth->str());
                     
                     front_server_->deliver_request(request_depth_package);
 
@@ -475,6 +481,7 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
             {
                 string symbol = *it;
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
+                LOG_TRACE("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
 
                 PackagePtr package = CreatePackage<ReqTrade>(symbol, false, ws, socket_id);
 
@@ -570,6 +577,7 @@ void WBServer::request_symbol_list(ID_TYPE socket_id)
                 if (pReqSymbolListData)
                 {
                     LOG_CLIENT_REQUEST(pReqSymbolListData->str());
+                    LOG_TRACE(pReqSymbolListData->str());
 
                     package->prepare_request(UT_FID_ReqSymbolListData, ID_MANAGER->get_id());
 
@@ -667,11 +675,11 @@ void WBServer::check_heartbeat()
                 {
                     ws_vec.push_back(iter.first);
 
-                    LOG_WARN("check_heartbeat " + iter.second->get_ws_str() + " lost heartbeat, " + iter.second->get_heartbeat_str());
+                    LOG_WARN("[CK] " + iter.second->get_ws_str() + " lost heartbeat, " + iter.second->get_heartbeat_str());
                 }
                 else
                 {
-                    LOG_TRACE("check_heartbeat " + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
+                    LOG_TRACE("[CK]" + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
 
                     // cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
                 }
@@ -733,7 +741,7 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
             wss_con_map_[socket_id] = ws_safe;
 
             LOG_INFO("store new ws: " + ws_safe->get_ws_str());
-            LOG_CLIENT_REQUEST("store new ws: " + ws_safe->get_ws_str());
+            // LOG_CLIENT_REQUEST("store new ws: " + ws_safe->get_ws_str());
         }
         return socket_id;
     }
@@ -815,11 +823,13 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
 
                 s_obj << "Clean Socket: " << ws  << ", id: " << socket_id << " successfully!";
                 LOG_CLIENT_REQUEST(s_obj.str());
+                LOG_INFO(s_obj.str());
             }
             else
             {
                 s_obj << "Socket: " << ws << ", id: " << socket_id << " has already been closed!";
                 LOG_CLIENT_REQUEST(s_obj.str());
+                LOG_INFO(s_obj.str());
             }
             return socket_id;
         
