@@ -670,6 +670,8 @@ void WBServer::check_heartbeat()
                 }
                 else
                 {
+                    LOG_TRACE("check_heartbeat " + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
+
                     // cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
                 }
             }
