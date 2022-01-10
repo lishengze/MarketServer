@@ -666,7 +666,7 @@ void WBServer::check_heartbeat()
                 {
                     ws_vec.push_back(iter.first);
 
-                    LOG_WARN("check_heartbeat " + iter.second->get_ws_str() + " lost heartbeat");
+                    LOG_WARN("check_heartbeat " + iter.second->get_ws_str() + " lost heartbeat, " + iter.second->get_heartbeat_str());
                 }
                 else
                 {
@@ -683,7 +683,7 @@ void WBServer::check_heartbeat()
         string heartbeat_str = get_heartbeat_str();    
         for (auto iter:wss_con_map_)
         {
-            iter.second->set_new_business_request(false);
+            // iter.second->set_new_business_request(false);
             // iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
 
             iter.second->send(heartbeat_str);
@@ -726,7 +726,7 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
             ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
 
-            ws_safe->set_new_business_request(true);
+            // ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 
             LOG_INFO("store new ws: " + ws_safe->get_ws_str());
@@ -764,7 +764,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             }
             else
             {
-                wss_con_map_[socket_id]->set_new_business_request(true);
+                // wss_con_map_[socket_id]->set_new_business_request(true);
                 wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
                 LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
             }
@@ -805,7 +805,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
             std::lock_guard<std::mutex> lk(wss_con_mutex_);
             if (wss_con_map_.find(socket_id) != wss_con_map_.end())
             {
-                wss_con_map_[socket_id]->set_new_business_request(false);
+                // wss_con_map_[socket_id]->set_new_business_request(false);
                 wss_con_map_[socket_id]->set_recv_heartbeat(0);
 
                 wss_con_map_.erase(socket_id);
@@ -877,7 +877,7 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
             LOG_WARN("Close: " + ws_safe->get_ws_str());
             ws->close();
 
-            ws_safe->set_new_business_request(false);
+            // ws_safe->set_new_business_request(false);
             ws_safe->set_recv_heartbeat(0);            
             wss_con_map_.erase(ws_safe->get_id());
         }              
