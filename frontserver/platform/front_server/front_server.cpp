@@ -133,7 +133,9 @@ void FrontServer::response_symbol_list_package(PackagePtr package)
 
                     iter.second = true;
 
-                    LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive!");
+                    LOG_INFO("req_ptr->websocket_ " + req_ptr->websocket_->get_ws_str() + " is alive! is_init: " + std::to_string(iter.second)
+                                + ", is_update: " + std::to_string(p_symbol_list->is_update()));
+                                
                     LOG->record_output_info("SymbolLists_" + req_ptr->websocket_->get_ws_str());
                     req_ptr->websocket_->send(symbol_list_str);
                 }
