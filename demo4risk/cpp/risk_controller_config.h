@@ -7,6 +7,7 @@
 
 #include "base/cpp/tinyformat.h"
 #include "global_declare.h"
+#include "../Log/log.h"
 
 using njson = nlohmann::json;
 
@@ -35,6 +36,9 @@ public:
             std::ifstream in_config(file_name);
             std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
             std::cout << contents << std::endl;
+
+            LOG_INFO(file_name);
+            LOG_INFO(contents);
             
             njson js = njson::parse(contents);
 
@@ -54,6 +58,8 @@ public:
 
             account_risk_ctrl_open_ = js["account_risk_ctrl_open"].get<bool>();
             order_risk_ctrl_open_ = js["order_risk_ctrl_open"].get<bool>();
+
+            check_symbol_secs = js["check_symbol_secs"].get<int>();
 
             UT_LOG_INFO(logger_, "Parse Config finish.");
         }
@@ -89,6 +95,8 @@ public:
 
     // logger
     UTLogPtr logger_;
+
+    int     check_symbol_secs{5};
 };
 
 

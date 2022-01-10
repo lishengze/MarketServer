@@ -47,7 +47,7 @@ public:
 
         if (check_abnormal_quote(src))
         {
-            LOG_WARN("\nBefore "+ worker_name + " " + src.symbol + quote_str(src));
+            LOG_WARN("\nBefore "+ worker_name + quote_str(src));
         }  
 
         SInnerQuote& tmp = this->process(src, ctx);
@@ -59,7 +59,7 @@ public:
 
         if (check_abnormal_quote(src))
         {
-            LOG_WARN("\nAfter "+ worker_name + " " + src.symbol + quote_str(src));
+            LOG_WARN("\nAfter "+ worker_name + quote_str(src));
         }          
 
         if( next_ ) {            
@@ -266,11 +266,11 @@ private:
     void _push_to_clients(const string& symbol = "");
 
     mutable std::mutex                  mutex_datas_;
+    mutable std::mutex                  mutex_config_;
+
     unordered_map<TSymbol, SInnerQuote> datas_;
     unordered_map<TSymbol, SInnerQuote> last_datas_;
     Params params_;
-
-
 
     // 处理流水线
     QuotePipeline           pipeline_;
@@ -281,5 +281,19 @@ private:
     WatermarkComputerWorker watermark_worker_;
     PrecisionWorker         pricesion_worker_;
 
-    std::mutex              filter_quote_mutex_;
+
+private:
+    void start_check_symbol();
+    void set_check_symbol_map(TSymbol symbol);
+    void check_symbol_main();
+
+    void check_symbol();
+
+    void erase_outdate_symbol(TSymbol symbol);
+    std::thread             check_thread_;
+    std::mutex              check_symbol_mutex_;
+
+    map<TSymbol, int>       check_symbol_map_;
+
+
 };

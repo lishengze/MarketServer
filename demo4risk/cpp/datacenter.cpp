@@ -788,10 +788,15 @@ DataCenter::DataCenter() {
     pipeline_.add_worker(&quotebias_worker_);
     pipeline_.add_worker(&watermark_worker_);
     pipeline_.add_worker(&pricesion_worker_);
+
+    start_check_symbol();
 }
 
 DataCenter::~DataCenter() {
-
+    if (check_thread_.joinable())
+    {
+        check_thread_.join();
+    }
 }
 
 void DataCenter::add_quote(const SInnerQuote& quote)
@@ -803,6 +808,8 @@ void DataCenter::add_quote(const SInnerQuote& quote)
     // } 
 
     // check_exchange_volume(quote);
+
+    set_check_symbol_map(quote.symbol);
 
     if (check_abnormal_quote( const_cast<SInnerQuote&>(quote)))
     {
@@ -819,25 +826,25 @@ void DataCenter::add_quote(const SInnerQuote& quote)
         v->publish4Hedge(quote.symbol, ptrData, NULL);
     }
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    
-    // 存储原始行情
-    datas_[quote.symbol] = quote;    
-    // 发布行情
+    {
+        std::lock_guard<std::mutex> lk(mutex_datas_);
+        datas_[quote.symbol] = quote;    
+    }
+
     _publish_quote(quote);    
 
 };
 
 void DataCenter::change_account(const AccountInfo& info)
 {   
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.account_config = info;
     _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.quote_config = config;
 
     LOG_TRACE("DataCenter::change MarketRiskConfig");
@@ -852,7 +859,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        std::unique_lock<std::mutex> inner_lock{mutex_config_};
         params_.symbol_config = config;
 
         LOG_INFO("DataCenter::change SymbolConfiguration");
@@ -872,7 +879,7 @@ void DataCenter::change_configuration(const map<TSymbol, map<TExchange, HedgeCon
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        std::unique_lock<std::mutex> inner_lock{ mutex_config_};
         params_.hedge_config = config;
 
         LOG_INFO("DataCenter::change HedgeConfig");
@@ -894,7 +901,7 @@ void DataCenter::change_orders(const string& symbol, const SOrder& order, const 
 {
     tfm::printfln("change_orders");
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.cache_order[symbol] = make_pair(asks, bids);
 
     _push_to_clients(symbol);
@@ -923,17 +930,20 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
 
     pipeline_.run(quote, params_, newQuote);
 
-    // 检查是否发生变化
-    auto iter = last_datas_.find(quote.symbol);
-    if( iter != last_datas_.end() ) {
-        const SInnerQuote& last_quote = iter->second;
-        if( quote.time_origin < last_quote.time_origin ) {
-            LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(quote.time_origin));
-            return;
-        }
+    {
+        // 检查是否发生变化
+        std::lock_guard<std::mutex> lk(mutex_datas_);
+        auto iter = last_datas_.find(quote.symbol);
+        if( iter != last_datas_.end() ) {
+            const SInnerQuote& last_quote = iter->second;
+            if( quote.time_origin < last_quote.time_origin ) {
+                LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(quote.time_origin));
+                return;
+            }
+        }        
+        last_datas_[quote.symbol] = newQuote;
     }
-
-    last_datas_[quote.symbol] = newQuote;
+    
 
     if (!check_quote(newQuote))
     {
@@ -1120,9 +1130,11 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
 
     if( total_volume < volume )
     {
-        LOG_WARN("_calc_otc_by_volume failed depth_sum_volume is: " 
+        string msg = "_calc_otc_by_volume failed depth_sum_volume is: " 
                 + total_volume.get_str_value() 
-                + ", request_volume: " + std::to_string(volume));
+                + ", request_volume: " + std::to_string(volume);
+        LOG_WARN(msg);
+        LOG_DEBUG(msg);
         
         return QuoteResponse_Result_NOT_ENOUGH_VOLUME;
     }
@@ -1221,9 +1233,11 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     }
     if( total_amount < otc_amount )
     {
-        LOG_WARN("_calc_otc_by_amount failed depth_sum_volume is: " 
+        string msg = "_calc_otc_by_amount failed depth_sum_volume is: " 
                 + total_amount.get_str_value() 
-                + ", otc_amount: " + std::to_string(otc_amount));
+                + ", otc_amount: " + std::to_string(otc_amount);
+        LOG_WARN(msg);
+        LOG_DEBUG(msg);
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
     }
         
@@ -1275,35 +1289,39 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
             + ", volume=" + std::to_string(volume)
             + ", amount=" + std::to_string(amount));
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    auto iter = last_datas_.find(symbol);
+    SInnerQuote* quote = nullptr;
 
-    if(iter == last_datas_.end())
     {
-        LOG_WARN("OTC Request Symbol " + symbol + " has no data");
-        return QuoteResponse_Result_WRONG_SYMBOL;
-    }
-        
-    SInnerQuote& quote = iter->second;
+        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+        auto iter = last_datas_.find(symbol);
 
-    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(quote, 10));
+        if(iter == last_datas_.end())
+        {
+            LOG_WARN("OTC Request Symbol " + symbol + " has no data");
+            return QuoteResponse_Result_WRONG_SYMBOL;
+        }
+
+        quote = &(iter->second);
+    }
+
+    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(*quote, 10));
 
     if( volume > 0 )
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote.asks, true, params_.quote_config[symbol], volume, price, quote.precise);
+            return _calc_otc_by_volume(quote->asks, true, params_.quote_config[symbol], volume, price, quote->precise);
         } else {
-            return _calc_otc_by_volume(quote.bids, false, params_.quote_config[symbol], volume, price, quote.precise);   
+            return _calc_otc_by_volume(quote->bids, false, params_.quote_config[symbol], volume, price, quote->precise);   
         }
     } 
     else
     {
         
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote.asks, true, params_.quote_config[symbol], amount, price, quote.precise);
+            return _calc_otc_by_amount(quote->asks, true, params_.quote_config[symbol], amount, price, quote->precise);
         } else { 
-            return _calc_otc_by_amount(quote.bids, false, params_.quote_config[symbol], amount, price, quote.precise);
+            return _calc_otc_by_amount(quote->bids, false, params_.quote_config[symbol], amount, price, quote->precise);
         }
     }
 
@@ -1314,7 +1332,7 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
 {
     watermark_worker_.query(watermarks);
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     for( const auto&v : params_.account_config.hedge_accounts_ ) {
         const TExchange& exchange = v.first;
         for( const auto& v2 : v.second.currencies ) {
@@ -1343,6 +1361,104 @@ void DataCenter::hedge_trade_order(string& symbol, double price, double amount, 
     }
     catch(const std::exception& e)
     {
-        std::cerr << __FILE__ << ":"  << __FUNCTION__ <<"."<< __LINE__ << " " <<  e.what() << '\n';
+       LOG_ERROR(e.what());
+    }
+}
+
+void DataCenter::start_check_symbol()
+{
+    try
+    {
+        check_thread_ = std::thread(&DataCenter::check_symbol_main, this);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+void DataCenter::set_check_symbol_map(TSymbol symbol)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(check_symbol_mutex_);
+
+        check_symbol_map_[symbol] = 1;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DataCenter::check_symbol_main()
+{
+    try
+    {
+        while(true)
+        {
+            check_symbol();
+
+            std::this_thread::sleep_for(std::chrono::seconds(CONFIG->check_symbol_secs));
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DataCenter::check_symbol()
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(check_symbol_mutex_);
+
+        for (auto& iter:check_symbol_map_)
+        {
+            const TSymbol& symbol = iter.first;
+
+            LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
+
+            if (iter.second == 0)
+            {
+                LOG_WARN(symbol + " is dead");
+
+                erase_outdate_symbol(symbol);
+
+                iter.second = -1;
+            }
+            else if (iter.second == 1)
+            {                
+                iter.second = 0;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+
+}
+
+void DataCenter::erase_outdate_symbol(TSymbol symbol)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_datas_);
+
+        if (datas_.find(symbol)!= datas_.end())
+        {
+            datas_.erase(symbol);
+        }
+
+        if (last_datas_.find(symbol) != last_datas_.end())
+        {
+            last_datas_.erase(symbol);
+        }        
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }

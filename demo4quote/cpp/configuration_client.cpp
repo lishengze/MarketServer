@@ -48,7 +48,11 @@ bool combine_config(const Document& hedges, const Document& symbols, const Docum
             uint32 sum_precision = helper_get_uint32(*iter, "sum_precision", 0); // 金额精度
 
             if( symbol == "" || !enable )
+            {
+                LOG_WARN("&&&&& " + symbol + ": " + std::to_string(enable));
                 continue;
+            }
+                
 
             Value symbol_config(rapidjson::Type::kObjectType);
             symbol_config.AddMember("enable", true, allocator);
@@ -73,7 +77,11 @@ bool combine_config(const Document& hedges, const Document& symbols, const Docum
             uint32 depth = helper_get_uint32(*iter, "publish_level", 100);
 
             if( symbol == "" || !enable || !output.HasMember(symbol.c_str()))
+            {
+                LOG_WARN("&&&&& " + symbol + ": " + std::to_string(enable) + ", " + "output has no" + symbol) ;
                 continue;
+            }
+               
 
             output[symbol.c_str()]["frequency"] = frequency;
             output[symbol.c_str()]["depth"] = depth;
@@ -96,10 +104,11 @@ bool combine_config(const Document& hedges, const Document& symbols, const Docum
             uint32 fee_maker = helper_get_uint32(*iter, "maker_fee", 0);
             uint32 frequency = helper_get_uint32(*iter, "frequency", 0);
 
-            if( exchange == "" || symbol == "" || !enable )
+            if( exchange == "" || symbol == "" || !enable || !output.HasMember(symbol.c_str()))
+            {
+                LOG_WARN("&&&&& " +  exchange + "." + symbol + ": " + std::to_string(enable) + ", " + "output has no" + symbol) ;
                 continue;
-            if( !output.HasMember(symbol.c_str()) )
-                continue;
+            }
 
             Value exchange_config(rapidjson::Type::kObjectType);
             exchange_config.AddMember("enable", true, allocator);
@@ -180,9 +189,9 @@ void ConfigurationClient::_parse_config()
             return;
         }
 
-        LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
-                + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
-                + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
+        // LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
+        //         + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
+        //         + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
 
         // 合并为内置配置格式
         Document output(rapidjson::Type::kObjectType);
