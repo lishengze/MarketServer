@@ -238,6 +238,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         {
             WebsocketClassThreadSafePtr ws_safe = wss_con_map_[socket_id];
 
+            ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
+
             nlohmann::json js = nlohmann::json::parse(ori_msg);
 
             if (js["type"].is_null())
