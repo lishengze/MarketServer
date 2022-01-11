@@ -55,7 +55,7 @@ void TimeKlineData::refresh_high_low()
         }
         else
         {
-            LOG_DEBUG("illegal ht: " + get_sec_time_str(high_time_) + ", high: " + high_.get_str_value());
+            LOG_DEBUG("illegal ht: " + get_sec_time_str(high_time_) + ", ct: " + get_sec_time_str(ori_data_.rbegin()->first) + ", high: " + high_.get_str_value());
             high_ = kline_high;
             high_time_ = kline_high_time;
         }
@@ -67,7 +67,7 @@ void TimeKlineData::refresh_high_low()
         }
         else
         {
-            LOG_DEBUG("illegal lt: " + get_sec_time_str(low_time_) + ", low:  " + high_.get_str_value());
+            LOG_DEBUG("illegal lt: " + get_sec_time_str(low_time_) + ", ct: " + get_sec_time_str(ori_data_.rbegin()->first) + ", low:  " + high_.get_str_value());
             low_ = kline_low;
             low_time_ = kline_low_time;
         }        
