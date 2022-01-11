@@ -19,7 +19,7 @@ bool TimeKlineData::is_time_legal(type_tick time)
         if (ori_data_.size() > 0)
         {
             type_tick last_time = ori_data_.rbegin()->first;
-            result = last_time - time < last_secs_;
+            result = (last_time - time) < last_secs_;
         }
         return result;
     }
@@ -55,7 +55,7 @@ void TimeKlineData::refresh_high_low()
         }
         else
         {
-            LOG_DEBUG("trade illegal ht: " + get_sec_time_str(high_time_) + ", high: " + high_.get_str_value());
+            LOG_DEBUG("illegal ht: " + get_sec_time_str(high_time_) + ", high: " + high_.get_str_value());
             high_ = kline_high;
             high_time_ = kline_high_time;
         }
@@ -67,7 +67,7 @@ void TimeKlineData::refresh_high_low()
         }
         else
         {
-            LOG_DEBUG("trade illegal lt: " + get_sec_time_str(high_time_) + ", low:  " + high_.get_str_value());
+            LOG_DEBUG("illegal lt: " + get_sec_time_str(low_time_) + ", low:  " + high_.get_str_value());
             low_ = kline_low;
             low_time_ = kline_low_time;
         }        
@@ -92,7 +92,7 @@ void TimeKlineData::erase_out_date_data()
 
         for (auto iter:ori_data_)
         {
-            if (latest_time - iter.first >= last_secs_)
+            if ((latest_time - iter.first) >= last_secs_)
             {
                 out_date_time.emplace_back(iter.first);
             }
@@ -100,7 +100,7 @@ void TimeKlineData::erase_out_date_data()
 
         for (type_tick time:out_date_time)
         {
-            LOG_TRACE("outdate_time: " + symbol_ + ", lt: " + get_sec_time_str(latest_time) + ", ct: " + get_sec_time_str(time));
+            LOG_TRACE("erase outdate_time: " + symbol_ + ", lt: " + get_sec_time_str(latest_time) + ", ct: " + get_sec_time_str(time));
             ori_data_.erase(time);
         }
 
