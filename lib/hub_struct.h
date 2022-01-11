@@ -157,6 +157,14 @@ struct KlineData:virtual public PacakgeBaseData
     SDecimal px_close;
     SDecimal volume;
 
+    // string str()
+    // {
+    //     stringstream s_s;
+    //     s_s << "h: " << px_high.get_str_value() << ", o: " << px_open.get_str_value() << ", l: " << px_close.get_str_value() << ", c: " << px_close.get_str_value()
+    //         << ", t: " << get_sec_time_str(index);
+    //     return s_s.str();
+    // }
+
     KlineData(){
         index = 0;
     }

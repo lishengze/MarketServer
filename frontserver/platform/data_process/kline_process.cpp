@@ -229,6 +229,22 @@ void KlineProcess::request_kline_package(PackagePtr package)
     }
 }
 
+bool is_valid_kline(KlineDataPtr kline_data)
+{
+    try
+    {
+        if (kline_data->px_high.get_value() * kline_data->px_open.get_value() * kline_data->px_low.get_value()  * kline_data->px_close.get_value() == 0)
+            return false;
+
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
 void KlineProcess::response_kline_package(PackagePtr package)
 {
     try
@@ -236,6 +252,12 @@ void KlineProcess::response_kline_package(PackagePtr package)
         if (test_kline_data_) return;
 
         KlineDataPtr pkline_data = GetField<KlineData>(package);
+
+        if (!is_valid_kline(pkline_data))
+        {
+            LOG_WARN("Invalid Kline: " + kline_str(pkline_data));
+            return;
+        }
 
         if (pkline_data)
         {

@@ -411,6 +411,14 @@ void KlineHubber::recover_from_db()
 
                 LOG_INFO("60 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
 
+                if (input.size() > 0 && input[0].symbol == "BTC_USDT")
+                {
+                    for (auto kline:input)
+                    {
+                        LOG_DEBUG(kline_str(kline));
+                    }
+                }
+
                 min1_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
             }
         }
@@ -422,21 +430,21 @@ void KlineHubber::recover_from_db()
                 vector<KlineData>& input = iter2.second;
                 filter_kline_data(input);   
 
-                if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
-                {
-                    // LOG_INFO(kline_str(input[0]));
+                // if (iter1.first == MIX_EXCHANGE_NAME && iter2.first == "BTC_USDT")
+                // {
+                //     // LOG_INFO(kline_str(input[0]));
 
-                    if (is_kline_valid(input[0]))
-                    {
-                        LOG_INFO(kline_str(input[0]) + " is invalid");
-                    }
-                    else
-                    {
-                        LOG_INFO(kline_str(input[0]) + " is valid");
-                    }
+                //     if (is_kline_valid(input[0]))
+                //     {
+                //         LOG_INFO(kline_str(input[0]) + " is invalid");
+                //     }
+                //     else
+                //     {
+                //         LOG_INFO(kline_str(input[0]) + " is valid");
+                //     }
 
-                    LOG_DEBUG(klines_str(input));
-                }
+                //     LOG_DEBUG(klines_str(input));
+                // }
 
                 LOG_INFO("3600 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
                 min60_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
@@ -502,7 +510,7 @@ void KlineHubber::on_kline(const TExchange& exchange, const TSymbol& symbol, int
     {
         for( const auto& v : callbacks_) {
             v->on_kline(exchange, symbol, resolution, outputs);
-            v->on_kline(exchange, symbol, 3600, output_60mins);
+            // v->on_kline(exchange, symbol, 3600, output_60mins);
         }
     }
     else

@@ -66,5 +66,15 @@ inline string get_sec_time_str(unsigned long time)
     return utrade::pandora::ToSecondStr(time * NANOSECONDS_PER_SECOND, "%Y-%m-%d %H:%M:%S");
 }
 
+inline string kline_str(KlineDataPtr pkline_data)
+{
+        stringstream s_s;
+        s_s << pkline_data->symbol << ", h: " << pkline_data->px_high.get_str_value() 
+            << ", o: " << pkline_data->px_open.get_str_value() 
+            << ", l: " << pkline_data->px_close.get_str_value() 
+            << ", c: " << pkline_data->px_close.get_str_value()
+            << ", t: " << get_sec_time_str(pkline_data->index);
+        return s_s.str();    
+}
 
 string get_package_str(unsigned int package_tid);

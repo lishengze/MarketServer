@@ -568,11 +568,12 @@ void filter_kline_data(vector<KlineData>& kline_list)
         {
             if (is_kline_valid(*iter))
             {
-                error_kline_list.push_back(iter);
+                valid_kline_list.push_back(*iter);                
             }
             else
             {
-                valid_kline_list.push_back(std::move(*iter));
+                LOG_WARN("invalid kline: " + kline_str(*iter));
+                error_kline_list.push_back(iter);
             }
         }        
 
@@ -594,11 +595,11 @@ bool is_kline_valid(KlineData& kline)
     bool result = false;
     try
     {
-        if (kline.px_open<=0 || kline.px_close<=0 || kline.px_high<=0 || kline.px_low<=0 )
+        if (kline.px_open.get_value() <=0 || kline.px_close.get_value() <=0 || kline.px_high.get_value() <=0 || kline.px_low.get_value() <=0 )
         {
-            result = true;
+            result = false;
         }
-        return result;
+        return true;
     }
     catch(const std::exception& e)
     {
