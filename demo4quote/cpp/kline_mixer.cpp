@@ -410,7 +410,7 @@ void KlineHubber::recover_from_db()
 
                 LOG_INFO("60 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
 
-                if (input.size() > 0 && input[0].symbol == "BTC_USDT")
+                if (input.size() > 0 && input[0].symbol == "BTC_USDT" && input[0].exchange == MIX_EXCHANGE_NAME)
                 {
                     for (auto kline:input)
                     {
