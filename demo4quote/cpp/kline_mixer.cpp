@@ -393,7 +393,6 @@ void KlineHubber::recover_from_db()
         vector<KlineData> all_db_data;
 
         LOG_INFO("\n******** KlineHubber::recover_from_db *******");
-
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_1;
         unordered_map<TExchange, unordered_map<TSymbol, vector<KlineData>>> data_60;
 
