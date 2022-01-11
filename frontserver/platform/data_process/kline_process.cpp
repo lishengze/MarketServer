@@ -34,10 +34,10 @@ void TimeKlineData::refresh_high_low()
 {
     try
     {
-        SDecimal kline_high = ori_data_.begin()->second->px_high;
-        SDecimal kline_low = ori_data_.begin()->second->px_low;
-        type_tick kline_high_time = ori_data_.begin()->second->index;
-        type_tick kline_low_time = ori_data_.begin()->second->index;;
+        SDecimal kline_high = ori_data_.rbegin()->second->px_high;
+        SDecimal kline_low = ori_data_.rbegin()->second->px_low;
+        type_tick kline_high_time = ori_data_.rbegin()->second->index;
+        type_tick kline_low_time = ori_data_.rbegin()->second->index;;
 
         for (auto iter:ori_data_)
         {
@@ -82,14 +82,43 @@ void TimeKlineData::refresh_high_low()
     }
 }
 
+void TimeKlineData::erase_out_date_data()
+{
+    try
+    {
+        type_tick latest_time = ori_data_.rbegin()->first;
+
+        std::list<type_tick> out_date_time;
+
+        for (auto iter:ori_data_)
+        {
+            if (latest_time - iter.first >= last_secs_)
+            {
+                out_date_time.emplace_back(iter.first);
+            }
+        }
+
+        for (type_tick time:out_date_time)
+        {
+            LOG_TRACE("outdate_time: " + symbol_ + ", lt: " + get_sec_time_str(latest_time) + ", ct: " + get_sec_time_str(time));
+            ori_data_.erase(time);
+        }
+
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 void TimeKlineData::update(KlineDataPtr kline_data)
 {
     try
     {
+        std::lock_guard<std::mutex> lk(update_mutex_);
+
         if (kline_data->frequency_ == frequency_)
         {
-            std::lock_guard<std::mutex> lk(update_mutex_);
-
             if (ori_data_.size() == 0)
             {
                 ori_data_[kline_data->index] = kline_data;
@@ -110,10 +139,7 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                 {
                     ori_data_[curr_time] = kline_data;
 
-                    if (curr_time - first_time >= last_secs_)
-                    {
-                        ori_data_.erase(first_time);
-                    }
+                    erase_out_date_data();
 
                     refresh_high_low();
                 }
@@ -233,7 +259,7 @@ bool is_valid_kline(KlineDataPtr kline_data)
 {
     try
     {
-        if (kline_data->px_high.get_value() * kline_data->px_open.get_value() * kline_data->px_low.get_value()  * kline_data->px_close.get_value() == 0)
+        if (kline_data->px_high.get_value() * kline_data->px_open.get_value() * kline_data->px_low.get_value()  * kline_data->px_close.get_value() <= 0)
             return false;
 
         return true;

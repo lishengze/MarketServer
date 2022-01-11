@@ -87,6 +87,8 @@ class TimeKlineData
 
         bool is_time_legal(type_tick time);
 
+        void erase_out_date_data();
+
         std::map<type_tick, KlineDataPtr>   ori_data_;
         int                                 frequency_{0};
         int                                 last_secs_{0};

@@ -418,7 +418,14 @@ void KlineHubber::recover_from_db()
                     }
                 }
 
-                min1_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
+                if (input.size() > 0)
+                {
+                    min1_cache_.update_kline(iter1.first, iter2.first, input, output, nouse);
+                }
+                // else
+                // {
+                //     LOG_WARN("60 " + iter1.first + " " + iter2.first + " " + std::to_string(input.size()));
+                // }
             }
         }
 
