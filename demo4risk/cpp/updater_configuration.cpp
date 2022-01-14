@@ -67,8 +67,11 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
         }
 
         if( !paramsObject.IsArray() )
+        {
+            LOG_ERROR("paramsObject is not array");
             return ;
-
+        }
+            
         map<TSymbol, SymbolConfiguration> output;
 
 
