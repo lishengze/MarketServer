@@ -123,7 +123,6 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
             output[config.SymbolId] = config;
         }
 
-
         callback_->on_configuration_update(output);
 
     }
@@ -192,8 +191,14 @@ bool combine_config(const Document& risks, map<TSymbol, MarketRiskConfig>& outpu
 {    
     try
     {
+        LOG_INFO("combine_config");
+        
         if( !risks.IsArray() )
-            return false;        
+        {
+            LOG_ERROR("risk is not array!");
+            return false;   
+        }
+                 
 
         for( auto iter = risks.Begin() ; iter != risks.End() ; iter++ ) 
         {
@@ -298,6 +303,10 @@ void ConfigurationClient::_parse_config()
     if( combine_config(riskParamsObject, output) ) {
         
         callback_->on_configuration_update(output);
+    }
+    else
+    {
+        LOG_WARN("Combine Failed!");
     }
 }
 
