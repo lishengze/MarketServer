@@ -192,7 +192,7 @@ bool combine_config(const Document& risks, map<TSymbol, MarketRiskConfig>& outpu
     try
     {
         LOG_INFO("combine_config");
-        
+
         if( !risks.IsArray() )
         {
             LOG_ERROR("risk is not array!");
@@ -278,6 +278,8 @@ bool combine_config(const Document& risks, map<TSymbol, MarketRiskConfig>& outpu
 
             LOG_INFO("\nMarketRisk: " + symbol + "\n" + cfg.desc());
         }
+
+        return true;
     }
     catch(const std::exception& e)
     {
