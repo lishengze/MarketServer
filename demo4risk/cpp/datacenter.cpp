@@ -847,10 +847,10 @@ void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& conf
     // std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.quote_config = config;
 
-    LOG_TRACE("DataCenter::change MarketRiskConfig");
+    LOG_INFO("DataCenter::change MarketRiskConfig");
     for (auto iter:params_.quote_config)
     {
-        LOG_TRACE("\n" + iter.first + "\n" + iter.second.desc());
+        LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
     }    
     _push_to_clients();
 }

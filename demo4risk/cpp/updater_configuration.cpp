@@ -302,8 +302,9 @@ void ConfigurationClient::_parse_config()
 
     // 合并为内置配置格式
     map<TSymbol, MarketRiskConfig> output;
-    if( combine_config(riskParamsObject, output) ) {
-        
+    if( combine_config(riskParamsObject, output) ) 
+    {
+        LOG_INFO("combine successfully");
         callback_->on_configuration_update(output);
     }
     else
