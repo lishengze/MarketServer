@@ -7,7 +7,7 @@
 
 #include "base/cpp/tinyformat.h"
 #include "global_declare.h"
-#include "../Log/log.h"
+#include "Log/log.h"
 
 using njson = nlohmann::json;
 
