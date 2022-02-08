@@ -191,7 +191,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
 
         SDecimal decimal_value(scaledPrice);
 
-        
+
         result[decimal_value].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
     }
 
@@ -833,12 +833,18 @@ DataCenter::~DataCenter() {
     }
 }
 
-void DataCenter::add_quote(const SInnerQuote& quote)
+void DataCenter::add_quote(SInnerQuote& quote)
 {    
     if (quote.symbol == "BTC_USD")
     {
         LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 5));
     } 
+
+    if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
+    {
+        quote.precise = params_.symbol_config[quote.symbol].PricePrecision;
+        quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
+    }
 
     // check_exchange_volume(quote);
 
@@ -859,6 +865,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
         v->publish4Hedge(quote.symbol, ptrData, NULL);
     }
 
+    
     {
         std::lock_guard<std::mutex> lk(mutex_datas_);
         datas_[quote.symbol] = quote;    

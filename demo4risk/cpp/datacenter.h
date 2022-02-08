@@ -233,7 +233,7 @@ public:
     ~DataCenter();
 
     // 回调行情通知
-    void add_quote(const SInnerQuote& quote);
+    void add_quote(SInnerQuote& quote);
     // 触发重新计算，并下发行情给所有client
     void change_account(const AccountInfo& info);
     // 触发重新计算，并下发行情给所有client
