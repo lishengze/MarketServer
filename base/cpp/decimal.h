@@ -324,7 +324,11 @@ struct SDecimal {
     }
 
     SDecimal & operator*=(const double &rhs) {
-        data_.real_.value_ *= rhs;
+        // data_.real_.value_ *= rhs;
+
+        double raw_value = get_value();
+        double d_result = raw_value * rhs;
+        this->from(d_result);
         return *this;
     }
 };
