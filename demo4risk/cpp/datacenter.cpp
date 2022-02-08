@@ -236,11 +236,12 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
 
-        // if (src.symbol == "BTC_USDT")
-        // {
-        //     LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
-        //                 + src.symbol + " " + quote_str(src, 8));
-        // } 
+        if (src.symbol == "BTC_USD")
+        {
+            LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+            LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
+                        + src.symbol + " " + quote_str(src, 2));
+        } 
                     
     }
     catch(const std::exception& e)
