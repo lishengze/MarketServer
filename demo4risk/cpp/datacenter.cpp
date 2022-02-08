@@ -439,10 +439,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
   
     }
 
-    if (src.symbol == "BTC_USD")
-    {
-        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-    }     
+    // if (src.symbol == "BTC_USD")
+    // {
+    //     LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+    // }     
 
     // if (src.symbol == "BTC_USDT")
     // {
@@ -638,10 +638,10 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
-    if (src.symbol == "BTC_USD")
-    {
-        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-    } 
+    // if (src.symbol == "BTC_USD")
+    // {
+    //     LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+    // } 
 
     return src;
 }
@@ -755,10 +755,10 @@ SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
     }
 
-        if (src.symbol == "BTC_USD")
-        {
-            LOG_DEBUG("\nAfter DefaultWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-        } 
+        // if (src.symbol == "BTC_USD")
+        // {
+        //     LOG_DEBUG("\nAfter DefaultWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+        // } 
 
 
     return src;
@@ -788,10 +788,10 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             // }
         }
 
-        if (src.symbol == "BTC_USD")
-        {
-            LOG_DEBUG("\nAfter PrecisionWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-        } 
+        // if (src.symbol == "BTC_USD")
+        // {
+        //     LOG_DEBUG("\nAfter PrecisionWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+        // } 
 
     }
     catch(const std::exception& e)
@@ -835,10 +835,10 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(SInnerQuote& quote)
 {    
-    if (quote.symbol == "BTC_USD")
-    {
-        LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 5));
-    } 
+    // if (quote.symbol == "BTC_USD")
+    // {
+    //     LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 5));
+    // } 
 
     if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
     {
@@ -1305,7 +1305,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
             + ", bias_price: " + price.get_str_value() 
             + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
-            + ", bias_value: " + std::to_string(config.OtcOffset));
+            + ", bias_value: " + std::to_string(config.OtcOffset)
+            + ", precise: " + std::to_string(precise));
 
     price.scale(precise, is_ask);
     return QuoteResponse_Result_OK;
