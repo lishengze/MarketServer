@@ -749,10 +749,10 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             int price_precision = ctx.params.symbol_config[src.symbol].PricePrecision;
             int amount_precision = ctx.params.symbol_config[src.symbol].AmountPrecision;
 
-            if (src.symbol == "BTC_USD")
-            {
-                LOG_DEBUG(quote_str(src, 5));                        
-            }
+            // if (src.symbol == "BTC_USD")
+            // {
+            //     LOG_DEBUG(quote_str(src, 5));                        
+            // }
 
             set_depth_presion(src.asks, price_precision, amount_precision);
             set_depth_presion(src.bids, price_precision, amount_precision);
@@ -805,11 +805,11 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(const SInnerQuote& quote)
 {    
-    // if (quote.symbol == "BTC_USDT")
-    // {
-    //     LOG_DEBUG("\nOriginal Quote: " + " " 
-    //                 + quote.symbol + " " + quote_str(quote, 8));
-    // } 
+    if (quote.symbol == "BTC_USD")
+    {
+        LOG_DEBUG("\nOriginal Quote: " + " " 
+                    + quote.symbol + " " + quote_str(quote, 5));
+    } 
 
     // check_exchange_volume(quote);
 
