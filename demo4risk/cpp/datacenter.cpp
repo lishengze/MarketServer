@@ -432,6 +432,11 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
   
     }
 
+    if (src.symbol == "BTC_USD")
+    {
+        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+    }     
+
     // if (src.symbol == "BTC_USDT")
     // {
     //     LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " 
@@ -626,6 +631,11 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
+    if (src.symbol == "BTC_USD")
+    {
+        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+    } 
+
     return src;
 }
 
@@ -706,11 +716,12 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
     }
 
-    // if (src.symbol == "BTC_USDT")
-    // {
-    //     LOG_DEBUG("\nAfter OrderBookWorker: " + " " 
-    //                 + src.symbol + " " + quote_str(src, 8));
-    // }     
+   
+
+        if (src.symbol == "BTC_USD")
+        {
+            LOG_DEBUG("\nAfter OrderBookWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+        } 
 
     return src;
     }
@@ -737,6 +748,12 @@ SInnerQuote& DefaultWorker::process(SInnerQuote& src, PipelineContent& ctx)
         }
     }
 
+        if (src.symbol == "BTC_USD")
+        {
+            LOG_DEBUG("\nAfter DefaultWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+        } 
+
+
     return src;
 }
 
@@ -757,12 +774,18 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             set_depth_presion(src.asks, price_precision, amount_precision);
             set_depth_presion(src.bids, price_precision, amount_precision);
 
-            if (src.symbol == "BTC_USD")
-            {
-                LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());        
-                LOG_DEBUG(quote_str(src, 5));                  
-            }
+            // if (src.symbol == "BTC_USD")
+            // {
+            //     LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());        
+            //     LOG_DEBUG(quote_str(src, 5));                  
+            // }
         }
+
+        if (src.symbol == "BTC_USD")
+        {
+            LOG_DEBUG("\nAfter PrecisionWorker: " + " " + src.symbol + " " + quote_str(src, 2));
+        } 
+
     }
     catch(const std::exception& e)
     {
@@ -807,8 +830,7 @@ void DataCenter::add_quote(const SInnerQuote& quote)
 {    
     if (quote.symbol == "BTC_USD")
     {
-        LOG_DEBUG("\nOriginal Quote: " + " " 
-                    + quote.symbol + " " + quote_str(quote, 5));
+        LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 5));
     } 
 
     // check_exchange_volume(quote);
