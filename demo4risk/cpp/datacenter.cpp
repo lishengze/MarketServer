@@ -749,16 +749,18 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             int price_precision = ctx.params.symbol_config[src.symbol].PricePrecision;
             int amount_precision = ctx.params.symbol_config[src.symbol].AmountPrecision;
 
+            if (src.symbol == "BTC_USD")
+            {
+                LOG_DEBUG(quote_str(src, 5));                        
+            }
+
             set_depth_presion(src.asks, price_precision, amount_precision);
             set_depth_presion(src.bids, price_precision, amount_precision);
 
             if (src.symbol == "BTC_USD")
             {
-                // LOG_DEBUG("price_precision: " + std::to_string(price_precision) 
-                //         + ", amount_precision: " + std::to_string(amount_precision)
-                //         + "\n" + quote_str(src, 5));
-
-                LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());                        
+                LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());        
+                LOG_DEBUG(quote_str(src, 5));                  
             }
         }
     }
