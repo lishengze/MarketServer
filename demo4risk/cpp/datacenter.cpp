@@ -242,12 +242,12 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
 
-        if (src.symbol == "BTC_USD")
-        {
-            LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
-            LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
-                        + src.symbol + " " + quote_str(src, 2));
-        } 
+        // if (src.symbol == "BTC_USD")
+        // {
+        //     LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+        //     LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
+        //                 + src.symbol + " " + quote_str(src, 2));
+        // } 
                     
     }
     catch(const std::exception& e)
@@ -1309,6 +1309,9 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
             + ", precise: " + std::to_string(precise));
 
     price.scale(precise, is_ask);
+
+    LOG_DEBUG("Scaled Price: " + price.get_str_value());
+    
     return QuoteResponse_Result_OK;
 }
 
