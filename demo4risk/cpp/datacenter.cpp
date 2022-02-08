@@ -155,7 +155,9 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
 
     for( const auto& v: depths )
     {
-        SDecimal scaledPrice = v.first;
+        // SDecimal scaledPrice = v.first;
+
+        double scaledPrice = v.first.get_value();
 
         if (config.PriceOffsetKind == 1)
         {
@@ -186,7 +188,9 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
         }
 
         dst[v.first].mix_exchanges(v.second, 0);
-        result[scaledPrice].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
+
+        SDecimal decimal_value(scaledPrice);
+        result[decimal_value].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
     }
 
     dst.swap(result);
