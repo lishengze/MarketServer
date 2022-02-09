@@ -234,9 +234,13 @@ void KlineProcess::request_kline_package(PackagePtr package)
 
                 if (rsp_package)
                 {
-                    if (rsp_package->PackageID() == UT_FID_RspKLineData)
+                    if (rsp_package->Tid() == UT_FID_RspKLineData)
                     {
                         init_subed_update_kline_data(rsp_package, pReqKlineData);
+                    }
+                    else
+                    {
+                        LOG_ERROR("rsp_package error package id");
                     }
 
                     process_engine_->deliver_response(rsp_package);
@@ -379,8 +383,6 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     assign(last_kline->symbol, kline_data->symbol);                
                 }
 
-
-
                 if (kline_data->index - last_kline->index >= last_kline->frequency_)
                 {
                     // 推送更新作为下一个 k 线时间数据;
@@ -414,7 +416,6 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                 {
                     // 推送更新作为当前 k 线时间数据;
                     KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
-                    // cur_kline_data->index = kline_update.last_update_time_;
 
                     std::stringstream s_log;
                     s_log << "old : " << cur_kline_data->symbol << " "
@@ -430,14 +431,12 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     if (rsp_package)
                     {
                         rsp_package->prepare_response(UT_FID_RspKLineData, ID_MANAGER->get_id());
-
                         process_engine_->deliver_response(rsp_package);
                     }  
                     else
                     {
                         LOG_ERROR("CreatePackage<RspKLineData> Failed!");
                     }
-
                 }
 
             }
@@ -986,12 +985,22 @@ void KlineProcess::init_subed_update_kline_data(PackagePtr rsp_package, ReqKLine
                 || sub_updated_kline_map_[symbol].find(freq) != sub_updated_kline_map_[symbol].end())
                 {
                     sub_updated_kline_map_[symbol][freq] = pRspKlineData->kline_data_vec_[pRspKlineData->kline_data_vec_.size()-1];
+
+                    LOG_INFO("Add Sub: " + symbol + ", freq: " + std::to_string(freq));
+                }
+                else
+                {
+                    LOG_INFO("Sub: " + symbol + ", freq: " + std::to_string(freq) + " already stored!");
                 }
             }
             else
             {
                 LOG_ERROR("pRspKlineData->kline_data_vec_ is Empty!");
             }
+        }
+        else
+        {
+            LOG_ERROR("pRspKlineData is NULL");
         }
     }
     catch(const std::exception& e)

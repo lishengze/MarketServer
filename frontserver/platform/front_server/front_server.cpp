@@ -264,7 +264,12 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         if (p_rsp_kline_data)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
-                          
+
+            if (p_rsp_kline_data->is_update_)
+            {
+                LOG_INFO(kline_data_str);
+            }
+                                      
             if (p_rsp_kline_data->is_update_)
             {
                 string symbol = p_rsp_kline_data->symbol_;
