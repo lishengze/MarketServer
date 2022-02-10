@@ -1485,7 +1485,7 @@ void DataCenter::check_symbol()
         {
             const TSymbol& symbol = iter.first;
 
-            LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
+            // LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
 
             if (iter.second == 0)
             {
