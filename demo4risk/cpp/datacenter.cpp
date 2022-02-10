@@ -541,7 +541,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         s_s << iter.first << ": " << iter.second << "\n";
     }
 
-    if (src.symbol == "ETH_USD")
+    if (src.symbol == "BTC_USDT" || src.symbol == "ETH_USD")
     {
         LOG_DEBUG(s_s.str());
     }
@@ -656,7 +656,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
-    if (src.symbol == "ETH_USD")
+    if (src.symbol == "BTC_USDT" || src.symbol == "ETH_USD")
     {
         LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 5));
     } 
