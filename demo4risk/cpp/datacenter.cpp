@@ -1207,8 +1207,13 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
             + ", bias_price: " + price.get_str_value() 
             + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
-            + ", bias_value: " + std::to_string(config.OtcOffset));
+            + ", bias_value: " + std::to_string(config.OtcOffset)
+            + ", precise: " + std::to_string(precise));
+
     price.scale(precise, is_ask);
+
+    LOG_DEBUG("Scaled Price: " + price.get_str_value());
+    
     return QuoteResponse_Result_OK;
 }
 
