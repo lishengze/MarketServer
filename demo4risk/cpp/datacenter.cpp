@@ -541,6 +541,11 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         s_s << iter.first << ": " << iter.second << "\n";
     }
 
+    if (src.symbol == "ETH_USD")
+    {
+        LOG_DEBUG(s_s.str());
+    }
+
     // 逐档从总余额中扣除资金消耗
     for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
     {
