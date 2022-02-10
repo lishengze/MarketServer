@@ -547,11 +547,14 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     }
 
     // 卖的方向，从bids列表中控制量;
-    for( auto iter = src.bids.begin() ; iter != src.bids.end() ; iter++ ) 
+    bool is_ctrl_over = false;
+    for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
         // SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
+
+        if (is_ctrl_over) continue;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second;
@@ -561,9 +564,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 << " need_amount: " + need_amount.get_str_value()  
                 << ", remain_amount: " + std::to_string(remain_amount) << "\n";
             
-            if( remain_amount < need_amount.get_value() ) 
+            if( remain_amount < need_amount.get_value()) 
             {
-                iter2->second = 0;
+                iter2->second = remain_amount / iter->first.get_value();
+                depth.total_volume += iter2->second;
+                is_ctrl_over = true;
+                sell_total_amounts[exchange] = 0;
                 break;
             } 
             else 
@@ -585,12 +591,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     }
     
     // 买的方向，从asks列表中控制量;
-    for( auto iter = src.asks.rbegin() ; iter != src.asks.rend() ; iter++ ) 
+    is_ctrl_over = false;
+    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
-        // SDecimal ori_total_volume = depth.total_volume;
         depth.total_volume = 0;
         
+        if (is_ctrl_over) continue;
         for( auto iter2 = depth.exchanges.begin() ; iter2 != depth.exchanges.end() ; iter2++ ) {
             const TExchange& exchange = iter2->first;
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
@@ -600,11 +607,16 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 << " need_amount: " + need_amount.get_str_value()  
                 << ", remain_amount: " + std::to_string(remain_amount) << "\n";
 
-            if( remain_amount < need_amount.get_value() ) {
-                iter2->second = 0;
+            if( remain_amount < need_amount.get_value() ) 
+            {
+                iter2->second = remain_amount / iter->first.get_value();
+                depth.total_volume += iter2->second;
+                is_ctrl_over = true;
+                buy_total_amounts[exchange] = 0;
                 break;
-                // LOG_DEBUG("Buy, p: " + iter->first.get_str_value() + " " + exchange + " v: " + need_amount.get_str_value() + " set to 0");
-            } else {
+            } 
+            else 
+            {
                 buy_total_amounts[exchange] -= need_amount.get_value();
                 depth.total_volume += iter2->second;
             }
@@ -644,10 +656,10 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
-    // if (src.symbol == "BTC_USD")
-    // {
-    //     LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-    // } 
+    if (src.symbol == "ETH_USD")
+    {
+        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 5));
+    } 
 
     return src;
 }
