@@ -522,7 +522,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     std::stringstream s_s;
 
-    s_s << ctx.params.account_config.hedage_account_str() << "\n";
+    s_s << ctx.params.account_config.hedage_account_str();
     
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
     ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_config_map, sell_total_amounts, false);
@@ -546,8 +546,8 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         LOG_DEBUG(s_s.str());
     }
 
-    // 逐档从总余额中扣除资金消耗
-    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; iter++ ) 
+    // 卖的方向，从bids列表中控制量;
+    for( auto iter = src.bids.begin() ; iter != src.bids.end() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
         // SDecimal ori_total_volume = depth.total_volume;
@@ -574,17 +574,18 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; ) 
+    for( auto iter = src.bids.begin() ; iter != src.bids.end() ; ) 
     {
         SInnerDepth& depth = iter->second;
         if( depth.total_volume.is_zero() ) {
-            src.asks.erase(iter++);
+            src.bids.erase(iter++);
         } else {
             iter++;
         }
     }
     
-    for( auto iter = src.bids.rbegin() ; iter != src.bids.rend() ; iter++ ) 
+    // 买的方向，从asks列表中控制量;
+    for( auto iter = src.asks.rbegin() ; iter != src.asks.rend() ; iter++ ) 
     {
         SInnerDepth& depth = iter->second;
         // SDecimal ori_total_volume = depth.total_volume;
@@ -610,11 +611,11 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    for( auto iter = src.bids.begin() ; iter != src.bids.end() ; ) 
+    for( auto iter = src.asks.begin() ; iter != src.asks.end() ; ) 
     {
         SInnerDepth& depth = iter->second;
         if( depth.total_volume.is_zero() ) {
-            src.bids.erase(iter++);
+            src.asks.erase(iter++);
         } else {
             iter++;
         }
@@ -1213,7 +1214,7 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     price.scale(precise, is_ask);
 
     LOG_DEBUG("Scaled Price: " + price.get_str_value());
-    
+
     return QuoteResponse_Result_OK;
 }
 
@@ -1338,7 +1339,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
 {
 
     string direction_str = direction==QuoteRequest_Direction_BUY?"buy":"sell";
-    LOG_INFO("[otc_query] " + exchange + "." + symbol 
+    LOG_DEBUG("[otc_query] " + exchange + "." + symbol 
             + ", direction=" + direction_str
             + ", volume=" + std::to_string(volume)
             + ", amount=" + std::to_string(amount));

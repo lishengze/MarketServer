@@ -188,6 +188,7 @@ struct AccountInfo
     {
         if (hedge_accounts_.size() == 0) return "";
         std::stringstream s_s;
+        s_s << "\n";
         for (auto iter:hedge_accounts_)
         {
             s_s << iter.first << ", " << iter.second.str() << "\n";
