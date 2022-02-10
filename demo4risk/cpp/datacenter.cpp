@@ -837,9 +837,9 @@ DataCenter::DataCenter() {
     {
         pipeline_.add_worker(&orderbook_worker_);
     }
-    pipeline_.add_worker(&quotebias_worker_);
-    pipeline_.add_worker(&watermark_worker_);
-    pipeline_.add_worker(&pricesion_worker_);
+    // pipeline_.add_worker(&quotebias_worker_);
+    // pipeline_.add_worker(&watermark_worker_);
+    // pipeline_.add_worker(&pricesion_worker_);
 
     start_check_symbol();
 }
