@@ -57,6 +57,7 @@ struct HedgeAccountInfo
 
     std::string str()
     {
+        if (currencies.size() == 0) return "";
         std::stringstream s_s;
         for (auto iter:currencies)
         {
@@ -185,6 +186,7 @@ struct AccountInfo
 
     string hedage_account_str()
     {
+        if (hedge_accounts_.size() == 0) return "";
         std::stringstream s_s;
         for (auto iter:hedge_accounts_)
         {
