@@ -529,7 +529,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_config_map, buy_total_amounts, true);
 
     
-    s_s << "\nBefore Risk sell_total_amounts " << sell_currency << "\n";
+    s_s << "Before Risk \nsell_total_amounts " << sell_currency << "\n";
     for (auto iter:sell_total_amounts)
     {
         s_s << iter.first << ": " << iter.second << "\n";
@@ -658,7 +658,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         
     if (src.symbol == "ETH_USD")
     {
-        LOG_DEBUG("\nAfter AccountAjdustWorker: " + " " + src.symbol + " " + quote_str(src, 5));
+        LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 5));
     } 
 
     return src;
