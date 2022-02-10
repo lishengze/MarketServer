@@ -1037,7 +1037,7 @@ bool DataCenter::check_quote(SInnerQuote& quote)
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
-        int i = 0;
+        uint32 i = 0;
         for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
         {
             new_asks[iter->first] = iter->second;
