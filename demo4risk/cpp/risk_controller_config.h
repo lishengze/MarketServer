@@ -61,7 +61,10 @@ public:
 
             check_symbol_secs = js["check_symbol_secs"].get<int>();
 
-            UT_LOG_INFO(logger_, "Parse Config finish.");
+            if (!js["test_symbol"].is_null())
+            {
+                test_symbol = js["test_symbol"].get<string>();
+            }
         }
         catch (std::exception& e)
         {
@@ -92,6 +95,8 @@ public:
 
     bool account_risk_ctrl_open_{false};
     bool order_risk_ctrl_open_{false};
+
+    string test_symbol;
 
     // logger
     UTLogPtr logger_;
