@@ -76,7 +76,7 @@ void StreamEngine::start()
 
     config_client_.start(CONFIG->nacos_addr_, CONFIG->nacos_namespace_);    
 
-    kline_hubber_.recover_from_db();
+    kline_hubber_.start();
 }
 
 void StreamEngine::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote)

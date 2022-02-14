@@ -9,6 +9,8 @@
 #include "global_declare.h"
 #include "Log/log.h"
 
+#include <sstream>
+
 using njson = nlohmann::json;
 
 
@@ -65,6 +67,8 @@ public:
             {
                 test_symbol = js["test_symbol"].get<string>();
             }
+
+            cout << str() << endl;
         }
         catch (std::exception& e)
         {
@@ -74,6 +78,25 @@ public:
         {
             std::cerr << "Config Unknown Exception! " << std::endl;
         }
+    }
+
+    string str() 
+    {
+        string result;
+        stringstream s_s;
+        s_s << "grpc_quote_addr_:   " << grpc_quote_addr_ << "\n"
+            << "grpc_account_addr_: " << grpc_account_addr_ << "\n"
+            << "grpc_publish_addr_: " << grpc_publish_addr_ << "\n"
+            << "nacos_addr_:        " << nacos_addr_ << "\n"
+            << "nacos_namespace_:   " << nacos_namespace_ << "\n"
+            << "sample_symbol_:     " << sample_symbol_ << "\n"
+            << "dump_binary_only_:  " << dump_binary_only_ << "\n"
+            << "output_to_screen_:  " << output_to_screen_ << "\n"
+            << "account_risk_ctrl_open_: " << account_risk_ctrl_open_ << "\n"
+            << "order_risk_ctrl_open_:   " << order_risk_ctrl_open_ << "\n"
+            << "test_symbol:        " << test_symbol << "\n"
+            << "check_symbol_secs:  " << check_symbol_secs << "\n";
+        return s_s.str();
     }
 
 public:
@@ -97,11 +120,12 @@ public:
     bool order_risk_ctrl_open_{false};
 
     string test_symbol;
+    int     check_symbol_secs{5};
 
     // logger
     UTLogPtr logger_;
 
-    int     check_symbol_secs{5};
+    
 };
 
 

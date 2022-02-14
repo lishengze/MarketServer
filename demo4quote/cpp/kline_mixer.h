@@ -117,12 +117,17 @@ public:
     // restart from database;
     void recover_from_db();
 
+    void start();
+
+
 private:
     set<IKlinePusher*> callbacks_;
     IDataProvider* db_interface_;
 
     KlineCache min1_cache_;
     KlineCache min60_cache_;
+
+    std::thread   recover_thread_;
 };
 
 // 计算聚合K线

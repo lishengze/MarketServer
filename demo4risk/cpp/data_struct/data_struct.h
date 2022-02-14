@@ -110,9 +110,9 @@ struct HedgeConfig
     std::string str() const {
 
         stringstream s_obj;
-        s_obj << "symbol: " << symbol << "\n"
-              << "exchange: " << exchange << "\n"
-              << "BuyFundPercent: " << BuyFundPercent << "\n"
+        s_obj << "symbol: " << symbol << ","
+              << "exchange: " << exchange << ","
+              << "BuyFundPercent: " << BuyFundPercent << ","
               << "SellFundPercent: " << SellFundPercent << "\n";
         
         return s_obj.str();

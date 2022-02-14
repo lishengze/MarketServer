@@ -383,7 +383,16 @@ KlineHubber::KlineHubber()
 
 KlineHubber::~KlineHubber()
 {
+    if (recover_thread_.joinable())
+    {
+        recover_thread_.join();
+    }
+}
 
+
+void KlineHubber::start()
+{
+    recover_thread_ = std::thread(&KlineHubber::recover_from_db, this);
 }
 
 void KlineHubber::recover_from_db()

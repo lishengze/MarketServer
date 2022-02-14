@@ -523,6 +523,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     std::stringstream s_s;
 
     s_s << ctx.params.account_config.hedage_account_str();
+
+    s_s << "hedge_config: \n";
+    for (auto iter:hedge_config_map)
+    {
+        s_s << iter.second.str();
+    }
+    s_s << "\n";
     
     unordered_map<TExchange, double> sell_total_amounts, buy_total_amounts;
     ctx.params.account_config.get_hedge_amounts(sell_currency, hedge_config_map, sell_total_amounts, false);
@@ -541,7 +548,9 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         s_s << iter.first << ": " << iter.second << "\n";
     }
 
-    if (src.symbol == "BTC_USDT" || src.symbol == "ETH_USD")
+
+
+    if (src.symbol == CONFIG->test_symbol)
     {
         LOG_DEBUG(s_s.str());
     }
@@ -560,7 +569,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             const SDecimal& need_amount = iter2->second;
             double remain_amount = sell_total_amounts[exchange];
 
-            s_s << "Ask " << exchange << " p: " + iter->first.get_str_value() + " " 
+            s_s << "bid " << exchange << " p: " + iter->first.get_str_value() + " " 
                 << " need_amount: " + need_amount.get_str_value()  
                 << ", remain_amount: " + std::to_string(remain_amount) << "\n";
             
@@ -603,7 +612,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
             const SDecimal& need_amount = iter2->second * iter->first.get_value();
             double remain_amount = buy_total_amounts[exchange];
             
-            s_s << "Bid " << exchange << " p: " + iter->first.get_str_value() + " " 
+            s_s << "ask " << exchange << " p: " + iter->first.get_str_value() + " " 
                 << " need_amount: " + need_amount.get_str_value()  
                 << ", remain_amount: " + std::to_string(remain_amount) << "\n";
 
@@ -633,21 +642,22 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         }
     }
 
-    s_s << "\nAfter Risk sell_total_amounts " << sell_currency << "\n";
-    for (auto iter:sell_total_amounts)
-    {
-        s_s << iter.first << ": " << iter.second << "\n";
-    }
+    // s_s << "\nAfter Risk sell_total_amounts " << sell_currency << "\n";
+    // for (auto iter:sell_total_amounts)
+    // {
+    //     s_s << iter.first << ": " << iter.second << "\n";
+    // }
 
-    s_s << "buy_total_amounts " << buy_currency << "\n";
-    for (auto iter:buy_total_amounts)
-    {
-        s_s << iter.first << ": " << iter.second << "\n";
-    }
+    // s_s << "buy_total_amounts " << buy_currency << "\n";
+    // for (auto iter:buy_total_amounts)
+    // {
+    //     s_s << iter.first << ": " << iter.second << "\n";
+    // }
 
-    if (src.asks.size() == 0 || src.bids.size() == 0)
+
+    if (src.symbol == CONFIG->test_symbol)
     {
-        // LOG_DEBUG(s_s.str());
+        LOG_DEBUG(s_s.str());
     }
 
     // if (src.symbol == "BTC_USDT")
@@ -853,9 +863,9 @@ DataCenter::~DataCenter() {
 
 void DataCenter::add_quote(SInnerQuote& quote)
 {    
-    // if (quote.symbol == "BTC_USD")
+    // if (quote.symbol == CONFIG->test_symbol)
     // {
-    //     LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 5));
+    //     LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 3));
     // } 
 
     if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
