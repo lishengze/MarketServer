@@ -213,8 +213,8 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
 
     // LOG_DEBUG(channel);
 
-    LOG_TRACE(channel);
-    
+    // LOG_TRACE(channel);
+
     LOG->record_input_info(channel);
 
     if( !decode_channelname(channel, channel_type, symbol, exchange) )
