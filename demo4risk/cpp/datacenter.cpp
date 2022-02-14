@@ -661,10 +661,10 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // }
 
 
-    if (src.symbol == CONFIG->test_symbol)
-    {
-        LOG_DEBUG(s_s.str());
-    }
+    // if (src.symbol == CONFIG->test_symbol)
+    // {
+    //     LOG_DEBUG(s_s.str());
+    // }
 
     // if (src.symbol == "BTC_USDT")
     // {
