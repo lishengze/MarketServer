@@ -50,6 +50,8 @@ public:
             LOG_WARN("\nBefore "+ worker_name + quote_str(src));
         }  
 
+        std::lock_guard<std::mutex> lk(process_mutex_);
+
         SInnerQuote& tmp = this->process(src, ctx);
 
         if (tmp.asks.size() == 0 && tmp.bids.size() == 0)
@@ -75,7 +77,7 @@ public:
     string worker_name{""};
 private:
     Worker *next_ = nullptr;
-    std::mutex      filter_quote_mutex_;
+    std::mutex      process_mutex_;
 };
 
 class DefaultWorker : public Worker

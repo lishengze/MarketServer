@@ -495,6 +495,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 {
     // set_snap(src);
 
+    if (src.symbol == CONFIG->test_symbol)
+    {
+        LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 5));
+    } 
+
+
     // 获取配置
     map<TExchange, HedgeConfig>& hedge_config_map = ctx.params.hedge_config[src.symbol];
 
@@ -666,7 +672,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
-    if (CONFIG->test_symbol != "" && src.symbol == CONFIG->test_symbol)
+    if (src.symbol == CONFIG->test_symbol)
     {
         LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 5));
     } 
