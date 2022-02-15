@@ -624,7 +624,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
             if( remain_amount < need_amount.get_value() ) 
             {
-                iter2->second = remain_amount;
+                iter2->second = remain_amount / iter->first.get_value();
                 depth.total_volume += iter2->second;
                 is_ctrl_over = true;
                 buy_total_amounts[exchange] = 0;
