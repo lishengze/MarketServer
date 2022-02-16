@@ -545,13 +545,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     s_s << "Before Risk \nsell_total_amounts " << sell_currency << "\n";
     for (auto iter:sell_total_amounts)
     {
-        s_s << iter.first << ": " << iter.second << "\n";
+        s_s << iter.first << ": " << std::to_string(iter.second) << "\n";
     }
 
     s_s << "buy_total_amounts " << buy_currency << "\n";
     for (auto iter:buy_total_amounts)
     {
-        s_s << iter.first << ": " << iter.second << "\n";
+        s_s << iter.first << ": " << std::to_string(iter.second) << "\n";
     }
 
     if (src.symbol == CONFIG->test_symbol)
