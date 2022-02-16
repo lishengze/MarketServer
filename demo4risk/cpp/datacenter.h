@@ -61,7 +61,7 @@ public:
 
         if (check_abnormal_quote(src))
         {
-            LOG_WARN("\nAfter "+ worker_name + quote_str(src));
+            // LOG_WARN("\nAfter "+ worker_name + quote_str(src));
         }          
 
         if( next_ ) {            
