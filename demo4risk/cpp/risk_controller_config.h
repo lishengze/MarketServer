@@ -33,7 +33,6 @@ public:
             //string WorkFolder = utrade::pandora::get_module_path();
             // append the prefix
             //string intact_file_name = WorkFolder + file_name;
-            UT_LOG_INFO(logger_, "System Parse Config File " << file_name);
             // read the config file
             std::ifstream in_config(file_name);
             std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
@@ -58,25 +57,71 @@ public:
             dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
 
-            account_risk_ctrl_open_ = js["account_risk_ctrl_open"].get<bool>();
-            order_risk_ctrl_open_ = js["order_risk_ctrl_open"].get<bool>();
 
-            check_symbol_secs = js["check_symbol_secs"].get<int>();
+            if (js["account_risk_ctrl_open"].is_null())
+            {
+                account_risk_ctrl_open_     = js["account_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need account_risk_ctrl_open");
+            }
+
+            if (js["order_risk_ctrl_open"].is_null())
+            {
+                order_risk_ctrl_open_       = js["order_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need order_risk_ctrl_open");
+            }
+
+            if (js["bias_risk_ctrl_open"].is_null())
+            {
+                bias_risk_ctrl_open_        = js["bias_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need bias_risk_ctrl_open");
+            }
+
+            if (js["watermark_risk_ctrl_open"].is_null())
+            {
+                watermark_risk_ctrl_open_   = js["watermark_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need watermark_risk_ctrl_open");
+            }
+
+            if (js["pricesion_risk_ctrl_open"].is_null())
+            {
+                pricesion_risk_ctrl_open_   = js["pricesion_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need pricesion_risk_ctrl_open");
+            }
+
+            if (js["check_symbol_secs"].is_null())
+            {
+                check_symbol_secs = js["check_symbol_secs"].get<int>();
+            }
+            else
+            {
+                LOG_ERROR("Need check_symbol_secs");
+            }          
 
             if (!js["test_symbol"].is_null())
             {
                 test_symbol = js["test_symbol"].get<string>();
             }
 
-            cout << str() << endl;
+            LOG_INFO(str());
         }
         catch (std::exception& e)
         {
-            std::cerr << "Config parse exception: " << e.what() << "\n";
-        }
-        catch (...)
-        {
-            std::cerr << "Config Unknown Exception! " << std::endl;
+            LOG_ERROR(e.what());
         }
     }
 
@@ -118,6 +163,9 @@ public:
 
     bool account_risk_ctrl_open_{false};
     bool order_risk_ctrl_open_{false};
+    bool bias_risk_ctrl_open_{false};
+    bool watermark_risk_ctrl_open_{false};
+    bool pricesion_risk_ctrl_open_{false};
 
     string test_symbol;
     int     check_symbol_secs{5};
@@ -132,6 +180,9 @@ public:
 #define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
 #define ACCOUNT_RISKCTRL_OPEN CONFIG->account_risk_ctrl_open_
 #define ORDER_RISKCTRL_OPEN CONFIG->order_risk_ctrl_open_
+#define BIAS_RISKCTRL_OPEN CONFIG->bias_risk_ctrl_open_
+#define WATERMARK_RISKCTRL_OPEN CONFIG->watermark_risk_ctrl_open_
+#define PRICESION_RISKCTRL_OPEN CONFIG->pricesion_risk_ctrl_open_
 
 #define _log_and_print(fmt, ...)                                     \
     do {                                                             \
