@@ -1051,6 +1051,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         LOG_WARN("\n" + newQuote.symbol + " _publish_quote \n" + quote_str(newQuote));
     }    
 
+    if (newQuote.symbol == CONFIG->test_symbol)
+    {
+        LOG_DEBUG("\nPUBLISH: " + quote_str(newQuote, 3));
+    }
     
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
