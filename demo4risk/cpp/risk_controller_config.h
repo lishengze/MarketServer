@@ -58,7 +58,7 @@ public:
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
 
 
-            if (js["account_risk_ctrl_open"].is_null())
+            if (!js["account_risk_ctrl_open"].is_null())
             {
                 account_risk_ctrl_open_     = js["account_risk_ctrl_open"].get<bool>();
             }
@@ -67,7 +67,7 @@ public:
                 LOG_ERROR("Need account_risk_ctrl_open");
             }
 
-            if (js["order_risk_ctrl_open"].is_null())
+            if (!js["order_risk_ctrl_open"].is_null())
             {
                 order_risk_ctrl_open_       = js["order_risk_ctrl_open"].get<bool>();
             }
@@ -76,7 +76,7 @@ public:
                 LOG_ERROR("Need order_risk_ctrl_open");
             }
 
-            if (js["bias_risk_ctrl_open"].is_null())
+            if (!js["bias_risk_ctrl_open"].is_null())
             {
                 bias_risk_ctrl_open_        = js["bias_risk_ctrl_open"].get<bool>();
             }
@@ -85,7 +85,7 @@ public:
                 LOG_ERROR("Need bias_risk_ctrl_open");
             }
 
-            if (js["watermark_risk_ctrl_open"].is_null())
+            if (!js["watermark_risk_ctrl_open"].is_null())
             {
                 watermark_risk_ctrl_open_   = js["watermark_risk_ctrl_open"].get<bool>();
             }
@@ -94,7 +94,7 @@ public:
                 LOG_ERROR("Need watermark_risk_ctrl_open");
             }
 
-            if (js["pricesion_risk_ctrl_open"].is_null())
+            if (!js["pricesion_risk_ctrl_open"].is_null())
             {
                 pricesion_risk_ctrl_open_   = js["pricesion_risk_ctrl_open"].get<bool>();
             }
@@ -103,7 +103,7 @@ public:
                 LOG_ERROR("Need pricesion_risk_ctrl_open");
             }
 
-            if (js["check_symbol_secs"].is_null())
+            if (!js["check_symbol_secs"].is_null())
             {
                 check_symbol_secs = js["check_symbol_secs"].get<int>();
             }
