@@ -554,12 +554,12 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         s_s << iter.first << ": " << iter.second << "\n";
     }
 
-
-
     if (src.symbol == CONFIG->test_symbol)
     {
         LOG_DEBUG(s_s.str());
     }
+
+    s_s.clear();
 
     // 卖的方向，从bids列表中控制量;
     bool is_ctrl_over = false;
@@ -579,7 +579,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
                 << " need_amount: " + need_amount.get_str_value()  
                 << ", remain_amount: " + std::to_string(remain_amount) << "\n";
             
-            if( remain_amount < need_amount.get_value()) 
+            if(remain_amount < need_amount.get_value())
             {
                 iter2->second = remain_amount;
                 depth.total_volume += iter2->second;
@@ -661,10 +661,10 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // }
 
 
-    // if (src.symbol == CONFIG->test_symbol)
-    // {
-    //     LOG_DEBUG(s_s.str());
-    // }
+    if (src.symbol == CONFIG->test_symbol)
+    {
+        LOG_DEBUG(s_s.str());
+    }
 
     // if (src.symbol == "BTC_USDT")
     // {
