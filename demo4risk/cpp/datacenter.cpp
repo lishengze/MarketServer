@@ -226,10 +226,10 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
-    if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
-    {
-        LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
-    } 
+        if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+        {
+            LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
+        } 
 
 
         if( ctx.params.quote_config.find(src.symbol) != ctx.params.quote_config.end() ) 
@@ -1085,10 +1085,10 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
         LOG_WARN("\n" + newQuote.symbol + " _publish_quote \n" + quote_str(newQuote));
     }    
 
-    if (newQuote.symbol == CONFIG->test_symbol)
-    {
-        LOG_DEBUG("\nPUBLISH: " + quote_str(newQuote, 3));
-    }
+    // if (newQuote.symbol == CONFIG->test_symbol)
+    // {
+    //     LOG_DEBUG("\nPUBLISH: " + quote_str(newQuote, 3));
+    // }
     
     std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
     innerquote_to_msd2(newQuote, ptrData.get(), true);    
