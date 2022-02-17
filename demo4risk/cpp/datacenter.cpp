@@ -226,6 +226,12 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
+    if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
+    } 
+
+
         if( ctx.params.quote_config.find(src.symbol) != ctx.params.quote_config.end() ) 
         {
             SInnerQuote tmp;
@@ -241,6 +247,12 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
         {
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
+
+    if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 5));
+    } 
+
 
         // if (src.symbol == "BTC_USD")
         // {
@@ -404,6 +416,11 @@ void WatermarkComputerWorker::thread_func() {
 SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
 
+    if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nBefore WatermarkComputerWorker: " + quote_str(src, 5));
+    } 
+
     set_snap(src);
     _calc_watermark();
     
@@ -450,6 +467,11 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
                 
+    if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + quote_str(src, 5));
+    } 
+
 
     return src;
 }
@@ -495,7 +517,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 {
     // set_snap(src);
 
-    if (src.symbol == CONFIG->test_symbol)
+    if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_ )
     {
         LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 5));
     } 
@@ -554,7 +576,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         s_s << iter.first << ": " << std::to_string(iter.second) << "\n";
     }
 
-    if (src.symbol == CONFIG->test_symbol)
+    if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_)
     {
         LOG_DEBUG(s_s.str());
     }
@@ -664,10 +686,10 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     // }
 
 
-    if (src.symbol == CONFIG->test_symbol)
-    {
-        LOG_DEBUG(s_s.str());
-    }
+    // if (src.symbol == CONFIG->test_symbol)
+    // {
+    //     LOG_DEBUG(s_s.str());
+    // }
 
     // if (src.symbol == "BTC_USDT")
     // {
@@ -675,7 +697,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     //                 + src.symbol + " " + quote_str(src, 8));
     // } 
         
-    if (src.symbol == CONFIG->test_symbol)
+    if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_)
     {
         LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 5));
     } 
@@ -687,6 +709,11 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {        
     try
     {
+    if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nBefore OrderBookWorker: " + quote_str(src, 5));
+    } 
+
     if (ctx.params.hedage_order_info.find(src.symbol) != ctx.params.hedage_order_info.end())
     {
         HedgeInfo& hedage_order_info = ctx.params.hedage_order_info[src.symbol];
@@ -762,10 +789,11 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
    
 
-        if (src.symbol == "BTC_USD")
-        {
-            LOG_DEBUG("\nAfter OrderBookWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-        } 
+    if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
+    {
+        LOG_DEBUG("\nAfter OrderBookWorker: " + quote_str(src, 5));
+    } 
+
 
     return src;
     }
@@ -805,6 +833,12 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
+        if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_ )
+        {
+            LOG_DEBUG("\nBefore PrecisionWorker: " + quote_str(src, 5));
+        } 
+
+
         if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
         {
             int price_precision = ctx.params.symbol_config[src.symbol].PricePrecision;
@@ -825,10 +859,10 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             // }
         }
 
-        // if (src.symbol == "BTC_USD")
-        // {
-        //     LOG_DEBUG("\nAfter PrecisionWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-        // } 
+        if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_ )
+        {
+            LOG_DEBUG("\nAfter PrecisionWorker: " + quote_str(src, 5));
+        } 
 
     }
     catch(const std::exception& e)
