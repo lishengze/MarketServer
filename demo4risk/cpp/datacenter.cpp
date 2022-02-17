@@ -226,14 +226,18 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
-        if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
-        {
-            LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
-        } 
 
 
         if( ctx.params.quote_config.find(src.symbol) != ctx.params.quote_config.end() ) 
         {
+
+            if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+            {
+                LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
+                LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+            } 
+
+
             SInnerQuote tmp;
             vector<pair<SDecimal, SInnerDepth>> depths;
             src.get_asks(depths);
@@ -248,10 +252,10 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
             LOG_WARN("QuoteConfig Can't Find " + src.symbol);
         }
 
-    if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
-    {
-        LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 5));
-    } 
+        if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+        {
+            LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 5));
+        } 
 
 
         // if (src.symbol == "BTC_USD")
