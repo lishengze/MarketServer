@@ -145,8 +145,11 @@ public:
             << "sample_symbol_:     " << sample_symbol_ << "\n"
             << "dump_binary_only_:  " << dump_binary_only_ << "\n"
             << "output_to_screen_:  " << output_to_screen_ << "\n"
+            << "fee_risk_ctrl_open_:     " << fee_risk_ctrl_open_ << "\n"
             << "account_risk_ctrl_open_: " << account_risk_ctrl_open_ << "\n"
             << "order_risk_ctrl_open_:   " << order_risk_ctrl_open_ << "\n"
+            << "watermark_risk_ctrl_open_:     " << watermark_risk_ctrl_open_ << "\n"
+            << "pricesion_risk_ctrl_open_:     " << fee_risk_ctrl_open_ << "\n"            
             << "test_symbol:        " << test_symbol << "\n"
             << "check_symbol_secs:  " << check_symbol_secs << "\n";
         return s_s.str();
