@@ -47,7 +47,7 @@ public:
 
         if (check_abnormal_quote(src))
         {
-            LOG_WARN("\nBefore "+ worker_name + quote_str(src));
+            // LOG_WARN("\nBefore "+ worker_name + quote_str(src));
         }  
 
         std::lock_guard<std::mutex> lk(process_mutex_);
@@ -111,6 +111,8 @@ public:
     virtual ~QuotePipeline();
 
     void add_worker(Worker* w) {
+        LOG_INFO("Add worker: " + w->worker_name);
+
         if( head_ == nullptr ) {
             head_ = w;
         }
