@@ -138,13 +138,19 @@ void ConfigurationClient::config_changed(const string& group, const string& data
 {
     try
     {
-        if( group == "BCTS" && dataid == "HedgeParams" ) {
+        if( group == "BCTS" && dataid == "HedgeParams" ) 
+        {
             hedge_params_ = configInfo;
-        } else if( group == "BCTS" && dataid == "SymbolParams" ) {
+        } 
+        else if( group == "BCTS" && dataid == "SymbolParams" ) 
+        {
             symbol_params_ = configInfo;
-        } else if( group == "BCTS" && dataid == "MarketRisk" ) {
+        } 
+        else if( group == "BCTS" && dataid == "MarketRisk" ) 
+        {
             risk_params_ = configInfo;
-        } else {
+        } 
+        else {
             _log_and_print("unknown configuration.");
             return;
         }

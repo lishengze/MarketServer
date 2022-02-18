@@ -57,6 +57,14 @@ public:
             dump_binary_only_ = bool(js["debug"]["dump_binary_only"].get<int>());
             output_to_screen_ = bool(js["debug"]["output_to_screen"].get<int>());
 
+            if (!js["fee_risk_ctrl_open"].is_null())
+            {
+                fee_risk_ctrl_open_         = js["fee_risk_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need account_risk_ctrl_open");
+            }
 
             if (!js["account_risk_ctrl_open"].is_null())
             {
@@ -161,6 +169,7 @@ public:
     // [for debug] output to screen
     bool output_to_screen_;
 
+    bool fee_risk_ctrl_open_{false};
     bool account_risk_ctrl_open_{false};
     bool order_risk_ctrl_open_{false};
     bool bias_risk_ctrl_open_{false};
@@ -178,9 +187,11 @@ public:
 
 
 #define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
-#define ACCOUNT_RISKCTRL_OPEN CONFIG->account_risk_ctrl_open_
-#define ORDER_RISKCTRL_OPEN CONFIG->order_risk_ctrl_open_
-#define BIAS_RISKCTRL_OPEN CONFIG->bias_risk_ctrl_open_
+
+#define FEE_RISKCTRL_OPEN       CONFIG->fee_risk_ctrl_open_
+#define ACCOUNT_RISKCTRL_OPEN   CONFIG->account_risk_ctrl_open_
+#define ORDER_RISKCTRL_OPEN     CONFIG->order_risk_ctrl_open_
+#define BIAS_RISKCTRL_OPEN      CONFIG->bias_risk_ctrl_open_
 #define WATERMARK_RISKCTRL_OPEN CONFIG->watermark_risk_ctrl_open_
 #define PRICESION_RISKCTRL_OPEN CONFIG->pricesion_risk_ctrl_open_
 

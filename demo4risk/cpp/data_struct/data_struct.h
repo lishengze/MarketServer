@@ -322,6 +322,18 @@ struct SymbolConfiguration {
 
         return s_obj.str();
     }  
+
+    std::string fee_info() const
+    {
+        stringstream s_obj;
+        s_obj << "SymbolId: " << SymbolId << "\n"
+              << "SymbolKind: " << SymbolKind << "\n"
+              << "FeeKind: " << FeeKind << "\n"
+              << "TakerFee: " << TakerFee << "\n"
+              << "MakerFee: " << MakerFee << "\n";                           
+
+        return s_obj.str();        
+    }
 };
 
 // 内部行情结构

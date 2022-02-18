@@ -258,9 +258,10 @@ void mix_quote(map<SDecimal, SDepth>& dst, const map<SDecimal, SDepth>& src, con
 
     for( auto iter = src.begin() ; iter != src.end() ; iter++ ) 
     {
-        SDecimal scaledPrice;
-        fee.compute(iter->first, scaledPrice, is_ask);
-        scaledPrice.scale(config.precise, is_ask);
+        SDecimal scaledPrice = iter->first;
+        // 手续费 与 精度控制都转到 风控进程去操作;
+        // fee.compute(iter->first, scaledPrice, is_ask);
+        // scaledPrice.scale(config.precise, is_ask); 
         dst[scaledPrice].volume_by_exchanges[exchange] = iter->second.volume;
     }
 }
