@@ -274,10 +274,12 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
+        // LOG_DEBUG(quote_str(src, 5));
+
         if( ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end() ) 
         {
 
-            if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+            if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
             {
                 LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 5));
                 LOG_DEBUG(ctx.params.symbol_config[src.symbol].fee_info());
@@ -297,7 +299,7 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
             LOG_WARN("symbol_config Can't Find " + src.symbol);
         }
 
-        if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
+        if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
         {
             LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 5));
         } 
