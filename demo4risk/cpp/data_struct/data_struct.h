@@ -439,6 +439,11 @@ struct HedgeInfo
 
     }
 
+    string str()
+    {
+        return symbol + ", ask_amount: " +std::to_string(ask_amount) + ", bid_amount: " + std::to_string(bid_amount);
+    }
+
     string symbol;
     double ask_amount{0};
     double bid_amount{0};

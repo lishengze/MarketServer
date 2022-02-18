@@ -556,49 +556,22 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {        
     try
     {
+
     if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nBefore OrderBookWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nBefore OrderBookWorker: " + quote_str(src, 3));
     } 
 
     if (ctx.params.hedage_order_info.find(src.symbol) != ctx.params.hedage_order_info.end())
     {
         HedgeInfo& hedage_order_info = ctx.params.hedage_order_info[src.symbol];
 
-        if (hedage_order_info.ask_amount > 0)
+        if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
         {
-            double ask_amount = hedage_order_info.ask_amount;
+            LOG_DEBUG(hedage_order_info.str());
+        } 
 
-            std::vector<SDecimal> delete_price;
-
-            for ( map<SDecimal, SInnerDepth>::reverse_iterator iter=src.asks.rbegin(); iter != src.asks.rend(); ++iter)
-            {
-                if (iter->second.total_volume > ask_amount)
-                {
-                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
-                    //         + ", amount: " + iter->second.total_volume.get_str_value() 
-                    //         + ", minus " + std::to_string(ask_amount));
-                    iter->second.total_volume -= ask_amount;
-                    break;
-                }
-                else
-                {
-                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
-                    //         + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
-                    //         + ", ask_amount " + std::to_string(ask_amount));
-                    ask_amount -= iter->second.total_volume.get_value();
-                    iter->second.total_volume = 0;
-                    delete_price.push_back(iter->first);
-                }
-            }
-
-            for (auto price: delete_price)
-            {
-                src.asks.erase(price);
-            }            
-        }
-
-        if (hedage_order_info.bid_amount > 0)
+        if (hedage_order_info.ask_amount > 0)
         {
             double bid_amount = hedage_order_info.bid_amount;
 
@@ -630,15 +603,53 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
             for (auto price: delete_price)
             {
                 src.bids.erase(price);
+            }         
+        }
+
+        if (hedage_order_info.bid_amount > 0)
+        {
+            double ask_amount = hedage_order_info.ask_amount;
+
+            std::vector<SDecimal> delete_price;
+
+            for ( map<SDecimal, SInnerDepth>::reverse_iterator iter=src.asks.rbegin(); iter != src.asks.rend(); ++iter)
+            {
+                if (iter->second.total_volume > ask_amount)
+                {
+                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                    //         + ", amount: " + iter->second.total_volume.get_str_value() 
+                    //         + ", minus " + std::to_string(ask_amount));
+                    iter->second.total_volume -= ask_amount;
+                    break;
+                }
+                else
+                {
+                    // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
+                    //         + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
+                    //         + ", ask_amount " + std::to_string(ask_amount));
+                    ask_amount -= iter->second.total_volume.get_value();
+                    iter->second.total_volume = 0;
+                    delete_price.push_back(iter->first);
+                }
+            }
+
+            for (auto price: delete_price)
+            {
+                src.asks.erase(price);
             }
         }
     }
-
-   
+    else
+    {
+        if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
+        {
+            LOG_DEBUG("No Order Info For " + src.symbol);
+        } 
+    }
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nAfter OrderBookWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nAfter OrderBookWorker: " + quote_str(src, 3));
     } 
 
 
