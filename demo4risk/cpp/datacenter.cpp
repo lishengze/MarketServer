@@ -416,13 +416,16 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
         if( is_ask ) {
             price *= ( 1 + config.OtcOffset); 
         } else {
+
+            if (config.OtcOffset > 1) config.OtcOffset = 1;
             price *= ( 1 - config.OtcOffset); 
         }
     }
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
-            price -= config.OtcOffset;
+            if (price < config.OtcOffset) price = 0;
+            else price -= config.OtcOffset;
         } else {
             price += config.OtcOffset;
         }        
@@ -524,15 +527,18 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         if( is_ask ) {
             price *= ( 1 + config.OtcOffset); 
         } else {
+
+            if (config.OtcOffset > 1) config.OtcOffset = 1;
             price *= ( 1 - config.OtcOffset); 
         }
     }
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
-            price += config.OtcOffset;
+            if (price < config.OtcOffset) price = 0;
+            else price -= config.OtcOffset;
         } else {
-            price -= config.OtcOffset;
+            price += config.OtcOffset;
         }        
     }
 
