@@ -243,12 +243,16 @@ bool TradeOrderEntity::process()
 
         bool is_trade = false;
 
-        cout << "\nTradeOrderEntity: \n"
-             << "symbol: " << symbol << "\n"
-             << "price: " << price << " \n"
-             << "amount: " << amount << " \n"
-             << "direction: " << direction << "\n"
-             << endl;
+        // cout << "\nTradeOrderEntity: \n"
+        //      << "symbol: " << symbol << "\n"
+        //      << "price: " << price << " \n"
+        //      << "amount: " << amount << " \n"
+        //      << "direction: " << direction << "\n"
+        //      << endl;
+
+        string sdirection = direction == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY? "buy": "sell";
+
+        LOG_DEBUG("Set Order: " + symbol + ", price: " + std::to_string(price) + ", amount: " + std::to_string(amount) + ", " + sdirection);
 
         cacher_->hedge_trade_order(symbol, price, amount, direction, is_trade);
 
