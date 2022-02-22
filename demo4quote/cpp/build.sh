@@ -4,7 +4,7 @@ cmake ../
 make -j4
 
 cp ../config.json ./
-cp ../../shell/*.sh ./
+cp ../../script/*.sh ./
 
 ./start.sh
 
