@@ -1,6 +1,6 @@
 {
     "grpc": {
-        "publish_addr": "0.0.0.0:9000"
+        "publish_addr": "0.0.0.0:8110"
     },
     "debug": {
         "mode": "realtime",
@@ -11,18 +11,14 @@
         "dump": 0
     },
     "nacos": {
-        "addr": "36.255.220.139:8848",
+        "addr": "10.8.78.83:8848",
         "namespace": "bcts"
     },
-    "reporter": {
-        "addr": "0.0.0.0",
-        "port": "8181"
-    },
     "redis_quote": {
-        "host": "36.255.220.139",
-        "port": 6379,
-        "password": "tradingtest",
+        "host": "127.0.0.1",
+        "port": 8379,
+        "password": "test_broker",
         "snap_interval": 10
     },
-    "check_secs": 5
+    "check_secs": 15
 }

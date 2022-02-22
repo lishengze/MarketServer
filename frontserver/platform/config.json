@@ -1,8 +1,8 @@
 {
-    "hub": 
+    "hub":
     {
-        "risk_controller_addr": "118.193.35.160:8111",
-        "stream_engine_addr": "118.193.35.160:8110"
+        "risk_controller_addr": "127.0.0.1:8111",
+        "stream_engine_addr": "127.0.0.1:8110"
     },
     "ws_server":
     {
@@ -18,5 +18,5 @@
         "frequency_numb": 1500,
         "frequency_base": [60, 3600]
     },
-    "is_dev_mode":true
+    "heartbeat_seconds": 30
 }
