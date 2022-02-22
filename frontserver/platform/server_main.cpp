@@ -51,7 +51,7 @@ int main(int argc, char** argv)
         }
         CONFIG->load_config(config_file_name);
 
-        LOG->set_statistic_secs_(CONFIG->get_heartbeat_secs());
+        // LOG->set_statistic_secs_(CONFIG->get_heartbeat_secs());
     
         utrade::pandora::ThreadSafeSingleton<ServerEngine>::DoubleCheckInstance(engine_pool);
 
