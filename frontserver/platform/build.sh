@@ -7,5 +7,3 @@ cp ../config.json ./
 cp ../../script/*.sh ./
 
 ./start.sh
-
-popd
