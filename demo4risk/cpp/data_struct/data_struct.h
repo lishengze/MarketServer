@@ -223,7 +223,7 @@ struct MarketRiskConfig
     //double TakerFee; // 百分比；taker手续费
     std::string symbol;
 
-    uint32 PublishFrequency;
+    uint32 PublishFrequency; // 发布频率
     uint32 PublishLevel;
     uint32 PriceOffsetKind;  // 价格偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
     double PriceOffset;      // 百分比；价格偏移量（买卖盘相同）

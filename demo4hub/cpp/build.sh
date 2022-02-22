@@ -1,11 +1,11 @@
-mkdir -p cmake/build
-pushd cmake/build
-cmake ../..
-make -j
+mkdir -p build
+cd build
+cmake ../
+make -j4
 popd
-cp cmake/build/libdemo4hub.so ../../lib/
-cp hub_struct.h ../../lib/
-cp hub_interface.h ../../lib/
-cp ../../base/cpp/basic.h ../../lib/
-cp ../../base/cpp/decimal.h ../../lib/
-cp ../../base/cpp/quote.h ../../lib/
+
+cp ../hub_struct.h hub_interface.h ../../../lib/
+
+cp libdemo4hub.so  ../../../lib/
+
+ls -al ../../../lib/

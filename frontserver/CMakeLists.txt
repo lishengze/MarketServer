@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++17 -O0 -pthread  -flto -O3 -DLIBUS_USE_OPENSSL -DLIBUS_USE_LIBUV")
 
 set(BOOST_ROOT /usr/local/boost_1_68)
+set(DESTINATION "/opt/bcts/market")
 
 ###############################################################################################
 INCLUDE_DIRECTORIES("..")
@@ -50,3 +51,5 @@ ADD_SUBDIRECTORY(platform)
 ################################################################################################
 INSTALL(DIRECTORY etc/ DESTINATION "etc")
 INSTALL(DIRECTORY bin/ DESTINATION "bin")
+
+
