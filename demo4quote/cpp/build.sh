@@ -8,4 +8,3 @@ cp ../../script/*.sh ./
 
 ./start.sh
 
-popd
