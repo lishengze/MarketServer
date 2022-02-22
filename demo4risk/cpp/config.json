@@ -2,10 +2,10 @@
     "grpc": {
         "publish_addr": "0.0.0.0:8111",
         "quote_addr": "127.0.0.1:8110",
-        "account_addr": "10.8.78.83:9000"
+        "account_addr": "127.0.0.1:9000"
     },
     "nacos": {
-        "addr": "10.8.78.83:8848",
+        "addr": "127.0.0.1:8848",
         "namespace": "bcts"
     },
     "debug": {
