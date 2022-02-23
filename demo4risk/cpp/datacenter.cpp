@@ -331,7 +331,12 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
             
             double price = iter->first.get_value();
             double old_price = price;
-            reset_price(price, config, true);
+
+            if (BIAS_RISKCTRL_OPEN)
+            {
+                reset_price(price, config, true);
+            }
+            
 
             if( (total_volume + iter->second.total_volume) <= volume ) {
                 total_volume += iter->second.total_volume;
@@ -452,7 +457,11 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
     {
         for( auto iter = depths.begin() ; iter != depths.end() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, true);
+
+            if (BIAS_RISKCTRL_OPEN)
+            {
+                reset_price(price, config, true);
+            }
 
             SDecimal cur_amounts = iter->second.total_volume * price;
             if( (total_amount + cur_amounts) <= otc_amount ) {
