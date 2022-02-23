@@ -386,14 +386,14 @@ struct HedgeInfo
             symbol{symbol_value}
     {
         LOG_INFO("HedgeInfo Init " + symbol);
-        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
+        if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
         {
             
             ask_amount = amount_value;
 
            LOG_INFO("init ask_amount: " + std::to_string(ask_amount));
         }
-        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_SELL)
+        else if (direction_value == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY)
         {
             
             bid_amount = amount_value;
