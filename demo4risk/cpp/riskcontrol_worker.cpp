@@ -816,9 +816,11 @@ void WatermarkComputerWorker::_calc_watermark()
 
             if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
             {
+                string result = "asks first depth list: ";
                 for( const auto& v : asks ) {
-                    LOG_DEBUG(iter->first + " ask " + v.get_str_value());
+                    result += v.get_str_value();
                 }                
+                LOG_DEBUG(result);
             }
 
 
@@ -826,9 +828,11 @@ void WatermarkComputerWorker::_calc_watermark()
 
             if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
             {
+                string result = "bids first depth list: ";
                 for( const auto& v : bids ) {
-                    LOG_DEBUG(iter->first + " bids " + v.get_str_value());
-                }                
+                    result += v.get_str_value();
+                }             
+                LOG_DEBUG(result);   
             }
 
             if( asks.size() > 0 && bids.size() > 0 ) {
@@ -836,7 +840,7 @@ void WatermarkComputerWorker::_calc_watermark()
 
                 if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
                 {
-                    LOG_DEBUG(iter->first + ", " + asks[asks.size()/2].get_str_value() + " " + bids[bids.size()/2].get_str_value() 
+                    LOG_DEBUG(iter->first + ", ask_median: " + asks[asks.size()/2].get_str_value() + ",bid_median" + bids[bids.size()/2].get_str_value() 
                                 + " " + iter->second->watermark.get_str_value());
                 }
             }
@@ -875,7 +879,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
     {
-        LOG_DEBUG("\nBefore Water, WaterMark: " + watermark.get_str_value());
+        LOG_DEBUG("\nWaterMark: " + watermark.get_str_value());
     } 
      
     if (watermark.get_value() != 0 )
