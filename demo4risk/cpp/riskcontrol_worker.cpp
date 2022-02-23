@@ -840,8 +840,8 @@ void WatermarkComputerWorker::_calc_watermark()
 
                 if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
                 {
-                    LOG_DEBUG(iter->first + ", ask_median: " + asks[asks.size()/2].get_str_value() + ",bid_median" + bids[bids.size()/2].get_str_value() 
-                                + " " + iter->second->watermark.get_str_value());
+                    LOG_DEBUG(iter->first + ", ask_median: " + asks[asks.size()/2].get_str_value() + ",bid_median: " + bids[bids.size()/2].get_str_value() 
+                                + ", watermark: " + iter->second->watermark.get_str_value());
                 }
             }
         }
@@ -877,10 +877,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
 
-    if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
-    {
-        LOG_DEBUG("\nWaterMark: " + watermark.get_str_value());
-    } 
+    // if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
+    // {
+    //     LOG_DEBUG("\nWaterMark: " + watermark.get_str_value());
+    // } 
      
     if (watermark.get_value() != 0 )
     {
