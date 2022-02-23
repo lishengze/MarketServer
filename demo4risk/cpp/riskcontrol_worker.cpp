@@ -814,31 +814,31 @@ void WatermarkComputerWorker::_calc_watermark()
             // 排序
             sort(asks.begin(), asks.end());
 
-            // if (iter->first == "BTC_USDT")
-            // {
-            //     for( const auto& v : asks ) {
-            //         LOG_DEBUG(iter->first + " ask " + v.get_str_value());
-            //     }                
-            // }
+            if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
+            {
+                for( const auto& v : asks ) {
+                    LOG_DEBUG(iter->first + " ask " + v.get_str_value());
+                }                
+            }
 
 
             sort(bids.begin(), bids.end());
 
-            // if (iter->first == "BTC_USDT")
-            // {
-            //     for( const auto& v : bids ) {
-            //         LOG_DEBUG(iter->first + " bids " + v.get_str_value());
-            //     }                
-            // }
+            if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
+            {
+                for( const auto& v : bids ) {
+                    LOG_DEBUG(iter->first + " bids " + v.get_str_value());
+                }                
+            }
 
             if( asks.size() > 0 && bids.size() > 0 ) {
                 iter->second->watermark = (asks[asks.size()/2] + bids[bids.size()/2])/2;
 
-                // if (iter->first == "BTC_USDT")
-                // {
-                //     LOG_DEBUG(iter->first +  asks[asks.size()/2].get_str_value() + " " + bids[bids.size()/2].get_str_value() 
-                //                 + " " + iter->second->watermark.get_str_value());
-                // }
+                if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
+                {
+                    LOG_DEBUG(iter->first + ", " + asks[asks.size()/2].get_str_value() + " " + bids[bids.size()/2].get_str_value() 
+                                + " " + iter->second->watermark.get_str_value());
+                }
             }
         }
     }
@@ -873,10 +873,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
 
-    // if (src.symbol == "ETH_USDT")
-    // {
-    //     LOG_DEBUG("\nBefore Water, water: " + watermark.get_str_value() + " Quote: \n" + quote_str(src, 5));
-    // } 
+    if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
+    {
+        LOG_DEBUG("\nBefore Water, WaterMark: " + watermark.get_str_value());
+    } 
      
     if (watermark.get_value() != 0 )
     {
