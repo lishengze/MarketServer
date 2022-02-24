@@ -111,7 +111,7 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                 if (WATERMARK_RISKCTRL_OPEN && src.symbol == CONFIG->test_symbol)
                 {
-                    LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
+                    LOG_DEBUG("watermark filter bid " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
                 }
             } 
             else 
@@ -140,8 +140,8 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                 stringstream s_s;
                 s_s << src.symbol << ", "
-                    << "add new price: " << new_price.get_value() << ", "
-                    << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                    << "add new price: " << new_price.get_str_value() << ", "
+                    << "volume: " << src_depths[new_price].total_volume.get_str_value() << ", "
                     << symbol_config.MinChangePrice
                     << ", is_ask: " << is_ask << "\n";
                     
@@ -811,7 +811,7 @@ void WatermarkComputerWorker::set_snap(const SInnerQuote& quote)
         string result = "watermark_ info: ";
         for (auto iter:watermark_)
         {
-            result += iter.first;
+            result += iter.first + ",";
         }
         LOG_DEBUG(result);
     }
