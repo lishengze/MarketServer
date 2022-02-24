@@ -65,40 +65,96 @@ void DataCenter::add_quote(SInnerQuote& quote)
     //     LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 3));
     // } 
 
-    if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
-    {
-        quote.precise = params_.symbol_config[quote.symbol].PricePrecision;
-        quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
-    }
+    // if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
+    // {
+    //     quote.precise = params_.symbol_config[quote.symbol].PricePrecision;
+    //     quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
+    // }
 
-    // check_exchange_volume(quote);
-
-    set_check_symbol_map(quote.symbol);
-
-    if (check_abnormal_quote( const_cast<SInnerQuote&>(quote)))
-    {
-        LOG_WARN("\n" + quote.symbol + " raw quote\n" + quote_str(quote));
-    }    
-
-    std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-
-    innerquote_to_msd2(quote, ptrData.get(), false);
-
-    LOG->record_output_info("Hedge_" + quote.symbol + "_" + quote.exchange);
-    for( const auto& v : callbacks_) 
-    {
-        v->publish4Hedge(quote.symbol, ptrData, NULL);
-    }
-
+    precheck_quote(quote);
     
+    set_src_quote(quote);
+
+    process(quote);
+        
+};
+
+void DataCenter::set_src_quote(const SInnerQuote& quote)
+{
+    try
     {
         std::lock_guard<std::mutex> lk(mutex_datas_);
         datas_[quote.symbol] = quote;    
     }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+}
 
-    _publish_quote(quote);    
+void DataCenter::precheck_quote(const SInnerQuote& quote)
+{
+    try
+    {
+        set_check_symbol_map(quote.symbol);
 
-};
+        if (check_abnormal_quote( const_cast<SInnerQuote&>(quote)))
+        {
+            LOG_WARN("\n" + quote.symbol + " raw quote\n" + quote_str(quote));
+        }    
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+bool DataCenter::process(const SInnerQuote& src_quote)
+{
+    try
+    {
+        SInnerQuote dst_quote;
+
+        pipeline_.run(src_quote, params_, dst_quote);
+
+        {
+            // 检查是否发生变化
+            std::lock_guard<std::mutex> lk(mutex_datas_);
+            auto iter = last_datas_.find(src_quote.symbol);
+            if( iter != last_datas_.end() ) {
+                const SInnerQuote& last_quote = iter->second;
+                if( src_quote.time_origin < last_quote.time_origin ) {
+                    LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(src_quote.time_origin));
+                    return false;
+                }
+            }        
+            last_datas_[src_quote.symbol] = dst_quote;
+        }
+        
+
+        if (!check_quote(dst_quote))
+        {
+            LOG_WARN(dst_quote.symbol + " not published!" );
+            return false;
+        }
+
+        if (check_abnormal_quote(dst_quote))
+        {
+            LOG_WARN("\n" + dst_quote.symbol + " _publish_quote \n" + quote_str(dst_quote));
+        }  
+
+
+        _publish_quote(dst_quote);
+
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+
+    return false;
+}
 
 void DataCenter::change_account(const AccountInfo& info)
 {   
@@ -110,10 +166,10 @@ void DataCenter::change_account(const AccountInfo& info)
 void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
     // std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
-    params_.quote_config = config;
+    params_.market_risk_config = config;
 
     LOG_INFO("DataCenter::change MarketRiskConfig");
-    for (auto iter:params_.quote_config)
+    for (auto iter:params_.market_risk_config)
     {
         LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
     }    
@@ -178,86 +234,66 @@ void DataCenter::_push_to_clients(const TSymbol& symbol)
     {
         for( auto iter = datas_.begin() ; iter != datas_.end() ; ++iter ) 
         {
-            _publish_quote(iter->second);
+            process(iter->second);
+
+            // _publish_quote(iter->second);
         }
     } else {
         auto iter = datas_.find(symbol);
         if( iter == datas_.end() )
             return;
 
-        _publish_quote(iter->second);
+        process(iter->second);
+
+        // _publish_quote(iter->second);
     }
 }
 
 void DataCenter::_publish_quote(const SInnerQuote& quote) 
-{    
-    SInnerQuote newQuote;
-
-    pipeline_.run(quote, params_, newQuote);
-
+{      
+    try
     {
-        // 检查是否发生变化
-        std::lock_guard<std::mutex> lk(mutex_datas_);
-        auto iter = last_datas_.find(quote.symbol);
-        if( iter != last_datas_.end() ) {
-            const SInnerQuote& last_quote = iter->second;
-            if( quote.time_origin < last_quote.time_origin ) {
-                LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(quote.time_origin));
-                return;
-            }
-        }        
-        last_datas_[quote.symbol] = newQuote;
+        std::shared_ptr<MarketStreamData> ptrData1(new MarketStreamData);
+        innerquote_to_msd2(quote, ptrData1.get(), false);
+        LOG->record_output_info("Hedge_" + quote.symbol + "_" + quote.exchange);
+        for( const auto& v : callbacks_) 
+        {
+            v->publish4Hedge(quote.symbol, ptrData1, NULL);
+        }    
+
+        std::shared_ptr<MarketStreamData> ptrData2(new MarketStreamData);
+        innerquote_to_msd2(quote, ptrData2.get(), true);    
+        LOG->record_output_info("Broker_" + quote.symbol + "_" + quote.exchange);
+        for( const auto& v : callbacks_) 
+        {
+            v->publish4Broker(quote.symbol, ptrData2, NULL);
+        }
+
+        // send to clients
+        std::shared_ptr<MarketStreamDataWithDecimal> ptrData3(new MarketStreamDataWithDecimal);
+        innerquote_to_msd3(quote, ptrData3.get(), true);   
+        LOG->record_output_info("Client_" + quote.symbol + "_" + quote.exchange);
+        for( const auto& v : callbacks_) 
+        {
+            v->publish4Client(quote.symbol, ptrData3, NULL);
+        }    
     }
-    
-
-    if (!check_quote(newQuote))
+    catch(const std::exception& e)
     {
-        LOG_WARN(quote.symbol + " not published!" );
-        return;
-    }
-
-    if (check_abnormal_quote(newQuote))
-    {
-        LOG_WARN("\n" + newQuote.symbol + " _publish_quote \n" + quote_str(newQuote));
-    }    
-
-    // if (newQuote.symbol == CONFIG->test_symbol)
-    // {
-    //     LOG_DEBUG("\nPUBLISH: " + quote_str(newQuote, 3));
-    // }
-    
-    std::shared_ptr<MarketStreamData> ptrData(new MarketStreamData);
-    innerquote_to_msd2(newQuote, ptrData.get(), true);    
-
-    LOG->record_output_info("Broker_" + quote.symbol + "_" + quote.exchange);
-
-    for( const auto& v : callbacks_) 
-    {
-        v->publish4Broker(quote.symbol, ptrData, NULL);
-    }
-
-    // send to clients
-    std::shared_ptr<MarketStreamDataWithDecimal> ptrData2(new MarketStreamDataWithDecimal);
-    innerquote_to_msd3(newQuote, ptrData2.get(), true);   
-
-    LOG->record_output_info("Client_" + quote.symbol + "_" + quote.exchange);
-
-    for( const auto& v : callbacks_) 
-    {
-        v->publish4Client(quote.symbol, ptrData2, NULL);
+        LOG_ERROR(e.what());
     }    
 }
 
 bool DataCenter::check_quote(SInnerQuote& quote)
 {
     bool result = false;
-    if (params_.quote_config.find(quote.symbol) != params_.quote_config.end())
+    if (params_.market_risk_config.find(quote.symbol) != params_.market_risk_config.end())
     {
-        result = params_.quote_config[quote.symbol].IsPublish;
+        result = params_.market_risk_config[quote.symbol].IsPublish;
 
         if (!result) return result;
 
-        uint32 publis_level = params_.quote_config[quote.symbol].PublishLevel;
+        uint32 publis_level = params_.market_risk_config[quote.symbol].PublishLevel;
         map<SDecimal, SInnerDepth> new_asks;
         map<SDecimal, SInnerDepth> new_bids;     
 
@@ -573,7 +609,7 @@ bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
     return true;
 }
 
-QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price)
+QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& dst_price)
 {
 
     string direction_str = direction==QuoteRequest_Direction_BUY?"buy":"sell";
@@ -593,28 +629,39 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
             LOG_WARN("OTC Request Symbol " + symbol + " has no data");
             return QuoteResponse_Result_WRONG_SYMBOL;
         }
-
         quote = &(iter->second);
     }
 
-    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(*quote, 10));
+    LOG_DEBUG("\n OTC Quote Data \n" + quote_str(*quote, 5));
+
+    uint32 precise = 8;
+    if (params_.symbol_config.find(symbol) != params_.symbol_config.end())
+    {
+        precise = params_.symbol_config[symbol].PricePrecision;
+    }
+    else
+    {
+        LOG_WARN("symbol_config has no config for " + symbol);
+    }
+
+    // if ()
+
+
 
     if( volume > 0 )
-    {
-        
+    {        
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_volume(quote->asks, true, params_.quote_config[symbol], volume, price, quote->precise);
+            return _calc_otc_by_volume(quote->asks, true, params_.market_risk_config[symbol], volume, dst_price, precise);
         } else {
-            return _calc_otc_by_volume(quote->bids, false, params_.quote_config[symbol], volume, price, quote->precise);   
+            return _calc_otc_by_volume(quote->bids, false, params_.market_risk_config[symbol], volume, dst_price, precise);   
         }
     } 
     else
-    {
-        
+    {        
         if( direction == QuoteRequest_Direction_BUY ) {
-            return _calc_otc_by_amount(quote->asks, true, params_.quote_config[symbol], amount, price, quote->precise);
+            return _calc_otc_by_amount(quote->asks, true, params_.market_risk_config[symbol], amount, dst_price, precise);
         } else { 
-            return _calc_otc_by_amount(quote->bids, false, params_.quote_config[symbol], amount, price, quote->precise);
+            return _calc_otc_by_amount(quote->bids, false, params_.market_risk_config[symbol], amount, dst_price, precise);
         }
     }
 
@@ -633,7 +680,7 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
             accounts[exchange][symbol] = v2.second.amount;
         }
     }
-    for( const auto&v : params_.quote_config ) {
+    for( const auto&v : params_.market_risk_config ) {
         const TSymbol& symbol = v.first;
         configurations[symbol] = v.second.desc();
     }

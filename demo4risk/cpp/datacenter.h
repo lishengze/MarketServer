@@ -72,6 +72,13 @@ public:
 
     virtual void hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade);
 
+
+    void precheck_quote(const SInnerQuote& quote);
+
+    void set_src_quote(const SInnerQuote& quote);
+
+    bool process(const SInnerQuote& quote);
+
 private:
     set<IQuotePusher*> callbacks_;
 

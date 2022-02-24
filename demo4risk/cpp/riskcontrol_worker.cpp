@@ -307,7 +307,7 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         // if (src.symbol == "BTC_USD")
         // {
-        //     LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+        //     LOG_DEBUG(ctx.params.market_risk_config[src.symbol].desc());
         //     LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
         //                 + src.symbol + " " + quote_str(src, 2));
         // } 
@@ -669,23 +669,23 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
 
 
-        if( ctx.params.quote_config.find(src.symbol) != ctx.params.quote_config.end() ) 
+        if( ctx.params.market_risk_config.find(src.symbol) != ctx.params.market_risk_config.end() ) 
         {
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
             {
                 LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
-                LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+                LOG_DEBUG(ctx.params.market_risk_config[src.symbol].desc());
             } 
 
 
             SInnerQuote tmp;
             vector<pair<SDecimal, SInnerDepth>> depths;
             src.get_asks(depths);
-            _calc_depth_bias(depths, ctx.params.quote_config[src.symbol],  true, tmp.asks);
+            _calc_depth_bias(depths, ctx.params.market_risk_config[src.symbol],  true, tmp.asks);
             src.asks.swap(tmp.asks);
             src.get_bids(depths);
-            _calc_depth_bias(depths, ctx.params.quote_config[src.symbol],  false, tmp.bids);
+            _calc_depth_bias(depths, ctx.params.market_risk_config[src.symbol],  false, tmp.bids);
             src.bids.swap(tmp.bids);
         }
         else
@@ -701,7 +701,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         // if (src.symbol == "BTC_USD")
         // {
-        //     LOG_DEBUG(ctx.params.quote_config[src.symbol].desc());
+        //     LOG_DEBUG(ctx.params.market_risk_config[src.symbol].desc());
         //     LOG_DEBUG("\nAfter QuoteBiasWorker: " + " " 
         //                 + src.symbol + " " + quote_str(src, 2));
         // } 
@@ -877,21 +877,10 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
 
-    // if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
-    // {
-    //     LOG_DEBUG("\nWaterMark: " + watermark.get_str_value());
-    // } 
-     
     if (watermark.get_value() != 0 )
     {
         _filter_by_watermark(src, watermark, ctx);
     }
-
-    // if (src.symbol == "ETH_USDT")
-    // {
-    //     LOG_DEBUG("\nAfter Water, water: " + watermark.get_str_value() + " Quote: " + " " 
-    //                 + src.symbol + " " + quote_str(src, 5));
-    // } 
 
     if (src.asks.size() > 0 && src.bids.size() > 0)
     {
@@ -906,16 +895,6 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
   
     }
 
-    // if (src.symbol == "BTC_USD")
-    // {
-    //     LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " + src.symbol + " " + quote_str(src, 2));
-    // }     
-
-    // if (src.symbol == "BTC_USDT")
-    // {
-    //     LOG_DEBUG("\nAfter WatermarkComputerWorker: " + " " 
-    //                 + src.symbol + " " + quote_str(src, 8));
-    // } 
                 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {

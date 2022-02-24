@@ -486,7 +486,7 @@ struct SInnerQuote {
 
 struct Params {
     AccountInfo account_config;
-    map<TSymbol, MarketRiskConfig> quote_config;
+    map<TSymbol, MarketRiskConfig> market_risk_config;
     map<TSymbol, SymbolConfiguration> symbol_config;
     map<TSymbol, HedgeInfo> hedage_order_info;
     map<TSymbol, map<TExchange, HedgeConfig>> hedge_config;
