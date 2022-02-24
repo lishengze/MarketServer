@@ -111,6 +111,15 @@ public:
                 LOG_ERROR("Need pricesion_risk_ctrl_open");
             }
 
+            if (!js["publish_ctrl_open"].is_null())
+            {
+                publish_ctrl_open_   = js["publish_ctrl_open"].get<bool>();
+            }
+            else
+            {
+                LOG_ERROR("Need pricesion_risk_ctrl_open");
+            }            
+
             if (!js["check_symbol_secs"].is_null())
             {
                 check_symbol_secs = js["check_symbol_secs"].get<int>();
@@ -172,12 +181,14 @@ public:
     // [for debug] output to screen
     bool output_to_screen_;
 
-    bool fee_risk_ctrl_open_{false};
-    bool account_risk_ctrl_open_{false};
-    bool order_risk_ctrl_open_{false};
-    bool bias_risk_ctrl_open_{false};
-    bool watermark_risk_ctrl_open_{false};
-    bool pricesion_risk_ctrl_open_{false};
+    bool fee_risk_ctrl_open_{true};
+    bool account_risk_ctrl_open_{true};
+    bool order_risk_ctrl_open_{true};
+    bool bias_risk_ctrl_open_{true};
+    bool watermark_risk_ctrl_open_{true};
+    bool pricesion_risk_ctrl_open_{true};
+
+    bool publish_ctrl_open_{true};
 
     string test_symbol;
     int     check_symbol_secs{5};
@@ -197,6 +208,7 @@ public:
 #define BIAS_RISKCTRL_OPEN      CONFIG->bias_risk_ctrl_open_
 #define WATERMARK_RISKCTRL_OPEN CONFIG->watermark_risk_ctrl_open_
 #define PRICESION_RISKCTRL_OPEN CONFIG->pricesion_risk_ctrl_open_
+#define PUBLISH_CTRL_OPEN       CONFIG->publish_ctrl_open_
 
 #define _log_and_print(fmt, ...)                                     \
     do {                                                             \

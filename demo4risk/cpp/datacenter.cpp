@@ -49,6 +49,11 @@ DataCenter::DataCenter()
     }
 
     start_check_symbol();
+
+    if(PUBLISH_CTRL_OPEN)
+    {
+        start_publish();
+    }    
 }
 
 DataCenter::~DataCenter() {
@@ -79,7 +84,11 @@ void DataCenter::update_publish_data_map()
         for (auto iter: params_.market_risk_config)
         {
             frequency_map_[iter.first] = iter.second.PublishFrequency;
+
+            LOG_DEBUG("PublishFrequency: " + iter.first + ", " + std::to_string(iter.second.PublishFrequency));            
         }
+
+                
     }
     catch(const std::exception& e)
     {
@@ -97,6 +106,16 @@ void DataCenter::publish_main()
             std::list<string> publish_list;
 
             int sleep_millsecs = get_sleep_millsecs(time, publish_list);
+
+            string debug_info = "Time: " + std::to_string(time) 
+                                + ", sleep_millsecs: " + std::to_string(sleep_millsecs);
+            
+            for (auto symbol:publish_list)
+            {
+                debug_info += symbol + ", pbf: " + std::to_string(frequency_map_[symbol]);
+            }
+
+            LOG_DEBUG(debug_info);
 
             process_symbols(publish_list);
             
@@ -174,8 +193,10 @@ void DataCenter::add_quote(SInnerQuote& quote)
     
     set_src_quote(quote);
 
-    process(quote);
-        
+    if (!PUBLISH_CTRL_OPEN)
+    {
+        process(quote);
+    }        
 };
 
 void DataCenter::process_symbols(std::list<string> symbol_list)
