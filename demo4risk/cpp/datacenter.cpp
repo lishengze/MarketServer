@@ -241,7 +241,9 @@ bool DataCenter::process(const SInnerQuote& src_quote)
     {
         SInnerQuote dst_quote;
 
-        riskctrl_work_line_.run(src_quote, params_, dst_quote);
+        Params cur_params = params_;
+
+        riskctrl_work_line_.run(src_quote, cur_params, dst_quote);
 
         if (!check_quote_time(src_quote, dst_quote)) return false;
         
