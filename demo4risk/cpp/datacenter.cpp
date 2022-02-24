@@ -61,12 +61,19 @@ DataCenter::~DataCenter() {
     {
         check_thread_.join();
     }
+
+    if (publish_thread_.joinable())
+    {
+        publish_thread_.join();
+    }
 }
 
 void DataCenter::start_publish()
 {
     try
     {
+        LOG_DEBUG("start_publish");
+
         publish_thread_ = std::thread(&DataCenter::publish_main, this);
     }
     catch(const std::exception& e)
@@ -107,15 +114,13 @@ void DataCenter::publish_main()
 
             int sleep_millsecs = get_sleep_millsecs(time, publish_list);
 
-            string debug_info = "Time: " + std::to_string(time) 
-                                + ", sleep_millsecs: " + std::to_string(sleep_millsecs);
+            LOG_DEBUG("Time: "+std::to_string(time) 
+                     + ", sleep_millsecs: " + std::to_string(sleep_millsecs) + "; ");
             
             for (auto symbol:publish_list)
             {
-                debug_info += symbol + ", pbf: " + std::to_string(frequency_map_[symbol]);
+                LOG_DEBUG("Pub: " + symbol + ", pbf: " + std::to_string(frequency_map_[symbol]));
             }
-
-            LOG_DEBUG(debug_info);
 
             process_symbols(publish_list);
             
@@ -153,6 +158,8 @@ int DataCenter::get_sleep_millsecs(unsigned long long time, std::list<string>& p
             }
         }
 
+        if (frequency_map_.size() == 0) sleep_millsecs = 10*1000;
+
         return sleep_millsecs;
     }
     catch(const std::exception& e)
@@ -167,7 +174,8 @@ int DataCenter::get_sleep_millsecs(unsigned long long cur_time, int fre)
     try
     {
         if (cur_time == 0) return fre;
-        else return cur_time % fre;
+        else if (cur_time % fre == 0) return 0;
+        else return fre * (cur_time / fre + 1) - cur_time;
     }
     catch(const std::exception& e)
     {
@@ -193,7 +201,7 @@ void DataCenter::add_quote(SInnerQuote& quote)
     
     set_src_quote(quote);
 
-    if (!PUBLISH_CTRL_OPEN)
+    if (!PUBLISH_CTRL_OPEN || params_.market_risk_config.find(quote.symbol) == params_.market_risk_config.end())
     {
         process(quote);
     }        
@@ -334,7 +342,10 @@ void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& conf
     {
         LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
     }    
-    _push_to_clients();
+
+    update_publish_data_map();
+
+    // _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& config)
@@ -348,9 +359,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
         for (auto iter:params_.symbol_config)
         {
             LOG_INFO("\n" + iter.first + " " + iter.second.desc());
-        }
-
-        update_publish_data_map();
+        }        
     }
     catch(const std::exception& e)
     {
