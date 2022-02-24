@@ -837,6 +837,8 @@ void WatermarkComputerWorker::_calc_watermark()
         // LOG_DEBUG("_calc_watermark");
         for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) 
         {
+
+            LOG_DEBUG("Calc " + iter->first);
             
             SymbolWatermark* obj= iter->second;
             vector<SDecimal> asks, bids;
