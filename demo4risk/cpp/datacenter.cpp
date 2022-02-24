@@ -71,6 +71,8 @@ void DataCenter::add_quote(SInnerQuote& quote)
     //     quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
     // }
 
+    
+
     precheck_quote(quote);
     
     set_src_quote(quote);
