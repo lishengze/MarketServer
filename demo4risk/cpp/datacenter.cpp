@@ -15,37 +15,37 @@ DataCenter::DataCenter()
     if (FEE_RISKCTRL_OPEN)
     {
         LOG_INFO("Add fee_worker_");
-        pipeline_.add_worker(&fee_worker_);
+        riskctrl_work_line_.add_worker(&fee_worker_);
     }
 
     if (ACCOUNT_RISKCTRL_OPEN)
     {
         LOG_INFO("Add account_worker_");
-        pipeline_.add_worker(&account_worker_);
+        riskctrl_work_line_.add_worker(&account_worker_);
     }
 
     if (ORDER_RISKCTRL_OPEN)
     {
         LOG_INFO("Add orderbook_worker_");
-        pipeline_.add_worker(&orderbook_worker_);
+        riskctrl_work_line_.add_worker(&orderbook_worker_);
     }
 
     if (BIAS_RISKCTRL_OPEN)
     {
         LOG_INFO("Add quotebias_worker_");
-        pipeline_.add_worker(&quotebias_worker_);
+        riskctrl_work_line_.add_worker(&quotebias_worker_);
     }
 
     if (WATERMARK_RISKCTRL_OPEN)
     {
         LOG_INFO("Add watermark_worker_");
-        pipeline_.add_worker(&watermark_worker_);
+        riskctrl_work_line_.add_worker(&watermark_worker_);
     }
 
     if (PRICESION_RISKCTRL_OPEN)
     {
         LOG_INFO("Add pricesion_worker_");
-        pipeline_.add_worker(&pricesion_worker_);
+        riskctrl_work_line_.add_worker(&pricesion_worker_);
     }
 
     start_check_symbol();
@@ -56,6 +56,105 @@ DataCenter::~DataCenter() {
     {
         check_thread_.join();
     }
+}
+
+void DataCenter::start_publish()
+{
+    try
+    {
+        publish_thread_ = std::thread(&DataCenter::publish_main, this);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DataCenter::update_publish_data_map()
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_frequency_map_);
+
+        for (auto iter: params_.market_risk_config)
+        {
+            frequency_map_[iter.first] = iter.second.PublishFrequency;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void DataCenter::publish_main()
+{
+    try
+    {
+        unsigned long long time = 0;
+        while (true)
+        {
+            std::list<string> publish_list;
+
+            int sleep_millsecs = get_sleep_millsecs(time, publish_list);
+
+            process_symbols(publish_list);
+            
+            time += sleep_millsecs;
+
+            if (time > 24*60*60*1000) time = 0;
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleep_millsecs));
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }    
+}
+
+int DataCenter::get_sleep_millsecs(unsigned long long time, std::list<string>& publish_list)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_frequency_map_);
+
+        int sleep_millsecs = 0;
+        for (auto iter:frequency_map_)
+        {
+            int cur_sleep_millsecs = get_sleep_millsecs(time, iter.second);
+
+            if (cur_sleep_millsecs == 0)
+            {
+                publish_list.push_back(iter.first);
+            }
+            else if (!sleep_millsecs || cur_sleep_millsecs <= sleep_millsecs)
+            {
+                sleep_millsecs = cur_sleep_millsecs;
+            }
+        }
+
+        return sleep_millsecs;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return 0;
+}
+
+int DataCenter::get_sleep_millsecs(unsigned long long cur_time, int fre)
+{
+    try
+    {
+        if (cur_time == 0) return fre;
+        else return cur_time % fre;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return -1;
 }
 
 void DataCenter::add_quote(SInnerQuote& quote)
@@ -71,8 +170,6 @@ void DataCenter::add_quote(SInnerQuote& quote)
     //     quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
     // }
 
-    
-
     precheck_quote(quote);
     
     set_src_quote(quote);
@@ -81,12 +178,73 @@ void DataCenter::add_quote(SInnerQuote& quote)
         
 };
 
+void DataCenter::process_symbols(std::list<string> symbol_list)
+{
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_original_datas_);
+
+        for (auto symbol:symbol_list)
+        {
+            if (original_datas_.find(symbol) == original_datas_.end())
+            {
+                LOG_WARN("No Original Data For " + symbol);
+                continue;
+            }
+            else
+            {
+                SInnerQuote& original_quote = original_datas_[symbol];
+
+                process(original_quote);
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+}
+
+bool DataCenter::process(const SInnerQuote& src_quote)
+{
+    try
+    {
+        SInnerQuote dst_quote;
+
+        riskctrl_work_line_.run(src_quote, params_, dst_quote);
+
+        if (!check_quote_time(src_quote, dst_quote)) return false;
+        
+        if (check_abnormal_quote(dst_quote))
+        {
+            LOG_WARN("\n" + dst_quote.symbol + " _publish_quote \n" + quote_str(dst_quote));
+        }  
+
+        if (!check_quote_publish(dst_quote))
+        {
+            LOG_WARN(dst_quote.symbol + " not published!" );
+            return false;
+        }
+
+        _publish_quote(dst_quote);
+
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+
+    return false;
+}
+
 void DataCenter::set_src_quote(const SInnerQuote& quote)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(mutex_datas_);
-        datas_[quote.symbol] = quote;    
+        std::lock_guard<std::mutex> lk(mutex_original_datas_);
+        original_datas_[quote.symbol] = quote;    
     }
     catch(const std::exception& e)
     {
@@ -111,50 +269,30 @@ void DataCenter::precheck_quote(const SInnerQuote& quote)
     }
 }
 
-bool DataCenter::process(const SInnerQuote& src_quote)
+
+bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuote& processed_quote)
 {
     try
     {
-        SInnerQuote dst_quote;
-
-        pipeline_.run(src_quote, params_, dst_quote);
-
+        // 检查是否发生变化
+        std::lock_guard<std::mutex> lk(mutex_riskctrl_datas_);
+        auto iter = riskctrl_datas_.find(src_quote.symbol);
+        if( iter != riskctrl_datas_.end() ) 
         {
-            // 检查是否发生变化
-            std::lock_guard<std::mutex> lk(mutex_datas_);
-            auto iter = last_datas_.find(src_quote.symbol);
-            if( iter != last_datas_.end() ) {
-                const SInnerQuote& last_quote = iter->second;
-                if( src_quote.time_origin < last_quote.time_origin ) {
-                    LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(src_quote.time_origin));
-                    return false;
-                }
-            }        
-            last_datas_[src_quote.symbol] = dst_quote;
-        }
-        
-
-        if (!check_quote(dst_quote))
-        {
-            LOG_WARN(dst_quote.symbol + " not published!" );
-            return false;
-        }
-
-        if (check_abnormal_quote(dst_quote))
-        {
-            LOG_WARN("\n" + dst_quote.symbol + " _publish_quote \n" + quote_str(dst_quote));
-        }  
-
-
-        _publish_quote(dst_quote);
-
+            const SInnerQuote& last_quote = iter->second;
+            if( src_quote.time_origin < last_quote.time_origin ) 
+            {
+                LOG_WARN("Quote Error last_quote.time: " + std::to_string(last_quote.time_origin) + ", processed quote_time: " + std::to_string(src_quote.time_origin));
+                return false;
+            }
+        }        
+        riskctrl_datas_[src_quote.symbol] = processed_quote;
         return true;
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
-
     return false;
 }
 
@@ -190,6 +328,8 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
         {
             LOG_INFO("\n" + iter.first + " " + iter.second.desc());
         }
+
+        update_publish_data_map();
     }
     catch(const std::exception& e)
     {
@@ -232,22 +372,32 @@ void DataCenter::change_orders(const string& symbol, const SOrder& order, const 
 
 void DataCenter::_push_to_clients(const TSymbol& symbol) 
 {
-    if( symbol == "" ) 
+    try
     {
-        for( auto iter = datas_.begin() ; iter != datas_.end() ; ++iter ) 
+        std::lock_guard<std::mutex> lk(mutex_original_datas_);
+
+        if( symbol == "" ) 
         {
+            for( auto iter = original_datas_.begin() ; iter != original_datas_.end() ; ++iter ) 
+            {
+                process(iter->second);
+            }
+        } 
+        else 
+        {
+            auto iter = original_datas_.find(symbol);
+            if(iter == original_datas_.end())
+            {
+                LOG_ERROR("No Original Data For " + symbol);
+                return;
+            }
+
             process(iter->second);
-
-            // _publish_quote(iter->second);
         }
-    } else {
-        auto iter = datas_.find(symbol);
-        if( iter == datas_.end() )
-            return;
-
-        process(iter->second);
-
-        // _publish_quote(iter->second);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 }
 
@@ -286,36 +436,43 @@ void DataCenter::_publish_quote(const SInnerQuote& quote)
     }    
 }
 
-bool DataCenter::check_quote(SInnerQuote& quote)
+bool DataCenter::check_quote_publish(SInnerQuote& quote)
 {
-    bool result = false;
-    if (params_.market_risk_config.find(quote.symbol) != params_.market_risk_config.end())
+    bool result = false;    
+
+    try
     {
-        result = params_.market_risk_config[quote.symbol].IsPublish;
-
-        if (!result) return result;
-
-        uint32 publis_level = params_.market_risk_config[quote.symbol].PublishLevel;
-        map<SDecimal, SInnerDepth> new_asks;
-        map<SDecimal, SInnerDepth> new_bids;     
-
-        uint32 i = 0;
-        for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
+        if (params_.market_risk_config.find(quote.symbol) != params_.market_risk_config.end())
         {
-            new_asks[iter->first] = iter->second;
-        }   
-        quote.asks.swap(new_asks);
+            result = params_.market_risk_config[quote.symbol].IsPublish;
 
-        i = 0;
-        for(auto iter = quote.bids.rbegin(); iter != quote.bids.rend() && i < publis_level; ++iter, ++i)
-        {
-            new_bids[iter->first] = iter->second;
+            if (!result) return result;
+
+            uint32 publis_level = params_.market_risk_config[quote.symbol].PublishLevel;
+            map<SDecimal, SInnerDepth> new_asks;
+            map<SDecimal, SInnerDepth> new_bids;     
+
+            uint32 i = 0;
+            for (auto iter = quote.asks.begin(); iter != quote.asks.end() && i < publis_level; ++iter, ++i)
+            {
+                new_asks[iter->first] = iter->second;
+            }   
+            quote.asks.swap(new_asks);
+
+            i = 0;
+            for(auto iter = quote.bids.rbegin(); iter != quote.bids.rend() && i < publis_level; ++iter, ++i)
+            {
+                new_bids[iter->first] = iter->second;
+            }
+            quote.bids.swap(new_bids);
         }
-        quote.bids.swap(new_bids);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
 
-    return result;
-    
+    return result;    
 }
 
 void reset_price(double& price, MarketRiskConfig& config, bool is_ask)
@@ -604,8 +761,8 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
 bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
 {
-    std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-    for( const auto& v: last_datas_ ) {
+    std::unique_lock<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
+    for( const auto& v: riskctrl_datas_ ) {
         snaps.push_back(v.second);
     }
     return true;
@@ -623,10 +780,10 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     SInnerQuote* quote = nullptr;
 
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_datas_ };
-        auto iter = last_datas_.find(symbol);
+        std::unique_lock<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
+        auto iter = riskctrl_datas_.find(symbol);
 
-        if(iter == last_datas_.end())
+        if(iter == riskctrl_datas_.end())
         {
             LOG_WARN("OTC Request Symbol " + symbol + " has no data");
             return QuoteResponse_Result_WRONG_SYMBOL;
@@ -787,17 +944,23 @@ void DataCenter::erase_outdate_symbol(TSymbol symbol)
 {
     try
     {
-        std::lock_guard<std::mutex> lk(mutex_datas_);
-
-        if (datas_.find(symbol)!= datas_.end())
         {
-            datas_.erase(symbol);
+            std::lock_guard<std::mutex> lk(mutex_original_datas_);
+
+            if (original_datas_.find(symbol)!= original_datas_.end())
+            {
+                original_datas_.erase(symbol);
+            }
         }
 
-        if (last_datas_.find(symbol) != last_datas_.end())
         {
-            last_datas_.erase(symbol);
-        }        
+            std::lock_guard<std::mutex> lk(mutex_riskctrl_datas_);
+            if (riskctrl_datas_.find(symbol) != riskctrl_datas_.end())
+            {
+                riskctrl_datas_.erase(symbol);
+            }    
+        }
+    
     }
     catch(const std::exception& e)
     {

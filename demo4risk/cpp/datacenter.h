@@ -68,16 +68,19 @@ public:
 
     void get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, map<TSymbol, double>>& accounts, map<TSymbol, string>& configurations);
 
-    bool check_quote(SInnerQuote& quote);
-
     virtual void hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade);
 
+    void process_symbols(std::list<string> symbol_list);
+
+    bool process(const SInnerQuote& quote);
 
     void precheck_quote(const SInnerQuote& quote);
 
     void set_src_quote(const SInnerQuote& quote);
 
-    bool process(const SInnerQuote& quote);
+    bool check_quote_time(const SInnerQuote& src_quote, const SInnerQuote& processed_quote);
+
+    bool check_quote_publish(SInnerQuote& quote);
 
 private:
     set<IQuotePusher*> callbacks_;
@@ -86,22 +89,25 @@ private:
 
     void _push_to_clients(const string& symbol = "");
 
-    mutable std::mutex                  mutex_datas_;
+    
     mutable std::mutex                  mutex_config_;
 
-    unordered_map<TSymbol, SInnerQuote> datas_;
-    unordered_map<TSymbol, SInnerQuote> last_datas_;
+    unordered_map<TSymbol, SInnerQuote> original_datas_;
+    mutable std::mutex                  mutex_original_datas_;
+
+    unordered_map<TSymbol, SInnerQuote> riskctrl_datas_;
+    mutable std::mutex                  mutex_riskctrl_datas_;
+
     Params params_;
 
     // 处理流水线
-    QuotePipeline           pipeline_;
-
-    FeeWorker               fee_worker_;
-    AccountAjdustWorker     account_worker_;
-    OrderBookWorker         orderbook_worker_;
-    QuoteBiasWorker         quotebias_worker_;
-    WatermarkComputerWorker watermark_worker_;
-    PrecisionWorker         pricesion_worker_;
+    QuotePipeline               riskctrl_work_line_;
+    FeeWorker                   fee_worker_;
+    AccountAjdustWorker         account_worker_;
+    OrderBookWorker             orderbook_worker_;
+    QuoteBiasWorker             quotebias_worker_;
+    WatermarkComputerWorker     watermark_worker_;
+    PrecisionWorker             pricesion_worker_;
 
 
 private:
@@ -116,6 +122,27 @@ private:
     std::mutex              check_symbol_mutex_;
 
     map<TSymbol, int>       check_symbol_map_;
+
+private:
+
+    void start_publish();
+    void publish_main();
+    void update_publish_data_map();
+    int  get_sleep_millsecs(unsigned long long cur_time, int fre);
+    int  get_sleep_millsecs(unsigned long long time, std::list<string>& publish_list);
+
+    struct FreqData
+    {
+        int     freq_millsecs{1000};
+        int     sleep_milleses{1000};
+        string  next_symbol;
+    };
+
+    string                       cur_symbol;
+    std::map<string, int>        frequency_map_;
+    std::mutex                   mutex_frequency_map_;
+
+    std::thread                  publish_thread_;
 
 
 };

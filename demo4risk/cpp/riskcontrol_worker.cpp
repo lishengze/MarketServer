@@ -59,14 +59,22 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
 
                             SDecimal new_price = watermark + symbol_config.MinChangePrice;
 
+                            
+
                             src_depths[new_price] = fake;
 
                             stringstream s_s;
-                            s_s << "Add New Price: " << src.symbol << ", "
-                                << "new price: " << new_price.get_value() << ", "
+                            s_s << "" << src.symbol << ", "
+                                << "add new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask << "\n";
-                            // LOG_DEBUG(s_s.str());
+                                << symbol_config.MinChangePrice
+                                << ", is_ask: " << is_ask << "\n";
+                             
+                            if (src.symbol == CONFIG->test_symbol)
+                            {
+                                LOG_DEBUG(s_s.str());
+                            }
+                            
                         }
                         else
                         {                            
@@ -121,11 +129,16 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
                             src_depths[new_price] = fake;
 
                             stringstream s_s;
-                            s_s << "Add New Price: " << src.symbol << ", "
-                                << "new price: " << new_price.get_value() << ", "
+                            s_s << src.symbol << ", "
+                                << "add new price: " << new_price.get_value() << ", "
                                 << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << "is_ask: " << is_ask << "\n";
-                            // LOG_DEBUG(s_s.str());
+                                << symbol_config.MinChangePrice
+                                << ", is_ask: " << is_ask << "\n";
+                                
+                            if (src.symbol == CONFIG->test_symbol)
+                            {
+                                LOG_DEBUG(s_s.str());
+                            }
                         }
                         else
                         {                  
