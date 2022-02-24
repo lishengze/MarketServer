@@ -813,7 +813,7 @@ void WatermarkComputerWorker::set_snap(const SInnerQuote& quote)
         {
             result += iter.first + ",";
         }
-        LOG_DEBUG(result);
+        // LOG_DEBUG(result);
     }
 }
 
@@ -838,7 +838,7 @@ void WatermarkComputerWorker::_calc_watermark()
         for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) 
         {
 
-            LOG_DEBUG("Calc " + iter->first);
+            // LOG_DEBUG("Calc " + iter->first);
             
             SymbolWatermark* obj= iter->second;
             vector<SDecimal> asks, bids;
@@ -889,7 +889,7 @@ void WatermarkComputerWorker::thread_func() {
 
     while( thread_run_ ) {
 
-        _calc_watermark();
+        // _calc_watermark();
 
         // 休眠
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
