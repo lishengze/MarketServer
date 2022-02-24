@@ -27,67 +27,66 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
         map<SDecimal, SInnerDepth>& src_depths = src.asks;
         bool patched = false;
         unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
+        std::list<SDecimal> delete_price;
 
-        for( auto v = src_depths.begin() ; v != src_depths.end() ; )
+        for( auto v = src_depths.begin() ; v != src_depths.end() ; v++)
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
 
-            if( price <= watermark) {
+            if( price <= watermark) 
+            {
                 // 过滤价位
-                for( const auto& v2 : depth.exchanges ){
+                for( const auto& v2 : depth.exchanges )
+                {
                     volumes[v2.first] += v2.second;
                 }
-                src_depths.erase(v++);
-                // LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
-            } else {
-                // 保留价位
-                if( !patched ) {
-                    patched = true;
-                    
-                    SInnerDepth fake;
-                    for( const auto &v : volumes ) {
-                        fake.exchanges[v.first] = v.second;
-                    }
-                    fake.set_total_volume();
 
-                    if (fake.total_volume.get_value() != 0)
-                    {
-                        if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
-                        {
-                            SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+                delete_price.push_back(price);
 
-                            SDecimal new_price = watermark + symbol_config.MinChangePrice;
-
-                            
-
-                            src_depths[new_price] = fake;
-
-                            stringstream s_s;
-                            s_s << "" << src.symbol << ", "
-                                << "add new price: " << new_price.get_value() << ", "
-                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << symbol_config.MinChangePrice
-                                << ", is_ask: " << is_ask << "\n";
-                             
-                            if (src.symbol == CONFIG->test_symbol)
-                            {
-                                LOG_DEBUG(s_s.str());
-                            }
-                            
-                        }
-                        else
-                        {                            
-                            depth.mix_exchanges(fake, 0, 1);
-                        }
-                    }
-                    
-                    // 
-                } else {
-                    break;
+                if (WATERMARK_RISKCTRL_OPEN && src.symbol == CONFIG->test_symbol)
+                {
+                    LOG_DEBUG("watermark filter ask " + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
                 }
-                v++;
+            } 
+            else 
+            {
+                break;
             }
+        }
+
+        if( !patched ) 
+        {
+            patched = true;            
+            SInnerDepth fake;
+            for( const auto &v : volumes ) {
+                fake.exchanges[v.first] = v.second;
+            }
+            fake.set_total_volume();
+
+            if (fake.total_volume.get_value() != 0)
+            {
+                SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+                SDecimal new_price = watermark + symbol_config.MinChangePrice;
+                src_depths[new_price] = fake;
+
+                stringstream s_s;
+                s_s << "" << src.symbol << ", "
+                    << "add new price: " << new_price.get_value() << ", "
+                    << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                    << symbol_config.MinChangePrice
+                    << ", is_ask: " << is_ask << "\n";
+                    
+                if (src.symbol == CONFIG->test_symbol)
+                {
+                    LOG_DEBUG(s_s.str());
+                }                        
+            }
+        } 
+
+        for (auto price:delete_price)
+        {
+            src_depths.erase(price);
         }
     }
     else // For Bid
@@ -95,61 +94,68 @@ void _filter_depth_by_watermark(SInnerQuote& src, const SDecimal& watermark, boo
         map<SDecimal, SInnerDepth>& src_depths = src.bids;
         bool patched = false;
         unordered_map<TExchange, SDecimal> volumes;   // 被watermark滤掉的单量自动归到买卖一
+        std::list<SDecimal> delete_price;
 
-        for( auto v = src_depths.rbegin() ; v != src_depths.rend() ; )
+        for( auto v = src_depths.rbegin() ; v != src_depths.rend() ; v++)
         {
             const SDecimal& price = v->first;
             SInnerDepth& depth = v->second;
             if( price >= watermark ) {
                 // 过滤价位
-                for( const auto& v2 : depth.exchanges ){
+                for( const auto& v2 : depth.exchanges )
+                {
                     volumes[v2.first] += v2.second;
                 }
-                v = decltype(v)(src_depths.erase( std::next(v).base() ));
-                // LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
-            } else {
-                // 保留价位
-                if( !patched ) {
-                    patched = true;
-                    
-                    SInnerDepth fake;
-                    for( const auto &v : volumes ) {
-                        fake.exchanges[v.first] = v.second;
-                    }
-                    fake.set_total_volume();
 
-                    if (fake.total_volume.get_value() != 0)
-                    {
-                        if (ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
-                        {
-                            SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+                delete_price.push_back(price);
 
-                            SDecimal new_price = watermark - symbol_config.MinChangePrice;
-
-                            src_depths[new_price] = fake;
-
-                            stringstream s_s;
-                            s_s << src.symbol << ", "
-                                << "add new price: " << new_price.get_value() << ", "
-                                << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
-                                << symbol_config.MinChangePrice
-                                << ", is_ask: " << is_ask << "\n";
-                                
-                            if (src.symbol == CONFIG->test_symbol)
-                            {
-                                LOG_DEBUG(s_s.str());
-                            }
-                        }
-                        else
-                        {                  
-                            depth.mix_exchanges(fake, 0, 1);
-                        }
-                    }
-                } else {
-                    break;
+                if (WATERMARK_RISKCTRL_OPEN && src.symbol == CONFIG->test_symbol)
+                {
+                    LOG_DEBUG("watermark filter bid" + src.symbol + ", depth_price: " + price.get_str_value() + ", water: " + watermark.get_str_value());
                 }
-                v++;
+            } 
+            else 
+            {
+                break;
             }
+        }
+
+        // 保留价位
+        if( !patched ) {
+            patched = true;
+            
+            SInnerDepth fake;
+            for( const auto &v : volumes ) {
+                fake.exchanges[v.first] = v.second;
+            }
+            fake.set_total_volume();
+
+            if (fake.total_volume.get_value() != 0)
+            {
+                SymbolConfiguration& symbol_config = ctx.params.symbol_config[src.symbol];
+
+                SDecimal new_price = watermark - symbol_config.MinChangePrice;
+
+                src_depths[new_price] = fake;
+
+                stringstream s_s;
+                s_s << src.symbol << ", "
+                    << "add new price: " << new_price.get_value() << ", "
+                    << "volume: " << src_depths[new_price].total_volume.get_value() << ", "
+                    << symbol_config.MinChangePrice
+                    << ", is_ask: " << is_ask << "\n";
+                    
+                if (src.symbol == CONFIG->test_symbol)
+                {
+                    LOG_DEBUG(s_s.str());
+                }
+            }
+        } 
+
+
+        for (auto price:delete_price)
+        {
+            src_depths.erase(price);
         }
     }
 }
@@ -799,6 +805,16 @@ void WatermarkComputerWorker::set_snap(const SInnerQuote& quote)
         iter->second->asks = first_ask;
         iter->second->bids = first_bid;
     }
+
+    if (WATERMARK_RISKCTRL_OPEN)
+    {
+        string result = "watermark_ info: ";
+        for (auto iter:watermark_)
+        {
+            result += iter.first;
+        }
+        LOG_DEBUG(result);
+    }
 }
 
 bool WatermarkComputerWorker::get_watermark(const string& symbol, SDecimal& watermark) const 
@@ -819,7 +835,9 @@ void WatermarkComputerWorker::_calc_watermark()
         std::unique_lock<std::mutex> inner_lock{ mutex_snaps_ };
         // 计算watermark
         // LOG_DEBUG("_calc_watermark");
-        for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) {
+        for( auto iter = watermark_.begin() ; iter != watermark_.end() ; ++iter ) 
+        {
+            
             SymbolWatermark* obj= iter->second;
             vector<SDecimal> asks, bids;
             for( auto &v : obj->asks ) { asks.push_back(v.second); }
@@ -890,7 +908,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
     SDecimal watermark;
     get_watermark(src.symbol, watermark);
 
-    if (watermark.get_value() != 0 )
+    if (watermark.get_value() != 0 && ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
     {
         _filter_by_watermark(src, watermark, ctx);
     }
@@ -903,11 +921,6 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
                       + " < bids.end:" +  src.bids.rbegin()->first.get_str_value());
         }
     }
-    else
-    {
-  
-    }
-
                 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {
