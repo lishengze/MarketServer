@@ -118,7 +118,12 @@ void WBServer::on_close(WebsocketClass * ws)
         s_s << "WBServer::on_close "<< ws;
         LOG_CLIENT_REQUEST(s_s.str());
         LOG_INFO(s_s.str());
+
+        ws->close();
+        
         clean_ws(ws);
+
+        
     }
     catch(const std::exception& e)
     {
