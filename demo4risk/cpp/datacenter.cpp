@@ -243,7 +243,9 @@ bool DataCenter::process(const SInnerQuote& src_quote)
 
         Params cur_params = params_;
 
-        riskctrl_work_line_.run(src_quote, cur_params, dst_quote);
+        PipelineContent context(params_);
+
+        riskctrl_work_line_.run(src_quote, context, dst_quote);
 
         if (!check_quote_time(src_quote, dst_quote)) return false;
         
@@ -329,14 +331,14 @@ bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuot
 
 void DataCenter::change_account(const AccountInfo& info)
 {   
-    // std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.account_config = info;
     _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
-    // std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
+    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
     params_.market_risk_config = config;
 
     LOG_INFO("DataCenter::change MarketRiskConfig");
@@ -354,7 +356,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        // std::unique_lock<std::mutex> inner_lock{mutex_config_};
+        std::unique_lock<std::mutex> inner_lock{mutex_config_};
         params_.symbol_config = config;
 
         LOG_INFO("DataCenter::change SymbolConfiguration");
@@ -374,7 +376,7 @@ void DataCenter::change_configuration(const map<TSymbol, map<TExchange, HedgeCon
 {
     try
     {
-        // std::unique_lock<std::mutex> inner_lock{ mutex_config_};
+        std::unique_lock<std::mutex> inner_lock{ mutex_config_};
         params_.hedge_config = config;
 
         LOG_INFO("DataCenter::change HedgeConfig");

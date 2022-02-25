@@ -17,7 +17,8 @@
 
 struct PipelineContent
 {
-    Params params;
+    PipelineContent(Params& params_):params{params_} { }
+    Params& params;
     bool is_sample_;
 };
 
@@ -124,14 +125,14 @@ public:
         }
     }
 
-    void run(const SInnerQuote& quote, const Params& params, SInnerQuote& newQuote) {
-        PipelineContent ctx;
-        ctx.params = params;
-        if( quote.symbol == CONFIG->sample_symbol_ ) {
-            ctx.is_sample_ = true;
-        } else {
-            ctx.is_sample_ = false;
-        }
+    void run(const SInnerQuote& quote, PipelineContent& ctx, SInnerQuote& newQuote) {
+        // PipelineContent ctx;
+        // ctx.params = params;
+        // if( quote.symbol == CONFIG->sample_symbol_ ) {
+        //     ctx.is_sample_ = true;
+        // } else {
+        //     ctx.is_sample_ = false;
+        // }
 
         assert( head_ != NULL );
         
