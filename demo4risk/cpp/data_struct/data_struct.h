@@ -491,4 +491,11 @@ struct Params {
     map<TSymbol, HedgeInfo> hedage_order_info;
     map<TSymbol, map<TExchange, HedgeConfig>> hedge_config;
     unordered_map<TSymbol, pair<vector<SOrderPriceLevel>, vector<SOrderPriceLevel>>> cache_order;
+
+    std::mutex  mutex_account_config_;
+    std::mutex  mutex_market_risk_config_;
+    std::mutex  mutex_symbol_config_;
+    std::mutex  mutex_hedage_order_info_;
+    std::mutex  mutex_hedge_config_;
+    std::mutex  mutex_cache_order_;
 };

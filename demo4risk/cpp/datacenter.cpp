@@ -86,7 +86,7 @@ void DataCenter::update_publish_data_map()
 {
     try
     {
-        std::lock_guard<std::mutex> lk(mutex_frequency_map_);
+        std::lock_guard<std::mutex> lk(params_.mutex_market_risk_config_);
 
         for (auto iter: params_.market_risk_config)
         {
@@ -94,8 +94,6 @@ void DataCenter::update_publish_data_map()
 
             LOG_DEBUG("PublishFrequency: " + iter.first + ", " + std::to_string(iter.second.PublishFrequency));            
         }
-
-                
     }
     catch(const std::exception& e)
     {
@@ -191,12 +189,6 @@ void DataCenter::add_quote(SInnerQuote& quote)
     //     LOG_DEBUG("\nOriginal Quote: " + " " + quote.symbol + " " + quote_str(quote, 3));
     // } 
 
-    // if (params_.symbol_config.find(quote.symbol) != params_.symbol_config.end())
-    // {
-    //     quote.precise = params_.symbol_config[quote.symbol].PricePrecision;
-    //     quote.vprecise = params_.symbol_config[quote.symbol].AmountPrecision;
-    // }
-
     precheck_quote(quote);
     
     set_src_quote(quote);
@@ -240,8 +232,6 @@ bool DataCenter::process(const SInnerQuote& src_quote)
     try
     {
         SInnerQuote dst_quote;
-
-        Params cur_params = params_;
 
         PipelineContent context(params_);
 
@@ -331,14 +321,14 @@ bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuot
 
 void DataCenter::change_account(const AccountInfo& info)
 {   
-    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
+    std::unique_lock<std::mutex> inner_lock{ params_.mutex_account_config_ };
     params_.account_config = info;
     _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
-    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
+    std::unique_lock<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
     params_.market_risk_config = config;
 
     LOG_INFO("DataCenter::change MarketRiskConfig");
@@ -356,7 +346,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{mutex_config_};
+        std::unique_lock<std::mutex> inner_lock{params_.mutex_symbol_config_};
         params_.symbol_config = config;
 
         LOG_INFO("DataCenter::change SymbolConfiguration");
@@ -398,7 +388,7 @@ void DataCenter::change_orders(const string& symbol, const SOrder& order, const 
 {
     tfm::printfln("change_orders");
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
+    std::unique_lock<std::mutex> inner_lock{ params_.mutex_cache_order_ };
     params_.cache_order[symbol] = make_pair(asks, bids);
 
     _push_to_clients(symbol);
@@ -476,6 +466,7 @@ bool DataCenter::check_quote_publish(SInnerQuote& quote)
 
     try
     {
+        std::lock_guard<std::mutex> lk(params_.mutex_market_risk_config_);
         if (params_.market_risk_config.find(quote.symbol) != params_.market_risk_config.end())
         {
             result = params_.market_risk_config[quote.symbol].IsPublish;
@@ -828,17 +819,25 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     LOG_DEBUG("\n OTC Quote Data \n" + quote_str(*quote, 5));
 
     uint32 precise = 8;
-    if (params_.symbol_config.find(symbol) != params_.symbol_config.end())
-    {
-        precise = params_.symbol_config[symbol].PricePrecision;
-    }
-    else
-    {
-        LOG_WARN("symbol_config has no config for " + symbol);
-    }
 
-    // if ()
+    {
+        std::lock_guard<std::mutex> lk(params_.mutex_symbol_config_);
+        if (params_.symbol_config.find(symbol) != params_.symbol_config.end())
+        {
+            precise = params_.symbol_config[symbol].PricePrecision;
+        }
+        else
+        {            
+            LOG_WARN("symbol_config has no config for " + symbol);
+            return QuoteResponse_Result_WRONG_SYMBOL;
+        }
 
+        if (params_.market_risk_config.find(symbol) == params_.market_risk_config.end())
+        {           
+            LOG_WARN("market_risk_config has no config for " + symbol);
+            return QuoteResponse_Result_WRONG_SYMBOL;
+        }
+    }
 
 
     if( volume > 0 )
@@ -865,24 +864,32 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
 {
     watermark_worker_.query(watermarks);
 
-    std::unique_lock<std::mutex> inner_lock{ mutex_config_ };
-    for( const auto&v : params_.account_config.hedge_accounts_ ) {
-        const TExchange& exchange = v.first;
-        for( const auto& v2 : v.second.currencies ) {
-            const TSymbol& symbol = v2.first;
-            accounts[exchange][symbol] = v2.second.amount;
+    {
+        std::unique_lock<std::mutex> inner_lock{ params_.mutex_account_config_ };
+        for( const auto&v : params_.account_config.hedge_accounts_ ) {
+            const TExchange& exchange = v.first;
+            for( const auto& v2 : v.second.currencies ) {
+                const TSymbol& symbol = v2.first;
+                accounts[exchange][symbol] = v2.second.amount;
+            }
         }
     }
-    for( const auto&v : params_.market_risk_config ) {
-        const TSymbol& symbol = v.first;
-        configurations[symbol] = v.second.desc();
+
+    {
+        std::unique_lock<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
+        for( const auto&v : params_.market_risk_config ) {
+            const TSymbol& symbol = v.first;
+            configurations[symbol] = v.second.desc();
+        }
     }
+
 }
 
 void DataCenter::hedge_trade_order(string& symbol, double price, double amount, TradedOrderStreamData_Direction direction, bool is_trade)
 {
     try
     {
+        std::lock_guard<std::mutex> lk(params_.mutex_hedage_order_info_);
         if (params_.hedage_order_info.find(symbol) == params_.hedage_order_info.end() && !is_trade)
         {
             params_.hedage_order_info[symbol] = HedgeInfo(symbol, price, amount, direction, is_trade);
