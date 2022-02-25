@@ -1,5 +1,6 @@
 #include "hub_interface.h"
 #include "hub_entity.h"
+#include "Log/log.h"
 
 #include <iostream>
 using std::cout;
@@ -8,15 +9,14 @@ using std::endl;
 
 int HubInterface::start(string file_name) 
 {
-    cout << "HubInterface Start " << endl;
+    LOG_INFO("HubInterface Start");
 
     return HUB->start(file_name);
 }
 
 int HubInterface::stop()
 {
-
-    cout << "HubInterface stop " << endl;
+    LOG_INFO("HubInterface stop");
     return HUB->stop();
 }
 
@@ -36,7 +36,6 @@ int HubInterface::get_kline(const char* exchange, const char* symbol, type_resol
 // 最近成交（请求）
 int HubInterface::get_lasttrades(vector<Trade>& trades)
 {
-    cout << "HubInterface get_lasttrades " << endl;
-
+    LOG_INFO("HubInterface get_lasttrades");
     return HUB->get_lasttrades(trades);
 }

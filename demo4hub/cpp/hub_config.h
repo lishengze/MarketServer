@@ -12,6 +12,8 @@ using njson = nlohmann::json;
 using namespace std;
 #include "base/cpp/basic.h"
 
+#include "Log/log.h"
+
 #define CONFIG utrade::pandora::Singleton<Config>::GetInstance()
 
 using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
@@ -19,7 +21,19 @@ using UTLogPtr = boost::shared_ptr<utrade::pandora::UTLog>;
 class Config
 {
 public:
-    Config(){}
+    Config(){
+
+        string work_dir = utrade::pandora::get_module_path() + "/build/";
+        string program_name = "source_data";
+
+        cout << "work_dir: " << work_dir << "\n"
+            << "program_name: " << program_name << "\n"
+            << endl;
+
+        LOG->set_work_dir(work_dir);
+        LOG->set_program_name(program_name);
+        LOG->start();
+    }
     virtual ~Config(){}
 
     // pasrse utrade.config.json file

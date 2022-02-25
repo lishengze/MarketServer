@@ -19,12 +19,13 @@ INCLUDE_DIRECTORIES("../../protos/cpp")
 INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora")
 
 ###############################################################################################
-add_library(demo4hub SHARED ${DIR_SRCS} ${PROTO_SRCS})        
+add_library(demo4hub SHARED ${DIR_SRCS} ${PROTO_SRCS} ${LOG_SRCS})        
 target_link_libraries(demo4hub ${Boost_LIBRARIES})
 target_link_libraries(demo4hub pandora)
 target_link_libraries(demo4hub log4cplus)

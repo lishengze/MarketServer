@@ -19,6 +19,7 @@
 #include "base/cpp/quote.h"
 
 #include "pandora/util/time_util.h"
+#include "Log/log.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
@@ -75,75 +76,101 @@ public:
 
 public:
     KlineUpdater(){}
-    ~KlineUpdater(){}
+    ~KlineUpdater(){
+
+        if (thread_loop_.joinable())
+        {
+            thread_loop_.join();
+        }        
+    }
 
     void start(const string& addr, IKlineUpdater* callback) {
-        thread_loop_ = new std::thread(&KlineUpdater::_run, this, addr, callback);
+        try
+        {
+            thread_loop_ = std::thread(&KlineUpdater::_run, this, addr, callback);
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
     }
 
 private:
 
-    void _request(const string& addr, IKlineUpdater* callback) {
-
-        cout << utrade::pandora::NanoTimeStr() << " [KlineUpdater] Start Request" << endl;
-
-        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
-        std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
-
-        GetKlinesRequest req;
-        MultiGetKlinesResponse resp;
-        ClientContext context;
-
-        std::unique_ptr<ClientReader<MultiGetKlinesResponse> > reader(stub->GetLast(&context, req));
-        switch(channel->GetState(true)) {
-            case GRPC_CHANNEL_IDLE: {
-                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_IDLE" << endl;
-                break;
-            }
-            case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_CONNECTING" << endl;
-                break;
-            }
-            case GRPC_CHANNEL_READY: {           
-                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_READY" << endl;
-                break;
-            }
-            case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
-                return;
-            }
-            case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "[KlineUpdater] status is GRPC_CHANNEL_SHUTDOWN" << endl;
-                break;
-            }
-        }
-        while (reader->Read(&resp)) {
-            // split and convert
+    void _request(const string& addr, IKlineUpdater* callback) 
+    {
+        try
+        {
+            LOG_INFO(" [KlineUpdater] Start Request");
             
-            std::cout << "\n****"<< utrade::pandora::NanoTimeStr() << " [update_kline] get " << resp.data_size() << " items ****" << std::endl;
-            for( int i = 0 ; i < resp.data_size() ; i ++ )
-            {
-                const SEKlineData& quote = resp.data(i);
-                callback->on_kline(quote);
+            auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+            std::unique_ptr<StreamEngine::Stub> stub = StreamEngine::NewStub(channel);
+
+            GetKlinesRequest req;
+            MultiGetKlinesResponse resp;
+            ClientContext context;
+
+            std::unique_ptr<ClientReader<MultiGetKlinesResponse> > reader(stub->GetLast(&context, req));
+            switch(channel->GetState(true)) {
+                case GRPC_CHANNEL_IDLE: {
+                    LOG_INFO("[KlineUpdater] status is GRPC_CHANNEL_IDLE");
+                    break;
+                }
+                case GRPC_CHANNEL_CONNECTING: {        
+                    LOG_INFO("[KlineUpdater] status is GRPC_CHANNEL_CONNECTING");
+                    break;
+                }
+                case GRPC_CHANNEL_READY: {           
+                    LOG_INFO("[KlineUpdater] status is GRPC_CHANNEL_READY");
+                    break;
+                }
+                case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
+                    LOG_ERROR("[KlineUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE");
+                    return;
+                }
+                case GRPC_CHANNEL_SHUTDOWN: {        
+                    LOG_ERROR("[KlineUpdater] status is GRPC_CHANNEL_SHUTDOWN");
+                    break;
+                }
+            }
+            while (reader->Read(&resp)) 
+            {   
+                LOG_TRACE(" [update_kline] get " + std::to_string(resp.data_size()) + " items ****");
+                for( int i = 0 ; i < resp.data_size() ; i ++ )
+                {
+                    const SEKlineData& quote = resp.data(i);
+                    callback->on_kline(quote);
+                }
+            }
+
+            Status status = reader->Finish();
+            if (status.ok()) {
+                LOG_INFO("GetLast rpc succeeded");
+            } else {
+                LOG_ERROR("GetLast rpc failed");
             }
         }
-
-        cout << "[KlineUpdater] Request Over!" << endl;
-
-        Status status = reader->Finish();
-        if (status.ok()) {
-            std::cout << "GetLast rpc succeeded." << std::endl;
-        } else {
-            std::cout << "GetLast rpc failed." << std::endl;
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
         }
+        
+
     }
 
     void _run(const string& addr, IKlineUpdater* callback) {
-        while( 1 ) {            
-            _request(addr, callback);
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+        try
+        {
+            while( 1 ) {            
+                _request(addr, callback);
+                std::this_thread::sleep_for(std::chrono::seconds(5));
+            }
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
         }
     }
 
-    std::thread*               thread_loop_ = nullptr;
+    std::thread               thread_loop_;
 };

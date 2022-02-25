@@ -15,6 +15,8 @@
 #include <google/protobuf/empty.pb.h>
 #include "risk_controller.grpc.pb.h"
 
+#include "Log/log.h"
+
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::ClientReader;
@@ -41,68 +43,95 @@ class QuoteUpdater
 {
 public:
     QuoteUpdater(){}
-    ~QuoteUpdater(){}
+    ~QuoteUpdater(){
+        if (thread_loop_.joinable())
+        {
+            thread_loop_.join();
+        }
+    }
 
     void start(const string& addr, IQuoteUpdater* callback) {
-        thread_loop_ = new std::thread(&QuoteUpdater::_run, this, addr, callback);
+        try
+        {
+            thread_loop_ = std::thread(&QuoteUpdater::_run, this, addr, callback);
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
+        }
     }
 
 private:
 
     void _request(const string& addr, IQuoteUpdater* callback) {
-        auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
-        std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
+        try
+        {
+            LOG_INFO("_request");
+            auto channel = grpc::CreateChannel(addr, grpc::InsecureChannelCredentials());
+            std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
 
-        google::protobuf::Empty req;
-        SEMultiData multiQuote;
-        ClientContext context;
+            google::protobuf::Empty req;
+            SEMultiData multiQuote;
+            ClientContext context;
 
-        std::unique_ptr<ClientReader<SEMultiData> > reader(stub->ServeMarketStream4Client(&context, req));
-        switch(channel->GetState(true)) {
-            case GRPC_CHANNEL_IDLE: {
-                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_IDLE" << endl;
-                break;
+            std::unique_ptr<ClientReader<SEMultiData> > reader(stub->ServeMarketStream4Client(&context, req));
+            switch(channel->GetState(true)) {
+                case GRPC_CHANNEL_IDLE: {
+                    LOG_INFO("[QuoteUpdater] status is GRPC_CHANNEL_IDLE");
+                    break;
+                }
+                case GRPC_CHANNEL_CONNECTING: {                
+                    LOG_INFO("[QuoteUpdater] status is GRPC_CHANNEL_CONNECTING");
+                    break;
+                }
+                case GRPC_CHANNEL_READY: {           
+                    LOG_INFO("[QuoteUpdater] status is GRPC_CHANNEL_READY");
+                    break;
+                }
+                case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
+                    LOG_ERROR("[QuoteUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE");
+                    return;
+                }
+                case GRPC_CHANNEL_SHUTDOWN: {        
+                    LOG_WARN("[QuoteUpdater] status is GRPC_CHANNEL_SHUTDOWN");
+                    break;
+                }
             }
-            case GRPC_CHANNEL_CONNECTING: {                
-                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_CONNECTING" << endl;
-                break;
+            while (reader->Read(&multiQuote)) {
+                // split and convert
+                // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
+                for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
+                    const SEData& quote = multiQuote.quotes(i);
+                    // std::cout << "QuoteUpdater  symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
+                    callback->on_snap(quote);
+                }
             }
-            case GRPC_CHANNEL_READY: {           
-                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_READY" << endl;
-                break;
-            }
-            case GRPC_CHANNEL_TRANSIENT_FAILURE: {         
-                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_TRANSIENT_FAILURE" << endl;
-                return;
-            }
-            case GRPC_CHANNEL_SHUTDOWN: {        
-                std::cout << "[QuoteUpdater] status is GRPC_CHANNEL_SHUTDOWN" << endl;
-                break;
+            Status status = reader->Finish();
+            if (status.ok()) {
+                LOG_INFO("ServeMarketStream4Client rpc succeeded.");
+            } else {
+                LOG_ERROR("ServeMarketStream4Client rpc failed." );
             }
         }
-        while (reader->Read(&multiQuote)) {
-            // split and convert
-            // std::cout << "get " << multiQuote.quotes_size() << " items" << std::endl;
-            for( int i = 0 ; i < multiQuote.quotes_size() ; ++ i ) {
-                const SEData& quote = multiQuote.quotes(i);
-                // std::cout << "QuoteUpdater  symbol " << quote.symbol() << " " << quote.asks_size() << "/" << quote.bids_size() << std::endl;
-                callback->on_snap(quote);
-            }
-        }
-        Status status = reader->Finish();
-        if (status.ok()) {
-            std::cout << "ServeMarketStream4Client rpc succeeded." << std::endl;
-        } else {
-            std::cout << "ServeMarketStream4Client rpc failed." << std::endl;
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
         }
     }
 
     void _run(const string& addr, IQuoteUpdater* callback) {
-        while( 1 ) {            
-            _request(addr, callback);
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+        try
+        {
+            while( 1 ) {            
+                _request(addr, callback);
+                std::this_thread::sleep_for(std::chrono::seconds(5));
+            }
+        }
+        catch(const std::exception& e)
+        {
+            LOG_ERROR(e.what());
         }
     }
 
-    std::thread*               thread_loop_ = nullptr;
+    std::thread               thread_loop_;
 };
