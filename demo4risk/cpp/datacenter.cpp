@@ -193,7 +193,7 @@ void DataCenter::add_quote(SInnerQuote& quote)
     
     set_src_quote(quote);
 
-    if (!PUBLISH_CTRL_OPEN || params_.market_risk_config.find(quote.symbol) == params_.market_risk_config.end())
+    if (!PUBLISH_CTRL_OPEN)
     {
         process(quote);
     }        
@@ -321,21 +321,26 @@ bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuot
 
 void DataCenter::change_account(const AccountInfo& info)
 {   
-    std::unique_lock<std::mutex> inner_lock{ params_.mutex_account_config_ };
-    params_.account_config = info;
-    _push_to_clients();
+    {
+        std::lock_guard<std::mutex> inner_lock{ params_.mutex_account_config_ };
+        params_.account_config = info;
+    }
+
+    // _push_to_clients();
 }
 
 void DataCenter::change_configuration(const map<TSymbol, MarketRiskConfig>& config)
 {   
-    std::unique_lock<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
-    params_.market_risk_config = config;
-
-    LOG_INFO("DataCenter::change MarketRiskConfig");
-    for (auto iter:params_.market_risk_config)
     {
-        LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
-    }    
+        std::lock_guard<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
+        params_.market_risk_config = config;
+
+        LOG_INFO("DataCenter::change MarketRiskConfig");
+        for (auto iter:params_.market_risk_config)
+        {
+            LOG_INFO("\n" + iter.first + "\n" + iter.second.desc());
+        }    
+    }
 
     update_publish_data_map();
 
@@ -346,7 +351,7 @@ void DataCenter::change_configuration(const map<TSymbol, SymbolConfiguration>& c
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{params_.mutex_symbol_config_};
+        std::lock_guard<std::mutex> inner_lock{params_.mutex_symbol_config_};
         params_.symbol_config = config;
 
         LOG_INFO("DataCenter::change SymbolConfiguration");
@@ -366,7 +371,7 @@ void DataCenter::change_configuration(const map<TSymbol, map<TExchange, HedgeCon
 {
     try
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_config_};
+        std::lock_guard<std::mutex> inner_lock{ mutex_config_};
         params_.hedge_config = config;
 
         LOG_INFO("DataCenter::change HedgeConfig");
@@ -386,10 +391,12 @@ void DataCenter::change_configuration(const map<TSymbol, map<TExchange, HedgeCon
 
 void DataCenter::change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids)
 {
-    tfm::printfln("change_orders");
 
-    std::unique_lock<std::mutex> inner_lock{ params_.mutex_cache_order_ };
-    params_.cache_order[symbol] = make_pair(asks, bids);
+    {
+        std::lock_guard<std::mutex> inner_lock{ params_.mutex_cache_order_ };
+        params_.cache_order[symbol] = make_pair(asks, bids);
+    }
+
 
     _push_to_clients(symbol);
 }
@@ -786,7 +793,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
 bool DataCenter::get_snaps(vector<SInnerQuote>& snaps)
 {
-    std::unique_lock<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
+    std::lock_guard<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
     for( const auto& v: riskctrl_datas_ ) {
         snaps.push_back(v.second);
     }
@@ -805,7 +812,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     SInnerQuote* quote = nullptr;
 
     {
-        std::unique_lock<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
+        std::lock_guard<std::mutex> inner_lock{ mutex_riskctrl_datas_ };
         auto iter = riskctrl_datas_.find(symbol);
 
         if(iter == riskctrl_datas_.end())
@@ -865,7 +872,7 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
     watermark_worker_.query(watermarks);
 
     {
-        std::unique_lock<std::mutex> inner_lock{ params_.mutex_account_config_ };
+        std::lock_guard<std::mutex> inner_lock{ params_.mutex_account_config_ };
         for( const auto&v : params_.account_config.hedge_accounts_ ) {
             const TExchange& exchange = v.first;
             for( const auto& v2 : v.second.currencies ) {
@@ -876,7 +883,7 @@ void DataCenter::get_params(map<TSymbol, SDecimal>& watermarks, map<TExchange, m
     }
 
     {
-        std::unique_lock<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
+        std::lock_guard<std::mutex> inner_lock{ params_.mutex_market_risk_config_ };
         for( const auto&v : params_.market_risk_config ) {
             const TSymbol& symbol = v.first;
             configurations[symbol] = v.second.desc();
