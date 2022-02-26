@@ -147,7 +147,7 @@ void DataReceive::test_kline_data()
                 << "open: " << open << ", high: " << high << ", "
                 << "low: " << low << ", close: " << volume << "\n";       
 
-            LOG_DEBUG(s_obj.str());        
+            // LOG_DEBUG(s_obj.str());        
         }         
     }
 }

@@ -464,7 +464,7 @@ void FrontServer::response_enquiry_data_package(PackagePtr package)
         if (pRspEnquiry)
         {
             string json_str = pRspEnquiry->get_json_str();
-            LOG_DEBUG(json_str);
+            // LOG_DEBUG(json_str);
         }
         else
         {

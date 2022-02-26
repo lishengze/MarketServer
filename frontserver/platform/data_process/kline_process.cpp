@@ -159,11 +159,11 @@ void TimeKlineData::update(KlineDataPtr kline_data)
                     low_time_ = low_ == kline_data->px_low ? kline_data->index : low_time_;
                 }
 
-                if ("BTC_USDT" == string(kline_data->symbol))
-                {
-                    LOG_DEBUG("high: " + high_.get_str_value() + ", ht: " + get_sec_time_str(high_time_) 
-                            + ", low: " + low_.get_str_value() + ", lt: " + get_sec_time_str(low_time_));
-                }
+                // if ("BTC_USDT" == string(kline_data->symbol))
+                // {
+                //     LOG_DEBUG("high: " + high_.get_str_value() + ", ht: " + get_sec_time_str(high_time_) 
+                //             + ", low: " + low_.get_str_value() + ", lt: " + get_sec_time_str(low_time_));
+                // }
             }
 
             start_price_ = ori_data_.begin()->second->px_open;            
@@ -390,15 +390,15 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     last_kline->index = kline_data->index;
                     KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                    std::stringstream s_log;
-                    s_log << "New : " << cur_kline_data->symbol << " "
-                          << get_sec_time_str(cur_kline_data->index) << " " 
-                          << "fre: " << kline_data->frequency_ << " "
-                          << "open: " << cur_kline_data->px_open.get_value() << " " 
-                          << "close: " << cur_kline_data->px_close.get_value() << " "
-                          << "high: " << cur_kline_data->px_high.get_value() << " "
-                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    LOG_DEBUG(s_log.str());
+                    // std::stringstream s_log;
+                    // s_log << "New : " << cur_kline_data->symbol << " "
+                    //       << get_sec_time_str(cur_kline_data->index) << " " 
+                    //       << "fre: " << kline_data->frequency_ << " "
+                    //       << "open: " << cur_kline_data->px_open.get_value() << " " 
+                    //       << "close: " << cur_kline_data->px_close.get_value() << " "
+                    //       << "high: " << cur_kline_data->px_high.get_value() << " "
+                    //       << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                    // LOG_DEBUG(s_log.str());
 
                     PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
                     if (rsp_package)
@@ -417,15 +417,15 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     // 推送更新作为当前 k 线时间数据;
                     KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                    std::stringstream s_log;
-                    s_log << "old : " << cur_kline_data->symbol << " "
-                          << get_sec_time_str(cur_kline_data->index) << " "
-                          << "fre: " << kline_data->frequency_ << " "
-                          << "open: " << cur_kline_data->px_open.get_value() << " " 
-                          << "close: " << cur_kline_data->px_close.get_value() << " "
-                          << "high: " << cur_kline_data->px_high.get_value() << " "
-                          << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    LOG_DEBUG(s_log.str());
+                    // std::stringstream s_log;
+                    // s_log << "old : " << cur_kline_data->symbol << " "
+                    //       << get_sec_time_str(cur_kline_data->index) << " "
+                    //       << "fre: " << kline_data->frequency_ << " "
+                    //       << "open: " << cur_kline_data->px_open.get_value() << " " 
+                    //       << "close: " << cur_kline_data->px_close.get_value() << " "
+                    //       << "high: " << cur_kline_data->px_high.get_value() << " "
+                    //       << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                    // LOG_DEBUG(s_log.str());
 
                     PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
                     if (rsp_package)
@@ -754,7 +754,7 @@ void KlineProcess::get_src_kline_data(vector<KlineDataPtr>& src_kline_data, std:
         }                
         else
         {
-            LOG_DEBUG("Real Start Time: " + std::to_string(iter->first));
+            // LOG_DEBUG("Real Start Time: " + std::to_string(iter->first));
 
             while (iter->first <= end_time && iter != symbol_kline_data.end())
             {
@@ -787,16 +787,16 @@ void KlineProcess::get_src_kline_data(string symbol, vector<KlineDataPtr>& resul
             vector<KlineData> append_result;
             HubInterface::get_kline("", symbol.c_str(), cur_freq_base, start_time, cur_earliest_time, append_result);
 
-            std::stringstream s_s;
-            s_s << "sum_data_count: " <<  data_count << " "
-                << "cur_data_count: " << symbol_kline_data.size() << " "
-                << "need_append_count: " << append_data_count << " "
-                << "recv_append_count: " << append_result.size() << " \n"             
-                << "cur_freq_base: " << cur_freq_base << " "
-                << "req_start_time: " << get_sec_time_str(start_time) << " "
-                << "req_end_time: " << get_sec_time_str(cur_earliest_time) << "\n";            
-            LOG_DEBUG(s_s.str());
-            s_s.clear();
+            // std::stringstream s_s;
+            // s_s << "sum_data_count: " <<  data_count << " "
+            //     << "cur_data_count: " << symbol_kline_data.size() << " "
+            //     << "need_append_count: " << append_data_count << " "
+            //     << "recv_append_count: " << append_result.size() << " \n"             
+            //     << "cur_freq_base: " << cur_freq_base << " "
+            //     << "req_start_time: " << get_sec_time_str(start_time) << " "
+            //     << "req_end_time: " << get_sec_time_str(cur_earliest_time) << "\n";            
+            // LOG_DEBUG(s_s.str());
+            // s_s.clear();
 
             // s_s << "recv_data: \n";
             // for (KlineData& kline_data:append_result)
@@ -1273,16 +1273,16 @@ void KlineProcess::update_trade_data(TradeDataPtr curTradeDataPtr)
 
             trade_data_map_[symbol] = curTradeDataPtr;
 
-            if ("BTC_USDT" == string(symbol))
-            {
-                LOG_DEBUG("\ntrade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
-                        + ", trade.low: " + curTradeDataPtr->low_.get_str_value() + ", trade.lt: " + get_sec_time_str(low_time)
-                        + "\nkline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_)
-                        + ", kline.low: " + cur_time_data.low_.get_str_value()+ ", kline.lt: " + get_sec_time_str(cur_time_data.low_time_)
-                        + "\ncur_price: " + curTradeDataPtr->price_.get_str_value() + ", ct: " + get_sec_time_str(curTradeDataPtr->time_)
-                        + ", start_price: " + cur_time_data.start_price_.get_str_value() 
-                        + ", st: " + get_sec_time_str(cur_time_data.ori_data_.begin()->first));
-            }
+            // if ("BTC_USDT" == string(symbol))
+            // {
+            //     LOG_DEBUG("\ntrade.high: " + curTradeDataPtr->high_.get_str_value() + ", trade.ht: " + get_sec_time_str(high_time)
+            //             + ", trade.low: " + curTradeDataPtr->low_.get_str_value() + ", trade.lt: " + get_sec_time_str(low_time)
+            //             + "\nkline.high: " + cur_time_data.high_.get_str_value()+ ", kline.ht: " + get_sec_time_str(cur_time_data.high_time_)
+            //             + ", kline.low: " + cur_time_data.low_.get_str_value()+ ", kline.lt: " + get_sec_time_str(cur_time_data.low_time_)
+            //             + "\ncur_price: " + curTradeDataPtr->price_.get_str_value() + ", ct: " + get_sec_time_str(curTradeDataPtr->time_)
+            //             + ", start_price: " + cur_time_data.start_price_.get_str_value() 
+            //             + ", st: " + get_sec_time_str(cur_time_data.ori_data_.begin()->first));
+            // }
 
             cur_time_data.high_ = curTradeDataPtr->high_;
             cur_time_data.low_ = curTradeDataPtr->low_;

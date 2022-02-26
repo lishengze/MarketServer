@@ -243,7 +243,7 @@ void DepthProces::request_enquiry_package(PackagePtr package)
 {
     try
     {
-        LOG_DEBUG("DepthProces::request_enquiry_package");
+        // LOG_DEBUG("DepthProces::request_enquiry_package");
 
         ReqEnquiryPtr p_req_enquiry = GetField<ReqEnquiry>(package);
 
