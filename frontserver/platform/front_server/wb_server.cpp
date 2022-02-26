@@ -545,6 +545,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr 
         {
             LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " recv heartbeat");
             wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
+            LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
         }        
         else
         {
@@ -744,6 +745,8 @@ ID_TYPE WBServer::store_ws(WebsocketClass * ws)
             WebsocketClassThreadSafePtr ws_safe = boost::make_shared<WebsocketClassThreadSafe>(ws, socket_id);
             ws_safe->set_recv_heartbeat(utrade::pandora::NanoTime());
 
+            LOG_DEBUG(ws_safe->get_ws_str() + " heartbeat_time: " + ws_safe->get_recv_heart_beate_time_str());
+
             // ws_safe->set_new_business_request(true);
             wss_con_map_[socket_id] = ws_safe;
 
@@ -785,6 +788,8 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
                 // wss_con_map_[socket_id]->set_new_business_request(true);
                 wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
                 LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
+
+                LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
             }
         }
         else
@@ -825,6 +830,8 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
             {
                 // wss_con_map_[socket_id]->set_new_business_request(false);
                 wss_con_map_[socket_id]->set_recv_heartbeat(0);
+
+                LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
 
                 wss_con_map_.erase(socket_id);
 
@@ -901,7 +908,11 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
             ws->close();
 
             // ws_safe->set_new_business_request(false);
-            ws_safe->set_recv_heartbeat(0);            
+
+            ws_safe->set_recv_heartbeat(0);        
+            
+            LOG_DEBUG(ws_safe->get_ws_str() + " heartbeat_time: " + ws_safe->get_recv_heart_beate_time_str());                
+
             wss_con_map_.erase(ws_safe->get_id());
         }              
     }
