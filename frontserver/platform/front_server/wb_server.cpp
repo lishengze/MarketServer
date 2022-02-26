@@ -118,6 +118,7 @@ void WBServer::on_close(WebsocketClass * ws)
         s_s << "WBServer::on_close "<< ws;
         LOG_CLIENT_REQUEST(s_s.str());
         LOG_INFO(s_s.str());
+        LOG_DEBUG(s_s.str());
 
         ws->close();
         
@@ -681,6 +682,7 @@ void WBServer::check_heartbeat()
                     ws_vec.push_back(iter.first);
 
                     LOG_WARN("[CK] " + iter.second->get_ws_str() + " lost heartbeat, " + iter.second->get_heartbeat_str());
+                    LOG_DEBUG("[CK] " + iter.second->get_ws_str() + " lost heartbeat, " + iter.second->get_heartbeat_str());
                 }
                 else
                 {
@@ -888,11 +890,14 @@ void WBServer::close_ws(WebsocketClassThreadSafePtr ws_safe)
         }
         else
         {
+            
             WebsocketClass * ws = ws_safe->get_ws();
             WSData* data_ptr = (WSData*)(ws->getUserData());
             data_ptr->set_id(0);
 
             LOG_WARN("Close: " + ws_safe->get_ws_str());
+            LOG_DEBUG("Close: " + ws_safe->get_ws_str());
+
             ws->close();
 
             // ws_safe->set_new_business_request(false);
