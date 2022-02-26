@@ -16,7 +16,7 @@ def process_heartbeat(ws):
     }
     heartbeat_info_str = json.dumps(heartbeat_info)
 
-    # print("heartbeat_info_str: %s" % (heartbeat_info_str))
+    print("heartbeat_info_str: %s" % (heartbeat_info_str))
     ws.send(heartbeat_info_str)    
 
 def get_time(secs):

@@ -832,6 +832,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
                 wss_con_map_[socket_id]->set_recv_heartbeat(0);
 
                 LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
+                LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
 
                 wss_con_map_.erase(socket_id);
 
