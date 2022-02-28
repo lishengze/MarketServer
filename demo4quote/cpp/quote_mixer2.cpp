@@ -326,26 +326,40 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     }
 
     // 交易
-    Trade trade;
-    {        
-        std::unique_lock<std::mutex> l{ mutex_quotes_ };
-        for( const auto& data : trades_[symbol] ) 
-        {
-            if( data.second.time > trade.time )
-                trade = data.second;
-        }
-    }
-    trade.price.scale(config.precise);
-    trade.volume.scale(config.vprecise);
-    if( trade.time > 0 ) {
-        engine_interface_->on_trade(MIX_EXCHANGE_NAME, symbol, trade);
-    }
+    // Trade trade;
+    // {        
+    //     std::unique_lock<std::mutex> l{ mutex_quotes_ };
+    //     for( const auto& data : trades_[symbol] ) 
+    //     {
+    //         if( data.second.time > trade.time )
+    //             trade = data.second;
+    //     }
+    // }
+    // trade.price.scale(config.precise);
+    // trade.volume.scale(config.vprecise);
+    // if( trade.time > 0 ) {
+    //     engine_interface_->on_trade(MIX_EXCHANGE_NAME, symbol, trade);
+    // }
 }
 
 void QuoteMixer2::on_trade(const TExchange& exchange, const TSymbol& symbol, const Trade& trade)
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     trades_[symbol][exchange] = trade;
+
+
+    // 交易
+    Trade trade_mix = trade;
+
+    if (configs_.find(symbol) != configs_.end())
+    {
+        trade_mix.price.scale(configs_[symbol].precise);
+        trade_mix.volume.scale(configs_[symbol].vprecise);
+    }
+
+    if( trade.time > 0 ) {
+        engine_interface_->on_trade(MIX_EXCHANGE_NAME, symbol, trade_mix);
+    }
 }
 
 void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& quote) 
