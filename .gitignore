@@ -17,6 +17,11 @@ build/
 cmake-build-debug/
 cmake-build-release/
 
+demo4quote/cpp/etc/*
+demo4risk/cpp/etc/*
+front_server/platform/etc/*
+
+
 # grpc生成的代码
 protos/cpp/*
 # protos/python/*
