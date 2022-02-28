@@ -142,21 +142,34 @@ int DataCenter::get_sleep_millsecs(unsigned long long time, std::list<string>& p
         std::lock_guard<std::mutex> lk(mutex_frequency_map_);
 
         int sleep_millsecs = 0;
-        for (auto iter:frequency_map_)
-        {
-            int cur_sleep_millsecs = get_sleep_millsecs(time, iter.second);
 
-            if (cur_sleep_millsecs == 0)
-            {
-                publish_list.push_back(iter.first);
-            }
-            else if (!sleep_millsecs || cur_sleep_millsecs <= sleep_millsecs)
-            {
-                sleep_millsecs = cur_sleep_millsecs;
-            }
-        }
 
         if (frequency_map_.size() == 0) sleep_millsecs = 10*1000;
+        else
+        {
+            int min_sleep_secs = frequency_map_.begin()->second;
+
+            for (auto iter:frequency_map_)
+            {
+                int cur_sleep_millsecs = get_sleep_millsecs(time, iter.second);
+
+                if (cur_sleep_millsecs == 0)
+                {
+                    publish_list.push_back(iter.first);
+                }
+                else if (!sleep_millsecs || cur_sleep_millsecs <= sleep_millsecs)
+                {
+                    sleep_millsecs = cur_sleep_millsecs;
+                }
+
+                if (min_sleep_secs > iter.second) min_sleep_secs = iter.second;
+            }
+
+            if (sleep_millsecs == 0)
+            {
+                sleep_millsecs = min_sleep_secs;
+            }
+        }
 
         return sleep_millsecs;
     }
