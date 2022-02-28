@@ -42,17 +42,17 @@ inline string get_env(int argc, char** argv)
         {
             cout << "================Invalid Usage!=================" << endl;
             cout << "====================Usage======================" << endl;
-            cout << "./opu dev" << endl;
-            cout << "./opu qa" << endl;
-            cout << "./opu prd" << endl;
-            cout << "./opu stg" << endl;
+            cout << "./opu -dev" << endl;
+            cout << "./opu -qa" << endl;
+            cout << "./opu -prd" << endl;
+            cout << "./opu -stg" << endl;
             cout << "=============================== end =====================" << endl;
             exit(0);
         }
 
         string env = argv[1];
         
-        cout<<env<<endl;
+        cout<< "env: " << env<<endl;
 
         return env;
     }
@@ -69,19 +69,19 @@ inline string get_config_file_name (string env)
     string result = "config.json";
     try
     {
-        if ("prd" == env) 
+        if ("-prd" == env) 
         {
             result = utrade::pandora::get_module_path() +  "/etc/prd/" + "config.json";
         } 
-        else if ("qa" == env) 
+        else if ("-qa" == env) 
         {
             result = utrade::pandora::get_module_path() +  "/etc/qa/" + "config.json";
         } 
-        else if ("stg" == env) 
+        else if ("-stg" == env) 
         {
             result = utrade::pandora::get_module_path() +  "/etc/stg/" + "config.json";
         } 
-        else if ("dev" == env)
+        else if ("-dev" == env)
         {
             result = utrade::pandora::get_module_path() +  "/etc/dev/" + "config.json";
         }
@@ -91,6 +91,8 @@ inline string get_config_file_name (string env)
         }
 
         cout<<"result Path:" << result <<endl;
+
+        return result;
     }
     catch(const std::exception& e)
     {

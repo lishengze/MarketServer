@@ -1,0 +1,22 @@
+{
+    "hub":
+    {
+        "risk_controller_addr": "127.0.0.1:8111",
+        "stream_engine_addr": "127.0.0.1:8110"
+    },
+    "ws_server":
+    {
+        "port": 8114
+    },
+    "rest_server":
+    {
+        "port": 8115
+    },
+    "market_cache":
+    {
+        "frequency_list": [60,300, 3600, 7200, 14400],
+        "frequency_numb": 1500,
+        "frequency_base": [60, 3600]
+    },
+    "heartbeat_seconds": 30
+}
