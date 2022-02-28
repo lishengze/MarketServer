@@ -2,7 +2,7 @@
 #include "config/config.h"
 
 #include "log/log.h"
-#include "base/cpp/util.h"
+// #include "base/cpp/util.h"
 #include "pandora/util/path_util.h"
 
 void setup_signal_handler_callback()
@@ -34,6 +34,70 @@ void init_log(char** argv)
     LOG->start();   
 }
 
+inline string get_env(int argc, char** argv)
+{
+    try
+    {
+        if(argc != 2)
+        {
+            cout << "================Invalid Usage!=================" << endl;
+            cout << "====================Usage======================" << endl;
+            cout << "./opu dev" << endl;
+            cout << "./opu qa" << endl;
+            cout << "./opu prd" << endl;
+            cout << "./opu stg" << endl;
+            cout << "=============================== end =====================" << endl;
+            exit(0);
+        }
+
+        string env = argv[1];
+        
+        cout<<env<<endl;
+
+        return env;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
+    return "dev";
+}
+
+inline string get_config_file_name (string env)
+{
+    string result = "config.json";
+    try
+    {
+        if ("prd" == env) 
+        {
+            result = utrade::pandora::get_module_path() +  "/etc/prd/" + "config.json";
+        } 
+        else if ("qa" == env) 
+        {
+            result = utrade::pandora::get_module_path() +  "/etc/qa/" + "config.json";
+        } 
+        else if ("stg" == env) 
+        {
+            result = utrade::pandora::get_module_path() +  "/etc/stg/" + "config.json";
+        } 
+        else if ("dev" == env)
+        {
+            result = utrade::pandora::get_module_path() +  "/etc/dev/" + "config.json";
+        }
+        else
+        {
+            result = utrade::pandora::get_module_path() +  "/etc/dev/" + "config.json";    
+        }
+
+        cout<<"result Path:" << result <<endl;
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }    
+}
+
 int main(int argc, char** argv)
 {
     try
@@ -53,7 +117,7 @@ int main(int argc, char** argv)
         //     config_file_name = argv[1];
         //     cout << "config_file_name: " << config_file_name << endl;
         // }
-        
+
         CONFIG->load_config(config_file_name);
 
         // LOG->set_statistic_secs_(CONFIG->get_heartbeat_secs());
