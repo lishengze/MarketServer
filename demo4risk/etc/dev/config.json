@@ -1,20 +1,20 @@
 {
     "grpc": {
         "publish_addr": "0.0.0.0:8111",
-        "quote_addr": "118.193.35.160:8110",
-        "account_addr": "36.255.220.139:9000"
+        "quote_addr": "127.0.0.1:8110",
+        "account_addr": "10.8.78.83:9000"
     },
     "nacos": {
-        "addr": "36.255.220.139:8848",
+        "addr": "10.8.78.83:8848",
         "namespace": "bcts"
     },
     "debug": {
-        "sample_symbol": "BTC_USDT",
+        "sample_symbol": "XRP_USDT",
         "output_to_screen": 0,
         "dump_binary_only": 0
     },
     "check_symbol_secs": 5,
-    "test_symbol": "ETH_USDT",
+    "test_symbol": "BTC_USDT",
     "fee_risk_ctrl_open": false,
     "account_risk_ctrl_open": false,
     "order_risk_ctrl_open": false,
@@ -22,4 +22,5 @@
     "watermark_risk_ctrl_open": false,   
     "pricesion_risk_ctrl_open": false,
     "publish_ctrl_open":true
+
 }
