@@ -244,7 +244,7 @@ void QuoteMixer2::_thread_loop()
         }
         
         // 休眠
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 

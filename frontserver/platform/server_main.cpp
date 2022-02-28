@@ -2,6 +2,7 @@
 #include "config/config.h"
 
 #include "log/log.h"
+#include "base/cpp/util.h"
 #include "pandora/util/path_util.h"
 
 void setup_signal_handler_callback()
@@ -37,18 +38,22 @@ int main(int argc, char** argv)
 {
     try
     {
+        string env = get_env(argc, argv);
+
         setup_signal_handler_callback();
         
         init_log(argv);
 
         utrade::pandora::io_service_pool engine_pool(4);
 
-        string config_file_name = "config.json";
-        if(argc == 2)
-        {
-            config_file_name = argv[1];
-            cout << "config_file_name: " << config_file_name << endl;
-        }
+        string config_file_name = get_config_file_name(env);
+
+        // if(argc == 2)
+        // {
+        //     config_file_name = argv[1];
+        //     cout << "config_file_name: " << config_file_name << endl;
+        // }
+        
         CONFIG->load_config(config_file_name);
 
         // LOG->set_statistic_secs_(CONFIG->get_heartbeat_secs());

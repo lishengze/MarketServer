@@ -1,6 +1,6 @@
 # !/bin/bash
 
-nohup /mnt/bcts_quote/frontserver/platform/build/front_server /mnt/bcts_quote/frontserver/platform/build/config.json  > /mnt/bcts_quote/frontserver/platform/build/front_server.log &
+nohup /mnt/bcts_quote/frontserver/platform/build/front_server qa > /mnt/bcts_quote/frontserver/platform/build/front_server.log &
 
 sleep 1s
 

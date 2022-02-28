@@ -3,7 +3,8 @@ cd build/
 cmake ../
 make -j4
 
-cp ../config.json ./
+cp -fr ../../etc ./
+
 cp ../../script/*.sh ./
 
 ./start.sh
