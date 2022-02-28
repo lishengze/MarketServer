@@ -20,6 +20,6 @@ fi
 cat start.sh
 
 ./clean.sh
-sleep 2s
+# sleep 2s
 
 ./start.sh

@@ -18,7 +18,6 @@ fi
 cat start.sh
 
 ./clean.sh
-sleep 2s
 
 ./start.sh
 
