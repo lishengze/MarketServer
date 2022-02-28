@@ -15,11 +15,11 @@
     },
     "check_symbol_secs": 15,
     "test_symbol": "ETH_USDT",
-    "fee_risk_ctrl_open": false,
-    "account_risk_ctrl_open": false,
-    "order_risk_ctrl_open": false,
-    "bias_risk_ctrl_open": false,
-    "watermark_risk_ctrl_open": false,   
-    "pricesion_risk_ctrl_open": false,
+    "fee_risk_ctrl_open": true,
+    "account_risk_ctrl_open": true,
+    "order_risk_ctrl_open": true,
+    "bias_risk_ctrl_open": true,
+    "watermark_risk_ctrl_open": true,   
+    "pricesion_risk_ctrl_open": true,
     "publish_ctrl_open":true
 }
