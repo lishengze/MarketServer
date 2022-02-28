@@ -1,0 +1,25 @@
+{
+    "grpc": {
+        "publish_addr": "0.0.0.0:8110"
+    },
+    "debug": {
+        "mode": "realtime",
+        "mode_bak": "realtime|replay",
+        "replay_ratio": 2,
+        "replay_replicas": 0,
+        "sample_symbol": "BTC_USDT",
+        "dump": 0
+    },
+    "nacos": {
+        "addr": "16.162.137.156:8848",
+        "namespace": "bcts"
+    },
+    "redis_quote": {
+        "host": "118.193.35.160",
+        "port": 8379,
+        "password": "test_broker",
+        "snap_interval": 10
+    },
+    "check_secs": 5
+}
+

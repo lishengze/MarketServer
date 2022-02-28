@@ -1,5 +1,6 @@
 #include "stream_engine_config.h"
 #include "stream_engine.h"
+#include "Log/log.h"
 
 void Config::parse_config(const std::string& file_name)
 {
@@ -8,18 +9,16 @@ void Config::parse_config(const std::string& file_name)
 
     try
     {
-        // get the running module path
-        //string WorkFolder = utrade::pandora::get_module_path();
-        // append the prefix
-        //string intact_file_name = WorkFolder + file_name;
-        UT_LOG_INFO(logger_, "System Parse Config File " << file_name);
-
         std::cout << "\n***** Config FileName:  " << file_name << std::endl;
+
+        LOG_INFO("\n***** Config FileName:  " + file_name);
 
         // read the config file
         std::ifstream in_config(file_name);
         std::string contents((std::istreambuf_iterator<char>(in_config)), std::istreambuf_iterator<char>());
-        std::cout << contents << std::endl;
+
+        LOG_INFO(contents);
+        
         njson js = njson::parse(contents);
 
         // grpc
@@ -48,11 +47,11 @@ void Config::parse_config(const std::string& file_name)
         
         check_secs = js["check_secs"].get<int>();
         
-        UT_LOG_INFO(logger_, "Parse Config finish.");
+
     }
     catch (std::exception& e)
     {
-        std::cerr << "Config parse exception: " << e.what() << "\n";
+        LOG_ERROR(e.what());
     }
     catch (...)
     {
