@@ -216,7 +216,7 @@ void WBServer::process_on_open(WebsocketClass * ws)
         std::stringstream s_s;
         s_s << "WBServer::process_on_open ws: " << ws;
         LOG_CLIENT_REQUEST(s_s.str());
-        LOG_INFO(s_s.str());
+        // LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = store_ws(ws);
 
