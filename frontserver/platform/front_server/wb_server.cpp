@@ -238,8 +238,8 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
     {
         std::stringstream s_s;
         s_s << "ori_msg: " << ws << ": " << ori_msg;
-        // LOG_CLIENT_REQUEST(s_s.str());
-        LOG_TRACE(s_s.str());
+        LOG_CLIENT_REQUEST(s_s.str());
+        LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
 
@@ -487,7 +487,7 @@ void WBServer::process_trade_req(string ori_msg, ID_TYPE socket_id, WebsocketCla
             {
                 string symbol = *it;
                 LOG_CLIENT_REQUEST("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
-                LOG_TRACE("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
+                // LOG_TRACE("socket_id: " + std::to_string(socket_id) + " req_trade: " + symbol);
 
                 PackagePtr package = CreatePackage<ReqTrade>(symbol, false, ws, socket_id);
 
@@ -543,7 +543,8 @@ void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr 
         std::lock_guard<std::mutex> lk(wss_con_mutex_);
         if (wss_con_map_.find(socket_id) != wss_con_map_.end())
         {
-            LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " recv heartbeat");
+            LOG_CLIENT_REQUEST(wss_con_map_[socket_id]->get_ws_str() + " recv heartbeat");
+
             wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
             LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
         }        
@@ -584,7 +585,6 @@ void WBServer::request_symbol_list(ID_TYPE socket_id)
                 if (pReqSymbolListData)
                 {
                     LOG_CLIENT_REQUEST(pReqSymbolListData->str());
-                    LOG_TRACE(pReqSymbolListData->str());
 
                     package->prepare_request(UT_FID_ReqSymbolListData, ID_MANAGER->get_id());
 
@@ -687,8 +687,8 @@ void WBServer::check_heartbeat()
                 }
                 else
                 {
-                    LOG_TRACE("[CK]" + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
-
+                    // LOG_TRACE("[CK]" + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
+                    LOG_CLIENT_REQUEST("[CK]" + iter.second->get_ws_str() + " is alive ^v^ ~" + iter.second->get_heartbeat_str());
                     // cout <<"\n[H] " << utrade::pandora::NanoTimeStr() << " id: " << iter.first << " check heartbeat Successfully!" << endl;                    
                 }
             }
@@ -704,7 +704,10 @@ void WBServer::check_heartbeat()
         {
             // iter.second->set_new_business_request(false);
             // iter.second->set_send_heartbeat(utrade::pandora::NanoTime());
-            LOG_TRACE("send heartbeat: " + iter.second->get_ws_str());
+            // LOG_TRACE("send heartbeat: " + iter.second->get_ws_str());
+
+            LOG_CLIENT_REQUEST("send heartbeat: " + iter.second->get_ws_str());
+
             iter.second->send(heartbeat_str);
         }
     }
@@ -787,7 +790,9 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
             {
                 // wss_con_map_[socket_id]->set_new_business_request(true);
                 wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
-                LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
+
+                // LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
+                LOG_CLIENT_REQUEST(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
 
                 LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
             }
@@ -831,7 +836,7 @@ ID_TYPE WBServer::clean_ws(WebsocketClass* ws)
                 // wss_con_map_[socket_id]->set_new_business_request(false);
                 wss_con_map_[socket_id]->set_recv_heartbeat(0);
 
-                LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
+                LOG_CLIENT_REQUEST(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
                 LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: 0");
 
                 wss_con_map_.erase(socket_id);
