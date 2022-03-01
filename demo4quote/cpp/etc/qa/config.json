@@ -11,7 +11,7 @@
         "dump": 0
     },
     "nacos": {
-        "addr": "16.162.137.156:8848",
+        "addr": "127.0.0.1:8848",
         "namespace": "bcts"
     },
     "redis_quote": {
