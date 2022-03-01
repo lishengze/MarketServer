@@ -239,7 +239,7 @@ void WBServer::process_on_message(string ori_msg, WebsocketClass * ws)
         std::stringstream s_s;
         s_s << "ori_msg: " << ws << ": " << ori_msg;
         LOG_CLIENT_REQUEST(s_s.str());
-        LOG_INFO(s_s.str());
+        // LOG_INFO(s_s.str());
 
         ID_TYPE socket_id = check_ws(ws);
 
