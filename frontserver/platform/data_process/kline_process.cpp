@@ -390,15 +390,19 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     last_kline->index = kline_data->index;
                     KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                    // std::stringstream s_log;
-                    // s_log << "New : " << cur_kline_data->symbol << " "
-                    //       << get_sec_time_str(cur_kline_data->index) << " " 
-                    //       << "fre: " << kline_data->frequency_ << " "
-                    //       << "open: " << cur_kline_data->px_open.get_value() << " " 
-                    //       << "close: " << cur_kline_data->px_close.get_value() << " "
-                    //       << "high: " << cur_kline_data->px_high.get_value() << " "
-                    //       << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    // LOG_DEBUG(s_log.str());
+                    if (cur_kline_data->symbol == TEST_SYMBOL)
+                    {
+                        std::stringstream s_log;
+                        s_log << "New : " << cur_kline_data->symbol << " "
+                            << get_sec_time_str(cur_kline_data->index) << " " 
+                            << "fre: " << kline_data->frequency_ << " "
+                            << "open: " << cur_kline_data->px_open.get_value() << " " 
+                            << "close: " << cur_kline_data->px_close.get_value() << " "
+                            << "high: " << cur_kline_data->px_high.get_value() << " "
+                            << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                        LOG_DEBUG(s_log.str());
+                    }
+
 
                     PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
                     if (rsp_package)
@@ -417,15 +421,19 @@ void KlineProcess::update_subed_kline_data(const KlineDataPtr kline_data)
                     // 推送更新作为当前 k 线时间数据;
                     KlineDataPtr cur_kline_data = boost::make_shared<KlineData>(*last_kline);
 
-                    // std::stringstream s_log;
-                    // s_log << "old : " << cur_kline_data->symbol << " "
-                    //       << get_sec_time_str(cur_kline_data->index) << " "
-                    //       << "fre: " << kline_data->frequency_ << " "
-                    //       << "open: " << cur_kline_data->px_open.get_value() << " " 
-                    //       << "close: " << cur_kline_data->px_close.get_value() << " "
-                    //       << "high: " << cur_kline_data->px_high.get_value() << " "
-                    //       << "low: " << cur_kline_data->px_low.get_value() << " \n";
-                    // LOG_DEBUG(s_log.str());
+                    if (cur_kline_data->symbol == TEST_SYMBOL)
+                    {
+                        std::stringstream s_log;
+                        s_log << "old : " << cur_kline_data->symbol << " "
+                            << get_sec_time_str(cur_kline_data->index) << " "
+                            << "fre: " << kline_data->frequency_ << " "
+                            << "open: " << cur_kline_data->px_open.get_value() << " " 
+                            << "close: " << cur_kline_data->px_close.get_value() << " "
+                            << "high: " << cur_kline_data->px_high.get_value() << " "
+                            << "low: " << cur_kline_data->px_low.get_value() << " \n";
+                        LOG_DEBUG(s_log.str());
+                    }
+
 
                     PackagePtr rsp_package = CreatePackage<RspKLineData>(cur_kline_data);
                     if (rsp_package)

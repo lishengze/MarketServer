@@ -198,6 +198,7 @@ void FrontServer::response_depth_data_package(PackagePtr package)
                         continue;                
                     }
                     req_ptr->websocket_->send(depth_str);
+
                     LOG->record_output_info(pRspRiskCtrledDepthData->simple_str() + ", ws: " + req_ptr->websocket_->get_ws_str());
                 }
 
@@ -264,11 +265,6 @@ void FrontServer::response_kline_data_package(PackagePtr package)
         if (p_rsp_kline_data)
         {
             string kline_data_str = p_rsp_kline_data->get_json_str();
-
-            if (p_rsp_kline_data->is_update_)
-            {
-                LOG_INFO(kline_data_str);
-            }
                                       
             if (p_rsp_kline_data->is_update_)
             {
@@ -301,6 +297,12 @@ void FrontServer::response_kline_data_package(PackagePtr package)
                             invalid_req_socket_vec.push_back(socket_id);
                             continue;                
                         }
+
+                        if (symbol == TEST_SYMBOL)
+                        {
+                            LOG_DEBUG(kline_data_str);
+                        }
+
                         req_ptr->websocket_->send(kline_data_str);
                         LOG->record_output_info(p_rsp_kline_data->simple_str() + ", ws: " + req_ptr->websocket_->get_ws_str());
                     }

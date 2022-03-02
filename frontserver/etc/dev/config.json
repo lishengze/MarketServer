@@ -18,5 +18,6 @@
         "frequency_numb": 1500,
         "frequency_base": [60]
     },
+    "test_symbol": "BTC_USDT",
     "heartbeat_seconds": 30
 }

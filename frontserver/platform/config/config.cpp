@@ -105,6 +105,11 @@ void Config::load_config(string file_name)
                 statistic_secs_ =  js["statistic_secs"].get<int>() > 10 ? js["statistic_secs"].get<int>():10;  
             }            
 
+            if (!js["test_symbol"].is_null())
+            {
+                test_symbol = js["test_symbol"].get<string>();
+            }
+
             // std::cout << "\nConfig: \n" + str() << std::endl;
             LOG_INFO("\nConfig: \n" + str());            
         }
@@ -133,7 +138,8 @@ try
         {
             s_s << freq << "\n";
         }  
-        s_s << "heartbeat_seconds: " << heartbeat_seconds <<"\n";
+        s_s << "test_symbol: " << get_test_symbol() 
+            <<  "\nheartbeat_seconds: " << heartbeat_seconds <<"\n";
         return s_s.str();
     }
     catch(const std::exception& e)

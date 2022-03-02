@@ -546,7 +546,7 @@ void WBServer::process_heartbeat(ID_TYPE socket_id, WebsocketClassThreadSafePtr 
             LOG_CLIENT_REQUEST(wss_con_map_[socket_id]->get_ws_str() + " recv heartbeat");
 
             wss_con_map_[socket_id]->set_recv_heartbeat(utrade::pandora::NanoTime());
-            LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
+            // LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
         }        
         else
         {
@@ -794,7 +794,7 @@ ID_TYPE WBServer::check_ws(WebsocketClass * ws)
                 // LOG_TRACE(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
                 LOG_CLIENT_REQUEST(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
 
-                LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
+                // LOG_DEBUG(wss_con_map_[socket_id]->get_ws_str() + " heartbeat_time: " + wss_con_map_[socket_id]->get_recv_heart_beate_time_str());
             }
         }
         else

@@ -16,7 +16,8 @@
     {
         "frequency_list": [60,300, 3600, 7200, 14400],
         "frequency_numb": 1500,
-        "frequency_base": [60, 3600]
+        "frequency_base": [60]
     },
+    "test_symbol": "BTC_USDT",
     "heartbeat_seconds": 30
 }
