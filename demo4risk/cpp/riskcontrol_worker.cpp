@@ -273,6 +273,84 @@ void _calc_depth_fee(const vector<pair<SDecimal, SInnerDepth>>& depths, SymbolCo
     dst.swap(result);
 }
 
+void _calc_depth_fee(const vector<pair<SDecimal, SInnerDepth>>& depths, map<string, HedgeConfig>& config_exchange_map, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
+{
+    map<SDecimal, SInnerDepth> result;
+
+    for(auto& v: depths )
+    {
+        
+        const SInnerDepth& inner_depth = v.second;
+
+        for (auto iter:inner_depth.exchanges)
+        {
+            SDecimal ori_price  = v.first;
+            const string& exchange = iter.first;
+
+            if (config_exchange_map.find(exchange) == config_exchange_map.end())
+            {
+                LOG_ERROR("Need Hedge Config For " + exchange);
+                continue;
+            }
+            HedgeConfig& config = config_exchange_map[exchange];
+
+            if (config.FeeKind == 1)
+            {
+                if( is_ask ) 
+                {
+                    ori_price *= ( 1 + config.TakerFee);
+                } 
+                else 
+                {
+                    if( config.TakerFee < 1 )
+                        ori_price *= ( 1 - config.TakerFee);
+                    else
+                        ori_price = 0;
+                }
+            }
+            else if (config.FeeKind == 2)
+            {
+                if( is_ask ) 
+                {
+                    ori_price += config.TakerFee;
+                } 
+                else 
+                {
+                    ori_price -= config.TakerFee;
+                }
+                ori_price = ori_price > 0?ori_price : 0;
+            }
+
+            if (result.find(ori_price) == result.end())
+            {
+                SInnerDepth new_depth;
+                new_depth.exchanges[exchange] = iter.second; 
+                new_depth.set_total_volume();
+                result[ori_price] = new_depth;
+            }
+            else
+            {
+                if (result[ori_price].exchanges.find(exchange) != result[ori_price].exchanges.end())
+                {
+                    result[ori_price].exchanges[exchange] += iter.second;
+                }
+                else
+                {
+                    result[ori_price].exchanges[exchange] = iter.second;
+                }
+                result[ori_price].set_total_volume();
+            }
+
+        }
+
+        // double scaledPrice = v.first.get_value();
+        // SDecimal decimal_value(scaledPrice);
+        // result[decimal_value] = v.second;
+    }
+
+    dst.swap(result);
+}
+
 void set_depth_presion(map<SDecimal, SInnerDepth>& depth, int price_precision, int amount_precision)
 {
     try
@@ -311,27 +389,54 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
         // LOG_DEBUG(quote_str(src, 5));
 
-        if( ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end() ) 
+        // if( ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end() ) 
+        // {
+
+        //     if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
+        //     {
+        //         LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 5));
+        //         LOG_DEBUG(ctx.params.symbol_config[src.symbol].fee_info());
+        //     } 
+
+        //     SInnerQuote tmp;
+        //     vector<pair<SDecimal, SInnerDepth>> depths;
+        //     src.get_asks(depths);
+        //     _calc_depth_fee(depths, ctx.params.symbol_config[src.symbol],  true, tmp.asks);
+        //     src.asks.swap(tmp.asks);
+        //     src.get_bids(depths);
+        //     _calc_depth_fee(depths, ctx.params.symbol_config[src.symbol],  false, tmp.bids);
+        //     src.bids.swap(tmp.bids);
+        // }
+        // else
+        // {
+        //     LOG_WARN("symbol_config Can't Find " + src.symbol);
+        // }
+
+        if( ctx.params.hedge_config.find(src.symbol) != ctx.params.hedge_config.end() ) 
         {
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
             {
                 LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 5));
-                LOG_DEBUG(ctx.params.symbol_config[src.symbol].fee_info());
+
+                for (auto iter: ctx.params.hedge_config[src.symbol])
+                {
+                    LOG_DEBUG("\nHedgeConfig: \n" + iter.second.str());
+                }
             } 
 
             SInnerQuote tmp;
             vector<pair<SDecimal, SInnerDepth>> depths;
             src.get_asks(depths);
-            _calc_depth_fee(depths, ctx.params.symbol_config[src.symbol],  true, tmp.asks);
+            _calc_depth_fee(depths, ctx.params.hedge_config[src.symbol],  true, tmp.asks);
             src.asks.swap(tmp.asks);
             src.get_bids(depths);
-            _calc_depth_fee(depths, ctx.params.symbol_config[src.symbol],  false, tmp.bids);
+            _calc_depth_fee(depths, ctx.params.hedge_config[src.symbol],  false, tmp.bids);
             src.bids.swap(tmp.bids);
         }
         else
         {
-            LOG_WARN("symbol_config Can't Find " + src.symbol);
+            LOG_WARN("hedge_config Can't Find " + src.symbol);
         }
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )

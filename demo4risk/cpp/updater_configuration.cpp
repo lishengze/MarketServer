@@ -61,7 +61,7 @@ void ConfigurationClient::load_risk_params(const NacosString &configInfo)
 
         if(risks.HasParseError())
         {
-            LOG_ERROR("parse RiskParams error " + std::to_string(risks.GetParseError()));
+            LOG_ERROR("parse MarketRisk error " + std::to_string(risks.GetParseError()));
             return;
         }
         if( !risks.IsArray() )
@@ -267,13 +267,13 @@ void ConfigurationClient::load_hedge_params(const NacosString &configInfo)
     try
     {
         Document hedgeParamsObject;    
-        hedgeParamsObject.Parse(hedge_params_.c_str());
+        hedgeParamsObject.Parse(configInfo.c_str());
         if(hedgeParamsObject.HasParseError())
         {
             LOG_WARN("parse HedgeParams error: " + std::to_string(hedgeParamsObject.GetParseError()));
             return;
         }
-        LOG_INFO("\nHedgeRisk OriInfo: \n" + hedge_params_.c_str());
+        LOG_INFO("\nHedgeRisk OriInfo: \n" + configInfo.c_str());
 
         map<TSymbol, map<TExchange, HedgeConfig>> output;
 
