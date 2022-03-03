@@ -207,12 +207,22 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
             scaledPrice = scaledPrice > 0 ? scaledPrice : 0;
         }
 
-        dst[v.first].mix_exchanges(v.second, 0);
+        // dst[v.first].mix_exchanges(v.second, 0);
 
         SDecimal decimal_value(scaledPrice);
 
+        SDecimal ori_volume = dst[v.first].total_volume;
 
-        result[decimal_value].mix_exchanges(v.second,volume_bias * (-1), config.AmountOffsetKind);
+        if (config.AmountOffsetKind == 1)
+        {
+            ori_volume = ori_volume * ((1 - config.AmountOffset)>0 ? 1-config.AmountOffset : 0);            
+        }
+        else
+        {
+            ori_volume = (ori_volume - config.AmountOffset) > 0 ? ori_volume-config.AmountOffset : 0;
+        }
+
+        result[decimal_value].total_volume = ori_volume;
     }
 
     dst.swap(result);
@@ -263,7 +273,6 @@ void _calc_depth_fee(const vector<pair<SDecimal, SInnerDepth>>& depths, SymbolCo
     dst.swap(result);
 }
 
-
 void set_depth_presion(map<SDecimal, SInnerDepth>& depth, int price_precision, int amount_precision)
 {
     try
@@ -276,6 +285,13 @@ void set_depth_presion(map<SDecimal, SInnerDepth>& depth, int price_precision, i
             SInnerDepth new_atom_depth = iter->second;
 
             new_price.scale(price_precision);            
+
+            // for (auto iter:new_atom_depth.exchanges)
+            // {
+            //     iter.second.scale(amount_precision);
+            // }
+            // new_atom_depth.set_total_volume();
+
             new_atom_depth.total_volume.scale(amount_precision);
             new_depth[new_price] = new_atom_depth;
         }
@@ -322,7 +338,6 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
         {
             LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 5));
         } 
-
 
         // if (src.symbol == "BTC_USD")
         // {

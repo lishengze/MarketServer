@@ -99,10 +99,11 @@ HedgeParams
 */
 struct HedgeConfig
 {
-    //double MakerFee; // 百分比；maker手续费
-    //double TakerFee; // 百分比；taker手续费
     std::string symbol;
     std::string exchange;
+    int    FeeKind;
+    double MakerFee; // 百分比；maker手续费
+    double TakerFee; // 百分比；taker手续费    
 
     double BuyFundPercent;
     double SellFundPercent;
@@ -112,6 +113,9 @@ struct HedgeConfig
         stringstream s_obj;
         s_obj << "symbol: " << symbol << ","
               << "exchange: " << exchange << ","
+              << "FeeKind: " << FeeKind << ", "
+              << "MakerFee: " << MakerFee << ", "
+              << "TakerFee: " << TakerFee << ", "
               << "BuyFundPercent: " << BuyFundPercent << ","
               << "SellFundPercent: " << SellFundPercent << "\n";
         

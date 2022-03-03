@@ -14,27 +14,26 @@ void ConfigurationClient::_run()
 
 void ConfigurationClient::config_changed(const string& group, const string& dataid, const NacosString &configInfo)
 {
-    // _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
 
-    LOG_INFO("\n--------------- config changed "+ group + "."+ dataid + ": \n" + configInfo.c_str());
-    
     if( group == "BCTS" ) {
 
         if (dataid == "MarketRisk")
         {
-            risk_params_ = configInfo;
+            // risk_params_ = configInfo;
 
-            if( risk_params_.length() > 0 ) 
-            {
-                this->_parse_config();
-            }
+            // if( risk_params_.length() > 0 ) 
+            // {
+            //     this->_parse_config();
+            // }
+
+            load_risk_params(configInfo);
         }
 
         if( dataid == "HedgeParams" ) 
         {
-            hedge_params_ = configInfo;
+            // hedge_params_ = configInfo;
 
-            load_hedge_params(hedge_params_);          
+            load_hedge_params(configInfo);          
         }        
 
         if (dataid == "SymbolParams")
@@ -42,12 +41,121 @@ void ConfigurationClient::config_changed(const string& group, const string& data
             load_symbol_params(configInfo);
         }
         
-    } else {
-        _log_and_print("unknown configuration.");
+    } 
+    else 
+    {
+        LOG_ERROR("\n---Unknown Config: "+ group + "."+ dataid + ": \n" + configInfo.c_str());
         return;
     }
     
 
+}
+
+void ConfigurationClient::load_risk_params(const NacosString &configInfo)
+{
+    try
+    {
+        Document risks;
+        risks.Parse(configInfo.c_str());
+        LOG_INFO("\nMarketRisk OriInfo: \n" + configInfo.c_str());
+
+        if(risks.HasParseError())
+        {
+            LOG_ERROR("parse RiskParams error " + std::to_string(risks.GetParseError()));
+            return;
+        }
+        if( !risks.IsArray() )
+        {
+            LOG_ERROR("MarketRisk is not array!");
+            return;   
+        }
+                 
+        map<TSymbol, MarketRiskConfig> output;
+        for( auto iter = risks.Begin() ; iter != risks.End() ; iter++ ) 
+        {
+            string symbol = helper_get_string(*iter, "symbol_id", "");
+            bool IsPublish = helper_get_bool(*iter, "switch", true);
+            uint32 PublishFrequency = helper_get_uint32(*iter, "publish_frequency", 1); // 暂时没用
+            uint32 PublishLevel = helper_get_uint32(*iter, "publish_level", 1); // 暂时没用
+
+            uint32 PriceOffsetKind = helper_get_uint32(*iter, "price_offset_kind", 1); // 暂时没用
+            double PriceOffset = helper_get_double(*iter, "price_offset", 0);
+
+            uint32 AmountOffsetKind = helper_get_uint32(*iter, "amount_offset_kind", 1); // 暂时没用
+            double AmountOffset = helper_get_double(*iter, "amount_offset", 0);
+
+            double DepositFundRatio = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
+
+            uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
+            double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
+            
+            if (PriceOffsetKind != 1 && PriceOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " PriceOffsetKind should be 1 or 2 ,now is: " + std::to_string(PriceOffsetKind));
+                continue;
+            }
+            if (PriceOffset < 0 || PriceOffset >= 1)
+            {
+                LOG_WARN(symbol + " PriceOffset should in (0, 1),now is: " + std::to_string(PriceOffset));
+                continue;
+            }
+
+            if (AmountOffsetKind != 1 && AmountOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " AmountOffsetKind should be 1 or 2 ,now is: " + std::to_string(AmountOffsetKind));
+                continue;
+            }
+
+            if (AmountOffset < 0 || AmountOffset >= 1)
+            {
+                LOG_WARN(symbol + " AmountOffset should in (0, 1),now is: " + std::to_string(AmountOffset));
+                continue;
+            }            
+
+            if (OTCOffsetKind != 1 && OTCOffsetKind != 2) 
+            {
+                LOG_WARN(symbol + " OTCOffsetKind should be 1 or 2 ,now is: " + std::to_string(OTCOffsetKind));
+                continue;
+            }
+
+            if (OtcOffset < 0 || OtcOffset >= 1) 
+            {
+                LOG_WARN(symbol + " OtcOffset should in (0, 1) ,now is: " + std::to_string(PriceOffsetKind));
+                continue;
+            }                        
+
+            if( symbol == "")
+            {
+                LOG_WARN("symbol is empty");
+                continue;
+            }            
+
+            MarketRiskConfig cfg;
+
+            cfg.symbol = symbol;
+            cfg.PublishFrequency = PublishFrequency;
+            cfg.PublishLevel = PublishLevel;
+            cfg.PriceOffsetKind = PriceOffsetKind;
+            cfg.PriceOffset = PriceOffset;
+            cfg.AmountOffsetKind = AmountOffsetKind;
+            cfg.AmountOffset = AmountOffset;
+            cfg.DepositFundRatio = DepositFundRatio;
+
+            cfg.OTCOffsetKind = OTCOffsetKind;
+            cfg.OtcOffset = OtcOffset;
+            cfg.IsPublish = IsPublish;
+
+            output[symbol] = cfg;
+
+            LOG_INFO("\nMarketRisk: " + symbol + "\n" + cfg.desc());
+        }
+
+        callback_->on_configuration_update(output);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
@@ -132,6 +240,28 @@ void ConfigurationClient::load_symbol_params(const NacosString &configInfo)
     }    
 }
 
+/*
+	{
+        "platform_id":"B2C2",
+        "instrument":"BTC_USD",
+        "switch":true,
+        "buy_fund_ratio":0.3,
+        "sell_fund_ratio":0.3,
+        "price_precision":4,
+        "amount_precision":4,
+        "sum_precision":2,
+        "min_unit":0.0001,
+        "min_change_price":0.01,
+        "max_margin":1,
+        "max_order":100,
+        "buy_price_limit":10000,
+        "sell_price_limit":5000,
+        "max_match_level":5,
+        "fee_kind":1,
+        "taker_fee":0,
+        "maker_fee":0
+    }
+*/
 void ConfigurationClient::load_hedge_params(const NacosString &configInfo)
 {
     try
@@ -157,6 +287,10 @@ void ConfigurationClient::load_hedge_params(const NacosString &configInfo)
             double BuyFundPercent = helper_get_double(*iter, "buy_fund_ratio", 1);
             double SellFundPercent = helper_get_double(*iter, "sell_fund_ratio", 1);
 
+            int FeeKind = helper_get_uint32(*iter, "fee_kind", 1);
+            double TakerFee = helper_get_double(*iter, "taker_fee", 1);
+            double MakerFee = helper_get_double(*iter, "maker_fee", 1);
+
             if (symbol == "")
             {
                 LOG_WARN("Empty Symbol");
@@ -169,10 +303,19 @@ void ConfigurationClient::load_hedge_params(const NacosString &configInfo)
                 continue;
             }
 
+            if (FeeKind != 1 && FeeKind != 2)
+            {
+                LOG_WARN("Unknown FeeKind: " + std::to_string(FeeKind));
+                continue;
+            }
+
             config.exchange = exchange;
             config.symbol = symbol;
             config.BuyFundPercent = BuyFundPercent;
             config.SellFundPercent = SellFundPercent;
+            config.FeeKind = FeeKind;
+            config.TakerFee = TakerFee;
+            config.MakerFee = MakerFee;
 
             output[symbol][exchange] = config;
 
@@ -312,7 +455,6 @@ void ConfigurationClient::_parse_config()
         LOG_WARN("Combine Failed!");
     }
 }
-
 
 bool ConfigurationClient::check_symbol(string symbol)
 {

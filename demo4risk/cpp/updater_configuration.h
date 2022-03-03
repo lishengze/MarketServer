@@ -27,14 +27,13 @@ public:
     // derive from NacosClient
     void config_changed(const std::string& group, const std::string& dataid, const NacosString &configInfo);
 
+    void load_risk_params(const NacosString &configInfo);
+
     void load_symbol_params(const NacosString &configInfo);
 
     void load_hedge_params(const NacosString &configInfo);
-
+    
     bool check_symbol(std::string symbol);
-
-    // map<TSymbol, MarketRiskConfig>& get_risk_config() { return risk_config_;}
-
 
 private:
     // derive from NacosClient
