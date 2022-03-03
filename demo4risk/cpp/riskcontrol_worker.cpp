@@ -211,7 +211,7 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
 
         SDecimal decimal_value(scaledPrice);
 
-        SDecimal ori_volume = dst[v.first].total_volume;
+        SDecimal ori_volume = v.second.total_volume;
 
         if (config.AmountOffsetKind == 1)
         {
