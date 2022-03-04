@@ -1112,9 +1112,11 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
-        if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_ )
+        if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_
+        && ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
         {
-            LOG_DEBUG("\nBefore PrecisionWorker: " + quote_str(src, 5));
+            LOG_DEBUG("\nBefore PrecisionWorker: " + quote_str(src, 3));
+            LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());
         } 
 
 
@@ -1140,7 +1142,7 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter PrecisionWorker: " + quote_str(src, 5));
+            LOG_DEBUG("\nAfter PrecisionWorker: " + quote_str(src, 3));
         } 
 
     }
