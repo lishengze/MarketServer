@@ -18,7 +18,6 @@ DataCenter::DataCenter()
         riskctrl_work_line_.add_worker(&fee_worker_);
     }
 
-
     if (BIAS_RISKCTRL_OPEN)
     {
         LOG_INFO("Add quotebias_worker_");
@@ -249,6 +248,10 @@ bool DataCenter::process(const SInnerQuote& src_quote)
 
         PipelineContent context(params_);
 
+        if (src_quote.symbol == CONFIG->test_symbol)
+        {
+            LOG_INFO("------------------ RiskCtrl Begine ------------------");
+        }
         riskctrl_work_line_.run(src_quote, context, dst_quote);
 
         if (!check_quote_time(src_quote, dst_quote)) return false;
