@@ -250,7 +250,7 @@ bool DataCenter::process(const SInnerQuote& src_quote)
 
         if (src_quote.symbol == CONFIG->test_symbol)
         {
-            LOG_INFO("------------------ RiskCtrl Begine ------------------");
+            LOG_DEBUG("------------------ RiskCtrl Begin ------------------");
         }
         riskctrl_work_line_.run(src_quote, context, dst_quote);
 
