@@ -394,14 +394,14 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 {
     try
     {
-        // LOG_DEBUG(quote_str(src, 5));
+        // LOG_DEBUG(quote_str(src, 3));
 
         // if( ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end() ) 
         // {
 
         //     if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
         //     {
-        //         LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 5));
+        //         LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 3));
         //         LOG_DEBUG(ctx.params.symbol_config[src.symbol].fee_info());
         //     } 
 
@@ -424,7 +424,7 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
             {
-                LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 5));
+                LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 3));
 
                 for (auto iter: ctx.params.hedge_config[src.symbol])
                 {
@@ -448,7 +448,7 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 5));
+            LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 3));
         } 
 
         // if (src.symbol == "BTC_USD")
@@ -867,7 +867,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
             {
-                LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 5));
+                LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 3));
                 LOG_DEBUG(ctx.params.market_risk_config[src.symbol].desc());
             } 
 
@@ -888,7 +888,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 5));
+            LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 3));
         } 
 
 
@@ -1075,7 +1075,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nBefore WatermarkComputerWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nBefore WatermarkComputerWorker: " + quote_str(src, 3));
     } 
 
     set_snap(src);
@@ -1100,7 +1100,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
                 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + quote_str(src, 3));
     } 
 
 
@@ -1127,7 +1127,7 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
             // if (src.symbol == "BTC_USD")
             // {
-            //     LOG_DEBUG(quote_str(src, 5));                        
+            //     LOG_DEBUG(quote_str(src, 3));                        
             // }
 
             set_depth_presion(src.asks, price_precision, amount_precision);
@@ -1136,7 +1136,7 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
             // if (src.symbol == "BTC_USD")
             // {
             //     LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());        
-            //     LOG_DEBUG(quote_str(src, 5));                  
+            //     LOG_DEBUG(quote_str(src, 3));                  
             // }
         }
 
