@@ -2,6 +2,13 @@ syntax = "proto3";
 
 package Proto3.MarketData;
 
+enum DataType
+{
+  Kline = 0;
+  Trade = 1;
+  Depth = 2;
+}
+
 message Decimal
 {
     uint64 value = 1;
@@ -30,6 +37,14 @@ message DepthQuote
     repeated Depth asks = 11;
     repeated Depth bids = 12;
 };
+
+message ReqDepthInfo
+{
+    string symbol = 1;
+    string exchange = 2;
+    uint64 time = 3;
+};
+
 
 message KlineData
 {
@@ -76,12 +91,29 @@ message TradeData
 
 message ReqTradeInfo
 {
+    string symbol = 1;
+    string exchange = 2;
+    uint64 time = 3;
+};
 
+message SubInfo
+{
+    string symbol = 1;
+    string exchange = 2;   
+    DataType data_type =3;
 };
 
 service MarketService
 {
-    rpc RequestKlineData() {
+    rpc RequestHistKlineData(ReqHishKlineInfo) returns (HistKlineData){}
 
-    }
+    rpc RequestTradeData(ReqTradeInfo) returns (TradeData) {}
+
+    rpc RequestDepthData(ReqDepthInfo) returns (DepthQuote) {}
+
+    rpc SubKlineData(stream SubInfo) returns (stream KlineData) {}
+
+    rpc SubTradeData(stream SubInfo) returns (stream TradeData) {}
+
+    rpc SubDepthData(stream SubInfo) returns (stream DepthQuote) {}
 };
