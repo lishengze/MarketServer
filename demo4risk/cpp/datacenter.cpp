@@ -115,13 +115,13 @@ void DataCenter::publish_main()
 
             int sleep_millsecs = get_sleep_millsecs(time, publish_list);
 
-            LOG_DEBUG("Time: "+std::to_string(time) 
-                     + ", sleep_millsecs: " + std::to_string(sleep_millsecs) + "; ");
+            // LOG_DEBUG("Time: "+std::to_string(time) 
+            //          + ", sleep_millsecs: " + std::to_string(sleep_millsecs) + "; ");
             
-            for (auto symbol:publish_list)
-            {
-                LOG_DEBUG("Pub: " + symbol + ", pbf: " + std::to_string(frequency_map_[symbol]));
-            }
+            // for (auto symbol:publish_list)
+            // {
+            //     LOG_DEBUG("Pub: " + symbol + ", pbf: " + std::to_string(frequency_map_[symbol]));
+            // }
 
             process_symbols(publish_list);
             
