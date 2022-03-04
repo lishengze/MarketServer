@@ -211,11 +211,11 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
 
         if (is_ask)
         {
-            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, price_bias);
+            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, config.PriceOffset);
         }
         else
         {
-            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, price_bias*-1);
+            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, config.PriceOffset*-1);
         }
 
         // // dst[v.first].mix_exchanges(v.second, 0);
@@ -511,7 +511,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 3));
     } 
 
 
@@ -691,10 +691,48 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         
     if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_)
     {
-        LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 5));
+        LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 3));
     } 
 
     return src;
+}
+
+void inner_depth_minus_amount(SInnerDepth& inner_depth, SDecimal amount)
+{
+    try
+    {
+        if (inner_depth.total_volume > amount)
+        {
+            inner_depth.total_volume -= amount;
+
+            for (auto& iter:inner_depth.exchanges)
+            {
+                if (iter.second > amount)
+                {
+                    iter.second -= amount;
+                    break;
+                }
+                else
+                {
+                    iter.second = 0;
+                    amount -= iter.second;
+                }
+            }
+        }
+        else
+        {
+            inner_depth.total_volume = 0;
+
+            for (auto& iter:inner_depth.exchanges)
+            {
+                iter.second = 0;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 // For Order
@@ -730,7 +768,9 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                         //         + ", amount: " + iter.second.total_volume.get_str_value() 
                         //         + ", minus " + std::to_string(bid_amount));
 
-                        iter->second.total_volume -= ask_amount;
+                        // iter->second.total_volume -= ask_amount;
+
+                        inner_depth_minus_amount(iter->second, ask_amount);
                         break;
                     }
                     else
@@ -740,7 +780,8 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                         //         + ", bid_amount " + std::to_string(bid_amount));
 
                         ask_amount -= iter->second.total_volume.get_value();
-                        iter->second.total_volume = 0;
+                        // iter->second.total_volume = 0;
+                        inner_depth_minus_amount(iter->second, ask_amount);
                         delete_price.push_back(iter->first);
                     }
                 }
@@ -764,7 +805,10 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                         // LOG_DEBUG(src.symbol + " ask_price: " + iter->first.get_str_value() 
                         //         + ", amount: " + iter->second.total_volume.get_str_value() 
                         //         + ", minus " + std::to_string(ask_amount));
-                        iter->second.total_volume -= bid_amount;
+                        // iter->second.total_volume -= bid_amount;
+
+                        inner_depth_minus_amount(iter->second, bid_amount);
+
                         break;
                     }
                     else
@@ -773,7 +817,10 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
                         //         + ", is deleted, delete amount: " + iter->second.total_volume.get_str_value() 
                         //         + ", ask_amount " + std::to_string(ask_amount));
                         bid_amount -= iter->second.total_volume.get_value();
-                        iter->second.total_volume = 0;
+
+                        inner_depth_minus_amount(iter->second, bid_amount);
+                        
+                        // iter->second.total_volume = 0;
                         delete_price.push_back(iter->first);
                     }
                 }

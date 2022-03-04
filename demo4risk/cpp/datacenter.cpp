@@ -31,8 +31,6 @@ DataCenter::DataCenter()
         riskctrl_work_line_.add_worker(&watermark_worker_);
     }
 
-
-
     if (PRICESION_RISKCTRL_OPEN)
     {
         LOG_INFO("Add pricesion_worker_");
