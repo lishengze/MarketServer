@@ -166,6 +166,36 @@ void _filter_by_watermark(SInnerQuote& src, const SDecimal& watermark, PipelineC
     _filter_depth_by_watermark(src, watermark, false, ctx);
 }
 
+SDecimal get_bias_decimal(const SDecimal& ori_data, int bias_kind, double bias_value)
+{
+    SDecimal result = ori_data;
+    try
+    {
+        if (bias_kind == 1)
+        {
+            double rate = 1+bias_value < 0?0:1+bias_value;
+
+            result = ori_data * rate;
+        }
+        else if (bias_kind == 2)
+        {
+            result = ori_data + bias_value<0 ? 0 : ori_data + bias_value;
+        }
+        else
+        {
+            LOG_ERROR("Unknown BiasKind: " + std::to_string(bias_kind));
+        }
+
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+
+    return result;
+}
+
 void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketRiskConfig& config, bool is_ask, map<SDecimal, SInnerDepth>& dst) 
 {
     double price_bias = config.PriceOffset;
@@ -179,50 +209,27 @@ void _calc_depth_bias(const vector<pair<SDecimal, SInnerDepth>>& depths, MarketR
 
         // double scaledPrice = v.first.get_value();
 
-        if (config.PriceOffsetKind == 1)
+        if (is_ask)
         {
-            if( is_ask ) 
-            {
-                scaledPrice *= ( 1 + price_bias );
-            } 
-            else 
-            {
-                if( price_bias < 1 )
-                    scaledPrice *= ( 1 - price_bias);
-                else
-                    scaledPrice = 0;
-            }
-        }
-        else if (config.PriceOffsetKind == 2)
-        {
-            if( is_ask ) 
-            {
-                scaledPrice += price_bias;
-            } 
-            else 
-            {
-                scaledPrice -= price_bias;
-            }
-
-            scaledPrice = scaledPrice > 0 ? scaledPrice : 0;
-        }
-
-        // dst[v.first].mix_exchanges(v.second, 0);
-
-        SDecimal decimal_value(scaledPrice);
-
-        SDecimal ori_volume = v.second.total_volume;
-
-        if (config.AmountOffsetKind == 1)
-        {
-            ori_volume = ori_volume * ((1 - config.AmountOffset)>0 ? 1-config.AmountOffset : 0);            
+            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, price_bias);
         }
         else
         {
-            ori_volume = (ori_volume - config.AmountOffset) > 0 ? ori_volume-config.AmountOffset : 0;
+            scaledPrice = get_bias_decimal(scaledPrice, config.PriceOffsetKind, price_bias*-1);
         }
 
-        result[decimal_value].total_volume = ori_volume;
+        // // dst[v.first].mix_exchanges(v.second, 0);
+
+        // SDecimal decimal_value(scaledPrice);
+
+        SDecimal bias_volume = get_bias_decimal(v.second.total_volume, config.AmountOffsetKind, config.AmountOffset*-1);
+
+        result[scaledPrice].total_volume = bias_volume;
+
+        for (auto exchange_iter:v.second.exchanges)
+        {
+            result[scaledPrice].exchanges[exchange_iter.first] = get_bias_decimal(exchange_iter.second, config.AmountOffsetKind, config.AmountOffset*-1);
+        }
     }
 
     dst.swap(result);
