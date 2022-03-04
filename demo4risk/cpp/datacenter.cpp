@@ -18,17 +18,6 @@ DataCenter::DataCenter()
         riskctrl_work_line_.add_worker(&fee_worker_);
     }
 
-    if (ACCOUNT_RISKCTRL_OPEN)
-    {
-        LOG_INFO("Add account_worker_");
-        riskctrl_work_line_.add_worker(&account_worker_);
-    }
-
-    if (ORDER_RISKCTRL_OPEN)
-    {
-        LOG_INFO("Add orderbook_worker_");
-        riskctrl_work_line_.add_worker(&orderbook_worker_);
-    }
 
     if (BIAS_RISKCTRL_OPEN)
     {
@@ -42,11 +31,25 @@ DataCenter::DataCenter()
         riskctrl_work_line_.add_worker(&watermark_worker_);
     }
 
+
+
     if (PRICESION_RISKCTRL_OPEN)
     {
         LOG_INFO("Add pricesion_worker_");
         riskctrl_work_line_.add_worker(&pricesion_worker_);
     }
+
+    if (ACCOUNT_RISKCTRL_OPEN)
+    {
+        LOG_INFO("Add account_worker_");
+        riskctrl_work_line_.add_worker(&account_worker_);
+    }
+
+    if (ORDER_RISKCTRL_OPEN)
+    {
+        LOG_INFO("Add orderbook_worker_");
+        riskctrl_work_line_.add_worker(&orderbook_worker_);
+    }    
 
     start_check_symbol();
 
