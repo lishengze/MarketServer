@@ -36,6 +36,7 @@ public:
 class BaseGrpcEntity
 {
 public:
+    std::string entity_name_;
     bool is_first;
     grpc::Alarm alarm_;
     
@@ -61,9 +62,9 @@ public:
     virtual void register_call() = 0;
     virtual bool process() = 0;
     virtual void on_init() {};
-    virtual string get_entity_name() {return "BaseGrpcEntity"; }
+    virtual string get_entity_name() {return entity_name_; }
 
-    BaseGrpcEntity():is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1),is_active_(true),is_processing_(false){}
+    BaseGrpcEntity(std::string entity_name="BaseGrpcEntity"):entity_name_{entity_name},is_first(true),status_(PROCESS),caller_(NULL),cq_(NULL),call_id_(-1),is_active_(true),is_processing_(false){}
     virtual ~BaseGrpcEntity(){}
 
     void make_active() {

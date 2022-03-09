@@ -17,6 +17,7 @@ MarketStream4BrokerEntity::MarketStream4BrokerEntity(::grpc::Service* service, I
 : responder_(get_context())
 , cacher_(cacher)
 {
+    entity_name_ = "MarketStream4BrokerEntity";
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
@@ -69,6 +70,7 @@ MarketStream4HedgeEntity::MarketStream4HedgeEntity(::grpc::Service* service, IDa
 : responder_(get_context())
 , cacher_(cacher)
 {
+    entity_name_ = "MarketStream4HedgeEntity";
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
@@ -120,6 +122,7 @@ MarketStream4ClientEntity::MarketStream4ClientEntity(::grpc::Service* service, I
 : responder_(get_context())
 , cacher_(cacher)
 {
+    entity_name_ = "MarketStream4ClientEntity";
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
@@ -173,6 +176,7 @@ OtcQuoteEntity::OtcQuoteEntity(::grpc::Service* service, IDataCacher* cacher)
 : responder_(get_context())
 , cacher_(cacher)
 {
+    entity_name_ = "OtcQuoteEntity";
     service_ = (GrpcRiskControllerService::AsyncService*)service;
 }
 
@@ -205,6 +209,7 @@ responder_(get_context())
 {
     try
     {
+        entity_name_ = "TradeOrderEntity";
         service_ = (GrpcRiskControllerService::AsyncService*)service;
     }
     catch(const std::exception& e)

@@ -66,9 +66,20 @@ void ServerEndpoint::_handle_rpcs()
         GPR_ASSERT(cq_->Next(&tag, &ok));
         if( ok ) {
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
+
+            if (cd->is_first)
+            {
+                LOG_DEBUG(cd->get_entity_name() + " fisrt connect!");
+            }
+
             cd->proceed(loop_id);
         } else {
+
+            
             BaseGrpcEntity* cd = static_cast<BaseGrpcEntity*>(tag);
+
+            LOG_DEBUG(cd->get_entity_name() + " over!");
+
             cd->release(loop_id);
         }
     }
