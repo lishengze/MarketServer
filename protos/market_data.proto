@@ -4,9 +4,9 @@ package Proto3.MarketData;
 
 enum DataType
 {
-  Kline = 0;
-  Trade = 1;
-  Depth = 2;
+  KLINE = 0;
+  TRADE = 1;
+  DEPTH = 2;
 }
 
 message Decimal
