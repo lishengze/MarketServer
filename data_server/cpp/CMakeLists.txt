@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 PROJECT(data_server)
 
+
 ###############################################################################################
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
 set(BOOST_ROOT /usr/local/boost_1_68)
@@ -27,12 +28,12 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
-add_executable(demo4risk ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
-target_link_libraries(demo4risk ${Boost_LIBRARIES})
-target_link_libraries(demo4risk pandora)
-target_link_libraries(demo4risk log4cplus)
-target_link_libraries(demo4risk nacos-cli)
-target_link_libraries(demo4risk protobuf protoc protobuf-lite)
-target_link_libraries(demo4risk grpc++_reflection grpc++ gpr ssl crypto)
+add_executable(data_server ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+target_link_libraries(data_server ${Boost_LIBRARIES})
+target_link_libraries(data_server pandora)
+target_link_libraries(data_server log4cplus)
+target_link_libraries(data_server nacos-cli)
+target_link_libraries(data_server protobuf protoc protobuf-lite)
+target_link_libraries(data_server grpc++_reflection grpc++ gpr ssl crypto)
 
 ###############################################################################################

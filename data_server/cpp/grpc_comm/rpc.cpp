@@ -62,7 +62,7 @@ void RequestTradeDataRPC::start_monitor_request()
 {
     try
     {
-        /* code */
+        service_->RequestRequestTradeData(&context_, &request_info_, &responder_, cq_, cq_, this);
     }
     catch(const std::exception& e)
     {

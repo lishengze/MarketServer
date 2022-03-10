@@ -2,10 +2,19 @@
 
 #include "../global_declare.h"
 
+using Proto3::MarketData::ReqTradeInfo;
+using Proto3::MarketData::TradeData;
+
+using grpc::ServerAsyncWriter;
+using grpc::ServerContext;
+
+
+
+
 class BaseRPC
 {
 public:
-    BaseRPC(grpc::ServerCompletionQueue* cq, MarketService* service):
+    BaseRPC(grpc::ServerCompletionQueue* cq, MarketService::AsyncService* service):
         cq_{cq}, service_{service}
     {
         
@@ -17,9 +26,9 @@ public:
 
     virtual void process();
 
-    virtual void start_monitor_request() { }
+    virtual void start_monitor_request() {}
 
-    virtual void proceed();
+    virtual void proceed() {}
 
     virtual BaseRPC* spawn();
 
@@ -33,15 +42,15 @@ public:
     
 public:
     grpc::ServerCompletionQueue*        cq_{nullptr};    
-    Proto3::MarketData::MarketService*  service_;
+    Proto3::MarketData::MarketService::AsyncService*  service_;
 
 };
 
-class RequestTradeDataRPC: public BasePRC
+class RequestTradeDataRPC: public BaseRPC
 {
     public:
-        RequestTradeDataRPC(grpc::ServerCompletionQueue* cq, MarketService* service):
-                            BasePRC{cq, service}
+        RequestTradeDataRPC(grpc::ServerCompletionQueue* cq, MarketService::AsyncService* service):
+                            BaseRPC{cq, service}, responder_{&context_}
         {
 
         }
@@ -49,4 +58,12 @@ class RequestTradeDataRPC: public BasePRC
         virtual void start_monitor_request();
 
         virtual BaseRPC* spawn();
-};
+
+    private:
+        ReqTradeInfo                             request_info_;
+        TradeData                                reply_info_;
+
+        ServerContext                            context_;
+        ServerAsyncResponseWriter<TradeData>     responder_;
+        
+};  

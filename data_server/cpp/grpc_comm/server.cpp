@@ -14,12 +14,48 @@ void GrpcServer::start()
 {
     try
     {
-        /* code */
+        init_async_server_env();
+
+        init_rpc();
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
+}
+
+void GrpcServer::init_async_server_env()
+{
+    try
+    {
+        cout << "BaseServer listen: " << address_ << endl;
+
+        builder_.AddListeningPort(address_, grpc::InsecureServerCredentials());
+        builder_.RegisterService(&service_);
+
+        cq_ = builder_.AddCompletionQueue();
+        server_ = builder_.BuildAndStart();
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
+}
+
+void GrpcServer::init_rpc()
+{
+    try
+    {
+        request_trade_data_rpc_ = new RequestTradeDataRPC(cq_.get(), &service_);
+
+        request_trade_data_rpc_->start();
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
 }
 
 void GrpcServer::init_cq_thread()

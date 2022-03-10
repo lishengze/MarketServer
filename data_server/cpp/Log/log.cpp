@@ -1,13 +1,12 @@
 #include "log.h"
 #include "pandora/util/time_util.h"
-#include "../updater_quote.h"
 
-RiskLog::RiskLog()
+DataServerLog::DataServerLog()
 {
     
 }
 
-RiskLog::~RiskLog()
+DataServerLog::~DataServerLog()
 {
 
 }

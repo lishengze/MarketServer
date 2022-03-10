@@ -5,19 +5,19 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 #include "pandora/log/base_log.h"
 
-class RiskLog:public BaseLog 
+class DataServerLog:public BaseLog 
 {
 public:
 
-    virtual ~RiskLog();
+    virtual ~DataServerLog();
 
-    RiskLog();
+    DataServerLog();
 
     using BaseLog::record_input_info;
     using BaseLog::record_output_info;
 };
 
-#define LOG utrade::pandora::ThreadSafeSingleton<RiskLog>::DoubleCheckInstance()
+#define LOG utrade::pandora::ThreadSafeSingleton<DataServerLog>::DoubleCheckInstance()
 
 #define LOG_TRACE(info) LOG->log_trace_(LOG_HEADER + info)
 #define LOG_DEBUG(info) LOG->log_debug_(LOG_HEADER + info)

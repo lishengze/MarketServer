@@ -1,21 +1,18 @@
-#include "risk_controller.h"
 #include "pandora/util/time_util.h"
 #include "Log/log.h"
 #include "global_declare.h"
-// #include "util/tool.h"
 
-#include "risk_controller_config.h"
 #include "pandora/util/path_util.h"
 
 // exit handler function
-void setup_signal_handler_callback()
-{
-    signal(SIGTERM, RiskControllerServer::signal_handler);
-    signal(SIGINT, RiskControllerServer::signal_handler);
-    signal(SIGHUP, RiskControllerServer::signal_handler);
-    signal(SIGQUIT, RiskControllerServer::signal_handler);
-    signal(SIGKILL, RiskControllerServer::signal_handler);
-}
+// void setup_signal_handler_callback()
+// {
+//     signal(SIGTERM, RiskControllerServer::signal_handler);
+//     signal(SIGINT, RiskControllerServer::signal_handler);
+//     signal(SIGHUP, RiskControllerServer::signal_handler);
+//     signal(SIGQUIT, RiskControllerServer::signal_handler);
+//     signal(SIGKILL, RiskControllerServer::signal_handler);
+// }
 
 void init_log(char** argv)
 {
@@ -42,10 +39,10 @@ inline string get_env(int argc, char** argv)
         {
             cout << "================Invalid Usage!=================" << endl;
             cout << "====================Usage======================" << endl;
-            cout << "./opu -dev" << endl;
-            cout << "./opu -qa" << endl;
-            cout << "./opu -prd" << endl;
-            cout << "./opu -stg" << endl;
+            cout << "./data_server -dev" << endl;
+            cout << "./data_server -qa" << endl;
+            cout << "./data_server -prd" << endl;
+            cout << "./data_server -stg" << endl;
             cout << "=============================== end =====================" << endl;
             exit(0);
         }
@@ -105,22 +102,22 @@ int main(int argc, char** argv) {
 
     string env = get_env(argc, argv);
 
-    setup_signal_handler_callback();
+    // setup_signal_handler_callback();
 
     init_log(argv);
 
     string config_file_name = get_config_file_name(env);
 
-    CONFIG->parse_config(config_file_name);
+    // CONFIG->parse_config(config_file_name);
 
-    RiskControllerServer riskControllerServer(config_file_name);
-    riskControllerServer.start();
+    // RiskControllerServer riskControllerServer(config_file_name);
+    // riskControllerServer.start();
     
-    utrade::pandora::io_service_pool engine_pool(3);
-    // start pool
-    engine_pool.start();
-    // launch the engine
-    engine_pool.block();
+    // utrade::pandora::io_service_pool engine_pool(3);
+    // // start pool
+    // engine_pool.start();
+    // // launch the engine
+    // engine_pool.block();
 
     std::cout << "exit" << std::endl;
     return 0;
