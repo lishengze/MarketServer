@@ -34,4 +34,5 @@ private:
 
 private:
     RequestTradeDataRPC*                          request_trade_data_rpc_{nullptr};
+    GetTradeStreamDataRPC*                        get_stream_trade_data_rpc{nullptr};
 };

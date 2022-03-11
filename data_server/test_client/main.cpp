@@ -4,7 +4,7 @@
 
 #include "pandora/util/path_util.h"
 
-#include "test/test.h"
+#include "test.h"
 
 // exit handler function
 // void setup_signal_handler_callback()
@@ -52,7 +52,7 @@ inline string get_env(int argc, char** argv)
         {
             env = argv[1];
         }
-        
+
         cout<< "env: " << env<<endl;
 
         return env;

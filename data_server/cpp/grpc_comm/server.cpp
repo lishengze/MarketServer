@@ -17,6 +17,8 @@ void GrpcServer::start()
         init_async_server_env();
 
         init_rpc();
+
+        init_cq_thread();
     }
     catch(const std::exception& e)
     {
@@ -28,7 +30,7 @@ void GrpcServer::init_async_server_env()
 {
     try
     {
-        cout << "BaseServer listen: " << address_ << endl;
+        LOG_INFO("BaseServer listen: " + address_);
 
         builder_.AddListeningPort(address_, grpc::InsecureServerCredentials());
         builder_.RegisterService(&service_);
@@ -47,9 +49,16 @@ void GrpcServer::init_rpc()
 {
     try
     {
-        request_trade_data_rpc_ = new RequestTradeDataRPC(cq_.get(), &service_);
+        LOG_INFO("Init request_trade_data_rpc_");
 
-        request_trade_data_rpc_->start();
+        // request_trade_data_rpc_ = new RequestTradeDataRPC(cq_.get(), &service_);
+        // request_trade_data_rpc_->register_server(this);
+        // request_trade_data_rpc_->start();
+
+        get_stream_trade_data_rpc = new GetTradeStreamDataRPC(cq_.get(), &service_);
+        get_stream_trade_data_rpc->register_server(this);
+        get_stream_trade_data_rpc->start();
+
     }
     catch(const std::exception& e)
     {
@@ -80,9 +89,13 @@ void GrpcServer::run_cq_loop()
         bool status;
         while(true)
         {
-            std::cout << "\n++++++++ Loop Start " << " ++++++++"<< std::endl;
-
+            // std::cout << "\n++++++++ Loop Start " << " ++++++++"<< std::endl;
+            
             bool result = cq_->Next(&tag, &status);
+
+            LOG_INFO("----- CQ WakeUp ----- " 
+                    + ", result: " + std::to_string(result) 
+                    + ", status: " + std::to_string(status));
 
             // cout << "cq loop server_spi class: " << server_spi_->get_class_name() 
             //      << " thread_id: " << std::this_thread::get_id() 
@@ -122,12 +135,26 @@ void GrpcServer::run_cq_loop()
             }
             else
             {
+                
                 if (result && status)
                 {                
-                    rpc->process();
+
+                    if (rpc->is_finished_)
+                    {
+                        LOG_INFO(rpc->get_rpc_name() + " is finished");
+
+                        reconnect_rpc(rpc);
+                    }
+                    else
+                    {
+                        rpc->process();
+                    }
+                    
                 }
                 else
                 {
+                    LOG_INFO(rpc->get_rpc_name() + " is over");
+
                     reconnect_rpc(rpc);
                 }                
             }
@@ -141,5 +168,15 @@ void GrpcServer::run_cq_loop()
 
 void GrpcServer::reconnect_rpc(BaseRPC* rpc)
 {
+    try
+    {
+        rpc->create_rpc_for_next_client();
 
+        delete rpc;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
 }

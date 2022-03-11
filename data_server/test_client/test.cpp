@@ -1,0 +1,30 @@
+#include "test.h"
+#include "Log/log.h"
+#include "grpc_client.h"
+
+#include "pandora/util/time_util.h"
+
+void test_grpc_client()
+{
+    GrpcClient client("0.0.0.0:5008");
+
+    for (int i = 0; i < 2; ++i)
+    {
+        ReqTradeInfoLocal req_trade_info;
+        req_trade_info.exchange = "FTX";
+        req_trade_info.symbol = "symbol";
+        req_trade_info.time = utrade::pandora::NanoTime();
+
+        client.request_trade_data(req_trade_info);   
+
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
+ 
+}
+
+void TestMain()
+{
+    LOG_INFO("TestMain");
+    
+    test_grpc_client();
+}

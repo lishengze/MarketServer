@@ -109,6 +109,8 @@ service MarketService
 
     rpc RequestTradeData(ReqTradeInfo) returns (TradeData) {}
 
+    rpc GetStreamTradeData(ReqTradeInfo) returns (stream TradeData) {}
+
     rpc RequestDepthData(ReqDepthInfo) returns (DepthQuote) {}
 
     rpc SubKlineData(stream SubInfo) returns (stream KlineData) {}

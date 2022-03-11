@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../global_declare.h"
+#include "../Log/log.h"
 
 using Proto3::MarketData::ReqTradeInfo;
 using Proto3::MarketData::TradeData;
@@ -9,18 +10,24 @@ using grpc::ServerAsyncWriter;
 using grpc::ServerContext;
 
 
-
+class GrpcServer;
 
 class BaseRPC
 {
 public:
-    BaseRPC(grpc::ServerCompletionQueue* cq, MarketService::AsyncService* service):
-        cq_{cq}, service_{service}
+    BaseRPC(MarketService::AsyncService* service, grpc::ServerCompletionQueue* cq, string rpc_name):
+        service_{service}, cq_{cq}, rpc_name_{rpc_name}
     {
-        
+        ++RPC_ID;
+
+        rpc_id = RPC_ID;
+
+        LOG_INFO("Create " + rpc_info());
     }
 
     virtual ~BaseRPC() {}
+
+    virtual void register_server(GrpcServer* server) {server_ = server;}
 
     virtual void start();
 
@@ -34,23 +41,38 @@ public:
 
     virtual void create_rpc_for_next_client();
 
+    virtual string get_rpc_name() { return rpc_name_;}
+
+    string rpc_info() { return rpc_name_ + "_" + std::to_string(rpc_id);}
+
 
 public:
     std::string                      rpc_name_{"BaseRpc"};
     bool                             is_stream_{false};
-    bool                             is_first_process_{true};
-    
-public:
-    grpc::ServerCompletionQueue*        cq_{nullptr};    
-    Proto3::MarketData::MarketService::AsyncService*  service_;
 
+    bool                             is_first_connect_{true};
+    bool                             is_inner_cq_event_{false};
+    bool                             is_finished_{false};
+
+    GrpcServer*                      server_{nullptr};
+
+
+
+    static uint64                    RPC_ID;
+
+    uint64                           rpc_id;
+
+public:
+    Proto3::MarketData::MarketService::AsyncService*  service_;
+    grpc::ServerCompletionQueue*                      cq_{nullptr};    
 };
+
 
 class RequestTradeDataRPC: public BaseRPC
 {
     public:
         RequestTradeDataRPC(grpc::ServerCompletionQueue* cq, MarketService::AsyncService* service):
-                            BaseRPC{cq, service}, responder_{&context_}
+                            BaseRPC{service, cq, "RequestTradeDataRPC"}, responder_{&context_}
         {
 
         }
@@ -59,11 +81,40 @@ class RequestTradeDataRPC: public BaseRPC
 
         virtual BaseRPC* spawn();
 
+        virtual void proceed();
+
     private:
+        ServerContext                            context_;
+
         ReqTradeInfo                             request_info_;
         TradeData                                reply_info_;
-
-        ServerContext                            context_;
         ServerAsyncResponseWriter<TradeData>     responder_;
+        
+};  
+
+
+class GetTradeStreamDataRPC: public BaseRPC
+{
+    public:
+        GetTradeStreamDataRPC(grpc::ServerCompletionQueue* cq, MarketService::AsyncService* service):
+                              BaseRPC{service, cq, "GetTradeStreamDataRPC"}, responder_{&context_}
+        {
+
+        }
+
+        virtual void start_monitor_request();
+
+        virtual BaseRPC* spawn();
+
+        virtual void proceed();
+
+    private:
+        ServerContext                            context_;
+
+        ReqTradeInfo                             request_info_;
+        TradeData                                reply_info_;
+        ServerAsyncWriter<TradeData>             responder_;
+
+        // ServerAsyncResponse
         
 };  

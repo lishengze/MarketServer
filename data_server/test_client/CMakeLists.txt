@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(data_server)
+PROJECT(test_client)
 
 
 ###############################################################################################
@@ -19,9 +19,6 @@ INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
-AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
-AUX_SOURCE_DIRECTORY(./grpc_comm GRPC_COMM_SRCS)
-AUX_SOURCE_DIRECTORY(./test TEST_SRCS)
 AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
@@ -29,12 +26,12 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
-add_executable(data_server ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${TEST_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
-target_link_libraries(data_server ${Boost_LIBRARIES})
-target_link_libraries(data_server pandora)
-target_link_libraries(data_server log4cplus)
-target_link_libraries(data_server nacos-cli)
-target_link_libraries(data_server protobuf protoc protobuf-lite)
-target_link_libraries(data_server grpc++_reflection grpc++ gpr ssl crypto)
+add_executable(test_client ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${TEST_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+target_link_libraries(test_client ${Boost_LIBRARIES})
+target_link_libraries(test_client pandora)
+target_link_libraries(test_client log4cplus)
+target_link_libraries(test_client nacos-cli)
+target_link_libraries(test_client protobuf protoc protobuf-lite)
+target_link_libraries(test_client grpc++_reflection grpc++ gpr ssl crypto)
 
 ###############################################################################################

@@ -21,4 +21,11 @@ using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
 using grpc::ServerAsyncWriter;
 
+using Proto3::MarketData::ReqTradeInfo;
+using Proto3::MarketData::TradeData;
+
 using Proto3::MarketData::MarketService;
+
+using grpc::Channel;
+using grpc::ClientContext;
+using grpc::Status;
