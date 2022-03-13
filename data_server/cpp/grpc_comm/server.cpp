@@ -138,12 +138,19 @@ void GrpcServer::run_cq_loop()
                 
                 if (result && status)
                 {                
-
-                    if (rpc->is_finished_)
+                    if (rpc->is_inner_cq_event_)
                     {
-                        LOG_INFO(rpc->get_rpc_name() + " is finished");
+                        rpc->is_inner_cq_event_ = false;
 
-                        reconnect_rpc(rpc);
+                        LOG_INFO(rpc->get_rpc_name() + " is inner write!");
+                    }
+                    else if (rpc->is_finished_)
+                    {
+                        LOG_INFO(rpc->get_rpc_name() + " is finished! *********** \n");
+
+
+
+                        // reconnect_rpc(rpc);
                     }
                     else
                     {

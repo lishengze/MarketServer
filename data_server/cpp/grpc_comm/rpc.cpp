@@ -24,7 +24,7 @@ void BaseRPC::process()
     {
         if (is_first_connect_)
         {
-            LOG_INFO(rpc_info() + " first connect");
+            LOG_INFO(rpc_info() + " first connect-------------");
             create_rpc_for_next_client();
             is_first_connect_ = false;
         }
@@ -152,25 +152,25 @@ void GetTradeStreamDataRPC::proceed()
 
        LOG_INFO("RequestTrade: " + request_info_.exchange() + "." + request_info_.symbol() + ": " + std::to_string(request_info_.time()));
 
-       int reply_count = 1;
-       for (int i = 0; i < reply_count; ++i)
-       {
-           std::this_thread::sleep_for(std::chrono::seconds(5));
+    //    int reply_count = 1;
+    //    for (int i = 0; i < reply_count; ++i)
+    //    {
+    //     //    std::this_thread::sleep_for(std::chrono::seconds(5))
+    //    }
 
-           reply_info_.set_exchange(request_info_.exchange());
+        reply_info_.set_exchange(request_info_.exchange());
 
-           reply_info_.set_symbol(request_info_.symbol());
+        reply_info_.set_symbol(request_info_.symbol());
 
-           reply_info_.set_time(utrade::pandora::NanoTime());
+        reply_info_.set_time(utrade::pandora::NanoTime());
 
-           reply_info_.mutable_price()->set_precise(8);
-           reply_info_.mutable_price()->set_value(2500 + i * 20);
+        reply_info_.mutable_price()->set_precise(8);
+        reply_info_.mutable_price()->set_value(rpc_id);
 
-           reply_info_.mutable_volume()->set_precise(8);
-           reply_info_.mutable_volume()->set_value(10+ i);           
+        reply_info_.mutable_volume()->set_precise(8);
+        reply_info_.mutable_volume()->set_value(rpc_id);           
 
-           responder_.Write(reply_info_, this);
-       }
+        responder_.Write(reply_info_, this);
 
 
         is_inner_cq_event_ = true;

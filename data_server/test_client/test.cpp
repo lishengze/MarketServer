@@ -8,12 +8,12 @@ void test_grpc_client()
 {
     GrpcClient client("0.0.0.0:5008");
 
-    for (int i = 0; i < 2; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         ReqTradeInfoLocal req_trade_info;
         req_trade_info.exchange = "FTX";
         req_trade_info.symbol = "symbol";
-        req_trade_info.time = utrade::pandora::NanoTime();
+        req_trade_info.time = i;
 
         client.request_trade_data(req_trade_info);   
 
