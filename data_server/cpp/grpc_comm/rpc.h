@@ -67,7 +67,6 @@ public:
     grpc::ServerCompletionQueue*                      cq_{nullptr};    
 };
 
-
 class RequestTradeDataRPC: public BaseRPC
 {
     public:
@@ -91,7 +90,6 @@ class RequestTradeDataRPC: public BaseRPC
         ServerAsyncResponseWriter<TradeData>     responder_;
         
 };  
-
 
 class GetTradeStreamDataRPC: public BaseRPC
 {

@@ -19,6 +19,8 @@ class GrpcClient
 
         void req_thread_main();
 
+        void get_trade_data(const ReqTradeInfoLocal& req_info);
+
         void request_trade_data(const ReqTradeInfoLocal& req_info);
 
     private:

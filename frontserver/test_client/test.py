@@ -155,11 +155,11 @@ def sub_kline(ws, sub_symbol):
 
 def on_open(ws):
     print("\n--------- on_open connected! --------")
-    # send_str = get_sub_depth_str(symbol="BTC_USDT")
+    send_str = get_sub_depth_str(symbol="BTC_USDT")
 
     # ws.send(send_str)
 
-    send_str = get_sub_kline_str(symbol = "BTC_USDT")
+    # send_str = get_sub_kline_str(symbol = "BTC_USDT")
 
     ws.send(send_str)
 
@@ -184,7 +184,8 @@ def test_websocket():
     # ip = "ws://36.855.220.139"
     # ip = "ws://118.193.35.160"
     # ip = "ws://18.162.52.222"
-    ip = "ws://127.0.0.1"
+    # ip = "ws://127.0.0.1"
+    ip = "ws://18.166.210.94"
     port = 8114
     url = ip + ":" + str(port)
     print("\n\n***** Connect %s *****" % (url))

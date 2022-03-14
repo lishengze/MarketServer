@@ -6,6 +6,7 @@ GrpcServer::~GrpcServer()
 {
     if (cq_thread_.joinable())
     {
+        LOG_INFO("cq_thread_ join");
         cq_thread_.join();
     }
 }
@@ -51,13 +52,13 @@ void GrpcServer::init_rpc()
     {
         LOG_INFO("Init request_trade_data_rpc_");
 
-        // request_trade_data_rpc_ = new RequestTradeDataRPC(cq_.get(), &service_);
-        // request_trade_data_rpc_->register_server(this);
-        // request_trade_data_rpc_->start();
+        request_trade_data_rpc_ = new RequestTradeDataRPC(cq_.get(), &service_);
+        request_trade_data_rpc_->register_server(this);
+        request_trade_data_rpc_->start();
 
-        get_stream_trade_data_rpc = new GetTradeStreamDataRPC(cq_.get(), &service_);
-        get_stream_trade_data_rpc->register_server(this);
-        get_stream_trade_data_rpc->start();
+        // get_stream_trade_data_rpc = new GetTradeStreamDataRPC(cq_.get(), &service_);
+        // get_stream_trade_data_rpc->register_server(this);
+        // get_stream_trade_data_rpc->start();
 
     }
     catch(const std::exception& e)
@@ -72,7 +73,6 @@ void GrpcServer::init_cq_thread()
     try
     {
         cq_thread_ = std::thread(&GrpcServer::run_cq_loop, this);
-
     }
     catch(const std::exception& e)
     {
