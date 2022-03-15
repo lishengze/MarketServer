@@ -102,5 +102,10 @@
         "semaphore": "cpp",
         "stop_token": "cpp",
         "grpc.h": "c"
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#242F32",
+        "titleBar.activeBackground": "#324246",
+        "titleBar.activeForeground": "#F9FBFB"
     }
 }

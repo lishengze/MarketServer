@@ -173,13 +173,13 @@ SDecimal get_bias_decimal(const SDecimal& ori_data, int bias_kind, double bias_v
     {
         if (bias_kind == 1)
         {
-            double rate = 1+bias_value < 0?0:1+bias_value;
+            double rate = (1+bias_value) < 0 ? 0 : (1+bias_value);
 
             result = ori_data * rate;
         }
         else if (bias_kind == 2)
         {
-            result = ori_data + bias_value<0 ? 0 : ori_data + bias_value;
+            result = (ori_data+bias_value) < 0 ? 0 : (ori_data+bias_value);
         }
         else
         {
