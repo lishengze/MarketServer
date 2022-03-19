@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../global_declare.h"
 #include <mysql_connection.h>
 #include <mysql_driver.h>
 #include <cppconn/statement.h>
@@ -13,6 +12,7 @@
 #include "base/cpp/base_data_stuct.h"
 
 #include "../data_struct/data_struct.h"
+
 
 class DBEngine
 {
@@ -110,16 +110,25 @@ public:
     TestEngine()
     {
         connect_info.host_ = "127.0.0.1";
-        connect_info.port_ = 5001;
-        connect_info.schema_ = "bcts";
-        connect_info.usr_ = "lsz";
+        connect_info.port_ = 3306;
+        connect_info.schema_ = "market";
+        connect_info.usr_ = "bcts";
         connect_info.pwd_ = "bcts";
 
+        test_create_table();
     }
 
-    void start();
+    void start()
+    {
+        test_create_table();
+    }
 
-    void test_create_table();
-
+    void test_create_table()
+    {
+        LOG_INFO(connect_info.str());
+        
+        DBEnginePool  engine_pool{connect_info};
+        // engine_pool.create_kline_table("FTX", "BTC_USDT");
+    }
     DBConnectInfo   connect_info;
 };

@@ -422,13 +422,15 @@ bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::
 }
 
 
-void TestEngine::start()
-{
-    test_create_table();
-}
+// void TestEngine::start()
+// {
+//     test_create_table();
+// }
 
-void TestEngine::test_create_table()
-{
-    DBEnginePool  engine_pool{connect_info};
-    engine_pool.create_kline_table("FTX", "BTC_USDT");
-}
+// void TestEngine::test_create_table()
+// {
+//     LOG_INFO(connect_info.str());
+
+//     DBEnginePool  engine_pool{connect_info};
+//     // engine_pool.create_kline_table("FTX", "BTC_USDT");
+// }

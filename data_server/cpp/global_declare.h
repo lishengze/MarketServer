@@ -21,4 +21,4 @@ using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
 using grpc::ServerAsyncWriter;
 
-using Proto3::MarketData::MarketService;
+// using namespace Proto3::MarketData;

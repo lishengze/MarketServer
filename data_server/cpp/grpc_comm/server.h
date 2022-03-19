@@ -29,7 +29,7 @@ private:
     std::unique_ptr<grpc::ServerCompletionQueue>  cq_;
     std::unique_ptr<grpc::Server>                 server_;
     grpc::ServerBuilder                           builder_;
-    MarketService::AsyncService                   service_;
+    Proto3::MarketData::MarketService::AsyncService service_;
     std::thread                                   cq_thread_;
 
 private:

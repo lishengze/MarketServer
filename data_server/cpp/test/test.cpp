@@ -1,6 +1,7 @@
 #include "test.h"
 #include "../Log/log.h"
 #include "../grpc_comm/server.h"
+#include "../db_engine/db_engine.h"
 
 void test_grpc_server()
 {
@@ -64,8 +65,8 @@ public:
 
     ServerContext                            context_;
     ReqTradeInfo                             request_info_;
-    TradeData                                reply_info_;
-    ServerAsyncResponseWriter<TradeData>     responder_;    
+    Proto3::MarketData::TradeData                                reply_info_;
+    ServerAsyncResponseWriter<Proto3::MarketData::TradeData>     responder_;    
 
     std::thread                                   cq_thread_;
 };
@@ -275,10 +276,10 @@ class ServerImpl final {
         // What we get from the client.
         ReqTradeInfo request_;
         // What we send back to the client.
-        TradeData reply_;
+        Proto3::MarketData::TradeData reply_;
 
         // The means to get back to the client.
-        ServerAsyncResponseWriter<TradeData> responder_;
+        ServerAsyncResponseWriter<Proto3::MarketData::TradeData> responder_;
 
         // Let's implement a tiny state machine with the following states.
         enum CallStatus { CREATE, PROCESS, FINISH };
@@ -328,11 +329,19 @@ void test_official_demo()
     server_obj.Run();
 }
 
+void test_db_engine()
+{
+  TestEngine test_engine;
+  // test_engine.start();
+}
+
 void TestMain()
 {
     LOG_INFO("TestMain");
     
-    test_grpc_server();
+    // test_grpc_server();
+
+    test_db_engine();
 
     // test_non_stream_server();
 
