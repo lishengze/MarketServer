@@ -26,6 +26,8 @@ INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
 INCLUDE_DIRECTORIES("../../component")
 
+INCLUDE_DIRECTORIES("/usr/local/include/nacos/")
+
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
@@ -44,6 +46,7 @@ LINK_DIRECTORIES("../../lib")
 # INCLUDE_DIRECTORIES("/usr/local/include")
 
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
+LINK_DIRECTORIES("/usr/local/grpc/lib/")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
@@ -56,12 +59,21 @@ else()
 endif()
 target_link_libraries(demo4quote pandora)
 target_link_libraries(demo4quote log4cplus)
+
+target_link_libraries(demo4quote absl_synchronization)
 target_link_libraries(demo4quote protobuf protoc protobuf-lite)
 target_link_libraries(demo4quote grpc++_reflection grpc++ gpr ssl crypto)
+
 target_link_libraries(demo4quote nacos-cli)
 target_link_libraries(demo4quote reporter)
-target_link_libraries(demo4quote SQLiteCpp sqlite3 dl)
+
+# target_link_libraries(demo4quote dl)
+
+target_link_libraries(demo4quote dl SQLiteCpp sqlite3)
 
 TARGET_LINK_LIBRARIES(demo4quote ssl crypto)
+
+
+
 
 ###############################################################################################

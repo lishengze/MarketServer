@@ -3,6 +3,7 @@
 # source: risk_controller.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -16,551 +17,22 @@ from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 import quote_data_pb2 as quote__data__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='risk_controller.proto',
-  package='quote.service.v1',
-  syntax='proto3',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15risk_controller.proto\x12\x10quote.service.v1\x1a\ngogo.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x10quote_data.proto\"\x83\x03\n\x15TradedOrderStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12\x35\n\x0corder_amount\x18\x03 \x01(\x01\x42\x1f\xe2\xde\x1f\x0bOrderAmount\xea\xde\x1f\x0corder_amount\x12`\n\tdirection\x18\x04 \x01(\x0e\x32\x31.quote.service.v1.TradedOrderStreamData.DirectionB\x1a\xe2\xde\x1f\tDirection\xea\xde\x1f\tdirection\x12\x32\n\x04time\x18\x05 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x34\n\x06traded\x18\x06 \x01(\x08\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\"\x1e\n\tDirection\x12\x07\n\x03\x42UY\x10\x00\x12\x08\n\x04SELL\x10\x01\"_\n\x14MultiOrderStreamData\x12G\n\x06orders\x18\x01 \x03(\x0b\x32!.quote.service.v1.OrderStreamDataB\x14\xe2\xde\x1f\x06Orders\xea\xde\x1f\x06orders\"\xff\x01\n\x0fOrderStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12\x35\n\x0corder_amount\x18\x03 \x01(\x01\x42\x1f\xe2\xde\x1f\x0bOrderAmount\xea\xde\x1f\x0corder_amount\x12\x38\n\rhedged_amount\x18\x04 \x01(\x01\x42!\xe2\xde\x1f\x0cHedgedAmount\xea\xde\x1f\rhedged_amount\x12\x32\n\x04time\x18\x05 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\"\xff\x01\n\x0cQuoteRequest\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12$\n\x06\x61mount\x18\x02 \x01(\x01\x42\x14\xe2\xde\x1f\x06\x41mount\xea\xde\x1f\x06\x61mount\x12*\n\x08turnover\x18\x03 \x01(\x01\x42\x18\xe2\xde\x1f\x08Turnover\xea\xde\x1f\x08turnover\x12W\n\tdirection\x18\x04 \x01(\x0e\x32(.quote.service.v1.QuoteRequest.DirectionB\x1a\xe2\xde\x1f\tDirection\xea\xde\x1f\tdirection\"\x1e\n\tDirection\x12\x07\n\x03\x42UY\x10\x00\x12\x08\n\x04SELL\x10\x01\"\x8d\x02\n\rQuoteResponse\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12L\n\x06result\x18\x03 \x01(\x0e\x32&.quote.service.v1.QuoteResponse.ResultB\x14\xe2\xde\x1f\x06Result\xea\xde\x1f\x06result\"e\n\x06Result\x12\x06\n\x02OK\x10\x00\x12\x10\n\x0cWRONG_SYMBOL\x10\x01\x12\x13\n\x0fWRONG_DIRECTION\x10\x02\x12\x15\n\x11NOT_ENOUGH_VOLUME\x10\x03\x12\x15\n\x11NOT_ENOUGH_AMOUNT\x10\x04\"\xa5\x03\n\x11GetParamsResponse\x12G\n\nwatermarks\x18\x01 \x03(\x0b\x32\x33.quote.service.v1.GetParamsResponse.WatermarksEntry\x12\x43\n\x08\x61\x63\x63ounts\x18\x02 \x03(\x0b\x32\x31.quote.service.v1.GetParamsResponse.AccountsEntry\x12M\n\rconfiguration\x18\x03 \x03(\x0b\x32\x36.quote.service.v1.GetParamsResponse.ConfigurationEntry\x1aL\n\x0fWatermarksEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal:\x02\x38\x01\x1a/\n\rAccountsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\x1a\x34\n\x12\x43onfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32\x8b\x05\n\x0eRiskController\x12_\n\x18ServeMarketStream4Broker\x12\x16.google.protobuf.Empty\x1a\'.quote.service.v1.MultiMarketStreamData\"\x00\x30\x01\x12^\n\x17ServeMarketStream4Hedge\x12\x16.google.protobuf.Empty\x1a\'.quote.service.v1.MultiMarketStreamData\"\x00\x30\x01\x12j\n\x18ServeMarketStream4Client\x12\x16.google.protobuf.Empty\x1a\x32.quote.service.v1.MultiMarketStreamDataWithDecimal\"\x00\x30\x01\x12T\n\x0ePutOrderStream\x12&.quote.service.v1.MultiOrderStreamData\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12M\n\x08OtcQuote\x12\x1e.quote.service.v1.QuoteRequest\x1a\x1f.quote.service.v1.QuoteResponse\"\x00\x12J\n\tGetParams\x12\x16.google.protobuf.Empty\x1a#.quote.service.v1.GetParamsResponse\"\x00\x12[\n\x14PutTradedOrderStream\x12\'.quote.service.v1.TradedOrderStreamData\x1a\x16.google.protobuf.Empty\"\x00(\x01\x62\x06proto3'
-  ,
-  dependencies=[gogo__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,quote__data__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15risk_controller.proto\x12\x10quote.service.v1\x1a\ngogo.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x10quote_data.proto\"\x83\x03\n\x15TradedOrderStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12\x35\n\x0corder_amount\x18\x03 \x01(\x01\x42\x1f\xe2\xde\x1f\x0bOrderAmount\xea\xde\x1f\x0corder_amount\x12`\n\tdirection\x18\x04 \x01(\x0e\x32\x31.quote.service.v1.TradedOrderStreamData.DirectionB\x1a\xe2\xde\x1f\tDirection\xea\xde\x1f\tdirection\x12\x32\n\x04time\x18\x05 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12\x34\n\x06traded\x18\x06 \x01(\x08\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\"\x1e\n\tDirection\x12\x07\n\x03\x42UY\x10\x00\x12\x08\n\x04SELL\x10\x01\"_\n\x14MultiOrderStreamData\x12G\n\x06orders\x18\x01 \x03(\x0b\x32!.quote.service.v1.OrderStreamDataB\x14\xe2\xde\x1f\x06Orders\xea\xde\x1f\x06orders\"\xff\x01\n\x0fOrderStreamData\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12\x35\n\x0corder_amount\x18\x03 \x01(\x01\x42\x1f\xe2\xde\x1f\x0bOrderAmount\xea\xde\x1f\x0corder_amount\x12\x38\n\rhedged_amount\x18\x04 \x01(\x01\x42!\xe2\xde\x1f\x0cHedgedAmount\xea\xde\x1f\rhedged_amount\x12\x32\n\x04time\x18\x05 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\"\xff\x01\n\x0cQuoteRequest\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12$\n\x06\x61mount\x18\x02 \x01(\x01\x42\x14\xe2\xde\x1f\x06\x41mount\xea\xde\x1f\x06\x61mount\x12*\n\x08turnover\x18\x03 \x01(\x01\x42\x18\xe2\xde\x1f\x08Turnover\xea\xde\x1f\x08turnover\x12W\n\tdirection\x18\x04 \x01(\x0e\x32(.quote.service.v1.QuoteRequest.DirectionB\x1a\xe2\xde\x1f\tDirection\xea\xde\x1f\tdirection\"\x1e\n\tDirection\x12\x07\n\x03\x42UY\x10\x00\x12\x08\n\x04SELL\x10\x01\"\x8d\x02\n\rQuoteResponse\x12$\n\x06symbol\x18\x01 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12!\n\x05price\x18\x02 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12L\n\x06result\x18\x03 \x01(\x0e\x32&.quote.service.v1.QuoteResponse.ResultB\x14\xe2\xde\x1f\x06Result\xea\xde\x1f\x06result\"e\n\x06Result\x12\x06\n\x02OK\x10\x00\x12\x10\n\x0cWRONG_SYMBOL\x10\x01\x12\x13\n\x0fWRONG_DIRECTION\x10\x02\x12\x15\n\x11NOT_ENOUGH_VOLUME\x10\x03\x12\x15\n\x11NOT_ENOUGH_AMOUNT\x10\x04\"\xa5\x03\n\x11GetParamsResponse\x12G\n\nwatermarks\x18\x01 \x03(\x0b\x32\x33.quote.service.v1.GetParamsResponse.WatermarksEntry\x12\x43\n\x08\x61\x63\x63ounts\x18\x02 \x03(\x0b\x32\x31.quote.service.v1.GetParamsResponse.AccountsEntry\x12M\n\rconfiguration\x18\x03 \x03(\x0b\x32\x36.quote.service.v1.GetParamsResponse.ConfigurationEntry\x1aL\n\x0fWatermarksEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal:\x02\x38\x01\x1a/\n\rAccountsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\x1a\x34\n\x12\x43onfigurationEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x32\x8b\x05\n\x0eRiskController\x12_\n\x18ServeMarketStream4Broker\x12\x16.google.protobuf.Empty\x1a\'.quote.service.v1.MultiMarketStreamData\"\x00\x30\x01\x12^\n\x17ServeMarketStream4Hedge\x12\x16.google.protobuf.Empty\x1a\'.quote.service.v1.MultiMarketStreamData\"\x00\x30\x01\x12j\n\x18ServeMarketStream4Client\x12\x16.google.protobuf.Empty\x1a\x32.quote.service.v1.MultiMarketStreamDataWithDecimal\"\x00\x30\x01\x12T\n\x0ePutOrderStream\x12&.quote.service.v1.MultiOrderStreamData\x1a\x16.google.protobuf.Empty\"\x00(\x01\x12M\n\x08OtcQuote\x12\x1e.quote.service.v1.QuoteRequest\x1a\x1f.quote.service.v1.QuoteResponse\"\x00\x12J\n\tGetParams\x12\x16.google.protobuf.Empty\x1a#.quote.service.v1.GetParamsResponse\"\x00\x12[\n\x14PutTradedOrderStream\x12\'.quote.service.v1.TradedOrderStreamData\x1a\x16.google.protobuf.Empty\"\x00(\x01\x62\x06proto3')
 
 
 
-_TRADEDORDERSTREAMDATA_DIRECTION = _descriptor.EnumDescriptor(
-  name='Direction',
-  full_name='quote.service.v1.TradedOrderStreamData.Direction',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='BUY', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='SELL', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=460,
-  serialized_end=490,
-)
-_sym_db.RegisterEnumDescriptor(_TRADEDORDERSTREAMDATA_DIRECTION)
-
-_QUOTEREQUEST_DIRECTION = _descriptor.EnumDescriptor(
-  name='Direction',
-  full_name='quote.service.v1.QuoteRequest.Direction',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='BUY', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='SELL', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=460,
-  serialized_end=490,
-)
-_sym_db.RegisterEnumDescriptor(_QUOTEREQUEST_DIRECTION)
-
-_QUOTERESPONSE_RESULT = _descriptor.EnumDescriptor(
-  name='Result',
-  full_name='quote.service.v1.QuoteResponse.Result',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='OK', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='WRONG_SYMBOL', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='WRONG_DIRECTION', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='NOT_ENOUGH_VOLUME', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='NOT_ENOUGH_AMOUNT', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=1274,
-  serialized_end=1375,
-)
-_sym_db.RegisterEnumDescriptor(_QUOTERESPONSE_RESULT)
-
-
-_TRADEDORDERSTREAMDATA = _descriptor.Descriptor(
-  name='TradedOrderStreamData',
-  full_name='quote.service.v1.TradedOrderStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.TradedOrderStreamData.symbol', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.TradedOrderStreamData.price', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='order_amount', full_name='quote.service.v1.TradedOrderStreamData.order_amount', index=2,
-      number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\013OrderAmount\352\336\037\014order_amount', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='direction', full_name='quote.service.v1.TradedOrderStreamData.direction', index=3,
-      number=4, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\tDirection\352\336\037\tdirection', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='quote.service.v1.TradedOrderStreamData.time', index=4,
-      number=5, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='traded', full_name='quote.service.v1.TradedOrderStreamData.traded', index=5,
-      number=6, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _TRADEDORDERSTREAMDATA_DIRECTION,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=103,
-  serialized_end=490,
-)
-
-
-_MULTIORDERSTREAMDATA = _descriptor.Descriptor(
-  name='MultiOrderStreamData',
-  full_name='quote.service.v1.MultiOrderStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='orders', full_name='quote.service.v1.MultiOrderStreamData.orders', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Orders\352\336\037\006orders', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=492,
-  serialized_end=587,
-)
-
-
-_ORDERSTREAMDATA = _descriptor.Descriptor(
-  name='OrderStreamData',
-  full_name='quote.service.v1.OrderStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.OrderStreamData.symbol', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.OrderStreamData.price', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='order_amount', full_name='quote.service.v1.OrderStreamData.order_amount', index=2,
-      number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\013OrderAmount\352\336\037\014order_amount', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hedged_amount', full_name='quote.service.v1.OrderStreamData.hedged_amount', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\014HedgedAmount\352\336\037\rhedged_amount', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='quote.service.v1.OrderStreamData.time', index=4,
-      number=5, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=590,
-  serialized_end=845,
-)
-
-
-_QUOTEREQUEST = _descriptor.Descriptor(
-  name='QuoteRequest',
-  full_name='quote.service.v1.QuoteRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.QuoteRequest.symbol', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='amount', full_name='quote.service.v1.QuoteRequest.amount', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Amount\352\336\037\006amount', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='turnover', full_name='quote.service.v1.QuoteRequest.turnover', index=2,
-      number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Turnover\352\336\037\010turnover', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='direction', full_name='quote.service.v1.QuoteRequest.direction', index=3,
-      number=4, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\tDirection\352\336\037\tdirection', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _QUOTEREQUEST_DIRECTION,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=848,
-  serialized_end=1103,
-)
-
-
-_QUOTERESPONSE = _descriptor.Descriptor(
-  name='QuoteResponse',
-  full_name='quote.service.v1.QuoteResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.QuoteResponse.symbol', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.QuoteResponse.price', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='result', full_name='quote.service.v1.QuoteResponse.result', index=2,
-      number=3, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Result\352\336\037\006result', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _QUOTERESPONSE_RESULT,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1106,
-  serialized_end=1375,
-)
-
-
-_GETPARAMSRESPONSE_WATERMARKSENTRY = _descriptor.Descriptor(
-  name='WatermarksEntry',
-  full_name='quote.service.v1.GetParamsResponse.WatermarksEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='quote.service.v1.GetParamsResponse.WatermarksEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='quote.service.v1.GetParamsResponse.WatermarksEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1620,
-  serialized_end=1696,
-)
-
-_GETPARAMSRESPONSE_ACCOUNTSENTRY = _descriptor.Descriptor(
-  name='AccountsEntry',
-  full_name='quote.service.v1.GetParamsResponse.AccountsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='quote.service.v1.GetParamsResponse.AccountsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='quote.service.v1.GetParamsResponse.AccountsEntry.value', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1698,
-  serialized_end=1745,
-)
-
-_GETPARAMSRESPONSE_CONFIGURATIONENTRY = _descriptor.Descriptor(
-  name='ConfigurationEntry',
-  full_name='quote.service.v1.GetParamsResponse.ConfigurationEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='quote.service.v1.GetParamsResponse.ConfigurationEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='quote.service.v1.GetParamsResponse.ConfigurationEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1747,
-  serialized_end=1799,
-)
-
-_GETPARAMSRESPONSE = _descriptor.Descriptor(
-  name='GetParamsResponse',
-  full_name='quote.service.v1.GetParamsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='watermarks', full_name='quote.service.v1.GetParamsResponse.watermarks', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='accounts', full_name='quote.service.v1.GetParamsResponse.accounts', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='configuration', full_name='quote.service.v1.GetParamsResponse.configuration', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_GETPARAMSRESPONSE_WATERMARKSENTRY, _GETPARAMSRESPONSE_ACCOUNTSENTRY, _GETPARAMSRESPONSE_CONFIGURATIONENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1378,
-  serialized_end=1799,
-)
-
-_TRADEDORDERSTREAMDATA.fields_by_name['direction'].enum_type = _TRADEDORDERSTREAMDATA_DIRECTION
-_TRADEDORDERSTREAMDATA_DIRECTION.containing_type = _TRADEDORDERSTREAMDATA
-_MULTIORDERSTREAMDATA.fields_by_name['orders'].message_type = _ORDERSTREAMDATA
-_QUOTEREQUEST.fields_by_name['direction'].enum_type = _QUOTEREQUEST_DIRECTION
-_QUOTEREQUEST_DIRECTION.containing_type = _QUOTEREQUEST
-_QUOTERESPONSE.fields_by_name['result'].enum_type = _QUOTERESPONSE_RESULT
-_QUOTERESPONSE_RESULT.containing_type = _QUOTERESPONSE
-_GETPARAMSRESPONSE_WATERMARKSENTRY.fields_by_name['value'].message_type = quote__data__pb2._DECIMAL
-_GETPARAMSRESPONSE_WATERMARKSENTRY.containing_type = _GETPARAMSRESPONSE
-_GETPARAMSRESPONSE_ACCOUNTSENTRY.containing_type = _GETPARAMSRESPONSE
-_GETPARAMSRESPONSE_CONFIGURATIONENTRY.containing_type = _GETPARAMSRESPONSE
-_GETPARAMSRESPONSE.fields_by_name['watermarks'].message_type = _GETPARAMSRESPONSE_WATERMARKSENTRY
-_GETPARAMSRESPONSE.fields_by_name['accounts'].message_type = _GETPARAMSRESPONSE_ACCOUNTSENTRY
-_GETPARAMSRESPONSE.fields_by_name['configuration'].message_type = _GETPARAMSRESPONSE_CONFIGURATIONENTRY
-DESCRIPTOR.message_types_by_name['TradedOrderStreamData'] = _TRADEDORDERSTREAMDATA
-DESCRIPTOR.message_types_by_name['MultiOrderStreamData'] = _MULTIORDERSTREAMDATA
-DESCRIPTOR.message_types_by_name['OrderStreamData'] = _ORDERSTREAMDATA
-DESCRIPTOR.message_types_by_name['QuoteRequest'] = _QUOTEREQUEST
-DESCRIPTOR.message_types_by_name['QuoteResponse'] = _QUOTERESPONSE
-DESCRIPTOR.message_types_by_name['GetParamsResponse'] = _GETPARAMSRESPONSE
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_TRADEDORDERSTREAMDATA = DESCRIPTOR.message_types_by_name['TradedOrderStreamData']
+_MULTIORDERSTREAMDATA = DESCRIPTOR.message_types_by_name['MultiOrderStreamData']
+_ORDERSTREAMDATA = DESCRIPTOR.message_types_by_name['OrderStreamData']
+_QUOTEREQUEST = DESCRIPTOR.message_types_by_name['QuoteRequest']
+_QUOTERESPONSE = DESCRIPTOR.message_types_by_name['QuoteResponse']
+_GETPARAMSRESPONSE = DESCRIPTOR.message_types_by_name['GetParamsResponse']
+_GETPARAMSRESPONSE_WATERMARKSENTRY = _GETPARAMSRESPONSE.nested_types_by_name['WatermarksEntry']
+_GETPARAMSRESPONSE_ACCOUNTSENTRY = _GETPARAMSRESPONSE.nested_types_by_name['AccountsEntry']
+_GETPARAMSRESPONSE_CONFIGURATIONENTRY = _GETPARAMSRESPONSE.nested_types_by_name['ConfigurationEntry']
+_TRADEDORDERSTREAMDATA_DIRECTION = _TRADEDORDERSTREAMDATA.enum_types_by_name['Direction']
+_QUOTEREQUEST_DIRECTION = _QUOTEREQUEST.enum_types_by_name['Direction']
+_QUOTERESPONSE_RESULT = _QUOTERESPONSE.enum_types_by_name['Result']
 TradedOrderStreamData = _reflection.GeneratedProtocolMessageType('TradedOrderStreamData', (_message.Message,), {
   'DESCRIPTOR' : _TRADEDORDERSTREAMDATA,
   '__module__' : 'risk_controller_pb2'
@@ -627,113 +99,78 @@ _sym_db.RegisterMessage(GetParamsResponse.WatermarksEntry)
 _sym_db.RegisterMessage(GetParamsResponse.AccountsEntry)
 _sym_db.RegisterMessage(GetParamsResponse.ConfigurationEntry)
 
+_RISKCONTROLLER = DESCRIPTOR.services_by_name['RiskController']
+if _descriptor._USE_C_DESCRIPTORS == False:
 
-_TRADEDORDERSTREAMDATA.fields_by_name['symbol']._options = None
-_TRADEDORDERSTREAMDATA.fields_by_name['price']._options = None
-_TRADEDORDERSTREAMDATA.fields_by_name['order_amount']._options = None
-_TRADEDORDERSTREAMDATA.fields_by_name['direction']._options = None
-_TRADEDORDERSTREAMDATA.fields_by_name['time']._options = None
-_TRADEDORDERSTREAMDATA.fields_by_name['traded']._options = None
-_MULTIORDERSTREAMDATA.fields_by_name['orders']._options = None
-_ORDERSTREAMDATA.fields_by_name['symbol']._options = None
-_ORDERSTREAMDATA.fields_by_name['price']._options = None
-_ORDERSTREAMDATA.fields_by_name['order_amount']._options = None
-_ORDERSTREAMDATA.fields_by_name['hedged_amount']._options = None
-_ORDERSTREAMDATA.fields_by_name['time']._options = None
-_QUOTEREQUEST.fields_by_name['symbol']._options = None
-_QUOTEREQUEST.fields_by_name['amount']._options = None
-_QUOTEREQUEST.fields_by_name['turnover']._options = None
-_QUOTEREQUEST.fields_by_name['direction']._options = None
-_QUOTERESPONSE.fields_by_name['symbol']._options = None
-_QUOTERESPONSE.fields_by_name['price']._options = None
-_QUOTERESPONSE.fields_by_name['result']._options = None
-_GETPARAMSRESPONSE_WATERMARKSENTRY._options = None
-_GETPARAMSRESPONSE_ACCOUNTSENTRY._options = None
-_GETPARAMSRESPONSE_CONFIGURATIONENTRY._options = None
-
-_RISKCONTROLLER = _descriptor.ServiceDescriptor(
-  name='RiskController',
-  full_name='quote.service.v1.RiskController',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=1802,
-  serialized_end=2453,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='ServeMarketStream4Broker',
-    full_name='quote.service.v1.RiskController.ServeMarketStream4Broker',
-    index=0,
-    containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    output_type=quote__data__pb2._MULTIMARKETSTREAMDATA,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ServeMarketStream4Hedge',
-    full_name='quote.service.v1.RiskController.ServeMarketStream4Hedge',
-    index=1,
-    containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    output_type=quote__data__pb2._MULTIMARKETSTREAMDATA,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ServeMarketStream4Client',
-    full_name='quote.service.v1.RiskController.ServeMarketStream4Client',
-    index=2,
-    containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    output_type=quote__data__pb2._MULTIMARKETSTREAMDATAWITHDECIMAL,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='PutOrderStream',
-    full_name='quote.service.v1.RiskController.PutOrderStream',
-    index=3,
-    containing_service=None,
-    input_type=_MULTIORDERSTREAMDATA,
-    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='OtcQuote',
-    full_name='quote.service.v1.RiskController.OtcQuote',
-    index=4,
-    containing_service=None,
-    input_type=_QUOTEREQUEST,
-    output_type=_QUOTERESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetParams',
-    full_name='quote.service.v1.RiskController.GetParams',
-    index=5,
-    containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    output_type=_GETPARAMSRESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='PutTradedOrderStream',
-    full_name='quote.service.v1.RiskController.PutTradedOrderStream',
-    index=6,
-    containing_service=None,
-    input_type=_TRADEDORDERSTREAMDATA,
-    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_RISKCONTROLLER)
-
-DESCRIPTOR.services_by_name['RiskController'] = _RISKCONTROLLER
-
+  DESCRIPTOR._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['symbol']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _TRADEDORDERSTREAMDATA.fields_by_name['price']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['price']._serialized_options = b'\342\336\037\005Price\352\336\037\005price'
+  _TRADEDORDERSTREAMDATA.fields_by_name['order_amount']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['order_amount']._serialized_options = b'\342\336\037\013OrderAmount\352\336\037\014order_amount'
+  _TRADEDORDERSTREAMDATA.fields_by_name['direction']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['direction']._serialized_options = b'\342\336\037\tDirection\352\336\037\tdirection'
+  _TRADEDORDERSTREAMDATA.fields_by_name['time']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['time']._serialized_options = b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time'
+  _TRADEDORDERSTREAMDATA.fields_by_name['traded']._options = None
+  _TRADEDORDERSTREAMDATA.fields_by_name['traded']._serialized_options = b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time'
+  _MULTIORDERSTREAMDATA.fields_by_name['orders']._options = None
+  _MULTIORDERSTREAMDATA.fields_by_name['orders']._serialized_options = b'\342\336\037\006Orders\352\336\037\006orders'
+  _ORDERSTREAMDATA.fields_by_name['symbol']._options = None
+  _ORDERSTREAMDATA.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _ORDERSTREAMDATA.fields_by_name['price']._options = None
+  _ORDERSTREAMDATA.fields_by_name['price']._serialized_options = b'\342\336\037\005Price\352\336\037\005price'
+  _ORDERSTREAMDATA.fields_by_name['order_amount']._options = None
+  _ORDERSTREAMDATA.fields_by_name['order_amount']._serialized_options = b'\342\336\037\013OrderAmount\352\336\037\014order_amount'
+  _ORDERSTREAMDATA.fields_by_name['hedged_amount']._options = None
+  _ORDERSTREAMDATA.fields_by_name['hedged_amount']._serialized_options = b'\342\336\037\014HedgedAmount\352\336\037\rhedged_amount'
+  _ORDERSTREAMDATA.fields_by_name['time']._options = None
+  _ORDERSTREAMDATA.fields_by_name['time']._serialized_options = b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time'
+  _QUOTEREQUEST.fields_by_name['symbol']._options = None
+  _QUOTEREQUEST.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _QUOTEREQUEST.fields_by_name['amount']._options = None
+  _QUOTEREQUEST.fields_by_name['amount']._serialized_options = b'\342\336\037\006Amount\352\336\037\006amount'
+  _QUOTEREQUEST.fields_by_name['turnover']._options = None
+  _QUOTEREQUEST.fields_by_name['turnover']._serialized_options = b'\342\336\037\010Turnover\352\336\037\010turnover'
+  _QUOTEREQUEST.fields_by_name['direction']._options = None
+  _QUOTEREQUEST.fields_by_name['direction']._serialized_options = b'\342\336\037\tDirection\352\336\037\tdirection'
+  _QUOTERESPONSE.fields_by_name['symbol']._options = None
+  _QUOTERESPONSE.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _QUOTERESPONSE.fields_by_name['price']._options = None
+  _QUOTERESPONSE.fields_by_name['price']._serialized_options = b'\342\336\037\005Price\352\336\037\005price'
+  _QUOTERESPONSE.fields_by_name['result']._options = None
+  _QUOTERESPONSE.fields_by_name['result']._serialized_options = b'\342\336\037\006Result\352\336\037\006result'
+  _GETPARAMSRESPONSE_WATERMARKSENTRY._options = None
+  _GETPARAMSRESPONSE_WATERMARKSENTRY._serialized_options = b'8\001'
+  _GETPARAMSRESPONSE_ACCOUNTSENTRY._options = None
+  _GETPARAMSRESPONSE_ACCOUNTSENTRY._serialized_options = b'8\001'
+  _GETPARAMSRESPONSE_CONFIGURATIONENTRY._options = None
+  _GETPARAMSRESPONSE_CONFIGURATIONENTRY._serialized_options = b'8\001'
+  _TRADEDORDERSTREAMDATA._serialized_start=103
+  _TRADEDORDERSTREAMDATA._serialized_end=490
+  _TRADEDORDERSTREAMDATA_DIRECTION._serialized_start=460
+  _TRADEDORDERSTREAMDATA_DIRECTION._serialized_end=490
+  _MULTIORDERSTREAMDATA._serialized_start=492
+  _MULTIORDERSTREAMDATA._serialized_end=587
+  _ORDERSTREAMDATA._serialized_start=590
+  _ORDERSTREAMDATA._serialized_end=845
+  _QUOTEREQUEST._serialized_start=848
+  _QUOTEREQUEST._serialized_end=1103
+  _QUOTEREQUEST_DIRECTION._serialized_start=460
+  _QUOTEREQUEST_DIRECTION._serialized_end=490
+  _QUOTERESPONSE._serialized_start=1106
+  _QUOTERESPONSE._serialized_end=1375
+  _QUOTERESPONSE_RESULT._serialized_start=1274
+  _QUOTERESPONSE_RESULT._serialized_end=1375
+  _GETPARAMSRESPONSE._serialized_start=1378
+  _GETPARAMSRESPONSE._serialized_end=1799
+  _GETPARAMSRESPONSE_WATERMARKSENTRY._serialized_start=1620
+  _GETPARAMSRESPONSE_WATERMARKSENTRY._serialized_end=1696
+  _GETPARAMSRESPONSE_ACCOUNTSENTRY._serialized_start=1698
+  _GETPARAMSRESPONSE_ACCOUNTSENTRY._serialized_end=1745
+  _GETPARAMSRESPONSE_CONFIGURATIONENTRY._serialized_start=1747
+  _GETPARAMSRESPONSE_CONFIGURATIONENTRY._serialized_end=1799
+  _RISKCONTROLLER._serialized_start=1802
+  _RISKCONTROLLER._serialized_end=2453
 # @@protoc_insertion_point(module_scope)

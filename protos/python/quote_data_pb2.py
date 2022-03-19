@@ -3,6 +3,7 @@
 # source: quote_data.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -14,685 +15,22 @@ _sym_db = _symbol_database.Default()
 import gogo_pb2 as gogo__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='quote_data.proto',
-  package='quote.service.v1',
-  syntax='proto3',
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10quote_data.proto\x12\x10quote.service.v1\x1a\ngogo.proto\"%\n\x07\x44\x65\x63imal\x12\x0c\n\x04\x62\x61se\x18\x01 \x01(\x03\x12\x0c\n\x04prec\x18\x02 \x01(\x05\"w\n MultiMarketStreamDataWithDecimal\x12S\n\x06quotes\x18\x01 \x03(\x0b\x32-.quote.service.v1.MarketStreamDataWithDecimalB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\xa0\x04\n\x1bMarketStreamDataWithDecimal\x12*\n\x08\x65xchange\x18\x01 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\x12$\n\x06symbol\x18\x02 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12\"\n\x06seq_no\x18\x03 \x01(\x03\x42\x12\xe2\xde\x1f\x05Seqno\xea\xde\x1f\x05seqno\x12\x32\n\x04time\x18\x04 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12&\n\x07is_snap\x18\x05 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\x12\x42\n\x04\x61sks\x18\x06 \x03(\x0b\x32\".quote.service.v1.DepthWithDecimalB\x10\xe2\xde\x1f\x04\x41sks\xea\xde\x1f\x04\x61sks\x12\x42\n\x04\x62ids\x18\x07 \x03(\x0b\x32\".quote.service.v1.DepthWithDecimalB\x10\xe2\xde\x1f\x04\x42ids\xea\xde\x1f\x04\x62ids\x12\x15\n\rprice_precise\x18\x08 \x01(\x05\x12\x16\n\x0evolume_precise\x18\t \x01(\x05\x12\x13\n\x0btime_arrive\x18\n \x01(\x03\x12%\n\x1dtime_produced_by_streamengine\x18\x0b \x01(\x03\x12$\n\x1ctime_produced_by_riskcontrol\x18\x0c \x01(\x03\x12\x16\n\x0e\x61mount_precise\x18\r \x01(\x05\"\xa7\x02\n\x10\x44\x65pthWithDecimal\x12<\n\x05price\x18\x01 \x01(\x0b\x32\x19.quote.service.v1.DecimalB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12?\n\x06volume\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.DecimalB\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12L\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32,.quote.service.v1.DepthWithDecimal.DataEntryB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x1a\x46\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal:\x02\x38\x01\"a\n\x15MultiMarketStreamData\x12H\n\x06quotes\x18\x01 \x03(\x0b\x32\".quote.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x85\x03\n\x10MarketStreamData\x12*\n\x08\x65xchange\x18\x01 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\x12$\n\x06symbol\x18\x02 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12\"\n\x06seq_no\x18\x03 \x01(\x03\x42\x12\xe2\xde\x1f\x05Seqno\xea\xde\x1f\x05seqno\x12\x32\n\x04time\x18\x04 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12&\n\x07is_snap\x18\x05 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\x12\x37\n\x04\x61sks\x18\x06 \x03(\x0b\x32\x17.quote.service.v1.DepthB\x10\xe2\xde\x1f\x04\x41sks\xea\xde\x1f\x04\x61sks\x12\x37\n\x04\x62ids\x18\x07 \x03(\x0b\x32\x17.quote.service.v1.DepthB\x10\xe2\xde\x1f\x04\x42ids\xea\xde\x1f\x04\x62ids\x12\x15\n\rprice_precise\x18\x08 \x01(\x05\x12\x16\n\x0evolume_precise\x18\t \x01(\x05\"\xc0\x01\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12$\n\x06volume\x18\x02 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12\x41\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32!.quote.service.v1.Depth.DataEntryB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xe5\x01\n\x05Kline\x12\r\n\x05index\x18\x01 \x01(\x03\x12\'\n\x04open\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12\'\n\x04high\x18\x03 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12&\n\x03low\x18\x04 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12(\n\x05\x63lose\x18\x05 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12)\n\x06volume\x18\x06 \x01(\x0b\x32\x19.quote.service.v1.Decimal\"K\n\x15MultiTradeWithDecimal\x12\x32\n\x06trades\x18\x01 \x03(\x0b\x32\".quote.service.v1.TradeWithDecimal\"\x97\x01\n\x10TradeWithDecimal\x12\x10\n\x08\x65xchange\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\x12(\n\x05price\x18\x04 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12)\n\x06volume\x18\x05 \x01(\x0b\x32\x19.quote.service.v1.Decimalb\x06proto3'
-  ,
-  dependencies=[gogo__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10quote_data.proto\x12\x10quote.service.v1\x1a\ngogo.proto\"%\n\x07\x44\x65\x63imal\x12\x0c\n\x04\x62\x61se\x18\x01 \x01(\x03\x12\x0c\n\x04prec\x18\x02 \x01(\x05\"w\n MultiMarketStreamDataWithDecimal\x12S\n\x06quotes\x18\x01 \x03(\x0b\x32-.quote.service.v1.MarketStreamDataWithDecimalB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\xa0\x04\n\x1bMarketStreamDataWithDecimal\x12*\n\x08\x65xchange\x18\x01 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\x12$\n\x06symbol\x18\x02 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12\"\n\x06seq_no\x18\x03 \x01(\x03\x42\x12\xe2\xde\x1f\x05Seqno\xea\xde\x1f\x05seqno\x12\x32\n\x04time\x18\x04 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12&\n\x07is_snap\x18\x05 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\x12\x42\n\x04\x61sks\x18\x06 \x03(\x0b\x32\".quote.service.v1.DepthWithDecimalB\x10\xe2\xde\x1f\x04\x41sks\xea\xde\x1f\x04\x61sks\x12\x42\n\x04\x62ids\x18\x07 \x03(\x0b\x32\".quote.service.v1.DepthWithDecimalB\x10\xe2\xde\x1f\x04\x42ids\xea\xde\x1f\x04\x62ids\x12\x15\n\rprice_precise\x18\x08 \x01(\x05\x12\x16\n\x0evolume_precise\x18\t \x01(\x05\x12\x13\n\x0btime_arrive\x18\n \x01(\x03\x12%\n\x1dtime_produced_by_streamengine\x18\x0b \x01(\x03\x12$\n\x1ctime_produced_by_riskcontrol\x18\x0c \x01(\x03\x12\x16\n\x0e\x61mount_precise\x18\r \x01(\x05\"\xa7\x02\n\x10\x44\x65pthWithDecimal\x12<\n\x05price\x18\x01 \x01(\x0b\x32\x19.quote.service.v1.DecimalB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12?\n\x06volume\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.DecimalB\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12L\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32,.quote.service.v1.DepthWithDecimal.DataEntryB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x1a\x46\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal:\x02\x38\x01\"a\n\x15MultiMarketStreamData\x12H\n\x06quotes\x18\x01 \x03(\x0b\x32\".quote.service.v1.MarketStreamDataB\x14\xe2\xde\x1f\x06Quotes\xea\xde\x1f\x06quotes\"\x85\x03\n\x10MarketStreamData\x12*\n\x08\x65xchange\x18\x01 \x01(\tB\x18\xe2\xde\x1f\x08\x45xchange\xea\xde\x1f\x08\x65xchange\x12$\n\x06symbol\x18\x02 \x01(\tB\x14\xe2\xde\x1f\x06Symbol\xea\xde\x1f\x06symbol\x12\"\n\x06seq_no\x18\x03 \x01(\x03\x42\x12\xe2\xde\x1f\x05Seqno\xea\xde\x1f\x05seqno\x12\x32\n\x04time\x18\x04 \x01(\x03\x42$\xe2\xde\x1f\x04Time\xea\xde\x1f\x04time\xfa\xde\x1f\x10wx/pkg/time.Time\x12&\n\x07is_snap\x18\x05 \x01(\x08\x42\x15\xe2\xde\x1f\x06IsSnap\xea\xde\x1f\x07is_snap\x12\x37\n\x04\x61sks\x18\x06 \x03(\x0b\x32\x17.quote.service.v1.DepthB\x10\xe2\xde\x1f\x04\x41sks\xea\xde\x1f\x04\x61sks\x12\x37\n\x04\x62ids\x18\x07 \x03(\x0b\x32\x17.quote.service.v1.DepthB\x10\xe2\xde\x1f\x04\x42ids\xea\xde\x1f\x04\x62ids\x12\x15\n\rprice_precise\x18\x08 \x01(\x05\x12\x16\n\x0evolume_precise\x18\t \x01(\x05\"\xc0\x01\n\x05\x44\x65pth\x12!\n\x05price\x18\x01 \x01(\tB\x12\xe2\xde\x1f\x05Price\xea\xde\x1f\x05price\x12$\n\x06volume\x18\x02 \x01(\x01\x42\x14\xe2\xde\x1f\x06Volume\xea\xde\x1f\x06volume\x12\x41\n\x04\x64\x61ta\x18\x03 \x03(\x0b\x32!.quote.service.v1.Depth.DataEntryB\x10\xe2\xde\x1f\x04\x44\x61ta\xea\xde\x1f\x04\x64\x61ta\x1a+\n\tDataEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xe5\x01\n\x05Kline\x12\r\n\x05index\x18\x01 \x01(\x03\x12\'\n\x04open\x18\x02 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12\'\n\x04high\x18\x03 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12&\n\x03low\x18\x04 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12(\n\x05\x63lose\x18\x05 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12)\n\x06volume\x18\x06 \x01(\x0b\x32\x19.quote.service.v1.Decimal\"K\n\x15MultiTradeWithDecimal\x12\x32\n\x06trades\x18\x01 \x03(\x0b\x32\".quote.service.v1.TradeWithDecimal\"\x97\x01\n\x10TradeWithDecimal\x12\x10\n\x08\x65xchange\x18\x01 \x01(\t\x12\x0e\n\x06symbol\x18\x02 \x01(\t\x12\x0c\n\x04time\x18\x03 \x01(\x03\x12(\n\x05price\x18\x04 \x01(\x0b\x32\x19.quote.service.v1.Decimal\x12)\n\x06volume\x18\x05 \x01(\x0b\x32\x19.quote.service.v1.Decimalb\x06proto3')
 
 
 
-
-_DECIMAL = _descriptor.Descriptor(
-  name='Decimal',
-  full_name='quote.service.v1.Decimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='base', full_name='quote.service.v1.Decimal.base', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='prec', full_name='quote.service.v1.Decimal.prec', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=50,
-  serialized_end=87,
-)
-
-
-_MULTIMARKETSTREAMDATAWITHDECIMAL = _descriptor.Descriptor(
-  name='MultiMarketStreamDataWithDecimal',
-  full_name='quote.service.v1.MultiMarketStreamDataWithDecimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='quotes', full_name='quote.service.v1.MultiMarketStreamDataWithDecimal.quotes', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Quotes\352\336\037\006quotes', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=89,
-  serialized_end=208,
-)
-
-
-_MARKETSTREAMDATAWITHDECIMAL = _descriptor.Descriptor(
-  name='MarketStreamDataWithDecimal',
-  full_name='quote.service.v1.MarketStreamDataWithDecimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exchange', full_name='quote.service.v1.MarketStreamDataWithDecimal.exchange', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Exchange\352\336\037\010exchange', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.MarketStreamDataWithDecimal.symbol', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='seq_no', full_name='quote.service.v1.MarketStreamDataWithDecimal.seq_no', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Seqno\352\336\037\005seqno', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='quote.service.v1.MarketStreamDataWithDecimal.time', index=3,
-      number=4, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_snap', full_name='quote.service.v1.MarketStreamDataWithDecimal.is_snap', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006IsSnap\352\336\037\007is_snap', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='asks', full_name='quote.service.v1.MarketStreamDataWithDecimal.asks', index=5,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Asks\352\336\037\004asks', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='bids', full_name='quote.service.v1.MarketStreamDataWithDecimal.bids', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Bids\352\336\037\004bids', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price_precise', full_name='quote.service.v1.MarketStreamDataWithDecimal.price_precise', index=7,
-      number=8, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume_precise', full_name='quote.service.v1.MarketStreamDataWithDecimal.volume_precise', index=8,
-      number=9, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time_arrive', full_name='quote.service.v1.MarketStreamDataWithDecimal.time_arrive', index=9,
-      number=10, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time_produced_by_streamengine', full_name='quote.service.v1.MarketStreamDataWithDecimal.time_produced_by_streamengine', index=10,
-      number=11, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time_produced_by_riskcontrol', full_name='quote.service.v1.MarketStreamDataWithDecimal.time_produced_by_riskcontrol', index=11,
-      number=12, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='amount_precise', full_name='quote.service.v1.MarketStreamDataWithDecimal.amount_precise', index=12,
-      number=13, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=211,
-  serialized_end=755,
-)
-
-
-_DEPTHWITHDECIMAL_DATAENTRY = _descriptor.Descriptor(
-  name='DataEntry',
-  full_name='quote.service.v1.DepthWithDecimal.DataEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='quote.service.v1.DepthWithDecimal.DataEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='quote.service.v1.DepthWithDecimal.DataEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=983,
-  serialized_end=1053,
-)
-
-_DEPTHWITHDECIMAL = _descriptor.Descriptor(
-  name='DepthWithDecimal',
-  full_name='quote.service.v1.DepthWithDecimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.DepthWithDecimal.price', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume', full_name='quote.service.v1.DepthWithDecimal.volume', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Volume\352\336\037\006volume', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='data', full_name='quote.service.v1.DepthWithDecimal.data', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Data\352\336\037\004data', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_DEPTHWITHDECIMAL_DATAENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=758,
-  serialized_end=1053,
-)
-
-
-_MULTIMARKETSTREAMDATA = _descriptor.Descriptor(
-  name='MultiMarketStreamData',
-  full_name='quote.service.v1.MultiMarketStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='quotes', full_name='quote.service.v1.MultiMarketStreamData.quotes', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Quotes\352\336\037\006quotes', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1055,
-  serialized_end=1152,
-)
-
-
-_MARKETSTREAMDATA = _descriptor.Descriptor(
-  name='MarketStreamData',
-  full_name='quote.service.v1.MarketStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exchange', full_name='quote.service.v1.MarketStreamData.exchange', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Exchange\352\336\037\010exchange', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.MarketStreamData.symbol', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Symbol\352\336\037\006symbol', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='seq_no', full_name='quote.service.v1.MarketStreamData.seq_no', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Seqno\352\336\037\005seqno', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='quote.service.v1.MarketStreamData.time', index=3,
-      number=4, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='is_snap', full_name='quote.service.v1.MarketStreamData.is_snap', index=4,
-      number=5, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006IsSnap\352\336\037\007is_snap', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='asks', full_name='quote.service.v1.MarketStreamData.asks', index=5,
-      number=6, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Asks\352\336\037\004asks', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='bids', full_name='quote.service.v1.MarketStreamData.bids', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Bids\352\336\037\004bids', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price_precise', full_name='quote.service.v1.MarketStreamData.price_precise', index=7,
-      number=8, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume_precise', full_name='quote.service.v1.MarketStreamData.volume_precise', index=8,
-      number=9, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1155,
-  serialized_end=1544,
-)
-
-
-_DEPTH_DATAENTRY = _descriptor.Descriptor(
-  name='DataEntry',
-  full_name='quote.service.v1.Depth.DataEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='quote.service.v1.Depth.DataEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='quote.service.v1.Depth.DataEntry.value', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1696,
-  serialized_end=1739,
-)
-
-_DEPTH = _descriptor.Descriptor(
-  name='Depth',
-  full_name='quote.service.v1.Depth',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.Depth.price', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\005Price\352\336\037\005price', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume', full_name='quote.service.v1.Depth.volume', index=1,
-      number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Volume\352\336\037\006volume', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='data', full_name='quote.service.v1.Depth.data', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\004Data\352\336\037\004data', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_DEPTH_DATAENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1547,
-  serialized_end=1739,
-)
-
-
-_KLINE = _descriptor.Descriptor(
-  name='Kline',
-  full_name='quote.service.v1.Kline',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='index', full_name='quote.service.v1.Kline.index', index=0,
-      number=1, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='open', full_name='quote.service.v1.Kline.open', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='high', full_name='quote.service.v1.Kline.high', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='low', full_name='quote.service.v1.Kline.low', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='close', full_name='quote.service.v1.Kline.close', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume', full_name='quote.service.v1.Kline.volume', index=5,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1742,
-  serialized_end=1971,
-)
-
-
-_MULTITRADEWITHDECIMAL = _descriptor.Descriptor(
-  name='MultiTradeWithDecimal',
-  full_name='quote.service.v1.MultiTradeWithDecimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='trades', full_name='quote.service.v1.MultiTradeWithDecimal.trades', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1973,
-  serialized_end=2048,
-)
-
-
-_TRADEWITHDECIMAL = _descriptor.Descriptor(
-  name='TradeWithDecimal',
-  full_name='quote.service.v1.TradeWithDecimal',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exchange', full_name='quote.service.v1.TradeWithDecimal.exchange', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='symbol', full_name='quote.service.v1.TradeWithDecimal.symbol', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='quote.service.v1.TradeWithDecimal.time', index=2,
-      number=3, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='price', full_name='quote.service.v1.TradeWithDecimal.price', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='volume', full_name='quote.service.v1.TradeWithDecimal.volume', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2051,
-  serialized_end=2202,
-)
-
-_MULTIMARKETSTREAMDATAWITHDECIMAL.fields_by_name['quotes'].message_type = _MARKETSTREAMDATAWITHDECIMAL
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['asks'].message_type = _DEPTHWITHDECIMAL
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['bids'].message_type = _DEPTHWITHDECIMAL
-_DEPTHWITHDECIMAL_DATAENTRY.fields_by_name['value'].message_type = _DECIMAL
-_DEPTHWITHDECIMAL_DATAENTRY.containing_type = _DEPTHWITHDECIMAL
-_DEPTHWITHDECIMAL.fields_by_name['price'].message_type = _DECIMAL
-_DEPTHWITHDECIMAL.fields_by_name['volume'].message_type = _DECIMAL
-_DEPTHWITHDECIMAL.fields_by_name['data'].message_type = _DEPTHWITHDECIMAL_DATAENTRY
-_MULTIMARKETSTREAMDATA.fields_by_name['quotes'].message_type = _MARKETSTREAMDATA
-_MARKETSTREAMDATA.fields_by_name['asks'].message_type = _DEPTH
-_MARKETSTREAMDATA.fields_by_name['bids'].message_type = _DEPTH
-_DEPTH_DATAENTRY.containing_type = _DEPTH
-_DEPTH.fields_by_name['data'].message_type = _DEPTH_DATAENTRY
-_KLINE.fields_by_name['open'].message_type = _DECIMAL
-_KLINE.fields_by_name['high'].message_type = _DECIMAL
-_KLINE.fields_by_name['low'].message_type = _DECIMAL
-_KLINE.fields_by_name['close'].message_type = _DECIMAL
-_KLINE.fields_by_name['volume'].message_type = _DECIMAL
-_MULTITRADEWITHDECIMAL.fields_by_name['trades'].message_type = _TRADEWITHDECIMAL
-_TRADEWITHDECIMAL.fields_by_name['price'].message_type = _DECIMAL
-_TRADEWITHDECIMAL.fields_by_name['volume'].message_type = _DECIMAL
-DESCRIPTOR.message_types_by_name['Decimal'] = _DECIMAL
-DESCRIPTOR.message_types_by_name['MultiMarketStreamDataWithDecimal'] = _MULTIMARKETSTREAMDATAWITHDECIMAL
-DESCRIPTOR.message_types_by_name['MarketStreamDataWithDecimal'] = _MARKETSTREAMDATAWITHDECIMAL
-DESCRIPTOR.message_types_by_name['DepthWithDecimal'] = _DEPTHWITHDECIMAL
-DESCRIPTOR.message_types_by_name['MultiMarketStreamData'] = _MULTIMARKETSTREAMDATA
-DESCRIPTOR.message_types_by_name['MarketStreamData'] = _MARKETSTREAMDATA
-DESCRIPTOR.message_types_by_name['Depth'] = _DEPTH
-DESCRIPTOR.message_types_by_name['Kline'] = _KLINE
-DESCRIPTOR.message_types_by_name['MultiTradeWithDecimal'] = _MULTITRADEWITHDECIMAL
-DESCRIPTOR.message_types_by_name['TradeWithDecimal'] = _TRADEWITHDECIMAL
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_DECIMAL = DESCRIPTOR.message_types_by_name['Decimal']
+_MULTIMARKETSTREAMDATAWITHDECIMAL = DESCRIPTOR.message_types_by_name['MultiMarketStreamDataWithDecimal']
+_MARKETSTREAMDATAWITHDECIMAL = DESCRIPTOR.message_types_by_name['MarketStreamDataWithDecimal']
+_DEPTHWITHDECIMAL = DESCRIPTOR.message_types_by_name['DepthWithDecimal']
+_DEPTHWITHDECIMAL_DATAENTRY = _DEPTHWITHDECIMAL.nested_types_by_name['DataEntry']
+_MULTIMARKETSTREAMDATA = DESCRIPTOR.message_types_by_name['MultiMarketStreamData']
+_MARKETSTREAMDATA = DESCRIPTOR.message_types_by_name['MarketStreamData']
+_DEPTH = DESCRIPTOR.message_types_by_name['Depth']
+_DEPTH_DATAENTRY = _DEPTH.nested_types_by_name['DataEntry']
+_KLINE = DESCRIPTOR.message_types_by_name['Kline']
+_MULTITRADEWITHDECIMAL = DESCRIPTOR.message_types_by_name['MultiTradeWithDecimal']
+_TRADEWITHDECIMAL = DESCRIPTOR.message_types_by_name['TradeWithDecimal']
 Decimal = _reflection.GeneratedProtocolMessageType('Decimal', (_message.Message,), {
   'DESCRIPTOR' : _DECIMAL,
   '__module__' : 'quote_data_pb2'
@@ -779,29 +117,79 @@ TradeWithDecimal = _reflection.GeneratedProtocolMessageType('TradeWithDecimal', 
   })
 _sym_db.RegisterMessage(TradeWithDecimal)
 
+if _descriptor._USE_C_DESCRIPTORS == False:
 
-_MULTIMARKETSTREAMDATAWITHDECIMAL.fields_by_name['quotes']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['exchange']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['symbol']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['seq_no']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['time']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['is_snap']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['asks']._options = None
-_MARKETSTREAMDATAWITHDECIMAL.fields_by_name['bids']._options = None
-_DEPTHWITHDECIMAL_DATAENTRY._options = None
-_DEPTHWITHDECIMAL.fields_by_name['price']._options = None
-_DEPTHWITHDECIMAL.fields_by_name['volume']._options = None
-_DEPTHWITHDECIMAL.fields_by_name['data']._options = None
-_MULTIMARKETSTREAMDATA.fields_by_name['quotes']._options = None
-_MARKETSTREAMDATA.fields_by_name['exchange']._options = None
-_MARKETSTREAMDATA.fields_by_name['symbol']._options = None
-_MARKETSTREAMDATA.fields_by_name['seq_no']._options = None
-_MARKETSTREAMDATA.fields_by_name['time']._options = None
-_MARKETSTREAMDATA.fields_by_name['is_snap']._options = None
-_MARKETSTREAMDATA.fields_by_name['asks']._options = None
-_MARKETSTREAMDATA.fields_by_name['bids']._options = None
-_DEPTH_DATAENTRY._options = None
-_DEPTH.fields_by_name['price']._options = None
-_DEPTH.fields_by_name['volume']._options = None
-_DEPTH.fields_by_name['data']._options = None
+  DESCRIPTOR._options = None
+  _MULTIMARKETSTREAMDATAWITHDECIMAL.fields_by_name['quotes']._options = None
+  _MULTIMARKETSTREAMDATAWITHDECIMAL.fields_by_name['quotes']._serialized_options = b'\342\336\037\006Quotes\352\336\037\006quotes'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['exchange']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['exchange']._serialized_options = b'\342\336\037\010Exchange\352\336\037\010exchange'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['symbol']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['seq_no']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['seq_no']._serialized_options = b'\342\336\037\005Seqno\352\336\037\005seqno'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['time']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['time']._serialized_options = b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['is_snap']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['is_snap']._serialized_options = b'\342\336\037\006IsSnap\352\336\037\007is_snap'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['asks']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['asks']._serialized_options = b'\342\336\037\004Asks\352\336\037\004asks'
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['bids']._options = None
+  _MARKETSTREAMDATAWITHDECIMAL.fields_by_name['bids']._serialized_options = b'\342\336\037\004Bids\352\336\037\004bids'
+  _DEPTHWITHDECIMAL_DATAENTRY._options = None
+  _DEPTHWITHDECIMAL_DATAENTRY._serialized_options = b'8\001'
+  _DEPTHWITHDECIMAL.fields_by_name['price']._options = None
+  _DEPTHWITHDECIMAL.fields_by_name['price']._serialized_options = b'\342\336\037\005Price\352\336\037\005price'
+  _DEPTHWITHDECIMAL.fields_by_name['volume']._options = None
+  _DEPTHWITHDECIMAL.fields_by_name['volume']._serialized_options = b'\342\336\037\006Volume\352\336\037\006volume'
+  _DEPTHWITHDECIMAL.fields_by_name['data']._options = None
+  _DEPTHWITHDECIMAL.fields_by_name['data']._serialized_options = b'\342\336\037\004Data\352\336\037\004data'
+  _MULTIMARKETSTREAMDATA.fields_by_name['quotes']._options = None
+  _MULTIMARKETSTREAMDATA.fields_by_name['quotes']._serialized_options = b'\342\336\037\006Quotes\352\336\037\006quotes'
+  _MARKETSTREAMDATA.fields_by_name['exchange']._options = None
+  _MARKETSTREAMDATA.fields_by_name['exchange']._serialized_options = b'\342\336\037\010Exchange\352\336\037\010exchange'
+  _MARKETSTREAMDATA.fields_by_name['symbol']._options = None
+  _MARKETSTREAMDATA.fields_by_name['symbol']._serialized_options = b'\342\336\037\006Symbol\352\336\037\006symbol'
+  _MARKETSTREAMDATA.fields_by_name['seq_no']._options = None
+  _MARKETSTREAMDATA.fields_by_name['seq_no']._serialized_options = b'\342\336\037\005Seqno\352\336\037\005seqno'
+  _MARKETSTREAMDATA.fields_by_name['time']._options = None
+  _MARKETSTREAMDATA.fields_by_name['time']._serialized_options = b'\342\336\037\004Time\352\336\037\004time\372\336\037\020wx/pkg/time.Time'
+  _MARKETSTREAMDATA.fields_by_name['is_snap']._options = None
+  _MARKETSTREAMDATA.fields_by_name['is_snap']._serialized_options = b'\342\336\037\006IsSnap\352\336\037\007is_snap'
+  _MARKETSTREAMDATA.fields_by_name['asks']._options = None
+  _MARKETSTREAMDATA.fields_by_name['asks']._serialized_options = b'\342\336\037\004Asks\352\336\037\004asks'
+  _MARKETSTREAMDATA.fields_by_name['bids']._options = None
+  _MARKETSTREAMDATA.fields_by_name['bids']._serialized_options = b'\342\336\037\004Bids\352\336\037\004bids'
+  _DEPTH_DATAENTRY._options = None
+  _DEPTH_DATAENTRY._serialized_options = b'8\001'
+  _DEPTH.fields_by_name['price']._options = None
+  _DEPTH.fields_by_name['price']._serialized_options = b'\342\336\037\005Price\352\336\037\005price'
+  _DEPTH.fields_by_name['volume']._options = None
+  _DEPTH.fields_by_name['volume']._serialized_options = b'\342\336\037\006Volume\352\336\037\006volume'
+  _DEPTH.fields_by_name['data']._options = None
+  _DEPTH.fields_by_name['data']._serialized_options = b'\342\336\037\004Data\352\336\037\004data'
+  _DECIMAL._serialized_start=50
+  _DECIMAL._serialized_end=87
+  _MULTIMARKETSTREAMDATAWITHDECIMAL._serialized_start=89
+  _MULTIMARKETSTREAMDATAWITHDECIMAL._serialized_end=208
+  _MARKETSTREAMDATAWITHDECIMAL._serialized_start=211
+  _MARKETSTREAMDATAWITHDECIMAL._serialized_end=755
+  _DEPTHWITHDECIMAL._serialized_start=758
+  _DEPTHWITHDECIMAL._serialized_end=1053
+  _DEPTHWITHDECIMAL_DATAENTRY._serialized_start=983
+  _DEPTHWITHDECIMAL_DATAENTRY._serialized_end=1053
+  _MULTIMARKETSTREAMDATA._serialized_start=1055
+  _MULTIMARKETSTREAMDATA._serialized_end=1152
+  _MARKETSTREAMDATA._serialized_start=1155
+  _MARKETSTREAMDATA._serialized_end=1544
+  _DEPTH._serialized_start=1547
+  _DEPTH._serialized_end=1739
+  _DEPTH_DATAENTRY._serialized_start=1696
+  _DEPTH_DATAENTRY._serialized_end=1739
+  _KLINE._serialized_start=1742
+  _KLINE._serialized_end=1971
+  _MULTITRADEWITHDECIMAL._serialized_start=1973
+  _MULTITRADEWITHDECIMAL._serialized_end=2048
+  _TRADEWITHDECIMAL._serialized_start=2051
+  _TRADEWITHDECIMAL._serialized_end=2202
 # @@protoc_insertion_point(module_scope)

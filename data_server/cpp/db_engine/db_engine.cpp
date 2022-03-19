@@ -21,11 +21,11 @@ bool DBEngine::connect()
         
         if (conn_ == NULL)
         {
-            LOG_ERROR(str() + " connect "+ db_connect_info_.str() +" failed!")
+            LOG_ERROR(str() + " connect "+ db_connect_info_.str() +" failed!");
         }
         else
         {
-            LOG_INFO(str() + "Connect " + db_connect_info_.str() +" successfully!")
+            LOG_INFO(str() + "Connect " + db_connect_info_.str() +" successfully!");
         }
     }
     catch(const std::exception& e)
@@ -35,20 +35,109 @@ bool DBEngine::connect()
     return false;
 }
 
-bool create_db(string db_name);
+bool DBEngine::create_db(string db_name)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
 
-bool check_db(string db_name);
+bool DBEngine::check_db(string db_name)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
-bool clean_db();
+bool DBEngine::clean_db()
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
-bool prepare_statement();
+bool DBEngine::prepare_statement()
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
-bool create_kline_table(const string& exchange, const string& symbol);
+bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
-bool insert_kline_data(const KlineData& kline_data);
+bool DBEngine::insert_kline_data(const KlineData& kline_data)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
-bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
+bool DBEngine::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;    
+}
 
+bool DBEngine::get_curr_table_list(std::set<string>& table_set)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
 
 bool DBEnginePool::init_pool(const DBConnectInfo& db_connect_info)
 {
@@ -78,7 +167,7 @@ void DBEnginePool::push_into_idle_list(DBEnginePtr db)
 
         if (idle_engine_list_.find(db) == idle_engine_list_.end())
         {
-            idle_engine_list_.push_back(db);
+            idle_engine_list_.insert(db);
 
             LOG_TRACE("Idle list Push DB " + db->str());
         }
@@ -129,7 +218,7 @@ bool DBEnginePool::check_idle_list()
                 for (int i=0; i<init_engine_count; ++i)
                 {
                     ++cur_engine_count;
-                    DBEnginePtr db_engine = boost::make_shared<DBEngine>(db_connect_info);
+                    DBEnginePtr db_engine = boost::make_shared<DBEngine>(db_connect_info_);
                     if (db_engine->connect())
                     {
                         idle_engine_list_.emplace(db_engine);
@@ -164,15 +253,18 @@ DBEnginePtr DBEnginePool::get_db()
     DBEnginePtr result = nullptr;
     try
     {
-        
-        if (check_idle_list())
+        int wait_counts = 10;
+        while (!check_idle_list() && wait_counts--)
         {
             std::lock_guard<std::mutex> lk(engine_list_mutex_);
             result = *(idle_engine_list_.begin());
             idle_engine_list_.erase(result);
             work_engine_list_.insert(result);
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
-        else
+        
+        if (!check_idle_list())
         {
             LOG_ERROR("All DB Con is Busy!");
         }
@@ -200,8 +292,143 @@ bool DBEnginePool::release_db(DBEnginePtr db)
     return false;
 }
 
-bool DBEnginePool::create_kline_table(const string& exchange, const string& symbol);
+bool DBEnginePool::create_kline_table(const string& exchange, const string& symbol)
+{
+    try
+    {
+        DBEnginePtr db_engine = get_db();
 
-bool DBEnginePool::insert_kline_data(const KlineData& kline_data);
+        if (db_engine)
+        {
+            db_engine->create_kline_table(exchange, symbol);
 
-bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
+            release_db(db_engine);
+        }
+        else
+        {
+            LOG_WARN("No DB Engine Available");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+bool DBEnginePool::insert_kline_data(const KlineData& kline_data)
+{
+    try
+    {
+        if (!check_kline_table(kline_data.exchange,kline_data.symbol))
+        {
+            create_kline_table(kline_data.exchange, kline_data.symbol);
+        }
+
+        DBEnginePtr db_engine = get_db();
+
+        if (db_engine)
+        {
+
+            db_engine->insert_kline_data(kline_data);
+
+            release_db(db_engine);
+        }
+        else
+        {
+            LOG_WARN("No DB Engine Available");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+    
+}
+
+bool DBEnginePool::check_kline_table(const string& exchange, const string& symbol)
+{
+    try
+    {
+        if (table_set_.size() == 0)
+        {
+            update_table_list();
+        }
+
+        string kline_table_name = get_kline_table_name(exchange, symbol);
+
+        if (table_set_.find(kline_table_name) == table_set_.end())
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    return false;
+}
+
+bool DBEnginePool::update_table_list()
+{
+    try
+    {
+        DBEnginePtr db_engine = get_db();
+
+        if (db_engine)
+        {
+            db_engine->get_curr_table_list(table_set_);
+        }
+        else
+        {
+            LOG_WARN("Update_table_list Failed! No DB Engine Available!");
+        }        
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    return false;
+}
+
+bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list)
+{
+    try
+    {
+        DBEnginePtr db_engine = get_db();
+
+        if (db_engine)
+        {
+            db_engine->get_kline_data_list(req_kline_info, dst_list);
+
+            release_db(db_engine);
+        }
+        else
+        {
+            LOG_WARN("No DB Engine Available");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+    
+}
+
+
+void TestEngine::start()
+{
+    test_create_table();
+}
+
+void TestEngine::test_create_table()
+{
+    DBEnginePool  engine_pool{connect_info};
+    engine_pool.create_kline_table("FTX", "BTC_USDT");
+}

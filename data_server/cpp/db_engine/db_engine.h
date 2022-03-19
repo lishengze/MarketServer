@@ -39,6 +39,8 @@ class DBEngine
 
         bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
 
+        bool get_curr_table_list(std::set<string>& table_set);
+
         string str()
         {
             return "db_id: " +std::to_string(db_id_);
@@ -61,7 +63,11 @@ using DBEnginePtr = boost::shared_ptr<DBEngine>;
 class DBEnginePool
 {
     public:
-        DBEnginePool(const DBConnectInfo& db_connect_info);
+        DBEnginePool(const DBConnectInfo& db_connect_info):
+        db_connect_info_{db_connect_info}
+        {
+            init_pool(db_connect_info);
+        }
 
         bool init_pool(const DBConnectInfo& db_connect_info);
 
@@ -75,6 +81,10 @@ class DBEnginePool
 
         bool release_db(DBEnginePtr db);
 
+        bool check_kline_table(const string& exchange, const string& symbol);
+
+        bool update_table_list();
+
         bool create_kline_table(const string& exchange, const string& symbol);
 
         bool insert_kline_data(const KlineData& kline_data);
@@ -82,6 +92,7 @@ class DBEnginePool
         bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
 
     private:
+        DBConnectInfo               db_connect_info_;
         int                         max_engine_count{20};
         int                         init_engine_count{10};
         int                         cur_engine_count{0};
@@ -89,5 +100,26 @@ class DBEnginePool
         std::set<DBEnginePtr>       idle_engine_list_;
         std::set<DBEnginePtr>       work_engine_list_;
         std::mutex                  engine_list_mutex_;
+
+        std::set<string>            table_set_;
 };
 
+class TestEngine
+{
+public:
+    TestEngine()
+    {
+        connect_info.host_ = "127.0.0.1";
+        connect_info.port_ = 5001;
+        connect_info.schema_ = "bcts";
+        connect_info.usr_ = "lsz";
+        connect_info.pwd_ = "bcts";
+
+    }
+
+    void start();
+
+    void test_create_table();
+
+    DBConnectInfo   connect_info;
+};

@@ -16,6 +16,7 @@ INCLUDE_DIRECTORIES("../..")
 INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
 INCLUDE_DIRECTORIES("../../component")
+INCLUDE_DIRECTORIES("/usr/local/include/nacos/")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
@@ -34,6 +35,7 @@ target_link_libraries(data_server ${Boost_LIBRARIES})
 target_link_libraries(data_server pandora)
 target_link_libraries(data_server log4cplus)
 target_link_libraries(data_server nacos-cli)
+target_link_libraries(data_server absl_synchronization)
 target_link_libraries(data_server protobuf protoc protobuf-lite)
 target_link_libraries(data_server grpc++_reflection grpc++ gpr ssl crypto)
 

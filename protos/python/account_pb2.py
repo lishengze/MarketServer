@@ -3,6 +3,7 @@
 # source: account.proto
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
+from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
@@ -15,162 +16,13 @@ import gogo_pb2 as gogo__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor.FileDescriptor(
-  name='account.proto',
-  package='asset.service.v1',
-  syntax='proto3',
-  serialized_options=b'Z\002v1',
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\raccount.proto\x12\x10\x61sset.service.v1\x1a\ngogo.proto\x1a\x1bgoogle/protobuf/empty.proto\"i\n\x11\x41\x63\x63ountStreamData\x12T\n\x0c\x61\x63\x63ount_data\x18\x01 \x03(\x0b\x32\x1d.asset.service.v1.AccountDataB\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountData\xea\xde\x1f\x0c\x61\x63\x63ount_data\"\xd3\x01\n\x0b\x41\x63\x63ountData\x12\x32\n\x0b\x65xchange_id\x18\x01 \x01(\tB\x1d\xe2\xde\x1f\nExchangeID\xea\xde\x1f\x0b\x65xchange_id\x12\x35\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x05\x42\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountType\xea\xde\x1f\x0c\x61\x63\x63ount_type\x12*\n\x08\x63urrency\x18\x03 \x01(\tB\x18\xe2\xde\x1f\x08\x43urrency\xea\xde\x1f\x08\x63urrency\x12-\n\tavailable\x18\x04 \x01(\x01\x42\x1a\xe2\xde\x1f\tAvailable\xea\xde\x1f\tavailable\"\xd0\x01\n\x11\x41\x63\x63ountChangeData\x12\x32\n\x0b\x65xchange_id\x18\x01 \x01(\tB\x1d\xe2\xde\x1f\nExchangeID\xea\xde\x1f\x0b\x65xchange_id\x12\x35\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x05\x42\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountType\xea\xde\x1f\x0c\x61\x63\x63ount_type\x12*\n\x08\x63urrency\x18\x03 \x01(\tB\x18\xe2\xde\x1f\x08\x43urrency\xea\xde\x1f\x08\x63urrency\x12$\n\x06\x61mount\x18\x04 \x01(\x01\x42\x14\xe2\xde\x1f\x06\x41mount\xea\xde\x1f\x06\x61mount2\xb0\x01\n\x05\x41sset\x12S\n\x10GetAccountStream\x12\x16.google.protobuf.Empty\x1a#.asset.service.v1.AccountStreamData\"\x00\x30\x01\x12R\n\x11\x43hangeAccountData\x12#.asset.service.v1.AccountChangeData\x1a\x16.google.protobuf.Empty\"\x00\x42\x04Z\x02v1b\x06proto3'
-  ,
-  dependencies=[gogo__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\raccount.proto\x12\x10\x61sset.service.v1\x1a\ngogo.proto\x1a\x1bgoogle/protobuf/empty.proto\"i\n\x11\x41\x63\x63ountStreamData\x12T\n\x0c\x61\x63\x63ount_data\x18\x01 \x03(\x0b\x32\x1d.asset.service.v1.AccountDataB\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountData\xea\xde\x1f\x0c\x61\x63\x63ount_data\"\xd3\x01\n\x0b\x41\x63\x63ountData\x12\x32\n\x0b\x65xchange_id\x18\x01 \x01(\tB\x1d\xe2\xde\x1f\nExchangeID\xea\xde\x1f\x0b\x65xchange_id\x12\x35\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x05\x42\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountType\xea\xde\x1f\x0c\x61\x63\x63ount_type\x12*\n\x08\x63urrency\x18\x03 \x01(\tB\x18\xe2\xde\x1f\x08\x43urrency\xea\xde\x1f\x08\x63urrency\x12-\n\tavailable\x18\x04 \x01(\x01\x42\x1a\xe2\xde\x1f\tAvailable\xea\xde\x1f\tavailable\"\xd0\x01\n\x11\x41\x63\x63ountChangeData\x12\x32\n\x0b\x65xchange_id\x18\x01 \x01(\tB\x1d\xe2\xde\x1f\nExchangeID\xea\xde\x1f\x0b\x65xchange_id\x12\x35\n\x0c\x61\x63\x63ount_type\x18\x02 \x01(\x05\x42\x1f\xe2\xde\x1f\x0b\x41\x63\x63ountType\xea\xde\x1f\x0c\x61\x63\x63ount_type\x12*\n\x08\x63urrency\x18\x03 \x01(\tB\x18\xe2\xde\x1f\x08\x43urrency\xea\xde\x1f\x08\x63urrency\x12$\n\x06\x61mount\x18\x04 \x01(\x01\x42\x14\xe2\xde\x1f\x06\x41mount\xea\xde\x1f\x06\x61mount2\xb0\x01\n\x05\x41sset\x12S\n\x10GetAccountStream\x12\x16.google.protobuf.Empty\x1a#.asset.service.v1.AccountStreamData\"\x00\x30\x01\x12R\n\x11\x43hangeAccountData\x12#.asset.service.v1.AccountChangeData\x1a\x16.google.protobuf.Empty\"\x00\x42\x04Z\x02v1b\x06proto3')
 
 
 
-
-_ACCOUNTSTREAMDATA = _descriptor.Descriptor(
-  name='AccountStreamData',
-  full_name='asset.service.v1.AccountStreamData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='account_data', full_name='asset.service.v1.AccountStreamData.account_data', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\013AccountData\352\336\037\014account_data', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=76,
-  serialized_end=181,
-)
-
-
-_ACCOUNTDATA = _descriptor.Descriptor(
-  name='AccountData',
-  full_name='asset.service.v1.AccountData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exchange_id', full_name='asset.service.v1.AccountData.exchange_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\nExchangeID\352\336\037\013exchange_id', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='account_type', full_name='asset.service.v1.AccountData.account_type', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\013AccountType\352\336\037\014account_type', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='currency', full_name='asset.service.v1.AccountData.currency', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Currency\352\336\037\010currency', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='available', full_name='asset.service.v1.AccountData.available', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\tAvailable\352\336\037\tavailable', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=184,
-  serialized_end=395,
-)
-
-
-_ACCOUNTCHANGEDATA = _descriptor.Descriptor(
-  name='AccountChangeData',
-  full_name='asset.service.v1.AccountChangeData',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='exchange_id', full_name='asset.service.v1.AccountChangeData.exchange_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\nExchangeID\352\336\037\013exchange_id', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='account_type', full_name='asset.service.v1.AccountChangeData.account_type', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\013AccountType\352\336\037\014account_type', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='currency', full_name='asset.service.v1.AccountChangeData.currency', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\010Currency\352\336\037\010currency', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='amount', full_name='asset.service.v1.AccountChangeData.amount', index=3,
-      number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\342\336\037\006Amount\352\336\037\006amount', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=398,
-  serialized_end=606,
-)
-
-_ACCOUNTSTREAMDATA.fields_by_name['account_data'].message_type = _ACCOUNTDATA
-DESCRIPTOR.message_types_by_name['AccountStreamData'] = _ACCOUNTSTREAMDATA
-DESCRIPTOR.message_types_by_name['AccountData'] = _ACCOUNTDATA
-DESCRIPTOR.message_types_by_name['AccountChangeData'] = _ACCOUNTCHANGEDATA
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
+_ACCOUNTSTREAMDATA = DESCRIPTOR.message_types_by_name['AccountStreamData']
+_ACCOUNTDATA = DESCRIPTOR.message_types_by_name['AccountData']
+_ACCOUNTCHANGEDATA = DESCRIPTOR.message_types_by_name['AccountChangeData']
 AccountStreamData = _reflection.GeneratedProtocolMessageType('AccountStreamData', (_message.Message,), {
   'DESCRIPTOR' : _ACCOUNTSTREAMDATA,
   '__module__' : 'account_pb2'
@@ -192,51 +44,35 @@ AccountChangeData = _reflection.GeneratedProtocolMessageType('AccountChangeData'
   })
 _sym_db.RegisterMessage(AccountChangeData)
 
+_ASSET = DESCRIPTOR.services_by_name['Asset']
+if _descriptor._USE_C_DESCRIPTORS == False:
 
-DESCRIPTOR._options = None
-_ACCOUNTSTREAMDATA.fields_by_name['account_data']._options = None
-_ACCOUNTDATA.fields_by_name['exchange_id']._options = None
-_ACCOUNTDATA.fields_by_name['account_type']._options = None
-_ACCOUNTDATA.fields_by_name['currency']._options = None
-_ACCOUNTDATA.fields_by_name['available']._options = None
-_ACCOUNTCHANGEDATA.fields_by_name['exchange_id']._options = None
-_ACCOUNTCHANGEDATA.fields_by_name['account_type']._options = None
-_ACCOUNTCHANGEDATA.fields_by_name['currency']._options = None
-_ACCOUNTCHANGEDATA.fields_by_name['amount']._options = None
-
-_ASSET = _descriptor.ServiceDescriptor(
-  name='Asset',
-  full_name='asset.service.v1.Asset',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=None,
-  create_key=_descriptor._internal_create_key,
-  serialized_start=609,
-  serialized_end=785,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='GetAccountStream',
-    full_name='asset.service.v1.Asset.GetAccountStream',
-    index=0,
-    containing_service=None,
-    input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    output_type=_ACCOUNTSTREAMDATA,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ChangeAccountData',
-    full_name='asset.service.v1.Asset.ChangeAccountData',
-    index=1,
-    containing_service=None,
-    input_type=_ACCOUNTCHANGEDATA,
-    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-])
-_sym_db.RegisterServiceDescriptor(_ASSET)
-
-DESCRIPTOR.services_by_name['Asset'] = _ASSET
-
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z\002v1'
+  _ACCOUNTSTREAMDATA.fields_by_name['account_data']._options = None
+  _ACCOUNTSTREAMDATA.fields_by_name['account_data']._serialized_options = b'\342\336\037\013AccountData\352\336\037\014account_data'
+  _ACCOUNTDATA.fields_by_name['exchange_id']._options = None
+  _ACCOUNTDATA.fields_by_name['exchange_id']._serialized_options = b'\342\336\037\nExchangeID\352\336\037\013exchange_id'
+  _ACCOUNTDATA.fields_by_name['account_type']._options = None
+  _ACCOUNTDATA.fields_by_name['account_type']._serialized_options = b'\342\336\037\013AccountType\352\336\037\014account_type'
+  _ACCOUNTDATA.fields_by_name['currency']._options = None
+  _ACCOUNTDATA.fields_by_name['currency']._serialized_options = b'\342\336\037\010Currency\352\336\037\010currency'
+  _ACCOUNTDATA.fields_by_name['available']._options = None
+  _ACCOUNTDATA.fields_by_name['available']._serialized_options = b'\342\336\037\tAvailable\352\336\037\tavailable'
+  _ACCOUNTCHANGEDATA.fields_by_name['exchange_id']._options = None
+  _ACCOUNTCHANGEDATA.fields_by_name['exchange_id']._serialized_options = b'\342\336\037\nExchangeID\352\336\037\013exchange_id'
+  _ACCOUNTCHANGEDATA.fields_by_name['account_type']._options = None
+  _ACCOUNTCHANGEDATA.fields_by_name['account_type']._serialized_options = b'\342\336\037\013AccountType\352\336\037\014account_type'
+  _ACCOUNTCHANGEDATA.fields_by_name['currency']._options = None
+  _ACCOUNTCHANGEDATA.fields_by_name['currency']._serialized_options = b'\342\336\037\010Currency\352\336\037\010currency'
+  _ACCOUNTCHANGEDATA.fields_by_name['amount']._options = None
+  _ACCOUNTCHANGEDATA.fields_by_name['amount']._serialized_options = b'\342\336\037\006Amount\352\336\037\006amount'
+  _ACCOUNTSTREAMDATA._serialized_start=76
+  _ACCOUNTSTREAMDATA._serialized_end=181
+  _ACCOUNTDATA._serialized_start=184
+  _ACCOUNTDATA._serialized_end=395
+  _ACCOUNTCHANGEDATA._serialized_start=398
+  _ACCOUNTCHANGEDATA._serialized_end=606
+  _ASSET._serialized_start=609
+  _ASSET._serialized_end=785
 # @@protoc_insertion_point(module_scope)
