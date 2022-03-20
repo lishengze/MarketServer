@@ -22,6 +22,7 @@ AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
 AUX_SOURCE_DIRECTORY(./grpc_comm GRPC_COMM_SRCS)
+AUX_SOURCE_DIRECTORY(./db_engine DB_ENGINE_SRCS)
 AUX_SOURCE_DIRECTORY(./test TEST_SRCS)
 AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
@@ -30,7 +31,7 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 
 ###############################################################################################
-add_executable(data_server ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${TEST_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
+add_executable(data_server ${DB_ENGINE_SRCS} ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${TEST_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
 target_link_libraries(data_server ${Boost_LIBRARIES})
 target_link_libraries(data_server pandora)
 target_link_libraries(data_server log4cplus)
@@ -38,5 +39,6 @@ target_link_libraries(data_server nacos-cli)
 target_link_libraries(data_server absl_synchronization)
 target_link_libraries(data_server protobuf protoc protobuf-lite)
 target_link_libraries(data_server grpc++_reflection grpc++ gpr ssl crypto)
+TARGET_LINK_LIBRARIES(data_server mysqlcppconn dl z)
 
 ###############################################################################################

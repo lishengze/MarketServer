@@ -115,20 +115,12 @@ public:
         connect_info.usr_ = "bcts";
         connect_info.pwd_ = "bcts";
 
-        test_create_table();
+        // test_create_table();
     }
 
-    void start()
-    {
-        test_create_table();
-    }
+    void start();
 
-    void test_create_table()
-    {
-        LOG_INFO(connect_info.str());
-        
-        DBEnginePool  engine_pool{connect_info};
-        // engine_pool.create_kline_table("FTX", "BTC_USDT");
-    }
+    void test_create_table();
+
     DBConnectInfo   connect_info;
 };

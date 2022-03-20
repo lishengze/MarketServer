@@ -21,11 +21,13 @@ bool DBEngine::connect()
         
         if (conn_ == NULL)
         {
-            LOG_ERROR(str() + " connect "+ db_connect_info_.str() +" failed!");
+            LOG_ERROR(str() + ", connect "+ db_connect_info_.str() +" failed!");
+            return false;
         }
         else
         {
-            LOG_INFO(str() + "Connect " + db_connect_info_.str() +" successfully!");
+            LOG_INFO(str() + ", Connect " + db_connect_info_.str() +" successfully!");
+            return true;
         }
     }
     catch(const std::exception& e)
@@ -210,6 +212,9 @@ bool DBEnginePool::check_idle_list()
     try
     {
         std::lock_guard<std::mutex> lk(engine_list_mutex_);
+
+        LOG_INFO("idle_engine_list_.size: " + std::to_string(idle_engine_list_.size()));
+
         if (idle_engine_list_.empty())
         {
             if (cur_engine_count < max_engine_count)
@@ -256,18 +261,21 @@ DBEnginePtr DBEnginePool::get_db()
         int wait_counts = 10;
         while (!check_idle_list() && wait_counts--)
         {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        
+        if (check_idle_list())
+        {
             std::lock_guard<std::mutex> lk(engine_list_mutex_);
             result = *(idle_engine_list_.begin());
             idle_engine_list_.erase(result);
             work_engine_list_.insert(result);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
-        
-        if (!check_idle_list())
+        else
         {
             LOG_ERROR("All DB Con is Busy!");
         }
+
         return result;
     }
     catch(const std::exception& e)
@@ -421,16 +429,15 @@ bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::
     
 }
 
+void TestEngine::start()
+{
+    test_create_table();
+}
 
-// void TestEngine::start()
-// {
-//     test_create_table();
-// }
+void TestEngine::test_create_table()
+{
+    LOG_INFO(connect_info.str());
 
-// void TestEngine::test_create_table()
-// {
-//     LOG_INFO(connect_info.str());
-
-//     DBEnginePool  engine_pool{connect_info};
-//     // engine_pool.create_kline_table("FTX", "BTC_USDT");
-// }
+    DBEnginePool  engine_pool{connect_info};
+    engine_pool.create_kline_table("FTX", "BTC_USDT");
+}

@@ -332,7 +332,7 @@ void test_official_demo()
 void test_db_engine()
 {
   TestEngine test_engine;
-  // test_engine.start();
+  test_engine.start();
 }
 
 void TestMain()
