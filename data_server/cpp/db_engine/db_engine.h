@@ -13,6 +13,40 @@
 
 #include "../data_struct/data_struct.h"
 
+struct PrepareSMT
+{
+    public:
+
+    PrepareSMT(sql::Connection* conn, const string& exchange, const string& symbol)
+    {
+        try
+        {
+            if (conn)
+            {
+                stmt_insert_kline = conn->prepareStatement(insert_kline_sql_str(exchange, symbol));
+                stmt_get_kline = conn->prepareStatement(get_kline_sql_str(exchange, symbol));
+
+                is_prepared_ = true;
+            }
+            else
+            {
+                LOG_ERROR("conn is null!");
+            }
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << "\n[E] PrepareSMT::prepare " << e.what() << '\n';
+        }
+    }
+    
+    bool is_prepared() { return is_prepared_;}
+    //下单请求回报
+    sql::PreparedStatement* stmt_insert_kline;
+    sql::PreparedStatement* stmt_get_kline;
+
+    bool is_prepared_{false};
+};
+
 
 class DBEngine
 {
@@ -35,6 +69,12 @@ class DBEngine
 
         bool create_kline_table(const string& exchange, const string& symbol);
 
+        void init_kline_prestmt(const string& exchange, const string& symbol);
+
+        void update_table_list();
+
+        string table_info();
+
         bool insert_kline_data(const KlineData& kline_data);
 
         bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
@@ -46,13 +86,15 @@ class DBEngine
             return "db_id: " +std::to_string(db_id_);
         }
 
+
+
     private:
         DBConnectInfo                   db_connect_info_;
         sql::Connection*                conn_{nullptr};
 
-        sql::PreparedStatement*         stmt_create_kline_table_;
-        sql::PreparedStatement*         stmt_insert_kline_data_;
-        sql::PreparedStatement*         stmt_get_kline_data_;
+        set<string>                     table_set_;
+
+        map<string, PrepareSMT>         kline_stmt_map;
 
         static int                      DB_ID;
         int                             db_id_;

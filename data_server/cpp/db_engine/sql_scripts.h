@@ -43,6 +43,19 @@ inline string char_to_string(char ori_char)
     return "";
 }
 
+inline string get_all_tables()
+{
+    try
+    {
+        return "show tables;";
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return "";
+}   
+
 inline string get_create_kline_sql_str(const string& exchange, const string& symbol)
 {
     try
@@ -53,21 +66,45 @@ inline string get_create_kline_sql_str(const string& exchange, const string& sym
                     exchange VARCHAR(32), \
                     symbol VARCHAR(64), \
                     resolution BIGINT,\
-                    time BIGINT, \
+                    time BIGINT PRIMARY KEY , \
                     open DECIMAL(32, 8), \
                     high DECIMAL(32, 8), \
                     low DECIMAL(32, 8), \
                     close DECIMAL(32, 8), \
-                    volume DECIMAL(32, 8) \
-                    PRIMARY KEY (`time`)) DEFAULT CHARSET utf8;");
-
-        // cout << "create sql: " << result << endl;
+                    volume DECIMAL(32, 8)) \
+                    DEFAULT CHARSET utf8;");
 
         return result; 
     }
     catch(const std::exception& e)
     {
-        std::cerr << "get_req_create_order_sql_str: " << e.what() << '\n';
+        LOG_ERROR(e.what());
+    }
+    return "";
+}
+
+inline string insert_kline_sql_str(const string& exchange, const string& symbol)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return "";
+}
+
+inline string get_kline_sql_str(const string& exchange, const string& symbol)
+{
+    try
+    {
+        /* code */
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
     }
     return "";
 }

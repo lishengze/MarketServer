@@ -93,13 +93,116 @@ bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
 {
     try
     {
-        /* code */
+        string kline_talbe_name = get_kline_table_name(exchange, symbol);
+
+        if (table_set_.size() == 0)
+        {
+            update_table_list();
+        }
+
+        init_kline_prestmt(exchange, symbol);
+
+        if (table_set_.find(kline_talbe_name) == table_set_.end())
+        {
+            string sql_str = get_create_kline_sql_str(exchange, symbol);
+            sql::Statement* stmt = conn_->createStatement();
+            stmt->execute(sql_str);
+
+            update_table_list();
+
+            LOG_INFO(table_info());
+
+            if (table_set_.find(kline_talbe_name) == table_set_.end())
+            {
+                LOG_ERROR("Create " + kline_talbe_name + " Failed!");
+                return false;
+            }
+            else
+            {
+                LOG_INFO("Create " + kline_talbe_name + " Successfully!");
+                return true;
+            }
+        }
+        else
+        {
+
+            LOG_WARN("Table " + kline_talbe_name + " was created!");
+        }
+
+        return true;
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
     return false;    
+}
+
+void DBEngine::update_table_list()
+{
+    try
+    {
+        if (conn_)
+        {
+            string sql_str = get_all_tables();
+            sql::Statement* stmt = conn_->createStatement();
+            sql::ResultSet* result = stmt->executeQuery(sql_str);
+
+            while(result->next())
+            {
+                string table = result->getString(1);
+
+                // LOG_INFO("table: " + table);
+
+                table_set_.emplace(table);
+            }
+        }
+        else
+        {
+            LOG_ERROR("conn_ is null");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+string DBEngine::table_info()
+{
+    try
+    {
+        string result = "";
+        for (auto table:table_set_)
+        {
+            result += table + ",";
+        }
+        if (table_set_.empty()) result = "table is empty";
+        result += "\n";
+        return result;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+
+void DBEngine::init_kline_prestmt(const string& exchange, const string& symbol)
+{
+    try
+    {
+        string kline_table = get_kline_table_name(exchange, symbol);
+
+        if (kline_stmt_map.find(kline_table) == kline_stmt_map.end())
+        {
+            kline_stmt_map.emplace(kline_table, PrepareSMT(conn_, exchange, symbol));
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }
 
 bool DBEngine::insert_kline_data(const KlineData& kline_data)
@@ -132,7 +235,9 @@ bool DBEngine::get_curr_table_list(std::set<string>& table_set)
 {
     try
     {
-        /* code */
+        if (table_set_.empty()) update_table_list();
+
+        table_set = table_set_;
     }
     catch(const std::exception& e)
     {
@@ -439,5 +544,5 @@ void TestEngine::test_create_table()
     LOG_INFO(connect_info.str());
 
     DBEnginePool  engine_pool{connect_info};
-    engine_pool.create_kline_table("FTX", "BTC_USDT");
+    engine_pool.create_kline_table("FTX", "ETH_USDT");
 }
