@@ -138,6 +138,25 @@ bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
     return false;    
 }
 
+
+bool DBEngine::check_kline_table(const string& exchange, const string& symbol)
+{
+    try
+    {
+        string kline_table_name = get_kline_table_name(exchange, symbol);
+
+        if (table_set_.size() == 0) update_table_list();
+
+        if (table_set_.find(kline_table_name) == table_set_.end()) return false;
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
 void DBEngine::update_table_list()
 {
     try
@@ -209,7 +228,31 @@ bool DBEngine::insert_kline_data(const KlineData& kline_data)
 {
     try
     {
-        /* code */
+        string kline_table_name = get_kline_table_name(kline_data.exchange, kline_data.symbol);
+
+        if (!check_kline_table(kline_data.exchange, kline_data.symbol))
+        {
+            create_kline_table(kline_data.exchange, kline_data.symbol);
+        }
+
+        if (kline_stmt_map.find(kline_table_name) == kline_stmt_map.end())
+        {
+            init_kline_prestmt(kline_data.exchange, kline_data.symbol);
+        }
+
+        sql::PreparedStatement* stmt = kline_stmt_map[kline_table_name].stmt_insert_kline;
+
+        stmt->setString(1, kline_data.exchange);
+        stmt->setString(2, kline_data.symbol);
+        stmt->setInt64(3,  kline_data.resolution);
+        stmt->setInt64(4,  kline_data.index);
+        stmt->setDouble(5, kline_data.px_open.get_value());
+        stmt->setDouble(6, kline_data.px_high.get_value());
+        stmt->setDouble(7, kline_data.px_low.get_value());
+        stmt->setDouble(8, kline_data.px_close.get_value());
+        stmt->setDouble(9, kline_data.volume.get_value());
+
+        stmt->execute();
     }
     catch(const std::exception& e)
     {
@@ -218,11 +261,46 @@ bool DBEngine::insert_kline_data(const KlineData& kline_data)
     return false;    
 }
 
-bool DBEngine::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list)
+bool DBEngine::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData>& dst_list)
 {
     try
     {
-        /* code */
+        if (!check_kline_table(req_kline_info.exchange, req_kline_info.symbol))
+        {
+            LOG_ERROR("Table " + get_kline_table_name(req_kline_info.exchange, req_kline_info.symbol) + " was not Created");
+            return false;
+        }
+
+        if (conn_)
+        {
+            string sql_str = get_kline_sql_str(req_kline_info.exchange, req_kline_info.symbol, req_kline_info.start_time, req_kline_info.end_time);
+            sql::Statement* stmt = conn_->createStatement();
+            sql::ResultSet* result = stmt->executeQuery(sql_str);
+
+            while(result->next())
+            {
+                KlineData cur_data;
+                cur_data.exchange = result->getString(1);
+                cur_data.symbol = result->getString(2);
+                cur_data.resolution = result->getInt64(3);
+                cur_data.index = result->getInt64(4);
+                cur_data.px_open = result->getDouble(5);
+                cur_data.px_high = result->getDouble(6);
+                cur_data.px_low = result->getDouble(7);
+                cur_data.px_close = result->getDouble(8);
+                cur_data.volume = result->getDouble(9);
+
+                LOG_INFO(cur_data.str());
+
+                dst_list.push_back(cur_data);
+            }
+            return true;
+        }
+        else
+        {
+            LOG_ERROR("conn_ is null");
+            return false;
+        }
     }
     catch(const std::exception& e)
     {
@@ -259,11 +337,13 @@ bool DBEnginePool::init_pool(const DBConnectInfo& db_connect_info)
                 push_into_idle_list(db_engine);
             }
         }
+        return true;
     }
     catch(const std::exception& e)
     {
         LOG_ERROR(e.what());
     }
+    return false;
 }
 
 void DBEnginePool::push_into_idle_list(DBEnginePtr db)
@@ -397,6 +477,7 @@ bool DBEnginePool::release_db(DBEnginePtr db)
         erase_from_work_list(db);
 
         push_into_idle_list(db);
+        return true;
     }
     catch(const std::exception& e)
     {
@@ -416,10 +497,12 @@ bool DBEnginePool::create_kline_table(const string& exchange, const string& symb
             db_engine->create_kline_table(exchange, symbol);
 
             release_db(db_engine);
+            return true;
         }
         else
         {
             LOG_WARN("No DB Engine Available");
+            return false;
         }
     }
     catch(const std::exception& e)
@@ -446,10 +529,12 @@ bool DBEnginePool::insert_kline_data(const KlineData& kline_data)
             db_engine->insert_kline_data(kline_data);
 
             release_db(db_engine);
+            return true;
         }
         else
         {
             LOG_WARN("No DB Engine Available");
+            return false;
         }
     }
     catch(const std::exception& e)
@@ -496,10 +581,12 @@ bool DBEnginePool::update_table_list()
         if (db_engine)
         {
             db_engine->get_curr_table_list(table_set_);
+            return true;
         }
         else
         {
             LOG_WARN("Update_table_list Failed! No DB Engine Available!");
+            return false;
         }        
     }
     catch(const std::exception& e)
@@ -509,7 +596,7 @@ bool DBEnginePool::update_table_list()
     return false;
 }
 
-bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list)
+bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData>& dst_list)
 {
     try
     {
@@ -520,10 +607,14 @@ bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::
             db_engine->get_kline_data_list(req_kline_info, dst_list);
 
             release_db(db_engine);
+
+            return true;
         }
         else
         {
             LOG_WARN("No DB Engine Available");
+
+            return false;
         }
     }
     catch(const std::exception& e)
@@ -536,7 +627,11 @@ bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::
 
 void TestEngine::start()
 {
-    test_create_table();
+    // test_create_table();
+
+    // test_insert_data();
+
+    test_get_kline_data();
 }
 
 void TestEngine::test_create_table()
@@ -545,4 +640,55 @@ void TestEngine::test_create_table()
 
     DBEnginePool  engine_pool{connect_info};
     engine_pool.create_kline_table("FTX", "ETH_USDT");
+}
+
+void TestEngine::test_insert_data()
+{
+    try
+    {
+        LOG_INFO(connect_info.str());
+
+        DBEnginePool  engine_pool{connect_info};
+
+        KlineData tmp_kline;
+        tmp_kline.exchange = "FTX";
+        tmp_kline.symbol = "ETH_USDT";
+        tmp_kline.resolution = 60;
+        tmp_kline.index = 1;
+        tmp_kline.px_open = 2480.1;
+        tmp_kline.px_high = 2499.5;
+        tmp_kline.px_low = 2433.7;
+        tmp_kline.px_close = 2477.5;
+        tmp_kline.volume = 11.6;
+
+        engine_pool.insert_kline_data(tmp_kline);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_INFO(e.what());
+    }
+}
+
+void TestEngine::test_get_kline_data()
+{
+    try
+    {
+        LOG_INFO(connect_info.str());
+
+        DBEnginePool  engine_pool{connect_info};
+
+        ReqKlineData req_info;
+        req_info.exchange = "FTX";
+        req_info.symbol = "ETH_USDT";
+        req_info.start_time = 0;
+        req_info.end_time = 1;
+
+        std::list<KlineData> result;
+
+        engine_pool.get_kline_data_list(req_info, result);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 }

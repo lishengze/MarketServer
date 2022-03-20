@@ -17,6 +17,8 @@ struct PrepareSMT
 {
     public:
 
+    PrepareSMT() {}
+
     PrepareSMT(sql::Connection* conn, const string& exchange, const string& symbol)
     {
         try
@@ -24,7 +26,6 @@ struct PrepareSMT
             if (conn)
             {
                 stmt_insert_kline = conn->prepareStatement(insert_kline_sql_str(exchange, symbol));
-                stmt_get_kline = conn->prepareStatement(get_kline_sql_str(exchange, symbol));
 
                 is_prepared_ = true;
             }
@@ -40,9 +41,8 @@ struct PrepareSMT
     }
     
     bool is_prepared() { return is_prepared_;}
-    //下单请求回报
+
     sql::PreparedStatement* stmt_insert_kline;
-    sql::PreparedStatement* stmt_get_kline;
 
     bool is_prepared_{false};
 };
@@ -69,6 +69,8 @@ class DBEngine
 
         bool create_kline_table(const string& exchange, const string& symbol);
 
+        bool check_kline_table(const string& exchange, const string& symbol);
+
         void init_kline_prestmt(const string& exchange, const string& symbol);
 
         void update_table_list();
@@ -77,7 +79,7 @@ class DBEngine
 
         bool insert_kline_data(const KlineData& kline_data);
 
-        bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
+        bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData>& dst_list);
 
         bool get_curr_table_list(std::set<string>& table_set);
 
@@ -131,7 +133,7 @@ class DBEnginePool
 
         bool insert_kline_data(const KlineData& kline_data);
 
-        bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData> dst_list);
+        bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData>& dst_list);
 
     private:
         DBConnectInfo               db_connect_info_;
@@ -163,6 +165,10 @@ public:
     void start();
 
     void test_create_table();
+
+    void test_insert_data();
+
+    void test_get_kline_data();
 
     DBConnectInfo   connect_info;
 };

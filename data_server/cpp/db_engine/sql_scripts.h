@@ -87,7 +87,9 @@ inline string insert_kline_sql_str(const string& exchange, const string& symbol)
 {
     try
     {
-        /* code */
+        string table_name = get_kline_table_name(exchange, symbol);
+        string result = string("INSERT INTO ") + table_name + " VALUES (" + get_qm_string(9) +");";
+        return result;
     }
     catch(const std::exception& e)
     {
@@ -96,11 +98,15 @@ inline string insert_kline_sql_str(const string& exchange, const string& symbol)
     return "";
 }
 
-inline string get_kline_sql_str(const string& exchange, const string& symbol)
+inline string get_kline_sql_str(const string& exchange, const string& symbol, uint64 start_time, uint64 end_time)
 {
     try
     {
-        /* code */
+        string table_name = get_kline_table_name(exchange, symbol);
+        string result = string("select * from ") + table_name 
+                      + " where time<=" + std::to_string(end_time) 
+                      + " and time>="+ std::to_string(start_time) + ";";
+        return result;       
     }
     catch(const std::exception& e)
     {
