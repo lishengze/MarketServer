@@ -191,7 +191,11 @@ void ProtobufSerializer::on_trade(const string& src)
         if (proto_trade.ParseFromString(src))
         {
             TradeData trade_data;
-            // COMM_LOG_INFO(trade_data.get_json_str());
+
+            decode_trade(proto_trade, trade_data);
+
+            COMM_LOG_INFO(trade_data.str());
+
             p_trade_processor_->on_trade(trade_data);
         }
         else

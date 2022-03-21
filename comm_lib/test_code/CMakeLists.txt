@@ -28,6 +28,7 @@ INCLUDE_DIRECTORIES("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(../cpp BASE_SRCS)
+AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # INCLUDE_DIRECTORIES("/root/.local/include")
@@ -47,18 +48,25 @@ LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-add_executable(${BIN_NAME}  ${DIR_SRCS} ${BASE_SRCS})
+add_executable(${BIN_NAME} ${PROTO_SRCS}  ${DIR_SRCS} ${BASE_SRCS})
 
 target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
-target_link_libraries(${BIN_NAME} boost_system)
 target_link_libraries(${BIN_NAME} pandora)
 target_link_libraries(${BIN_NAME} log4cplus)
+
+target_link_libraries (${BIN_NAME}  absl_synchronization absl_symbolize absl_stacktrace absl_debugging_internal absl_base)
+target_link_libraries (${BIN_NAME}  absl_strings absl_strings_internal absl_time absl_time_zone absl_exponential_biased)
+target_link_libraries (${BIN_NAME}  absl_spinlock_wait absl_log_severity absl_raw_logging_internal absl_throw_delegate)
+target_link_libraries (${BIN_NAME}  absl_malloc_internal absl_bad_optional_access absl_civil_time absl_int128)
+target_link_libraries (${BIN_NAME}  absl_demangle_internal absl_graphcycles_internal absl_hashtablez_sampler)
+target_link_libraries (${BIN_NAME}  absl_city absl_raw_hash_set absl_str_format_internal absl_cord absl_status)
+target_link_libraries (${BIN_NAME}  absl_bad_variant_access absl_hash absl_statusor)
+
 target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
 target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
 target_link_libraries(${BIN_NAME} nacos-cli)
-target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+
 TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

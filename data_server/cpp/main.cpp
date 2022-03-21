@@ -5,6 +5,7 @@
 #include "pandora/util/path_util.h"
 
 #include "test/test.h"
+#include "config/config.h"
 
 // exit handler function
 // void setup_signal_handler_callback()
@@ -112,7 +113,7 @@ int main(int argc, char** argv) {
 
     string config_file_name = get_config_file_name(env);
 
-    // CONFIG->parse_config(config_file_name);
+    CONFIG->load_config(config_file_name);
 
     // RiskControllerServer riskControllerServer(config_file_name);
     // riskControllerServer.start();

@@ -32,6 +32,8 @@ public:
                     QuoteSourceCallbackInterface* kline_engine, 
                     QuoteSourceCallbackInterface* trade_engine)
     {
+        COMM_LOG_INFO("Choose ProtobufSerializer");
+        
         p_depth_processor_ = boost::make_shared<DepthProcessor>(depth_engine);
         p_kline_processor_ = boost::make_shared<KlineProcessor>(kline_engine);
         p_trade_processor_ = boost::make_shared<TradeProcessor>(trade_engine);

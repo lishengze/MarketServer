@@ -230,10 +230,10 @@ void KafkaServer::listen_data_main()
 
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
 
-            // if (records.size()>0)
-            // {
-            //     COMM_LOG_INFO("records.size: " + std::to_string(records.size()));
-            // }
+            if (records.size()>0)
+            {
+                // COMM_LOG_INFO("records.size: " + std::to_string(records.size()));
+            }
             
             std::unique_lock<std::mutex> lk(src_data_mutex_);
             for (const auto& record: records) 
@@ -339,6 +339,13 @@ void KafkaServer::process_data()
     }
 }
 
+/*
+Topic Ex:
+1. trade: TRADEx-XRP_USD;
+2. depth: DEPTHx-XRP_USD.FTX;
+3. kline: KLINEx-XRP_USD.FTX;
+4. topic|src; 
+*/
 bool KafkaServer::pre_process(const string& src_data, MetaData& meta_data)
 {
     try
@@ -362,14 +369,18 @@ bool KafkaServer::pre_process(const string& src_data, MetaData& meta_data)
         string symbol_exchange = topic.substr(type_end_pos+1);
 
         std::string::size_type symbol_end_pos = symbol_exchange.find(SYMBOL_EXCHANGE_SEPARATOR);
-        if( symbol_end_pos == std::string::npos)
+        if( symbol_end_pos != std::string::npos)
         {
-            COMM_LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
-            return false;
+            // COMM_LOG_WARN("Cann't Locate SYMBOL_EXCHANGE_SEPARATOR " + SYMBOL_EXCHANGE_SEPARATOR + ", symbol_exchange: " + symbol_exchange);
+            // return false;
+            meta_data.symbol = symbol_exchange.substr(0, symbol_end_pos);
+            meta_data.exchange = symbol_exchange.substr(symbol_end_pos + 1);  
         }
-            
-        meta_data.symbol = symbol_exchange.substr(0, symbol_end_pos);
-        meta_data.exchange = symbol_exchange.substr(symbol_end_pos + 1);                
+        else
+        {
+            meta_data.symbol = symbol_exchange;
+        }
+              
         meta_data.body = src_data.substr(topic_end_pos+1);
 
         return true;
@@ -603,6 +614,13 @@ void KafkaServer::subscribe_topics(std::set<string> topics)
         {
             consumer_sptr_->unsubscribe();
             consumer_sptr_->subscribe(topics);
+
+            kafka::Topics topics_s = consumer_sptr_->subscription();
+
+            for (auto topic:topics_s)
+            {
+                COMM_LOG_INFO("Subed Topic: " + topic);
+            }
         }
     }
     catch(const std::exception& e)

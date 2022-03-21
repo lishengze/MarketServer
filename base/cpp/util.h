@@ -22,7 +22,7 @@ inline bool is_trade_valid(const TradeData& trade)
 {
     try
     {
-        return trade.time_ > 1000000000000000000 && trade.time_ < 1900000000000000000;
+        return trade.time > 1000000000000000000 && trade.time < 1900000000000000000;
     }
     catch(const std::exception& e)
     {

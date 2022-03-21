@@ -33,7 +33,7 @@ string get_trade_topic(string exchange, string symbol)
 {
     try
     {
-        return string(TRADE_TYPE) + TYPE_SEPARATOR + symbol+ SYMBOL_EXCHANGE_SEPARATOR  + exchange;
+        return string(TRADE_TYPE) + TYPE_SEPARATOR + symbol;
     }
     catch(const std::exception& e)
     {

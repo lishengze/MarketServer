@@ -36,9 +36,9 @@ MetaType get_test_meta()
 void test_code()
 {
     TestEngine engine;
-    string server_address = "127.0.0.1:9117";
+    string server_address = "43.154.179.47:9117";
 
-    Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::JSON, &engine);
+    Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, &engine);
 
     MetaType test_meta{std::move(get_test_meta())};
     
@@ -46,9 +46,9 @@ void test_code()
 
     // comm.set_kline_meta(test_meta);
 
-    // comm.set_trade_meta(test_meta);
+    comm.set_trade_meta(test_meta);
 
-    comm.set_meta(test_meta, test_meta, test_meta);
+    // comm.set_meta(test_meta, test_meta, test_meta);
 
     comm.launch();
 
@@ -65,7 +65,7 @@ void test_time()
 
 void TestMain()
 {
-    // test_code();
+    test_code();
 
-    test_time();
+    // test_time();
 }

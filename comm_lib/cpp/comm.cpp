@@ -3,6 +3,7 @@
 
 #include "kafka_server.h"
 #include "json_serializer.h"
+#include "protobuf_serializer.h"
 
 COMM_NAMESPACE_START
 
@@ -26,6 +27,14 @@ Comm::Comm(string server_address,
     {
         serializer_ = new JsonSerializer(depth_engine, kline_engine, trade_engine);
     }
+    else if (serialize_type ==  SERIALIZE_TYPE::PROTOBUF)
+    {
+        serializer_ = new ProtobufSerializer(depth_engine, kline_engine, trade_engine);
+    }
+    else
+    {
+        COMM_LOG_ERROR("Unknown Protobuf Type");
+    }
 
     if (net_type == NET_TYPE::KAFKA)
     {
@@ -44,6 +53,14 @@ Comm::Comm(string server_address,
     {
         serializer_ = new JsonSerializer(engine_center);
     }
+    else if (serialize_type ==  SERIALIZE_TYPE::PROTOBUF)
+    {
+        serializer_ = new ProtobufSerializer(engine_center);
+    }
+    else
+    {
+        COMM_LOG_ERROR("Unknown Protobuf Type");
+    }    
 
     if (net_type == NET_TYPE::KAFKA)
     {

@@ -42,10 +42,10 @@ inline string get_env(int argc, char** argv)
         {
             cout << "================Invalid Usage!=================" << endl;
             cout << "====================Usage======================" << endl;
-            cout << "./opu -dev" << endl;
-            cout << "./opu -qa" << endl;
-            cout << "./opu -prd" << endl;
-            cout << "./opu -stg" << endl;
+            cout << "./front_server -dev" << endl;
+            cout << "./front_server -qa" << endl;
+            cout << "./front_server -prd" << endl;
+            cout << "./front_server -stg" << endl;
             cout << "=============================== end =====================" << endl;
             exit(0);
         }

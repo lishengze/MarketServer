@@ -20,6 +20,7 @@
 #include <thread>
 #include <atomic>
 #include <iomanip>
+#include <boost/shared_ptr.hpp>
 
 using namespace std;
 #include "tinyformat.h"
