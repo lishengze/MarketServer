@@ -4,7 +4,6 @@
 #include "../Log/log.h"
 
 using Proto3::MarketData::ReqTradeInfo;
-// using Proto3::MarketData::Proto3::MarketData::TradeData;
 using Proto3::MarketData::MarketService;
 
 using grpc::ServerAsyncWriter;
@@ -83,12 +82,12 @@ class RequestTradeDataRPC: public BaseRPC
 
         virtual void proceed();
 
-    private:
+    private
         ServerContext                            context_;
 
         ReqTradeInfo                             request_info_;
-        Proto3::MarketData::TradeData                                reply_info_;
-        ServerAsyncResponseWriter<Proto3::MarketData::TradeData>     responder_;
+        PTradeData                               reply_info_;
+        ServerAsyncResponseWriter<PTradeData>    responder_;
         
 };  
 
@@ -111,8 +110,8 @@ class GetTradeStreamDataRPC: public BaseRPC
         ServerContext                            context_;
 
         ReqTradeInfo                             request_info_;
-        Proto3::MarketData::TradeData                                reply_info_;
-        ServerAsyncWriter<Proto3::MarketData::TradeData>             responder_;
+        PTradeData                               reply_info_;
+        ServerAsyncWriter<PTradeData>            responder_;
 
         // ServerAsyncResponse
         

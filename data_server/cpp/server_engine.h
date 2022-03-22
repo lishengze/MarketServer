@@ -10,6 +10,12 @@ class ServerEngine
     public:
         ServerEngine();
 
+        void start();
+
+        static volatile int signal_sys;
+        static void signal_handler(int signum);
+
+        bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
 
     private:
         GrpcServerPtr       grpc_server_sptr_{nullptr};

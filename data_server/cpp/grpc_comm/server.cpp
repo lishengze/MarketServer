@@ -1,6 +1,8 @@
 #include "server.h"
 #include "rpc.h"
 #include "../Log/log.h"
+#include "../data_struct/data_struct.h"
+#include "base/cpp/base_data_stuct.h"
 
 GrpcServer::~GrpcServer()
 {
@@ -186,4 +188,17 @@ void GrpcServer::reconnect_rpc(BaseRPC* rpc)
         LOG_ERROR(e.what());
     }
     
+}
+
+bool GrpcServer::get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data)
+{
+    try
+    {
+        return true;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
 }

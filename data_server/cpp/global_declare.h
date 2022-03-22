@@ -21,4 +21,8 @@ using grpc::ServerAsyncWriter;
 using grpc::ServerAsyncResponseWriter;
 using grpc::ServerAsyncWriter;
 
+using PMarketService = Proto3::MarketData::MarketService::AsyncService;
+using PTradeData = Proto3::MarketData::TradeData;
+using PReqTradeInfo = Proto3::MarketData::ReqTradeInfo;
+
 // using namespace Proto3::MarketData;

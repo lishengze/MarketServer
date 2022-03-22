@@ -4,6 +4,28 @@
 #include "pandora/util/thread_safe_singleton.hpp"
 #define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
 
+#include "../data_struct/data_struct.h"
+
+struct DataBaseInfo
+{
+    string Url;
+    int Port;
+    string UserName;
+    string Password;
+    string Schemas;
+
+    string str()
+    {
+        std::stringstream s_s;
+        s_s << "Url: " << Url << "\n"
+            << "Port: " << Port << "\n"
+            << "UserName: " << UserName << "\n"
+            << "Password: " << Password << "\n"
+            << "Schemas: " << Schemas << "\n";
+        return s_s.str();
+    }  
+};
+
 class Config
 {
     public:
@@ -21,40 +43,13 @@ class Config
 
         void load_config(string file_name);
 
-        int get_ws_port() { return ws_port_;}
-
-        int get_rest_port() { return rest_port_;}
-
-        int get_frequency_numb() { return frequency_numb_;}
-
-        int get_heartbeat_secs() {return heartbeat_seconds;}
-
-        int get_statistic_secs() {return statistic_secs_;}
-
-        string get_test_symbol() {return test_symbol;}
-
-        bool get_dev_mode() { return is_dev_mode_;}
-
-        std::set<int>& get_frequency_base() { return frequency_base_list_;}
-        std::set<int>& get_frequency_list() { return frequency_list_;}
-        string get_file_name() { return file_name_;}
-
-        string str();
-
-    private:
-        string                  file_name_;
-        string                  hub_address_;
-        int                     ws_port_;   
-        int                     rest_port_; 
-        std::set<int>           frequency_list_;
-        int                     frequency_numb_{100};
-        std::set<int>           frequency_base_list_;
-
-        bool                    is_dev_mode_{true};
-        int                     heartbeat_seconds{5};
-        int                     statistic_secs_{10};
-        string                  test_symbol{""};
-
+    public:
+        DBConnectInfo           database_info_;
+        string                  kafka_ip_;
+        string                  grpc_listen_ip_;
 };
 
 #define TEST_SYMBOL CONFIG->get_test_symbol()
+#define DATABASE_INFO CONFIG->database_info_
+#define KAFKA_IP CONFIG->kafka_ip_
+#define GRPC_LISTEN_IP CONFIG->grpc_listen_ip_

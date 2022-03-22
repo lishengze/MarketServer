@@ -21,99 +21,33 @@ void Config::load_config(string file_name)
         else
         {
             string contents((istreambuf_iterator<char>(in_config)), istreambuf_iterator<char>());
-
-            // s_s << contents << "\n";
-
             LOG_INFO(contents);
 
             nlohmann::json js = nlohmann::json::parse(contents);
-            
-            if (!js["hub"].is_null() && !js["hub"]["risk_controller_addr"].is_null())
+
+            if (!js["database"].is_null())
             {
-                hub_address_ = js["hub"]["risk_controller_addr"].get<string>();
+                database_info_.host_ = js["database"]["host"].get<std::string>();
+                database_info_.port_ = js["database"]["port"].get<int>();
+                database_info_.usr_ = js["database"]["usr"].get<std::string>();
+                database_info_.pwd_ = js["database"]["pwd"].get<std::string>();
+                database_info_.schema_ = js["database"]["schema"].get<std::string>();
             }
             else
             {
-                string error_msg = file_name + " does not have hub.addr! \n";
-                // s_s << error_msg << "\n"; 
-               LOG_ERROR(error_msg);
+                LOG_ERROR("Config Need Database Info");
             }
 
-            if (!js["ws_server"].is_null() && !js["ws_server"]["port"].is_null())
+            if (!js["kafka_ip"].is_null())
             {
-                ws_port_ = js["ws_server"]["port"].get<int>();                
+                kafka_ip_ = js["kafka_ip_"].get<std::string>();
             }
             else
             {
-                string error_msg = file_name + " does not have ws_server.port! \n";
-                LOG_ERROR(error_msg);
+                LOG_ERROR("Config Need Kafka Ip");
             }
-
-            if (!js["rest_server"].is_null() && !js["rest_server"]["port"].is_null())
-            {
-                rest_port_ = js["rest_server"]["port"].get<int>();
-            }
-            else
-            {
-                string error_msg = file_name + " does not have rest_server.port! \n";
-                LOG_ERROR(error_msg);
-            }   
-
-            if (!js["market_cache"].is_null())
-            {
-                if (js["market_cache"]["frequency_list"].is_array())
-                {
-                    nlohmann::json frequency_list = js["market_cache"]["frequency_list"];
-                    for (json::iterator it = frequency_list.begin(); it != frequency_list.end(); ++it)
-                    {
-                        json &value = *it;
-                        frequency_list_.emplace(value.get<int>());                        
-                    }
-                }
-
-                if (js["market_cache"]["frequency_numb"].is_number())
-                {
-                    frequency_numb_ = js["market_cache"]["frequency_numb"].get<int>();
-                }
-
-                if (js["market_cache"]["frequency_base"].is_array())
-                {
-                    nlohmann::json frequency_base_list = js["market_cache"]["frequency_base"];
-
-                    for (json::iterator it = frequency_base_list.begin(); it != frequency_base_list.end(); ++it)
-                    {
-                        json &value = *it;
-                        frequency_base_list_.emplace(value.get<int>());                        
-                    }
-                }                
-            }              
-
-            if (!js["is_dev_mode"].is_null())
-            {
-                is_dev_mode_ = js["is_dev_mode"].get<bool>();
-            }
-          
-            if (!js["heartbeat_seconds"].is_null())
-            {
-
-                heartbeat_seconds =  js["heartbeat_seconds"].get<int>() > 2 ? js["heartbeat_seconds"].get<int>():3;  
-            }
-
-            if (!js["statistic_secs"].is_null())
-            {
-
-                statistic_secs_ =  js["statistic_secs"].get<int>() > 10 ? js["statistic_secs"].get<int>():10;  
-            }            
-
-            if (!js["test_symbol"].is_null())
-            {
-                test_symbol = js["test_symbol"].get<string>();
-            }
-
-            // std::cout << "\nConfig: \n" + str() << std::endl;
             LOG_INFO("\nConfig: \n" + str());            
-        }
-    
+        }    
     }
     catch(const std::exception& e)
     {
@@ -126,20 +60,8 @@ string Config::str()
 try
     {
         std::stringstream s_s;
-        s_s << "is_dev_mode: " << is_dev_mode_ << "\n"; 
-        s_s << "frequency_list_: " << "\n";
-        for (auto freq:frequency_list_)
-        {
-            s_s << freq << "\n";
-        }       
-        s_s << "frequency_numb_: " << frequency_numb_ << "\n";
-        s_s << "frequency_base: " << "\n";
-        for (auto freq:frequency_base_list_)
-        {
-            s_s << freq << "\n";
-        }  
-        s_s << "test_symbol: " << get_test_symbol() 
-            <<  "\nheartbeat_seconds: " << heartbeat_seconds <<"\n";
+        s_s << "database_info_: " << database_info_.str() << "\n"
+            << "kafka_ip_: " << kafka_ip_ << "\n"; 
         return s_s.str();
     }
     catch(const std::exception& e)

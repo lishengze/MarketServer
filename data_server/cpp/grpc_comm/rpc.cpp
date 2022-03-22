@@ -1,5 +1,7 @@
 #include "rpc.h"
 #include "../Log/log.h"
+#include "../global_declare.h"
+#include "server.h"
 
 #include "pandora/util/time_util.h"
 
@@ -112,6 +114,14 @@ void RequestTradeDataRPC::proceed()
        LOG_INFO("RequestTrade: " + request_info_.exchange() + "." + request_info_.symbol() 
                 + ": " + std::to_string(request_info_.time()));
 
+
+        TradeData trade_data;
+
+        ReqTradeInfo req_trade(request_info_);
+
+        server_->get_req_trade_info(req_trade, trade_data);
+
+
         reply_info_.set_exchange(request_info_.exchange());
 
         reply_info_.set_symbol(request_info_.symbol());
@@ -119,12 +129,12 @@ void RequestTradeDataRPC::proceed()
         reply_info_.set_time(utrade::pandora::NanoTime());
 
         reply_info_.mutable_price()->set_precise(8);
-        reply_info_.mutable_price()->set_value(rpc_id);
+        reply_info_.mutable_price()->set_value(trade_data.price.get_value());
 
         reply_info_.mutable_volume()->set_precise(8);
-        reply_info_.mutable_volume()->set_value(rpc_id);           
+        reply_info_.mutable_volume()->set_value(trade_data.volume.get_value());           
 
-        is_inner_cq_event_ = true;
+        is_inner_cq_event_ = true;        
 
         responder_.Finish(reply_info_, grpc::Status::OK, this);       
         is_finished_ = true;

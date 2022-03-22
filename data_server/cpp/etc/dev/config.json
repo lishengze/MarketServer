@@ -1,0 +1,11 @@
+{
+    "database" :
+    {
+      "host" : "tcp://10.8.150.66", 
+      "port" : 3306,
+      "usr" : "bcts",
+      "pwd" : "bcts",
+      "schema": "market"
+    },
+    "kafka_ip_": "43.154.179.47:9117"
+}

@@ -16,7 +16,6 @@ void setup_signal_handler_callback()
     signal(SIGSEGV, ServerEngine::signal_handler);
 }
 
-
 void init_log(char** argv)
 {
     string program_full_name = argv[0];

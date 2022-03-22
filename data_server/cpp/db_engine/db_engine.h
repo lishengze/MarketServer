@@ -104,10 +104,13 @@ class DBEngine
 
 using DBEnginePtr = boost::shared_ptr<DBEngine>;
 
+
+FORWARD_DECLARE_PTR(ServerEngine);
+
 class DBEnginePool
 {
     public:
-        DBEnginePool(const DBConnectInfo& db_connect_info):
+        DBEnginePool(const DBConnectInfo& db_connect_info, ServerEngine* server_engine):
         db_connect_info_{db_connect_info}
         {
             init_pool(db_connect_info);
@@ -141,6 +144,8 @@ class DBEnginePool
         int                         init_engine_count{10};
         int                         cur_engine_count{0};
 
+        ServerEngine*               server_engine_{nullptr};
+
         std::set<DBEnginePtr>       idle_engine_list_;
         std::set<DBEnginePtr>       work_engine_list_;
         std::mutex                  engine_list_mutex_;
@@ -148,6 +153,7 @@ class DBEnginePool
         std::set<string>            table_set_;
 };
 
+DECLARE_PTR(DBEnginePool);
 class TestEngine
 {
 public:
