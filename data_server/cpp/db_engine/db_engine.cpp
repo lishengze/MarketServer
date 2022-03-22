@@ -324,6 +324,55 @@ bool DBEngine::get_curr_table_list(std::set<string>& table_set)
     return false;
 }
 
+bool DBEngine::get_nearest_kline(const ReqKlineData& req_kline_info, KlineData& rst)
+{
+    try
+    {
+        if (!check_kline_table(req_kline_info.exchange, req_kline_info.symbol))
+        {
+            LOG_ERROR("Table " + get_kline_table_name(req_kline_info.exchange, req_kline_info.symbol) + " was not Created");
+            return false;
+        }
+
+        if (conn_)
+        {
+            string sql_str = get_kline_sql_str(req_kline_info.exchange, req_kline_info.symbol, req_kline_info.start_time, req_kline_info.end_time);
+            sql::Statement* stmt = conn_->createStatement();
+            sql::ResultSet* result = stmt->executeQuery(sql_str);
+
+            while(result->next())
+            {
+                KlineData cur_data;
+                cur_data.exchange = result->getString(1);
+                cur_data.symbol = result->getString(2);
+                cur_data.resolution = result->getInt64(3);
+                cur_data.index = result->getInt64(4);
+                cur_data.px_open = result->getDouble(5);
+                cur_data.px_high = result->getDouble(6);
+                cur_data.px_low = result->getDouble(7);
+                cur_data.px_close = result->getDouble(8);
+                cur_data.volume = result->getDouble(9);
+
+                LOG_INFO(cur_data.str());
+
+                rst = cur_data;
+            }
+            return true;
+        }
+        else
+        {
+            LOG_ERROR("conn_ is null");
+            return false;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;        
+}
+
+
 bool DBEnginePool::init_pool(const DBConnectInfo& db_connect_info)
 {
     try
@@ -625,6 +674,35 @@ bool DBEnginePool::get_kline_data_list(const ReqKlineData& req_kline_info, std::
     
 }
 
+bool DBEnginePool::get_nearest_kline(const ReqKlineData& req_kline_info, KlineData& rst)
+{
+    try
+    {
+        DBEnginePtr db_engine = get_db();
+
+        if (db_engine)
+        {
+            db_engine->get_nearest_kline(req_kline_info, rst);
+
+            release_db(db_engine);
+
+            return true;
+        }
+        else
+        {
+            LOG_WARN("No DB Engine Available");
+
+            return false;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return false;
+}
+
+
 void TestEngine::start()
 {
     // test_create_table();
@@ -638,7 +716,7 @@ void TestEngine::test_create_table()
 {
     LOG_INFO(connect_info.str());
 
-    DBEnginePool  engine_pool{connect_info};
+    DBEnginePool  engine_pool{connect_info, nullptr};
     engine_pool.create_kline_table("FTX", "ETH_USDT");
 }
 
@@ -648,7 +726,7 @@ void TestEngine::test_insert_data()
     {
         LOG_INFO(connect_info.str());
 
-        DBEnginePool  engine_pool{connect_info};
+        DBEnginePool  engine_pool{connect_info, nullptr};
 
         KlineData tmp_kline;
         tmp_kline.exchange = "FTX";
@@ -675,7 +753,7 @@ void TestEngine::test_get_kline_data()
     {
         LOG_INFO(connect_info.str());
 
-        DBEnginePool  engine_pool{connect_info};
+        DBEnginePool  engine_pool{connect_info, nullptr};
 
         ReqKlineData req_info;
         req_info.exchange = "FTX";

@@ -316,8 +316,6 @@ class ServerImpl final {
   std::unique_ptr<Server>                       server_;
 };
 
-
-
 void test_non_stream_server()
 {
     TestServer test_server ("0.0.0.0:5008");
@@ -339,9 +337,9 @@ void TestMain()
 {
     LOG_INFO("TestMain");
     
-    // test_grpc_server();
+    test_grpc_server();
 
-    test_db_engine();
+    // test_db_engine();
 
     // test_non_stream_server();
 

@@ -1,13 +1,14 @@
 #pragma once
 
 #include "../global_declare.h"
+#include "../data_struct/data_struct.h"
 #include "rpc.h"
 
 FORWARD_DECLARE_PTR(ServerEngine);
 class GrpcServer
 {
 public:
-    GrpcServer(string address, ServerEngine* server_engine):address_{address}, server_engine{server_engine_} {}
+    GrpcServer(string address, ServerEngine* server_engine=nullptr):address_{address}, server_engine_{server_engine} {}
 
     virtual ~GrpcServer();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../front_server_declare.h"
+#include "../global_declare.h"
 #include "pandora/util/thread_safe_singleton.hpp"
 #define CONFIG utrade::pandora::ThreadSafeSingleton<Config>::DoubleCheckInstance()
 
@@ -43,7 +43,12 @@ class Config
 
         void load_config(string file_name);
 
+        string str();
+
+
     public:
+        string                  file_name_;
+
         DBConnectInfo           database_info_;
         string                  kafka_ip_;
         string                  grpc_listen_ip_;

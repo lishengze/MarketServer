@@ -1,4 +1,5 @@
 #include "base/cpp/basic.h"
+#include "base/cpp/base_data_stuct.h"
 
 #include <grpc/grpc.h>
 #include <grpcpp/alarm.h>

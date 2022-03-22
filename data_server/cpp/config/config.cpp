@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include "pandora/util/json.hpp"
-#include "../log/log.h"
+#include "../Log/log.h"
 
 void Config::load_config(string file_name)
 {

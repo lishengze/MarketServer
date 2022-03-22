@@ -45,4 +45,6 @@ class Comm
         Serializer*         serializer_{nullptr};
 };
 
+DECLARE_PTR(Comm);
+
 COMM_NAMESPACE_END

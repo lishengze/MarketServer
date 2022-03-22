@@ -83,6 +83,8 @@ class DBEngine
 
         bool get_curr_table_list(std::set<string>& table_set);
 
+        bool get_nearest_kline(const ReqKlineData& req_kline_info, KlineData& rst);
+
         string str()
         {
             return "db_id: " +std::to_string(db_id_);
@@ -110,7 +112,7 @@ FORWARD_DECLARE_PTR(ServerEngine);
 class DBEnginePool
 {
     public:
-        DBEnginePool(const DBConnectInfo& db_connect_info, ServerEngine* server_engine):
+        DBEnginePool(const DBConnectInfo& db_connect_info, ServerEngine* server_engine=nullptr):
         db_connect_info_{db_connect_info}
         {
             init_pool(db_connect_info);
@@ -137,6 +139,8 @@ class DBEnginePool
         bool insert_kline_data(const KlineData& kline_data);
 
         bool get_kline_data_list(const ReqKlineData& req_kline_info, std::list<KlineData>& dst_list);
+
+        bool get_nearest_kline(const ReqKlineData& req_kline_info, KlineData& rst);
 
     private:
         DBConnectInfo               db_connect_info_;

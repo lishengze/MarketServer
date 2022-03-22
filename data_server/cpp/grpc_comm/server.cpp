@@ -3,6 +3,7 @@
 #include "../Log/log.h"
 #include "../data_struct/data_struct.h"
 #include "base/cpp/base_data_stuct.h"
+#include "../server_engine.h"
 
 GrpcServer::~GrpcServer()
 {
@@ -194,7 +195,7 @@ bool GrpcServer::get_req_trade_info(const ReqTradeData& req_trade, TradeData& ds
 {
     try
     {
-        return true;
+        return server_engine_->get_req_trade_info(req_trade, dst_trade_data);
     }
     catch(const std::exception& e)
     {

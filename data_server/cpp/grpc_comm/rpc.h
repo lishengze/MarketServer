@@ -82,7 +82,7 @@ class RequestTradeDataRPC: public BaseRPC
 
         virtual void proceed();
 
-    private
+    private:
         ServerContext                            context_;
 
         ReqTradeInfo                             request_info_;

@@ -2,7 +2,7 @@
 #include "../Log/log.h"
 #include "../global_declare.h"
 #include "server.h"
-
+#include "base/cpp/base_data_stuct.h"
 #include "pandora/util/time_util.h"
 
 uint64 BaseRPC::RPC_ID = 0;

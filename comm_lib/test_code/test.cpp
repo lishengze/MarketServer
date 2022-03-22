@@ -20,7 +20,7 @@ class TestEngine:public bcts::comm::QuoteSourceCallbackInterface
 
     // 交易接口
     virtual void on_trade( TradeData& trade) {
-        // cout << trade.str() << endl;
+        cout << trade.str() << endl;
     };
 };
 

@@ -1,23 +1,38 @@
 #pragma once
 
 #include "global_declare.h"
+#include "data_struct/data_struct.h"
+#include "lib/comm/comm_interface_define.h"
+#include "lib/comm/comm.h"
 
 FORWARD_DECLARE_PTR(GrpcServer);
 FORWARD_DECLARE_PTR(DBEnginePool);
 
-class ServerEngine
+
+
+class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface
 {
     public:
         ServerEngine();
 
         void start();
 
-        static volatile int signal_sys;
-        static void signal_handler(int signum);
+
 
         bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
 
+        void insert_kline_data(const KlineData& kline_data);
+
+        virtual void on_kline( KlineData& kline);
+
+        virtual void on_trade( TradeData& trade);
+
     private:
-        GrpcServerPtr       grpc_server_sptr_{nullptr};
-        DBEnginePoolPtr     db_engine_sptr_{nullptr};
+        GrpcServerPtr           grpc_server_sptr_{nullptr};
+        DBEnginePoolPtr         db_engine_sptr_{nullptr};
+        bcts::comm::CommPtr     comm_server_sptr{nullptr};
+
+    public:
+        static volatile int signal_sys;
+        static void signal_handler(int signum);    
 };
