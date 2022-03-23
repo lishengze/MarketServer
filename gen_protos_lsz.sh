@@ -7,6 +7,7 @@ mkdir -p protos/python
 # generate grpc 
 protoc --proto_path=protos --cpp_out=protos/cpp market_data.proto
 protoc --proto_path=protos --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --grpc_out=protos/cpp market_data.proto
+python3 -m grpc_tools.protoc -I protos --python_out=protos/python market_data.proto
 
 # gogo.proro
 protoc --proto_path=protos --cpp_out=protos/cpp gogo.proto
