@@ -240,18 +240,22 @@ void KafkaServer::listen_data_main()
             {                
                 if (!record.error()) 
                 {
-                    string ori_data = record.value().toString();
+                    // string ori_data = record.value().toString();
 
-                    COMM_LOG_INFO(ori_data);
+                    // char* data =  new char[record.value().size()+1];
 
-                    serializer_->on_trade(ori_data);
+                    // memcpy(data, (char*)(record.value().data()), record.value().size());
 
-                    // string topic = record.topic();      
-                    // ori_data = topic + TOPIC_SEPARATOR + ori_data;
 
-                    
-                    
-                    // src_data_vec_.emplace_back(std::move(ori_data));
+                    string ori_data((char*)(record.value().data()), record.value().size());
+
+                    // COMM_LOG_INFO(ori_data);
+
+                    // serializer_->on_trade(ori_data);
+
+                    string topic = record.topic();      
+                    ori_data = topic + TOPIC_SEPARATOR + ori_data;
+                    src_data_vec_.emplace_back(std::move(ori_data));
                 } 
                 else 
                 {
@@ -450,7 +454,9 @@ void KafkaServer::publish_kline(const KlineData& kline)
         string serializer_data{std::move(serializer_->on_kline(kline))};
         string topic = get_kline_topic(kline.exchange, kline.symbol);
 
-        COMM_LOG_OUTPUT_KLINE(kline.meta_str(), kline);
+        // COMM_LOG_OUTPUT_KLINE(kline.meta_str(), kline);
+
+        COMM_LOG_INFO(kline.str());
 
         publish_msg(topic, serializer_data);
     }

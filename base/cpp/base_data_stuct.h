@@ -277,6 +277,7 @@ struct KlineData
     string exchange;
     string symbol;
     int    resolution;
+    unsigned long long sequence_no;
 
     KlineData(){
         index = 0;
@@ -307,14 +308,15 @@ struct KlineData
         return "";
     }
 
-    string str()
+    string str() const
     {
         try
         {
             std::stringstream stream_obj;
 
-            stream_obj  << "[K-Kine] SRC " << get_sec_time_str(index)  
-                        << ", " << exchange << ", "<< symbol << ","
+            stream_obj  << "[K] " << utrade::pandora::ToSecondStr(index)  
+                        << ",se: " << sequence_no << ", "
+                        << exchange << ", "<< symbol << ","
                         << "open: " << px_open.get_value() << ", high: " << px_high.get_value() << ", "
                         << "low: " << px_low.get_value() << ", close: " << px_close.get_value() << "\n"; 
 
@@ -447,11 +449,11 @@ struct TradeData
         {
             std::stringstream stream_obj;
 
-            stream_obj  << "Symbol: " << symbol
-                        << ", Exchange: " << exchange                         
-                        << ", Time " << get_sec_time_str(time)  
-                        << ", LastPx" << price.get_value() 
-                        << ", Qty: "<< volume.get_value() 
+            stream_obj  << "symbol: " << symbol
+                        << ", exchange: " << exchange                         
+                        << ", time: " << get_sec_time_str(time)  
+                        << ", price: " << price.get_value() 
+                        << ", volume: "<< volume.get_value() 
                         << ", sequence_no: " << sequence_no
                         << "\n"; 
 

@@ -103,6 +103,7 @@ string ProtobufSerializer::on_kline(const KlineData& kline)
         set_decimal(proto_kline.mutable_volume(), kline.volume);
 
         proto_kline.set_resolution(kline.resolution);
+        proto_kline.set_sequence_no(kline.sequence_no);
 
         return proto_kline.SerializeAsString();
     }
@@ -129,17 +130,17 @@ string ProtobufSerializer::on_trade(const TradeData& trade)
 
         string result = proto_trade.SerializeAsString();
 
-        COMM_LOG_INFO("SeTrade: " + result);
+        // COMM_LOG_INFO("SeTrade: " + result);
 
-        PTradeData des_trade;
-        if (des_trade.ParseFromString(result))
-        {
-            COMM_LOG_INFO("[S] Desrialize: " + des_trade.symbol());
-        }
-        else
-        {
-            COMM_LOG_INFO("[F] Desrialize Failed");
-        }
+        // PTradeData des_trade;
+        // if (des_trade.ParseFromString(result))
+        // {
+        //     COMM_LOG_INFO("[S] Desrialize: " + des_trade.symbol());
+        // }
+        // else
+        // {
+        //     COMM_LOG_INFO("[F] Desrialize Failed");
+        // }
 
         return result;
     }
@@ -184,6 +185,8 @@ void ProtobufSerializer::on_kline(const string& src)
         if (proto_kline.ParseFromString(src))
         {
             KlineData kline;
+            decode_kline(proto_kline, kline);
+            // COMM_LOG_INFO(kline.str());
             p_kline_processor_->on_kline(kline);
             // COMM_LOG_INFO(kline.get_json_str());
         }
@@ -212,7 +215,7 @@ void ProtobufSerializer::on_trade(const string& src)
 
             decode_trade(proto_trade, trade_data);
 
-            COMM_LOG_INFO(trade_data.str());
+            // COMM_LOG_INFO(trade_data.str());
 
             p_trade_processor_->on_trade(trade_data);
         }
@@ -255,9 +258,8 @@ void decode_depth_map(const PRepeatedDepth& src, map<SDecimal, SDepth>& dst)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        COMM_LOG_ERROR(e.what());
     }
-    
 }
 
 bool ProtobufSerializer::decode_depth(PDepthQuote& src, SDepthQuote& depth_quote)
@@ -295,11 +297,12 @@ bool ProtobufSerializer::decode_kline(PKlineData& src, KlineData& kline)
         
         kline.resolution = src.resolution();
 
-        kline.volume.parse_by_raw(src.volume().value(), src.volume().precise());
-        kline.px_open.parse_by_raw(src.px_open().value(), src.px_open().precise());
-        kline.px_high.parse_by_raw(src.px_high().value(), src.px_high().precise());
-        kline.px_low.parse_by_raw(src.px_low().value(), src.px_low().precise());
-        kline.px_close.parse_by_raw(src.px_close().value(), src.px_close().precise());        
+        kline.volume = src.volume().value() / pow(10, src.volume().precise());
+        kline.px_open = src.px_open().value() / pow(10, src.px_open().precise());
+        kline.px_high = src.px_high().value() / pow(10, src.px_high().precise());
+        kline.px_low = src.px_low().value() / pow(10, src.px_low().precise());
+        kline.px_close = src.px_close().value() / pow(10, src.px_close().precise());    
+        kline.sequence_no = src.sequence_no();    
 
         return true;
     }
@@ -318,8 +321,13 @@ bool ProtobufSerializer::decode_trade(PTradeData& src,TradeData& trade_data)
         trade_data.symbol = src.symbol();
         trade_data.exchange = src.exchange();
 
-        trade_data.price.parse_by_raw(src.price().value(), src.price().precise());
-        trade_data.volume.parse_by_raw(src.volume().value(), src.volume().precise());
+        // COMM_LOG_INFO()
+
+        trade_data.price = src.price().value() / pow(10, src.price().precise());
+
+        trade_data.volume = src.volume().value() / pow(10, src.volume().precise());
+
+        trade_data.sequence_no = src.sequence_no();
 
         return true;
     }
