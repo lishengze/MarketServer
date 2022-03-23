@@ -29,7 +29,7 @@ MetaType get_test_meta()
     MetaType test_meta;
     std::set<string> exchange_set;
     exchange_set.emplace("FTX");
-    test_meta["BTC_USDT"] = exchange_set;
+    test_meta["MATIC_USDT"] = exchange_set;
     return test_meta;
 }
 
