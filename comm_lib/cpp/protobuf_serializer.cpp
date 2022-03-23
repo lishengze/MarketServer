@@ -117,6 +117,7 @@ string ProtobufSerializer::on_trade(const TradeData& trade)
 {
     try
     {
+        
         PTradeData proto_trade;
         proto_trade.set_time(trade.time);
         set_decimal(proto_trade.mutable_price(), trade.price);
@@ -187,6 +188,8 @@ void ProtobufSerializer::on_trade(const string& src)
 {
     try
     {
+        COMM_LOG_INFO("Deserialize Trade");
+
         PTradeData proto_trade;
         if (proto_trade.ParseFromString(src))
         {
@@ -200,7 +203,9 @@ void ProtobufSerializer::on_trade(const string& src)
         }
         else
         {
+            
             COMM_LOG_WARN("decode trade faild, ori_msg: " + src);
+            cout << proto_trade.symbol() << endl;
         }
     }
     catch(const std::exception& e)

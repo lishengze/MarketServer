@@ -362,6 +362,7 @@ struct TradeData
     SDecimal    volume;
     TSymbol     symbol;
     TExchange   exchange;
+    unsigned long long       sequence_no;
 
     TradeData() {
         time = 0;

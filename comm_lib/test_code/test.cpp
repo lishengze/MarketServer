@@ -29,14 +29,14 @@ MetaType get_test_meta()
     MetaType test_meta;
     std::set<string> exchange_set;
     exchange_set.emplace("FTX");
-    test_meta["MATIC_USDT"] = exchange_set;
+    test_meta["BTC_USDT"] = exchange_set;
     return test_meta;
 }
 
 void test_code()
 {
     TestEngine engine;
-    string server_address = "127.0.0.1:9117";
+    string server_address = "43.154.179.47:9117";
 
     Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, &engine);
 
@@ -63,9 +63,37 @@ void test_time()
     cout << utrade::pandora::NanoTime() << endl;
 }
 
+
+void test_produce()
+{
+    TestEngine engine;
+    string server_address = "127.0.0.1:9117";
+
+    Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, &engine);    
+
+    TradeData trade_data;
+
+    trade_data.symbol = "BTC_USDT";
+    trade_data.exchange = "FTX";
+    trade_data.price = 42381.5;
+    trade_data.volume = 0.1;
+    
+    for (int i=0; i < 1000; ++i)
+    {   
+        trade_data.time = utrade::pandora::NanoTime();
+        trade_data.sequence_no = i;
+
+        comm.publish_trade(trade_data);
+
+        std::this_thread::sleep_for(std::chrono::seconds{3});
+    }
+}
+
 void TestMain()
 {
-    test_code();
+    // test_code();
 
     // test_time();
+
+    test_produce();
 }

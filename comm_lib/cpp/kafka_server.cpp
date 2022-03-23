@@ -138,7 +138,7 @@ bool KafkaServer::create_topic(kafka::Topic topic)
 
             kafka::Properties topic_props;            
 
-            auto createResult = adclient_sptr_->createTopics({topic}, 3, 3, topic_props);
+            auto createResult = adclient_sptr_->createTopics({topic}, 1, 1, topic_props);
             if (createResult.error)
             {
                 COMM_LOG_ERROR("Create Topic Error: " + createResult.error.message());
@@ -230,10 +230,10 @@ void KafkaServer::listen_data_main()
 
             auto records = consumer_sptr_->poll(std::chrono::milliseconds(100));
 
-            if (records.size()>0)
-            {
-                // COMM_LOG_INFO("records.size: " + std::to_string(records.size()));
-            }
+            // if (records.size()>0)
+            // {
+            //     COMM_LOG_INFO("records.size: " + std::to_string(records.size()));
+            // }
             
             std::unique_lock<std::mutex> lk(src_data_mutex_);
             for (const auto& record: records) 
@@ -241,12 +241,15 @@ void KafkaServer::listen_data_main()
                 if (!record.error()) 
                 {
                     string ori_data = record.value().toString();
-                    string topic = record.topic();      
-                    ori_data = topic + TOPIC_SEPARATOR + ori_data;
+
+                    serializer_->on_trade(ori_data);
+
+                    // string topic = record.topic();      
+                    // ori_data = topic + TOPIC_SEPARATOR + ori_data;
 
                     // COMM_LOG_INFO(ori_data);
                     
-                    src_data_vec_.emplace_back(std::move(ori_data));
+                    // src_data_vec_.emplace_back(std::move(ori_data));
                 } 
                 else 
                 {
@@ -291,9 +294,13 @@ void KafkaServer::process_main()
                 return !(src_data_vec_.size()==0);
             });            
 
-            // COMM_LOG_INFO("src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
+            // COMM_LOG_INFO("process src_data_vec_.size: " + std::to_string(src_data_vec_.size()));
 
             if (serializer_) process_data();
+            else
+            {
+                COMM_LOG_ERROR("serializer_ is null");
+            }
 
             src_data_vec_.clear();
         }
@@ -313,7 +320,7 @@ void KafkaServer::process_data()
             MetaData meta_data;
             if (!pre_process(src_data, meta_data)) continue;
 
-            if (!is_data_subed(meta_data.type, meta_data.symbol, meta_data.exchange)) continue;
+            // if (!is_data_subed(meta_data.type, meta_data.symbol, meta_data.exchange)) continue;
 
             if (meta_data.type == DEPTH_TYPE)
             {
@@ -382,6 +389,8 @@ bool KafkaServer::pre_process(const string& src_data, MetaData& meta_data)
         }
               
         meta_data.body = src_data.substr(topic_end_pos+1);
+
+        COMM_LOG_INFO(meta_data.simple_str());
 
         return true;
     }
@@ -456,7 +465,9 @@ void KafkaServer::publish_trade(const TradeData& trade)
         string serializer_data{std::move(serializer_->on_trade(trade))};
         string topic = get_trade_topic(trade.exchange, trade.symbol);
 
-        COMM_LOG_OUTPUT_TRADE(trade.meta_str(), trade);
+        // COMM_LOG_OUTPUT_TRADE(trade.meta_str(), trade);
+
+        COMM_LOG_INFO(trade.meta_str());
 
         publish_msg(topic, serializer_data);
     }
