@@ -36,7 +36,7 @@ MetaType get_test_meta()
 void test_consume()
 {
     TestEngine engine;
-    string server_address = "43.154.179.47:9117";
+    string server_address = "127.0.0.1:9117";
 
     Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, &engine);
 
