@@ -33,7 +33,7 @@ MetaType get_test_meta()
     return test_meta;
 }
 
-void test_code()
+void test_consume()
 {
     TestEngine engine;
     string server_address = "43.154.179.47:9117";
@@ -70,17 +70,17 @@ void test_produce()
     string server_address = "127.0.0.1:9117";
 
     Comm comm(server_address, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, &engine);    
-
-    TradeData trade_data;
-
-    trade_data.symbol = "BTC_USDT";
-    trade_data.exchange = "FTX";
-    trade_data.price = 42381.5;
-    trade_data.volume = 0.1;
     
     for (int i=0; i < 1000; ++i)
     {   
+        TradeData trade_data;
+
+        trade_data.symbol = "BTC_USDT";
+        trade_data.exchange = "FTX";
+        trade_data.price = 42380.5 + i;
+
         trade_data.time = utrade::pandora::NanoTime();
+        trade_data.volume = 0.1 + i;
         trade_data.sequence_no = i;
 
         comm.publish_trade(trade_data);
@@ -91,9 +91,9 @@ void test_produce()
 
 void TestMain()
 {
-    // test_code();
+    test_consume();
 
     // test_time();
 
-    test_produce();
+    // test_produce();
 }

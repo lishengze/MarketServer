@@ -125,8 +125,23 @@ string ProtobufSerializer::on_trade(const TradeData& trade)
 
         proto_trade.set_symbol(trade.symbol);
         proto_trade.set_exchange(trade.exchange);
+        proto_trade.set_sequence_no(trade.sequence_no);
 
-        return proto_trade.SerializeAsString();
+        string result = proto_trade.SerializeAsString();
+
+        COMM_LOG_INFO("SeTrade: " + result);
+
+        PTradeData des_trade;
+        if (des_trade.ParseFromString(result))
+        {
+            COMM_LOG_INFO("[S] Desrialize: " + des_trade.symbol());
+        }
+        else
+        {
+            COMM_LOG_INFO("[F] Desrialize Failed");
+        }
+
+        return result;
     }
     catch(const std::exception& e)
     {

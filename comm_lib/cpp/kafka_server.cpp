@@ -242,12 +242,14 @@ void KafkaServer::listen_data_main()
                 {
                     string ori_data = record.value().toString();
 
+                    COMM_LOG_INFO(ori_data);
+
                     serializer_->on_trade(ori_data);
 
                     // string topic = record.topic();      
                     // ori_data = topic + TOPIC_SEPARATOR + ori_data;
 
-                    // COMM_LOG_INFO(ori_data);
+                    
                     
                     // src_data_vec_.emplace_back(std::move(ori_data));
                 } 
@@ -467,7 +469,7 @@ void KafkaServer::publish_trade(const TradeData& trade)
 
         // COMM_LOG_OUTPUT_TRADE(trade.meta_str(), trade);
 
-        COMM_LOG_INFO(trade.meta_str());
+        COMM_LOG_INFO(trade.str());
 
         publish_msg(topic, serializer_data);
     }

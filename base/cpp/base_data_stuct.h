@@ -441,7 +441,7 @@ struct TradeData
         return "";
     }    
 
-    string str()
+    string str() const
     {
         try
         {
@@ -452,6 +452,7 @@ struct TradeData
                         << ", Time " << get_sec_time_str(time)  
                         << ", LastPx" << price.get_value() 
                         << ", Qty: "<< volume.get_value() 
+                        << ", sequence_no: " << sequence_no
                         << "\n"; 
 
             return stream_obj.str();
