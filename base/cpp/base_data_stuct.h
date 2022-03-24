@@ -490,7 +490,6 @@ struct ReqTradeData
 
     ReqTradeData() {}
 
-
     string symbol;
     string exchange;
     uint64 time;
