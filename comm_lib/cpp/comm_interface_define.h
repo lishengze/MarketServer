@@ -7,7 +7,6 @@
 
 
 COMM_NAMESPACE_START
-
 class GrpcServerInterface
 {
     public:

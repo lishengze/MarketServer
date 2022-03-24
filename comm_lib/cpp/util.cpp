@@ -152,4 +152,14 @@ string get_trade_jsonstr(const TradeData& trade)
     return "";
 }
 
+ReqTradeData get_req_trade(const PReqTradeInfo& proto_reqtrade)
+{
+    ReqTradeData result;
+    result.exchange = proto_reqtrade.exchange();
+    result.symbol = proto_reqtrade.symbol();
+    result.time = proto_reqtrade.time();
+
+    return result;
+}
+
 COMM_NAMESPACE_END

@@ -2,11 +2,13 @@
 
 #include "global_declare.h"
 #include "data_struct/data_struct.h"
-#include "lib/comm/comm_interface_define.h"
-#include "lib/comm/comm.h"
+#include "comm_interface_define.h"
+#include "rpc_server.h"
+#include "comm.h"
 
-FORWARD_DECLARE_PTR(GrpcServer);
-FORWARD_DECLARE_PTR(DBEnginePool);
+
+// FORWARD_DECLARE_PTR(GrpcServer);
+// FORWARD_DECLARE_PTR(DBEnginePool);
 
 class ServerEngine
 {

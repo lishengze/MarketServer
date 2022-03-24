@@ -47,6 +47,7 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
 LINK_DIRECTORIES("/usr/local/lib")
 LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
+LINK_DIRECTORIES("/usr/local/grpc/lib")
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
@@ -58,25 +59,26 @@ target_link_libraries(${SO_NAME} boost_system)
 target_link_libraries(${SO_NAME} pandora)
 target_link_libraries(${SO_NAME} log4cplus)
 
-# target_link_libraries (${SO_NAME}  absl_synchronization absl_symbolize absl_stacktrace absl_debugging_internal absl_base)
-# target_link_libraries (${SO_NAME}  absl_strings absl_strings_internal absl_time absl_time_zone absl_exponential_biased)
-# target_link_libraries (${SO_NAME}  absl_spinlock_wait absl_log_severity absl_raw_logging_internal absl_throw_delegate)
-# target_link_libraries (${SO_NAME}  absl_malloc_internal absl_bad_optional_access absl_civil_time absl_int128)
-# target_link_libraries (${SO_NAME}  absl_demangle_internal absl_graphcycles_internal absl_hashtablez_sampler)
-# target_link_libraries (${SO_NAME}  absl_city absl_raw_hash_set absl_str_format_internal absl_cord absl_status)
-# target_link_libraries (${SO_NAME}  absl_bad_variant_access absl_hash absl_statusor)
+target_link_libraries (${SO_NAME}  absl_synchronization absl_symbolize absl_stacktrace absl_debugging_internal absl_base)
+target_link_libraries (${SO_NAME}  absl_strings absl_strings_internal absl_time absl_time_zone absl_exponential_biased)
+target_link_libraries (${SO_NAME}  absl_spinlock_wait absl_log_severity absl_raw_logging_internal absl_throw_delegate)
+target_link_libraries (${SO_NAME}  absl_malloc_internal absl_bad_optional_access absl_civil_time absl_int128)
+target_link_libraries (${SO_NAME}  absl_demangle_internal absl_graphcycles_internal absl_hashtablez_sampler)
+target_link_libraries (${SO_NAME}  absl_city absl_raw_hash_set absl_str_format_internal absl_cord absl_status)
+target_link_libraries (${SO_NAME}  absl_bad_variant_access absl_hash absl_statusor)
 
 # target_link_libraries(${SO_NAME} protobuf protoc protobuf-lite)
 # target_link_libraries(${SO_NAME} grpc++_reflection grpc++ gpr ssl crypto)
 
 target_link_libraries(${SO_NAME} protobuf )
 target_link_libraries(${SO_NAME} grpc++)
+target_link_libraries(${SO_NAME} gpr)
+
 target_link_libraries(${SO_NAME} ssl crypto)
 
 target_link_libraries(${SO_NAME} nacos-cli)
 target_link_libraries(${SO_NAME} SQLiteCpp sqlite3 dl)
 
-TARGET_LINK_LIBRARIES(${SO_NAME} ssl crypto)
 TARGET_LINK_LIBRARIES(${SO_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

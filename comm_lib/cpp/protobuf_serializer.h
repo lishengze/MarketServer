@@ -12,16 +12,6 @@
 #include "kline_processor.h"
 #include "trade_processor.h"
 
-#include "market_data.pb.h"
-
-using PDecimal = Proto3::MarketData::Decimal;
-using PDepth = Proto3::MarketData::Depth;
-using PDepthQuote = Proto3::MarketData::DepthQuote;
-using PKlineData = Proto3::MarketData::KlineData;
-using PTradeData = Proto3::MarketData::TradeData;
-using PRepeatedDepth = google::protobuf::RepeatedPtrField<PDepth>;
-using PDepthMap = google::protobuf::Map<std::string, Proto3::MarketData::Decimal>;
-
 COMM_NAMESPACE_START
 
 class ProtobufSerializer:public Serializer

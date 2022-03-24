@@ -481,12 +481,12 @@ struct ReqKlineData
 
 struct ReqTradeData
 {
-    ReqTradeData(const PReqTradeInfo& proto_reqtrade)
-    {
-        symbol = proto_reqtrade.symbol();
-        exchange = proto_reqtrade.exchange();
-        time = proto_reqtrade.time();
-    }
+    // ReqTradeData(const PReqTradeInfo& proto_reqtrade)
+    // {
+    //     symbol = proto_reqtrade.symbol();
+    //     exchange = proto_reqtrade.exchange();
+    //     time = proto_reqtrade.time();
+    // }
 
     ReqTradeData() {}
 
