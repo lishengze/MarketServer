@@ -1,6 +1,12 @@
 #include "redis_quote.h"
 #include "stream_engine_config.h"
 #include "converter.h"
+
+#include<time.h>
+#include <iostream>
+#include<string>
+#include<stdlib.h>
+
 // json库
 #include "base/cpp/rapidjson/document.h"
 #include "base/cpp/rapidjson/writer.h"
@@ -48,6 +54,10 @@ void redisquote_to_quote_depth(const Value& data, const SExchangeConfig& config,
         const double& volume = iter->value.GetDouble();
         SDecimal dPrice = SDecimal::parse(price, config.precise);
         SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
+
+        SDecimal dPrice = std::atof(price.c_str()); 
+        SDecimal dVolume = volume;
+
         depths[dPrice].volume = dVolume;
     }
 }
@@ -272,6 +282,12 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         SDepthQuote quote;
         quote.exchange = exchange;
         quote.symbol = symbol;
+
+        if (symbol == "ETH_BTC")
+        {
+            LOG_DEBUG(config.str());
+        }
+
         if( !redisquote_to_quote(body, quote, config, true))
         {
             LOG_WARN("redisquote_to_quote failed. channel=" + channel + ", msg=" + msg);            
