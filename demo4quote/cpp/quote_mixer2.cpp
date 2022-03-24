@@ -279,7 +279,7 @@ void normalize(map<SDecimal, SDepth>& src, const QuoteMixer2::SMixerConfig& conf
     {
         volume = 0;
         for( auto& v : iter->second.volume_by_exchanges ) {
-            v.second.scale(config.vprecise);
+            // v.second.scale(config.vprecise);
             volume += v.second;
         }
         iter->second.volume = volume;
@@ -319,8 +319,8 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         }
     }
 
-    // normalize(snap.asks, config);
-    // normalize(snap.bids, config);
+    normalize(snap.asks, config);
+    normalize(snap.bids, config);
 
     if (symbol == "ETH_BTC")
     {
@@ -331,10 +331,6 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         snap.symbol = symbol;
         snap.exchange = MIX_EXCHANGE_NAME;        
         engine_interface_->on_snap(MIX_EXCHANGE_NAME, symbol, snap);
-    }
-    else
-    {
-
     }
 
     // 交易
