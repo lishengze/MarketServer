@@ -12,30 +12,32 @@ public:
     virtual void publish_binary(const TExchange& exchange, const TSymbol& symbol, std::shared_ptr<MarketStreamDataWithDecimal> snap) = 0;
 };
 
+struct SMixerConfig
+{
+    type_uint32 depth;
+    type_uint32 precise;
+    type_uint32 vprecise;
+    type_uint32 aprecise;
+    float frequency;
+    unordered_map<TExchange, SymbolFee> fees;
+
+    std::string str() 
+    {
+        return "pre: " + std::to_string(precise) + ", vpre: " + std::to_string(vprecise) + ", apre: " +  std::to_string(aprecise);
+    }
+
+    bool operator==(const SMixerConfig &rhs) const {
+        return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
+    }
+    bool operator!=(const SMixerConfig &rhs) const {
+        return !(*this == rhs);
+    }
+};
+
 class QuoteMixer2
 {
 public:
-    struct SMixerConfig
-    {
-        type_uint32 depth;
-        type_uint32 precise;
-        type_uint32 vprecise;
-        type_uint32 aprecise;
-        float frequency;
-        unordered_map<TExchange, SymbolFee> fees;
 
-        std::string str() 
-        {
-            return "pre: " + std::to_string(precise) + ", vpre: " + std::to_string(vprecise) + ", apre: " +  std::to_string(aprecise);
-        }
-
-        bool operator==(const SMixerConfig &rhs) const {
-            return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
-        }
-        bool operator!=(const SMixerConfig &rhs) const {
-            return !(*this == rhs);
-        }
-    };
 public:
 
     QuoteMixer2();
