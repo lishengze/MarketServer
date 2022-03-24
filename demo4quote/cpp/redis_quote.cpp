@@ -52,8 +52,8 @@ void redisquote_to_quote_depth(const Value& data, const SExchangeConfig& config,
     {
         const string& price = iter->name.GetString();
         const double& volume = iter->value.GetDouble();
-        SDecimal dPrice = SDecimal::parse(price, config.precise);
-        SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
+        // SDecimal dPrice = SDecimal::parse(price, config.precise);
+        // SDecimal dVolume = SDecimal::parse(volume, config.vprecise);
 
         SDecimal dPrice = std::atof(price.c_str()); 
         SDecimal dVolume = volume;
