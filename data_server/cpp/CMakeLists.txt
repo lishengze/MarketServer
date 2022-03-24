@@ -41,7 +41,8 @@ target_link_libraries(${BIN_NAME} pandora)
 target_link_libraries(${BIN_NAME} log4cplus)
 target_link_libraries(${BIN_NAME} nacos-cli)
 
-# target_link_libraries(${BIN_NAME} absl_synchronization)
+target_link_libraries(${BIN_NAME} absl_synchronization)
+
 # target_link_libraries(${BIN_NAME} protobuf)
 # target_link_libraries(${BIN_NAME} protoc protobuf-lite)
 # target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
@@ -61,6 +62,6 @@ target_link_libraries(${BIN_NAME} ssl crypto)
 
 
 TARGET_LINK_LIBRARIES(${BIN_NAME} mysqlcppconn dl z)
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+# TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
 
 ###############################################################################################

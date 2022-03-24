@@ -40,7 +40,7 @@ void Config::load_config(string file_name)
 
             if (!js["kafka_ip"].is_null())
             {
-                kafka_ip_ = js["kafka_ip_"].get<std::string>();
+                kafka_ip_ = js["kafka_ip"].get<std::string>();
             }
             else
             {

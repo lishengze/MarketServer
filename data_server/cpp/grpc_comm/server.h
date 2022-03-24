@@ -5,6 +5,7 @@
 #include "rpc.h"
 
 FORWARD_DECLARE_PTR(ServerEngine);
+
 class GrpcServer
 {
 public:

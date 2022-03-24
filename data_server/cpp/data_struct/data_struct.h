@@ -22,30 +22,3 @@ struct DBConnectInfo
     string                          schema_;
     int                             port_;
 };
-
-struct ReqKlineData
-{
-    string symbol;
-    string exchange;    
-    uint64 start_time;
-    uint64 end_time;
-    uint32 count;
-    uint32 frequency;    
-};
-
-struct ReqTradeData
-{
-    ReqTradeData(const PReqTradeInfo& proto_reqtrade)
-    {
-        symbol = proto_reqtrade.symbol();
-        exchange = proto_reqtrade.exchange();
-        time = proto_reqtrade.time();
-    }
-
-    ReqTradeData() {}
-
-
-    string symbol;
-    string exchange;
-    uint64 time;
-};

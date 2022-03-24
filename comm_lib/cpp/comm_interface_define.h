@@ -8,6 +8,14 @@
 
 COMM_NAMESPACE_START
 
+class GrpcServerInterface
+{
+    public:
+
+    void start();
+
+    bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
+};
 
 class QuoteSourceCallbackInterface
 {

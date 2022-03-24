@@ -17,7 +17,7 @@ void test_grpc_client()
 
         client.request_trade_data(req_trade_info);   
 
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
     }
  
 }

@@ -8,8 +8,27 @@
 FORWARD_DECLARE_PTR(GrpcServer);
 FORWARD_DECLARE_PTR(DBEnginePool);
 
+class ServerEngine
+{
+    public:
+        ServerEngine();
 
+        void start();
 
+        bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
+
+        void insert_kline_data(const KlineData& kline_data);
+
+        virtual void on_kline( KlineData& kline);
+
+        virtual void on_trade( TradeData& trade);
+
+    public:
+        static volatile int signal_sys;
+        static void signal_handler(int signum);    
+};
+
+/*
 class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface
 {
     public:
@@ -36,3 +55,4 @@ class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface
         static volatile int signal_sys;
         static void signal_handler(int signum);    
 };
+*/
