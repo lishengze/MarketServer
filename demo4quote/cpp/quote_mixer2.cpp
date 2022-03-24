@@ -125,6 +125,12 @@ void QuoteCacher::erase_dead_exchange_symbol_depth(const TExchange& exchange, co
 
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& ori_quote) 
 {
+
+    if (symbol == "ETH_BTC")
+    {
+        LOG_DEBUG("Original ETH_BTC: " + quote_str(ori_quote));
+    }
+
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
     if (check_abnormal_quote(quote))
     {
@@ -288,7 +294,7 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     snap.sequence_no = seqno;
     snap.origin_time = 0;
     snap.arrive_time = get_miliseconds();
-    snap.price_precise = config.precise;
+    snap.price_precise = config.precise;          
     snap.volume_precise = config.vprecise;
     snap.amount_precise = config.aprecise;
     {
@@ -313,8 +319,8 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
         }
     }
 
-    normalize(snap.asks, config);
-    normalize(snap.bids, config);
+    // normalize(snap.asks, config);
+    // normalize(snap.bids, config);
 
     if (symbol == "ETH_BTC")
     {
