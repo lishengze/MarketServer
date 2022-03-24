@@ -24,6 +24,11 @@ public:
         float frequency;
         unordered_map<TExchange, SymbolFee> fees;
 
+        std::string str() 
+        {
+            return "pre: " + std::to_string(precise) + ", vpre: " + std::to_string(vprecise) + ", apre: " +  std::to_string(aprecise);
+        }
+
         bool operator==(const SMixerConfig &rhs) const {
             return depth == rhs.depth && precise == rhs.precise && vprecise == rhs.vprecise && frequency == rhs.frequency&& fees == rhs.fees;
         }
