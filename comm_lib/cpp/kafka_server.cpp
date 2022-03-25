@@ -27,6 +27,7 @@ KafkaServer::~KafkaServer()
 {
     if (listen_thread_.joinable())
     {
+        COMM_LOG_INFO("listen_thread_ join");
         listen_thread_.join();
     }
 }
@@ -69,6 +70,8 @@ void KafkaServer::launch()
         start_listen_data();
 
         start_process_data();
+
+        COMM_LOG_INFO("launch end!");
     }
     catch(const std::exception& e)
     {

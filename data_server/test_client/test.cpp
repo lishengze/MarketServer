@@ -13,7 +13,7 @@ void test_grpc_client()
         ReqTradeInfoLocal req_trade_info;
         req_trade_info.exchange = "FTX";
         req_trade_info.symbol = "symbol";
-        req_trade_info.time = i;
+        req_trade_info.time = 1648210737040520318;
 
         client.request_trade_data(req_trade_info);   
 

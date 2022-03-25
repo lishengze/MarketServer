@@ -10,11 +10,11 @@ USING_COMM_NAMESPACE
 
 ServerEngine::ServerEngine()
 {
-    grpc_server_sptr_ = boost::make_shared<GrpcServer>(KAFKA_IP, this);
+    grpc_server_sptr_ = boost::make_shared<GrpcServer>(GRPC_LISTEN_IP, this);
 
     db_engine_sptr_ = boost::make_shared<DBEnginePool>(DATABASE_INFO, this);
 
-    comm_server_sptr = boost::make_shared<Comm>(GRPC_LISTEN_IP, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, this);
+    comm_server_sptr = boost::make_shared<Comm>(KAFKA_IP, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, this);
 }
 
 MetaType get_test_kline_meta()
@@ -38,8 +38,6 @@ void ServerEngine::start()
         bcts::comm::MetaType test_meta = get_test_kline_meta();
 
         comm_server_sptr->set_kline_meta(test_meta);
-
-        // comm_server_sptr->set_trade_meta(test_meta);
 
         comm_server_sptr->launch();
     }
@@ -90,7 +88,7 @@ bool ServerEngine::get_req_trade_info(const ReqTradeData& req_trade, TradeData& 
 {
     try
     {
-        LOG_INFO(req_trade.str());
+        LOG_INFO("ReqTradeData: " + req_trade.str());
 
         ReqKlineData req_kline;
         req_kline.exchange = req_trade.exchange;

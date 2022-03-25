@@ -103,6 +103,7 @@ private:
     std::thread                        listen_thread_;
     
     std::thread                        process_thread_;
+    
     std::mutex                         src_data_mutex_;
     std::condition_variable            src_data_cv_;
     std::vector<std::string>           src_data_vec_;

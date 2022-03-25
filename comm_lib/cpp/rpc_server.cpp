@@ -20,11 +20,15 @@ void GrpcServer::start()
     {
         cout << "GrpcServer::start " << endl;
 
+        COMM_LOG_INFO("start");
+
         init_async_server_env();
 
         init_rpc();
 
         init_cq_thread();
+
+        COMM_LOG_INFO("start end");
     }
     catch(const std::exception& e)
     {
@@ -200,6 +204,7 @@ bool GrpcServer::get_req_trade_info(const ReqTradeData& req_trade, TradeData& ds
 {
     try
     {
+        COMM_LOG_INFO("ReqTradeData: " + req_trade.str());
         return server_engine_->get_req_trade_info(req_trade, dst_trade_data);
     }
     catch(const std::exception& e)
