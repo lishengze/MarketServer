@@ -71,6 +71,7 @@ target_link_libraries(${SO_NAME} log4cplus)
 # target_link_libraries(${SO_NAME} grpc++_reflection grpc++ gpr ssl crypto)
 
 target_link_libraries(${SO_NAME} protobuf )
+target_link_libraries(${SO_NAME} grpc++_reflection)
 target_link_libraries(${SO_NAME} grpc++)
 target_link_libraries(${SO_NAME} gpr)
 

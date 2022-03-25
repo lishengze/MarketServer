@@ -4,15 +4,11 @@
 #include "kafka_server.h"
 #include "json_serializer.h"
 #include "protobuf_serializer.h"
+#include "util.h"
 
 COMM_NAMESPACE_START
 
-void init_log(string program_name="comm", string work_dir="")
-{
-    COMM_LOG->set_work_dir(work_dir);
-    COMM_LOG->set_program_name(program_name);
-    COMM_LOG->start();
-}
+
 
 Comm::Comm(string server_address,
             QuoteSourceCallbackInterface* depth_engine,

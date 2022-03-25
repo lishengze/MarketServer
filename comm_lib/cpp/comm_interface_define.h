@@ -11,9 +11,9 @@ class GrpcServerInterface
 {
     public:
 
-    void start();
+    void start() {}
 
-    bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
+    bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data) {}
 };
 
 class QuoteSourceCallbackInterface

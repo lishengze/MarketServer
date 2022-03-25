@@ -3,6 +3,7 @@
 #include "comm_declare.h"
 #include "comm_interface_define.h"
 #include "rpc.h"
+#include "util.h"
 
 
 COMM_NAMESPACE_START
@@ -10,7 +11,9 @@ COMM_NAMESPACE_START
 class GrpcServer
 {
 public:
-    GrpcServer(string address, GrpcServerInterface* server_engine=nullptr):address_{address}, server_engine_{server_engine} {}
+    GrpcServer(string address, GrpcServerInterface* server_engine=nullptr):address_{address}, server_engine_{server_engine} {
+        init_log();
+    }
 
     virtual ~GrpcServer();
 

@@ -59,9 +59,9 @@ target_link_libraries(${BIN_NAME} nacos-cli)
 # target_link_libraries (${BIN_NAME}  absl_city absl_raw_hash_set absl_str_format_internal absl_cord absl_status)
 # target_link_libraries (${BIN_NAME}  absl_bad_variant_access absl_hash absl_statusor)
 
-# target_link_libraries(${BIN_NAME} protobuf )
-# target_link_libraries(${BIN_NAME} grpc++)
-# target_link_libraries(${BIN_NAME} gpr)
+target_link_libraries(${BIN_NAME} protobuf )
+target_link_libraries(${BIN_NAME} grpc++)
+target_link_libraries(${BIN_NAME} gpr)
 # target_link_libraries(${BIN_NAME} ssl crypto)
 
 

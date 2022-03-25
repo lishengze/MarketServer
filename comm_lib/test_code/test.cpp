@@ -3,6 +3,7 @@
 
 #include "../cpp/comm.h"
 #include "../cpp/comm_interface_define.h"
+#include "../cpp/rpc_server.h"
 
 USING_COMM_NAMESPACE
 
@@ -34,6 +35,14 @@ MetaType get_test_meta()
     exchange_set.emplace("FTX");
     test_meta["BTC_USDT"] = exchange_set;
     return test_meta;
+}
+
+void test_grpc_server()
+{
+    cout << "test_grpc_server " << endl;
+    bcts::comm::GrpcServer server("0.0.0.0:5008");
+
+    server.start();   
 }
 
 void test_consume()
@@ -117,7 +126,9 @@ void test_produce()
 
 void TestMain()
 {
-    test_consume();
+    test_grpc_server();
+
+    // test_consume();
 
     // test_time();
 

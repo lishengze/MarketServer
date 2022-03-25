@@ -18,6 +18,8 @@ void GrpcServer::start()
 {
     try
     {
+        cout << "GrpcServer::start " << endl;
+
         init_async_server_env();
 
         init_rpc();
@@ -34,6 +36,7 @@ void GrpcServer::init_async_server_env()
 {
     try
     {
+        cout << "lister 0" << endl;
         COMM_LOG_INFO("BaseServer listen: " + address_);
 
         builder_.AddListeningPort(address_, grpc::InsecureServerCredentials());
@@ -41,6 +44,8 @@ void GrpcServer::init_async_server_env()
 
         cq_ = builder_.AddCompletionQueue();
         server_ = builder_.BuildAndStart();
+
+        cout << "lister 1" << endl;
     }
     catch(const std::exception& e)
     {
