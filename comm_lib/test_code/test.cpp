@@ -28,6 +28,11 @@ class TestEngine:public bcts::comm::QuoteSourceCallbackInterface
     };
 };
 
+void test_time()
+{
+    cout << utrade::pandora::NanoTime() << endl;
+}
+
 MetaType get_test_meta()
 {
     MetaType test_meta;
@@ -69,12 +74,6 @@ void test_consume()
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 }
-
-void test_time()
-{
-    cout << utrade::pandora::NanoTime() << endl;
-}
-
 
 void test_produce()
 {

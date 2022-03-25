@@ -5,33 +5,35 @@
 #include "comm_interface_define.h"
 #include "rpc_server.h"
 #include "comm.h"
+#include "db_engine/db_engine.h"
 
+USING_COMM_NAMESPACE
 
 // FORWARD_DECLARE_PTR(GrpcServer);
 // FORWARD_DECLARE_PTR(DBEnginePool);
 
-class ServerEngine
-{
-    public:
-        ServerEngine();
+// class ServerEngine
+// {
+//     public:
+//         ServerEngine();
 
-        void start();
+//         void start();
 
-        bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
+//         bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
 
-        void insert_kline_data(const KlineData& kline_data);
+//         void insert_kline_data(const KlineData& kline_data);
 
-        virtual void on_kline( KlineData& kline);
+//         virtual void on_kline( KlineData& kline);
 
-        virtual void on_trade( TradeData& trade);
+//         virtual void on_trade( TradeData& trade);
 
-    public:
-        static volatile int signal_sys;
-        static void signal_handler(int signum);    
-};
+//     public:
+//         static volatile int signal_sys;
+//         static void signal_handler(int signum);    
+// };
 
-/*
-class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface
+/**/
+class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface, public bcts::comm::ServerEngineInterface
 {
     public:
         ServerEngine();
@@ -57,4 +59,4 @@ class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface
         static volatile int signal_sys;
         static void signal_handler(int signum);    
 };
-*/
+

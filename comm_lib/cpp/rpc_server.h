@@ -11,7 +11,7 @@ COMM_NAMESPACE_START
 class GrpcServer
 {
 public:
-    GrpcServer(string address, GrpcServerInterface* server_engine=nullptr):address_{address}, server_engine_{server_engine} {
+    GrpcServer(string address, ServerEngineInterface* server_engine=nullptr):address_{address}, server_engine_{server_engine} {
         init_log();
     }
 
@@ -34,7 +34,7 @@ public:
 
 private:
     string                                        address_;
-    GrpcServerInterface*                          server_engine_;
+    ServerEngineInterface*                          server_engine_;
 
     std::unique_ptr<grpc::ServerCompletionQueue>  cq_;
     std::unique_ptr<grpc::Server>                 server_;

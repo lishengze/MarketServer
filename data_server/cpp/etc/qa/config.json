@@ -7,5 +7,6 @@
       "pwd" : "bcts",
       "schema": "market"
     },
-    "kafka_ip_": "43.154.179.47:9117"
+    "kafka_ip_": "43.154.179.47:9117",
+    "grpc_listen_ip": "0.0.0.0:5008"
 }

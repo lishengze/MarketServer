@@ -91,6 +91,7 @@ bool DBEngine::prepare_statement()
 
 bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
 {
+    bool result = false;
     try
     {
         string kline_talbe_name = get_kline_table_name(exchange, symbol);
@@ -99,8 +100,6 @@ bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
         {
             update_table_list();
         }
-
-        init_kline_prestmt(exchange, symbol);
 
         if (table_set_.find(kline_talbe_name) == table_set_.end())
         {
@@ -115,21 +114,23 @@ bool DBEngine::create_kline_table(const string& exchange, const string& symbol)
             if (table_set_.find(kline_talbe_name) == table_set_.end())
             {
                 LOG_ERROR("Create " + kline_talbe_name + " Failed!");
-                return false;
+                result = false;
             }
             else
             {
                 LOG_INFO("Create " + kline_talbe_name + " Successfully!");
-                return true;
+                result = true;
             }
         }
         else
         {
-
             LOG_WARN("Table " + kline_talbe_name + " was created!");
         }
 
-        return true;
+        init_kline_prestmt(exchange, symbol);
+
+        result = true;
+        return result;
     }
     catch(const std::exception& e)
     {
@@ -336,7 +337,10 @@ bool DBEngine::get_nearest_kline(const ReqKlineData& req_kline_info, KlineData& 
 
         if (conn_)
         {
-            string sql_str = get_kline_sql_str(req_kline_info.exchange, req_kline_info.symbol, req_kline_info.start_time, req_kline_info.end_time);
+            string sql_str = get_kline_sql_str(req_kline_info.exchange, req_kline_info.symbol, req_kline_info.start_time);
+
+            LOG_INFO(sql_str);
+            
             sql::Statement* stmt = conn_->createStatement();
             sql::ResultSet* result = stmt->executeQuery(sql_str);
 
@@ -567,6 +571,7 @@ bool DBEnginePool::insert_kline_data(const KlineData& kline_data)
     {
         if (!check_kline_table(kline_data.exchange,kline_data.symbol))
         {
+            LOG_WARN(get_kline_table_name(kline_data.exchange,kline_data.symbol) + " needed to be created!");
             create_kline_table(kline_data.exchange, kline_data.symbol);
         }
 
@@ -574,7 +579,6 @@ bool DBEnginePool::insert_kline_data(const KlineData& kline_data)
 
         if (db_engine)
         {
-
             db_engine->insert_kline_data(kline_data);
 
             release_db(db_engine);

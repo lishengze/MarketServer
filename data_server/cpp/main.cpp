@@ -6,6 +6,8 @@
 
 #include "test/test.h"
 #include "config/config.h"
+#include "server_engine.h"
+
 
 // exit handler function
 // void setup_signal_handler_callback()
@@ -115,6 +117,16 @@ int main(int argc, char** argv) {
 
     CONFIG->load_config(config_file_name);
 
+
+    ServerEngine server_engine;
+
+    server_engine.start();
+
+    while (true)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+    }
+
     // RiskControllerServer riskControllerServer(config_file_name);
     // riskControllerServer.start();
     
@@ -124,7 +136,7 @@ int main(int argc, char** argv) {
     // // launch the engine
     // engine_pool.block();
 
-    TestMain();
+    // TestMain();
 
     std::cout << "exit" << std::endl;
     return 0;

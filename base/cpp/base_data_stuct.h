@@ -490,6 +490,11 @@ struct ReqTradeData
 
     ReqTradeData() {}
 
+    string str()  const
+    {
+        return exchange + "." + symbol + ": " + utrade::pandora::ToSecondStr(time);
+    }
+
     string symbol;
     string exchange;
     uint64 time;

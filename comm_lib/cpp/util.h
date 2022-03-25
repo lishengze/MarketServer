@@ -8,6 +8,7 @@
 
 COMM_NAMESPACE_START
 
+
 string get_kline_topic(string exchange, string symbol);
 
 string get_depth_topic(string exchange, string symbol);
@@ -22,11 +23,7 @@ string get_trade_jsonstr(const TradeData& trade);
 
 ReqTradeData get_req_trade(const PReqTradeInfo& proto_reqtrade);
 
-inline void init_log(string program_name="comm", string work_dir="")
-{
-    COMM_LOG->set_work_dir(work_dir);
-    COMM_LOG->set_program_name(program_name);
-    COMM_LOG->start();
-}
+
+void init_log(string program_name="comm", string work_dir="");
 
 COMM_NAMESPACE_END

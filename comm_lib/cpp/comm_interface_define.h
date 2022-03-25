@@ -7,7 +7,7 @@
 
 
 COMM_NAMESPACE_START
-class GrpcServerInterface
+class ServerEngineInterface
 {
     public:
 

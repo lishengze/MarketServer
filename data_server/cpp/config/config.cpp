@@ -46,6 +46,17 @@ void Config::load_config(string file_name)
             {
                 LOG_ERROR("Config Need Kafka Ip");
             }
+
+
+            if (!js["grpc_listen_ip"].is_null())
+            {
+                grpc_listen_ip_ = js["grpc_listen_ip"].get<std::string>();
+            }
+            else
+            {
+                LOG_ERROR("Config Need grpc_listen_ip");
+            }
+
             LOG_INFO("\nConfig: \n" + str());            
         }    
     }

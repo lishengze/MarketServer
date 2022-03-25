@@ -1,5 +1,7 @@
 #include "util.h"
 
+static std::atomic_bool g_log_init{false};
+
 COMM_NAMESPACE_START
 
 string get_kline_topic(string exchange, string symbol)
@@ -160,6 +162,18 @@ ReqTradeData get_req_trade(const PReqTradeInfo& proto_reqtrade)
     result.time = proto_reqtrade.time();
 
     return result;
+}
+
+void init_log(string program_name, string work_dir)
+{
+
+    if (g_log_init) return;
+
+    g_log_init = true;
+
+    COMM_LOG->set_work_dir(work_dir);
+    COMM_LOG->set_program_name(program_name);
+    COMM_LOG->start();
 }
 
 COMM_NAMESPACE_END

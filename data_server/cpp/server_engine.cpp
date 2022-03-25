@@ -1,15 +1,29 @@
 #include "server_engine.h"
 
-#include "db_engine/db_engine.h"
 #include "Log/log.h"
 #include "config/config.h"
 #include <signal.h>
 
 int volatile ServerEngine::signal_sys = SIGINT;
 
+USING_COMM_NAMESPACE
+
 ServerEngine::ServerEngine()
 {
+    grpc_server_sptr_ = boost::make_shared<GrpcServer>(KAFKA_IP, this);
 
+    db_engine_sptr_ = boost::make_shared<DBEnginePool>(DATABASE_INFO, this);
+
+    comm_server_sptr = boost::make_shared<Comm>(GRPC_LISTEN_IP, NET_TYPE::KAFKA, SERIALIZE_TYPE::PROTOBUF, this);
+}
+
+MetaType get_test_kline_meta()
+{
+    MetaType test_meta;
+    std::set<string> exchange_set;
+    exchange_set.emplace("FTX");
+    test_meta["BTC_USDT"] = exchange_set;
+    return test_meta;
 }
 
 
@@ -18,12 +32,16 @@ void ServerEngine::start()
     try
     {
         LOG_INFO("Start");
-        // bcts::comm::MetaType test_meta = get_test_meta();
 
-        // // comm_server_sptr->set_kline_meta(test_meta);
+        grpc_server_sptr_->start();
+
+        bcts::comm::MetaType test_meta = get_test_kline_meta();
+
+        comm_server_sptr->set_kline_meta(test_meta);
+
         // comm_server_sptr->set_trade_meta(test_meta);
 
-        // comm_server_sptr->launch();
+        comm_server_sptr->launch();
     }
     catch(const std::exception& e)
     {
@@ -35,8 +53,8 @@ void ServerEngine::on_kline(KlineData& kline_data)
 {
     try
     {
-        // insert_kline_data(kline_data);
         LOG_INFO(kline_data.str());
+        insert_kline_data(kline_data);       
     }
     catch(const std::exception& e)
     {
@@ -60,7 +78,7 @@ void ServerEngine::insert_kline_data(const KlineData& kline_data)
 {
     try
     {
-        // db_engine_sptr_->insert_kline_data(kline_data);
+        db_engine_sptr_->insert_kline_data(kline_data);
     }
     catch(const std::exception& e)
     {
@@ -72,25 +90,27 @@ bool ServerEngine::get_req_trade_info(const ReqTradeData& req_trade, TradeData& 
 {
     try
     {
-        // ReqKlineData req_kline;
-        // req_kline.exchange = req_trade.exchange;
-        // req_kline.symbol = req_trade.symbol;
+        LOG_INFO(req_trade.str());
+
+        ReqKlineData req_kline;
+        req_kline.exchange = req_trade.exchange;
+        req_kline.symbol = req_trade.symbol;
 
 
-        // req_kline.start_time = req_trade.time;
-        // req_kline.end_time = req_trade.time;
+        req_kline.start_time = req_trade.time;
+        req_kline.end_time = req_trade.time;
 
-        // req_kline.count = 1;
+        req_kline.count = 1;
 
-        // KlineData kline_data;
+        KlineData kline_data;
 
-        // db_engine_sptr_->get_nearest_kline(req_kline, kline_data);
+        db_engine_sptr_->get_nearest_kline(req_kline, kline_data);
 
-        // dst_trade_data.exchange = req_trade.exchange;
-        // dst_trade_data.symbol = req_trade.symbol;
+        dst_trade_data.exchange = req_trade.exchange;
+        dst_trade_data.symbol = req_trade.symbol;
 
-        // dst_trade_data.price = kline_data.px_close;
-        // dst_trade_data.volume = kline_data.volume;
+        dst_trade_data.price = kline_data.px_close;
+        dst_trade_data.volume = kline_data.volume;
 
         return true;
     }

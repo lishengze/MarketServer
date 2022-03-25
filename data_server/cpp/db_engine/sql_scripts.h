@@ -114,3 +114,19 @@ inline string get_kline_sql_str(const string& exchange, const string& symbol, ui
     }
     return "";
 }
+
+inline string get_kline_sql_str(const string& exchange, const string& symbol, uint64 time)
+{
+    try
+    {
+        string table_name = get_kline_table_name(exchange, symbol);
+        string result = string("select * from ") + table_name 
+                      + " where time==" + std::to_string(time)  + ";";
+        return result;       
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return "";
+}

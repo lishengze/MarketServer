@@ -1,11 +1,12 @@
 {
     "database" :
     {
-      "host" : "tcp://10.8.150.66", 
+      "host" : "tcp://127.0.0.1", 
       "port" : 3306,
       "usr" : "bcts",
       "pwd" : "bcts",
       "schema": "market"
     },
-    "kafka_ip": "43.154.179.47:9117"
+    "kafka_ip": "127.0.0.1:9117",
+    "grpc_listen_ip": "0.0.0.0:5008"
 }
