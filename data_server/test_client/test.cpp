@@ -8,11 +8,11 @@ void test_grpc_client()
 {
     GrpcClient client("0.0.0.0:5008");
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 1; ++i)
     {
         ReqTradeInfoLocal req_trade_info;
         req_trade_info.exchange = "FTX";
-        req_trade_info.symbol = "symbol";
+        req_trade_info.symbol = "BTC_USDT";
         req_trade_info.time = 1648210737040520318;
 
         client.request_trade_data(req_trade_info);   

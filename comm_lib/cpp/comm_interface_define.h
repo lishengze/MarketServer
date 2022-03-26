@@ -13,7 +13,10 @@ class ServerEngineInterface
 
     void start() {}
 
-    bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data) {}
+    virtual bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data) {
+        COMM_LOG_INFO("ServerEngineInterface get_req_trade_info");
+        return true;
+    }
 };
 
 class QuoteSourceCallbackInterface

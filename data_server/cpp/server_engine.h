@@ -42,7 +42,7 @@ class ServerEngine:public bcts::comm::QuoteSourceCallbackInterface, public bcts:
 
 
 
-        bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
+        virtual bool get_req_trade_info(const ReqTradeData& req_trade, TradeData& dst_trade_data);
 
         void insert_kline_data(const KlineData& kline_data);
 

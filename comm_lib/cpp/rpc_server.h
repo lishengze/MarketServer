@@ -34,7 +34,7 @@ public:
 
 private:
     string                                        address_;
-    ServerEngineInterface*                          server_engine_;
+    ServerEngineInterface*                        server_engine_;
 
     std::unique_ptr<grpc::ServerCompletionQueue>  cq_;
     std::unique_ptr<grpc::Server>                 server_;

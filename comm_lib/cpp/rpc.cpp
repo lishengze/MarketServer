@@ -121,6 +121,8 @@ void RequestTradeDataRPC::proceed()
 
         server_->get_req_trade_info(req_trade, trade_data);
 
+        COMM_LOG_INFO("Get Trade Data: " + trade_data.str());
+
 
         reply_info_.set_exchange(request_info_.exchange());
 
@@ -128,11 +130,17 @@ void RequestTradeDataRPC::proceed()
 
         reply_info_.set_time(utrade::pandora::NanoTime());
 
-        reply_info_.mutable_price()->set_precise(8);
-        reply_info_.mutable_price()->set_value(trade_data.price.get_value());
+        set_decimal(reply_info_.mutable_price(), trade_data.price);
+        set_decimal(reply_info_.mutable_volume(), trade_data.volume);
 
-        reply_info_.mutable_volume()->set_precise(8);
-        reply_info_.mutable_volume()->set_value(trade_data.volume.get_value());           
+        COMM_LOG_INFO("[PRICE]: value: " + std::to_string(reply_info_.mutable_price()->value()) 
+                + ", precise: " + std::to_string(reply_info_.mutable_price()->precise()) );
+
+        // reply_info_.mutable_price()->set_precise(8);
+        // reply_info_.mutable_price()->set_value(trade_data.price.get_value());
+
+        // reply_info_.mutable_volume()->set_precise(8);
+        // reply_info_.mutable_volume()->set_value(trade_data.volume.get_value());           
 
         is_inner_cq_event_ = true;        
 

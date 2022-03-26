@@ -82,6 +82,8 @@ void Comm::launch()
     try
     {
         net_server_->launch();
+
+        COMM_LOG_INFO("Comm launch End!");        
     }
     catch(const std::exception& e)
     {

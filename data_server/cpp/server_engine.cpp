@@ -40,6 +40,8 @@ void ServerEngine::start()
         comm_server_sptr->set_kline_meta(test_meta);
 
         comm_server_sptr->launch();
+
+        LOG_INFO("Start End!");
     }
     catch(const std::exception& e)
     {
@@ -104,11 +106,15 @@ bool ServerEngine::get_req_trade_info(const ReqTradeData& req_trade, TradeData& 
 
         db_engine_sptr_->get_nearest_kline(req_kline, kline_data);
 
+        dst_trade_data.time = kline_data.index;
         dst_trade_data.exchange = req_trade.exchange;
         dst_trade_data.symbol = req_trade.symbol;
 
         dst_trade_data.price = kline_data.px_close;
         dst_trade_data.volume = kline_data.volume;
+
+        LOG_INFO("DST TRADE: " + dst_trade_data.str());
+        LOG_INFO("KLINE: " + kline_data.str());
 
         return true;
     }

@@ -14,14 +14,6 @@
 
 COMM_NAMESPACE_START
 
-
-
-inline void set_decimal(PDecimal* dst, const SDecimal& src)
-{
-    dst->set_precise(src.prec());
-    dst->set_value(src.value());
-}
-
 void set_depth(PRepeatedDepth* depth_list,  const map<SDecimal, SDepth>& src)
 {
     try

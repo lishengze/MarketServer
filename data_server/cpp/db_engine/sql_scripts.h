@@ -121,7 +121,7 @@ inline string get_kline_sql_str(const string& exchange, const string& symbol, ui
     {
         string table_name = get_kline_table_name(exchange, symbol);
         string result = string("select * from ") + table_name 
-                      + " where time==" + std::to_string(time)  + ";";
+                      + " where time=" + std::to_string(time)  + ";";
         return result;       
     }
     catch(const std::exception& e)

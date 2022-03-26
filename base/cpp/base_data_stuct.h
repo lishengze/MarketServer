@@ -451,7 +451,7 @@ struct TradeData
 
             stream_obj  << "symbol: " << symbol
                         << ", exchange: " << exchange                         
-                        << ", time: " << get_sec_time_str(time)  
+                        << ", time: " << utrade::pandora::ToSecondStr(time)  
                         << ", price: " << price.get_value() 
                         << ", volume: "<< volume.get_value() 
                         << ", sequence_no: " << sequence_no

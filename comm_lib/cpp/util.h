@@ -8,6 +8,11 @@
 
 COMM_NAMESPACE_START
 
+inline void set_decimal(PDecimal* dst, const SDecimal& src)
+{
+    dst->set_precise(src.prec());
+    dst->set_value(src.value());
+}
 
 string get_kline_topic(string exchange, string symbol);
 

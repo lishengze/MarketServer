@@ -64,8 +64,11 @@ void GrpcClient::get_trade_data(const ReqTradeInfoLocal& req_info)
         while(reader->Read(&reply))
         {
             LOG_INFO(reply.exchange() + "." +reply.symbol() 
-                    + ", price: " + std::to_string(reply.price().value()) 
-                    + ", volume: " +  std::to_string(reply.volume().value()));
+                    + ", price: " + std::to_string(reply.mutable_price()->value() / pow(10, reply.mutable_price()->precise() ) ) 
+                    + ", volume: " +  std::to_string(reply.mutable_volume()->value() / pow(10, reply.mutable_volume()->precise() )));
+
+            LOG_INFO("[PRICE]: value: " + std::to_string(reply.mutable_price()->value()) 
+                + ", precise: " + std::to_string(reply.mutable_price()->precise()) );
         }
 
         Status status = reader->Finish();
@@ -107,8 +110,11 @@ void GrpcClient::request_trade_data(const ReqTradeInfoLocal& req_info)
         if (status.ok())
         {
             LOG_INFO(reply.exchange() + "." +reply.symbol() 
-                    + ", price: " + std::to_string(reply.price().value()) 
-                    + ", volume: " +  std::to_string(reply.volume().value()));
+                    + ", price: " + std::to_string(reply.mutable_price()->value() / pow(10, reply.mutable_price()->precise() ) ) 
+                    + ", volume: " +  std::to_string(reply.mutable_volume()->value() / pow(10, reply.mutable_volume()->precise() )));
+
+            LOG_INFO("[PRICE]: value: " + std::to_string(reply.mutable_price()->value()) 
+                + ", precise: " + std::to_string(reply.mutable_price()->precise()) );
         }
 
         // switch(channel->GetState(true)) {
