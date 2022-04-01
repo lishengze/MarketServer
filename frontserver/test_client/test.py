@@ -187,7 +187,7 @@ def test_websocket():
     # ip = "ws://127.0.0.1"
     # ip = "ws://18.166.210.94"
     port = 8114
-    url = ip + ":" + str(port) + "/trading/market"
+    url = ip + ":" + str(port) + "/trading/marketws"
     print("\n\n***** Connect %s *****" % (url))
     
     ws = websocket.WebSocketApp(url,
