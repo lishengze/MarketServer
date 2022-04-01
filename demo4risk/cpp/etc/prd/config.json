@@ -1,11 +1,11 @@
 {
     "grpc": {
         "publish_addr": "0.0.0.0:8111",
-        "quote_addr": "118.193.35.160:8110",
-        "account_addr": "36.255.220.139:9000"
+        "quote_addr": "127.0.0.1:8110",
+        "account_addr": "10.11.2.135:8204"
     },
     "nacos": {
-        "addr": "36.255.220.139:8848",
+        "addr": "10.11.2.28:8848",
         "namespace": "bcts"
     },
     "debug": {
@@ -18,7 +18,7 @@
     "fee_risk_ctrl_open": false,
     "account_risk_ctrl_open": false,
     "order_risk_ctrl_open": false,
-    "bias_risk_ctrl_open": false,
+    "bias_risk_ctrl_open": true,
     "watermark_risk_ctrl_open": false,   
     "pricesion_risk_ctrl_open": false,
     "publish_ctrl_open":true
