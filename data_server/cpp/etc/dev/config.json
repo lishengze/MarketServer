@@ -8,5 +8,21 @@
       "schema": "market"
     },
     "kafka_ip": "127.0.0.1:9117",
+    "kafka_subinfo":
+    {
+      "kline":
+      {
+        "FTX":["BTC_USDT"],
+        "OKEX":["BTC_USDT"],
+        "BCTS":["BTC_USDT"]
+      },
+      "trade":["BTC_USDT"],
+      "depth":
+      {
+        "FTX":["BTC_USDT"],
+        "OKEX":["BTC_USDT"],
+        "BCTS":["BTC_USDT"]        
+      }
+    },
     "grpc_listen_ip": "0.0.0.0:5008"
 }

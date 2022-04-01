@@ -16,7 +16,7 @@ set(BOOST_ROOT /usr/local/boost_1_68)
 AUX_SOURCE_DIRECTORY(. MAIN_SRC)
 ###############################################################################################
 INCLUDE_DIRECTORIES(".")
-INCLUDE_DIRECTORIES("../uWebsockets")
+INCLUDE_DIRECTORIES("../include/uWebsockets")
 
 FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
 INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})

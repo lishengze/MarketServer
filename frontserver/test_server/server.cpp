@@ -79,7 +79,7 @@ void Server::start()
 {
     cout << "Start Listen: " << server_port_ << endl;
 
-    uWS::App().ws<PerSocketData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
+    uWS::App().ws<PerSocketData>("/trading/market", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
         if (token) {
             std::cout << "Listening on port " << server_port_ << std::endl;
         }
