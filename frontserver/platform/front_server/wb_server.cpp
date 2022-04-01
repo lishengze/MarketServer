@@ -144,7 +144,7 @@ void WBServer::listen()
 {
     try
     {
-        uWS::App().ws<WSData>("/*", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
+        uWS::App().ws<WSData>("/trading/market", std::move(websocket_behavior_)).listen(server_port_, [this](auto* token){
             if (token) {
                 LOG_INFO("WServer Start Listen: " + std::to_string(server_port_));
             }
