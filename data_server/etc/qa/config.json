@@ -1,7 +1,7 @@
 {
     "database" :
     {
-      "host" : "tcp://10.8.150.66", 
+      "host" : "tcp://127.0.0.1", 
       "port" : 3306,
       "usr" : "bcts",
       "pwd" : "bcts",
