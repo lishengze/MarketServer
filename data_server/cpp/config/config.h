@@ -73,3 +73,7 @@ class Config
 #define DATABASE_INFO CONFIG->database_info_
 #define KAFKA_IP CONFIG->kafka_ip_
 #define GRPC_LISTEN_IP CONFIG->grpc_listen_ip_
+
+#define KLINE_META CONFIG->kline_meta_data_
+#define TRADE_META CONFIG->trade_meta_data_
+#define DEPTH_META CONFIG->depth_meta_data_

@@ -741,6 +741,7 @@ void KafkaServer::set_kline_meta(const MetaType meta)
 {
     try
     {
+        if (meta.size() == 0) return;
         std::set<string> new_topics;
         for (auto iter:meta)
         {
@@ -766,6 +767,7 @@ void KafkaServer::set_depth_meta(const MetaType meta)
 {
     try
     {
+        if (meta.size() == 0) return;
         std::set<string> new_topics;
         for (auto iter:meta)
         {
@@ -791,6 +793,8 @@ void KafkaServer::set_trade_meta(const MetaType meta)
 {
     try
     {
+        if (meta.size() == 0) return;
+        
         std::set<string> new_topics;
         for (auto iter:meta)
         {
