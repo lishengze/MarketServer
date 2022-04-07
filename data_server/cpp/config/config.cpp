@@ -4,6 +4,8 @@
 #include "pandora/util/json.hpp"
 #include "../Log/log.h"
 
+USING_COMM_NAMESPACE
+
 void Config::load_config(string file_name)
 {
     try
@@ -59,6 +61,70 @@ void Config::load_config(string file_name)
 
             LOG_INFO("\nConfig: \n" + str());            
         }    
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+void Config::parse_meta_data_atom(nlohmann::json& js, MetaType& meta)
+{
+    try
+    {
+        meta.clear();
+        for (auto iter = js.begin() ; iter != js.end() ; ++iter)
+        {
+            string exchange = iter.key();
+            nlohmann::json& symbol_list = iter.value();
+
+            for (auto symbol_iter = js.begin(); symbol_iter != js.end() ; ++symbol_iter)
+            {
+                string symbol = (*iter).get<string>();
+                meta[symbol].emplace(exchange);
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+
+void Config::parse_meta_data(nlohmann::json& js)
+{
+    try
+    {
+        if (!js["meta_data"].is_null())
+        {
+            nlohmann::json& meta_data_js = js["meta_data"];
+
+            if (!meta_data_js["kline"].is_null())
+            {
+                nlohmann::json& src_data = meta_data_js["kline"];
+
+                parse_meta_data_atom(src_data, kline_meta_data_);
+            }
+
+            if (!meta_data_js["Trade"].is_null())
+            {
+                nlohmann::json& src_data = meta_data_js["Trade"];
+
+                parse_meta_data_atom(src_data, trade_meta_data_);
+            }
+
+            if (!meta_data_js["Depth"].is_null())
+            {
+                nlohmann::json& src_data = meta_data_js["Depth"];
+
+                parse_meta_data_atom(src_data, depth_meta_data_);
+            }                        
+        }
+        else
+        {
+            LOG_ERROR("Config Need meta_data");
+        }
     }
     catch(const std::exception& e)
     {
