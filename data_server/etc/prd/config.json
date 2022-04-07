@@ -7,5 +7,18 @@
       "pwd" : "bcts",
       "schema": "market"
     },
+    "meta_data":
+    {
+        "kline": {
+          "FTX": ["BTC_USDT"]
+        },
+        "Trade": {
+          "FTX": ["BTC_USDT"]
+        },
+        "Depth": {
+          "FTX": ["BTC_USDT"]
+        }
+    },
+    "grpc_listen_ip": "0.0.0.0:8811",    
     "kafka_ip_": "43.154.179.47:9117"
 }

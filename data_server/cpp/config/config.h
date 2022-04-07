@@ -54,6 +54,8 @@ class Config
 
         string str();
 
+        string meta_str(MetaType& meta_data);
+
 
     public:
         string                  file_name_;
