@@ -5,7 +5,7 @@
       "port" : 3306,
       "usr" : "bcts",
       "pwd" : "bcts",
-      "schema": "market"
+      "schema": "BCTS@market123"
     },
-    "kafka_ip_": "43.154.179.47:9117"
+    "kafka_ip_": "127.0.0.1:9117"
 }
