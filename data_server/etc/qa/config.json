@@ -4,8 +4,8 @@
       "host" : "tcp://127.0.0.1", 
       "port" : 3306,
       "usr" : "bcts",
-      "pwd" : "bcts",
-      "schema": "BCTS@market123"
+      "pwd" : "BCTS@market123",
+      "schema": "market"
     },
     "kafka_ip_": "127.0.0.1:9117"
 }
