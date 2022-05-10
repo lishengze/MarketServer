@@ -635,7 +635,7 @@ void RedisQuote::check_exchange_symbol_depth_alive()
                 const TExchange& exchange = iter1.first;
                 const TSymbol& symbol = iter2.first;
 
-                // LOG_DEBUG(exchange + "." + symbol + ": " +std::to_string(iter2.second));
+                LOG_DEBUG(exchange + "." + symbol + ": " +std::to_string(iter2.second));
 
                 if (iter2.second == 0)
                 {
