@@ -744,9 +744,13 @@ void RedisQuote::_loopng_check_heartbeat()
     LOG_WARN("reconnect redis ...");
     
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
+    LOG_WARN("reconnect redis ------- 1");
     redis_api_->RegisterSpi(this);
+    LOG_WARN("reconnect redis ------- 2");
     redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
+    LOG_WARN("reconnect redis ------- 3");
     last_time_ = get_miliseconds();
+    LOG_WARN("reconnect redis ------- 4");
     last_redis_time_ = get_miliseconds();
 
     LOG_WARN("reconnect redis over.");
