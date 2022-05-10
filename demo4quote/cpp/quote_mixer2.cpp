@@ -306,11 +306,11 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
 
             SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
 
-            if (symbol ==  "ETH_BTC")
-            {
-                LOG_DEBUG(quote_str(quote, 3));
-                // LOG_DEBUG(config.str());
-            }
+            // if (symbol ==  "ETH_BTC")
+            // {
+            //     // LOG_DEBUG(quote_str(quote, 3));
+            //     // LOG_DEBUG(config.str());
+            // }
 
             if( quote.origin_time > snap.origin_time ) // 交易所时间取聚合品种中较大的
                 snap.origin_time = quote.origin_time;
