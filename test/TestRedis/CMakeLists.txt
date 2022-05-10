@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(test)
-
-SET (BIN_NAME "test")
+PROJECT(TestRedis)
 
 if(DEFINED ENV{LOCAL})
     MESSAGE(STATUS "defined env.LOCAL")
@@ -22,48 +20,67 @@ INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
 ###############################################################################################
 # for general include
 INCLUDE_DIRECTORIES("../..")
+INCLUDE_DIRECTORIES("../../base/include")
 # for protos
 INCLUDE_DIRECTORIES("../../protos/cpp")
 # for include pandora
 INCLUDE_DIRECTORIES("../../component")
 
+INCLUDE_DIRECTORIES("/usr/local/include/nacos/")
+
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
+# AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
+# AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
+# AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # INCLUDE_DIRECTORIES("/root/.local/include")
 # for gogo
 # INCLUDE_DIRECTORIES("/home/mk/go/src")
 # for search lib pandora
-# LINK_DIRECTORIES("../../lib")
+LINK_DIRECTORIES("../../lib")
 # for search lib grpc
 # LINK_DIRECTORIES("/root/.local/lib")
 
 # INCLUDE_DIRECTORIES("/usr/local/include")
 
-# LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
+LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
+LINK_DIRECTORIES("/usr/local/grpc/lib/")
+
+if (BUILD_DYNAMIC)
+    message ("  build dynamic lib: yes")
+else()
+    message ("  build dynamic lib: no")
+endif()
 
 # ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
-# add_executable(${BIN_NAME} ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
-
-add_executable(${BIN_NAME} ${DIR_SRCS} ${LOG_SRCS})
-
+add_executable(TestRedis ${DIR_SRCS} ${LOG_SRCS})
 if(DEFINED ENV{LOCAL})
-    target_link_libraries(${BIN_NAME} asan ${Boost_LIBRARIES})
+    target_link_libraries(TestRedis asan ${Boost_LIBRARIES})
 else()
-    target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+    target_link_libraries(TestRedis ${Boost_LIBRARIES})
 endif()
 
-target_link_libraries(${BIN_NAME} pandora)
-target_link_libraries(${BIN_NAME} log4cplus)
-# target_link_libraries(${BIN_NAME} protobuf protoc protobuf-lite)
-# target_link_libraries(${BIN_NAME} grpc++_reflection grpc++ gpr ssl crypto)
-# target_link_libraries(${BIN_NAME} nacos-cli)
-# target_link_libraries(${BIN_NAME} reporter)
-# target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
+target_link_libraries(TestRedis pandora)
+target_link_libraries(TestRedis log4cplus)
 
-# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+# target_link_libraries(TestRedis absl_synchronization)
+# target_link_libraries(TestRedis protobuf protoc protobuf-lite)
+# target_link_libraries(TestRedis grpc++_reflection grpc++ gpr ssl crypto)
+
+# target_link_libraries(TestRedis nacos-cli)
+# target_link_libraries(TestRedis reporter)
+
+# # target_link_libraries(TestRedis dl)
+
+# target_link_libraries(TestRedis dl SQLiteCpp sqlite3)
+
+# TARGET_LINK_LIBRARIES(TestRedis ssl crypto)
+
+
+
 
 ###############################################################################################
