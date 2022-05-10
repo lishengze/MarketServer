@@ -126,10 +126,10 @@ void QuoteCacher::erase_dead_exchange_symbol_depth(const TExchange& exchange, co
 void QuoteCacher::on_snap(const TExchange& exchange, const TSymbol& symbol, const SDepthQuote& ori_quote) 
 {
 
-    if (symbol == "ETH_BTC")
-    {
-        LOG_DEBUG("Original ETH_BTC: " + quote_str(ori_quote));
-    }
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG("Original ETH_BTC: " + quote_str(ori_quote));
+    // }
 
     SDepthQuote& quote = const_cast<SDepthQuote&>(ori_quote);
     if (check_abnormal_quote(quote))
@@ -322,10 +322,10 @@ void QuoteMixer2::_calc_symbol(const TSymbol& symbol, const SMixerConfig& config
     normalize(snap.asks, config);
     normalize(snap.bids, config);
 
-    if (symbol == "ETH_BTC")
-    {
-        LOG_DEBUG(quote_str(snap, 3));
-    }
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG(quote_str(snap, 3));
+    // }
 
     if( snap.origin_time > 0 ) {
         snap.symbol = symbol;
@@ -374,10 +374,10 @@ void QuoteMixer2::on_snap(const TExchange& exchange, const TSymbol& symbol, cons
 {
     std::unique_lock<std::mutex> l{ mutex_quotes_ };
     
-    if (symbol == "ETH_BTC")
-    {
-        LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote, 3));
-    }
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG("\n" + exchange + "." + symbol + " Original Snap Data" + quote_str(quote, 3));
+    // }
 
     // cout << "QuoteMixer2::on_snap: " << quote.str() << endl;
     quotes_[symbol][exchange] = quote;

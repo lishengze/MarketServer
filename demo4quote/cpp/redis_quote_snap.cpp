@@ -74,10 +74,10 @@ void RedisSnapRequester::_get_snap(const TExchange& exchange, const TSymbol& sym
     // LOG_INFO("RedisSnapRequester: get snap " + depth_key);
     string depthData = redis_sync_api_->SyncGet(depth_key);
 
-    if (symbol == "ETH_BTC")
-    {
-        LOG_DEBUG("redis get msg: " + depthData);
-    }
+    // if (symbol == "ETH_BTC")
+    // {
+    //     LOG_DEBUG("redis get msg: " + depthData);
+    // }
 
 
     // 

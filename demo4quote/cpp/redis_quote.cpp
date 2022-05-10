@@ -283,10 +283,10 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         quote.exchange = exchange;
         quote.symbol = symbol;
 
-        if (symbol == "ETH_BTC")
-        {
-            LOG_DEBUG(config.str());
-        }
+        // if (symbol == "ETH_BTC")
+        // {
+        //     LOG_DEBUG(config.str());
+        // }
 
         if( !redisquote_to_quote(body, quote, config, true))
         {
