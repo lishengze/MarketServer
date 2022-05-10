@@ -988,7 +988,7 @@ void DataCenter::check_symbol()
 
             if (iter.second == 0)
             {
-                LOG_WARN(symbol + " is dead");
+                LOG_WARN(symbol + " is dead, erase it!");
 
                 erase_outdate_symbol(symbol);
 
