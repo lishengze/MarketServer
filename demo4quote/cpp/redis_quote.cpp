@@ -142,6 +142,12 @@ RedisQuote::RedisQuote()
 RedisQuote::~RedisQuote()
 {
     thread_run_ = false;
+
+    if (check_dead_symbol_thread_.joinable()) 
+    {
+        check_dead_symbol_thread_.join();
+    }
+
     if (checker_loop_) {
         if (checker_loop_->joinable()) {
             checker_loop_->join();
@@ -194,7 +200,11 @@ bool RedisQuote::start()
 
         type_tick now = get_miliseconds();
         last_time_ = now;
+
+        check_dead_symbol_thread_ = std::thread(&RedisQuote::check_dead_symbol_main, this);
+
         checker_loop_ = new std::thread(&RedisQuote::_looping, this);
+
     }
     
     return true;
@@ -283,10 +293,10 @@ void RedisQuote::on_message(const std::string& channel, const std::string& msg, 
         quote.exchange = exchange;
         quote.symbol = symbol;
 
-        if (symbol == "ETH_BTC")
-        {
-            LOG_DEBUG(config.str());
-        }
+        // if (symbol == "ETH_BTC")
+        // {
+        //     LOG_DEBUG(config.str());
+        // }
 
         if( !redisquote_to_quote(body, quote, config, true))
         {
@@ -559,6 +569,16 @@ int RedisQuote::_sync_by_update(const TExchange& exchange, const TSymbol& symbol
     }
 };
 
+void RedisQuote::check_dead_symbol_main()
+{
+    LOG_INFO("\n************* Check Dead Symbol Main ************* \n");
+    while(true) {
+        std::this_thread::sleep_for(std::chrono::seconds(CONFIG->check_secs));
+
+        check_exchange_symbol_depth_alive();        
+    }
+}
+
 void RedisQuote::_looping() 
 {
     last_statistic_time_ = get_miliseconds();
@@ -572,6 +592,8 @@ void RedisQuote::_looping()
 
         // 休眠
         std::this_thread::sleep_for(std::chrono::seconds(CONFIG->check_secs));
+
+        // check_exchange_symbol_depth_alive();
 
         type_tick now = get_miliseconds();
 
@@ -590,8 +612,6 @@ void RedisQuote::_looping()
             _looping_check_nodata();
             last_nodata_time_ = now;
         }
-
-        check_exchange_symbol_depth_alive();
 
         // // 打印统计信息
         // if( (now - last_statistic_time_) > 10*1000 ) 
@@ -635,7 +655,7 @@ void RedisQuote::check_exchange_symbol_depth_alive()
                 const TExchange& exchange = iter1.first;
                 const TSymbol& symbol = iter2.first;
 
-                // LOG_DEBUG(exchange + "." + symbol + ": " +std::to_string(iter2.second));
+                LOG_DEBUG(exchange + "." + symbol + ": " +std::to_string(iter2.second));
 
                 if (iter2.second == 0)
                 {
@@ -647,9 +667,7 @@ void RedisQuote::check_exchange_symbol_depth_alive()
                     iter2.second = -1;
                 }
                 else if (iter2.second == 1)
-                {
-
-                    
+                {                    
                     iter2.second = 0;
 
                     // LOG_DEBUG("reset " + exchange + "." + symbol + ": " +std::to_string(iter2.second));
@@ -726,9 +744,13 @@ void RedisQuote::_loopng_check_heartbeat()
     LOG_WARN("reconnect redis ...");
     
     redis_api_ = RedisApiPtr{new utrade::pandora::CRedisApi{CONFIG->logger_}};
+    // LOG_WARN("reconnect redis ------- 1");
     redis_api_->RegisterSpi(this);
+    // LOG_WARN("reconnect redis ------- 2");
     redis_api_->RegisterRedis(params_.host, params_.port, params_.password, utrade::pandora::RM_Subscribe);
+    // LOG_WARN("reconnect redis ------- 3");
     last_time_ = get_miliseconds();
+    // LOG_WARN("reconnect redis ------- 4");
     last_redis_time_ = get_miliseconds();
 
     LOG_WARN("reconnect redis over.");

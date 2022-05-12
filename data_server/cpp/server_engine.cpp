@@ -37,7 +37,11 @@ void ServerEngine::start()
 
         bcts::comm::MetaType test_meta = get_test_kline_meta();
 
-        comm_server_sptr->set_kline_meta(test_meta);
+        comm_server_sptr->set_kline_meta(KLINE_META);
+
+        comm_server_sptr->set_trade_meta(TRADE_META);
+
+        comm_server_sptr->set_depth_meta(DEPTH_META);
 
         comm_server_sptr->launch();
 

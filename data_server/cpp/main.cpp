@@ -118,9 +118,9 @@ int main(int argc, char** argv) {
     CONFIG->load_config(config_file_name);
 
 
-    ServerEngine server_engine;
+    // ServerEngine server_engine;
 
-    server_engine.start();
+    // server_engine.start();
 
     while (true)
     {

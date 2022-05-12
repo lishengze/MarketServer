@@ -984,11 +984,11 @@ void DataCenter::check_symbol()
         {
             const TSymbol& symbol = iter.first;
 
-            // LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
+            LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
 
             if (iter.second == 0)
             {
-                LOG_WARN(symbol + " is dead");
+                LOG_WARN(symbol + " is dead, erase it!");
 
                 erase_outdate_symbol(symbol);
 

@@ -118,6 +118,7 @@ private:
     void check_exchange_symbol_depth_alive();
     void erase_dead_exchange_symbol_depth(const TExchange& exchange, const TSymbol& symbol);
     void set_exchange_symbol_depth_alive_map(const TExchange& exchange, const TSymbol& symbol);
+    void check_dead_symbol_main();
 
     std::mutex mutex_check_;
 private:
@@ -151,6 +152,9 @@ private:
     //std::mutex mutex_checker_;
     type_tick last_time_; // 上一次从redis收到行情的时间
     std::thread* checker_loop_ = nullptr;
+    std::thread check_dead_symbol_thread_;
+
+
     std::atomic<bool> thread_run_;
     void _looping();
     void _loopng_check_heartbeat();
