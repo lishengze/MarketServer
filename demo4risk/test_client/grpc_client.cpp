@@ -151,10 +151,10 @@ string get_otc_failed_info(quote::service::v1::QuoteResponse_Result result) {
     }
 }
 
-string get_otc_direction(quote::service::v1::QuoteRequest_Direction& direction) {
+string get_otc_direction(quote::service::v1::QuoteRequest_Direction direction) {
     if (direction == quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_BUY) {
         return "buy";
-    } else (direction == quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_SELL) {
+    } else if(direction == quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_SELL) {
         return "Sell";
     }
 }
