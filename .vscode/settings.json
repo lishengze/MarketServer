@@ -102,7 +102,8 @@
         "semaphore": "cpp",
         "stop_token": "cpp",
         "grpc.h": "c",
-        "redis_quote_snap.h": "c"
+        "redis_quote_snap.h": "c",
+        "*.inc": "cpp"
     },
     "workbench.colorCustomizations": {
         "activityBar.background": "#242F32",
