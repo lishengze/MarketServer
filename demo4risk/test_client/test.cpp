@@ -24,7 +24,7 @@ void test_grpc_client()
 
 void test_otc() { 
     OTCClient client("0.0.0.0:8111");
-    client.otc_("BTC_USDT", 2);
+    client.OTC();
 }
 
 void TestMain()

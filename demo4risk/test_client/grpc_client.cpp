@@ -4,6 +4,9 @@
 
 #include <grpcpp/grpcpp.h>
 
+#define OTC_BUY quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_BUY
+#define OTC_SELL quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_SELL
+
 void GrpcClient::get_trade_data(const ReqTradeInfoLocal& req_info)
 {
     try
@@ -148,37 +151,72 @@ string get_otc_failed_info(quote::service::v1::QuoteResponse_Result result) {
     }
 }
 
-void OTCClient::otc_(string symbol, int data_count) {
+string get_otc_direction(quote::service::v1::QuoteRequest_Direction& direction) {
+    if (direction == quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_BUY) {
+        return "buy";
+    } else (direction == quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_SELL) {
+        return "Sell";
+    }
+}
+
+string get_otc_req_info(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction) { 
+    return string("Request: " + symbol + ", "+ std::to_string(amount) +" usdt, direction: " + get_otc_direction(direction));
+}
+
+void OTCClient::OTC() {
+    std::vector<string> symbol_list{"BTC_USDT", "ETH_USDT", "BTC_USD", "ETH_USD", "USDT_USD"}; 
+    int symbol_index = 0;
+    while (true) {
+
+        string cur_symbol = symbol_list[symbol_index % symbol_list.size()];
+        
+        QuoteResponse buy_result;
+        QuoteResponse sell_result;
+        double amount = 100;
+
+        if (!otc_(cur_symbol, amount, OTC_BUY, buy_result)) continue;
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        if (!otc_(cur_symbol, amount, OTC_SELL, sell_result)) continue;
+
+        if (std::stof(buy_result.price()) >= std::stof(sell_result.price())) {
+            LOG_ERROR(get_otc_req_info(cur_symbol, amount, OTC_BUY) + " buy_result: " + buy_result.price() + " \nbigger than \n" 
+                    + get_otc_req_info(cur_symbol, amount, OTC_BUY)+ " sell_result: " + sell_result.price());
+        }
+
+        symbol_index++;
+
+        std::this_thread::sleep_for(std::chrono::seconds(4));
+    }
+}
+
+bool OTCClient::otc_(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction, QuoteResponse& reply) {
 
         LOG_INFO("request_trade_data");
 
-        for (int i = 0; i<data_count; ++i) {
-            std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(address_, grpc::InsecureChannelCredentials());
 
-            std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
+        std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(address_, grpc::InsecureChannelCredentials());
 
-            QuoteRequest  request;
-            QuoteResponse reply;
+        std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
 
-            request.set_symbol(symbol);
-            request.set_turnover(100);
+        QuoteRequest  request;
 
-            LOG_INFO("Request: " + symbol + ", 100 usdt");
+        request.set_symbol(symbol);
+        request.set_turnover(amount);
+        request.set_direction(direction);
 
+        string req_info_str = get_otc_req_info(symbol, amount, direction);
 
-            request.set_direction(quote::service::v1::QuoteRequest_Direction::QuoteRequest_Direction_BUY);
+        ClientContext context;
 
-            ClientContext context;
+        grpc::Status status = stub->OtcQuote(&context, request, &reply);  
 
-            grpc::Status status = stub->OtcQuote(&context, request, &reply);  
-
-            if (reply.result() == quote::service::v1::QuoteResponse_Result::QuoteResponse_Result_OK) {
-                LOG_INFO("Reply Price: " + reply.price());
-            } else {
-                LOG_WARN("Request"  + symbol + ", 100 usdt Failed! " + get_otc_failed_info(reply.result()));
-            }
-
-
-            std::this_thread::sleep_for(std::chrono::seconds(3));
-        }
+        if (reply.result() == quote::service::v1::QuoteResponse_Result::QuoteResponse_Result_OK) {
+            return true;
+            LOG_INFO(req_info_str + ", Reply Price: " + reply.price());
+        } else {
+            LOG_WARN(req_info_str + " Failed! Msg: " + get_otc_failed_info(reply.result()));
+            return false;
+        }        
 }
