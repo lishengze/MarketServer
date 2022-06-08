@@ -164,7 +164,7 @@ string get_otc_req_info(string symbol, double amount, quote::service::v1::QuoteR
 }
 
 void OTCClient::OTC() {
-    std::vector<string> symbol_list{"BTC_USDT", "ETH_USDT", "BTC_USD", "ETH_USD", "USDT_USD"}; 
+    std::vector<string> symbol_list{"BTC_USDT", "ETH_USDT"}; 
     int symbol_index = 0;
     while (true) {
 
