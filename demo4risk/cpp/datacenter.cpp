@@ -746,21 +746,21 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_amount += cur_amounts;
 
                 LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_volume: "   + iter->second.total_volume.get_str_value() 
                         + ", total_volume: " + std::to_string(total_volume)
-                        + ", cur_amount: " + std::to_string(cur_amounts)
+                        + ", cur_amount: "   + std::to_string(cur_amounts)
                         + ", total_amount: " + std::to_string(total_amount)
-                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", otc_amount: "   + std::to_string(otc_amount)
                         + ", bid;");                
             } else {
                 total_volume += (otc_amount - total_amount) / price;
                 total_amount = otc_amount;
                 LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
-                        + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", cur_volume: "   + iter->second.total_volume.get_str_value() 
                         + ", total_volume: " + std::to_string(total_volume)
-                        + ", cur_amount: " + std::to_string(cur_amounts)
+                        + ", cur_amount: "   + std::to_string(cur_amounts)
                         + ", total_amount: " + std::to_string(total_amount)
-                        + ", otc_amount: " + std::to_string(otc_amount)
+                        + ", otc_amount: "   + std::to_string(otc_amount)
                         + ", bid;");
                 break;
             }
