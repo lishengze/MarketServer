@@ -180,7 +180,7 @@ void OTCClient::OTC() {
 
         if (!otc_(cur_symbol, amount, OTC_SELL, sell_result)) continue;
 
-        if (std::stof(buy_result.price()) >= std::stof(sell_result.price())) {
+        if (std::stof(buy_result.price()) < std::stof(sell_result.price())) {
             LOG_ERROR(get_otc_req_info(cur_symbol, amount, OTC_BUY) + " buy_result: " + buy_result.price() + " \nbigger than \n" 
                     + get_otc_req_info(cur_symbol, amount, OTC_BUY)+ " sell_result: " + sell_result.price());
         }
