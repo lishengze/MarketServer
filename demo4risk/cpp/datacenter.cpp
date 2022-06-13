@@ -753,6 +753,12 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                         + ", bid;");                
             } else {
                 double cur_volume = (otc_amount - total_amount) / price;
+
+                LOG_DEBUG("---- cur_volume: " + std::to_string(cur_volume) 
+                + ", otc_amount - total_amount: " + std::to_string(otc_amount - total_amount)
+                + ", price: " + std::to_string(price)
+                + ", restored_price: " + (otc_amount - total_amount)/cur_volume);
+
                 total_volume += cur_volume;
                 total_amount = otc_amount;
                 LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
