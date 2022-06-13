@@ -746,6 +746,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
                 LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
                         + ", cur_amount: " + cur_amounts.get_str_value()
                         + ", total_amount: " + total_amount.get_str_value()
                         + ", otc_amount: " + std::to_string(otc_amount)
@@ -755,6 +756,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_amount = otc_amount;
                 LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
+                        + ", total_volume: " + total_volume.get_str_value()
                         + ", cur_amount: " + cur_amounts.get_str_value()
                         + ", total_amount: " + total_amount.get_str_value()
                         + ", otc_amount: " + std::to_string(otc_amount)

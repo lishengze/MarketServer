@@ -209,7 +209,7 @@ bool OTCClient::otc_(string symbol, double amount, quote::service::v1::QuoteRequ
         grpc::Status status = stub->OtcQuote(&context, request, &reply);  
 
         if (reply.result() == quote::service::v1::QuoteResponse_Result::QuoteResponse_Result_OK) {
-            LOG_INFO(req_info_str + ", Reply Price: " + reply.price());
+            LOG_TRACE(req_info_str + ", Reply Price: " + reply.price());
             return true;
         } else {
             LOG_WARN(req_info_str + " Failed! Msg: " + get_otc_failed_info(reply.result()));
