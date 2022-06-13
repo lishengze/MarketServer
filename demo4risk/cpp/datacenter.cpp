@@ -714,7 +714,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += iter->second.total_volume.get_value();
                 total_amount += cur_amounts;
 
-                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                LOG_DEBUG("cur_price: " + std::to_string(price) 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
                         + ", cur_amount: " + std::to_string(cur_amounts)
                         + ", total_amount: " + std::to_string(total_amount)
@@ -724,7 +724,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
                 total_volume += (otc_amount - total_amount) / price;
                 total_amount = otc_amount;
 
-                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                LOG_DEBUG("done cur_price: " + std::to_string(price) 
                         + ", cur_volume: " + iter->second.total_volume.get_str_value() 
                         + ", cur_amount: " + std::to_string(cur_amounts)
                         + ", total_amount: " + std::to_string(total_amount)
@@ -739,12 +739,13 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             reset_price(price, config, false);
+
             double cur_amounts = iter->second.total_volume.get_value() * price;
             if( (total_amount + cur_amounts) <= otc_amount ) {
                 total_volume += iter->second.total_volume.get_value();
                 total_amount += cur_amounts;
 
-                LOG_DEBUG("cur_price: " + iter->first.get_str_value() 
+                LOG_DEBUG("cur_price: " + std::to_string(price) 
                         + ", cur_volume: "   + iter->second.total_volume.get_str_value() 
                         + ", total_volume: " + std::to_string(total_volume)
                         + ", cur_amount: "   + std::to_string(cur_amounts)
@@ -761,7 +762,7 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
 
                 total_volume += cur_volume;
                 total_amount = otc_amount;
-                LOG_DEBUG("done cur_price: " + iter->first.get_str_value() 
+                LOG_DEBUG("done cur_price: " + std::to_string(price) 
                         + ", cur_depth_volume: "   + iter->second.total_volume.get_str_value() 
                         + ", cur_volume: " + std::to_string(cur_volume)
                         + ", total_volume: " + std::to_string(total_volume)
