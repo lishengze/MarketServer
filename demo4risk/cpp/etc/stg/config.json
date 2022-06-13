@@ -2,10 +2,10 @@
     "grpc": {
         "publish_addr": "0.0.0.0:8111",
         "quote_addr": "127.0.0.1:8110",
-        "account_addr": "36.255.220.139:9000"
+        "account_addr": "10.11.2.135:8201"
     },
     "nacos": {
-        "addr": "16.162.137.156:8848",
+        "addr": "10.11.2.135:8848",
         "namespace": "bcts"
     },
     "debug": {
@@ -13,7 +13,7 @@
         "output_to_screen": 0,
         "dump_binary_only": 0
     },
-    "check_symbol_secs": 5,
+    "check_symbol_secs": 15,
     "test_symbol": "ETH_USDT",
     "fee_risk_ctrl_open": true,
     "account_risk_ctrl_open": true,
