@@ -392,7 +392,9 @@ KlineHubber::~KlineHubber()
 
 void KlineHubber::start()
 {
+    LOG_INFO("\n******** KlineHubber::recover_from_db Start! *******");
     recover_thread_ = std::thread(&KlineHubber::recover_from_db, this);
+    LOG_INFO("\n******** KlineHubber::recover_from_db End! *******");
 }
 
 void KlineHubber::recover_from_db()

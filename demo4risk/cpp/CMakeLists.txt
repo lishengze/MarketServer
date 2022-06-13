@@ -35,6 +35,8 @@ AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 # LINK_DIRECTORIES("../lib")
 # for search lib grpc
 LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
+LINK_DIRECTORIES("/usr/local/boost_1_68/lib/")
+
 
 ###############################################################################################
 add_executable(demo4risk ${UTIL_SRCS} ${DATA_STRUCT_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})

@@ -138,6 +138,8 @@ void ConfigurationClient::config_changed(const string& group, const string& data
 {
     try
     {
+        LOG_INFO("Config Changed: " + group + "." +dataid);
+
         if( group == "BCTS" && dataid == "HedgeParams" ) 
         {
             hedge_params_ = configInfo;
@@ -161,7 +163,7 @@ void ConfigurationClient::config_changed(const string& group, const string& data
     }
     catch(const std::exception& e)
     {
-        _log_and_print("[Exception] %s ", e.what());
+        LOG_ERROR(e.what());
     }
     
     // _log_and_print("nacos configuration %s-%s %s", group, dataid, configInfo);
@@ -175,7 +177,7 @@ void ConfigurationClient::_parse_config()
         hedgeParamsObject.Parse(hedge_params_.c_str());
         if(hedgeParamsObject.HasParseError())
         {
-            _log_and_print("parse HedgeParams error %d", hedgeParamsObject.GetParseError());
+            LOG_ERROR("parse HedgeParams error " + std::to_string(int(hedgeParamsObject.GetParseError())));
             return;
         }
             
@@ -183,7 +185,7 @@ void ConfigurationClient::_parse_config()
         symbolParamsObject.Parse(symbol_params_.c_str());
         if(symbolParamsObject.HasParseError())
         {
-            _log_and_print("parse SymbolParams error %d", symbolParamsObject.GetParseError());
+            LOG_ERROR("parse SymbolParams error " + std::to_string(int(symbolParamsObject.GetParseError())));
             return;
         }
             
@@ -191,13 +193,13 @@ void ConfigurationClient::_parse_config()
         riskParamsObject.Parse(risk_params_.c_str());
         if(riskParamsObject.HasParseError())
         {
-            _log_and_print("parse RiskParams error %d", riskParamsObject.GetParseError());
+            LOG_ERROR("parse RiskParams error %d" + std::to_string(int(riskParamsObject.GetParseError())));
             return;
         }
 
-        // LOG_INFO("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
-        //         + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
-        //         + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
+        LOG_TRACE("\nhedgeParamsObject: \n " + ToJson(hedgeParamsObject) 
+                + "\nsymbolParamsObject: \n " +  ToJson(symbolParamsObject)
+                + "\nriskParamsObject: \n " +  ToJson(riskParamsObject) );
 
         // 合并为内置配置格式
         Document output(rapidjson::Type::kObjectType);
@@ -207,6 +209,6 @@ void ConfigurationClient::_parse_config()
     }
     catch(const std::exception& e)
     {
-        _log_and_print("[Exception] %s ", e.what());
+        LOG_ERROR(e.what());
     }
 }
