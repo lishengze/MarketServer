@@ -212,6 +212,30 @@ void DataCenter::add_quote(SInnerQuote& quote)
     }        
 };
 
+void DataCenter::update_trade(const TradeData& trade)
+{
+    try
+    {
+        std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
+        trade_data_map_.emplace(std::make_pair(trade.symbol, std::move(trade)));
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
+double DataCenter::get_price(const string& symbol) {
+    std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
+
+    if (trade_data_map_.find(symbol) == trade_data_map_.end()) {
+        return 0;
+    } else {
+        return trade_data_map_[symbol].price;
+    }
+}
+
+
 void DataCenter::process_symbols(std::list<string> symbol_list)
 {
     try
@@ -565,10 +589,25 @@ void reset_price(double& price, MarketRiskConfig& config, bool is_ask)
     }
 }
 
-QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& dst_price, uint32 precise)
+double DataCenter::get_offset(double amount, const MarketRiskConfig& config)
+{
+    double offset = 0.0;
+
+    
+    return offset;
+}
+
+QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& dst_price, uint32 precise)
 {
     double total_volume = 0; 
     double total_amount = 0;
+
+    if (!get_price(config.symbol)) {
+        return QuoteResponse_Result_WRONG_SYMBOL;
+    }
+
+    double symbol_price = get_price(config.symbol);
+    double target_amount = volume * symbol_price;
 
     if( is_ask ) 
     {
@@ -660,31 +699,31 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
         
     double price = total_amount / total_volume;
     double ori_price = price;
+    double otc_offset = get_offset(target_amount, config);
 
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
-            price *= ( 1 + config.OtcOffset); 
+            price *= ( 1 + otc_offset); 
         } else {
-
-            if (config.OtcOffset > 1) config.OtcOffset = 1;
-            price *= ( 1 - config.OtcOffset); 
+            if (otc_offset > 1) otc_offset = 1;
+            price *= ( 1 - otc_offset); 
         }
     }
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
-            if (price < config.OtcOffset) price = 0;
-            else price -= config.OtcOffset;
+            if (price < otc_offset) price = 0;
+            else price -= otc_offset;
         } else {
-            price += config.OtcOffset;
+            price += otc_offset;
         }        
     }
 
     LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
             + ", bias_price: " + std::to_string(price)
             + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
-            + ", bias_value: " + std::to_string(config.OtcOffset)
+            + ", bias_value: " + std::to_string(otc_offset)
             + ", precise: " + std::to_string(precise));
 
     dst_price = price;
@@ -695,7 +734,8 @@ QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depth
     return QuoteResponse_Result_OK;
 }
 
-QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& dst_price, uint32 precise)
+// offset = quoted_offset + (readl_amount / quoted_amount_size) * quoted_amount_offset
+QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& dst_price, uint32 precise)
 {
     double total_volume = 0;
     double total_amount = 0;
@@ -783,35 +823,36 @@ QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depth
         LOG_DEBUG(msg);
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
     }
-        
 
+    double otc_offset = get_offset(otc_amount, config);
+        
     double price = total_amount / total_volume;
     double ori_price = price;
 
     if (config.OTCOffsetKind == 1)
     {
         if( is_ask ) {
-            price *= ( 1 + config.OtcOffset); 
+            price *= ( 1 + otc_offset); 
         } else {
 
-            if (config.OtcOffset > 1) config.OtcOffset = 1;
-            price *= ( 1 - config.OtcOffset); 
+            if (otc_offset > 1) otc_offset = 1;
+            price *= ( 1 - otc_offset); 
         }
     }
     else if (config.OTCOffsetKind == 2)
     {
         if( is_ask ) {
-            if (price < config.OtcOffset) price = 0;
-            else price -= config.OtcOffset;
+            if (price < otc_offset) price = 0;
+            else price -= otc_offset;
         } else {
-            price += config.OtcOffset;
+            price += otc_offset;
         }        
     }
 
     LOG_DEBUG("ori_price: " + std::to_string(ori_price) 
             + ", bias_price: " + std::to_string(price)
             + ", bias_kind: " + std::to_string(config.OTCOffsetKind)
-            + ", bias_value: " + std::to_string(config.OtcOffset)
+            + ", otc_offset: " + std::to_string(otc_offset)
             + ", precise: " + std::to_string(precise));
 
     dst_price = price;

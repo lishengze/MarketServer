@@ -221,6 +221,27 @@ struct AccountInfo
     "user":"admin",
     time":"2021-07-13 06:25:33"},
 */
+
+/*
+{
+    "symbol_id": "USDT_USD",
+    "switch": true,
+    "publish_frequency": 8000,
+    "publish_level": 20,
+    "price_offset_kind": 1,
+    "price_offset": 0.001,
+    "amount_offset_kind": 1,
+    "amount_offset": 0.5,
+    "user": "admin",
+    "time": "2022-03-14 09:03:22",
+    "quoted_offset_kind": 0,
+    "quoted_offset": 0,
+    "quoted_amount_size": 0,
+    "quoted_amount_offset": 0
+}
+*/
+
+// offset = quoted_offset + (readl_amount / quoted_amount_size) * quoted_amount_offset
 struct MarketRiskConfig
 {
     //double MakerFee; // 百分比；maker手续费
@@ -240,6 +261,11 @@ struct MarketRiskConfig
     uint32 OTCOffsetKind;    // 询价偏移算法，取值1或2，1表示百比分，2表示绝对值。默认为1.
 
     double OtcOffset;        // 询价偏移
+
+    double OTCAmountSize;
+    double OTCAmountOffset;
+
+    
     bool   IsPublish{true};
 
     std::string desc() const {

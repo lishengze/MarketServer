@@ -48,6 +48,13 @@ public:
 
     // 回调行情通知
     void add_quote(SInnerQuote& quote);
+
+    void update_trade(const TradeData& trade);
+
+    double get_price(const string& symbol);
+
+    double get_offset(double amount, const MarketRiskConfig& config);
+
     // 触发重新计算，并下发行情给所有client
     void change_account(const AccountInfo& info);
     // 触发重新计算，并下发行情给所有client
@@ -59,6 +66,11 @@ public:
 
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
+    
+    QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& dst_price, uint32 precise)
+
+    QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& dst_price, uint32 precise)
+
     // 询价查询
     QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price);
     // 注册推送接口
@@ -97,6 +109,9 @@ private:
 
     unordered_map<TSymbol, SInnerQuote> riskctrl_datas_;
     mutable std::mutex                  mutex_riskctrl_datas_;
+
+    unordered_map<TSymbol, TradeData>   trade_data_map_;
+    mutable std::mutex                  trade_data_mutex_;
 
     Params params_;
 

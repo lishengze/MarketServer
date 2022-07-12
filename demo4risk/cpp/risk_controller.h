@@ -27,6 +27,8 @@ public:
     // 聚合行情回调
     void on_snap(const SEData& quote);
 
+    void on_trade(const SETrade& trade);
+
     // 配置修改回调
     void on_configuration_update(const map<TSymbol, MarketRiskConfig>& config);
 

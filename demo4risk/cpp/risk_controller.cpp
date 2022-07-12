@@ -6,6 +6,7 @@
 #include "updater_quote.h"
 #include "Log/log.h"
 #include "util/tool.h"
+#include "base/cpp/base_data_stuct.h"
 
 // config file relative path
 const char* config_file = "config.json";
@@ -46,6 +47,23 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
         dst.bids[price] = depth;
     }
 }
+
+void SETradeToTrade(const SETrade& src, TradeData& dst)
+{    
+    try
+    {
+        assign(dst.symbol, src.symbol());
+        assign(dst.exchange, src.exchange());
+        dst.time = src.time();
+        Decimal_to_SDecimal(dst.price, src.price());
+        Decimal_to_SDecimal(dst.volume, src.volume());
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+}
+
 
 RiskControllerServer::RiskControllerServer(std::string config_file_name)
 {       
@@ -89,6 +107,16 @@ void RiskControllerServer::on_snap(const SEData& quote)
 
     datacenter_.add_quote(raw);
 }
+
+void RiskControllerServer::on_trade(const SETrade& trade)
+{
+    // QuoteData to SInnerQuote
+    TradeData _trade;
+    SETradeToTrade(trade, _trade);
+
+    datacenter_.update_trade(_trade);
+}
+
 
 void RiskControllerServer::on_configuration_update(const map<TSymbol, MarketRiskConfig>& config)
 {

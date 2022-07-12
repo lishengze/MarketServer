@@ -8,6 +8,7 @@
 class IQuoteUpdater {
 public:
     virtual void on_snap(const SEData& quote) = 0;
+    virtual void on_trade(const SETrade& trade) = 0;
 };
 
 class QuoteUpdater 
@@ -104,6 +105,10 @@ private:
 
                 callback->on_snap(quote);
             } else if( datatype == QUOTE_TYPE_TRADE ) {
+                SETrade trade;
+                if( !trade.ParseFromString(quoteData) )
+                    return false;    
+                callback->on_trade(trade);
             }
             startpos = pos2 + 1 + length;
         } 

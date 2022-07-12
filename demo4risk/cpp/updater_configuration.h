@@ -27,7 +27,7 @@ public:
     // derive from NacosClient
     void config_changed(const std::string& group, const std::string& dataid, const NacosString &configInfo);
 
-    void load_risk_params(const NacosString &configInfo);
+    void load_market_risk(const NacosString &configInfo);
 
     void load_symbol_params(const NacosString &configInfo);
 

@@ -51,6 +51,7 @@ using SEMultiData = quote::service::v1::MultiMarketStreamDataWithDecimal;
 using SEData = quote::service::v1::MarketStreamDataWithDecimal;
 using SEDepth = quote::service::v1::DepthWithDecimal;
 using SEDecimal = quote::service::v1::Decimal;
+using SETrade = quote::service::v1::TradeWithDecimal;
 using quote::service::v1::DataInBinary;
 
 using quote::service::v1::TradedOrderStreamData_Direction;

@@ -6,7 +6,7 @@ import time
 import _thread
 import time
 
-from Logger import *
+from frontserver.monitor.Logger import *
 
 logger = Logger();
 
@@ -39,8 +39,8 @@ def print_depth_data(dic):
         print(item)        
 
 def on_message(ws, message):
-    # print("on_message")
-    # print(message)
+    print("on_message")
+    print(message)
 
     dic = json.loads(message)
     if dic["type"] == "heartbeat":
@@ -108,7 +108,7 @@ def get_sub_kline_str(symbol="BTC_USDT"):
     sub_info = {
         "type":"kline_update",
         "symbol":symbol,
-        "data_count":str(600),
+        "data_count":str(2),
         "frequency":str(frequency)
     }
 
@@ -159,13 +159,13 @@ def on_open(ws):
 
     # ws.send(send_str)
 
-    # send_str = get_sub_kline_str(symbol = "BTC_USDT")
-
-    # ws.send(send_str)
-
-    send_str = get_sub_trade_str()
+    send_str = get_sub_kline_str(symbol = "BTC_USDT")
 
     ws.send(send_str)
+
+    # send_str = get_sub_trade_str()
+
+    # ws.send(send_str)
 
     # time.sleep(5)
 

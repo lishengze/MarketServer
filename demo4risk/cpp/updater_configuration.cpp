@@ -1,5 +1,6 @@
 #include "updater_configuration.h"
 #include "risk_controller_config.h"
+#include "pandora/util/float_util.h"
 
 void ConfigurationClient::_run()
 {
@@ -26,7 +27,7 @@ void ConfigurationClient::config_changed(const string& group, const string& data
             //     this->_parse_config();
             // }
 
-            load_risk_params(configInfo);
+            load_market_risk(configInfo);
         }
 
         if( dataid == "HedgeParams" ) 
@@ -51,7 +52,7 @@ void ConfigurationClient::config_changed(const string& group, const string& data
 
 }
 
-void ConfigurationClient::load_risk_params(const NacosString &configInfo)
+void ConfigurationClient::load_market_risk(const NacosString &configInfo)
 {
     try
     {
@@ -86,8 +87,11 @@ void ConfigurationClient::load_risk_params(const NacosString &configInfo)
 
             double DepositFundRatio = helper_get_double(*iter, "deposit_fund_ratio", 100); // 暂时没用
 
-            uint32 OTCOffsetKind = helper_get_uint32(*iter, "poll_offset_kind", 1); // 暂时没用
-            double OtcOffset = helper_get_double(*iter, "poll_offset", 0);
+            uint32 OTCOffsetKind = helper_get_uint32(*iter, "quoted_offset_kind", 1); // 暂时没用
+            double OtcOffset = helper_get_double(*iter, "quoted_offset", 0);
+
+            double OTCAmountSize = helper_get_double(*iter, "quoted_amount_size", 0);
+            double OTCAmountOffset = helper_get_double(*iter, "quoted_amount_offset", 0);
             
             if (PriceOffsetKind != 1 && PriceOffsetKind != 2) 
             {
@@ -122,7 +126,17 @@ void ConfigurationClient::load_risk_params(const NacosString &configInfo)
             {
                 LOG_WARN(symbol + " OtcOffset should in (0, 1) ,now is: " + std::to_string(PriceOffsetKind));
                 continue;
-            }                        
+            }                      
+
+            if (utrade::pandora::less_equal(OTCAmountSize, 0) ) {
+                LOG_WARN(symbol + " OTCAmountSize is " + std::to_string(OTCAmountSize));
+                continue;                
+            }
+
+            if (utrade::pandora::less_equal(OTCAmountOffset, 0) ) {
+                LOG_WARN(symbol + " OTCAmountOffset is " + std::to_string(OTCAmountOffset));
+                continue;                
+            }            
 
             if( symbol == "")
             {
@@ -143,6 +157,10 @@ void ConfigurationClient::load_risk_params(const NacosString &configInfo)
 
             cfg.OTCOffsetKind = OTCOffsetKind;
             cfg.OtcOffset = OtcOffset;
+
+            cfg.OTCAmountOffset = OTCAmountOffset;
+            cfg.OTCAmountSize = OTCAmountSize;
+
             cfg.IsPublish = IsPublish;
 
             output[symbol] = cfg;
