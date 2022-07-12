@@ -226,13 +226,21 @@ void DataCenter::update_trade(const TradeData& trade)
 }
 
 double DataCenter::get_price(const string& symbol) {
-    std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
+    try
+    {
+        std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
 
-    if (trade_data_map_.find(symbol) == trade_data_map_.end()) {
-        return 0;
-    } else {
-        return trade_data_map_[symbol].price;
+        if (trade_data_map_.find(symbol) == trade_data_map_.end()) {
+            return 0;
+        } else {
+            return trade_data_map_[symbol].price.get_value();
+        }
     }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    return 0.0;
 }
 
 
@@ -589,11 +597,24 @@ void reset_price(double& price, MarketRiskConfig& config, bool is_ask)
     }
 }
 
+// offset = quoted_offset + (readl_amount / quoted_amount_size) * quoted_amount_offset
 double DataCenter::get_offset(double amount, const MarketRiskConfig& config)
 {
     double offset = 0.0;
+    try
+    {
+        offset = config.OtcOffset + (amount / config.OTCAmountSize) * config.OTCAmountOffset;
 
-    
+        LOG_DEBUG(config.symbol + ", base_offset: " + std::to_string(config.OtcOffset) 
+                    + ", amount_offset: " + std::to_string(config.OTCAmountOffset)
+                    + ", amount_size: " + std::to_string(config.OTCAmountSize)
+                    + ", amount: " + std::to_string(amount) + ", offset: " + std::to_string(offset));
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+        
     return offset;
 }
 
@@ -608,6 +629,9 @@ QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerD
 
     double symbol_price = get_price(config.symbol);
     double target_amount = volume * symbol_price;
+
+    LOG_DEBUG(config.symbol + ", symbol_price: " + std::to_string(symbol_price) + ", volume: " + std::to_string(volume)
+                + ", target_amount: " + std::to_string(target_amount));
 
     if( is_ask ) 
     {
@@ -825,6 +849,8 @@ QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerD
     }
 
     double otc_offset = get_offset(otc_amount, config);
+
+    // LOG_DEBUG(config.symbol + ", " +);
         
     double price = total_amount / total_volume;
     double ori_price = price;

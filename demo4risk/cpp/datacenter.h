@@ -13,6 +13,7 @@
 #include "data_struct/data_struct.h"
 #include "util/tool.h"
 #include "Log/log.h"
+#include "base/cpp/base_data_stuct.h"
 
 
 class IDataCacher
@@ -67,9 +68,9 @@ public:
     // 触发指定品种重新计算，并下发该品种行情给所有client
     void change_orders(const string& symbol, const SOrder& order, const vector<SOrderPriceLevel>& asks, const vector<SOrderPriceLevel>& bids);
     
-    QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& dst_price, uint32 precise)
+    QuoteResponse_Result _calc_otc_by_volume(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double volume, SDecimal& dst_price, uint32 precise);
 
-    QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& dst_price, uint32 precise)
+    QuoteResponse_Result _calc_otc_by_amount(const map<SDecimal, SInnerDepth>& depths, bool is_ask, MarketRiskConfig& config, double otc_amount, SDecimal& dst_price, uint32 precise);
 
     // 询价查询
     QuoteResponse_Result otc_query(const TExchange& exchange, const TSymbol& symbol, QuoteRequest_Direction direction, double volume, double amount, SDecimal& price);

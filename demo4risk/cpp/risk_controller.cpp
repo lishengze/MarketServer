@@ -48,12 +48,18 @@ void quotedata_to_innerquote(const SEData& src, SInnerQuote& dst) {
     }
 }
 
+inline void Decimal_to_SDecimal(SDecimal& dst, const Decimal& src)
+{
+    dst.from_raw(src.base(), src.prec());
+}
+
+
 void SETradeToTrade(const SETrade& src, TradeData& dst)
 {    
     try
     {
-        assign(dst.symbol, src.symbol());
-        assign(dst.exchange, src.exchange());
+        dst.symbol = src.symbol();
+        dst.exchange = src.exchange();
         dst.time = src.time();
         Decimal_to_SDecimal(dst.price, src.price());
         Decimal_to_SDecimal(dst.volume, src.volume());
