@@ -23,7 +23,7 @@ void test_grpc_client()
 }
 
 void test_otc() { 
-    OTCClient client("0.0.0.0:8111");
+    OTCClient client("118.193.35.160:8111");
     client.OTC();
 }
 

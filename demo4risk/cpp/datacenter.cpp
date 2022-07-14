@@ -674,7 +674,11 @@ QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerD
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             double old_price = price;
-            reset_price(price, config, false);
+            
+            if (BIAS_RISKCTRL_OPEN)
+            {
+                reset_price(price, config, true);
+            }
 
             if( (total_volume + iter->second.total_volume.get_value()) <= volume ) {
                 total_volume += iter->second.total_volume.get_value();
@@ -802,7 +806,11 @@ QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerD
     {
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
-            reset_price(price, config, false);
+            if (BIAS_RISKCTRL_OPEN)
+            {
+                reset_price(price, config, false);
+            }
+
 
             double cur_amounts = iter->second.total_volume.get_value() * price;
             if( (total_amount + cur_amounts) <= otc_amount ) {
@@ -819,7 +827,7 @@ QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerD
             } else {
                 double cur_volume = (otc_amount - total_amount) / price;
 
-                LOG_DEBUG("---- cur_volume: " + std::to_string(cur_volume) 
+                LOG_DEBUG("cur_volume: " + std::to_string(cur_volume) 
                 + ", otc_amount - total_amount: " + std::to_string(otc_amount - total_amount)
                 + ", price: " + std::to_string(price)
                 + ", restored_price: " + std::to_string((otc_amount - total_amount)/cur_volume));
