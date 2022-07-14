@@ -92,7 +92,7 @@ void DataCenter::update_publish_data_map()
         {
             frequency_map_[iter.first] = iter.second.PublishFrequency;
 
-            LOG_DEBUG("PublishFrequency: " + iter.first + ", " + std::to_string(iter.second.PublishFrequency));            
+            // LOG_DEBUG("PublishFrequency: " + iter.first + ", " + std::to_string(iter.second.PublishFrequency));            
         }
     }
     catch(const std::exception& e)
@@ -674,7 +674,7 @@ QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerD
         for( auto iter = depths.rbegin() ; iter != depths.rend() ; iter ++ ) {
             double price = iter->first.get_value();
             double old_price = price;
-            
+
             if (BIAS_RISKCTRL_OPEN)
             {
                 reset_price(price, config, true);
