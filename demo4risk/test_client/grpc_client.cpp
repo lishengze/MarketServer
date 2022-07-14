@@ -159,12 +159,16 @@ string get_otc_direction(quote::service::v1::QuoteRequest_Direction direction) {
     }
 }
 
-string get_otc_req_info(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction) { 
-    return string("Request: " + symbol + ", "+ std::to_string(amount) +" usdt, direction: " + get_otc_direction(direction));
+string get_otc_amount_req_info(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction) { 
+    return string("Req: " + symbol + ", amount: "+ std::to_string(amount) +", dir: " + get_otc_direction(direction));
+}
+
+string get_otc_volume_req_info(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction) { 
+    return string("Req: " + symbol + ", volume: "+ std::to_string(amount) +", dir: " + get_otc_direction(direction));
 }
 
 void OTCClient::OTC() {
-    std::vector<string> symbol_list{"BTC_USDT", "ETH_USDT"}; 
+    std::vector<string> symbol_list{"BTC_USDT"}; 
     int symbol_index = 0;
     while (true) {
 
@@ -174,24 +178,68 @@ void OTCClient::OTC() {
         QuoteResponse sell_result;
         double amount = 100;
 
-        if (!otc_(cur_symbol, amount, OTC_BUY, buy_result)) continue;
+        if (!otc_amount(cur_symbol, amount, OTC_BUY, buy_result)) continue;
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
-        if (!otc_(cur_symbol, amount, OTC_SELL, sell_result)) continue;
+        if (!otc_amount(cur_symbol, amount, OTC_SELL, sell_result)) continue;
 
-        if (std::stof(buy_result.price()) < std::stof(sell_result.price())) {
-            LOG_ERROR(get_otc_req_info(cur_symbol, amount, OTC_BUY) + " buy_result: " + buy_result.price() + " \nbigger than \n" 
-                    + get_otc_req_info(cur_symbol, amount, OTC_BUY)+ " sell_result: " + sell_result.price());
-        }
+        // if (std::stof(buy_result.price()) < std::stof(sell_result.price())) {
+        //     LOG_ERROR(get_otc_amount_req_info(cur_symbol, amount, OTC_BUY) + " buy_result: " + buy_result.price() + " \nbigger than \n" 
+        //             + get_otc_amount_req_info(cur_symbol, amount, OTC_BUY)+ " sell_result: " + sell_result.price());
+        // }
+
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+
+        double volume = 1;
+
+        if (!otc_volume(cur_symbol, volume, OTC_BUY, buy_result)) continue;
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        if (!otc_volume(cur_symbol, volume, OTC_SELL, sell_result)) continue;
+
+        // if (std::stof(buy_result.price()) < std::stof(sell_result.price())) {
+        //     LOG_ERROR(get_otc_volume_req_info(cur_symbol, amount, OTC_BUY) + " buy_result: " + buy_result.price() + " \nbigger than \n" 
+        //             + get_otc_volume_req_info(cur_symbol, amount, OTC_BUY)+ " sell_result: " + sell_result.price());
+        // }        
 
         symbol_index++;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
 
-        std::this_thread::sleep_for(std::chrono::seconds(4));
     }
 }
 
-bool OTCClient::otc_(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction, QuoteResponse& reply) {
+bool OTCClient::otc_amount(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction, QuoteResponse& reply) {
+
+    std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(address_, grpc::InsecureChannelCredentials());
+
+    std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
+
+    QuoteRequest  request;
+
+    request.set_symbol(symbol);
+    request.set_turnover(amount);
+    request.set_direction(direction);
+
+    string req_info_str = get_otc_amount_req_info(symbol, amount, direction);
+
+    ClientContext context;
+
+    grpc::Status status = stub->OtcQuote(&context, request, &reply);  
+
+    if (reply.result() == quote::service::v1::QuoteResponse_Result::QuoteResponse_Result_OK) {
+        LOG_INFO(req_info_str + ", Reply Price: " + reply.price());
+        return true;
+    } else {
+        LOG_WARN(req_info_str + " Failed! Msg: " + get_otc_failed_info(reply.result()));
+        return false;
+    }        
+}
+
+bool OTCClient::otc_volume(string symbol, double volume, QuoteRequest_Direction direction, QuoteResponse& reply) { 
+    try
+    {
         std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel(address_, grpc::InsecureChannelCredentials());
 
         std::unique_ptr<RiskController::Stub> stub = RiskController::NewStub(channel);
@@ -199,20 +247,25 @@ bool OTCClient::otc_(string symbol, double amount, quote::service::v1::QuoteRequ
         QuoteRequest  request;
 
         request.set_symbol(symbol);
-        request.set_turnover(amount);
+        request.set_amount(volume);
         request.set_direction(direction);
 
-        string req_info_str = get_otc_req_info(symbol, amount, direction);
+        string req_info_str = get_otc_volume_req_info(symbol, volume, direction);
 
         ClientContext context;
 
         grpc::Status status = stub->OtcQuote(&context, request, &reply);  
 
         if (reply.result() == quote::service::v1::QuoteResponse_Result::QuoteResponse_Result_OK) {
-            LOG_TRACE(req_info_str + ", Reply Price: " + reply.price());
+            LOG_INFO(req_info_str + ", Reply Price: " + reply.price());
             return true;
         } else {
             LOG_WARN(req_info_str + " Failed! Msg: " + get_otc_failed_info(reply.result()));
             return false;
-        }        
+        }  
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
 }

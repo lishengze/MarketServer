@@ -257,7 +257,7 @@ bool TradeOrderEntity::process()
 
         string sdirection = direction == TradedOrderStreamData_Direction::TradedOrderStreamData_Direction_BUY? "buy": "sell";
 
-        LOG_DEBUG("Set Order: " + symbol + ", price: " + std::to_string(price) + ", amount: " + std::to_string(amount) + ", " + sdirection);
+        LOG_INFO("Set Order: " + symbol + ", price: " + std::to_string(price) + ", amount: " + std::to_string(amount) + ", " + sdirection);
 
         cacher_->hedge_trade_order(symbol, price, amount, direction, is_trade);
 

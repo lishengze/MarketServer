@@ -282,7 +282,7 @@ bool DataCenter::process(const SInnerQuote& src_quote)
 
         if (src_quote.symbol == CONFIG->test_symbol)
         {
-            LOG_DEBUG("------------------ RiskCtrl Begin ------------------");
+            // LOG_DEBUG("------------------ RiskCtrl Begin ------------------");
         }
         riskctrl_work_line_.run(src_quote, context, dst_quote);
 
@@ -1063,7 +1063,7 @@ void DataCenter::check_symbol()
         {
             const TSymbol& symbol = iter.first;
 
-            LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
+            // LOG_DEBUG(symbol + ": " + std::to_string(iter.second));
 
             if (iter.second == 0)
             {

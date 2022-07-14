@@ -53,7 +53,9 @@ class OTCClient:public BaseGrpcClient
 
         void OTC();
 
-        bool otc_(string symbol, double amount, quote::service::v1::QuoteRequest_Direction direction, QuoteResponse& reply);
+        bool otc_amount(string symbol, double amount, QuoteRequest_Direction direction, QuoteResponse& reply);
+
+        bool otc_volume(string symbol, double volume, QuoteRequest_Direction direction, QuoteResponse& reply);
 };
 
 

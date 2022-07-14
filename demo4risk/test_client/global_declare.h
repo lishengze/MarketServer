@@ -35,3 +35,5 @@ using quote::service::v1::QuoteResponse;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
+
+using quote::service::v1::QuoteRequest_Direction;
