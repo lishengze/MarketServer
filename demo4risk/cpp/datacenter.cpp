@@ -217,7 +217,8 @@ void DataCenter::update_trade(const TradeData& trade)
     try
     {
         std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
-        trade_data_map_.emplace(std::make_pair(trade.symbol, std::move(trade)));
+        trade_data_map_[trade.symbol] = trade;
+        // trade_data_map_.emplace(std::make_pair(trade.symbol, std::move(trade)));
     }
     catch(const std::exception& e)
     {
