@@ -334,7 +334,7 @@ void DataCenter::_update_riskctrl_data(const SInnerQuote& quote) {
     try
     {
         std::lock_guard<std::mutex> lk(mutex_riskctrl_datas_);
-        LOG_DEBUG("Update quote: " + quote.symbol);
+        // LOG_DEBUG("Update quote: " + quote.symbol);
         riskctrl_datas_[quote.symbol] = quote;
     }
     catch(const std::exception& e)

@@ -190,6 +190,8 @@ void OTCClient::OTC() {
         // }
 
         std::this_thread::sleep_for(std::chrono::seconds(10));
+        break;
+
 
         double volume = 1;
 
@@ -206,7 +208,7 @@ void OTCClient::OTC() {
 
         symbol_index++;
         std::this_thread::sleep_for(std::chrono::seconds(10));
-
+        break;
     }
 }
 
