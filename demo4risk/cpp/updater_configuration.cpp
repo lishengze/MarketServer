@@ -98,7 +98,7 @@ void ConfigurationClient::load_market_risk(const NacosString &configInfo)
                 LOG_WARN(symbol + " PriceOffsetKind should be 1 or 2 ,now is: " + std::to_string(PriceOffsetKind));
                 continue;
             }
-            if (PriceOffset < 0 || PriceOffset >= 1)
+            if (PriceOffset < 0)
             {
                 LOG_WARN(symbol + " PriceOffset should in (0, 1),now is: " + std::to_string(PriceOffset));
                 continue;
@@ -110,7 +110,7 @@ void ConfigurationClient::load_market_risk(const NacosString &configInfo)
                 continue;
             }
 
-            if (AmountOffset < 0 || AmountOffset >= 1)
+            if (AmountOffset < 0)
             {
                 LOG_WARN(symbol + " AmountOffset should in (0, 1),now is: " + std::to_string(AmountOffset));
                 continue;
@@ -122,9 +122,9 @@ void ConfigurationClient::load_market_risk(const NacosString &configInfo)
                 continue;
             }
 
-            if (OtcOffset < 0 || OtcOffset >= 1) 
+            if (OtcOffset < 0 ) 
             {
-                LOG_WARN(symbol + " OtcOffset should in (0, 1) ,now is: " + std::to_string(PriceOffsetKind));
+                LOG_WARN(symbol + " OtcOffset is wrong ,now is: " + std::to_string(PriceOffsetKind));
                 continue;
             }                      
 
@@ -133,7 +133,7 @@ void ConfigurationClient::load_market_risk(const NacosString &configInfo)
                 continue;                
             }
 
-            if (utrade::pandora::less_equal(OTCAmountOffset, 0) ) {
+            if (OTCAmountOffset < 0) {
                 LOG_WARN(symbol + " OTCAmountOffset is " + std::to_string(OTCAmountOffset));
                 continue;                
             }            
