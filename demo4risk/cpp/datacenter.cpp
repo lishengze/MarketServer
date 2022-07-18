@@ -961,12 +961,14 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         else
         {            
             LOG_WARN("symbol_config has no config for " + symbol);
+            LOG_DEBUG("symbol_config has no config for " + symbol);
             return QuoteResponse_Result_WRONG_SYMBOL;
         }
 
         if (params_.market_risk_config.find(symbol) == params_.market_risk_config.end())
         {           
             LOG_WARN("market_risk_config has no config for " + symbol);
+            LOG_DEBUG("market_risk_config has no config for " + symbol);
             return QuoteResponse_Result_WRONG_SYMBOL;
         }
     }
