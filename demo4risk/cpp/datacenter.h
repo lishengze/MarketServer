@@ -98,6 +98,8 @@ public:
 private:
     set<IQuotePusher*> callbacks_;
 
+    void _update_riskctrl_data(const SInnerQuote& quote);
+
     void _publish_quote(const SInnerQuote& quote);
 
     void _push_to_clients(const string& symbol = "");

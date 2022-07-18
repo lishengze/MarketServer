@@ -218,7 +218,7 @@ void DataCenter::update_trade(const TradeData& trade)
     {
         std::lock_guard<std::mutex> inner_lock{trade_data_mutex_};
         trade_data_map_[trade.symbol] = trade;
-        LOG_TRACE(trade.str());
+        // LOG_TRACE(trade.str());
         // trade_data_map_.emplace(std::make_pair(trade.symbol, std::move(trade)));
     }
     catch(const std::exception& e)
@@ -303,6 +303,8 @@ bool DataCenter::process(const SInnerQuote& src_quote)
             return false;
         }
 
+        _update_riskctrl_data(dst_quote);
+
         _publish_quote(dst_quote);
 
         return true;
@@ -324,8 +326,22 @@ void DataCenter::set_src_quote(const SInnerQuote& quote)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
+        LOG_ERROR(e.what());
     }
+}
+
+void DataCenter::_update_riskctrl_data(const SInnerQuote& quote) { 
+    try
+    {
+        std::lock_guard<std::mutex> lk(mutex_riskctrl_datas_);
+        LOG_DEBUG("Update quote: " + quote.symbol);
+        riskctrl_datas_[quote.symbol] = quote;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+    
 }
 
 void DataCenter::precheck_quote(const SInnerQuote& quote)
@@ -349,7 +365,7 @@ bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuot
 {
     try
     {
-        // 检查是否发生变化
+        // 检查时间
         std::lock_guard<std::mutex> lk(mutex_riskctrl_datas_);
         auto iter = riskctrl_datas_.find(src_quote.symbol);
         if( iter != riskctrl_datas_.end() ) 
@@ -361,7 +377,7 @@ bool DataCenter::check_quote_time(const SInnerQuote& src_quote, const SInnerQuot
                 return false;
             }
         }        
-        riskctrl_datas_[src_quote.symbol] = processed_quote;
+        
         return true;
     }
     catch(const std::exception& e)
