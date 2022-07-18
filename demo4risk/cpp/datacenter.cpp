@@ -942,6 +942,7 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
         if(iter == riskctrl_datas_.end())
         {
             LOG_WARN("OTC Request Symbol " + symbol + " has no data");
+            LOG_DEBUG("OTC Request Symbol " + symbol + " has no data");
             return QuoteResponse_Result_WRONG_SYMBOL;
         }
         quote = &(iter->second);
