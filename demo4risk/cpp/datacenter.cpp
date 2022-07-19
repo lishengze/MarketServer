@@ -977,17 +977,17 @@ QuoteResponse_Result DataCenter::otc_query(const TExchange& exchange, const TSym
     if( volume > 0 )
     {        
         if( direction == QuoteRequest_Direction_SELL ) {
-            return _calc_otc_by_volume(quote->asks, true, params_.market_risk_config[symbol], volume, dst_price, precise);
+            return _calc_otc_by_volume(quote->bids, true, params_.market_risk_config[symbol], volume, dst_price, precise);
         } else {
-            return _calc_otc_by_volume(quote->bids, false, params_.market_risk_config[symbol], volume, dst_price, precise);   
+            return _calc_otc_by_volume(quote->asks, false, params_.market_risk_config[symbol], volume, dst_price, precise);   
         }
     } 
     else
     {        
         if( direction == QuoteRequest_Direction_SELL ) {
-            return _calc_otc_by_amount(quote->asks, true, params_.market_risk_config[symbol], amount, dst_price, precise);
+            return _calc_otc_by_amount(quote->bids, true, params_.market_risk_config[symbol], amount, dst_price, precise);
         } else { 
-            return _calc_otc_by_amount(quote->bids, false, params_.market_risk_config[symbol], amount, dst_price, precise);
+            return _calc_otc_by_amount(quote->asks, false, params_.market_risk_config[symbol], amount, dst_price, precise);
         }
     }
 
