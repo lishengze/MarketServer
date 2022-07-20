@@ -95,6 +95,8 @@ public:
 
     bool check_quote_publish(SInnerQuote& quote);
 
+    double get_usd_price(const string& symbol);
+
 private:
     set<IQuotePusher*> callbacks_;
 

@@ -3,6 +3,7 @@
 #include "grpc_server.h"
 #include "converter.h"
 #include "updater_configuration.h"
+#include <boost/algorithm/string.hpp>
 
 #include "updater_quote.h"
 #include "Log/log.h"
@@ -244,7 +245,6 @@ double DataCenter::get_price(const string& symbol) {
     }
     return 0.0;
 }
-
 
 void DataCenter::process_symbols(std::list<string> symbol_list)
 {
@@ -739,13 +739,18 @@ QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerD
         
     double price = total_amount / total_volume;
     double ori_price = price;
-    double target_amount = volume * ori_price;
+    double otc_amount = volume * ori_price;
 
 
     LOG_DEBUG(config.symbol + ", symbol_price: " + std::to_string(ori_price) + ", volume: " + std::to_string(volume)
-                + ", target_amount: " + std::to_string(target_amount));
+                + ", otc_amount: " + std::to_string(otc_amount));
 
-    double otc_offset = get_offset(target_amount, config);
+    double usd_otc_amount = get_usd_price(config.symbol) * otc_amount;
+    double otc_offset = get_offset(usd_otc_amount, config);
+
+    LOG_DEBUG("USD_PRICE: " + std::to_string(get_usd_price(config.symbol)) 
+    + ", otc_amount: " + std::to_string(otc_amount) 
+    + ", usd_otc_amount: " + std::to_string(usd_otc_amount));
 
     if (config.OTCOffsetKind == 1)
     {
@@ -874,7 +879,12 @@ QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerD
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
     }
 
-    double otc_offset = get_offset(otc_amount, config);
+    double usd_otc_amount = get_usd_price(config.symbol) * otc_amount;
+    double otc_offset = get_offset(usd_otc_amount, config);
+
+    LOG_DEBUG("USD_PRICE: " + std::to_string(get_usd_price(config.symbol)) 
+    + ", otc_amount: " + std::to_string(otc_amount) 
+    + ", usd_otc_amount: " + std::to_string(usd_otc_amount));
 
     // LOG_DEBUG(config.symbol + ", " +);
         
@@ -1141,4 +1151,57 @@ void DataCenter::erase_outdate_symbol(TSymbol symbol)
     {
         LOG_ERROR(e.what());
     }
+}
+
+/*
+func (d *DataEngine) GetUsdPrice(symbol string) float64 {
+	usd_price := 1.0
+
+	symbol_list := strings.Split(symbol, "_")
+
+	if len(symbol_list) != 2 {
+		return usd_price
+	}
+
+	if symbol_list[1] != "USD" {
+		trans_symbol := symbol_list[1] + "_USD"
+
+		if trade, ok := d.trade_cache_map.Load(trans_symbol); ok {
+			tmp_trade := trade.(*datastruct.Trade)
+			usd_price = tmp_trade.Price
+		}
+
+		// logx.Slowf("trans_symbol: %s, usd_price: %f", trans_symbol, usd_price)
+	}
+
+	return usd_price
+}
+*/
+
+double DataCenter::get_usd_price(const string& symbol) {
+    double usd_price = 1.0;
+    try
+    {
+        std::vector<std::string> symbol_list;
+        boost::split(symbol_list, symbol, boost::is_any_of("_")); 
+
+        if (symbol_list.size() !=2) {
+            return usd_price;
+        }
+
+        if (symbol_list[1] != "USD") {
+            string target_symbol = symbol_list[1] + "_USD";
+
+            if (trade_data_map_.find(target_symbol) != trade_data_map_.end()) {
+                usd_price = trade_data_map_[target_symbol].price.get_value();
+            }
+        }
+        return usd_price;
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERROR(e.what());
+    }
+
+    return usd_price;
 }
