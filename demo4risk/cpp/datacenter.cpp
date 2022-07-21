@@ -1186,7 +1186,7 @@ double DataCenter::get_usd_price(const string& symbol) {
         boost::split(symbol_list, symbol, boost::is_any_of("_")); 
 
         for (auto symbol:symbol_list) {
-            LOG_DEBUG(symbol)
+            LOG_DEBUG(symbol);
         }
 
         if (symbol_list.size() !=2) {
