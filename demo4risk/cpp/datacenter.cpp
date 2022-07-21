@@ -1185,9 +1185,9 @@ double DataCenter::get_usd_price(const string& symbol) {
         std::vector<std::string> symbol_list;
         boost::split(symbol_list, symbol, boost::is_any_of("_")); 
 
-        for (auto symbol:symbol_list) {
-            LOG_DEBUG(symbol);
-        }
+        // for (auto symbol:symbol_list) {
+        //     LOG_DEBUG(symbol);
+        // }
 
         if (symbol_list.size() !=2) {
             return usd_price;
@@ -1196,13 +1196,22 @@ double DataCenter::get_usd_price(const string& symbol) {
         if (symbol_list[1] != "USD") {
             string target_symbol = symbol_list[1] + "_USD";
 
-            LOG_DEBUG("target_symbol: " + target_symbol);
+            {
+                LOG_DEBUG("original_symbol "+ symbol +" target_symbol: " + target_symbol);
 
-            if (trade_data_map_.find(target_symbol) != trade_data_map_.end()) {
-                usd_price = trade_data_map_[target_symbol].price.get_value();
-            } else {
-                LOG_DEBUG("target_symbol: " + target_symbol + " not exits!");
+                std::lock_guard<std::mutex> lk(trade_data_mutex_);
+
+                for (auto iter:trade_data_map_) {
+                    LOG_DEBUG(iter.first + ": " + iter.second.price.get_str_value());
+                }
+
+                if (trade_data_map_.find(target_symbol) != trade_data_map_.end()) {
+                    usd_price = trade_data_map_[target_symbol].price.get_value();
+                } else {
+                    LOG_DEBUG("target_symbol: " + target_symbol + " not exits!");
+                }
             }
+
         }
         return usd_price;
     }
