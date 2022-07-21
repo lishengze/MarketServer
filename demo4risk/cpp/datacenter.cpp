@@ -1192,6 +1192,7 @@ double DataCenter::get_usd_price(const string& symbol) {
         if (symbol_list[1] != "USD") {
             string target_symbol = symbol_list[1] + "_USD";
 
+            
             if (trade_data_map_.find(target_symbol) != trade_data_map_.end()) {
                 usd_price = trade_data_map_[target_symbol].price.get_value();
             }
