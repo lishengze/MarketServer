@@ -424,12 +424,12 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
             {
-                LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 3));
+                // LOG_DEBUG("\nBefore FeeWorker: " + quote_str(src, 3));
 
-                for (auto iter: ctx.params.hedge_config[src.symbol])
-                {
-                    LOG_DEBUG("\nHedgeConfig: \n" + iter.second.str());
-                }
+                // for (auto iter: ctx.params.hedge_config[src.symbol])
+                // {
+                //     LOG_DEBUG("\nHedgeConfig: \n" + iter.second.str());
+                // }
             } 
 
             SInnerQuote tmp;
@@ -448,7 +448,7 @@ SInnerQuote& FeeWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->fee_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 3));
+            // LOG_DEBUG("\nAfter FeeWorker: " + quote_str(src, 3));
         } 
 
         // if (src.symbol == "BTC_USD")
@@ -511,7 +511,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 3));
+        // LOG_DEBUG("\nBefore AccountAjdustWorker: " + quote_str(src, 3));
     } 
 
 
@@ -556,13 +556,13 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
     ctx.params.account_config.get_hedge_amounts(buy_currency, hedge_config_map, buy_total_amounts, true);
 
     
-    s_s << "Before Risk \nsell_total_amounts " << sell_currency << "\n";
+    // s_s << "Before Risk \nsell_total_amounts " << sell_currency << "\n";
     for (auto iter:sell_total_amounts)
     {
         s_s << iter.first << ": " << std::to_string(iter.second) << "\n";
     }
 
-    s_s << "buy_total_amounts " << buy_currency << "\n";
+    // s_s << "buy_total_amounts " << buy_currency << "\n";
     for (auto iter:buy_total_amounts)
     {
         s_s << iter.first << ": " << std::to_string(iter.second) << "\n";
@@ -691,7 +691,7 @@ SInnerQuote& AccountAjdustWorker::process(SInnerQuote& src, PipelineContent& ctx
         
     if (src.symbol == CONFIG->test_symbol && CONFIG->account_risk_ctrl_open_)
     {
-        LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 3));
+        // LOG_DEBUG("\nAfter AccountAjdustWorker: " + quote_str(src, 3));
     } 
 
     return src;
@@ -742,7 +742,7 @@ SInnerQuote& OrderBookWorker::process(SInnerQuote& src, PipelineContent& ctx)
     {
         if (src.symbol == CONFIG->test_symbol && CONFIG->order_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nBefore OrderBookWorker: " + quote_str(src, 3));
+            // LOG_DEBUG("\nBefore OrderBookWorker: " + quote_str(src, 3));
         } 
 
         if (ctx.params.hedage_order_info.find(src.symbol) != ctx.params.hedage_order_info.end())
@@ -867,7 +867,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
             if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
             {
-                LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 3));
+                // LOG_DEBUG("\nBefore QuoteBiasWorker: " + quote_str(src, 3));
                 LOG_DEBUG(ctx.params.market_risk_config[src.symbol].desc());
             } 
 
@@ -888,7 +888,7 @@ SInnerQuote& QuoteBiasWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->bias_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 3));
+            // LOG_DEBUG("\nAfter QuoteBiasWorker: " + quote_str(src, 3));
         } 
 
 
@@ -1075,7 +1075,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nBefore WatermarkComputerWorker: " + quote_str(src, 3));
+        // LOG_DEBUG("\nBefore WatermarkComputerWorker: " + quote_str(src, 3));
     } 
 
     set_snap(src);
@@ -1100,7 +1100,7 @@ SInnerQuote& WatermarkComputerWorker::process(SInnerQuote& src, PipelineContent&
                 
     if (src.symbol == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_ )
     {
-        LOG_DEBUG("\nAfter WatermarkComputerWorker: " + quote_str(src, 3));
+        // LOG_DEBUG("\nAfter WatermarkComputerWorker: " + quote_str(src, 3));
     } 
 
 
@@ -1115,8 +1115,8 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
         if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_
         && ctx.params.symbol_config.find(src.symbol) != ctx.params.symbol_config.end())
         {
-            LOG_DEBUG("\nBefore PrecisionWorker: " + quote_str(src, 3));
-            LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());
+            // LOG_DEBUG("\nBefore PrecisionWorker: " + quote_str(src, 3));
+            // LOG_DEBUG(ctx.params.symbol_config[src.symbol].desc());
         } 
 
 
@@ -1142,7 +1142,7 @@ SInnerQuote& PrecisionWorker::process(SInnerQuote& src, PipelineContent& ctx)
 
         if (src.symbol == CONFIG->test_symbol && CONFIG->pricesion_risk_ctrl_open_ )
         {
-            LOG_DEBUG("\nAfter PrecisionWorker: " + quote_str(src, 3));
+            // LOG_DEBUG("\nAfter PrecisionWorker: " + quote_str(src, 3));
         } 
 
     }
