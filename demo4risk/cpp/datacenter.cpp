@@ -745,10 +745,11 @@ QuoteResponse_Result DataCenter::_calc_otc_by_volume(const map<SDecimal, SInnerD
     LOG_DEBUG(config.symbol + ", symbol_price: " + std::to_string(ori_price) + ", volume: " + std::to_string(volume)
                 + ", otc_amount: " + std::to_string(otc_amount));
 
-    double usd_otc_amount = get_usd_price(config.symbol) * otc_amount;
+    double usd_price = get_usd_price(config.symbol);
+    double usd_otc_amount = usd_price * otc_amount;
     double otc_offset = get_offset(usd_otc_amount, config);
 
-    LOG_DEBUG("USD_PRICE: " + std::to_string(get_usd_price(config.symbol)) 
+    LOG_DEBUG("USD_PRICE: " + std::to_string(usd_price) 
     + ", otc_amount: " + std::to_string(otc_amount) 
     + ", usd_otc_amount: " + std::to_string(usd_otc_amount));
 
@@ -879,10 +880,11 @@ QuoteResponse_Result DataCenter::_calc_otc_by_amount(const map<SDecimal, SInnerD
         return QuoteResponse_Result_NOT_ENOUGH_AMOUNT;
     }
 
-    double usd_otc_amount = get_usd_price(config.symbol) * otc_amount;
+    double usd_price = get_usd_price(config.symbol);
+    double usd_otc_amount = usd_price * otc_amount;
     double otc_offset = get_offset(usd_otc_amount, config);
 
-    LOG_DEBUG("USD_PRICE: " + std::to_string(get_usd_price(config.symbol)) 
+    LOG_DEBUG("USD_PRICE: " + std::to_string(usd_price) 
     + ", otc_amount: " + std::to_string(otc_amount) 
     + ", usd_otc_amount: " + std::to_string(usd_otc_amount));
 

@@ -168,7 +168,7 @@ string get_otc_volume_req_info(string symbol, double amount, quote::service::v1:
 }
 
 void OTCClient::OTC() {
-    std::vector<string> symbol_list{"BTC_USDT"}; 
+    std::vector<string> symbol_list{"ETH_BTC"}; 
     int symbol_index = 0;
     while (true) {
 
@@ -176,7 +176,7 @@ void OTCClient::OTC() {
         
         QuoteResponse buy_result;
         QuoteResponse sell_result;
-        double amount = 100;
+        double amount = 0.1;
 
         if (!otc_amount(cur_symbol, amount, OTC_BUY, buy_result)) continue;
 
