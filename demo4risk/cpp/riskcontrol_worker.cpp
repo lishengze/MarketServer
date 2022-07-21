@@ -1027,7 +1027,7 @@ void WatermarkComputerWorker::_calc_watermark()
                 for( const auto& v : asks ) {
                     result += v.get_str_value();
                 }                
-                LOG_DEBUG(result);
+                // LOG_DEBUG(result);
             }
 
 
@@ -1038,7 +1038,7 @@ void WatermarkComputerWorker::_calc_watermark()
                 string result = "bids first depth list: ";
                 for( const auto& v : bids ) {
                     result += v.get_str_value();
-                }             
+                // }             
                 LOG_DEBUG(result);   
             }
 
@@ -1047,8 +1047,8 @@ void WatermarkComputerWorker::_calc_watermark()
 
                 if (iter->first == CONFIG->test_symbol && CONFIG->watermark_risk_ctrl_open_)
                 {
-                    LOG_DEBUG(iter->first + ", ask_median: " + asks[asks.size()/2].get_str_value() + ",bid_median: " + bids[bids.size()/2].get_str_value() 
-                                + ", watermark: " + iter->second->watermark.get_str_value());
+                    // LOG_DEBUG(iter->first + ", ask_median: " + asks[asks.size()/2].get_str_value() + ",bid_median: " + bids[bids.size()/2].get_str_value() 
+                    //             + ", watermark: " + iter->second->watermark.get_str_value());
                 }
             }
         }
