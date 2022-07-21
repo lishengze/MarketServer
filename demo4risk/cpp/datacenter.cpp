@@ -1185,6 +1185,10 @@ double DataCenter::get_usd_price(const string& symbol) {
         std::vector<std::string> symbol_list;
         boost::split(symbol_list, symbol, boost::is_any_of("_")); 
 
+        for (auto symbol:symbol_list) {
+            LOG_DEBUG(symbol)
+        }
+
         if (symbol_list.size() !=2) {
             return usd_price;
         }
@@ -1192,9 +1196,12 @@ double DataCenter::get_usd_price(const string& symbol) {
         if (symbol_list[1] != "USD") {
             string target_symbol = symbol_list[1] + "_USD";
 
-            
+            LOG_DEBUG("target_symbol: " + target_symbol);
+
             if (trade_data_map_.find(target_symbol) != trade_data_map_.end()) {
                 usd_price = trade_data_map_[target_symbol].price.get_value();
+            } else {
+                LOG_DEBUG("target_symbol: " + target_symbol + " not exits!");
             }
         }
         return usd_price;
