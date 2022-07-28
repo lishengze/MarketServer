@@ -18,7 +18,7 @@
     "fee_risk_ctrl_open": false,
     "account_risk_ctrl_open": false,
     "order_risk_ctrl_open": false,
-    "bias_risk_ctrl_open": false,
+    "bias_risk_ctrl_open": true,
     "watermark_risk_ctrl_open": false,   
     "pricesion_risk_ctrl_open": false,
     "publish_ctrl_open":true
