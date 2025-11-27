@@ -23,7 +23,7 @@ include_directories("../..")
 include_directories("../../base/include")
 
 # for include pandora
-include_directories("../../../component")
+include_directories("../../component")
 include_directories("../include")
 
 aux_source_directory(. DIR_SRCS)
