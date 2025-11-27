@@ -1,19 +1,19 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(demo4hub_demo)
+cmake_minimum_required(VERSION 3.12)
+project(demo4hub_demo)
 
 
 ###############################################################################################
-INCLUDE_DIRECTORIES("../")
-INCLUDE_DIRECTORIES("../lib")
-INCLUDE_DIRECTORIES("../base/cpp")
+include_directories("../")
+include_directories("../lib")
+include_directories("../base/cpp")
 
-INCLUDE_DIRECTORIES("../component/")
+include_directories("../component/")
 
-LINK_DIRECTORIES("../lib")
+link_directories("../lib")
 # for search lib quark
-LINK_DIRECTORIES("/opt/utrade/console/lib/quark")
+link_directories("/opt/utrade/console/lib/quark")
 # for search lib pandora
-LINK_DIRECTORIES("/opt/utrade/console/lib/pandora")
+link_directories("/opt/utrade/console/lib/pandora")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 

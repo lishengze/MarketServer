@@ -1,9 +1,9 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.7)
-PROJECT(demo)
+cmake_minimum_required(VERSION 3.7)
+project(demo)
 
 ###############################################################################################
-INCLUDE_DIRECTORIES("../lib")
-LINK_DIRECTORIES("../lib")
+include_directories("../lib")
+link_directories("../lib")
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 
 ###############################################################################################

@@ -1,31 +1,31 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
+cmake_minimum_required(VERSION 3.12)
 
 SET("SO_NAME" bcts_comm)
 
-PROJECT(${SO_NAME})
+project(${SO_NAME})
 
 set(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g3 -Wall -pthread")
 
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 set(BOOST_ROOT /usr/local/boost_1_68)
 
-FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time system filesystem thread 
+find_package(Boost 1.68.0 COMPONENTS date_time system filesystem thread 
                                      serialization math_tr1 chrono regex 
                                      program_options unit_test_framework 
                                      locale REQUIRED)
                                      
-INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
+include_directories(${BOOST_INCLUDEDIR})
 
 ###############################################################################################
 # for general include
-INCLUDE_DIRECTORIES("../..")
-INCLUDE_DIRECTORIES("../../base/include")
+include_directories("../..")
+include_directories("../../base/include")
 # for protos
-INCLUDE_DIRECTORIES("../../protos/cpp")
+include_directories("../../protos/cpp")
 # for include pandora
-INCLUDE_DIRECTORIES("../../component")
-INCLUDE_DIRECTORIES("/usr/local/include/nacos/")
+include_directories("../../component")
+include_directories("/usr/local/include/nacos/")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
@@ -34,22 +34,22 @@ AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 # for grpc
-# INCLUDE_DIRECTORIES("/root/.local/include")
+# include_directories("/root/.local/include")
 # for gogo
-# INCLUDE_DIRECTORIES("/home/mk/go/src")
+# include_directories("/home/mk/go/src")
 # for search lib pandora
 
 # for search lib grpc
-# LINK_DIRECTORIES("/root/.local/lib")
+# link_directories("/root/.local/lib")
 
-# INCLUDE_DIRECTORIES("/usr/local/include")
+# include_directories("/usr/local/include")
 
-LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
-LINK_DIRECTORIES("/usr/local/lib")
-LINK_DIRECTORIES("/usr/local/boost_1_68/lib")
-LINK_DIRECTORIES("/usr/local/grpc/lib")
+link_directories("/opt/utrade/console/lib/pandora/")
+link_directories("/usr/local/lib")
+link_directories("/usr/local/boost_1_68/lib")
+link_directories("/usr/local/grpc/lib")
 
-# ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
 add_library(${SO_NAME} SHARED ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})

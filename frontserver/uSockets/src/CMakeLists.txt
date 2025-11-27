@@ -4,13 +4,13 @@
 # update-date:
 #   2019-01-04  init version
 ############################################################################################################################
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(uSockets)
+cmake_minimum_required(VERSION 3.12)
+project(uSockets)
 SET(CMAKE_CXX_STANDARD 11)
 
 ############################################################################################################################
-INCLUDE_DIRECTORIES(".")
-INCLUDE_DIRECTORIES("..")
+include_directories(".")
+include_directories("..")
 
 
 ############################################################################################################################
@@ -39,20 +39,20 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} uv ssl crypto z)
 # ############################################################################################################################
 # # installation
 # # install directory to the right path
-# INSTALL(DIRECTORY messager order position redis util package DESTINATION "include/${PROJECT_NAME}" 
+# install(DIRECTORY messager order position redis util package DESTINATION "include/${PROJECT_NAME}" 
 #                                                              PATTERN "*.cpp" EXCLUDE 
 #                                                              PATTERN "package.h" EXCLUDE 
 #                                                              PATTERN "channel.h" EXCLUDE)
 # # install special files to include
-# INSTALL(FILES package/package.h package/channel.h envdeclare.h DESTINATION "include")
+# install(FILES package/package.h package/channel.h envdeclare.h DESTINATION "include")
 # # install pandora_declare.h
-# INSTALL(FILES pandora_declare.h DESTINATION "include/${PROJECT_NAME}")
+# install(FILES pandora_declare.h DESTINATION "include/${PROJECT_NAME}")
 
-# # INSTALL(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static 
+# # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_static 
 # #         ARCHIVE DESTINATION "lib/${PROJECT_NAME}"
 # #         LIBRARY DESTINATION "lib/${PROJECT_NAME}")
 # # install library
-# INSTALL(TARGETS ${PROJECT_NAME} 
+# install(TARGETS ${PROJECT_NAME} 
 #         ARCHIVE DESTINATION "lib/${PROJECT_NAME}"
 #         LIBRARY DESTINATION "lib/${PROJECT_NAME}")
 

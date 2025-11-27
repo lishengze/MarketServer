@@ -1,24 +1,24 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(data_server)
+cmake_minimum_required(VERSION 3.12)
+project(data_server)
 
 SET("BIN_NAME" data_server)
 
 ###############################################################################################
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
 set(BOOST_ROOT /usr/local/boost_1_68)
 
-FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
-INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
+find_package(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
+include_directories(${BOOST_INCLUDEDIR})
 
 ###############################################################################################
 # for general include
-INCLUDE_DIRECTORIES("../..")
-INCLUDE_DIRECTORIES("../../lib/comm")
+include_directories("../..")
+include_directories("../../lib/comm")
 # for protos
-INCLUDE_DIRECTORIES("../../protos/cpp")
+include_directories("../../protos/cpp")
 # for include pandora
-INCLUDE_DIRECTORIES("../../component")
-INCLUDE_DIRECTORIES("/usr/local/include/nacos/")
+include_directories("../../component")
+include_directories("/usr/local/include/nacos/")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./config CONFIG_SRCS)
@@ -32,8 +32,8 @@ AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
 # AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
 
 
-LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
-LINK_DIRECTORIES("../../lib/comm")
+link_directories("/opt/utrade/console/lib/pandora/")
+link_directories("../../lib/comm")
 
 ###############################################################################################
 # add_executable(${BIN_NAME} ${CONFIG_SRCS} ${DB_ENGINE_SRCS} ${UTIL_SRCS} ${GRPC_COMM_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${TEST_SRCS} ${PROTO_SRCS} ${BASE_SRCS})

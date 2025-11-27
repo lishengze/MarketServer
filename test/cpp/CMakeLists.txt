@@ -1,5 +1,5 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
-PROJECT(test)
+cmake_minimum_required(VERSION 3.12)
+project(test)
 
 SET (BIN_NAME "test")
 
@@ -10,40 +10,40 @@ set(CMAKE_CXX_STANDARD 11)
 
 ###############################################################################################
 if(DEFINED ENV{LOCAL})
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pg -g3 -Wall -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pg -g3 -Wall -pthread")
 else()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g3 -Wall -pthread")
 endif()
 set(BOOST_ROOT /usr/local/boost_1_68)
 
-FIND_PACKAGE(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
-INCLUDE_DIRECTORIES(${BOOST_INCLUDEDIR})
+find_package(Boost 1.68.0 COMPONENTS date_time filesystem system thread serialization math_tr1 chrono regex program_options unit_test_framework locale REQUIRED)
+include_directories(${BOOST_INCLUDEDIR})
 
 ###############################################################################################
 # for general include
-INCLUDE_DIRECTORIES("../..")
+include_directories("../..")
 # for protos
-INCLUDE_DIRECTORIES("../../protos/cpp")
+include_directories("../../protos/cpp")
 # for include pandora
-INCLUDE_DIRECTORIES("../../component")
+include_directories("../../component")
 
 AUX_SOURCE_DIRECTORY(. DIR_SRCS)
 AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
 
 # for grpc
-# INCLUDE_DIRECTORIES("/root/.local/include")
+# include_directories("/root/.local/include")
 # for gogo
-# INCLUDE_DIRECTORIES("/home/mk/go/src")
+# include_directories("/home/mk/go/src")
 # for search lib pandora
-# LINK_DIRECTORIES("../../lib")
+# link_directories("../../lib")
 # for search lib grpc
-# LINK_DIRECTORIES("/root/.local/lib")
+# link_directories("/root/.local/lib")
 
-# INCLUDE_DIRECTORIES("/usr/local/include")
+# include_directories("/usr/local/include")
 
-# LINK_DIRECTORIES("/opt/utrade/console/lib/pandora/")
+# link_directories("/opt/utrade/console/lib/pandora/")
 
-# ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ ../../component ${CMAKE_CURRENT_BINARY_DIR}/component)
 
 ###############################################################################################
 # add_executable(${BIN_NAME} ${UTIL_SRCS} ${DIR_SRCS} ${LOG_SRCS} ${PROTO_SRCS} ${BASE_SRCS})
