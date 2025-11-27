@@ -15,7 +15,7 @@ link_directories("/opt/utrade/console/lib/quark")
 # for search lib pandora
 link_directories("/opt/utrade/console/lib/pandora")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+aux_source_directory(. DIR_SRCS)
 
 ###############################################################################################
 add_executable(demo4hub_demo ${DIR_SRCS})

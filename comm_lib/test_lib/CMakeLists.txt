@@ -26,7 +26,7 @@ include_directories("../../base/include")
 include_directories("../../component")
 include_directories("../include")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+aux_source_directory(. DIR_SRCS)
 
 # for grpc
 # include_directories("/root/.local/include")

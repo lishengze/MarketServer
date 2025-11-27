@@ -16,9 +16,9 @@ include_directories("../../protos/cpp")
 # for include pandora
 include_directories("../../component")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(../../base/cpp BASE_SRCS)
+aux_source_directory(../../protos/cpp PROTO_SRCS)
 
 # for include pandora
 # include_directories("../../pandora")

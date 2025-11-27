@@ -4,7 +4,7 @@ project(demo)
 ###############################################################################################
 include_directories("../lib")
 link_directories("../lib")
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+aux_source_directory(. DIR_SRCS)
 
 ###############################################################################################
 add_executable(demo ${DIR_SRCS})
