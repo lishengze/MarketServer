@@ -64,8 +64,8 @@ target_link_libraries(${BIN_NAME} nacos-cli)
 # target_link_libraries(${BIN_NAME} reporter)
 # target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
-# TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+# target_link_libraries(${BIN_NAME} ssl crypto)
+# target_link_libraries(${BIN_NAME} rdkafka rdkafka++)
+target_link_libraries(${BIN_NAME} bcts_comm)
 
 ###############################################################################################

@@ -64,6 +64,6 @@ target_link_libraries(${BIN_NAME} log4cplus)
 # target_link_libraries(${BIN_NAME} reporter)
 # target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
+# target_link_libraries(${BIN_NAME} ssl crypto)
 
 ###############################################################################################

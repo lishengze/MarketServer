@@ -71,7 +71,7 @@ target_link_libraries(demo4quote reporter)
 
 target_link_libraries(demo4quote dl SQLiteCpp sqlite3)
 
-TARGET_LINK_LIBRARIES(demo4quote ssl crypto)
+target_link_libraries(demo4quote ssl crypto)
 
 
 

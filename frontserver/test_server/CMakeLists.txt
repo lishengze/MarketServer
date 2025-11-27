@@ -26,5 +26,5 @@ link_directories("/usr/local/boost_1_68/lib")
 
 ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC})
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} crypto  uv ssl z uSockets ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} crypto  uv ssl z uSockets ${Boost_LIBRARIES})
 

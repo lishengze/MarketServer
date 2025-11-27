@@ -78,7 +78,7 @@ target_link_libraries(TestRedis log4cplus)
 
 # target_link_libraries(TestRedis dl SQLiteCpp sqlite3)
 
-# TARGET_LINK_LIBRARIES(TestRedis ssl crypto)
+# target_link_libraries(TestRedis ssl crypto)
 
 
 

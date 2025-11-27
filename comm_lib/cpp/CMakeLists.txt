@@ -80,6 +80,6 @@ target_link_libraries(${SO_NAME} ssl crypto)
 target_link_libraries(${SO_NAME} nacos-cli)
 target_link_libraries(${SO_NAME} SQLiteCpp sqlite3 dl)
 
-TARGET_LINK_LIBRARIES(${SO_NAME} rdkafka rdkafka++)
+target_link_libraries(${SO_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

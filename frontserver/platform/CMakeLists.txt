@@ -72,8 +72,8 @@ ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC} ${DATA_STRUCTURE_SRC} ${DATA_PROCESS_SRC}
                ${DATA_RECEIVE_SRC} ${FRONT_SERVER_SRC} 
                ${UTIL_SRC} ${CONFIG_SRC} ${LOG_SRC})
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto uv z uSockets )
-TARGET_LINK_LIBRARIES(${BIN_NAME} demo4hub)
-TARGET_LINK_LIBRARIES(${BIN_NAME} asio_httpclient quark pandora comm log4cplus)
+target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} ssl crypto uv z uSockets )
+target_link_libraries(${BIN_NAME} demo4hub)
+target_link_libraries(${BIN_NAME} asio_httpclient quark pandora comm log4cplus)
 

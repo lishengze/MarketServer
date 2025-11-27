@@ -68,6 +68,6 @@ target_link_libraries(${BIN_NAME} gpr)
 target_link_libraries(${BIN_NAME} ssl crypto)
 
 target_link_libraries(${BIN_NAME} nacos-cli)
-TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
+target_link_libraries(${BIN_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

@@ -65,7 +65,7 @@ target_link_libraries(${BIN_NAME} gpr)
 # target_link_libraries(${BIN_NAME} ssl crypto)
 
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} mysqlcppconn dl z)
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+target_link_libraries(${BIN_NAME} mysqlcppconn dl z)
+target_link_libraries(${BIN_NAME} bcts_comm)
 
 ###############################################################################################
