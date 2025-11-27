@@ -25,7 +25,7 @@ include_directories("../..")
 # for protos
 include_directories("../../protos/cpp")
 # for include pandora
-include_directories("../../component")
+include_directories("../../../component")
 
 aux_source_directory(. DIR_SRCS)
 aux_source_directory(./Log LOG_SRCS)

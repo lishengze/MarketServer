@@ -24,7 +24,7 @@ include_directories("../../base/include")
 # for protos
 include_directories("../../protos/cpp")
 # for include pandora
-include_directories("../../component")
+include_directories("../../../component")
 
 include_directories("/usr/local/include/nacos/")
 

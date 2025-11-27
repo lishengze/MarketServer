@@ -17,7 +17,7 @@ include_directories("../../lib/comm")
 # for protos
 include_directories("../../protos/cpp")
 # for include pandora
-include_directories("../../component")
+include_directories("../../../component")
 include_directories("/usr/local/include/nacos/")
 
 aux_source_directory(. DIR_SRCS)
