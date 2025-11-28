@@ -16,14 +16,14 @@ set(BOOST_ROOT /usr/local/boost_1_68)
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 #add_dependencies(-DBOOST_SYSTEM_NO_DEPRECATED)
 
-AUX_SOURCE_DIRECTORY(. MAIN_SRC)
-AUX_SOURCE_DIRECTORY(./data_process DATA_PROCESS_SRC)
-AUX_SOURCE_DIRECTORY(./data_receive DATA_RECEIVE_SRC)
-AUX_SOURCE_DIRECTORY(./data_structure DATA_STRUCTURE_SRC)
-AUX_SOURCE_DIRECTORY(./front_server FRONT_SERVER_SRC)
-AUX_SOURCE_DIRECTORY(./util UTIL_SRC)
-AUX_SOURCE_DIRECTORY(./config CONFIG_SRC)
-AUX_SOURCE_DIRECTORY(./log LOG_SRC)
+aux_source_directory(. MAIN_SRC)
+aux_source_directory(./data_process DATA_PROCESS_SRC)
+aux_source_directory(./data_receive DATA_RECEIVE_SRC)
+aux_source_directory(./data_structure DATA_STRUCTURE_SRC)
+aux_source_directory(./front_server FRONT_SERVER_SRC)
+aux_source_directory(./util UTIL_SRC)
+aux_source_directory(./config CONFIG_SRC)
+aux_source_directory(./log LOG_SRC)
 
 ###############################################################################################
 include_directories(".")
@@ -72,8 +72,8 @@ ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC} ${DATA_STRUCTURE_SRC} ${DATA_PROCESS_SRC}
                ${DATA_RECEIVE_SRC} ${FRONT_SERVER_SRC} 
                ${UTIL_SRC} ${CONFIG_SRC} ${LOG_SRC})
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto uv z uSockets )
-TARGET_LINK_LIBRARIES(${BIN_NAME} demo4hub)
-TARGET_LINK_LIBRARIES(${BIN_NAME} asio_httpclient quark pandora comm log4cplus)
+target_link_libraries(${BIN_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} ssl crypto uv z uSockets )
+target_link_libraries(${BIN_NAME} demo4hub)
+target_link_libraries(${BIN_NAME} asio_httpclient quark pandora comm log4cplus)
 

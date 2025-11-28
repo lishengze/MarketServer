@@ -14,16 +14,18 @@ include_directories("../..")
 # for protos
 include_directories("../../protos/cpp")
 # for include pandora
-include_directories("../../component")
+include_directories("../../../component")
 include_directories("/usr/local/include/nacos/")
 
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
-AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
-AUX_SOURCE_DIRECTORY(./data_struct DATA_STRUCT_SRCS)
-AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(./Log LOG_SRCS)
+aux_source_directory(./util UTIL_SRCS)
+aux_source_directory(./data_struct DATA_STRUCT_SRCS)
+aux_source_directory(../../base/cpp BASE_SRCS)
+aux_source_directory(../../protos/cpp PROTO_SRCS)
+
+aux_source_directory(./nacos NACOS_SRCS)
 
 # for include pandora
 # include_directories("../../pandora")

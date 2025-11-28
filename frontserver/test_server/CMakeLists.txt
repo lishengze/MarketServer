@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O0 -pthread  -flto -O3 -DLIB
 
 set(BOOST_ROOT /usr/local/boost_1_68)
 
-AUX_SOURCE_DIRECTORY(. MAIN_SRC)
+aux_source_directory(. MAIN_SRC)
 ###############################################################################################
 include_directories(".")
 include_directories("../include/uWebsockets")
@@ -26,5 +26,5 @@ link_directories("/usr/local/boost_1_68/lib")
 
 ADD_EXECUTABLE(${BIN_NAME} ${MAIN_SRC})
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} crypto  uv ssl z uSockets ${Boost_LIBRARIES})
+target_link_libraries(${BIN_NAME} crypto  uv ssl z uSockets ${Boost_LIBRARIES})
 

@@ -20,9 +20,9 @@ include_directories("../../protos/cpp")
 # for include pandora
 include_directories("../../component")
 
-AUX_SOURCE_DIRECTORY(../cpp TOOL_SRCS)
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+aux_source_directory(../cpp TOOL_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(../../protos/cpp PROTO_SRCS)
 
 link_directories("/opt/utrade/console/lib/pandora")
 

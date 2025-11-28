@@ -26,7 +26,7 @@ include_directories("../../base/include")
 include_directories("../../component")
 include_directories("../include")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
+aux_source_directory(. DIR_SRCS)
 
 # for grpc
 # include_directories("/root/.local/include")
@@ -58,9 +58,9 @@ add_executable(${BIN_NAME}  ${DIR_SRCS})
 # target_link_libraries(${BIN_NAME} nacos-cli)
 # target_link_libraries(${BIN_NAME} SQLiteCpp sqlite3 dl)
 
-# TARGET_LINK_LIBRARIES(${BIN_NAME} ssl crypto)
-# TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
+# target_link_libraries(${BIN_NAME} ssl crypto)
+# target_link_libraries(${BIN_NAME} rdkafka rdkafka++)
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+target_link_libraries(${BIN_NAME} bcts_comm)
 
 ###############################################################################################

@@ -26,9 +26,9 @@ include_directories("../../protos/cpp")
 # for include pandora
 include_directories("../../component")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(../cpp BASE_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(../cpp BASE_SRCS)
+aux_source_directory(../../protos/cpp PROTO_SRCS)
 
 # for grpc
 # include_directories("/root/.local/include")
@@ -68,6 +68,6 @@ target_link_libraries(${BIN_NAME} gpr)
 target_link_libraries(${BIN_NAME} ssl crypto)
 
 target_link_libraries(${BIN_NAME} nacos-cli)
-TARGET_LINK_LIBRARIES(${BIN_NAME} rdkafka rdkafka++)
+target_link_libraries(${BIN_NAME} rdkafka rdkafka++)
 
 ###############################################################################################

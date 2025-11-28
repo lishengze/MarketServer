@@ -20,10 +20,10 @@ include_directories("../../protos/cpp")
 include_directories("../../component")
 include_directories("/usr/local/include/nacos/")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
-AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
-AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(./Log LOG_SRCS)
+aux_source_directory(../../base/cpp BASE_SRCS)
+aux_source_directory(../../protos/cpp PROTO_SRCS)
 
 
 link_directories("/opt/utrade/console/lib/pandora/")

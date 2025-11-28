@@ -20,16 +20,16 @@ include_directories("../../protos/cpp")
 include_directories("../../component")
 include_directories("/usr/local/include/nacos/")
 
-AUX_SOURCE_DIRECTORY(. DIR_SRCS)
-AUX_SOURCE_DIRECTORY(./config CONFIG_SRCS)
-AUX_SOURCE_DIRECTORY(./Log LOG_SRCS)
-AUX_SOURCE_DIRECTORY(./util UTIL_SRCS)
-# AUX_SOURCE_DIRECTORY(./grpc_comm GRPC_COMM_SRCS)
-AUX_SOURCE_DIRECTORY(./db_engine DB_ENGINE_SRCS)
-AUX_SOURCE_DIRECTORY(./test TEST_SRCS)
-AUX_SOURCE_DIRECTORY(../../base/cpp BASE_SRCS)
+aux_source_directory(. DIR_SRCS)
+aux_source_directory(./config CONFIG_SRCS)
+aux_source_directory(./Log LOG_SRCS)
+aux_source_directory(./util UTIL_SRCS)
+# aux_source_directory(./grpc_comm GRPC_COMM_SRCS)
+aux_source_directory(./db_engine DB_ENGINE_SRCS)
+aux_source_directory(./test TEST_SRCS)
+aux_source_directory(../../base/cpp BASE_SRCS)
 
-# AUX_SOURCE_DIRECTORY(../../protos/cpp PROTO_SRCS)
+# aux_source_directory(../../protos/cpp PROTO_SRCS)
 
 
 link_directories("/opt/utrade/console/lib/pandora/")
@@ -65,7 +65,7 @@ target_link_libraries(${BIN_NAME} gpr)
 # target_link_libraries(${BIN_NAME} ssl crypto)
 
 
-TARGET_LINK_LIBRARIES(${BIN_NAME} mysqlcppconn dl z)
-TARGET_LINK_LIBRARIES(${BIN_NAME} bcts_comm)
+target_link_libraries(${BIN_NAME} mysqlcppconn dl z)
+target_link_libraries(${BIN_NAME} bcts_comm)
 
 ###############################################################################################

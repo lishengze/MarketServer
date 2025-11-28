@@ -32,9 +32,9 @@ ADD_LIBRARY(${PROJECT_NAME} SHARED ${TOOL_SRC})
 # ADD_LIBRARY(${PROJECT_NAME}_static STATIC ${TOOL_SRC})
 
 # link external lib
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} uv ssl crypto z)
+target_link_libraries(${PROJECT_NAME} uv ssl crypto z)
 
-#TARGET_LINK_LIBRARIES(${PROJECT_NAME} log4cplus ssl curl hiredis event quark zmq asio_httpclient SQLiteCpp sqlite3 dl)
+#target_link_libraries(${PROJECT_NAME} log4cplus ssl curl hiredis event quark zmq asio_httpclient SQLiteCpp sqlite3 dl)
 
 # ############################################################################################################################
 # # installation
